@@ -1,0 +1,491 @@
+from __future__ import annotations
+
+from typing import Any, Optional
+
+from ._http import (
+    BASE_URL,
+    DEFAULT_TIMEOUT,
+    _RateLimiter,
+    _resolve_api_key,
+    sync_request,
+)
+
+
+class _GoogleNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country_code: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        search_type: Optional[str] = None,
+        device: Optional[str] = None,
+        nfpr: Optional[bool] = None,
+        light_request: Optional[bool] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"query": query}
+        if country_code is not None:
+            params["country_code"] = country_code
+        if language is not None:
+            params["language"] = language
+        if page is not None:
+            params["page"] = page
+        if search_type is not None:
+            params["search_type"] = search_type
+        if device is not None:
+            params["device"] = device
+        if nfpr is not None:
+            params["nfpr"] = nfpr
+        if light_request is not None:
+            params["light_request"] = light_request
+        return self._client._post("/api/v1/google", params)
+
+
+class _AmazonNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        domain: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        currency: Optional[str] = None,
+        device: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        start_page: Optional[int] = None,
+        pages: Optional[int] = None,
+        category_id: Optional[str] = None,
+        merchant_id: Optional[str] = None,
+        zip_code: Optional[str] = None,
+        autoselect_variant: Optional[bool] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"query": query}
+        if domain is not None:
+            params["domain"] = domain
+        if country is not None:
+            params["country"] = country
+        if language is not None:
+            params["language"] = language
+        if currency is not None:
+            params["currency"] = currency
+        if device is not None:
+            params["device"] = device
+        if sort_by is not None:
+            params["sort_by"] = sort_by
+        if start_page is not None:
+            params["start_page"] = start_page
+        if pages is not None:
+            params["pages"] = pages
+        if category_id is not None:
+            params["category_id"] = category_id
+        if merchant_id is not None:
+            params["merchant_id"] = merchant_id
+        if zip_code is not None:
+            params["zip_code"] = zip_code
+        if autoselect_variant is not None:
+            params["autoselect_variant"] = autoselect_variant
+        return self._client._post("/api/v1/amazon/search", params)
+
+    def product(
+        self,
+        asin: str,
+        *,
+        domain: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        currency: Optional[str] = None,
+        device: Optional[str] = None,
+        zip_code: Optional[str] = None,
+        autoselect_variant: Optional[bool] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"query": asin}
+        if domain is not None:
+            params["domain"] = domain
+        if country is not None:
+            params["country"] = country
+        if language is not None:
+            params["language"] = language
+        if currency is not None:
+            params["currency"] = currency
+        if device is not None:
+            params["device"] = device
+        if zip_code is not None:
+            params["zip_code"] = zip_code
+        if autoselect_variant is not None:
+            params["autoselect_variant"] = autoselect_variant
+        return self._client._post("/api/v1/amazon/product", params)
+
+
+class _WalmartNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        domain: Optional[str] = None,
+        device: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        start_page: Optional[int] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        fulfillment_speed: Optional[str] = None,
+        fulfillment_type: Optional[str] = None,
+        delivery_zip: Optional[str] = None,
+        store_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"query": query}
+        if domain is not None:
+            params["domain"] = domain
+        if device is not None:
+            params["device"] = device
+        if sort_by is not None:
+            params["sort_by"] = sort_by
+        if start_page is not None:
+            params["start_page"] = start_page
+        if min_price is not None:
+            params["min_price"] = min_price
+        if max_price is not None:
+            params["max_price"] = max_price
+        if fulfillment_speed is not None:
+            params["fulfillment_speed"] = fulfillment_speed
+        if fulfillment_type is not None:
+            params["fulfillment_type"] = fulfillment_type
+        if delivery_zip is not None:
+            params["delivery_zip"] = delivery_zip
+        if store_id is not None:
+            params["store_id"] = store_id
+        return self._client._post("/api/v1/walmart/search", params)
+
+    def product(
+        self,
+        product_id: str,
+        *,
+        domain: Optional[str] = None,
+        device: Optional[str] = None,
+        delivery_zip: Optional[str] = None,
+        store_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"product_id": product_id}
+        if domain is not None:
+            params["domain"] = domain
+        if device is not None:
+            params["device"] = device
+        if delivery_zip is not None:
+            params["delivery_zip"] = delivery_zip
+        if store_id is not None:
+            params["store_id"] = store_id
+        return self._client._post("/api/v1/walmart/product", params)
+
+
+class _YouTubeNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        upload_date: Optional[str] = None,
+        type: Optional[str] = None,
+        duration: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        hd: Optional[bool] = None,
+        subtitles: Optional[bool] = None,
+        creative_commons: Optional[bool] = None,
+        live: Optional[bool] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"search": query}
+        if upload_date is not None:
+            params["upload_date"] = upload_date
+        if type is not None:
+            params["type"] = type
+        if duration is not None:
+            params["duration"] = duration
+        if sort_by is not None:
+            params["sort_by"] = sort_by
+        if hd is not None:
+            params["hd"] = hd
+        if subtitles is not None:
+            params["subtitles"] = subtitles
+        if creative_commons is not None:
+            params["creative_commons"] = creative_commons
+        if live is not None:
+            params["live"] = live
+        return self._client._post("/api/v1/youtube/search", params)
+
+    def metadata(self, video_id: str) -> dict[str, Any]:
+        return self._client._post("/api/v1/youtube/metadata", {"video_id": video_id})
+
+
+class _RedditNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        type: Optional[str] = None,
+        sort: Optional[str] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"query": query}
+        if type is not None:
+            params["type"] = type
+        if sort is not None:
+            params["sort"] = sort
+        if cursor is not None:
+            params["cursor"] = cursor
+        return self._client._post("/api/v1/reddit/search", params)
+
+    def post(self, url: str) -> dict[str, Any]:
+        return self._client._post("/api/v1/reddit/post", {"url": url})
+
+
+class _TikTokNamespace:
+    def __init__(self, client: ScavioClient) -> None:
+        self._client = client
+
+    def profile(
+        self,
+        *,
+        username: Optional[str] = None,
+        sec_user_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if sec_user_id is not None:
+            params["sec_user_id"] = sec_user_id
+        return self._client._post("/api/v1/tiktok/profile", params)
+
+    def user_posts(
+        self,
+        sec_user_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        sort_type: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"sec_user_id": sec_user_id}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        if sort_type is not None:
+            params["sort_type"] = sort_type
+        return self._client._post("/api/v1/tiktok/user/posts", params)
+
+    def video(self, video_id: str) -> dict[str, Any]:
+        return self._client._post("/api/v1/tiktok/video", {"video_id": video_id})
+
+    def video_comments(
+        self,
+        video_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"video_id": video_id}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        return self._client._post("/api/v1/tiktok/video/comments", params)
+
+    def comment_replies(
+        self,
+        video_id: str,
+        comment_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "video_id": video_id,
+            "comment_id": comment_id,
+        }
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        return self._client._post("/api/v1/tiktok/video/comments/replies", params)
+
+    def search_videos(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        sort_type: Optional[str] = None,
+        publish_time: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"keyword": keyword}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        if sort_type is not None:
+            params["sort_type"] = sort_type
+        if publish_time is not None:
+            params["publish_time"] = publish_time
+        return self._client._post("/api/v1/tiktok/search/videos", params)
+
+    def search_users(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"keyword": keyword}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        return self._client._post("/api/v1/tiktok/search/users", params)
+
+    def hashtag(
+        self,
+        *,
+        hashtag_name: Optional[str] = None,
+        hashtag_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if hashtag_name is not None:
+            params["hashtag_name"] = hashtag_name
+        if hashtag_id is not None:
+            params["hashtag_id"] = hashtag_id
+        return self._client._post("/api/v1/tiktok/hashtag", params)
+
+    def hashtag_videos(
+        self,
+        hashtag_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"hashtag_id": hashtag_id}
+        if cursor is not None:
+            params["cursor"] = cursor
+        if count is not None:
+            params["count"] = count
+        return self._client._post("/api/v1/tiktok/hashtag/videos", params)
+
+    def user_followers(
+        self,
+        sec_user_id: str,
+        *,
+        count: Optional[int] = None,
+        page_token: Optional[str] = None,
+        min_time: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"sec_user_id": sec_user_id}
+        if count is not None:
+            params["count"] = count
+        if page_token is not None:
+            params["page_token"] = page_token
+        if min_time is not None:
+            params["min_time"] = min_time
+        return self._client._post("/api/v1/tiktok/user/followers", params)
+
+    def user_followings(
+        self,
+        sec_user_id: str,
+        *,
+        count: Optional[int] = None,
+        page_token: Optional[str] = None,
+        min_time: Optional[int] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"sec_user_id": sec_user_id}
+        if count is not None:
+            params["count"] = count
+        if page_token is not None:
+            params["page_token"] = page_token
+        if min_time is not None:
+            params["min_time"] = min_time
+        return self._client._post("/api/v1/tiktok/user/followings", params)
+
+
+class ScavioClient:
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        *,
+        base_url: str = BASE_URL,
+        timeout: int = DEFAULT_TIMEOUT,
+        max_requests_per_second: int = 1,
+    ) -> None:
+        self._api_key = _resolve_api_key(api_key)
+        self._base_url = base_url.rstrip("/")
+        self._timeout = timeout
+        self._rate_limiter = _RateLimiter(max_requests_per_second)
+
+        self.google = _GoogleNamespace(self)
+        self.amazon = _AmazonNamespace(self)
+        self.walmart = _WalmartNamespace(self)
+        self.youtube = _YouTubeNamespace(self)
+        self.reddit = _RedditNamespace(self)
+        self.tiktok = _TikTokNamespace(self)
+
+    def _post(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
+        return sync_request(
+            "POST",
+            path,
+            api_key=self._api_key,
+            base_url=self._base_url,
+            timeout=self._timeout,
+            rate_limiter=self._rate_limiter,
+            json=params,
+        )
+
+    def _get(self, path: str) -> dict[str, Any]:
+        return sync_request(
+            "GET",
+            path,
+            api_key=self._api_key,
+            base_url=self._base_url,
+            timeout=self._timeout,
+            rate_limiter=self._rate_limiter,
+        )
+
+    def search(
+        self,
+        query: str,
+        *,
+        country_code: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        search_type: Optional[str] = None,
+        device: Optional[str] = None,
+        nfpr: Optional[bool] = None,
+        light_request: Optional[bool] = None,
+    ) -> dict[str, Any]:
+        return self.google.search(
+            query,
+            country_code=country_code,
+            language=language,
+            page=page,
+            search_type=search_type,
+            device=device,
+            nfpr=nfpr,
+            light_request=light_request,
+        )
+
+    def get_usage(self) -> dict[str, Any]:
+        return self._get("/api/v1/usage")
+
+    def __enter__(self) -> ScavioClient:
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        pass
