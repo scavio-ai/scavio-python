@@ -1,28 +1,39 @@
 # Scavio Python SDK
 
-[![PyPI version](https://img.shields.io/pypi/v/scavio-python.svg)](https://pypi.org/project/scavio-python/)
-[![Python](https://img.shields.io/pypi/pyversions/scavio-python.svg)](https://pypi.org/project/scavio-python/)
+[![PyPI version](https://img.shields.io/pypi/v/scavio.svg)](https://pypi.org/project/scavio/)
+[![Downloads](https://img.shields.io/pypi/dm/scavio.svg)](https://pypi.org/project/scavio/)
+[![Python](https://img.shields.io/pypi/pyversions/scavio.svg)](https://pypi.org/project/scavio/)
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, and TikTok with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> Scavio is the all-in-one search API for AI -- a powerful alternative to Tavily, SerpAPI, and ScraperAPI. One API key, six data sources, structured results with knowledge graphs.
+> One API key, six data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
-## Features
+## Why Scavio
 
-- **6 data sources** -- Google, Amazon, Walmart, YouTube, Reddit, TikTok
-- **20+ endpoints** -- search, product details, video metadata, comments, profiles, and more
-- **Sync + async** -- `ScavioClient` and `AsyncScavioClient` with identical APIs
-- **Structured data** -- knowledge graphs, related searches, product specs out of the box
-- **Built for AI** -- designed for LangChain, CrewAI, LlamaIndex, and custom agents
-- **Rate limiting** -- built-in sliding-window rate limiter
-- **Type hints** -- full PEP 561 support for IDE autocomplete
+| Feature | Scavio | Tavily | SerpAPI | ScraperAPI |
+|---------|--------|--------|---------|------------|
+| Google Search | Yes | Yes | Yes | Yes |
+| Amazon Products | Yes | No | Yes | No |
+| Walmart Products | Yes | No | No | No |
+| YouTube Search | Yes | No | Yes | No |
+| Reddit Search | Yes | No | No | No |
+| TikTok Data (11 endpoints) | Yes | No | No | No |
+| Data Sources | 6 | 1 | 1 per plan | 1 |
+| Structured JSON | Yes | Yes | Yes | Raw HTML |
+| Knowledge Graphs | Yes | No | Yes | No |
+| Async Client | Yes | Yes | No | No |
+| Single API Key | Yes | Yes | No | No |
+| Rate Limiting Built-in | Yes | No | No | No |
+| Type Hints (PEP 561) | Yes | Yes | No | No |
+
+Tavily focuses on AI-optimized web search. SerpAPI offers SERP parsing across search engines with separate plans. ScraperAPI provides raw web scraping with proxy rotation. Scavio combines multi-source structured data in a single SDK with one API key.
 
 ## Installation
 
 ```bash
-pip install scavio-python
+pip install scavio
 ```
 
 ## Quick Start
@@ -35,89 +46,225 @@ from scavio import ScavioClient
 client = ScavioClient(api_key="sk_...")  # or set SCAVIO_API_KEY env var
 
 results = client.search("best noise cancelling headphones 2026")
-print(results["results"])
+for r in results["results"]:
+    print(r["title"], r["url"])
 ```
 
-## Usage
+## Examples
 
-### Google Search
+### 1. AI Web Research -- Feed Search Results to an LLM
 
 ```python
-# Basic search
-results = client.search("pizza new york", country_code="us", language="en")
+from scavio import ScavioClient
 
-# News search
+client = ScavioClient()
+
+results = client.search("latest advances in quantum computing 2026")
+
+context = "\n\n".join(
+    f"[{r['title']}]({r['url']})\n{r['content']}"
+    for r in results["results"]
+)
+
+prompt = f"Based on these search results, summarize the latest advances:\n\n{context}"
+# Pass `prompt` to your LLM of choice (OpenAI, Anthropic, etc.)
+print(prompt[:500])
+```
+
+### 2. Price Comparison -- Amazon vs Walmart
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+query = "sony wh-1000xm5"
+amazon = client.amazon.search(query, domain="com")
+walmart = client.walmart.search(query)
+
+print("Amazon:")
+for p in amazon["data"]["products"][:3]:
+    print(f"  ${p['price']} - {p['title'][:60]}")
+
+print("\nWalmart:")
+for p in walmart["data"]["products"][:3]:
+    print(f"  ${p['price']} - {p['title'][:60]}")
+```
+
+### 3. Product Lookup by ASIN
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+product = client.amazon.product("B0BS1PRC4L")
+data = product["data"]
+
+print(f"Brand:   {data['brand']}")
+print(f"Title:   {data['title']}")
+print(f"Rating:  {data['rating']} ({data['reviews_count']} reviews)")
+print(f"Price:   ${data['buybox'][0]['price']}")
+```
+
+### 4. SEO Competitor Analysis
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+results = client.search("best project management software", country_code="us")
+
+domains = {}
+for r in results["results"]:
+    domain = r["domain"]
+    domains[domain] = domains.get(domain, 0) + 1
+
+print("Domains ranking for this keyword:")
+for domain, count in sorted(domains.items(), key=lambda x: -x[1]):
+    print(f"  {domain}: {count} result(s)")
+```
+
+### 5. News Aggregation
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
 news = client.google.search("AI startups", search_type="news")
 
-# Image search
-images = client.google.search("sunset wallpaper", search_type="images")
+for article in news["news_results"][:5]:
+    print(f"[{article['source']}] {article['title']}")
+    print(f"  {article['link']}")
+    print()
 ```
 
-### Amazon
+### 6. YouTube Content Discovery
 
 ```python
-# Search products
-products = client.amazon.search("wireless headphones", domain="com", sort_by="most_recent")
+from scavio import ScavioClient
 
-# Get product details by ASIN
-product = client.amazon.product("B09V3KXJPB")
+client = ScavioClient()
+
+videos = client.youtube.search("python tutorial", sort_by="view_count")
+
+for v in videos["data"]["results"][:5]:
+    title = v["title"]["runs"][0]["text"]
+    views = v.get("viewCountText", {}).get("simpleText", "N/A")
+    print(f"{title} ({views})")
+    print(f"  https://youtube.com/watch?v={v['videoId']}")
+
+# Get detailed metadata for a specific video
+meta = client.youtube.metadata("dQw4w9WgXcQ")
+print(f"\n{meta['data']['title']}")
+print(f"  {meta['data']['view_count']:,} views, {meta['data']['like_count']:,} likes")
 ```
 
-### Walmart
+### 7. Reddit Market Research
 
 ```python
-products = client.walmart.search("wireless headphones", sort_by="best_match")
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+posts = client.reddit.search("best mechanical keyboard", sort="hot")
+
+for post in posts["data"]["posts"]:
+    print(f"r/{post['subreddit']} - {post['title']}")
+    print(f"  {post['url']}")
+    print()
+```
+
+### 8. TikTok Hashtag Analysis
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+hashtag = client.tiktok.hashtag(hashtag_name="python")
+info = hashtag["data"]["challengeInfo"]
+
+print(f"#{info['challenge']['title']}")
+print(f"  Views: {int(info['statsV2']['viewCount']):,}")
+print(f"  Videos: {int(info['statsV2']['videoCount']):,}")
+```
+
+### 9. Social Media Monitoring
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+brand = "scavio"
+reddit = client.reddit.search(brand, sort="hot")
+tiktok = client.tiktok.search_videos(brand, count=5)
+
+print(f"Reddit mentions ({len(reddit['data']['posts'])}):")
+for post in reddit["data"]["posts"][:3]:
+    print(f"  r/{post['subreddit']}: {post['title']}")
+
+tiktok_videos = tiktok["data"].get("search_item_list", [])
+print(f"\nTikTok mentions ({len(tiktok_videos)}):")
+for v in tiktok_videos[:3]:
+    desc = v["aweme_info"].get("desc", "No description")
+    print(f"  {desc[:80]}")
+```
+
+### 10. Price Drop Alert
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
 
 product = client.walmart.product("123456789")
+price = product["data"]["price"]
+title = product["data"]["title"]
+
+threshold = 50.00
+if price and price < threshold:
+    print(f"PRICE DROP: {title[:60]}")
+    print(f"  Now ${price} (threshold: ${threshold})")
+else:
+    print(f"{title[:60]}: ${price}")
 ```
 
-### YouTube
-
-```python
-videos = client.youtube.search("javascript tutorial", sort_by="view_count")
-
-metadata = client.youtube.metadata("dQw4w9WgXcQ")
-```
-
-### Reddit
-
-```python
-posts = client.reddit.search("python web scraping", sort="hot")
-
-post = client.reddit.post("https://www.reddit.com/r/programming/comments/abc123/example/")
-```
-
-### TikTok
-
-```python
-profile = client.tiktok.profile(username="tiktok")
-
-videos = client.tiktok.search_videos("cooking recipe", count=10)
-
-video = client.tiktok.video("7000000000000000000")
-
-comments = client.tiktok.video_comments("7000000000000000000")
-```
-
-### Check Usage
-
-```python
-usage = client.get_usage()
-print(f"Plan: {usage['plan']}, Credits: {usage['credit_balance']}")
-```
-
-## Async Support
+### 11. Async Multi-Source Search
 
 ```python
 import asyncio
 from scavio import AsyncScavioClient
 
 async def main():
-    async with AsyncScavioClient(api_key="sk_...") as client:
-        results = await client.search("best restaurants in NYC")
-        print(results)
+    async with AsyncScavioClient() as client:
+        google = await client.search("mechanical keyboard")
+        amazon = await client.amazon.search("mechanical keyboard", domain="com")
+
+        print(f"Google: {len(google['results'])} results")
+        print(f"Amazon: {len(amazon['data']['products'])} products")
+
+        for r in google["results"][:3]:
+            print(f"  Web: {r['title'][:60]}")
+        for p in amazon["data"]["products"][:3]:
+            print(f"  Amazon: ${p['price']} - {p['title'][:50]}")
 
 asyncio.run(main())
+```
+
+### 12. Check API Usage
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+usage = client.get_usage()
+print(f"Plan: {usage['plan']}")
+print(f"Credits remaining: {usage['credit_balance']}")
 ```
 
 ## Error Handling
