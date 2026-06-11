@@ -553,7 +553,9 @@ class _AsyncInstagramNamespace:
         }
         if cursor is not None:
             params["cursor"] = cursor
-        return await self._client._post("/api/v1/instagram/post/comments/replies", params)
+        return await self._client._post(
+            "/api/v1/instagram/post/comments/replies", params
+        )
 
     async def search_users(
         self,
