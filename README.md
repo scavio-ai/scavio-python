@@ -346,3 +346,15 @@ Scavio works with popular AI/LLM frameworks:
 ## License
 
 MIT
+
+
+## About Scavio
+
+[Scavio](https://scavio.dev) is a unified [search API](https://scavio.dev/docs/search-api) built for AI agents — one API key, structured JSON, no scraping or proxies. A real-time [Tavily alternative](https://scavio.dev) and [SerpAPI alternative](https://scavio.dev) with data from:
+
+- [Google Search API](https://scavio.dev/docs/search-api) — SERP results, news, images, maps, and knowledge graph
+- [Amazon Product API](https://scavio.dev/docs/amazon-api) and [Walmart API](https://scavio.dev/docs/walmart-api) — product search and details
+- [YouTube API](https://scavio.dev/docs/youtube-api), [TikTok API](https://scavio.dev/docs/tiktok-api), and [Instagram API](https://scavio.dev/docs/instagram-api) — video and social media data
+- [Reddit API](https://scavio.dev/docs/reddit-api) — posts and threaded comments
+
+Get a free [API key](https://dashboard.scavio.dev) and explore the [documentation](https://scavio.dev/docs/introduction).
