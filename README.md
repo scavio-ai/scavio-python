@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, and TikTok with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, TikTok, and Instagram with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, six data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -20,6 +20,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Search | Yes | No | No | No |
 | TikTok Data (11 endpoints) | Yes | No | No | No |
+| Instagram Data (12 endpoints) | Yes | No | No | No |
 | Data Sources | 6 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
@@ -192,7 +193,23 @@ print(f"  Views: {int(info['statsV2']['viewCount']):,}")
 print(f"  Videos: {int(info['statsV2']['videoCount']):,}")
 ```
 
-### 9. Social Media Monitoring
+### 9. Instagram Profile and Posts
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+profile = client.instagram.profile(username="instagram")
+user = profile["data"]["user"]
+print(f"@{user['username']} - {user['edge_followed_by']['count']:,} followers")
+
+posts = client.instagram.user_posts(username="instagram", count=12)
+reels = client.instagram.user_reels(username="instagram")
+hashtags = client.instagram.search_hashtags("fashion")
+```
+
+### 10. Social Media Monitoring
 
 ```python
 from scavio import ScavioClient
@@ -214,7 +231,7 @@ for v in tiktok_videos[:3]:
     print(f"  {desc[:80]}")
 ```
 
-### 10. Price Drop Alert
+### 11. Price Drop Alert
 
 ```python
 from scavio import ScavioClient
@@ -233,7 +250,7 @@ else:
     print(f"{title[:60]}: ${price}")
 ```
 
-### 11. Async Multi-Source Search
+### 12. Async Multi-Source Search
 
 ```python
 import asyncio
@@ -255,7 +272,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### 12. Check API Usage
+### 13. Check API Usage
 
 ```python
 from scavio import ScavioClient

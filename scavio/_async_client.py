@@ -418,6 +418,204 @@ class _AsyncTikTokNamespace:
         return await self._client._post("/api/v1/tiktok/user/followings", params)
 
 
+class _AsyncInstagramNamespace:
+    def __init__(self, client: AsyncScavioClient) -> None:
+        self._client = client
+
+    async def profile(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        return await self._client._post("/api/v1/instagram/profile", params)
+
+    async def user_posts(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        count: Optional[int] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        if count is not None:
+            params["count"] = count
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/user/posts", params)
+
+    async def user_reels(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        count: Optional[int] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        if count is not None:
+            params["count"] = count
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/user/reels", params)
+
+    async def user_tagged(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        count: Optional[int] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        if count is not None:
+            params["count"] = count
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/user/tagged", params)
+
+    async def user_stories(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        return await self._client._post("/api/v1/instagram/user/stories", params)
+
+    async def post(
+        self,
+        *,
+        url: Optional[str] = None,
+        media_id: Optional[str] = None,
+        shortcode: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if url is not None:
+            params["url"] = url
+        if media_id is not None:
+            params["media_id"] = media_id
+        if shortcode is not None:
+            params["shortcode"] = shortcode
+        return await self._client._post("/api/v1/instagram/post", params)
+
+    async def post_comments(
+        self,
+        *,
+        shortcode: Optional[str] = None,
+        url: Optional[str] = None,
+        cursor: Optional[str] = None,
+        sort_order: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if shortcode is not None:
+            params["shortcode"] = shortcode
+        if url is not None:
+            params["url"] = url
+        if cursor is not None:
+            params["cursor"] = cursor
+        if sort_order is not None:
+            params["sort_order"] = sort_order
+        return await self._client._post("/api/v1/instagram/post/comments", params)
+
+    async def comment_replies(
+        self,
+        media_id: str,
+        comment_id: str,
+        *,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {
+            "media_id": media_id,
+            "comment_id": comment_id,
+        }
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/post/comments/replies", params)
+
+    async def search_users(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"keyword": keyword}
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/search/users", params)
+
+    async def search_hashtags(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"keyword": keyword}
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/search/hashtags", params)
+
+    async def user_followers(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        count: Optional[int] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        if count is not None:
+            params["count"] = count
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/user/followers", params)
+
+    async def user_followings(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        count: Optional[int] = None,
+        cursor: Optional[str] = None,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {}
+        if username is not None:
+            params["username"] = username
+        if user_id is not None:
+            params["user_id"] = user_id
+        if count is not None:
+            params["count"] = count
+        if cursor is not None:
+            params["cursor"] = cursor
+        return await self._client._post("/api/v1/instagram/user/followings", params)
+
+
 class AsyncScavioClient:
     def __init__(
         self,
@@ -437,6 +635,7 @@ class AsyncScavioClient:
         self.youtube = _AsyncYouTubeNamespace(self)
         self.reddit = _AsyncRedditNamespace(self)
         self.tiktok = _AsyncTikTokNamespace(self)
+        self.instagram = _AsyncInstagramNamespace(self)
 
     async def _post(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
         return await async_request(
