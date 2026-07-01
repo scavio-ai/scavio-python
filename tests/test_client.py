@@ -76,22 +76,22 @@ class TestGoogleSearch:
     def test_search_with_params(self, mock_post):
         mock_post.return_value = _mock_response(200, {"results": []})
         client = ScavioClient(api_key="sk_test")
-        client.search("test", country_code="fr", search_type="news", page=2)
+        client.search("test", gl="fr", hl="en", start=10)
         call_kwargs = mock_post.call_args
         assert call_kwargs[1]["json"] == {
             "query": "test",
-            "country_code": "fr",
-            "search_type": "news",
-            "page": 2,
+            "gl": "fr",
+            "hl": "en",
+            "start": 10,
         }
 
     @patch("scavio._http.requests.post")
-    def test_google_namespace_alias(self, mock_post):
+    def test_google_namespace_hits_v2(self, mock_post):
         mock_post.return_value = _mock_response(200, {"results": []})
         client = ScavioClient(api_key="sk_test")
         client.google.search("test")
         call_kwargs = mock_post.call_args
-        assert "/api/v1/google" in call_kwargs[0][0]
+        assert "/api/v2/google" in call_kwargs[0][0]
 
 
 class TestAmazon:
@@ -179,3 +179,55 @@ class TestTikTok:
         client = ScavioClient(api_key="sk_test")
         client.tiktok.search_videos("cooking", count=5)
         assert mock_post.call_args[1]["json"] == {"keyword": "cooking", "count": 5}
+
+
+class TestGoogleV2:
+    """Google v2 namespace: correct passthrough paths + body."""
+
+    @patch("scavio._http.requests.post")
+    def test_search(self, mock_post):
+        mock_post.return_value = _mock_response(200, {"organic_results": []})
+        client = ScavioClient(api_key="sk_test")
+        client.google.search("cold brew")
+        assert mock_post.call_args[0][0] == "https://api.scavio.dev/api/v2/google"
+        assert mock_post.call_args[1]["json"] == {"query": "cold brew"}
+
+    @patch("scavio._http.requests.post")
+    def test_paths(self, mock_post):
+        mock_post.return_value = _mock_response(200, {})
+        client = ScavioClient(api_key="sk_test")
+        cases = [
+            (lambda: client.google.ai_mode("q"), "/api/v2/google/ai-mode"),
+            (lambda: client.google.maps_search("q"), "/api/v2/google/maps/search"),
+            (lambda: client.google.maps_place("ChIJ"), "/api/v2/google/maps/place"),
+            (lambda: client.google.maps_reviews("0x1:0x2"), "/api/v2/google/maps/reviews"),
+            (lambda: client.google.shopping("laptop"), "/api/v2/google/shopping"),
+            (lambda: client.google.shopping_product(catalog_id="700", query="laptop"), "/api/v2/google/shopping/product"),
+            (lambda: client.google.shopping_stores("700", "tok"), "/api/v2/google/shopping/product/stores"),
+            (lambda: client.google.flights("JFK", "LAX", "2026-12-15"), "/api/v2/google/flights"),
+            (lambda: client.google.hotels("Bali", "2026-08-01", "2026-08-03"), "/api/v2/google/hotels"),
+            (lambda: client.google.hotels_detail("tok", "2026-08-01", "2026-08-03"), "/api/v2/google/hotels/detail"),
+            (lambda: client.google.news("openai"), "/api/v2/google/news"),
+            (lambda: client.google.trends("bitcoin"), "/api/v2/google/trends"),
+            (lambda: client.google.trending("US"), "/api/v2/google/trending"),
+        ]
+        for call, path in cases:
+            call()
+            assert mock_post.call_args[0][0] == f"https://api.scavio.dev{path}", path
+
+    @patch("scavio._http.requests.post")
+    def test_passthrough_and_drops_none(self, mock_post):
+        mock_post.return_value = _mock_response(200, {})
+        client = ScavioClient(api_key="sk_test")
+        client.google.search("q", gl="us", hl="en")
+        assert mock_post.call_args[1]["json"] == {"query": "q", "gl": "us", "hl": "en"}
+        # place details: only the provided id is sent, None is dropped
+        client.google.maps_place("ChIJ")
+        assert mock_post.call_args[1]["json"] == {"place_id": "ChIJ"}
+
+    @patch("scavio._http.requests.post")
+    def test_shopping_product_full_flow(self, mock_post):
+        mock_post.return_value = _mock_response(200, {})
+        client = ScavioClient(api_key="sk_test")
+        client.google.shopping_product(catalog_id="700", query="laptop")
+        assert mock_post.call_args[1]["json"] == {"catalog_id": "700", "query": "laptop"}

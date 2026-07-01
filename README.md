@@ -47,8 +47,8 @@ from scavio import ScavioClient
 client = ScavioClient(api_key="sk_...")  # or set SCAVIO_API_KEY env var
 
 results = client.search("best noise cancelling headphones 2026")
-for r in results["results"]:
-    print(r["title"], r["url"])
+for r in results["organic_results"]:
+    print(r["title"], r["link"])
 ```
 
 ## Examples
@@ -63,8 +63,8 @@ client = ScavioClient()
 results = client.search("latest advances in quantum computing 2026")
 
 context = "\n\n".join(
-    f"[{r['title']}]({r['url']})\n{r['content']}"
-    for r in results["results"]
+    f"[{r['title']}]({r['link']})\n{r.get('snippet', '')}"
+    for r in results["organic_results"]
 )
 
 prompt = f"Based on these search results, summarize the latest advances:\n\n{context}"
@@ -115,16 +115,11 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-results = client.search("best project management software", country_code="us")
+results = client.search("best project management software", gl="us")
 
-domains = {}
-for r in results["results"]:
-    domain = r["domain"]
-    domains[domain] = domains.get(domain, 0) + 1
-
-print("Domains ranking for this keyword:")
-for domain, count in sorted(domains.items(), key=lambda x: -x[1]):
-    print(f"  {domain}: {count} result(s)")
+for r in results["organic_results"]:
+    print(f"{r['position']}. {r['title']}")
+    print(f"   {r['link']}")
 ```
 
 ### 5. News Aggregation
@@ -134,7 +129,7 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-news = client.google.search("AI startups", search_type="news")
+news = client.google.news("AI startups")
 
 for article in news["news_results"][:5]:
     print(f"[{article['source']}] {article['title']}")
@@ -261,10 +256,10 @@ async def main():
         google = await client.search("mechanical keyboard")
         amazon = await client.amazon.search("mechanical keyboard", domain="com")
 
-        print(f"Google: {len(google['results'])} results")
+        print(f"Google: {len(google['organic_results'])} results")
         print(f"Amazon: {len(amazon['data']['products'])} products")
 
-        for r in google["results"][:3]:
+        for r in google["organic_results"][:3]:
             print(f"  Web: {r['title'][:60]}")
         for p in amazon["data"]["products"][:3]:
             print(f"  Amazon: ${p['price']} - {p['title'][:50]}")

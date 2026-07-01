@@ -11,38 +11,130 @@ from ._http import (
 )
 
 
+def _compact(body: dict[str, Any]) -> dict[str, Any]:
+    """Drop keys whose value is None so unset params are not sent."""
+    return {k: v for k, v in body.items() if v is not None}
+
+
 class _GoogleNamespace:
+    """Google endpoints (scrape.do engine, /api/v2/google).
+
+    A faithful passthrough that returns Google's full response. Every endpoint
+    costs 1 credit. Any additional scrape.do parameter can be passed as a
+    keyword argument. See https://scavio.dev/docs/search-api.
+    """
+
     def __init__(self, client: ScavioClient) -> None:
         self._client = client
 
-    def search(
-        self,
-        query: str,
-        *,
-        country_code: Optional[str] = None,
-        language: Optional[str] = None,
-        page: Optional[int] = None,
-        search_type: Optional[str] = None,
-        device: Optional[str] = None,
-        nfpr: Optional[bool] = None,
-        light_request: Optional[bool] = None,
+    def search(self, query: str, **params: Any) -> dict[str, Any]:
+        """Google SERP search (includes the AI Overview when Google returns one)."""
+        return self._client._post("/api/v2/google", _compact({"query": query, **params}))
+
+    def ai_mode(self, query: str, **params: Any) -> dict[str, Any]:
+        """Google AI Mode answer."""
+        return self._client._post("/api/v2/google/ai-mode", _compact({"query": query, **params}))
+
+    def maps_search(self, query: str, **params: Any) -> dict[str, Any]:
+        """Google Maps local results."""
+        return self._client._post("/api/v2/google/maps/search", _compact({"query": query, **params}))
+
+    def maps_place(
+        self, place_id: Optional[str] = None, *, data_cid: Optional[str] = None, **params: Any
     ) -> dict[str, Any]:
-        params: dict[str, Any] = {"query": query}
-        if country_code is not None:
-            params["country_code"] = country_code
-        if language is not None:
-            params["language"] = language
-        if page is not None:
-            params["page"] = page
-        if search_type is not None:
-            params["search_type"] = search_type
-        if device is not None:
-            params["device"] = device
-        if nfpr is not None:
-            params["nfpr"] = nfpr
-        if light_request is not None:
-            params["light_request"] = light_request
-        return self._client._post("/api/v1/google", params)
+        """Google Maps place details. Provide place_id or data_cid."""
+        return self._client._post(
+            "/api/v2/google/maps/place",
+            _compact({"place_id": place_id, "data_cid": data_cid, **params}),
+        )
+
+    def maps_reviews(
+        self, data_id: Optional[str] = None, *, place_id: Optional[str] = None, **params: Any
+    ) -> dict[str, Any]:
+        """Google Maps reviews. Provide data_id or place_id."""
+        return self._client._post(
+            "/api/v2/google/maps/reviews",
+            _compact({"data_id": data_id, "place_id": place_id, **params}),
+        )
+
+    def shopping(self, query: str, **params: Any) -> dict[str, Any]:
+        """Google Shopping search results."""
+        return self._client._post("/api/v2/google/shopping", _compact({"query": query, **params}))
+
+    def shopping_product(
+        self,
+        *,
+        catalog_id: Optional[str] = None,
+        query: Optional[str] = None,
+        product_id: Optional[str] = None,
+        **params: Any,
+    ) -> dict[str, Any]:
+        """Google Shopping product. Pass catalog_id + query for full details and sellers."""
+        return self._client._post(
+            "/api/v2/google/shopping/product",
+            _compact({"catalog_id": catalog_id, "query": query, "product_id": product_id, **params}),
+        )
+
+    def shopping_stores(self, catalog_id: str, next_page_token: str, **params: Any) -> dict[str, Any]:
+        """Google Shopping product sellers (continuation of shopping_product)."""
+        return self._client._post(
+            "/api/v2/google/shopping/product/stores",
+            _compact({"catalog_id": catalog_id, "next_page_token": next_page_token, **params}),
+        )
+
+    def flights(
+        self, departure_id: str, arrival_id: str, outbound_date: str, **params: Any
+    ) -> dict[str, Any]:
+        """Google Flights."""
+        return self._client._post(
+            "/api/v2/google/flights",
+            _compact({
+                "departure_id": departure_id,
+                "arrival_id": arrival_id,
+                "outbound_date": outbound_date,
+                **params,
+            }),
+        )
+
+    def hotels(
+        self, query: str, check_in_date: str, check_out_date: str, **params: Any
+    ) -> dict[str, Any]:
+        """Google Hotels search."""
+        return self._client._post(
+            "/api/v2/google/hotels",
+            _compact({
+                "query": query,
+                "check_in_date": check_in_date,
+                "check_out_date": check_out_date,
+                **params,
+            }),
+        )
+
+    def hotels_detail(
+        self, detail_token: str, check_in_date: str, check_out_date: str, **params: Any
+    ) -> dict[str, Any]:
+        """Google Hotels property details (from a hotels listing detail_token)."""
+        return self._client._post(
+            "/api/v2/google/hotels/detail",
+            _compact({
+                "detail_token": detail_token,
+                "check_in_date": check_in_date,
+                "check_out_date": check_out_date,
+                **params,
+            }),
+        )
+
+    def news(self, query: Optional[str] = None, **params: Any) -> dict[str, Any]:
+        """Google News. Provide query or a topic/story/publication token."""
+        return self._client._post("/api/v2/google/news", _compact({"query": query, **params}))
+
+    def trends(self, query: str, **params: Any) -> dict[str, Any]:
+        """Google Trends data."""
+        return self._client._post("/api/v2/google/trends", _compact({"query": query, **params}))
+
+    def trending(self, geo: str, **params: Any) -> dict[str, Any]:
+        """Google Trending Now for a country."""
+        return self._client._post("/api/v2/google/trending", _compact({"geo": geo, **params}))
 
 
 class _AmazonNamespace:
@@ -657,28 +749,9 @@ class ScavioClient:
             rate_limiter=self._rate_limiter,
         )
 
-    def search(
-        self,
-        query: str,
-        *,
-        country_code: Optional[str] = None,
-        language: Optional[str] = None,
-        page: Optional[int] = None,
-        search_type: Optional[str] = None,
-        device: Optional[str] = None,
-        nfpr: Optional[bool] = None,
-        light_request: Optional[bool] = None,
-    ) -> dict[str, Any]:
-        return self.google.search(
-            query,
-            country_code=country_code,
-            language=language,
-            page=page,
-            search_type=search_type,
-            device=device,
-            nfpr=nfpr,
-            light_request=light_request,
-        )
+    def search(self, query: str, **params: Any) -> dict[str, Any]:
+        """Shortcut for :meth:`google.search` (Google SERP via /api/v2/google)."""
+        return self.google.search(query, **params)
 
     def get_usage(self) -> dict[str, Any]:
         return self._get("/api/v1/usage")
