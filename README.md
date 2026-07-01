@@ -27,6 +27,8 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Async Client | Yes | Yes | No | No |
 | Single API Key | Yes | Yes | No | No |
 | Rate Limiting Built-in | Yes | No | No | No |
+| Automatic Retries + Backoff | Yes | No | No | No |
+| Fully Typed Parameters | Yes | No | No | No |
 | Type Hints (PEP 561) | Yes | Yes | No | No |
 
 Tavily focuses on AI-optimized web search. SerpAPI offers SERP parsing across search engines with separate plans. ScraperAPI provides raw web scraping with proxy rotation. Scavio combines multi-source structured data in a single SDK with one API key.
@@ -51,7 +53,50 @@ for r in results["organic_results"]:
     print(r["title"], r["link"])
 ```
 
-## Examples
+Every method returns the raw API response as a plain `dict` (response shapes are
+passed through from the upstream providers and vary by endpoint).
+
+## Fully typed parameters
+
+Every endpoint exposes all of its parameters as explicit, documented,
+autocomplete-friendly keyword arguments with `Literal` types for enums. Your
+editor shows the full parameter set, allowed enum values, and defaults inline.
+
+```python
+# Google web search with the full parameter surface
+results = client.google.search(
+    "electric cars",
+    gl="us",                 # country of the search
+    hl="en",                 # UI language
+    location="Austin, Texas, United States",
+    time_period="last_month",
+    device="mobile",
+)
+
+# YouTube filters. The digit-named API fields (4k, 360, 3d) are exposed as
+# valid Python identifiers: four_k, video_360, video_3d.
+client.youtube.search("drone footage", four_k=True, hdr=True, duration="long")
+
+# Amazon product lookup: pass the ASIN (sent to the API as `query`).
+client.amazon.product("B09XS7JWHH", domain="co.uk", currency="GBP")
+```
+
+### Forward-compatible passthrough
+
+Any parameter the API adds in the future can be passed via `**extra` and is sent
+verbatim, so you never have to wait for an SDK release:
+
+```python
+client.google.search("openai", **{"some_new_param": "value"})
+```
+
+## Retries and resilience
+
+The client automatically retries transient failures (HTTP 429 and 5xx, plus
+network/timeout errors) with exponential backoff, jitter, and `Retry-After`
+support. Configure or disable it with `max_retries`.
+
+
 
 ### 1. AI Web Research -- Feed Search Results to an LLM
 
@@ -287,6 +332,12 @@ from scavio import (
     InvalidAPIKeyError,
     RateLimitError,
     InsufficientCreditsError,
+    NotFoundError,
+    BadRequestError,
+    ScavioConnectionError,
+    ScavioTimeoutError,
+    ScavioAPIError,
+    ScavioError,
 )
 
 client = ScavioClient(api_key="sk_...")
@@ -299,7 +350,16 @@ except RateLimitError:
     print("Too many requests - upgrade your plan")
 except InsufficientCreditsError:
     print("Out of credits - purchase more at dashboard.scavio.dev")
+except ScavioAPIError as e:
+    # Any other non-2xx response; inspect the details:
+    print(e.status_code, e.response_body)
 ```
+
+All exceptions inherit from `ScavioError`. HTTP errors (`BadRequestError` 400,
+`InvalidAPIKeyError` 401, `InsufficientCreditsError` 402, `NotFoundError` 404,
+`RateLimitError` 429, `ScavioAPIError` for anything else) carry `.status_code`
+and `.response_body`. Network failures raise `ScavioConnectionError` /
+`ScavioTimeoutError` after retries are exhausted.
 
 ## Configuration
 
@@ -307,9 +367,27 @@ except InsufficientCreditsError:
 client = ScavioClient(
     api_key="sk_...",
     base_url="https://api.scavio.dev",  # custom base URL
-    timeout=30,                          # request timeout in seconds
-    max_requests_per_second=1,           # rate limiting (1-10)
+    timeout=30.0,                        # request timeout in seconds
+    max_requests_per_second=1,           # client-side rate limit (1-10)
+    max_retries=2,                       # retries on 429/5xx/network (0 disables)
 )
+```
+
+### Async client
+
+The async client mirrors the sync one method-for-method. It keeps a single
+pooled `httpx.AsyncClient` alive for its lifetime; close it with
+`await client.aclose()` or use the async context manager.
+
+```python
+import asyncio
+from scavio import AsyncScavioClient
+
+async def main():
+    async with AsyncScavioClient(api_key="sk_...") as client:
+        return await client.google.search("openai", gl="us")
+
+asyncio.run(main())
 ```
 
 ## Integrations
@@ -324,12 +402,17 @@ Scavio works with popular AI/LLM frameworks:
 
 | Service | Endpoints | Credits |
 |---------|-----------|---------|
-| Google | `search` | 1-2 |
-| Amazon | `search`, `product` | 1 each |
+| Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
+| Amazon | `search`, `product`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product` | 1 each |
 | YouTube | `search`, `metadata` | 1 each |
 | Reddit | `search`, `post` | 2 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
+| Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 2 each |
+
+Every method's full parameter list is available inline in your editor (typed
+keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
+for field-level details.
 
 ## Links
 

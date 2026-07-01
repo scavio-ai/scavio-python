@@ -5,19 +5,31 @@ from ._exceptions import (
     InsufficientCreditsError,
     InvalidAPIKeyError,
     MissingAPIKeyError,
+    NotFoundError,
     RateLimitError,
     ScavioAPIError,
+    ScavioAPIStatusError,
+    ScavioConnectionError,
     ScavioError,
+    ScavioTimeoutError,
 )
+from ._types import UsageResponse
+from ._version import __version__
 
 __all__ = [
     "ScavioClient",
     "AsyncScavioClient",
+    "UsageResponse",
     "ScavioError",
     "MissingAPIKeyError",
+    "ScavioConnectionError",
+    "ScavioTimeoutError",
+    "ScavioAPIStatusError",
+    "BadRequestError",
     "InvalidAPIKeyError",
     "InsufficientCreditsError",
+    "NotFoundError",
     "RateLimitError",
-    "BadRequestError",
     "ScavioAPIError",
+    "__version__",
 ]
