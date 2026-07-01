@@ -195,25 +195,38 @@ class TestGoogleV2:
     @patch("scavio._http.requests.post")
     def test_paths(self, mock_post):
         mock_post.return_value = _mock_response(200, {})
-        client = ScavioClient(api_key="sk_test")
-        cases = [
-            (lambda: client.google.ai_mode("q"), "/api/v2/google/ai-mode"),
-            (lambda: client.google.maps_search("q"), "/api/v2/google/maps/search"),
-            (lambda: client.google.maps_place("ChIJ"), "/api/v2/google/maps/place"),
-            (lambda: client.google.maps_reviews("0x1:0x2"), "/api/v2/google/maps/reviews"),
-            (lambda: client.google.shopping("laptop"), "/api/v2/google/shopping"),
-            (lambda: client.google.shopping_product(catalog_id="700", query="laptop"), "/api/v2/google/shopping/product"),
-            (lambda: client.google.shopping_stores("700", "tok"), "/api/v2/google/shopping/product/stores"),
-            (lambda: client.google.flights("JFK", "LAX", "2026-12-15"), "/api/v2/google/flights"),
-            (lambda: client.google.hotels("Bali", "2026-08-01", "2026-08-03"), "/api/v2/google/hotels"),
-            (lambda: client.google.hotels_detail("tok", "2026-08-01", "2026-08-03"), "/api/v2/google/hotels/detail"),
-            (lambda: client.google.news("openai"), "/api/v2/google/news"),
-            (lambda: client.google.trends("bitcoin"), "/api/v2/google/trends"),
-            (lambda: client.google.trending("US"), "/api/v2/google/trending"),
-        ]
-        for call, path in cases:
-            call()
-            assert mock_post.call_args[0][0] == f"https://api.scavio.dev{path}", path
+        g = ScavioClient(api_key="sk_test").google
+        base = "https://api.scavio.dev"
+
+        def url() -> str:
+            return mock_post.call_args[0][0]
+
+        g.ai_mode("q")
+        assert url() == f"{base}/api/v2/google/ai-mode"
+        g.maps_search("q")
+        assert url() == f"{base}/api/v2/google/maps/search"
+        g.maps_place("ChIJ")
+        assert url() == f"{base}/api/v2/google/maps/place"
+        g.maps_reviews("0x1:0x2")
+        assert url() == f"{base}/api/v2/google/maps/reviews"
+        g.shopping("laptop")
+        assert url() == f"{base}/api/v2/google/shopping"
+        g.shopping_product(catalog_id="700", query="laptop")
+        assert url() == f"{base}/api/v2/google/shopping/product"
+        g.shopping_stores("700", "tok")
+        assert url() == f"{base}/api/v2/google/shopping/product/stores"
+        g.flights("JFK", "LAX", "2026-12-15")
+        assert url() == f"{base}/api/v2/google/flights"
+        g.hotels("Bali", "2026-08-01", "2026-08-03")
+        assert url() == f"{base}/api/v2/google/hotels"
+        g.hotels_detail("tok", "2026-08-01", "2026-08-03")
+        assert url() == f"{base}/api/v2/google/hotels/detail"
+        g.news("openai")
+        assert url() == f"{base}/api/v2/google/news"
+        g.trends("bitcoin")
+        assert url() == f"{base}/api/v2/google/trends"
+        g.trending("US")
+        assert url() == f"{base}/api/v2/google/trending"
 
     @patch("scavio._http.requests.post")
     def test_passthrough_and_drops_none(self, mock_post):
@@ -230,4 +243,7 @@ class TestGoogleV2:
         mock_post.return_value = _mock_response(200, {})
         client = ScavioClient(api_key="sk_test")
         client.google.shopping_product(catalog_id="700", query="laptop")
-        assert mock_post.call_args[1]["json"] == {"catalog_id": "700", "query": "laptop"}
+        assert mock_post.call_args[1]["json"] == {
+            "catalog_id": "700",
+            "query": "laptop",
+        }

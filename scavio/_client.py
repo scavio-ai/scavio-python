@@ -28,19 +28,29 @@ class _GoogleNamespace:
         self._client = client
 
     def search(self, query: str, **params: Any) -> dict[str, Any]:
-        """Google SERP search (includes the AI Overview when Google returns one)."""
-        return self._client._post("/api/v2/google", _compact({"query": query, **params}))
+        """Google SERP search (includes the AI Overview when present)."""
+        return self._client._post(
+            "/api/v2/google", _compact({"query": query, **params})
+        )
 
     def ai_mode(self, query: str, **params: Any) -> dict[str, Any]:
         """Google AI Mode answer."""
-        return self._client._post("/api/v2/google/ai-mode", _compact({"query": query, **params}))
+        return self._client._post(
+            "/api/v2/google/ai-mode", _compact({"query": query, **params})
+        )
 
     def maps_search(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Maps local results."""
-        return self._client._post("/api/v2/google/maps/search", _compact({"query": query, **params}))
+        return self._client._post(
+            "/api/v2/google/maps/search", _compact({"query": query, **params})
+        )
 
     def maps_place(
-        self, place_id: Optional[str] = None, *, data_cid: Optional[str] = None, **params: Any
+        self,
+        place_id: Optional[str] = None,
+        *,
+        data_cid: Optional[str] = None,
+        **params: Any,
     ) -> dict[str, Any]:
         """Google Maps place details. Provide place_id or data_cid."""
         return self._client._post(
@@ -49,7 +59,11 @@ class _GoogleNamespace:
         )
 
     def maps_reviews(
-        self, data_id: Optional[str] = None, *, place_id: Optional[str] = None, **params: Any
+        self,
+        data_id: Optional[str] = None,
+        *,
+        place_id: Optional[str] = None,
+        **params: Any,
     ) -> dict[str, Any]:
         """Google Maps reviews. Provide data_id or place_id."""
         return self._client._post(
@@ -59,7 +73,9 @@ class _GoogleNamespace:
 
     def shopping(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Shopping search results."""
-        return self._client._post("/api/v2/google/shopping", _compact({"query": query, **params}))
+        return self._client._post(
+            "/api/v2/google/shopping", _compact({"query": query, **params})
+        )
 
     def shopping_product(
         self,
@@ -69,17 +85,28 @@ class _GoogleNamespace:
         product_id: Optional[str] = None,
         **params: Any,
     ) -> dict[str, Any]:
-        """Google Shopping product. Pass catalog_id + query for full details and sellers."""
+        """Google Shopping product. Pass catalog_id + query for full data."""
         return self._client._post(
             "/api/v2/google/shopping/product",
-            _compact({"catalog_id": catalog_id, "query": query, "product_id": product_id, **params}),
+            _compact(
+                {
+                    "catalog_id": catalog_id,
+                    "query": query,
+                    "product_id": product_id,
+                    **params,
+                }
+            ),
         )
 
-    def shopping_stores(self, catalog_id: str, next_page_token: str, **params: Any) -> dict[str, Any]:
+    def shopping_stores(
+        self, catalog_id: str, next_page_token: str, **params: Any
+    ) -> dict[str, Any]:
         """Google Shopping product sellers (continuation of shopping_product)."""
         return self._client._post(
             "/api/v2/google/shopping/product/stores",
-            _compact({"catalog_id": catalog_id, "next_page_token": next_page_token, **params}),
+            _compact(
+                {"catalog_id": catalog_id, "next_page_token": next_page_token, **params}
+            ),
         )
 
     def flights(
@@ -88,12 +115,14 @@ class _GoogleNamespace:
         """Google Flights."""
         return self._client._post(
             "/api/v2/google/flights",
-            _compact({
-                "departure_id": departure_id,
-                "arrival_id": arrival_id,
-                "outbound_date": outbound_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "departure_id": departure_id,
+                    "arrival_id": arrival_id,
+                    "outbound_date": outbound_date,
+                    **params,
+                }
+            ),
         )
 
     def hotels(
@@ -102,12 +131,14 @@ class _GoogleNamespace:
         """Google Hotels search."""
         return self._client._post(
             "/api/v2/google/hotels",
-            _compact({
-                "query": query,
-                "check_in_date": check_in_date,
-                "check_out_date": check_out_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "query": query,
+                    "check_in_date": check_in_date,
+                    "check_out_date": check_out_date,
+                    **params,
+                }
+            ),
         )
 
     def hotels_detail(
@@ -116,25 +147,33 @@ class _GoogleNamespace:
         """Google Hotels property details (from a hotels listing detail_token)."""
         return self._client._post(
             "/api/v2/google/hotels/detail",
-            _compact({
-                "detail_token": detail_token,
-                "check_in_date": check_in_date,
-                "check_out_date": check_out_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "detail_token": detail_token,
+                    "check_in_date": check_in_date,
+                    "check_out_date": check_out_date,
+                    **params,
+                }
+            ),
         )
 
     def news(self, query: Optional[str] = None, **params: Any) -> dict[str, Any]:
         """Google News. Provide query or a topic/story/publication token."""
-        return self._client._post("/api/v2/google/news", _compact({"query": query, **params}))
+        return self._client._post(
+            "/api/v2/google/news", _compact({"query": query, **params})
+        )
 
     def trends(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Trends data."""
-        return self._client._post("/api/v2/google/trends", _compact({"query": query, **params}))
+        return self._client._post(
+            "/api/v2/google/trends", _compact({"query": query, **params})
+        )
 
     def trending(self, geo: str, **params: Any) -> dict[str, Any]:
         """Google Trending Now for a country."""
-        return self._client._post("/api/v2/google/trending", _compact({"geo": geo, **params}))
+        return self._client._post(
+            "/api/v2/google/trending", _compact({"geo": geo, **params})
+        )
 
 
 class _AmazonNamespace:

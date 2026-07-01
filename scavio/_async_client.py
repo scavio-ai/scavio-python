@@ -24,19 +24,29 @@ class _AsyncGoogleNamespace:
         self._client = client
 
     async def search(self, query: str, **params: Any) -> dict[str, Any]:
-        """Google SERP search (includes the AI Overview when Google returns one)."""
-        return await self._client._post("/api/v2/google", _compact({"query": query, **params}))
+        """Google SERP search (includes the AI Overview when present)."""
+        return await self._client._post(
+            "/api/v2/google", _compact({"query": query, **params})
+        )
 
     async def ai_mode(self, query: str, **params: Any) -> dict[str, Any]:
         """Google AI Mode answer."""
-        return await self._client._post("/api/v2/google/ai-mode", _compact({"query": query, **params}))
+        return await self._client._post(
+            "/api/v2/google/ai-mode", _compact({"query": query, **params})
+        )
 
     async def maps_search(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Maps local results."""
-        return await self._client._post("/api/v2/google/maps/search", _compact({"query": query, **params}))
+        return await self._client._post(
+            "/api/v2/google/maps/search", _compact({"query": query, **params})
+        )
 
     async def maps_place(
-        self, place_id: Optional[str] = None, *, data_cid: Optional[str] = None, **params: Any
+        self,
+        place_id: Optional[str] = None,
+        *,
+        data_cid: Optional[str] = None,
+        **params: Any,
     ) -> dict[str, Any]:
         """Google Maps place details. Provide place_id or data_cid."""
         return await self._client._post(
@@ -45,7 +55,11 @@ class _AsyncGoogleNamespace:
         )
 
     async def maps_reviews(
-        self, data_id: Optional[str] = None, *, place_id: Optional[str] = None, **params: Any
+        self,
+        data_id: Optional[str] = None,
+        *,
+        place_id: Optional[str] = None,
+        **params: Any,
     ) -> dict[str, Any]:
         """Google Maps reviews. Provide data_id or place_id."""
         return await self._client._post(
@@ -55,7 +69,9 @@ class _AsyncGoogleNamespace:
 
     async def shopping(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Shopping search results."""
-        return await self._client._post("/api/v2/google/shopping", _compact({"query": query, **params}))
+        return await self._client._post(
+            "/api/v2/google/shopping", _compact({"query": query, **params})
+        )
 
     async def shopping_product(
         self,
@@ -65,10 +81,17 @@ class _AsyncGoogleNamespace:
         product_id: Optional[str] = None,
         **params: Any,
     ) -> dict[str, Any]:
-        """Google Shopping product. Pass catalog_id + query for full details and sellers."""
+        """Google Shopping product. Pass catalog_id + query for full data."""
         return await self._client._post(
             "/api/v2/google/shopping/product",
-            _compact({"catalog_id": catalog_id, "query": query, "product_id": product_id, **params}),
+            _compact(
+                {
+                    "catalog_id": catalog_id,
+                    "query": query,
+                    "product_id": product_id,
+                    **params,
+                }
+            ),
         )
 
     async def shopping_stores(
@@ -77,7 +100,9 @@ class _AsyncGoogleNamespace:
         """Google Shopping product sellers (continuation of shopping_product)."""
         return await self._client._post(
             "/api/v2/google/shopping/product/stores",
-            _compact({"catalog_id": catalog_id, "next_page_token": next_page_token, **params}),
+            _compact(
+                {"catalog_id": catalog_id, "next_page_token": next_page_token, **params}
+            ),
         )
 
     async def flights(
@@ -86,12 +111,14 @@ class _AsyncGoogleNamespace:
         """Google Flights."""
         return await self._client._post(
             "/api/v2/google/flights",
-            _compact({
-                "departure_id": departure_id,
-                "arrival_id": arrival_id,
-                "outbound_date": outbound_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "departure_id": departure_id,
+                    "arrival_id": arrival_id,
+                    "outbound_date": outbound_date,
+                    **params,
+                }
+            ),
         )
 
     async def hotels(
@@ -100,12 +127,14 @@ class _AsyncGoogleNamespace:
         """Google Hotels search."""
         return await self._client._post(
             "/api/v2/google/hotels",
-            _compact({
-                "query": query,
-                "check_in_date": check_in_date,
-                "check_out_date": check_out_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "query": query,
+                    "check_in_date": check_in_date,
+                    "check_out_date": check_out_date,
+                    **params,
+                }
+            ),
         )
 
     async def hotels_detail(
@@ -114,25 +143,33 @@ class _AsyncGoogleNamespace:
         """Google Hotels property details (from a hotels listing detail_token)."""
         return await self._client._post(
             "/api/v2/google/hotels/detail",
-            _compact({
-                "detail_token": detail_token,
-                "check_in_date": check_in_date,
-                "check_out_date": check_out_date,
-                **params,
-            }),
+            _compact(
+                {
+                    "detail_token": detail_token,
+                    "check_in_date": check_in_date,
+                    "check_out_date": check_out_date,
+                    **params,
+                }
+            ),
         )
 
     async def news(self, query: Optional[str] = None, **params: Any) -> dict[str, Any]:
         """Google News. Provide query or a topic/story/publication token."""
-        return await self._client._post("/api/v2/google/news", _compact({"query": query, **params}))
+        return await self._client._post(
+            "/api/v2/google/news", _compact({"query": query, **params})
+        )
 
     async def trends(self, query: str, **params: Any) -> dict[str, Any]:
         """Google Trends data."""
-        return await self._client._post("/api/v2/google/trends", _compact({"query": query, **params}))
+        return await self._client._post(
+            "/api/v2/google/trends", _compact({"query": query, **params})
+        )
 
     async def trending(self, geo: str, **params: Any) -> dict[str, Any]:
         """Google Trending Now for a country."""
-        return await self._client._post("/api/v2/google/trending", _compact({"geo": geo, **params}))
+        return await self._client._post(
+            "/api/v2/google/trending", _compact({"geo": geo, **params})
+        )
 
 
 class _AsyncAmazonNamespace:
