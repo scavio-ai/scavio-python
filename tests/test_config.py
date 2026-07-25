@@ -52,6 +52,29 @@ def test_namespaces_present():
         assert hasattr(client, ns)
 
 
+def test_youtube_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in (
+        "search",
+        "shorts",
+        "suggestions",
+        "video",
+        "metadata",
+        "comments",
+        "comment_replies",
+        "transcript",
+        "related",
+        "channel_search",
+        "channel",
+        "channel_videos",
+        "channel_shorts",
+        "channel_community",
+        "channel_resolve",
+        "streams",
+    ):
+        assert hasattr(client.youtube, method)
+
+
 def test_sync_context_manager():
     with ScavioClient(api_key="k") as client:
         assert isinstance(client, ScavioClient)

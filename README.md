@@ -192,15 +192,21 @@ client = ScavioClient()
 videos = client.youtube.search("python tutorial", sort_by="view_count")
 
 for v in videos["data"]["results"][:5]:
-    title = v["title"]["runs"][0]["text"]
-    views = v.get("viewCountText", {}).get("simpleText", "N/A")
-    print(f"{title} ({views})")
-    print(f"  https://youtube.com/watch?v={v['videoId']}")
+    print(f"{v['title']} ({v['view_count']:,} views)")
+    print(f"  {v['url']}")
 
-# Get detailed metadata for a specific video
-meta = client.youtube.metadata("dQw4w9WgXcQ")
-print(f"\n{meta['data']['title']}")
-print(f"  {meta['data']['view_count']:,} views, {meta['data']['like_count']:,} likes")
+# Full details for a specific video (metadata() is a deprecated alias of video())
+video = client.youtube.video("dQw4w9WgXcQ")
+print(f"\n{video['data']['title']}")
+print(f"  {video['data']['view_count']:,} views")
+
+# Transcript, related videos, comments, channel, and streams
+transcript = client.youtube.transcript("dQw4w9WgXcQ", format="text")
+related = client.youtube.related("dQw4w9WgXcQ")
+comments = client.youtube.comments("dQw4w9WgXcQ")
+channel_id = client.youtube.channel_resolve("@mkbhd")["data"]["channel_id"]
+channel = client.youtube.channel(channel_id)
+streams = client.youtube.streams("dQw4w9WgXcQ")
 ```
 
 ### 7. Reddit Market Research
@@ -405,7 +411,7 @@ Scavio works with popular AI/LLM frameworks:
 | Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
 | Amazon | `search`, `product`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product` | 1 each |
-| YouTube | `search`, `metadata` | 1 each |
+| YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
 | Reddit | `search`, `post` | 2 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 2 each |

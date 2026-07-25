@@ -64,6 +64,62 @@ def test_youtube_digit_aliases(monkeypatch):
     assert captured["json"] == {"search": "cats", "4k": True, "360": True, "3d": True}
 
 
+def test_youtube_search_features_and_cursor(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.search("cats", features=["hd", "4k"], cursor="c1")
+    assert captured["path"] == "/api/v1/youtube/search"
+    assert captured["json"] == {"search": "cats", "features": ["hd", "4k"], "cursor": "c1"}
+
+
+def test_youtube_video_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.video("dQw4w9WgXcQ")
+    assert captured["path"] == "/api/v1/youtube/video"
+    assert captured["json"] == {"video_id": "dQw4w9WgXcQ"}
+
+
+def test_youtube_metadata_alias_posts_to_video(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.metadata("dQw4w9WgXcQ")
+    assert captured["path"] == "/api/v1/youtube/video"
+    assert captured["json"] == {"video_id": "dQw4w9WgXcQ"}
+
+
+def test_youtube_comment_replies_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.comment_replies("vid", "rc1", cursor="c2")
+    assert captured["path"] == "/api/v1/youtube/comments/replies"
+    assert captured["json"] == {"video_id": "vid", "reply_cursor": "rc1", "cursor": "c2"}
+
+
+def test_youtube_transcript_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.transcript("vid", language="en", format="srt")
+    assert captured["path"] == "/api/v1/youtube/transcript"
+    assert captured["json"] == {"video_id": "vid", "language": "en", "format": "srt"}
+
+
+def test_youtube_channel_resolve_param(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.channel_resolve("@mkbhd")
+    assert captured["path"] == "/api/v1/youtube/channel/resolve"
+    assert captured["json"] == {"channel": "@mkbhd"}
+
+
+def test_youtube_streams_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.streams("vid")
+    assert captured["path"] == "/api/v1/youtube/streams"
+    assert captured["json"] == {"video_id": "vid"}
+
+
 def test_amazon_product_asin_alias(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")

@@ -49,7 +49,7 @@ _NS_META = {
     "google": ("Google", "Google endpoints (SERP, Maps, Shopping, Flights, Hotels, News, Trends)."),
     "amazon": ("Amazon", "Amazon product search and lookup endpoints."),
     "walmart": ("Walmart", "Walmart product search and lookup endpoints."),
-    "youtube": ("YouTube", "YouTube search and video metadata endpoints."),
+    "youtube": ("YouTube", "YouTube search, video, transcript, channel, comment, and streams endpoints."),
     "reddit": ("Reddit", "Reddit search and post endpoints."),
     "tiktok": ("TikTok", "TikTok profile, video, hashtag, and search endpoints."),
     "instagram": ("Instagram", "Instagram profile, media, and search endpoints."),

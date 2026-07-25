@@ -644,7 +644,7 @@ class _AsyncWalmartNamespace:
         return await self._client._call("walmart_product", {"product_id": product_id, "domain": domain, "device": device, "delivery_zip": delivery_zip, "store_id": store_id}, extra)
 
 class _AsyncYouTubeNamespace:
-    """YouTube search and video metadata endpoints."""
+    """YouTube search, video, transcript, channel, comment, and streams endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -654,9 +654,11 @@ class _AsyncYouTubeNamespace:
         query: str,
         *,
         upload_date: Optional[Literal["last_hour", "today", "this_week", "this_month", "this_year"]] = None,
-        type: Optional[Literal["video", "channel", "playlist"]] = None,
+        type: Optional[Literal["video", "channel", "playlist", "movie"]] = None,
         duration: Optional[Literal["short", "medium", "long"]] = None,
         sort_by: Optional[Literal["relevance", "date", "view_count", "rating"]] = None,
+        features: Optional[list[str]] = None,
+        cursor: Optional[str] = None,
         hd: Optional[bool] = None,
         subtitles: Optional[bool] = None,
         creative_commons: Optional[bool] = None,
@@ -669,9 +671,9 @@ class _AsyncYouTubeNamespace:
         video_3d: Optional[bool] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search YouTube videos, channels, and playlists.
+        """Search YouTube videos, channels, and playlists. Costs 2 credits.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             query: Search query (1-500 characters).
@@ -679,6 +681,8 @@ class _AsyncYouTubeNamespace:
             type: Filter by result type.
             duration: short (<4 min), medium (4-20 min), long (>20 min).
             sort_by: Sort order.
+            features: Feature filters: hd, 4k, subtitles, creative_commons, live, 360, 3d, hdr, vr180.
+            cursor: Pagination cursor from a prior response.
             hd: HD videos only.
             subtitles: Videos with subtitles/CC only.
             creative_commons: Creative Commons licensed only.
@@ -691,9 +695,49 @@ class _AsyncYouTubeNamespace:
             video_3d: 3D videos only.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("youtube_search", {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live, "hdr": hdr, "location": location, "vr180": vr180, "four_k": four_k, "video_360": video_360, "video_3d": video_3d}, extra)
+        return await self._client._call("youtube_search", {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "features": features, "cursor": cursor, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live, "hdr": hdr, "location": location, "vr180": vr180, "four_k": four_k, "video_360": video_360, "video_3d": video_3d}, extra)
 
-    async def metadata(
+    async def shorts(
+        self,
+        query: str,
+        *,
+        sort_by: Optional[str] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search YouTube Shorts. Costs 2 credits.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            sort_by: Sort order.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_shorts", {"query": query, "sort_by": sort_by, "cursor": cursor}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        language: Optional[str] = None,
+        region: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """YouTube search autocomplete suggestions.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            language: Suggestion language (ISO 639-1, default 'en').
+            region: Region code (ISO 3166-1 alpha-2, default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_suggestions", {"query": query, "language": language, "region": region}, extra)
+
+    async def video(
         self,
         video_id: str,
         **extra: Any,
@@ -703,10 +747,218 @@ class _AsyncYouTubeNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            video_id: YouTube video id (e.g. 'dQw4w9WgXcQ').
+            video_id: YouTube video id or full watch URL (e.g. 'dQw4w9WgXcQ').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_video", {"video_id": video_id}, extra)
+
+    async def metadata(
+        self,
+        video_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full metadata for a single YouTube video. Deprecated alias of video().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id or full watch URL (e.g. 'dQw4w9WgXcQ').
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("youtube_metadata", {"video_id": video_id}, extra)
+
+    async def comments(
+        self,
+        video_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Top-level comments on a YouTube video.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_comments", {"video_id": video_id, "cursor": cursor}, extra)
+
+    async def comment_replies(
+        self,
+        video_id: str,
+        reply_cursor: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Replies to a YouTube comment.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id.
+            reply_cursor: Reply cursor from a comment's reply_cursor field.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_comment_replies", {"video_id": video_id, "reply_cursor": reply_cursor, "cursor": cursor}, extra)
+
+    async def transcript(
+        self,
+        video_id: str,
+        *,
+        language: Optional[str] = None,
+        format: Optional[Literal["text", "srt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Transcript / captions for a YouTube video. Costs 8 credits.
+
+        Costs 8 credits. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id.
+            language: Caption language code (default 'en').
+            format: 'text' plain transcript or 'srt' timed subtitles.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_transcript", {"video_id": video_id, "language": language, "format": format}, extra)
+
+    async def related(
+        self,
+        video_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Videos related to a YouTube video.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_related", {"video_id": video_id, "cursor": cursor}, extra)
+
+    async def channel_search(
+        self,
+        query: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search YouTube channels.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel_search", {"query": query, "cursor": cursor}, extra)
+
+    async def channel(
+        self,
+        channel_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """YouTube channel details.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            channel_id: Channel id, @handle, or channel URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel", {"channel_id": channel_id}, extra)
+
+    async def channel_videos(
+        self,
+        channel_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Videos uploaded by a YouTube channel.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            channel_id: YouTube channel id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel_videos", {"channel_id": channel_id, "cursor": cursor}, extra)
+
+    async def channel_shorts(
+        self,
+        channel_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Shorts posted by a YouTube channel.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            channel_id: YouTube channel id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel_shorts", {"channel_id": channel_id, "cursor": cursor}, extra)
+
+    async def channel_community(
+        self,
+        channel_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Community posts from a YouTube channel.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            channel_id: YouTube channel id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel_community", {"channel_id": channel_id, "cursor": cursor}, extra)
+
+    async def channel_resolve(
+        self,
+        channel: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Resolve a YouTube @handle or channel URL to a channel id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            channel: A @handle or channel URL to resolve.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_channel_resolve", {"channel": channel}, extra)
+
+    async def streams(
+        self,
+        video_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Playable / downloadable stream formats for a YouTube video. Costs 3 credits.
+
+        Costs 3 credits. Returns the API response as a dict.
+
+        Args:
+            video_id: YouTube video id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("youtube_streams", {"video_id": video_id}, extra)
 
 class _AsyncRedditNamespace:
     """Reddit search and post endpoints."""
