@@ -51,7 +51,7 @@ _NS_META = {
     "walmart": ("Walmart", "Walmart product search and lookup endpoints."),
     "youtube": ("YouTube", "YouTube search, video, transcript, channel, comment, and streams endpoints."),
     "reddit": ("Reddit", "Reddit search, post, comment, subreddit, user, and trending endpoints."),
-    "twitter": ("Twitter", "Twitter search, tweet, and user endpoints."),
+    "x": ("X", "X search, tweet, and user endpoints."),
     "tiktok": ("TikTok", "TikTok profile, video, hashtag, and search endpoints."),
     "instagram": ("Instagram", "Instagram profile, media, and search endpoints."),
     "linkedin": ("LinkedIn", "LinkedIn person, company, job, post, and search endpoints."),

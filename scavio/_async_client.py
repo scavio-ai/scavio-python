@@ -13,8 +13,8 @@ from ._namespaces_async import (
     _AsyncLinkedInNamespace,
     _AsyncRedditNamespace,
     _AsyncTikTokNamespace,
-    _AsyncTwitterNamespace,
     _AsyncWalmartNamespace,
+    _AsyncXNamespace,
     _AsyncYouTubeNamespace,
 )
 from ._params import build_body
@@ -73,7 +73,7 @@ class AsyncScavioClient:
         self.walmart = _AsyncWalmartNamespace(self)
         self.youtube = _AsyncYouTubeNamespace(self)
         self.reddit = _AsyncRedditNamespace(self)
-        self.twitter = _AsyncTwitterNamespace(self)
+        self.x = _AsyncXNamespace(self)
         self.tiktok = _AsyncTikTokNamespace(self)
         self.instagram = _AsyncInstagramNamespace(self)
         self.linkedin = _AsyncLinkedInNamespace(self)

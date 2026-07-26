@@ -54,7 +54,7 @@ def test_namespaces_present():
         "walmart",
         "youtube",
         "reddit",
-        "twitter",
+        "x",
         "tiktok",
         "instagram",
         "linkedin",
@@ -81,7 +81,7 @@ def test_reddit_methods_present():
         assert hasattr(client.reddit, method)
 
 
-def test_twitter_methods_present():
+def test_x_methods_present():
     client = ScavioClient(api_key="k")
     for method in (
         "search",
@@ -96,7 +96,7 @@ def test_twitter_methods_present():
         "user_followings",
         "trending",
     ):
-        assert hasattr(client.twitter, method)
+        assert hasattr(client.x, method)
 
 
 def test_linkedin_methods_present():

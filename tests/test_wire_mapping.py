@@ -206,14 +206,14 @@ def test_reddit_trending_empty_body(monkeypatch):
     assert captured["json"] == {}
 
 
-# --- Twitter (new) ----------------------------------------------------------
+# --- X (new) ----------------------------------------------------------------
 
 
-def test_twitter_search_wire(monkeypatch):
+def test_x_search_wire(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    client.twitter.search("artificial intelligence", search_type="Latest", cursor="c1")
-    assert captured["path"] == "/api/v1/twitter/search"
+    client.x.search("artificial intelligence", search_type="Latest", cursor="c1")
+    assert captured["path"] == "/api/v1/x/search"
     assert captured["json"] == {
         "search": "artificial intelligence",
         "search_type": "Latest",
@@ -221,11 +221,11 @@ def test_twitter_search_wire(monkeypatch):
     }
 
 
-def test_twitter_user_tweets_wire(monkeypatch):
+def test_x_user_tweets_wire(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    client.twitter.user_tweets("elonmusk")
-    assert captured["path"] == "/api/v1/twitter/user/tweets"
+    client.x.user_tweets("elonmusk")
+    assert captured["path"] == "/api/v1/x/user/tweets"
     assert captured["json"] == {"screen_name": "elonmusk"}
 
 

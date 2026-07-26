@@ -11,8 +11,8 @@ from ._namespaces_sync import (
     _LinkedInNamespace,
     _RedditNamespace,
     _TikTokNamespace,
-    _TwitterNamespace,
     _WalmartNamespace,
+    _XNamespace,
     _YouTubeNamespace,
 )
 from ._params import build_body
@@ -25,7 +25,7 @@ from ._types import UsageResponse
 class ScavioClient:
     """Synchronous client for the Scavio Search API.
 
-    A unified API over Google, YouTube, Amazon, Walmart, Reddit, Twitter,
+    A unified API over Google, YouTube, Amazon, Walmart, Reddit, X,
     TikTok, Instagram, and LinkedIn. Every provider is exposed as a namespace
     (``client.google``, ``client.amazon``, ...) whose methods return the raw
     JSON response as a ``dict``.
@@ -67,7 +67,7 @@ class ScavioClient:
         self.walmart = _WalmartNamespace(self)
         self.youtube = _YouTubeNamespace(self)
         self.reddit = _RedditNamespace(self)
-        self.twitter = _TwitterNamespace(self)
+        self.x = _XNamespace(self)
         self.tiktok = _TikTokNamespace(self)
         self.instagram = _InstagramNamespace(self)
         self.linkedin = _LinkedInNamespace(self)

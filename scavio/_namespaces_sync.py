@@ -13,7 +13,7 @@ __all__ = [
     "_WalmartNamespace",
     "_YouTubeNamespace",
     "_RedditNamespace",
-    "_TwitterNamespace",
+    "_XNamespace",
     "_TikTokNamespace",
     "_InstagramNamespace",
     "_LinkedInNamespace",
@@ -1175,8 +1175,8 @@ class _RedditNamespace:
         """
         return self._client._call("reddit_trending", {}, extra)
 
-class _TwitterNamespace:
-    """Twitter search, tweet, and user endpoints."""
+class _XNamespace:
+    """X search, tweet, and user endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -1199,7 +1199,7 @@ class _TwitterNamespace:
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_search", {"search": search, "search_type": search_type, "cursor": cursor}, extra)
+        return self._client._call("x_search", {"search": search, "search_type": search_type, "cursor": cursor}, extra)
 
     def tweet(
         self,
@@ -1214,7 +1214,7 @@ class _TwitterNamespace:
             tweet_id: Tweet id.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_tweet", {"tweet_id": tweet_id}, extra)
+        return self._client._call("x_tweet", {"tweet_id": tweet_id}, extra)
 
     def tweet_comments(
         self,
@@ -1234,7 +1234,7 @@ class _TwitterNamespace:
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_tweet_comments", {"tweet_id": tweet_id, "rank": rank, "cursor": cursor}, extra)
+        return self._client._call("x_tweet_comments", {"tweet_id": tweet_id, "rank": rank, "cursor": cursor}, extra)
 
     def tweet_retweeters(
         self,
@@ -1252,7 +1252,7 @@ class _TwitterNamespace:
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_tweet_retweeters", {"tweet_id": tweet_id, "cursor": cursor}, extra)
+        return self._client._call("x_tweet_retweeters", {"tweet_id": tweet_id, "cursor": cursor}, extra)
 
     def user(
         self,
@@ -1264,10 +1264,10 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user", {"screen_name": screen_name}, extra)
+        return self._client._call("x_user", {"screen_name": screen_name}, extra)
 
     def user_tweets(
         self,
@@ -1281,11 +1281,11 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user_tweets", {"screen_name": screen_name, "cursor": cursor}, extra)
+        return self._client._call("x_user_tweets", {"screen_name": screen_name, "cursor": cursor}, extra)
 
     def user_replies(
         self,
@@ -1299,11 +1299,11 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user_replies", {"screen_name": screen_name, "cursor": cursor}, extra)
+        return self._client._call("x_user_replies", {"screen_name": screen_name, "cursor": cursor}, extra)
 
     def user_media(
         self,
@@ -1317,11 +1317,11 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user_media", {"screen_name": screen_name, "cursor": cursor}, extra)
+        return self._client._call("x_user_media", {"screen_name": screen_name, "cursor": cursor}, extra)
 
     def user_followers(
         self,
@@ -1335,11 +1335,11 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user_followers", {"screen_name": screen_name, "cursor": cursor}, extra)
+        return self._client._call("x_user_followers", {"screen_name": screen_name, "cursor": cursor}, extra)
 
     def user_followings(
         self,
@@ -1353,11 +1353,11 @@ class _TwitterNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            screen_name: A Twitter handle (without the @).
+            screen_name: An X handle (without the @).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_user_followings", {"screen_name": screen_name, "cursor": cursor}, extra)
+        return self._client._call("x_user_followings", {"screen_name": screen_name, "cursor": cursor}, extra)
 
     def trending(
         self,
@@ -1373,7 +1373,7 @@ class _TwitterNamespace:
             country: Country name (server default 'UnitedStates').
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("twitter_trending", {"country": country}, extra)
+        return self._client._call("x_trending", {"country": country}, extra)
 
 class _TikTokNamespace:
     """TikTok profile, video, hashtag, and search endpoints."""

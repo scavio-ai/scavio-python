@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, Twitter, TikTok, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, nine data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -19,7 +19,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Walmart Products | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
-| Twitter Data (11 endpoints) | Yes | No | No | No |
+| X Data (11 endpoints) | Yes | No | No | No |
 | TikTok Data (11 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
 | LinkedIn Data (14 endpoints) | Yes | No | No | No |
@@ -264,23 +264,23 @@ reels = client.instagram.user_reels(username="instagram")
 hashtags = client.instagram.search_hashtags("fashion")
 ```
 
-### 10. Twitter Search and Profiles
+### 10. X Search and Profiles
 
 ```python
 from scavio import ScavioClient
 
 client = ScavioClient()
 
-tweets = client.twitter.search("AI agents", search_type="Latest")
+tweets = client.x.search("AI agents", search_type="Latest")
 for t in tweets["data"]["timeline"][:5]:
     print(f"@{t['screen_name']}: {t['text'][:80]}")
 
 # Profile, a user's tweets, followers, and a single tweet's replies
-profile = client.twitter.user("elonmusk")
-timeline = client.twitter.user_tweets("elonmusk")
-followers = client.twitter.user_followers("elonmusk")
-replies = client.twitter.tweet_comments("1808168603721650364", rank="top")
-trending = client.twitter.trending(country="UnitedStates")
+profile = client.x.user("elonmusk")
+timeline = client.x.user_tweets("elonmusk")
+followers = client.x.user_followers("elonmusk")
+replies = client.x.tweet_comments("1808168603721650364", rank="top")
+trending = client.x.trending(country="UnitedStates")
 ```
 
 ### 11. LinkedIn People and Companies
@@ -461,7 +461,7 @@ Scavio works with popular AI/LLM frameworks:
 | Walmart | `search`, `product` | 1 each |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
-| Twitter | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
+| X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 2 each |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | 4 each (`company`/`company_posts` 1) |
@@ -491,7 +491,7 @@ MIT
 - [Amazon Product API](https://scavio.dev/amazon-product-api) and [Walmart Product API](https://scavio.dev/walmart-product-api) — product search and details
 - [YouTube API](https://scavio.dev/youtube-transcript-api), [TikTok API](https://scavio.dev/tiktok-api), and [Instagram API](https://scavio.dev/instagram-api) — video and social media data
 - [Reddit API](https://scavio.dev/reddit-api) — posts, comments, subreddits, and trending
-- [Twitter API](https://scavio.dev/twitter-api) and [LinkedIn API](https://scavio.dev/linkedin-api) — tweets, profiles, companies, and jobs
+- [X API](https://scavio.dev/x-api) and [LinkedIn API](https://scavio.dev/linkedin-api) — tweets, profiles, companies, and jobs
 
 For a detailed head-to-head breakdown, see [Tavily vs Scavio](https://scavio.dev/compare/tavily/vs-scavio).
 
