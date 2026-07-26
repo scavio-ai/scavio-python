@@ -13,8 +13,10 @@ __all__ = [
     "_WalmartNamespace",
     "_YouTubeNamespace",
     "_RedditNamespace",
+    "_TwitterNamespace",
     "_TikTokNamespace",
     "_InstagramNamespace",
+    "_LinkedInNamespace",
 ]
 
 class _GoogleNamespace:
@@ -961,7 +963,7 @@ class _YouTubeNamespace:
         return self._client._call("youtube_streams", {"video_id": video_id}, extra)
 
 class _RedditNamespace:
-    """Reddit search and post endpoints."""
+    """Reddit search, post, comment, subreddit, user, and trending endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -970,38 +972,408 @@ class _RedditNamespace:
         self,
         query: str,
         *,
-        type: Optional[Literal["posts", "comments"]] = None,
-        sort: Optional[Literal["new", "relevance", "hot", "top", "comments"]] = None,
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Reddit posts or comments. Costs 2 credits.
+        """Search Reddit posts.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             query: Search query (1-500 characters).
-            type: Result type (server default 'posts').
-            sort: Sort order (server default 'new').
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("reddit_search", {"query": query, "type": type, "sort": sort, "cursor": cursor}, extra)
+        return self._client._call("reddit_search", {"query": query, "cursor": cursor}, extra)
+
+    def search_suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Autocomplete suggestions for a Reddit search query.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_search_suggestions", {"query": query}, extra)
 
     def post(
         self,
         url: str,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Fetch a Reddit post with its threaded comments. Costs 2 credits.
+        """Full details for a single Reddit post.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             url: Full Reddit post URL.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("reddit_post", {"url": url}, extra)
+
+    def post_comments(
+        self,
+        post_id: str,
+        *,
+        sort: Optional[Literal["HOT", "NEW", "TOP", "BEST", "CONTROVERSIAL"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Top-level comments for a Reddit post.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            post_id: Post fullname (t3_...) or bare id.
+            sort: Comment sort order (server default 'TOP').
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_post_comments", {"post_id": post_id, "sort": sort, "cursor": cursor}, extra)
+
+    def comment_replies(
+        self,
+        post_id: str,
+        cursor: str,
+        *,
+        sort: Optional[Literal["HOT", "NEW", "TOP", "BEST", "CONTROVERSIAL"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Replies to a specific Reddit comment.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            post_id: Post fullname (t3_...) or bare id.
+            cursor: reply_cursor from a comment in the comments endpoint.
+            sort: Comment sort order (server default 'TOP').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_comment_replies", {"post_id": post_id, "cursor": cursor, "sort": sort}, extra)
+
+    def subreddit(
+        self,
+        subreddit: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Metadata for a subreddit.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            subreddit: Subreddit name (without the r/ prefix).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_subreddit", {"subreddit": subreddit}, extra)
+
+    def subreddit_posts(
+        self,
+        subreddit: str,
+        *,
+        sort: Optional[Literal["BEST", "HOT", "NEW", "TOP", "CONTROVERSIAL", "RISING"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A subreddit's post feed.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            subreddit: Subreddit name (without the r/ prefix).
+            sort: Feed sort order (server default 'HOT').
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_subreddit_posts", {"subreddit": subreddit, "sort": sort, "cursor": cursor}, extra)
+
+    def user(
+        self,
+        username: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A redditor's profile.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Reddit username (without the u/ prefix).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_user", {"username": username}, extra)
+
+    def user_posts(
+        self,
+        username: str,
+        *,
+        sort: Optional[Literal["HOT", "NEW", "TOP", "BEST", "CONTROVERSIAL"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A redditor's submitted posts.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Reddit username (without the u/ prefix).
+            sort: Sort order (server default 'NEW').
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_user_posts", {"username": username, "sort": sort, "cursor": cursor}, extra)
+
+    def user_comments(
+        self,
+        username: str,
+        *,
+        sort: Optional[Literal["HOT", "NEW", "TOP", "BEST", "CONTROVERSIAL"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A redditor's comments.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Reddit username (without the u/ prefix).
+            sort: Sort order (server default 'NEW').
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_user_comments", {"username": username, "sort": sort, "cursor": cursor}, extra)
+
+    def popular(
+        self,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site-wide popular feed.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_popular", {"cursor": cursor}, extra)
+
+    def trending(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current trending Reddit search queries.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_trending", {}, extra)
+
+class _TwitterNamespace:
+    """Twitter search, tweet, and user endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        search: str,
+        *,
+        search_type: Optional[Literal["Top", "Latest", "People", "Photos", "Videos"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search tweets and people.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            search: Search query (1-500 characters).
+            search_type: Result category (server default 'Top').
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_search", {"search": search, "search_type": search_type, "cursor": cursor}, extra)
+
+    def tweet(
+        self,
+        tweet_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full details for a single tweet.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            tweet_id: Tweet id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_tweet", {"tweet_id": tweet_id}, extra)
+
+    def tweet_comments(
+        self,
+        tweet_id: str,
+        *,
+        rank: Optional[Literal["top", "latest"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Replies to a tweet (ranked or chronological).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            tweet_id: Tweet id.
+            rank: 'top' (ranked) or 'latest' (chronological); server default 'top'.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_tweet_comments", {"tweet_id": tweet_id, "rank": rank, "cursor": cursor}, extra)
+
+    def tweet_retweeters(
+        self,
+        tweet_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Users who retweeted a tweet.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            tweet_id: Tweet id.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_tweet_retweeters", {"tweet_id": tweet_id, "cursor": cursor}, extra)
+
+    def user(
+        self,
+        screen_name: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Profile details for a user.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user", {"screen_name": screen_name}, extra)
+
+    def user_tweets(
+        self,
+        screen_name: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A user's tweets.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user_tweets", {"screen_name": screen_name, "cursor": cursor}, extra)
+
+    def user_replies(
+        self,
+        screen_name: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A user's tweets and replies.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user_replies", {"screen_name": screen_name, "cursor": cursor}, extra)
+
+    def user_media(
+        self,
+        screen_name: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A user's media tweets.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user_media", {"screen_name": screen_name, "cursor": cursor}, extra)
+
+    def user_followers(
+        self,
+        screen_name: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A user's followers.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user_followers", {"screen_name": screen_name, "cursor": cursor}, extra)
+
+    def user_followings(
+        self,
+        screen_name: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Accounts a user follows.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            screen_name: A Twitter handle (without the @).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_user_followings", {"screen_name": screen_name, "cursor": cursor}, extra)
+
+    def trending(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Trending topics for a country.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country name (server default 'UnitedStates').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("twitter_trending", {"country": country}, extra)
 
 class _TikTokNamespace:
     """TikTok profile, video, hashtag, and search endpoints."""
@@ -1481,3 +1853,296 @@ class _InstagramNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("instagram_user_followings", {"username": username, "user_id": user_id, "count": count, "cursor": cursor}, extra)
+
+class _LinkedInNamespace:
+    """LinkedIn person, company, job, post, and search endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def person(
+        self,
+        username: str,
+        *,
+        include_experiences: Optional[bool] = None,
+        include_educations: Optional[bool] = None,
+        include_skills: Optional[bool] = None,
+        include_certifications: Optional[bool] = None,
+        include_follower_and_connection: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full profile for a LinkedIn member. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            username: Public identifier (vanity handle).
+            include_experiences: Include work experience.
+            include_educations: Include education history.
+            include_skills: Include skills.
+            include_certifications: Include certifications.
+            include_follower_and_connection: Include follower and connection counts.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_person", {"username": username, "include_experiences": include_experiences, "include_educations": include_educations, "include_skills": include_skills, "include_certifications": include_certifications, "include_follower_and_connection": include_follower_and_connection}, extra)
+
+    def person_about(
+        self,
+        *,
+        urn: Optional[str] = None,
+        username: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """About/overview metadata for a member. Provide urn or username. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            urn: Member urn.
+            username: Public identifier; resolved to a urn if urn is omitted.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_person_about", {"urn": urn, "username": username}, extra)
+
+    def person_posts(
+        self,
+        *,
+        urn: Optional[str] = None,
+        username: Optional[str] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A member's recent posts. Provide urn or username. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            urn: Member urn.
+            username: Public identifier; resolved to a urn if urn is omitted.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_person_posts", {"urn": urn, "username": username, "cursor": cursor}, extra)
+
+    def person_contact(
+        self,
+        username: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Public contact info for a member. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            username: Public identifier (vanity handle).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_person_contact", {"username": username}, extra)
+
+    def company(
+        self,
+        company: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Profile for a LinkedIn company.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            company: Company universal name (slug) or LinkedIn company URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_company", {"company": company}, extra)
+
+    def company_posts(
+        self,
+        company: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A company's recent posts.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            company: Company universal name (slug) or LinkedIn company URL.
+            cursor: Pagination cursor from a prior response.
+            count: Results per page (1-100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_company_posts", {"company": company, "cursor": cursor, "count": count}, extra)
+
+    def company_people(
+        self,
+        *,
+        company_id: Optional[str] = None,
+        company: Optional[str] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """People who work at a company. Provide company_id or company. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            company_id: Numeric company id.
+            company: Company slug/url; resolved to a company_id if company_id is omitted.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_company_people", {"company_id": company_id, "company": company, "cursor": cursor}, extra)
+
+    def company_jobs(
+        self,
+        *,
+        company_id: Optional[str] = None,
+        company: Optional[str] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A company's open job listings. Provide company_id or company. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            company_id: Numeric company id.
+            company: Company slug/url; resolved to a company_id if company_id is omitted.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_company_jobs", {"company_id": company_id, "company": company, "cursor": cursor}, extra)
+
+    def search_people(
+        self,
+        *,
+        search: Optional[str] = None,
+        title: Optional[str] = None,
+        company: Optional[str] = None,
+        school: Optional[str] = None,
+        location: Optional[str] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search for people by name, title, company, or school. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            search: Name to search for.
+            title: Job title filter.
+            company: Company filter.
+            school: School filter.
+            location: A geo name or id to filter by.
+            cursor: Page cursor (page number).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_search_people", {"search": search, "title": title, "company": company, "school": school, "location": location, "cursor": cursor}, extra)
+
+    def search_jobs(
+        self,
+        search: str,
+        *,
+        cursor: Optional[str] = None,
+        date_posted: Optional[str] = None,
+        geocode: Optional[str] = None,
+        experience_level: Optional[str] = None,
+        remote: Optional[str] = None,
+        job_type: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search for jobs by keyword. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            search: Search keyword.
+            cursor: Pagination cursor from a prior response.
+            date_posted: Date-posted filter.
+            geocode: Geo id to filter by.
+            experience_level: Experience-level filter.
+            remote: Remote/on-site filter.
+            job_type: Job-type filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_search_jobs", {"search": search, "cursor": cursor, "date_posted": date_posted, "geocode": geocode, "experience_level": experience_level, "remote": remote, "job_type": job_type}, extra)
+
+    def search_posts(
+        self,
+        search: str,
+        *,
+        cursor: Optional[str] = None,
+        date_posted: Optional[str] = None,
+        sort_by: Optional[str] = None,
+        content_type: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search for posts by keyword. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            search: Search keyword.
+            cursor: Pagination cursor from a prior response.
+            date_posted: Date-posted filter.
+            sort_by: Sort order.
+            content_type: Content-type filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_search_posts", {"search": search, "cursor": cursor, "date_posted": date_posted, "sort_by": sort_by, "content_type": content_type}, extra)
+
+    def job(
+        self,
+        job_id: str,
+        *,
+        include_skills: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full details for a single job listing. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            job_id: Job id.
+            include_skills: Include the job's required skills.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_job", {"job_id": job_id, "include_skills": include_skills}, extra)
+
+    def post(
+        self,
+        post_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full details for a single post. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            post_id: Post id or activity urn.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_post", {"post_id": post_id}, extra)
+
+    def post_comments(
+        self,
+        post_id: str,
+        *,
+        cursor: Optional[str] = None,
+        sort_order: Optional[Literal["relevance", "recent"]] = None,
+        post_type: Optional[Literal["activity", "ugc"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Comments on a post. Costs 4 credits.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            post_id: Post id or activity urn.
+            cursor: Pagination cursor from a prior response.
+            sort_order: Comment sort order.
+            post_type: Post type.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("linkedin_post_comments", {"post_id": post_id, "cursor": cursor, "sort_order": sort_order, "post_type": post_type}, extra)

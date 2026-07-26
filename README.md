@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, TikTok, and Instagram with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, Twitter, TikTok, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, six data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, nine data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -18,10 +18,12 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
-| Reddit Search | Yes | No | No | No |
+| Reddit Data (12 endpoints) | Yes | No | No | No |
+| Twitter Data (11 endpoints) | Yes | No | No | No |
 | TikTok Data (11 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
-| Data Sources | 6 | 1 | 1 per plan | 1 |
+| LinkedIn Data (14 endpoints) | Yes | No | No | No |
+| Data Sources | 9 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -216,12 +218,19 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-posts = client.reddit.search("best mechanical keyboard", sort="hot")
+posts = client.reddit.search("best mechanical keyboard")
 
-for post in posts["data"]["posts"]:
+for post in posts["data"]["results"]:
     print(f"r/{post['subreddit']} - {post['title']}")
     print(f"  {post['url']}")
     print()
+
+# Drill into a subreddit, a post's comments, or a redditor
+feed = client.reddit.subreddit_posts("MechanicalKeyboards", sort="TOP")
+comments = client.reddit.post_comments("t3_1v6ngaf", sort="TOP")
+history = client.reddit.user_posts("spez")
+popular = client.reddit.popular()
+trending = client.reddit.trending()
 ```
 
 ### 8. TikTok Hashtag Analysis
@@ -255,7 +264,46 @@ reels = client.instagram.user_reels(username="instagram")
 hashtags = client.instagram.search_hashtags("fashion")
 ```
 
-### 10. Social Media Monitoring
+### 10. Twitter Search and Profiles
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+tweets = client.twitter.search("AI agents", search_type="Latest")
+for t in tweets["data"]["timeline"][:5]:
+    print(f"@{t['screen_name']}: {t['text'][:80]}")
+
+# Profile, a user's tweets, followers, and a single tweet's replies
+profile = client.twitter.user("elonmusk")
+timeline = client.twitter.user_tweets("elonmusk")
+followers = client.twitter.user_followers("elonmusk")
+replies = client.twitter.tweet_comments("1808168603721650364", rank="top")
+trending = client.twitter.trending(country="UnitedStates")
+```
+
+### 11. LinkedIn People and Companies
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Member profile (4 credits) and their recent posts
+person = client.linkedin.person("williamhgates")
+person_posts = client.linkedin.person_posts(username="williamhgates")
+
+# Company profile (1 credit) and hiring signals
+company = client.linkedin.company("microsoft")
+jobs = client.linkedin.company_jobs(company="microsoft")
+
+# Search people and jobs
+people = client.linkedin.search_people(title="data engineer", location="Berlin")
+job_results = client.linkedin.search_jobs("software engineer", remote="true")
+```
+
+### 12. Social Media Monitoring
 
 ```python
 from scavio import ScavioClient
@@ -263,11 +311,11 @@ from scavio import ScavioClient
 client = ScavioClient()
 
 brand = "scavio"
-reddit = client.reddit.search(brand, sort="hot")
+reddit = client.reddit.search(brand)
 tiktok = client.tiktok.search_videos(brand, count=5)
 
-print(f"Reddit mentions ({len(reddit['data']['posts'])}):")
-for post in reddit["data"]["posts"][:3]:
+print(f"Reddit mentions ({len(reddit['data']['results'])}):")
+for post in reddit["data"]["results"][:3]:
     print(f"  r/{post['subreddit']}: {post['title']}")
 
 tiktok_videos = tiktok["data"].get("search_item_list", [])
@@ -277,7 +325,7 @@ for v in tiktok_videos[:3]:
     print(f"  {desc[:80]}")
 ```
 
-### 11. Price Drop Alert
+### 13. Price Drop Alert
 
 ```python
 from scavio import ScavioClient
@@ -296,7 +344,7 @@ else:
     print(f"{title[:60]}: ${price}")
 ```
 
-### 12. Async Multi-Source Search
+### 14. Async Multi-Source Search
 
 ```python
 import asyncio
@@ -318,7 +366,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### 13. Check API Usage
+### 15. Check API Usage
 
 ```python
 from scavio import ScavioClient
@@ -412,9 +460,11 @@ Scavio works with popular AI/LLM frameworks:
 | Amazon | `search`, `product`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product` | 1 each |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
-| Reddit | `search`, `post` | 2 each |
+| Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
+| Twitter | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 2 each |
+| LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | 4 each (`company`/`company_posts` 1) |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
@@ -440,7 +490,8 @@ MIT
 - [Google Search API](https://scavio.dev/google-search-api) — SERP results, news, images, maps, and knowledge graph
 - [Amazon Product API](https://scavio.dev/amazon-product-api) and [Walmart Product API](https://scavio.dev/walmart-product-api) — product search and details
 - [YouTube API](https://scavio.dev/youtube-transcript-api), [TikTok API](https://scavio.dev/tiktok-api), and [Instagram API](https://scavio.dev/instagram-api) — video and social media data
-- [Reddit API](https://scavio.dev/reddit-api) — posts and threaded comments
+- [Reddit API](https://scavio.dev/reddit-api) — posts, comments, subreddits, and trending
+- [Twitter API](https://scavio.dev/twitter-api) and [LinkedIn API](https://scavio.dev/linkedin-api) — tweets, profiles, companies, and jobs
 
 For a detailed head-to-head breakdown, see [Tavily vs Scavio](https://scavio.dev/compare/tavily/vs-scavio).
 

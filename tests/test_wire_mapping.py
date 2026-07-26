@@ -160,3 +160,112 @@ def test_instagram_post_one_of_required(monkeypatch):
         client.instagram.post()
     # Any one of the three satisfies it.
     client.instagram.post(shortcode="abc")
+
+
+# --- Reddit (upgrade: existing search/post kept, 10 new endpoints) ----------
+
+
+def test_reddit_search_backward_compatible(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.search("serpapi alternative", cursor="c1")
+    assert captured["path"] == "/api/v1/reddit/search"
+    assert captured["json"] == {"query": "serpapi alternative", "cursor": "c1"}
+
+
+def test_reddit_post_backward_compatible(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.post("https://www.reddit.com/r/programming/comments/abc123/x/")
+    assert captured["path"] == "/api/v1/reddit/post"
+    assert captured["json"] == {"url": "https://www.reddit.com/r/programming/comments/abc123/x/"}
+
+
+def test_reddit_post_comments_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.post_comments("t3_1v6ngaf", sort="TOP", cursor="c1")
+    assert captured["path"] == "/api/v1/reddit/post/comments"
+    assert captured["json"] == {"post_id": "t3_1v6ngaf", "sort": "TOP", "cursor": "c1"}
+
+
+def test_reddit_comment_replies_requires_cursor(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.comment_replies("t3_1v6ngaf", "reply_cursor_1")
+    assert captured["path"] == "/api/v1/reddit/post/comments/replies"
+    assert captured["json"] == {"post_id": "t3_1v6ngaf", "cursor": "reply_cursor_1"}
+
+
+def test_reddit_trending_empty_body(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.trending()
+    assert captured["method"] == "POST"
+    assert captured["path"] == "/api/v1/reddit/trending"
+    assert captured["json"] == {}
+
+
+# --- Twitter (new) ----------------------------------------------------------
+
+
+def test_twitter_search_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.twitter.search("artificial intelligence", search_type="Latest", cursor="c1")
+    assert captured["path"] == "/api/v1/twitter/search"
+    assert captured["json"] == {
+        "search": "artificial intelligence",
+        "search_type": "Latest",
+        "cursor": "c1",
+    }
+
+
+def test_twitter_user_tweets_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.twitter.user_tweets("elonmusk")
+    assert captured["path"] == "/api/v1/twitter/user/tweets"
+    assert captured["json"] == {"screen_name": "elonmusk"}
+
+
+# --- LinkedIn (new) ---------------------------------------------------------
+
+
+def test_linkedin_person_bool_flags_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.linkedin.person("williamhgates", include_skills=True)
+    assert captured["path"] == "/api/v1/linkedin/person"
+    assert captured["json"] == {"username": "williamhgates", "include_skills": True}
+
+
+@pytest.mark.parametrize(
+    "method", ["person_about", "person_posts", "company_people", "company_jobs"]
+)
+def test_linkedin_one_of_required(method, monkeypatch):
+    from scavio import ScavioError
+
+    patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        getattr(client.linkedin, method)()
+
+
+def test_linkedin_search_people_needs_one_field(monkeypatch):
+    from scavio import ScavioError
+
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        client.linkedin.search_people(location="Austin")
+    client.linkedin.search_people(title="engineer")
+    assert captured["json"] == {"title": "engineer"}
+
+
+def test_linkedin_company_resolves_via_slug(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.linkedin.company_people(company="microsoft")
+    assert captured["path"] == "/api/v1/linkedin/company/people"
+    assert captured["json"] == {"company": "microsoft"}

@@ -10,8 +10,10 @@ from ._namespaces_async import (
     _AsyncAmazonNamespace,
     _AsyncGoogleNamespace,
     _AsyncInstagramNamespace,
+    _AsyncLinkedInNamespace,
     _AsyncRedditNamespace,
     _AsyncTikTokNamespace,
+    _AsyncTwitterNamespace,
     _AsyncWalmartNamespace,
     _AsyncYouTubeNamespace,
 )
@@ -71,8 +73,10 @@ class AsyncScavioClient:
         self.walmart = _AsyncWalmartNamespace(self)
         self.youtube = _AsyncYouTubeNamespace(self)
         self.reddit = _AsyncRedditNamespace(self)
+        self.twitter = _AsyncTwitterNamespace(self)
         self.tiktok = _AsyncTikTokNamespace(self)
         self.instagram = _AsyncInstagramNamespace(self)
+        self.linkedin = _AsyncLinkedInNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

@@ -48,8 +48,76 @@ def test_valid_rps_accepted(rps):
 
 def test_namespaces_present():
     client = ScavioClient(api_key="k")
-    for ns in ("google", "amazon", "walmart", "youtube", "reddit", "tiktok", "instagram"):
+    for ns in (
+        "google",
+        "amazon",
+        "walmart",
+        "youtube",
+        "reddit",
+        "twitter",
+        "tiktok",
+        "instagram",
+        "linkedin",
+    ):
         assert hasattr(client, ns)
+
+
+def test_reddit_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in (
+        "search",
+        "search_suggestions",
+        "post",
+        "post_comments",
+        "comment_replies",
+        "subreddit",
+        "subreddit_posts",
+        "user",
+        "user_posts",
+        "user_comments",
+        "popular",
+        "trending",
+    ):
+        assert hasattr(client.reddit, method)
+
+
+def test_twitter_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in (
+        "search",
+        "tweet",
+        "tweet_comments",
+        "tweet_retweeters",
+        "user",
+        "user_tweets",
+        "user_replies",
+        "user_media",
+        "user_followers",
+        "user_followings",
+        "trending",
+    ):
+        assert hasattr(client.twitter, method)
+
+
+def test_linkedin_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in (
+        "person",
+        "person_about",
+        "person_posts",
+        "person_contact",
+        "company",
+        "company_posts",
+        "company_people",
+        "company_jobs",
+        "search_people",
+        "search_jobs",
+        "search_posts",
+        "job",
+        "post",
+        "post_comments",
+    ):
+        assert hasattr(client.linkedin, method)
 
 
 def test_youtube_methods_present():
