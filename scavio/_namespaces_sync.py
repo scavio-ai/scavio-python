@@ -1617,9 +1617,9 @@ class _InstagramNamespace:
         user_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Instagram profile. Provide username or user_id. Costs 2 credits.
+        """Instagram profile. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -1659,9 +1659,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Reels from an Instagram user. Provide username or user_id. Costs 2 credits.
+        """Reels from an Instagram user. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -1681,9 +1681,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Posts an Instagram user is tagged in. Provide username or user_id. Costs 2 credits.
+        """Posts an Instagram user is tagged in. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -1701,9 +1701,9 @@ class _InstagramNamespace:
         user_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Active stories for an Instagram user. Provide username or user_id. Costs 2 credits.
+        """Active stories for an Instagram user. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -1720,9 +1720,9 @@ class _InstagramNamespace:
         shortcode: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """An Instagram post. Provide url, media_id, or shortcode. Costs 2 credits.
+        """An Instagram post. Provide url, media_id, or shortcode. Costs 8 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 8 credits. Returns the API response as a dict.
 
         Args:
             url: Full Instagram post URL.
@@ -1741,9 +1741,9 @@ class _InstagramNamespace:
         sort_order: Optional[Literal["popular", "newest"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Comments on an Instagram post. Provide shortcode or url. Costs 2 credits.
+        """Comments on an Instagram post. Provide shortcode or url. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             shortcode: Instagram shortcode (from the post URL).
@@ -1762,9 +1762,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Replies to an Instagram comment. Costs 2 credits.
+        """Replies to an Instagram comment. Costs 8 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 8 credits. Returns the API response as a dict.
 
         Args:
             media_id: Instagram media id.
@@ -1781,9 +1781,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Instagram users by keyword. Costs 2 credits.
+        """Search Instagram users by keyword. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             keyword: Search keyword (1-500 characters).
@@ -1799,9 +1799,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Instagram hashtags by keyword. Costs 2 credits.
+        """Search Instagram hashtags by keyword. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             keyword: Search keyword (1-500 characters).
@@ -1819,9 +1819,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Followers of an Instagram user. Provide username or user_id. Costs 2 credits.
+        """Followers of an Instagram user. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -1841,9 +1841,9 @@ class _InstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Accounts an Instagram user follows. Provide username or user_id. Costs 2 credits.
+        """Accounts an Instagram user follows. Provide username or user_id. Costs 10 credits.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).

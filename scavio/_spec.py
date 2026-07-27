@@ -1033,13 +1033,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="profile",
         http="POST",
         path="/api/v1/instagram/profile",
-        summary="Instagram profile. Provide username or user_id. Costs 2 credits.",
+        summary="Instagram profile. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_user_posts",
@@ -1063,7 +1063,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_reels",
         http="POST",
         path="/api/v1/instagram/user/reels",
-        summary="Reels from an Instagram user. Provide username or user_id. Costs 2 credits.",
+        summary="Reels from an Instagram user. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1071,7 +1071,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_user_tagged",
@@ -1079,7 +1079,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_tagged",
         http="POST",
         path="/api/v1/instagram/user/tagged",
-        summary="Posts an Instagram user is tagged in. Provide username or user_id. Costs 2 credits.",
+        summary="Posts an Instagram user is tagged in. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1087,7 +1087,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_user_stories",
@@ -1095,13 +1095,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_stories",
         http="POST",
         path="/api/v1/instagram/user/stories",
-        summary="Active stories for an Instagram user. Provide username or user_id. Costs 2 credits.",
+        summary="Active stories for an Instagram user. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_post",
@@ -1109,14 +1109,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post",
         http="POST",
         path="/api/v1/instagram/post",
-        summary="An Instagram post. Provide url, media_id, or shortcode. Costs 2 credits.",
+        summary="An Instagram post. Provide url, media_id, or shortcode. Costs 8 credits.",
         params=(
             _str("url", "Full Instagram post URL."),
             _str("media_id", "Instagram media id."),
             _str("shortcode", "Instagram shortcode (from the post URL)."),
         ),
         one_of=(("url", "media_id", "shortcode"),),
-        credits=2,
+        credits=8,
     ),
     Endpoint(
         key="instagram_post_comments",
@@ -1124,7 +1124,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post_comments",
         http="POST",
         path="/api/v1/instagram/post/comments",
-        summary="Comments on an Instagram post. Provide shortcode or url. Costs 2 credits.",
+        summary="Comments on an Instagram post. Provide shortcode or url. Costs 10 credits.",
         params=(
             _str("shortcode", "Instagram shortcode (from the post URL)."),
             _str("url", "Full Instagram post URL."),
@@ -1132,7 +1132,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _lit("sort_order", ("popular", "newest"), "Comment sort order."),
         ),
         one_of=(("shortcode", "url"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_comment_replies",
@@ -1140,13 +1140,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="comment_replies",
         http="POST",
         path="/api/v1/instagram/post/comments/replies",
-        summary="Replies to an Instagram comment. Costs 2 credits.",
+        summary="Replies to an Instagram comment. Costs 8 credits.",
         params=(
             _req("media_id", "Instagram media id."),
             _req("comment_id", "Parent comment id."),
             _str("cursor", "Pagination cursor from a prior response."),
         ),
-        credits=2,
+        credits=8,
     ),
     Endpoint(
         key="instagram_search_users",
@@ -1154,12 +1154,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_users",
         http="POST",
         path="/api/v1/instagram/search/users",
-        summary="Search Instagram users by keyword. Costs 2 credits.",
+        summary="Search Instagram users by keyword. Costs 10 credits.",
         params=(
             _req("keyword", "Search keyword (1-500 characters)."),
             _str("cursor", "Pagination cursor from a prior response."),
         ),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_search_hashtags",
@@ -1167,12 +1167,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_hashtags",
         http="POST",
         path="/api/v1/instagram/search/hashtags",
-        summary="Search Instagram hashtags by keyword. Costs 2 credits.",
+        summary="Search Instagram hashtags by keyword. Costs 10 credits.",
         params=(
             _req("keyword", "Search keyword (1-500 characters)."),
             _str("cursor", "Pagination cursor from a prior response."),
         ),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_user_followers",
@@ -1180,7 +1180,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_followers",
         http="POST",
         path="/api/v1/instagram/user/followers",
-        summary="Followers of an Instagram user. Provide username or user_id. Costs 2 credits.",
+        summary="Followers of an Instagram user. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1188,7 +1188,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="instagram_user_followings",
@@ -1196,7 +1196,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_followings",
         http="POST",
         path="/api/v1/instagram/user/followings",
-        summary="Accounts an Instagram user follows. Provide username or user_id. Costs 2 credits.",
+        summary="Accounts an Instagram user follows. Provide username or user_id. Costs 10 credits.",
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1204,7 +1204,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=2,
+        credits=10,
     ),
     # =============================== X ===================================
     Endpoint(
