@@ -89,6 +89,10 @@ _GOOGLE_DOMAIN = _str("google_domain", "Regional Google domain (e.g. 'google.co.
 _LOCATION = _str("location", "Canonical location name; auto-encoded to a UULE string.")
 _UULE = _str("uule", "Pre-encoded UULE location string (takes priority over location).")
 
+# TikTok Shop marketplace regions with full upstream coverage (category listings
+# are US/GB only and are declared inline on that endpoint).
+_TIKTOK_SHOP_REGIONS = ("US", "GB", "SG", "MY", "PH", "TH", "VN", "ID")
+
 
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
@@ -1535,6 +1539,180 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=4,
     ),
+    # ============================ TikTok Shop ============================
+    Endpoint(
+        key="tiktok_shop_search",
+        namespace="tiktok_shop",
+        method="search",
+        http="POST",
+        path="/api/v1/tiktok-shop/search",
+        summary=(
+            "Search TikTok Shop products by keyword (US catalog). Returns up to 30 products per "
+            "page with exact prices, ratings and shop details. Paginate with next_cursor and dedupe "
+            "by product_id across pages. Product ids returned here are not guaranteed to resolve on "
+            "product(): only about 44% do, so treat search as a listing source, not the first leg of "
+            "a search-then-detail pipeline."
+        ),
+        params=(
+            _req("search", "Search keyword (1-200 characters)."),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_search_suggestions",
+        namespace="tiktok_shop",
+        method="search_suggestions",
+        http="POST",
+        path="/api/v1/tiktok-shop/search/suggestions",
+        summary=(
+            "Keyword autocomplete and expansion for a partial query, across 8 marketplace regions. "
+            "Suggestions are not guaranteed prefix matches: a misspelling returns typo corrections, "
+            "and results can include brand and shop names."
+        ),
+        params=(
+            _req("search", "Partial search keyword (1-100 characters)."),
+            _lit(
+                "region",
+                _TIKTOK_SHOP_REGIONS,
+                "Marketplace region (server default 'US').",
+            ),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_product",
+        namespace="tiktok_shop",
+        method="product",
+        http="POST",
+        path="/api/v1/tiktok-shop/product",
+        summary=(
+            "Full product detail: description, images, variants with stock, shipping, shop profile, "
+            "category path and top reviews. This endpoint does NOT return a price -- upstream masks it "
+            "on the product page -- so read exact prices from search(), shop_products() or "
+            "category_products() instead. It also resolves only about 44% of the product ids returned "
+            "by search(): upstream has no detail data for the rest, so an HTTP 404 is a normal outcome "
+            "rather than an error and must not be retried.\n"
+            "\n"
+            "        The SDK raises NotFoundError on that 404 -- there is no data field in the response "
+            "body to test -- so a loop over search() ids must catch it or it dies on the first miss:\n"
+            "\n"
+            "            from scavio import NotFoundError\n"
+            "\n"
+            "            for product_id in product_ids:\n"
+            "                try:\n"
+            "                    detail = client.tiktok_shop.product(product_id)\n"
+            "                except NotFoundError:\n"
+            "                    continue  # no detail upstream; skip it, do not retry\n"
+            "\n"
+            "        product_reviews() often works for ids product() cannot resolve: of 8 such ids "
+            "tested, 8 returned HTTP 200 and 7 carried at least one review, so it is a useful "
+            "fallback source of product detail."
+        ),
+        params=(
+            _req("product_id", "TikTok Shop product id (6-25 digits)."),
+            _lit(
+                "region",
+                _TIKTOK_SHOP_REGIONS,
+                "Marketplace region (server default 'US').",
+            ),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_product_reviews",
+        namespace="tiktok_shop",
+        method="product_reviews",
+        http="POST",
+        path="/api/v1/tiktok-shop/product/reviews",
+        summary=(
+            "Paginated product reviews with text, images, star histogram and verified-purchase flags, "
+            "up to 200 per call. total_reviews drifts between calls and must not be used to compute a "
+            "page count; page with has_more instead."
+        ),
+        params=(
+            _req("product_id", "TikTok Shop product id (6-25 digits)."),
+            _int("page", "1-based page number (1-500; server default 1)."),
+            _int("page_size", "Reviews per page (1-200; server default 20)."),
+            _lit(
+                "sort",
+                ("relevant", "recent"),
+                "'relevant' returns text-complete, image-heavy reviews; 'recent' is fresher but far more text-sparse. Server default 'relevant'.",
+            ),
+            _int("rating", "Only reviews with this star rating (1-5)."),
+            _bool("has_media", "Only reviews with a photo or video."),
+            _bool("verified_only", "Only verified purchases. Ignored when has_media is True (upstream allows one filter at a time)."),
+            _lit(
+                "region",
+                _TIKTOK_SHOP_REGIONS,
+                "Marketplace region (server default 'US').",
+            ),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_categories",
+        namespace="tiktok_shop",
+        method="categories",
+        http="POST",
+        path="/api/v1/tiktok-shop/categories",
+        summary=(
+            "The global TikTok Shop category tree: 28 top-level categories, 240 nodes, two levels deep. "
+            "Category ids are identical in every region and names are always English. Takes no parameters."
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_category_products",
+        namespace="tiktok_shop",
+        method="category_products",
+        http="POST",
+        path="/api/v1/tiktok-shop/category/products",
+        summary=(
+            "Products listed under a category id from categories(), with exact prices. Page size is "
+            "inconsistent upstream (15 to 20 per page), so always paginate with next_cursor rather than "
+            "assuming a fixed size. Category listings are shallow: after a few pages the source stops "
+            "returning new products and has_more turns false, which is the end of the listing rather "
+            "than an error."
+        ),
+        params=(
+            _req("category_id", "Category id from categories(); level 1 or 2 both work."),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
+            _lit(
+                "region",
+                ("US", "GB"),
+                "Marketplace region. Category listings are served for US and GB only (server default 'US').",
+            ),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_shop_products",
+        namespace="tiktok_shop",
+        method="shop_products",
+        http="POST",
+        path="/api/v1/tiktok-shop/shop/products",
+        summary=(
+            "A shop's product catalog, 30 per page, with exact prices. Shop follower count, location and "
+            "shop-level rating are not available here; call product() for the full shop profile."
+        ),
+        params=(
+            _req("shop_id", "TikTok Shop seller id (also called seller_id elsewhere on TikTok)."),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
+            _lit(
+                "region",
+                _TIKTOK_SHOP_REGIONS,
+                "Marketplace region (server default 'US').",
+            ),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_shop_resolve",
+        namespace="tiktok_shop",
+        method="resolve",
+        http="POST",
+        path="/api/v1/tiktok-shop/resolve",
+        summary=(
+            "Resolve any TikTok Shop URL or share link to a product_id or shop_id, ready to pass to the "
+            "other methods. Accepts canonical product and store pages, tiktok.com/view links, affiliate "
+            "share links and vt.tiktok.com short links."
+        ),
+        params=(_req("url", "A TikTok Shop URL or share link."),),
+    ),
 )
 
 
@@ -1551,6 +1729,7 @@ NAMESPACES: tuple[str, ...] = (
     "tiktok",
     "instagram",
     "linkedin",
+    "tiktok_shop",
 )
 
 

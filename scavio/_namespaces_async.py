@@ -17,6 +17,7 @@ __all__ = [
     "_AsyncTikTokNamespace",
     "_AsyncInstagramNamespace",
     "_AsyncLinkedInNamespace",
+    "_AsyncTikTokShopNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -2146,3 +2147,173 @@ class _AsyncLinkedInNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("linkedin_post_comments", {"post_id": post_id, "cursor": cursor, "sort_order": sort_order, "post_type": post_type}, extra)
+
+class _AsyncTikTokShopNamespace:
+    """TikTok Shop search, product, review, category, shop, and URL-resolution endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        search: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search TikTok Shop products by keyword (US catalog). Returns up to 30 products per page with exact prices, ratings and shop details. Paginate with next_cursor and dedupe by product_id across pages. Product ids returned here are not guaranteed to resolve on product(): only about 44% do, so treat search as a listing source, not the first leg of a search-then-detail pipeline.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            search: Search keyword (1-200 characters).
+            cursor: Opaque cursor from a prior response's next_cursor.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_search", {"search": search, "cursor": cursor}, extra)
+
+    async def search_suggestions(
+        self,
+        search: str,
+        *,
+        region: Optional[Literal["US", "GB", "SG", "MY", "PH", "TH", "VN", "ID"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword autocomplete and expansion for a partial query, across 8 marketplace regions. Suggestions are not guaranteed prefix matches: a misspelling returns typo corrections, and results can include brand and shop names.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            search: Partial search keyword (1-100 characters).
+            region: Marketplace region (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_search_suggestions", {"search": search, "region": region}, extra)
+
+    async def product(
+        self,
+        product_id: str,
+        *,
+        region: Optional[Literal["US", "GB", "SG", "MY", "PH", "TH", "VN", "ID"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full product detail: description, images, variants with stock, shipping, shop profile, category path and top reviews. This endpoint does NOT return a price -- upstream masks it on the product page -- so read exact prices from search(), shop_products() or category_products() instead. It also resolves only about 44% of the product ids returned by search(): upstream has no detail data for the rest, so an HTTP 404 is a normal outcome rather than an error and must not be retried.
+
+        The SDK raises NotFoundError on that 404 -- there is no data field in the response body to test -- so a loop over search() ids must catch it or it dies on the first miss:
+
+            from scavio import NotFoundError
+
+            for product_id in product_ids:
+                try:
+                    detail = client.tiktok_shop.product(product_id)
+                except NotFoundError:
+                    continue  # no detail upstream; skip it, do not retry
+
+        product_reviews() often works for ids product() cannot resolve: of 8 such ids tested, 8 returned HTTP 200 and 7 carried at least one review, so it is a useful fallback source of product detail.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TikTok Shop product id (6-25 digits).
+            region: Marketplace region (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_product", {"product_id": product_id, "region": region}, extra)
+
+    async def product_reviews(
+        self,
+        product_id: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevant", "recent"]] = None,
+        rating: Optional[int] = None,
+        has_media: Optional[bool] = None,
+        verified_only: Optional[bool] = None,
+        region: Optional[Literal["US", "GB", "SG", "MY", "PH", "TH", "VN", "ID"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Paginated product reviews with text, images, star histogram and verified-purchase flags, up to 200 per call. total_reviews drifts between calls and must not be used to compute a page count; page with has_more instead.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TikTok Shop product id (6-25 digits).
+            page: 1-based page number (1-500; server default 1).
+            page_size: Reviews per page (1-200; server default 20).
+            sort: 'relevant' returns text-complete, image-heavy reviews; 'recent' is fresher but far more text-sparse. Server default 'relevant'.
+            rating: Only reviews with this star rating (1-5).
+            has_media: Only reviews with a photo or video.
+            verified_only: Only verified purchases. Ignored when has_media is True (upstream allows one filter at a time).
+            region: Marketplace region (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_product_reviews", {"product_id": product_id, "page": page, "page_size": page_size, "sort": sort, "rating": rating, "has_media": has_media, "verified_only": verified_only, "region": region}, extra)
+
+    async def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The global TikTok Shop category tree: 28 top-level categories, 240 nodes, two levels deep. Category ids are identical in every region and names are always English. Takes no parameters.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_categories", {}, extra)
+
+    async def category_products(
+        self,
+        category_id: str,
+        *,
+        cursor: Optional[str] = None,
+        region: Optional[Literal["US", "GB"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products listed under a category id from categories(), with exact prices. Page size is inconsistent upstream (15 to 20 per page), so always paginate with next_cursor rather than assuming a fixed size. Category listings are shallow: after a few pages the source stops returning new products and has_more turns false, which is the end of the listing rather than an error.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: Category id from categories(); level 1 or 2 both work.
+            cursor: Opaque cursor from a prior response's next_cursor.
+            region: Marketplace region. Category listings are served for US and GB only (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_category_products", {"category_id": category_id, "cursor": cursor, "region": region}, extra)
+
+    async def shop_products(
+        self,
+        shop_id: str,
+        *,
+        cursor: Optional[str] = None,
+        region: Optional[Literal["US", "GB", "SG", "MY", "PH", "TH", "VN", "ID"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A shop's product catalog, 30 per page, with exact prices. Shop follower count, location and shop-level rating are not available here; call product() for the full shop profile.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            shop_id: TikTok Shop seller id (also called seller_id elsewhere on TikTok).
+            cursor: Opaque cursor from a prior response's next_cursor.
+            region: Marketplace region (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_shop_products", {"shop_id": shop_id, "cursor": cursor, "region": region}, extra)
+
+    async def resolve(
+        self,
+        url: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Resolve any TikTok Shop URL or share link to a product_id or shop_id, ready to pass to the other methods. Accepts canonical product and store pages, tiktok.com/view links, affiliate share links and vt.tiktok.com short links.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A TikTok Shop URL or share link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_shop_resolve", {"url": url}, extra)

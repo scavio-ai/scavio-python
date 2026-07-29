@@ -58,6 +58,7 @@ def test_namespaces_present():
         "tiktok",
         "instagram",
         "linkedin",
+        "tiktok_shop",
     ):
         assert hasattr(client, ns)
 
@@ -118,6 +119,21 @@ def test_linkedin_methods_present():
         "post_comments",
     ):
         assert hasattr(client.linkedin, method)
+
+
+def test_tiktok_shop_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in (
+        "search",
+        "search_suggestions",
+        "product",
+        "product_reviews",
+        "categories",
+        "category_products",
+        "shop_products",
+        "resolve",
+    ):
+        assert hasattr(client.tiktok_shop, method)
 
 
 def test_youtube_methods_present():

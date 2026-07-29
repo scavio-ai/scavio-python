@@ -269,3 +269,134 @@ def test_linkedin_company_resolves_via_slug(monkeypatch):
     client.linkedin.company_people(company="microsoft")
     assert captured["path"] == "/api/v1/linkedin/company/people"
     assert captured["json"] == {"company": "microsoft"}
+
+
+# --- TikTok Shop (new) ------------------------------------------------------
+
+
+def test_tiktok_shop_search_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.search("phone case", cursor="c1")
+    assert captured["path"] == "/api/v1/tiktok-shop/search"
+    assert captured["json"] == {"search": "phone case", "cursor": "c1"}
+
+
+def test_tiktok_shop_search_has_no_typed_region():
+    # Search is US-only upstream, so region is deliberately not a typed argument
+    # (it can still be forced through **extra, like any forward-compat param).
+    assert [p.name for p in ENDPOINTS["tiktok_shop_search"].params] == ["search", "cursor"]
+    assert [p.name for p in ENDPOINTS["tiktok_shop_categories"].params] == []
+
+
+def test_tiktok_shop_suggestions_region_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.search_suggestions("wireless", region="GB")
+    assert captured["path"] == "/api/v1/tiktok-shop/search/suggestions"
+    assert captured["json"] == {"search": "wireless", "region": "GB"}
+
+
+def test_tiktok_shop_product_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.product("1732293553906094315")
+    assert captured["path"] == "/api/v1/tiktok-shop/product"
+    assert captured["json"] == {"product_id": "1732293553906094315"}
+
+
+def test_tiktok_shop_product_reviews_filters_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.product_reviews(
+        "1732293553906094315",
+        page=2,
+        page_size=200,
+        sort="recent",
+        rating=5,
+        has_media=True,
+        verified_only=False,
+    )
+    assert captured["path"] == "/api/v1/tiktok-shop/product/reviews"
+    assert captured["json"] == {
+        "product_id": "1732293553906094315",
+        "page": 2,
+        "page_size": 200,
+        "sort": "recent",
+        "rating": 5,
+        "has_media": True,
+        "verified_only": False,
+    }
+
+
+def test_tiktok_shop_categories_empty_body(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.categories()
+    assert captured["method"] == "POST"
+    assert captured["path"] == "/api/v1/tiktok-shop/categories"
+    assert captured["json"] == {}
+
+
+def test_tiktok_shop_category_products_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.category_products("601450", cursor="c1", region="GB")
+    assert captured["path"] == "/api/v1/tiktok-shop/category/products"
+    assert captured["json"] == {"category_id": "601450", "cursor": "c1", "region": "GB"}
+
+
+def test_tiktok_shop_shop_products_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.shop_products("7495514739648989419")
+    assert captured["path"] == "/api/v1/tiktok-shop/shop/products"
+    assert captured["json"] == {"shop_id": "7495514739648989419"}
+
+
+def test_tiktok_shop_resolve_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.tiktok_shop.resolve("https://vt.tiktok.com/ZT2AHoGsE/")
+    assert captured["path"] == "/api/v1/tiktok-shop/resolve"
+    assert captured["json"] == {"url": "https://vt.tiktok.com/ZT2AHoGsE/"}
+
+
+async def test_tiktok_shop_search_wire_async(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.tiktok_shop.search("phone case")
+    assert captured["path"] == "/api/v1/tiktok-shop/search"
+    assert captured["json"] == {"search": "phone case"}
+
+
+def test_tiktok_shop_endpoints_are_one_credit():
+    tiktok_shop = [ep for ep in ENDPOINTS.values() if ep.namespace == "tiktok_shop"]
+    assert len(tiktok_shop) == 8
+    for ep in tiktok_shop:
+        assert ep.credits == 1, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path.startswith("/api/v1/tiktok-shop/"), ep.key
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_tiktok_shop_product_docstring_carries_both_caveats(module):
+    """The price and partial-coverage caveats must reach anyone reading inline docs."""
+    import importlib
+
+    cls = getattr(importlib.import_module(module), "_TikTokShopNamespace", None)
+    if cls is None:
+        cls = importlib.import_module(module)._AsyncTikTokShopNamespace
+    doc = cls.product.__doc__ or ""
+    assert "does NOT return a price" in doc
+    assert "44%" in doc
+    assert "an HTTP 404 is a normal outcome" in doc
+    # The 404 body has no data field; describing it by one is unfollowable advice.
+    assert "data null" not in doc
+    assert "data: null" not in doc
+    # The 404 raises, so the docstring must name the exception and show the catch.
+    assert "NotFoundError" in doc
+    assert "except NotFoundError" in doc
+    search_doc = cls.search.__doc__ or ""
+    assert "exact prices" in search_doc
+    assert "not guaranteed to resolve" in search_doc

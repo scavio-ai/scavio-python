@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, nine data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, ten data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -21,9 +21,10 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
 | TikTok Data (11 endpoints) | Yes | No | No | No |
+| TikTok Shop Data (8 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
 | LinkedIn Data (14 endpoints) | Yes | No | No | No |
-| Data Sources | 9 | 1 | 1 per plan | 1 |
+| Data Sources | 10 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -303,7 +304,37 @@ people = client.linkedin.search_people(title="data engineer", location="Berlin")
 job_results = client.linkedin.search_jobs("software engineer", remote="true")
 ```
 
-### 12. Social Media Monitoring
+### 12. TikTok Shop Product Research
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Listings carry exact prices
+results = client.tiktok_shop.search("phone case")
+for p in results["data"]["products"][:5]:
+    print(p["title"], p["price"]["current"], p["shop"]["shop_name"])
+
+# Detail adds description, variants, stock and shipping -- but NOT a price
+# (upstream masks it), and it resolves only about 44% of the ids search returns.
+# A 404 there is a normal outcome, not an error: skip the item, do not retry.
+from scavio import NotFoundError
+
+product_id = results["data"]["products"][0]["product_id"]
+try:
+    detail = client.tiktok_shop.product(product_id)
+    print(detail["data"]["title"], len(detail["data"]["variants"]), "variants")
+except NotFoundError:
+    pass  # no detail data upstream for this product; skip it, do not retry
+
+reviews = client.tiktok_shop.product_reviews(product_id, page_size=200, sort="relevant")
+catalog = client.tiktok_shop.shop_products("7495514739648989419")   # exact prices
+tree = client.tiktok_shop.categories()
+resolved = client.tiktok_shop.resolve("https://vt.tiktok.com/ZT2AHoGsE/")
+```
+
+### 13. Social Media Monitoring
 
 ```python
 from scavio import ScavioClient
@@ -325,7 +356,7 @@ for v in tiktok_videos[:3]:
     print(f"  {desc[:80]}")
 ```
 
-### 13. Price Drop Alert
+### 14. Price Drop Alert
 
 ```python
 from scavio import ScavioClient
@@ -344,7 +375,7 @@ else:
     print(f"{title[:60]}: ${price}")
 ```
 
-### 14. Async Multi-Source Search
+### 15. Async Multi-Source Search
 
 ```python
 import asyncio
@@ -366,7 +397,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### 15. Check API Usage
+### 16. Check API Usage
 
 ```python
 from scavio import ScavioClient
@@ -463,6 +494,7 @@ Scavio works with popular AI/LLM frameworks:
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
+| TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 8 each (`user_posts` 2) |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | 4 each (`company`/`company_posts` 1) |
 
@@ -490,8 +522,9 @@ MIT
 - [Google Search API](https://scavio.dev/google-search-api) — SERP results, news, images, maps, and knowledge graph
 - [Amazon Product API](https://scavio.dev/amazon-product-api) and [Walmart Product API](https://scavio.dev/walmart-product-api) — product search and details
 - [YouTube API](https://scavio.dev/youtube-transcript-api), [TikTok API](https://scavio.dev/tiktok-api), and [Instagram API](https://scavio.dev/instagram-api) — video and social media data
+- [TikTok Shop API](https://scavio.dev/docs/tiktok-shop-search) — product search, detail, reviews, categories, and shop catalogs
 - [Reddit API](https://scavio.dev/reddit-api) — posts, comments, subreddits, and trending
-- [X API](https://scavio.dev/x-api) and [LinkedIn API](https://scavio.dev/linkedin-api) — tweets, profiles, companies, and jobs
+- [X API](https://scavio.dev/docs/x-search) and [LinkedIn API](https://scavio.dev/docs/linkedin-person) — tweets, profiles, companies, and jobs
 
 For a detailed head-to-head breakdown, see [Tavily vs Scavio](https://scavio.dev/compare/tavily/vs-scavio).
 
