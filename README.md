@@ -291,18 +291,29 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-# Member profile (4 credits) and their recent posts
-person = client.linkedin.person("williamhgates")
-person_posts = client.linkedin.person_posts(username="williamhgates")
+# Member profile and their recent posts (1 credit each). A handle or a full
+# LinkedIn URL works anywhere.
+person = client.linkedin.person(username="williamhgates")
+person_posts = client.linkedin.person_posts(url="https://www.linkedin.com/in/williamhgates/")
 
-# Company profile (1 credit) and hiring signals
-company = client.linkedin.company("microsoft")
-jobs = client.linkedin.company_jobs(company="microsoft")
+# Company profile and its recent posts
+company = client.linkedin.company(company="microsoft")
+company_posts = client.linkedin.company_posts(company="microsoft")
 
-# Search people and jobs
-people = client.linkedin.search_people(title="data engineer", location="Berlin")
-job_results = client.linkedin.search_jobs("software engineer", remote="true")
+# Jobs: search, then pull full detail for one listing
+job_results = client.linkedin.search_jobs("software engineer", location="United States")
+job = client.linkedin.job(job_id=job_results["data"]["data"][0]["id"])
+
+# A post and its comments (10 per page)
+post = client.linkedin.post(post_id="7488618410256523265")
+comments = client.linkedin.post_comments(post_id="7488618410256523265", page=1)
 ```
+
+> **Retired endpoints.** The upstream provider withdrew the datasets behind
+> `person_contact`, `company_people`, `company_jobs`, `search_people` and
+> `search_posts`. They remain callable but always return HTTP 410 and are never
+> billed. `company()` still returns `featured_employees` (a small sample of
+> staff), and `search_jobs()` with a company name substitutes for `company_jobs`.
 
 ### 12. TikTok Shop Product Research
 

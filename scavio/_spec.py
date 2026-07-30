@@ -1341,22 +1341,27 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(_str("country", "Country name (server default 'UnitedStates')."),),
     ),
     # =============================== LinkedIn ============================
+    # The provider retired the `linkedin/web/*` namespace it was built on; these
+    # now run on `linkedin/web_v2/*`, which is URL-native. Public params are
+    # unchanged (the permalink is built server-side) and `url` is accepted
+    # everywhere as a direct alternative. All live endpoints are 1 credit.
+    # Five endpoints have no upstream left and always return HTTP 410 unbilled;
+    # they are kept so existing code fails loudly rather than silently vanishing.
     Endpoint(
         key="linkedin_person",
         namespace="linkedin",
         method="person",
         http="POST",
         path="/api/v1/linkedin/person",
-        summary="Full profile for a LinkedIn member. Costs 4 credits.",
-        params=(
-            _req("username", "Public identifier (vanity handle)."),
-            _bool("include_experiences", "Include work experience."),
-            _bool("include_educations", "Include education history."),
-            _bool("include_skills", "Include skills."),
-            _bool("include_certifications", "Include certifications."),
-            _bool("include_follower_and_connection", "Include follower and connection counts."),
+        summary=(
+            "Full profile for a LinkedIn member, including about text, experience, education, "
+            "honours and links. Provide username or url."
         ),
-        credits=4,
+        params=(
+            _str("username", "Public identifier (vanity handle)."),
+            _str("url", "Full LinkedIn profile URL, as an alternative to username."),
+        ),
+        one_of=(("username", "url"),),
     ),
     Endpoint(
         key="linkedin_person_about",
@@ -1364,13 +1369,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="person_about",
         http="POST",
         path="/api/v1/linkedin/person/about",
-        summary="About/overview metadata for a member. Provide urn or username. Costs 4 credits.",
-        params=(
-            _str("urn", "Member urn."),
-            _str("username", "Public identifier; resolved to a urn if urn is omitted."),
+        summary=(
+            "About/overview metadata for a member: summary, experience, education, honours and "
+            "links. Provide username or url."
         ),
-        one_of=(("urn", "username"),),
-        credits=4,
+        params=(
+            _str("username", "Public identifier (vanity handle)."),
+            _str("url", "Full LinkedIn profile URL, as an alternative to username."),
+        ),
+        one_of=(("username", "url"),),
     ),
     Endpoint(
         key="linkedin_person_posts",
@@ -1378,14 +1385,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="person_posts",
         http="POST",
         path="/api/v1/linkedin/person/posts",
-        summary="A member's recent posts. Provide urn or username. Costs 4 credits.",
-        params=(
-            _str("urn", "Member urn."),
-            _str("username", "Public identifier; resolved to a urn if urn is omitted."),
-            _str("cursor", "Pagination cursor from a prior response."),
+        summary=(
+            "A member's recent posts, up to 50. The provider exposes no further pages, so there "
+            "is no cursor. Provide username or url."
         ),
-        one_of=(("urn", "username"),),
-        credits=4,
+        params=(
+            _str("username", "Public identifier (vanity handle)."),
+            _str("url", "Full LinkedIn profile URL, as an alternative to username."),
+        ),
+        one_of=(("username", "url"),),
     ),
     Endpoint(
         key="linkedin_person_contact",
@@ -1393,9 +1401,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="person_contact",
         http="POST",
         path="/api/v1/linkedin/person/contact",
-        summary="Public contact info for a member. Costs 4 credits.",
-        params=(_req("username", "Public identifier (vanity handle)."),),
-        credits=4,
+        summary=(
+            "RETIRED: contact-info scraping was withdrawn by the upstream provider. This endpoint "
+            "always returns HTTP 410 and is never billed."
+        ),
+        params=(_str("username", "Public identifier (vanity handle)."),),
+        credits=0,
     ),
     Endpoint(
         key="linkedin_company",
@@ -1403,8 +1414,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="company",
         http="POST",
         path="/api/v1/linkedin/company",
-        summary="Profile for a LinkedIn company.",
-        params=(_req("company", "Company universal name (slug) or LinkedIn company URL."),),
+        summary=(
+            "Profile for a LinkedIn company, including locations, specialties, similar and "
+            "affiliated companies. Provide company or url."
+        ),
+        params=(
+            _str("company", "Company universal name (slug)."),
+            _str("url", "Full LinkedIn company URL, as an alternative to company."),
+        ),
+        one_of=(("company", "url"),),
     ),
     Endpoint(
         key="linkedin_company_posts",
@@ -1412,12 +1430,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="company_posts",
         http="POST",
         path="/api/v1/linkedin/company/posts",
-        summary="A company's recent posts.",
-        params=(
-            _req("company", "Company universal name (slug) or LinkedIn company URL."),
-            _str("cursor", "Pagination cursor from a prior response."),
-            _int("count", "Results per page (1-100)."),
+        summary=(
+            "A company's recent posts, up to 50. The provider exposes no further pages, so there "
+            "is no cursor. Provide company or url."
         ),
+        params=(
+            _str("company", "Company universal name (slug)."),
+            _str("url", "Full LinkedIn company URL, as an alternative to company."),
+        ),
+        one_of=(("company", "url"),),
     ),
     Endpoint(
         key="linkedin_company_people",
@@ -1425,14 +1446,16 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="company_people",
         http="POST",
         path="/api/v1/linkedin/company/people",
-        summary="People who work at a company. Provide company_id or company. Costs 4 credits.",
+        summary=(
+            "RETIRED: the employee directory was withdrawn by the upstream provider. This endpoint "
+            "always returns HTTP 410 and is never billed. company() returns featured_employees, a "
+            "small sample of staff profiles."
+        ),
         params=(
             _str("company_id", "Numeric company id."),
-            _str("company", "Company slug/url; resolved to a company_id if company_id is omitted."),
-            _str("cursor", "Pagination cursor from a prior response."),
+            _str("company", "Company slug or url."),
         ),
-        one_of=(("company_id", "company"),),
-        credits=4,
+        credits=0,
     ),
     Endpoint(
         key="linkedin_company_jobs",
@@ -1440,14 +1463,16 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="company_jobs",
         http="POST",
         path="/api/v1/linkedin/company/jobs",
-        summary="A company's open job listings. Provide company_id or company. Costs 4 credits.",
+        summary=(
+            "RETIRED: per-company job listings were withdrawn by the upstream provider. This "
+            "endpoint always returns HTTP 410 and is never billed. Use search_jobs() with the "
+            "company name as the search term."
+        ),
         params=(
             _str("company_id", "Numeric company id."),
-            _str("company", "Company slug/url; resolved to a company_id if company_id is omitted."),
-            _str("cursor", "Pagination cursor from a prior response."),
+            _str("company", "Company slug or url."),
         ),
-        one_of=(("company_id", "company"),),
-        credits=4,
+        credits=0,
     ),
     Endpoint(
         key="linkedin_search_people",
@@ -1455,17 +1480,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_people",
         http="POST",
         path="/api/v1/linkedin/search/people",
-        summary="Search for people by name, title, company, or school. Costs 4 credits.",
+        summary=(
+            "RETIRED: people search was withdrawn by the upstream provider. This endpoint always "
+            "returns HTTP 410 and is never billed."
+        ),
         params=(
             _str("search", "Name to search for."),
             _str("title", "Job title filter."),
             _str("company", "Company filter."),
             _str("school", "School filter."),
             _str("location", "A geo name or id to filter by."),
-            _str("cursor", "Page cursor (page number)."),
         ),
-        one_of=(("search", "title", "company", "school"),),
-        credits=4,
+        credits=0,
     ),
     Endpoint(
         key="linkedin_search_jobs",
@@ -1473,17 +1499,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_jobs",
         http="POST",
         path="/api/v1/linkedin/search/jobs",
-        summary="Search for jobs by keyword. Costs 4 credits.",
+        summary=(
+            "Search for jobs by keyword and optional location. The provider rotates its result "
+            "set, so repeat calls return different listings and there is no stable pagination."
+        ),
         params=(
             _req("search", "Search keyword."),
-            _str("cursor", "Pagination cursor from a prior response."),
-            _str("date_posted", "Date-posted filter."),
-            _str("geocode", "Geo id to filter by."),
-            _str("experience_level", "Experience-level filter."),
-            _str("remote", "Remote/on-site filter."),
-            _str("job_type", "Job-type filter."),
+            _str("location", "Geographic filter; omit to search everywhere."),
         ),
-        credits=4,
     ),
     Endpoint(
         key="linkedin_search_posts",
@@ -1491,15 +1514,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_posts",
         http="POST",
         path="/api/v1/linkedin/search/posts",
-        summary="Search for posts by keyword. Costs 4 credits.",
-        params=(
-            _req("search", "Search keyword."),
-            _str("cursor", "Pagination cursor from a prior response."),
-            _str("date_posted", "Date-posted filter."),
-            _str("sort_by", "Sort order."),
-            _str("content_type", "Content-type filter."),
+        summary=(
+            "RETIRED: post search was withdrawn by the upstream provider. This endpoint always "
+            "returns HTTP 410 and is never billed."
         ),
-        credits=4,
+        params=(_str("search", "Search keyword."),),
+        credits=0,
     ),
     Endpoint(
         key="linkedin_job",
@@ -1507,12 +1527,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="job",
         http="POST",
         path="/api/v1/linkedin/job",
-        summary="Full details for a single job listing. Costs 4 credits.",
+        summary="Full details for a single job listing, including the hiring company. Provide job_id or url.",
         params=(
-            _req("job_id", "Job id."),
-            _bool("include_skills", "Include the job's required skills."),
+            _str("job_id", "Job id."),
+            _str("url", "Full LinkedIn job URL, as an alternative to job_id."),
         ),
-        credits=4,
+        one_of=(("job_id", "url"),),
     ),
     Endpoint(
         key="linkedin_post",
@@ -1520,9 +1540,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post",
         http="POST",
         path="/api/v1/linkedin/post",
-        summary="Full details for a single post. Costs 4 credits.",
-        params=(_req("post_id", "Post id or activity urn."),),
-        credits=4,
+        summary="Full details for a single post, including its top visible comments. Provide post_id or url.",
+        params=(
+            _str("post_id", "Post id or activity urn."),
+            _str("url", "Full LinkedIn post URL, as an alternative to post_id."),
+        ),
+        one_of=(("post_id", "url"),),
     ),
     Endpoint(
         key="linkedin_post_comments",
@@ -1530,14 +1553,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post_comments",
         http="POST",
         path="/api/v1/linkedin/post/comments",
-        summary="Comments on a post. Costs 4 credits.",
+        summary="Comments on a post with their replies, 10 per page. Provide post_id or url.",
         params=(
-            _req("post_id", "Post id or activity urn."),
-            _str("cursor", "Pagination cursor from a prior response."),
-            _lit("sort_order", ("relevance", "recent"), "Comment sort order."),
-            _lit("post_type", ("activity", "ugc"), "Post type."),
+            _str("post_id", "Post id or activity urn."),
+            _str("url", "Full LinkedIn post URL, as an alternative to post_id."),
+            _int("page", "1-based page number, 10 comments per page."),
         ),
-        credits=4,
+        one_of=(("post_id", "url"),),
     ),
     # ============================ TikTok Shop ============================
     Endpoint(

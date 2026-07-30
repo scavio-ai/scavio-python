@@ -1863,76 +1863,67 @@ class _AsyncLinkedInNamespace:
 
     async def person(
         self,
-        username: str,
         *,
-        include_experiences: Optional[bool] = None,
-        include_educations: Optional[bool] = None,
-        include_skills: Optional[bool] = None,
-        include_certifications: Optional[bool] = None,
-        include_follower_and_connection: Optional[bool] = None,
+        username: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full profile for a LinkedIn member. Costs 4 credits.
+        """Full profile for a LinkedIn member, including about text, experience, education, honours and links. Provide username or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             username: Public identifier (vanity handle).
-            include_experiences: Include work experience.
-            include_educations: Include education history.
-            include_skills: Include skills.
-            include_certifications: Include certifications.
-            include_follower_and_connection: Include follower and connection counts.
+            url: Full LinkedIn profile URL, as an alternative to username.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_person", {"username": username, "include_experiences": include_experiences, "include_educations": include_educations, "include_skills": include_skills, "include_certifications": include_certifications, "include_follower_and_connection": include_follower_and_connection}, extra)
+        return await self._client._call("linkedin_person", {"username": username, "url": url}, extra)
 
     async def person_about(
         self,
         *,
-        urn: Optional[str] = None,
         username: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """About/overview metadata for a member. Provide urn or username. Costs 4 credits.
+        """About/overview metadata for a member: summary, experience, education, honours and links. Provide username or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            urn: Member urn.
-            username: Public identifier; resolved to a urn if urn is omitted.
+            username: Public identifier (vanity handle).
+            url: Full LinkedIn profile URL, as an alternative to username.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_person_about", {"urn": urn, "username": username}, extra)
+        return await self._client._call("linkedin_person_about", {"username": username, "url": url}, extra)
 
     async def person_posts(
         self,
         *,
-        urn: Optional[str] = None,
         username: Optional[str] = None,
-        cursor: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A member's recent posts. Provide urn or username. Costs 4 credits.
+        """A member's recent posts, up to 50. The provider exposes no further pages, so there is no cursor. Provide username or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            urn: Member urn.
-            username: Public identifier; resolved to a urn if urn is omitted.
-            cursor: Pagination cursor from a prior response.
+            username: Public identifier (vanity handle).
+            url: Full LinkedIn profile URL, as an alternative to username.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_person_posts", {"urn": urn, "username": username, "cursor": cursor}, extra)
+        return await self._client._call("linkedin_person_posts", {"username": username, "url": url}, extra)
 
     async def person_contact(
         self,
-        username: str,
+        *,
+        username: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Public contact info for a member. Costs 4 credits.
+        """RETIRED: contact-info scraping was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 0 credits. Returns the API response as a dict.
 
         Args:
             username: Public identifier (vanity handle).
@@ -1942,78 +1933,75 @@ class _AsyncLinkedInNamespace:
 
     async def company(
         self,
-        company: str,
+        *,
+        company: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Profile for a LinkedIn company.
+        """Profile for a LinkedIn company, including locations, specialties, similar and affiliated companies. Provide company or url.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            company: Company universal name (slug) or LinkedIn company URL.
+            company: Company universal name (slug).
+            url: Full LinkedIn company URL, as an alternative to company.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_company", {"company": company}, extra)
+        return await self._client._call("linkedin_company", {"company": company, "url": url}, extra)
 
     async def company_posts(
         self,
-        company: str,
         *,
-        cursor: Optional[str] = None,
-        count: Optional[int] = None,
+        company: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A company's recent posts.
+        """A company's recent posts, up to 50. The provider exposes no further pages, so there is no cursor. Provide company or url.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            company: Company universal name (slug) or LinkedIn company URL.
-            cursor: Pagination cursor from a prior response.
-            count: Results per page (1-100).
+            company: Company universal name (slug).
+            url: Full LinkedIn company URL, as an alternative to company.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_company_posts", {"company": company, "cursor": cursor, "count": count}, extra)
+        return await self._client._call("linkedin_company_posts", {"company": company, "url": url}, extra)
 
     async def company_people(
         self,
         *,
         company_id: Optional[str] = None,
         company: Optional[str] = None,
-        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """People who work at a company. Provide company_id or company. Costs 4 credits.
+        """RETIRED: the employee directory was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed. company() returns featured_employees, a small sample of staff profiles.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 0 credits. Returns the API response as a dict.
 
         Args:
             company_id: Numeric company id.
-            company: Company slug/url; resolved to a company_id if company_id is omitted.
-            cursor: Pagination cursor from a prior response.
+            company: Company slug or url.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_company_people", {"company_id": company_id, "company": company, "cursor": cursor}, extra)
+        return await self._client._call("linkedin_company_people", {"company_id": company_id, "company": company}, extra)
 
     async def company_jobs(
         self,
         *,
         company_id: Optional[str] = None,
         company: Optional[str] = None,
-        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A company's open job listings. Provide company_id or company. Costs 4 credits.
+        """RETIRED: per-company job listings were withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed. Use search_jobs() with the company name as the search term.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 0 credits. Returns the API response as a dict.
 
         Args:
             company_id: Numeric company id.
-            company: Company slug/url; resolved to a company_id if company_id is omitted.
-            cursor: Pagination cursor from a prior response.
+            company: Company slug or url.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_company_jobs", {"company_id": company_id, "company": company, "cursor": cursor}, extra)
+        return await self._client._call("linkedin_company_jobs", {"company_id": company_id, "company": company}, extra)
 
     async def search_people(
         self,
@@ -2023,12 +2011,11 @@ class _AsyncLinkedInNamespace:
         company: Optional[str] = None,
         school: Optional[str] = None,
         location: Optional[str] = None,
-        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search for people by name, title, company, or school. Costs 4 credits.
+        """RETIRED: people search was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 0 credits. Returns the API response as a dict.
 
         Args:
             search: Name to search for.
@@ -2036,117 +2023,99 @@ class _AsyncLinkedInNamespace:
             company: Company filter.
             school: School filter.
             location: A geo name or id to filter by.
-            cursor: Page cursor (page number).
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_search_people", {"search": search, "title": title, "company": company, "school": school, "location": location, "cursor": cursor}, extra)
+        return await self._client._call("linkedin_search_people", {"search": search, "title": title, "company": company, "school": school, "location": location}, extra)
 
     async def search_jobs(
         self,
         search: str,
         *,
-        cursor: Optional[str] = None,
-        date_posted: Optional[str] = None,
-        geocode: Optional[str] = None,
-        experience_level: Optional[str] = None,
-        remote: Optional[str] = None,
-        job_type: Optional[str] = None,
+        location: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search for jobs by keyword. Costs 4 credits.
+        """Search for jobs by keyword and optional location. The provider rotates its result set, so repeat calls return different listings and there is no stable pagination.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             search: Search keyword.
-            cursor: Pagination cursor from a prior response.
-            date_posted: Date-posted filter.
-            geocode: Geo id to filter by.
-            experience_level: Experience-level filter.
-            remote: Remote/on-site filter.
-            job_type: Job-type filter.
+            location: Geographic filter; omit to search everywhere.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_search_jobs", {"search": search, "cursor": cursor, "date_posted": date_posted, "geocode": geocode, "experience_level": experience_level, "remote": remote, "job_type": job_type}, extra)
+        return await self._client._call("linkedin_search_jobs", {"search": search, "location": location}, extra)
 
     async def search_posts(
         self,
-        search: str,
         *,
-        cursor: Optional[str] = None,
-        date_posted: Optional[str] = None,
-        sort_by: Optional[str] = None,
-        content_type: Optional[str] = None,
+        search: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search for posts by keyword. Costs 4 credits.
+        """RETIRED: post search was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 0 credits. Returns the API response as a dict.
 
         Args:
             search: Search keyword.
-            cursor: Pagination cursor from a prior response.
-            date_posted: Date-posted filter.
-            sort_by: Sort order.
-            content_type: Content-type filter.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_search_posts", {"search": search, "cursor": cursor, "date_posted": date_posted, "sort_by": sort_by, "content_type": content_type}, extra)
+        return await self._client._call("linkedin_search_posts", {"search": search}, extra)
 
     async def job(
         self,
-        job_id: str,
         *,
-        include_skills: Optional[bool] = None,
+        job_id: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full details for a single job listing. Costs 4 credits.
+        """Full details for a single job listing, including the hiring company. Provide job_id or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             job_id: Job id.
-            include_skills: Include the job's required skills.
+            url: Full LinkedIn job URL, as an alternative to job_id.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_job", {"job_id": job_id, "include_skills": include_skills}, extra)
+        return await self._client._call("linkedin_job", {"job_id": job_id, "url": url}, extra)
 
     async def post(
         self,
-        post_id: str,
+        *,
+        post_id: Optional[str] = None,
+        url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full details for a single post. Costs 4 credits.
+        """Full details for a single post, including its top visible comments. Provide post_id or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             post_id: Post id or activity urn.
+            url: Full LinkedIn post URL, as an alternative to post_id.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_post", {"post_id": post_id}, extra)
+        return await self._client._call("linkedin_post", {"post_id": post_id, "url": url}, extra)
 
     async def post_comments(
         self,
-        post_id: str,
         *,
-        cursor: Optional[str] = None,
-        sort_order: Optional[Literal["relevance", "recent"]] = None,
-        post_type: Optional[Literal["activity", "ugc"]] = None,
+        post_id: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Comments on a post. Costs 4 credits.
+        """Comments on a post with their replies, 10 per page. Provide post_id or url.
 
-        Costs 4 credits. Returns the API response as a dict.
+        Costs 1 credit. Returns the API response as a dict.
 
         Args:
             post_id: Post id or activity urn.
-            cursor: Pagination cursor from a prior response.
-            sort_order: Comment sort order.
-            post_type: Post type.
+            url: Full LinkedIn post URL, as an alternative to post_id.
+            page: 1-based page number, 10 comments per page.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("linkedin_post_comments", {"post_id": post_id, "cursor": cursor, "sort_order": sort_order, "post_type": post_type}, extra)
+        return await self._client._call("linkedin_post_comments", {"post_id": post_id, "url": url, "page": page}, extra)
 
 class _AsyncTikTokShopNamespace:
     """TikTok Shop search, product, review, category, shop, and URL-resolution endpoints."""

@@ -229,19 +229,32 @@ def test_x_user_tweets_wire(monkeypatch):
     assert captured["json"] == {"screen_name": "elonmusk"}
 
 
-# --- LinkedIn (new) ---------------------------------------------------------
+# --- LinkedIn ---------------------------------------------------------------
+#
+# The provider retired the `linkedin/web/*` namespace these were built on. The
+# live endpoints now run on `web_v2`, which is URL-native: public params are
+# unchanged, `url` is accepted everywhere, and the include_* flags / cursors that
+# web_v2 has no equivalent for are gone. Five endpoints are retired upstream and
+# answer 410; the SDK keeps them so old code fails loudly.
 
 
-def test_linkedin_person_bool_flags_wire(monkeypatch):
+def test_linkedin_person_wire(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    client.linkedin.person("williamhgates", include_skills=True)
+    client.linkedin.person(username="williamhgates")
     assert captured["path"] == "/api/v1/linkedin/person"
-    assert captured["json"] == {"username": "williamhgates", "include_skills": True}
+    assert captured["json"] == {"username": "williamhgates"}
+
+
+def test_linkedin_accepts_url_instead_of_handle(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.linkedin.person(url="https://www.linkedin.com/in/williamhgates/")
+    assert captured["json"] == {"url": "https://www.linkedin.com/in/williamhgates/"}
 
 
 @pytest.mark.parametrize(
-    "method", ["person_about", "person_posts", "company_people", "company_jobs"]
+    "method", ["person", "person_about", "person_posts", "company", "company_posts", "job", "post", "post_comments"]
 )
 def test_linkedin_one_of_required(method, monkeypatch):
     from scavio import ScavioError
@@ -252,23 +265,59 @@ def test_linkedin_one_of_required(method, monkeypatch):
         getattr(client.linkedin, method)()
 
 
-def test_linkedin_search_people_needs_one_field(monkeypatch):
-    from scavio import ScavioError
-
+def test_linkedin_search_jobs_location_is_optional(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    with pytest.raises(ScavioError):
-        client.linkedin.search_people(location="Austin")
-    client.linkedin.search_people(title="engineer")
-    assert captured["json"] == {"title": "engineer"}
+    client.linkedin.search_jobs("engineer")
+    assert captured["json"] == {"search": "engineer"}
+    client.linkedin.search_jobs("engineer", location="United States")
+    assert captured["json"] == {"search": "engineer", "location": "United States"}
 
 
-def test_linkedin_company_resolves_via_slug(monkeypatch):
+def test_linkedin_post_comments_page_wire(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    client.linkedin.company_people(company="microsoft")
-    assert captured["path"] == "/api/v1/linkedin/company/people"
+    client.linkedin.post_comments(post_id="7488618410256523265", page=2)
+    assert captured["path"] == "/api/v1/linkedin/post/comments"
+    assert captured["json"] == {"post_id": "7488618410256523265", "page": 2}
+
+
+def test_linkedin_company_slug_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.linkedin.company(company="microsoft")
+    assert captured["path"] == "/api/v1/linkedin/company"
     assert captured["json"] == {"company": "microsoft"}
+
+
+@pytest.mark.parametrize(
+    "method", ["person_contact", "company_people", "company_jobs", "search_people", "search_posts"]
+)
+def test_linkedin_retired_endpoints_still_callable(method, monkeypatch):
+    """Retired upstream, but kept in the SDK so callers get the API's 410 rather
+    than an AttributeError. They must not impose one_of validation locally."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    getattr(client.linkedin, method)()
+    assert captured["path"].startswith("/api/v1/linkedin/")
+
+
+def test_linkedin_retired_endpoints_documented_as_retired():
+    from scavio._spec import ENDPOINTS
+
+    retired = {
+        "linkedin_person_contact",
+        "linkedin_company_people",
+        "linkedin_company_jobs",
+        "linkedin_search_people",
+        "linkedin_search_posts",
+    }
+    for ep in ENDPOINTS.values():
+        if ep.key in retired:
+            assert ep.summary.startswith("RETIRED:"), ep.key
+            assert ep.credits == 0, ep.key
+        elif ep.namespace == "linkedin":
+            assert ep.credits == 1, ep.key
 
 
 # --- TikTok Shop (new) ------------------------------------------------------
