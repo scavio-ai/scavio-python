@@ -93,6 +93,16 @@ _UULE = _str("uule", "Pre-encoded UULE location string (takes priority over loca
 # are US/GB only and are declared inline on that endpoint).
 _TIKTOK_SHOP_REGIONS = ("US", "GB", "SG", "MY", "PH", "TH", "VN", "ID")
 
+# Marketplace selection, shared by every Amazon endpoint.
+_AMAZON_COUNTRY = _str(
+    "country",
+    "Marketplace country code (ISO 3166-1 alpha-2, e.g. 'us', 'gb', 'de'). Defaults to 'us'.",
+)
+_AMAZON_DOMAIN = _str(
+    "domain",
+    "Deprecated: Amazon domain suffix ('com', 'co.uk'). Use country instead.",
+)
+
 
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
@@ -622,6 +632,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=3,
     ),
     # =============================== Amazon ==============================
+    # Amazon moved to a new upstream in 2026-07 and the API now returns a
+    # normalized shape instead of the old raw passthrough. Nine params went with
+    # the old provider: language, currency, device, sort_by, pages, category_id,
+    # merchant_id, zip_code and autoselect_variant. They are gone from the
+    # signatures below rather than kept as no-ops - notably `sort_by`, which the
+    # marketplace was verified to ignore entirely (every sort value returned the
+    # same unordered set). The API answers 200 with a top-level `warnings` array
+    # if a retired param is sent anyway, e.g. through **extra.
+    #
+    # `country` (ISO 3166-1 alpha-2) is the canonical marketplace selector;
+    # `domain` and `start_page` are kept as deprecated aliases because published
+    # SDK versions send them.
     Endpoint(
         key="amazon_search",
         namespace="amazon",
@@ -631,29 +653,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary="Search Amazon product listings.",
         params=(
             _req("query", "Product search query (1-500 characters)."),
-            _str("domain", "Amazon domain suffix (default 'com', e.g. 'co.uk')."),
-            _str("country", "Country code for localization."),
-            _str("language", "Language code."),
-            _str("currency", "Currency code (ISO 4217, e.g. 'USD')."),
-            _lit("device", ("desktop", "mobile", "tablet"), "Device to emulate."),
-            _lit(
-                "sort_by",
-                (
-                    "most_recent",
-                    "price_low_to_high",
-                    "price_high_to_low",
-                    "featured",
-                    "average_review",
-                    "bestsellers",
-                ),
-                "Result sort order.",
-            ),
-            _int("start_page", "Starting page (1-indexed)."),
-            _int("pages", "Number of pages to fetch."),
-            _str("category_id", "Amazon category id."),
-            _str("merchant_id", "Filter to a specific merchant."),
-            _str("zip_code", "ZIP/postal code for localized pricing."),
-            _bool("autoselect_variant", "Auto-select the default variant."),
+            _AMAZON_COUNTRY,
+            _AMAZON_DOMAIN,
+            _int("page", "Results page, 1-based. One page per call, 1 credit each."),
+            _int("start_page", "Deprecated alias for page."),
         ),
     ),
     Endpoint(
@@ -665,13 +668,24 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary="Full details for a single Amazon product by ASIN.",
         params=(
             _req("asin", "Amazon ASIN (e.g. 'B09XS7JWHH').", wire="query"),
-            _str("domain", "Amazon domain suffix (default 'com')."),
-            _str("country", "Country code for localization."),
-            _str("language", "Language code."),
-            _str("currency", "Currency code (ISO 4217, e.g. 'USD')."),
-            _lit("device", ("desktop", "mobile", "tablet"), "Device to emulate."),
-            _str("zip_code", "ZIP/postal code for localized pricing."),
-            _bool("autoselect_variant", "Auto-select the default variant."),
+            _AMAZON_COUNTRY,
+            _AMAZON_DOMAIN,
+        ),
+    ),
+    Endpoint(
+        key="amazon_offers",
+        namespace="amazon",
+        method="offers",
+        http="POST",
+        path="/api/v1/amazon/offers",
+        summary=(
+            "Every seller offer for an Amazon ASIN: price, seller, condition, shipping, and which "
+            "offer holds the buy box. Page 1 only."
+        ),
+        params=(
+            _req("asin", "Amazon ASIN (e.g. 'B09XS7JWHH').", wire="query"),
+            _AMAZON_COUNTRY,
+            _AMAZON_DOMAIN,
         ),
     ),
     Endpoint(
@@ -680,7 +694,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="options",
         http="GET",
         path="/api/v1/amazon/options",
-        summary="Supported Amazon domains, languages, currencies, and countries. No API key required.",
+        summary=(
+            "Supported Amazon marketplaces, as 'domains' and 'countries'. 'languages' and "
+            "'currencies' remain in the payload but are always empty: neither is a request param "
+            "any more. No API key required."
+        ),
         params=(),
     ),
     # ============================== Walmart ==============================

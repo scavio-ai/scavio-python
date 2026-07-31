@@ -56,8 +56,9 @@ for r in results["organic_results"]:
     print(r["title"], r["link"])
 ```
 
-Every method returns the raw API response as a plain `dict` (response shapes are
-passed through from the upstream providers and vary by endpoint).
+Every method returns the API response as a plain `dict`. Amazon responses are
+normalized to a stable, documented shape; the other endpoints pass the upstream
+provider's shape through, so fields vary by endpoint.
 
 ## Fully typed parameters
 
@@ -81,7 +82,8 @@ results = client.google.search(
 client.youtube.search("drone footage", four_k=True, hdr=True, duration="long")
 
 # Amazon product lookup: pass the ASIN (sent to the API as `query`).
-client.amazon.product("B09XS7JWHH", domain="co.uk", currency="GBP")
+# `country` is the marketplace, as an ISO 3166-1 alpha-2 code.
+client.amazon.product("B09XS7JWHH", country="gb")
 ```
 
 ### Forward-compatible passthrough
@@ -128,7 +130,7 @@ from scavio import ScavioClient
 client = ScavioClient()
 
 query = "sony wh-1000xm5"
-amazon = client.amazon.search(query, domain="com")
+amazon = client.amazon.search(query, country="us")
 walmart = client.walmart.search(query)
 
 print("Amazon:")
@@ -140,20 +142,26 @@ for p in walmart["data"]["products"][:3]:
     print(f"  ${p['price']} - {p['title'][:60]}")
 ```
 
-### 3. Product Lookup by ASIN
+### 3. Product Lookup by ASIN, plus every seller offer
 
 ```python
 from scavio import ScavioClient
 
 client = ScavioClient()
 
-product = client.amazon.product("B0BS1PRC4L")
-data = product["data"]
+data = client.amazon.product("B0BS1PRC4L")["data"]
 
 print(f"Brand:   {data['brand']}")
 print(f"Title:   {data['title']}")
 print(f"Rating:  {data['rating']} ({data['reviews_count']} reviews)")
-print(f"Price:   ${data['buybox'][0]['price']}")
+print(f"Price:   {data['price']} {data['currency']}")
+
+# Same ASIN, every seller: price, condition, and who holds the buy box.
+offers = client.amazon.offers("B0BS1PRC4L")["data"]
+print(f"{offers['total_offers']} offers")
+for o in offers["offers"][:5]:
+    tag = " (buy box)" if o["is_buy_box_winner"] else ""
+    print(f"  {o['price']} {o['currency']} - {o['seller_name']} [{o['condition']}]{tag}")
 ```
 
 ### 4. SEO Competitor Analysis
@@ -395,7 +403,7 @@ from scavio import AsyncScavioClient
 async def main():
     async with AsyncScavioClient() as client:
         google = await client.search("mechanical keyboard")
-        amazon = await client.amazon.search("mechanical keyboard", domain="com")
+        amazon = await client.amazon.search("mechanical keyboard", country="us")
 
         print(f"Google: {len(google['organic_results'])} results")
         print(f"Amazon: {len(amazon['data']['products'])} products")
@@ -499,7 +507,7 @@ Scavio works with popular AI/LLM frameworks:
 | Service | Endpoints | Credits |
 |---------|-----------|---------|
 | Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
-| Amazon | `search`, `product`, `options` | 1 each (`options` free) |
+| Amazon | `search`, `product`, `offers`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product` | 1 each |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
@@ -512,6 +520,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Amazon changed in 0.12.0 (breaking)
+
+Amazon moved to a new upstream and the API now returns a normalized shape
+instead of the previous raw provider payload.
+
+- `search` returns `{query, page, total_results, total_results_text, count, products[], filters[], related_searches[]}`.
+  Each product is `{asin, title, url, image, price, currency, rating, reviews_count, is_sponsored, position, badge, sales_volume, delivery{is_free, date, fastest_date}}`.
+- `product` returns flat fields: `price`, `list_price`, `currency`, `rating`, `reviews_count`, `features`, `images`, `videos`, `variants`, `specifications`, `best_sellers_rank`, `shipping`, and more. The old `buybox[]` array no longer exists -- use `offers` for per-seller pricing.
+- `offers` is new: every seller for one ASIN, with `price`, `condition`, `seller_name`, `is_buy_box_winner`, `is_fulfilled_by_amazon`, and delivery windows.
+- `country` (ISO 3166-1 alpha-2: `us`, `gb`, `de`) is the marketplace selector and replaces `domain`. `page` replaces `start_page`. The old names still work as deprecated aliases.
+- Nine parameters were removed: `language`, `currency`, `device`, `sort_by`, `pages`, `category_id`, `merchant_id`, `zip_code`, `autoselect_variant`. `sort_by` in particular was verified to be ignored by the marketplace, so result sorting is not available at any layer. Sending one of them anyway (via `**extra`) still returns 200, with a top-level `warnings` array explaining what was ignored.
+- `options` still returns `domains` and `countries`; `languages` and `currencies` are now always empty, because neither is a request parameter any more.
 
 ## Links
 

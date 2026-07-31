@@ -63,6 +63,12 @@ def test_namespaces_present():
         assert hasattr(client, ns)
 
 
+def test_amazon_methods_present():
+    client = ScavioClient(api_key="k")
+    for method in ("search", "product", "offers", "options"):
+        assert hasattr(client.amazon, method)
+
+
 def test_reddit_methods_present():
     client = ScavioClient(api_key="k")
     for method in (

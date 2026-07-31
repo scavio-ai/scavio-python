@@ -496,7 +496,7 @@ class _AsyncGoogleNamespace:
         return await self._client._call("google_trending", {"geo": geo, "hl": hl, "hours": hours, "cat": cat, "sort": sort, "status": status}, extra)
 
 class _AsyncAmazonNamespace:
-    """Amazon product search and lookup endpoints."""
+    """Amazon product search, product detail, and seller offer endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -505,18 +505,10 @@ class _AsyncAmazonNamespace:
         self,
         query: str,
         *,
-        domain: Optional[str] = None,
         country: Optional[str] = None,
-        language: Optional[str] = None,
-        currency: Optional[str] = None,
-        device: Optional[Literal["desktop", "mobile", "tablet"]] = None,
-        sort_by: Optional[Literal["most_recent", "price_low_to_high", "price_high_to_low", "featured", "average_review", "bestsellers"]] = None,
+        domain: Optional[str] = None,
+        page: Optional[int] = None,
         start_page: Optional[int] = None,
-        pages: Optional[int] = None,
-        category_id: Optional[str] = None,
-        merchant_id: Optional[str] = None,
-        zip_code: Optional[str] = None,
-        autoselect_variant: Optional[bool] = None,
         **extra: Any,
     ) -> dict[str, Any]:
         """Search Amazon product listings.
@@ -525,33 +517,20 @@ class _AsyncAmazonNamespace:
 
         Args:
             query: Product search query (1-500 characters).
-            domain: Amazon domain suffix (default 'com', e.g. 'co.uk').
-            country: Country code for localization.
-            language: Language code.
-            currency: Currency code (ISO 4217, e.g. 'USD').
-            device: Device to emulate.
-            sort_by: Result sort order.
-            start_page: Starting page (1-indexed).
-            pages: Number of pages to fetch.
-            category_id: Amazon category id.
-            merchant_id: Filter to a specific merchant.
-            zip_code: ZIP/postal code for localized pricing.
-            autoselect_variant: Auto-select the default variant.
+            country: Marketplace country code (ISO 3166-1 alpha-2, e.g. 'us', 'gb', 'de'). Defaults to 'us'.
+            domain: Deprecated: Amazon domain suffix ('com', 'co.uk'). Use country instead.
+            page: Results page, 1-based. One page per call, 1 credit each.
+            start_page: Deprecated alias for page.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("amazon_search", {"query": query, "domain": domain, "country": country, "language": language, "currency": currency, "device": device, "sort_by": sort_by, "start_page": start_page, "pages": pages, "category_id": category_id, "merchant_id": merchant_id, "zip_code": zip_code, "autoselect_variant": autoselect_variant}, extra)
+        return await self._client._call("amazon_search", {"query": query, "country": country, "domain": domain, "page": page, "start_page": start_page}, extra)
 
     async def product(
         self,
         asin: str,
         *,
-        domain: Optional[str] = None,
         country: Optional[str] = None,
-        language: Optional[str] = None,
-        currency: Optional[str] = None,
-        device: Optional[Literal["desktop", "mobile", "tablet"]] = None,
-        zip_code: Optional[str] = None,
-        autoselect_variant: Optional[bool] = None,
+        domain: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
         """Full details for a single Amazon product by ASIN.
@@ -560,21 +539,36 @@ class _AsyncAmazonNamespace:
 
         Args:
             asin: Amazon ASIN (e.g. 'B09XS7JWHH').
-            domain: Amazon domain suffix (default 'com').
-            country: Country code for localization.
-            language: Language code.
-            currency: Currency code (ISO 4217, e.g. 'USD').
-            device: Device to emulate.
-            zip_code: ZIP/postal code for localized pricing.
-            autoselect_variant: Auto-select the default variant.
+            country: Marketplace country code (ISO 3166-1 alpha-2, e.g. 'us', 'gb', 'de'). Defaults to 'us'.
+            domain: Deprecated: Amazon domain suffix ('com', 'co.uk'). Use country instead.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("amazon_product", {"asin": asin, "domain": domain, "country": country, "language": language, "currency": currency, "device": device, "zip_code": zip_code, "autoselect_variant": autoselect_variant}, extra)
+        return await self._client._call("amazon_product", {"asin": asin, "country": country, "domain": domain}, extra)
+
+    async def offers(
+        self,
+        asin: str,
+        *,
+        country: Optional[str] = None,
+        domain: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every seller offer for an Amazon ASIN: price, seller, condition, shipping, and which offer holds the buy box. Page 1 only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            asin: Amazon ASIN (e.g. 'B09XS7JWHH').
+            country: Marketplace country code (ISO 3166-1 alpha-2, e.g. 'us', 'gb', 'de'). Defaults to 'us'.
+            domain: Deprecated: Amazon domain suffix ('com', 'co.uk'). Use country instead.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("amazon_offers", {"asin": asin, "country": country, "domain": domain}, extra)
 
     async def options(
         self,
     ) -> dict[str, Any]:
-        """Supported Amazon domains, languages, currencies, and countries. No API key required.
+        """Supported Amazon marketplaces, as 'domains' and 'countries'. 'languages' and 'currencies' remain in the payload but are always empty: neither is a request param any more. No API key required.
 
         No API key required. Returns the API response as a dict.
         """

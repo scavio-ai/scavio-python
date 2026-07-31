@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
 from scavio import AsyncScavioClient, ScavioClient
@@ -123,8 +125,63 @@ def test_youtube_streams_wire(monkeypatch):
 def test_amazon_product_asin_alias(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
-    client.amazon.product("B09XS7JWHH", domain="co.uk")
-    assert captured["json"] == {"query": "B09XS7JWHH", "domain": "co.uk"}
+    client.amazon.product("B09XS7JWHH", country="gb")
+    assert captured["path"] == "/api/v1/amazon/product"
+    assert captured["json"] == {"query": "B09XS7JWHH", "country": "gb"}
+
+
+def test_amazon_offers_asin_alias(monkeypatch):
+    """offers carries the ASIN in `query` too, exactly like product."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.amazon.offers("B09XS7JWHH")
+    assert captured["path"] == "/api/v1/amazon/offers"
+    assert captured["json"] == {"query": "B09XS7JWHH"}
+
+
+def test_amazon_search_page(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.amazon.search("wireless headphones", country="us", page=2)
+    assert captured["json"] == {"query": "wireless headphones", "country": "us", "page": 2}
+
+
+def test_amazon_domain_alias_still_accepted(monkeypatch):
+    """`domain` is deprecated in favour of `country` but must keep working:
+    published SDK versions send it and the API still translates it."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.amazon.search("laptop", domain="co.uk", start_page=3)
+    assert captured["json"] == {"query": "laptop", "domain": "co.uk", "start_page": 3}
+
+
+@pytest.mark.parametrize(
+    "method,retired",
+    [
+        ("search", "sort_by"),
+        ("search", "pages"),
+        ("search", "category_id"),
+        ("search", "merchant_id"),
+        ("search", "language"),
+        ("search", "currency"),
+        ("search", "device"),
+        ("search", "zip_code"),
+        ("search", "autoselect_variant"),
+        ("product", "language"),
+        ("product", "currency"),
+        ("product", "device"),
+        ("product", "zip_code"),
+        ("product", "autoselect_variant"),
+    ],
+)
+def test_amazon_retired_params_are_not_typed_args(method, retired):
+    """The Amazon provider swap removed these. They must not reappear as typed
+    arguments: `sort_by` in particular was verified to be a no-op upstream, and
+    a typed argument reads as a supported filter. Anything still sent lands in
+    **extra and the API answers with a `warnings` array."""
+    client = ScavioClient(api_key="sk_test")
+    params = inspect.signature(getattr(client.amazon, method)).parameters
+    assert retired not in params
 
 
 def test_amazon_options_is_get(monkeypatch):
