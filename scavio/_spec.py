@@ -1386,12 +1386,19 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/person/posts",
         summary=(
-            "A member's recent posts, up to 50. The provider exposes no further pages, so there "
-            "is no cursor. Provide username or url."
+            "A member's posts, or the posts they commented on or reacted to. 50 per page; "
+            "paginate by passing the previous response's next_cursor. Provide username or url."
         ),
         params=(
             _str("username", "Public identifier (vanity handle)."),
             _str("url", "Full LinkedIn profile URL, as an alternative to username."),
+            _lit(
+                "type",
+                ("posts", "comments", "reactions"),
+                "Which feed to return: the member's own posts (default), posts they commented on, "
+                "or posts they reacted to.",
+            ),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
         one_of=(("username", "url"),),
     ),
@@ -1431,12 +1438,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/company/posts",
         summary=(
-            "A company's recent posts, up to 50. The provider exposes no further pages, so there "
-            "is no cursor. Provide company or url."
+            "A company's recent posts. 50 per page; paginate by passing the previous response's "
+            "next_cursor. Provide company or url."
         ),
         params=(
             _str("company", "Company universal name (slug)."),
             _str("url", "Full LinkedIn company URL, as an alternative to company."),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
         one_of=(("company", "url"),),
     ),
@@ -1500,12 +1508,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/search/jobs",
         summary=(
-            "Search for jobs by keyword and optional location. The provider rotates its result "
-            "set, so repeat calls return different listings and there is no stable pagination."
+            "Search for jobs by keyword and optional location. 25 per page; paginate with "
+            "next_cursor. The provider rotates its result set, so pages overlap slightly and "
+            "repeat calls return different listings - dedupe by job id."
         ),
         params=(
             _req("search", "Search keyword."),
             _str("location", "Geographic filter; omit to search everywhere."),
+            _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
     ),
     Endpoint(
@@ -1553,7 +1563,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post_comments",
         http="POST",
         path="/api/v1/linkedin/post/comments",
-        summary="Comments on a post with their replies, 10 per page. Provide post_id or url.",
+        summary=(
+            "Comments on a post with their replies. Paginate with a 1-based page; page size "
+            "varies, so keep going until a page comes back empty. Provide post_id or url."
+        ),
         params=(
             _str("post_id", "Post id or activity urn."),
             _str("url", "Full LinkedIn post URL, as an alternative to post_id."),

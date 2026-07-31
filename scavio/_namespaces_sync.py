@@ -1902,18 +1902,22 @@ class _LinkedInNamespace:
         *,
         username: Optional[str] = None,
         url: Optional[str] = None,
+        type: Optional[Literal["posts", "comments", "reactions"]] = None,
+        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A member's recent posts, up to 50. The provider exposes no further pages, so there is no cursor. Provide username or url.
+        """A member's posts, or the posts they commented on or reacted to. 50 per page; paginate by passing the previous response's next_cursor. Provide username or url.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             username: Public identifier (vanity handle).
             url: Full LinkedIn profile URL, as an alternative to username.
+            type: Which feed to return: the member's own posts (default), posts they commented on, or posts they reacted to.
+            cursor: Opaque cursor from a prior response's next_cursor.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("linkedin_person_posts", {"username": username, "url": url}, extra)
+        return self._client._call("linkedin_person_posts", {"username": username, "url": url, "type": type, "cursor": cursor}, extra)
 
     def person_contact(
         self,
@@ -1954,18 +1958,20 @@ class _LinkedInNamespace:
         *,
         company: Optional[str] = None,
         url: Optional[str] = None,
+        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A company's recent posts, up to 50. The provider exposes no further pages, so there is no cursor. Provide company or url.
+        """A company's recent posts. 50 per page; paginate by passing the previous response's next_cursor. Provide company or url.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             company: Company universal name (slug).
             url: Full LinkedIn company URL, as an alternative to company.
+            cursor: Opaque cursor from a prior response's next_cursor.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("linkedin_company_posts", {"company": company, "url": url}, extra)
+        return self._client._call("linkedin_company_posts", {"company": company, "url": url, "cursor": cursor}, extra)
 
     def company_people(
         self,
@@ -2032,18 +2038,20 @@ class _LinkedInNamespace:
         search: str,
         *,
         location: Optional[str] = None,
+        cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search for jobs by keyword and optional location. The provider rotates its result set, so repeat calls return different listings and there is no stable pagination.
+        """Search for jobs by keyword and optional location. 25 per page; paginate with next_cursor. The provider rotates its result set, so pages overlap slightly and repeat calls return different listings - dedupe by job id.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             search: Search keyword.
             location: Geographic filter; omit to search everywhere.
+            cursor: Opaque cursor from a prior response's next_cursor.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("linkedin_search_jobs", {"search": search, "location": location}, extra)
+        return self._client._call("linkedin_search_jobs", {"search": search, "location": location, "cursor": cursor}, extra)
 
     def search_posts(
         self,
@@ -2105,7 +2113,7 @@ class _LinkedInNamespace:
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Comments on a post with their replies, 10 per page. Provide post_id or url.
+        """Comments on a post with their replies. Paginate with a 1-based page; page size varies, so keep going until a page comes back empty. Provide post_id or url.
 
         Costs 1 credit. Returns the API response as a dict.
 
