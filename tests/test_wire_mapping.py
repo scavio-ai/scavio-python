@@ -254,7 +254,17 @@ def test_linkedin_accepts_url_instead_of_handle(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "method", ["person", "person_about", "person_posts", "company", "company_posts", "job", "post", "post_comments"]
+    "method",
+    [
+        "person",
+        "person_about",
+        "person_posts",
+        "company",
+        "company_posts",
+        "job",
+        "post",
+        "post_comments",
+    ],
 )
 def test_linkedin_one_of_required(method, monkeypatch):
     from scavio import ScavioError
