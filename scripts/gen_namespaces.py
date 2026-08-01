@@ -47,7 +47,7 @@ endpoints_for = _spec.endpoints_for
 # Human-facing class name and one-line description per namespace.
 _NS_META = {
     "google": ("Google", "Google endpoints (SERP, Maps, Shopping, Flights, Hotels, News, Trends)."),
-    "amazon": ("Amazon", "Amazon product search and lookup endpoints."),
+    "amazon": ("Amazon", "Amazon product search, product detail, and seller offer endpoints."),
     "walmart": ("Walmart", "Walmart product search and lookup endpoints."),
     "youtube": ("YouTube", "YouTube search, video, transcript, channel, comment, and streams endpoints."),
     "reddit": ("Reddit", "Reddit search, post, comment, subreddit, user, and trending endpoints."),
