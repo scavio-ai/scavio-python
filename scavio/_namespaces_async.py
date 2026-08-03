@@ -1900,9 +1900,9 @@ class _AsyncLinkedInNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A member's posts, or the posts they commented on or reacted to. 50 per page; paginate by passing the previous response's next_cursor. Provide username or url.
+        """A member's posts, or the posts they commented on or reacted to. 50 per page; paginate by passing the previous response's next_cursor. Provide username or url. Costs 10 credits per page.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             username: Public identifier (vanity handle).
@@ -1955,9 +1955,9 @@ class _AsyncLinkedInNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A company's recent posts. 50 per page; paginate by passing the previous response's next_cursor. Provide company or url.
+        """A company's recent posts. 50 per page; paginate by passing the previous response's next_cursor. Provide company or url. Costs 10 credits per page.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             company: Company universal name (slug).
@@ -2035,9 +2035,9 @@ class _AsyncLinkedInNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search for jobs by keyword and optional location. 25 per page; paginate with next_cursor. The provider rotates its result set, so pages overlap slightly and repeat calls return different listings - dedupe by job id.
+        """Search for jobs by keyword and optional location. 25 per page; paginate with next_cursor. The provider rotates its result set, so pages overlap slightly and repeat calls return different listings - dedupe by job id. Costs 10 credits per page.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             search: Search keyword.
@@ -2070,9 +2070,9 @@ class _AsyncLinkedInNamespace:
         url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full details for a single job listing, including the hiring company. Provide job_id or url.
+        """Full details for a single job listing, including the hiring company. Provide job_id or url. Costs 30 credits. A listing with no detail record upstream returns an unbilled 404, which happens for roughly one job id in five returned by search_jobs.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 30 credits. Returns the API response as a dict.
 
         Args:
             job_id: Job id.
@@ -2107,9 +2107,9 @@ class _AsyncLinkedInNamespace:
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Comments on a post with their replies. Paginate with a 1-based page; page size varies, so keep going until a page comes back empty. Provide post_id or url.
+        """Comments on a post with their replies. Paginate with a 1-based page; page size varies, so keep going until a page comes back empty. Provide post_id or url. Costs 10 credits per page.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             post_id: Post id or activity urn.

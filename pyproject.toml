@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.12.0"
+version = "0.13.0"
 description = "Python SDK for the Scavio Search API - real-time Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, and LinkedIn data"
 readme = "README.md"
 license = "MIT"

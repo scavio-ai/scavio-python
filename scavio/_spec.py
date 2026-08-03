@@ -1362,7 +1362,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     # The provider retired the `linkedin/web/*` namespace it was built on; these
     # now run on `linkedin/web_v2/*`, which is URL-native. Public params are
     # unchanged (the permalink is built server-side) and `url` is accepted
-    # everywhere as a direct alternative. All live endpoints are 1 credit.
+    # everywhere as a direct alternative. Credits follow the upstream price tier:
+    # profile, company and single-post reads are 1, the paginated list endpoints
+    # are 10 per page, and job detail is 30.
     # Five endpoints have no upstream left and always return HTTP 410 unbilled;
     # they are kept so existing code fails loudly rather than silently vanishing.
     Endpoint(
@@ -1405,7 +1407,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/linkedin/person/posts",
         summary=(
             "A member's posts, or the posts they commented on or reacted to. 50 per page; "
-            "paginate by passing the previous response's next_cursor. Provide username or url."
+            "paginate by passing the previous response's next_cursor. Provide username or url. "
+            "Costs 10 credits per page."
         ),
         params=(
             _str("username", "Public identifier (vanity handle)."),
@@ -1419,6 +1422,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
         one_of=(("username", "url"),),
+        credits=10,
     ),
     Endpoint(
         key="linkedin_person_contact",
@@ -1457,7 +1461,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/linkedin/company/posts",
         summary=(
             "A company's recent posts. 50 per page; paginate by passing the previous response's "
-            "next_cursor. Provide company or url."
+            "next_cursor. Provide company or url. Costs 10 credits per page."
         ),
         params=(
             _str("company", "Company universal name (slug)."),
@@ -1465,6 +1469,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
         one_of=(("company", "url"),),
+        credits=10,
     ),
     Endpoint(
         key="linkedin_company_people",
@@ -1528,13 +1533,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Search for jobs by keyword and optional location. 25 per page; paginate with "
             "next_cursor. The provider rotates its result set, so pages overlap slightly and "
-            "repeat calls return different listings - dedupe by job id."
+            "repeat calls return different listings - dedupe by job id. Costs 10 credits per page."
         ),
         params=(
             _req("search", "Search keyword."),
             _str("location", "Geographic filter; omit to search everywhere."),
             _str("cursor", "Opaque cursor from a prior response's next_cursor."),
         ),
+        credits=10,
     ),
     Endpoint(
         key="linkedin_search_posts",
@@ -1555,12 +1561,17 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="job",
         http="POST",
         path="/api/v1/linkedin/job",
-        summary="Full details for a single job listing, including the hiring company. Provide job_id or url.",
+        summary=(
+            "Full details for a single job listing, including the hiring company. Provide job_id "
+            "or url. Costs 30 credits. A listing with no detail record upstream returns an "
+            "unbilled 404, which happens for roughly one job id in five returned by search_jobs."
+        ),
         params=(
             _str("job_id", "Job id."),
             _str("url", "Full LinkedIn job URL, as an alternative to job_id."),
         ),
         one_of=(("job_id", "url"),),
+        credits=30,
     ),
     Endpoint(
         key="linkedin_post",
@@ -1583,7 +1594,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/linkedin/post/comments",
         summary=(
             "Comments on a post with their replies. Paginate with a 1-based page; page size "
-            "varies, so keep going until a page comes back empty. Provide post_id or url."
+            "varies, so keep going until a page comes back empty. Provide post_id or url. "
+            "Costs 10 credits per page."
         ),
         params=(
             _str("post_id", "Post id or activity urn."),
@@ -1591,6 +1603,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _int("page", "1-based page number, 10 comments per page."),
         ),
         one_of=(("post_id", "url"),),
+        credits=10,
     ),
     # ============================ TikTok Shop ============================
     Endpoint(

@@ -379,12 +379,26 @@ def test_linkedin_retired_endpoints_documented_as_retired():
         "linkedin_search_people",
         "linkedin_search_posts",
     }
+    # Live costs mirror the upstream price tiers the backend bills on: 0.001 usd
+    # -> 1 credit, 0.01 -> 10, 0.03 -> 30. Pinned per key so a drift from the
+    # backend's COST map shows up here.
+    live_credits = {
+        "linkedin_person": 1,
+        "linkedin_person_about": 1,
+        "linkedin_person_posts": 10,
+        "linkedin_company": 1,
+        "linkedin_company_posts": 10,
+        "linkedin_search_jobs": 10,
+        "linkedin_job": 30,
+        "linkedin_post": 1,
+        "linkedin_post_comments": 10,
+    }
     for ep in ENDPOINTS.values():
         if ep.key in retired:
             assert ep.summary.startswith("RETIRED:"), ep.key
             assert ep.credits == 0, ep.key
         elif ep.namespace == "linkedin":
-            assert ep.credits == 1, ep.key
+            assert ep.credits == live_credits[ep.key], ep.key
 
 
 # --- TikTok Shop (new) ------------------------------------------------------

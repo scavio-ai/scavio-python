@@ -299,8 +299,8 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-# Member profile and their recent posts (1 credit each). A handle or a full
-# LinkedIn URL works anywhere.
+# Member profile (1 credit) and their recent posts (10 credits per page). A
+# handle or a full LinkedIn URL works anywhere.
 person = client.linkedin.person(username="williamhgates")
 person_posts = client.linkedin.person_posts(url="https://www.linkedin.com/in/williamhgates/")
 
@@ -515,7 +515,7 @@ Scavio works with popular AI/LLM frameworks:
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 8 each (`user_posts` 2) |
-| LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | 4 each (`company`/`company_posts` 1) |
+| LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
