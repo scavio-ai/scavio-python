@@ -74,6 +74,20 @@ def test_youtube_search_features_and_cursor(monkeypatch):
     assert captured["json"] == {"search": "cats", "features": ["hd", "4k"], "cursor": "c1"}
 
 
+def test_youtube_search_has_no_location_flag():
+    """location was never in the backend schema; it must not be offered."""
+    sig = inspect.signature(ScavioClient(api_key="sk_test").youtube.search)
+    assert "location" not in sig.parameters
+
+
+def test_youtube_shorts_sort_by_is_typed(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.youtube.shorts("funny cats", sort_by="view_count", cursor="c1")
+    assert captured["path"] == "/api/v1/youtube/shorts"
+    assert captured["json"] == {"search": "funny cats", "sort_by": "view_count", "cursor": "c1"}
+
+
 def test_youtube_video_wire(monkeypatch):
     captured = patch_sync(monkeypatch)
     client = ScavioClient(api_key="sk_test")
@@ -236,6 +250,29 @@ def test_reddit_post_backward_compatible(monkeypatch):
     client.reddit.post("https://www.reddit.com/r/programming/comments/abc123/x/")
     assert captured["path"] == "/api/v1/reddit/post"
     assert captured["json"] == {"url": "https://www.reddit.com/r/programming/comments/abc123/x/"}
+
+
+def test_reddit_post_accepts_post_id(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.reddit.post(post_id="t3_1v6ngaf")
+    assert captured["path"] == "/api/v1/reddit/post"
+    assert captured["json"] == {"post_id": "t3_1v6ngaf"}
+
+
+def test_reddit_post_one_of_required(monkeypatch):
+    from scavio import ScavioError
+
+    patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        client.reddit.post()
+
+
+def test_reddit_search_has_no_filter_params():
+    """The backend accepts only query and cursor; any type/sort control is a lie."""
+    sig = inspect.signature(ScavioClient(api_key="sk_test").reddit.search)
+    assert [n for n in sig.parameters if n != "extra"] == ["query", "cursor"]
 
 
 def test_reddit_post_comments_wire(monkeypatch):

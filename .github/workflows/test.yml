@@ -29,5 +29,8 @@ jobs:
       - name: Lint
         run: ruff check scavio/ tests/
 
+      - name: Generated namespaces up to date
+        run: python scripts/gen_namespaces.py --check
+
       - name: Test
         run: pytest tests/ -v

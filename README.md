@@ -23,7 +23,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | TikTok Data (11 endpoints) | Yes | No | No | No |
 | TikTok Shop Data (8 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
-| LinkedIn Data (14 endpoints) | Yes | No | No | No |
+| LinkedIn Data (9 endpoints) | Yes | No | No | No |
 | Data Sources | 10 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
@@ -234,8 +234,10 @@ for post in posts["data"]["results"]:
     print(f"  {post['url']}")
     print()
 
-# Drill into a subreddit, a post's comments, or a redditor
+# Drill into a subreddit, a single post, or a redditor. reddit.post() takes a
+# url or a post_id and returns the post alone -- comments are a separate call.
 feed = client.reddit.subreddit_posts("MechanicalKeyboards", sort="TOP")
+detail = client.reddit.post(post_id="t3_1v6ngaf")
 comments = client.reddit.post_comments("t3_1v6ngaf", sort="TOP")
 history = client.reddit.user_posts("spez")
 popular = client.reddit.popular()
@@ -514,12 +516,23 @@ Scavio works with popular AI/LLM frameworks:
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
-| Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | 8 each (`user_posts` 2) |
+| Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | `user_posts` 2, `post`/`comment_replies` 8, the other nine 10 each |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Changed in 0.14.0
+
+- `reddit.post()` now takes `post_id` as well as `url` -- pass either one. `url`
+  stays the first positional argument, so existing calls are unaffected.
+  The response is a flat post object and carries no comments; use
+  `reddit.post_comments()` for those.
+- `youtube.shorts(sort_by=...)` is now typed as
+  `relevance | date | view_count | rating` instead of a free-form string.
+- `youtube.search()` lost its `location` flag. It was never part of the backend
+  schema, so it was silently dropped rather than filtering anything.
 
 ### Amazon changed in 0.12.0 (breaking)
 

@@ -83,6 +83,8 @@ def _signature_lines(ep: Endpoint) -> list[str]:
     lines = ["        self,"]
     for p in ep.required_params:
         lines.append(f"        {p.name}: {p.annotation},")
+    for p in ep.positional_optional_params:
+        lines.append(f"        {p.name}: {p.annotation} = None,")
     optional = ep.optional_params
     if optional:
         lines.append("        *,")

@@ -23,6 +23,9 @@ class Param:
         annotation: The type annotation emitted into the generated signature.
         wire: The wire field name if it differs from ``name``.
         required: Whether the argument is positional/required (before ``*``).
+        positional: Whether an *optional* argument is still emitted before ``*``
+            (with a ``None`` default), so existing positional callers keep
+            working after a second alternative param is added alongside it.
         doc: One-line description used in the generated docstring.
     """
 
@@ -30,6 +33,7 @@ class Param:
     annotation: str
     wire: Optional[str] = None
     required: bool = False
+    positional: bool = False
     doc: str = ""
 
     @property
@@ -54,8 +58,12 @@ class Endpoint:
         return [p for p in self.params if p.required]
 
     @property
+    def positional_optional_params(self) -> list[Param]:
+        return [p for p in self.params if not p.required and p.positional]
+
+    @property
     def optional_params(self) -> list[Param]:
-        return [p for p in self.params if not p.required]
+        return [p for p in self.params if not p.required and not p.positional]
 
 
 # --- Param construction shorthands -----------------------------------------
@@ -441,7 +449,6 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _bool("creative_commons", "Creative Commons licensed only."),
             _bool("live", "Live videos only."),
             _bool("hdr", "HDR videos only."),
-            _bool("location", "Videos with location metadata only."),
             _bool("vr180", "VR180 videos only."),
             Param("four_k", "Optional[bool]", wire="4k", doc="4K videos only."),
             Param("video_360", "Optional[bool]", wire="360", doc="360-degree videos only."),
@@ -458,7 +465,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary="Search YouTube Shorts. Costs 2 credits.",
         params=(
             _req("query", "Search query (1-500 characters).", wire="search"),
-            _str("sort_by", "Sort order."),
+            _lit(
+                "sort_by",
+                ("relevance", "date", "view_count", "rating"),
+                "Sort order (passed through verbatim; no date remap here).",
+            ),
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         credits=2,
@@ -774,8 +785,22 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post",
         http="POST",
         path="/api/v1/reddit/post",
-        summary="Full details for a single Reddit post.",
-        params=(_req("url", "Full Reddit post URL."),),
+        summary=(
+            "Full details for a single Reddit post, as a flat post object (no comments). "
+            "Provide url or post_id."
+        ),
+        params=(
+            # url stays positional (with a None default) so callers written
+            # against the url-only signature keep working unchanged.
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc="Full Reddit post URL.",
+            ),
+            _str("post_id", "Post fullname (t3_...) or bare id, as an alternative to url."),
+        ),
+        one_of=(("post_id", "url"),),
     ),
     Endpoint(
         key="reddit_post_comments",

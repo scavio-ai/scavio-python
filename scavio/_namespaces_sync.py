@@ -661,7 +661,6 @@ class _YouTubeNamespace:
         creative_commons: Optional[bool] = None,
         live: Optional[bool] = None,
         hdr: Optional[bool] = None,
-        location: Optional[bool] = None,
         vr180: Optional[bool] = None,
         four_k: Optional[bool] = None,
         video_360: Optional[bool] = None,
@@ -685,20 +684,19 @@ class _YouTubeNamespace:
             creative_commons: Creative Commons licensed only.
             live: Live videos only.
             hdr: HDR videos only.
-            location: Videos with location metadata only.
             vr180: VR180 videos only.
             four_k: 4K videos only.
             video_360: 360-degree videos only.
             video_3d: 3D videos only.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("youtube_search", {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "features": features, "cursor": cursor, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live, "hdr": hdr, "location": location, "vr180": vr180, "four_k": four_k, "video_360": video_360, "video_3d": video_3d}, extra)
+        return self._client._call("youtube_search", {"query": query, "upload_date": upload_date, "type": type, "duration": duration, "sort_by": sort_by, "features": features, "cursor": cursor, "hd": hd, "subtitles": subtitles, "creative_commons": creative_commons, "live": live, "hdr": hdr, "vr180": vr180, "four_k": four_k, "video_360": video_360, "video_3d": video_3d}, extra)
 
     def shorts(
         self,
         query: str,
         *,
-        sort_by: Optional[str] = None,
+        sort_by: Optional[Literal["relevance", "date", "view_count", "rating"]] = None,
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
@@ -708,7 +706,7 @@ class _YouTubeNamespace:
 
         Args:
             query: Search query (1-500 characters).
-            sort_by: Sort order.
+            sort_by: Sort order (passed through verbatim; no date remap here).
             cursor: Pagination cursor from a prior response.
             extra: Additional wire parameters passed through verbatim.
         """
@@ -998,18 +996,21 @@ class _RedditNamespace:
 
     def post(
         self,
-        url: str,
+        url: Optional[str] = None,
+        *,
+        post_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full details for a single Reddit post.
+        """Full details for a single Reddit post, as a flat post object (no comments). Provide url or post_id.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             url: Full Reddit post URL.
+            post_id: Post fullname (t3_...) or bare id, as an alternative to url.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("reddit_post", {"url": url}, extra)
+        return self._client._call("reddit_post", {"url": url, "post_id": post_id}, extra)
 
     def post_comments(
         self,
