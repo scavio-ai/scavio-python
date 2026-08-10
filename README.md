@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, and LinkedIn with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from 31 sources -- Google, Amazon, Walmart, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, ten data sources, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 31 data sources, 195 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -24,7 +24,14 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | TikTok Shop Data (8 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
 | LinkedIn Data (9 endpoints) | Yes | No | No | No |
-| Data Sources | 10 | 1 | 1 per plan | 1 |
+| eBay Sold-Listing Price History | Yes | No | No | No |
+| Real Estate (Zillow + Redfin, 6 endpoints) | Yes | No | No | No |
+| Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
+| Jobs & Employers (Indeed + Glassdoor, 8 endpoints) | Yes | No | No | No |
+| Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
+| Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
+| Read Any URL (`extract`) | Yes | Yes | No | Yes |
+| Data Sources | 31 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -430,6 +437,111 @@ print(f"Plan: {usage['plan']}")
 print(f"Credits remaining: {usage['credit_balance']}")
 ```
 
+### 17. Read Any URL -- `extract()`
+
+`extract` is a core capability, not a platform, so it is a top-level method:
+`client.extract(url)`, never `client.extract.extract()`. It is the "read this
+page" primitive an agent reaches for when the page is not on a site Scavio has
+a dedicated namespace for.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Default: readability Markdown, plain datacenter fetch. 1 credit.
+page = client.extract("https://example.com/blog/post")["data"]
+print(page["content_length"], "chars of", page["format"])
+print(page["content"][:500])
+
+# format="html" is the raw page; format="text" is the Markdown flattened.
+raw = client.extract("https://example.com/blog/post", format="html")
+
+# mode is the price-bearing parameter, and the only knob that matters on a
+# hard target: "normal" (1 credit) -> "advanced", a full browser render
+# (1 credit) -> "ultra", the hardest-target tier (2 credits).
+hard = client.extract("https://example.com/spa", format="markdown", mode="ultra")
+
+# Billing is charged only on a successful extraction: a dead link, a bot wall
+# or a timeout costs nothing, so retrying up a tier is safe.
+```
+
+### 18. eBay Price Research -- Sold Listings, Not Asking Prices
+
+Live listings tell you what sellers *want*. `sold=True` searches completed
+listings that actually sold, which is what a pricing model needs.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+sold = client.ebay.search(
+    query="airpods pro 2",
+    sold=True,
+    condition="used",
+    per_page=240,          # 60, 120 or 240 only; anything else falls back to 60
+    min_price=50,          # prices are numbers, so 49.99 is legal too
+)["data"]
+
+prices = sorted(p["price"] for p in sold["products"] if p.get("price"))
+print("median sold price:", prices[len(prices) // 2])
+
+# On the sold view eBay publishes no headline count, so total_results is null.
+# Page with `page` until a page comes back empty rather than trusting a total.
+assert sold["total_results"] is None
+
+# On the LIVE view total_results is eBay's own estimate and an unstable one --
+# four identical requests minutes apart reported 28k, 140k, 170k and 27k.
+# Treat it as an order of magnitude, never as a count.
+
+# `seller` works with no query at all, which is how you page a whole catalogue.
+# ebay.seller() is a profile card only -- it cannot enumerate inventory.
+catalogue = client.ebay.search(seller="mytechstore", page=1)["data"]
+profile = client.ebay.seller("mytechstore")["data"]
+```
+
+### 19. Meta Ad Library -- Walking a Competitor's Whole Ad Set
+
+Meta pages the ad library by cursor, and the first page is a different size
+from the rest: 30 ads on page 1, then 10 per cursor page.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+ads, cursor = [], None
+while True:
+    # page_id is the advertiser's numeric Facebook Page id, as a string.
+    page = client.meta_ads.advertiser("20531316728", cursor=cursor)["data"]
+    ads.extend(page["ads"])
+    if not page["has_next_page"]:
+        break
+    cursor = page["next_cursor"]
+
+print(len(ads), "ads")
+
+# Every page is 1 credit, and past the first 30 ads a page is 10 ads, so a deep
+# walk costs roughly one credit per ten ads. Budget for depth.
+
+# Keyword search pages the same way. total_results caps at 50000 with
+# total_is_capped true, because Meta itself only reports ">50,000" -- never
+# present it as an exact count.
+first = client.meta_ads.search(
+    "black friday", country="US", active_status="active"
+)["data"]
+if first["total_is_capped"]:
+    print("more than", first["total_results"], "ads match")
+
+# Spend, reach, impressions and the paid-for-by disclosure are political-only.
+# On commercial ads they are null by design, not a bug.
+political = client.meta_ads.search("vote", ad_type="political_and_issue_ads")["data"]
+
+# The cursor is a self-contained blob: every other filter is ignored while it
+# is set, so do not "change the filter and keep paging" -- start a new walk.
+```
+
 ## Error Handling
 
 ```python
@@ -510,7 +622,7 @@ Scavio works with popular AI/LLM frameworks:
 |---------|-----------|---------|
 | Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
 | Amazon | `search`, `product`, `offers`, `options` | 1 each (`options` free) |
-| Walmart | `search`, `product` | 1 each |
+| Walmart | `search`, `product`, `reviews`, `category`, `offers`, `seller`, `seller_products` | 1, except `search`/`category` on `domain="com.mx"`, which cost 2 |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
@@ -518,10 +630,65 @@ Scavio works with popular AI/LLM frameworks:
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | `user_posts` 2, `post`/`comment_replies` 8, the other nine 10 each |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
+| Threads | `profile`, `user_posts`, `user_replies`, `post`, `post_comments`, `search_users` | 2, but `profile`/`user_posts`/`user_replies` cost 4 when addressed by `username` instead of `user_id` |
+| Kuaishou | `profile`, `user_posts`, `user_live`, `user_resolve`, `video`, `video_comments`, `comment_replies`, `videos_batch`, `search`, `search_videos`, `search_users`, `search_live`, `tag_feed`, `trending` | priced per endpoint: `videos_batch` 40, `profile` and the four `search*` 10 each, `video` 2, the rest 1 |
+| eBay | `search` (live or sold listings), `product`, `seller` | 1 each |
+| Target | `search`, `category`, `product`, `reviews` | 1 each |
+| Home Depot | `search`, `product`, `reviews` | 2 each |
+| Zillow | `search`, `property`, `agent_reviews` | 1 each |
+| Redfin | `search`, `property`, `market` | 1 each |
+| Booking.com | `search`, `hotel`, `reviews` | 1 each |
+| Tripadvisor | `locations` (start here), `search`, `location`, `reviews` | 2 each |
+| Airbnb | `search`, `listing`, `reviews` | 1 each |
+| Yelp | `search`, `business`, `reviews` | 2 each |
+| Indeed | `search`, `job`, `company`, `company_reviews` | 2 each |
+| Glassdoor | `companies` (start here), `company`, `reviews`, `salaries` | 1 each |
+| Apple App Store | `search`, `app`, `reviews` | 1 each |
+| Google Play | `search`, `app`, `reviews` | 2 each |
+| SEC EDGAR | `lookup` (start here), `company`, `filings`, `concept`, `facts`, `search` | 1 each |
+| Companies House | `search` (start here), `company`, `officers`, `filing_history` | 1 each |
+| G2 | `search`, `product`, `reviews` | 5 each |
+| Capterra | `search`, `product`, `reviews` | 2 each |
+| Google Ads Transparency | `advertisers` (start here), `search`, `creative` | 1 each |
+| Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
+| Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Changed in 0.15.0
+
+- **21 new namespaces with 85 endpoints**: Threads, Kuaishou, eBay, Target,
+  Home Depot, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed,
+  Glassdoor, Apple App Store, Google Play, SEC EDGAR, Companies House, G2,
+  Capterra, Google Ads Transparency and the Meta Ad Library. With the Walmart
+  rebuild and `extract` below, that is 93 endpoints in this batch and 195 in the
+  SDK. Every method is typed and documented inline, on both the sync and async
+  clients.
+- **`client.extract(url, format=..., mode=...)` is new, and is a top-level
+  method, not a namespace.** Reading an arbitrary URL is a core capability
+  rather than a platform, so it is `client.extract(...)`, never
+  `client.extract.extract(...)`.
+- **Walmart grew from 2 endpoints to 7** (`reviews`, `category`, `offers`,
+  `seller`, `seller_products` are new) and `search`/`product` changed shape.
+  `device`, `delivery_zip` and `store_id` are retired: the API answers 200 with
+  a top-level `warnings` array if you send them through `**extra`. `domain`
+  (`com` | `ca` | `com.mx`) is new on `search` and `category`, and it is the
+  price-bearing parameter. `page` supersedes `start_page`, which stays as a
+  deprecated alias.
+- **Walmart `min_price` / `max_price` widened from `int` to `float`.** The
+  backend was always `z.number()`, so `19.99` was always accepted; the old
+  annotation was simply wrong. No runtime behaviour changed.
+- **Four surfaces are body-priced and their docstrings say so** instead of
+  quoting a flat price: Walmart (`com.mx` costs 2), Threads (4 credits when
+  addressed by `username` instead of `user_id`), Kuaishou (1, 2, 10 or 40 per
+  endpoint) and `extract` (`mode="ultra"` costs 2).
+- Some caveats worth knowing before you write a loop: eBay `sold=True` returns
+  `total_results: null`; Meta Ad Library pages are 30 ads then 10, and the
+  cursor ignores every other filter; Capterra `search` does not paginate at all;
+  Apple App Store `search` has no pagination either (raise `limit`, up to 200);
+  Airbnb prices exist only on `search`, never on `listing`.
 
 ### Changed in 0.14.0
 

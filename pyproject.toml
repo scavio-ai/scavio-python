@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.14.0"
-description = "Python SDK for the Scavio Search API - real-time Google, Amazon, Walmart, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, and LinkedIn data"
+version = "0.15.0"
+description = "Python SDK for the Scavio Search API - real-time data from 31 sources (Google, Amazon, Walmart, eBay, Zillow, Redfin, Booking, Airbnb, Yelp, Indeed, Glassdoor, SEC EDGAR, G2, Meta Ad Library and more) plus URL extraction"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -33,6 +33,30 @@ keywords = [
     "tiktok-shop",
     "instagram",
     "linkedin",
+    "threads",
+    "kuaishou",
+    "ebay",
+    "target",
+    "home-depot",
+    "zillow",
+    "redfin",
+    "booking",
+    "tripadvisor",
+    "airbnb",
+    "yelp",
+    "indeed",
+    "glassdoor",
+    "app-store",
+    "google-play",
+    "sec-edgar",
+    "companies-house",
+    "g2",
+    "capterra",
+    "google-ads-transparency",
+    "meta-ad-library",
+    "url-extraction",
+    "real-estate-data",
+    "job-data",
     "serp",
     "ecommerce",
     "knowledge-graph",

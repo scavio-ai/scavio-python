@@ -6,7 +6,7 @@ import inspect
 
 import pytest
 
-from scavio import AsyncScavioClient, ScavioClient
+from scavio import AsyncScavioClient, ScavioClient, ScavioError
 from scavio._spec import ENDPOINTS
 
 from ._endpoint_cases import POST_KEYS, values_and_expected
@@ -567,3 +567,262 @@ def test_tiktok_shop_product_docstring_carries_both_caveats(module):
     search_doc = cls.search.__doc__ or ""
     assert "exact prices" in search_doc
     assert "not guaranteed to resolve" in search_doc
+
+
+# --- Extract (core, hand-written top-level method) --------------------------
+
+
+def test_extract_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.extract("https://example.com/post", format="markdown", mode="ultra")
+    assert captured["method"] == "POST"
+    assert captured["path"] == "/api/v1/extract"
+    assert captured["json"] == {
+        "url": "https://example.com/post",
+        "format": "markdown",
+        "mode": "ultra",
+    }
+
+
+def test_extract_drops_unset_tiers(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.extract("https://example.com")
+    assert captured["json"] == {"url": "https://example.com"}
+
+
+async def test_extract_wire_async(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.extract("https://example.com", format="text")
+    assert captured["path"] == "/api/v1/extract"
+    assert captured["json"] == {"url": "https://example.com", "format": "text"}
+
+
+@pytest.mark.parametrize("client_cls", [ScavioClient, AsyncScavioClient])
+def test_extract_signature_is_url_plus_two_keywords(client_cls):
+    sig = inspect.signature(client_cls(api_key="sk_test").extract)
+    assert list(sig.parameters) == ["url", "format", "mode"]
+    assert sig.parameters["format"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert sig.parameters["mode"].kind is inspect.Parameter.KEYWORD_ONLY
+
+
+# --- Body-priced surfaces: no flat "Costs N credits." -----------------------
+
+BODY_PRICED = {"walmart", "threads", "kuaishou", "_core"}
+
+
+def test_every_body_priced_endpoint_carries_a_credits_note():
+    for ep in ENDPOINTS.values():
+        if ep.namespace in BODY_PRICED:
+            assert ep.credits_note, ep.key
+            assert ep.credits_note.endswith("."), ep.key
+        else:
+            assert ep.credits_note is None, ep.key
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+@pytest.mark.parametrize(
+    ("namespace", "method"),
+    [("walmart", "search"), ("walmart", "category")],
+)
+def test_walmart_domain_priced_docstrings_state_the_domain_rule(module, namespace, method):
+    """domain=com.mx costs 2; a flat 'Costs 1 credit.' would understate it by 2x."""
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_WalmartNamespace", None) or mod._AsyncWalmartNamespace
+    doc = getattr(cls, method).__doc__ or ""
+    assert "Costs 1 credit." not in doc
+    assert "com.mx" in doc
+    assert "2 credits" in doc
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+@pytest.mark.parametrize("method", ["profile", "user_posts", "user_replies"])
+def test_threads_username_priced_docstrings_state_both_rates(module, method):
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_ThreadsNamespace", None) or mod._AsyncThreadsNamespace
+    doc = getattr(cls, method).__doc__ or ""
+    assert "Costs 2 credits." not in doc
+    assert "2 credits addressed by user_id" in doc
+    assert "4 credits addressed by username" in doc
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_kuaishou_docstrings_carry_their_own_cost(module):
+    """Kuaishou prices per endpoint across a 40x range; one platform line is wrong."""
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_KuaishouNamespace", None) or mod._AsyncKuaishouNamespace
+    for ep in ENDPOINTS.values():
+        if ep.namespace != "kuaishou":
+            continue
+        doc = getattr(cls, ep.method).__doc__ or ""
+        plural = "s" if ep.credits != 1 else ""
+        assert f"Costs {ep.credits} credit{plural}." in doc, ep.key
+        assert "PER ENDPOINT" in doc, ep.key
+    assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == "kuaishou"} == {1, 2, 10, 40}
+
+
+@pytest.mark.parametrize("client_cls", [ScavioClient, AsyncScavioClient])
+def test_extract_docstring_states_the_tiers_not_a_flat_price(client_cls):
+    doc = client_cls.extract.__doc__ or ""
+    assert "Costs 1 credit." not in doc
+    assert "'ultra' costs 2" in doc
+    assert "only a successful extraction is billed" in doc
+
+
+# --- New-platform shape guards ----------------------------------------------
+
+
+def test_ebay_sold_listings_are_reachable_and_typed(monkeypatch):
+    """sold=True is the price-research differentiator; it must be a typed bool."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.ebay.search(query="airpods pro 2", sold=True, per_page=240)
+    assert captured["path"] == "/api/v1/ebay/search"
+    assert captured["json"] == {"query": "airpods pro 2", "sold": True, "per_page": 240}
+    per_page = next(p for p in ENDPOINTS["ebay_search"].params if p.name == "per_page")
+    # Numeric literals, unquoted: the backend is z.union([z.literal(60), ...]).
+    assert per_page.annotation == "Optional[Literal[60, 120, 240]]"
+
+
+def test_ebay_search_requires_query_or_seller():
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        client.ebay.search()
+
+
+def test_ebay_seller_only_search_needs_no_query(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.ebay.search(seller="mytechstore", page=2)
+    assert captured["json"] == {"seller": "mytechstore", "page": 2}
+
+
+def test_meta_ads_paths_are_hyphenated_not_derived_from_the_route_key():
+    """The route key is `metaads`; the served path is /api/v1/meta-ads/*."""
+    meta = [ep for ep in ENDPOINTS.values() if ep.namespace == "meta_ads"]
+    assert len(meta) == 3
+    for ep in meta:
+        assert ep.path.startswith("/api/v1/meta-ads/"), ep.key
+        assert "metaads" not in ep.path, ep.key
+
+
+def test_meta_ads_cursor_paging(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.meta_ads.search("black friday", cursor="c1")
+    assert captured["path"] == "/api/v1/meta-ads/search"
+    assert captured["json"] == {"query": "black friday", "cursor": "c1"}
+
+
+def test_walmart_seller_products_path_is_hyphenated():
+    assert ENDPOINTS["walmart_seller_products"].path == "/api/v1/walmart/seller-products"
+
+
+def test_companies_house_and_kuaishou_divergent_paths():
+    assert ENDPOINTS["companies_house_filing_history"].path == (
+        "/api/v1/companieshouse/filing-history"
+    )
+    assert ENDPOINTS["kuaishou_comment_replies"].path == "/api/v1/kuaishou/video/sub-comments"
+    assert ENDPOINTS["zillow_agent_reviews"].path == "/api/v1/zillow/reviews"
+
+
+def test_home_depot_namespace_maps_to_unhyphenated_route():
+    for ep in ENDPOINTS.values():
+        if ep.namespace == "home_depot":
+            assert ep.path.startswith("/api/v1/homedepot/"), ep.key
+
+
+def test_kuaishou_videos_batch_takes_a_list(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.kuaishou.videos_batch(["p1", "p2"])
+    assert captured["path"] == "/api/v1/kuaishou/videos/batch"
+    assert captured["json"] == {"photo_ids": ["p1", "p2"]}
+    param = ENDPOINTS["kuaishou_videos_batch"].params[0]
+    assert param.annotation == "list[str]" and param.required
+
+
+def test_price_filters_are_floats_not_ints():
+    """Backends are z.number(), not z.number().int(): 19.99 and 1.5 baths are legal."""
+    for key, names in {
+        "walmart_search": ("min_price", "max_price"),
+        "ebay_search": ("min_price", "max_price"),
+        "zillow_search": ("min_price", "max_price", "baths_min", "baths_max", "max_hoa"),
+        "redfin_search": ("min_price", "max_price", "max_hoa"),
+        "airbnb_search": ("min_price", "max_price"),
+        "booking_search": ("min_price", "max_price"),
+        "indeed_search": ("min_salary",),
+        "home_depot_search": ("min_price", "max_price"),
+    }.items():
+        params = {p.name: p for p in ENDPOINTS[key].params}
+        for name in names:
+            assert params[name].annotation == "Optional[float]", (key, name)
+
+
+def test_int_literal_unions_are_never_quoted():
+    """A string '1' fails the route schema on every one of these."""
+    for key, name in [
+        ("yelp_reviews", "rating"),
+        ("g2_search", "rating"),
+        ("g2_reviews", "rating"),
+        ("redfin_search", "region_type"),
+        ("redfin_market", "region_type"),
+        ("indeed_search", "radius"),
+        ("indeed_search", "max_age_days"),
+        ("ebay_search", "per_page"),
+    ]:
+        annotation = next(p for p in ENDPOINTS[key].params if p.name == name).annotation
+        assert '"' not in annotation, (key, name, annotation)
+        assert "Literal[" in annotation
+
+
+def test_sec_list_fields_accept_a_scalar_a_list_or_a_joined_string(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.sec.filings(ticker="AAPL", form=["10-K", "10-Q"])
+    assert captured["json"] == {"ticker": "AAPL", "form": ["10-K", "10-Q"]}
+    annotation = next(p for p in ENDPOINTS["sec_filings"].params if p.name == "form").annotation
+    assert annotation == "Optional[Union[str, list[str]]]"
+
+
+def test_new_platform_endpoint_counts():
+    """Guards against a fragment being half-merged."""
+    expected = {
+        "walmart": 7,
+        "threads": 6,
+        "kuaishou": 14,
+        "ebay": 3,
+        "target": 4,
+        "home_depot": 3,
+        "zillow": 3,
+        "booking": 3,
+        "tripadvisor": 4,
+        "indeed": 4,
+        "airbnb": 3,
+        "glassdoor": 4,
+        "yelp": 3,
+        "app_store": 3,
+        "google_play": 3,
+        "sec": 6,
+        "redfin": 3,
+        "companies_house": 4,
+        "g2": 3,
+        "capterra": 3,
+        "google_ads": 3,
+        "meta_ads": 3,
+        "_core": 1,
+    }
+    counts: dict[str, int] = {}
+    for ep in ENDPOINTS.values():
+        if ep.namespace in expected:
+            counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
+    assert counts == expected
+    assert sum(expected.values()) == 93

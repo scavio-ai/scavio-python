@@ -47,20 +47,36 @@ def test_valid_rps_accepted(rps):
 
 
 def test_namespaces_present():
+    from scavio._spec import NAMESPACES
+
     client = ScavioClient(api_key="k")
-    for ns in (
-        "google",
-        "amazon",
-        "walmart",
-        "youtube",
-        "reddit",
-        "x",
-        "tiktok",
-        "instagram",
-        "linkedin",
-        "tiktok_shop",
-    ):
-        assert hasattr(client, ns)
+    for ns in NAMESPACES:
+        assert hasattr(client, ns), ns
+
+
+def test_namespace_attribute_order_matches_spec():
+    """The client must expose exactly the spec's namespaces, and nothing extra."""
+    from scavio._spec import NAMESPACES
+
+    client = ScavioClient(api_key="k")
+    exposed = [
+        name
+        for name in vars(client)
+        if not name.startswith("_") and type(getattr(client, name)).__name__.endswith("Namespace")
+    ]
+    assert exposed == list(NAMESPACES)
+
+
+def test_extract_is_a_top_level_method_not_a_namespace():
+    """extract is a CORE endpoint: client.extract(url), never client.extract.extract()."""
+    from scavio._spec import ENDPOINTS, NAMESPACES
+
+    assert "_core" not in NAMESPACES
+    assert "extract" not in NAMESPACES
+    assert ENDPOINTS["extract"].namespace == "_core"
+    client = ScavioClient(api_key="k")
+    assert callable(client.extract)
+    assert not hasattr(client.extract, "extract")
 
 
 def test_amazon_methods_present():

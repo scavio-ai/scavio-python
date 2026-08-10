@@ -43,6 +43,18 @@ class Param:
 
 @dataclass(frozen=True)
 class Endpoint:
+    """A single API endpoint.
+
+    Attributes:
+        credits: The constant credit cost, used to build the generated
+            "Costs N credits." docstring line.
+        credits_note: A complete sentence replacing that line on the four
+            BODY-PRICED surfaces (walmart, threads, kuaishou, extract), whose
+            real cost is a function of the request body and cannot be stated as
+            a single number. ``credits`` stays the floor so nothing that reads
+            it has to learn a second type.
+    """
+
     key: str
     namespace: str
     method: str
@@ -52,6 +64,7 @@ class Endpoint:
     params: Sequence[Param] = field(default_factory=tuple)
     one_of: Sequence[Sequence[str]] = field(default_factory=tuple)
     credits: int = 1
+    credits_note: Optional[str] = None
 
     @property
     def required_params(self) -> list[Param]:
@@ -88,6 +101,50 @@ def _bool(name: str, doc: str) -> Param:
 def _lit(name: str, choices: Sequence[str], doc: str, *, wire: Optional[str] = None) -> Param:
     literal = "Optional[Literal[" + ", ".join(f'"{c}"' for c in choices) + "]]"
     return Param(name=name, annotation=literal, wire=wire, doc=doc)
+
+
+def _float(name: str, doc: str) -> Param:
+    """A genuinely fractional number: backend ``z.number()``, not ``.int()``.
+
+    Prices, HOA fees and half-baths all arrive here; ``_int`` would be a lie.
+    """
+    return Param(name=name, annotation="Optional[float]", doc=doc)
+
+
+def _ilit(name: str, choices: Sequence[int], doc: str) -> Param:
+    """An INT-valued literal union, e.g. ``Literal[1, 2, 3]``.
+
+    Distinct from ``_lit``, which quotes every member: these backends are
+    ``z.union([z.literal(1), ...])`` and reject the string "1".
+    """
+    literal = "Optional[Literal[" + ", ".join(str(c) for c in choices) + "]]"
+    return Param(name=name, annotation=literal, doc=doc)
+
+
+def _ilit_list(name: str, choices: Sequence[int], doc: str) -> Param:
+    """An array of int literals, e.g. Yelp's price bands ``[1, 2]``."""
+    literal = "Optional[list[Literal[" + ", ".join(str(c) for c in choices) + "]]]"
+    return Param(name=name, annotation=literal, doc=doc)
+
+
+def _str_list(name: str, doc: str, *, required: bool = False) -> Param:
+    annotation = "list[str]" if required else "Optional[list[str]]"
+    return Param(name=name, annotation=annotation, required=required, doc=doc)
+
+
+def _int_list(name: str, doc: str) -> Param:
+    return Param(name=name, annotation="Optional[list[int]]", doc=doc)
+
+
+def _str_or_list(name: str, doc: str) -> Param:
+    """A field the backend accepts as one value, a list, or a comma-joined string."""
+    return Param(name=name, annotation="Optional[Union[str, list[str]]]", doc=doc)
+
+
+def _lit_or_int(name: str, choices: Sequence[str], doc: str) -> Param:
+    """A named enum OR a raw numeric upstream id (Booking accommodation types)."""
+    literal = "Literal[" + ", ".join(f'"{c}"' for c in choices) + "]"
+    return Param(name=name, annotation=f"Optional[Union[{literal}, int]]", doc=doc)
 
 
 # Reusable Google locale params (identical across most Google endpoints).
@@ -711,51 +768,6 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "any more. No API key required."
         ),
         params=(),
-    ),
-    # ============================== Walmart ==============================
-    Endpoint(
-        key="walmart_search",
-        namespace="walmart",
-        method="search",
-        http="POST",
-        path="/api/v1/walmart/search",
-        summary="Search Walmart product listings.",
-        params=(
-            _req("query", "Product search query (1-500 characters)."),
-            _str("domain", "Walmart domain."),
-            _lit("device", ("desktop", "mobile", "tablet"), "Device to emulate."),
-            _lit(
-                "sort_by",
-                ("best_match", "price_low", "price_high", "best_seller"),
-                "Result sort order.",
-            ),
-            _int("start_page", "Starting page (1-indexed)."),
-            _int("min_price", "Minimum price filter (USD)."),
-            _int("max_price", "Maximum price filter (USD)."),
-            _lit(
-                "fulfillment_speed",
-                ("today", "tomorrow", "2_days", "anytime"),
-                "Delivery speed filter.",
-            ),
-            _lit("fulfillment_type", ("in_store",), "Fulfillment type filter."),
-            _str("delivery_zip", "ZIP code for localized results."),
-            _str("store_id", "Store id for in-store availability."),
-        ),
-    ),
-    Endpoint(
-        key="walmart_product",
-        namespace="walmart",
-        method="product",
-        http="POST",
-        path="/api/v1/walmart/product",
-        summary="Full details for a single Walmart product.",
-        params=(
-            _req("product_id", "Walmart product id."),
-            _str("domain", "Walmart domain."),
-            _lit("device", ("desktop", "mobile", "tablet"), "Device to emulate."),
-            _str("delivery_zip", "ZIP code for localized pricing."),
-            _str("store_id", "Store id for in-store availability."),
-        ),
     ),
     # =============================== Reddit ==============================
     Endpoint(
@@ -1804,12 +1816,3154 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         params=(_req("url", "A TikTok Shop URL or share link."),),
     ),
+    # ============================== Walmart ==============================
+    # search and product REPLACE the pre-0.15 entries of the same name: device /
+    # delivery_zip / store_id are retired, and the API answers 200 with a
+    # top-level `warnings` array if they are sent anyway, which is what old
+    # callers passing them through **extra now get.
+    #
+    # BODY-PRICED: walmartCreditCost(domain) - com=1, ca=1, com.mx=2. Only
+    # /search and /category accept `domain`, so only those two can cost 2; the
+    # other five are always 1. credits_note carries the rule into the generated
+    # docstring so it never claims a flat price on search or category.
+    Endpoint(
+        key="walmart_search",
+        namespace="walmart",
+        method="search",
+        http="POST",
+        path="/api/v1/walmart/search",
+        summary=(
+            "Search Walmart and get structured product rows (products, products_count and the "
+            "store the results were priced against). Costs 1 credit on domain 'com' or 'ca' and "
+            "2 credits on 'com.mx'."
+        ),
+        params=(
+            _req("query", "Product search query (1-500 characters)."),
+            _lit(
+                "domain",
+                ("com", "ca", "com.mx"),
+                "Marketplace: 'com' (US, default, 1 credit), 'ca' (1 credit), 'com.mx' "
+                "(2 credits). Sets the currency and product URLs of the response.",
+            ),
+            _int("page", "Results page, 1-based (integer >= 1). One page per call."),
+            _int("start_page", "Deprecated alias for page; send page instead."),
+            _lit(
+                "sort_by",
+                (
+                    "best_match",
+                    "price_low",
+                    "price_high",
+                    "best_seller",
+                    "rating_high",
+                    "new",
+                ),
+                "Result sort order. Defaults to 'best_match'.",
+            ),
+            # Backend is z.number() (not int): decimals are accepted.
+            _float(
+                "min_price",
+                "Minimum price filter in the marketplace's own currency; decimals allowed (e.g. "
+                "19.99).",
+            ),
+            _float(
+                "max_price",
+                "Maximum price filter in the marketplace's own currency; decimals allowed (e.g. "
+                "199.5).",
+            ),
+            _lit(
+                "fulfillment_speed",
+                ("today", "tomorrow"),
+                "Only items deliverable today, or by tomorrow. '2_days' and 'anytime' are not "
+                "accepted - for anytime, omit this parameter.",
+            ),
+            _lit(
+                "fulfillment_type",
+                ("in_store",),
+                "Set to 'in_store' to return only items available for in-store pickup.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is a "
+            "function of the request body, not a constant for the route."
+        ),
+    ),
+    Endpoint(
+        key="walmart_product",
+        namespace="walmart",
+        method="product",
+        http="POST",
+        path="/api/v1/walmart/product",
+        summary=(
+            "Full detail for a single Walmart product: price, rating, images, specifications, "
+            "availability and seller. US marketplace only - walmart.ca product pages could not "
+            "be fetched at all, so this endpoint takes no domain."
+        ),
+        params=(
+            _req("product_id", "Walmart item id (usItemId), e.g. '13544111159'."),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
+            "domain, so it is always 1."
+        ),
+    ),
+    Endpoint(
+        key="walmart_reviews",
+        namespace="walmart",
+        method="reviews",
+        http="POST",
+        path="/api/v1/walmart/reviews",
+        summary=(
+            "Customer reviews for a Walmart product with ratings, text, author, date and the "
+            "rating breakdown. 10 reviews per page; paginate with page."
+        ),
+        params=(
+            _req("product_id", "Walmart item id (usItemId), e.g. '13544111159'."),
+            _int("page", "Reviews page, 1-based (integer >= 1). 10 reviews per page."),
+            _lit(
+                "sort",
+                (
+                    "relevancy",
+                    "submission-desc",
+                    "submission-asc",
+                    "rating-desc",
+                    "rating-asc",
+                    "helpful-desc",
+                ),
+                "Review sort order. Omit for Walmart's own default ordering.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
+            "domain, so it is always 1."
+        ),
+    ),
+    Endpoint(
+        key="walmart_category",
+        namespace="walmart",
+        method="category",
+        http="POST",
+        path="/api/v1/walmart/category",
+        summary=(
+            "Products within a Walmart category, in the same product shape as search. Costs 1 "
+            "credit on domain 'com' or 'ca' and 2 credits on 'com.mx'; `limit` trims the "
+            "response after fetching and never reduces the cost."
+        ),
+        params=(
+            _req(
+                "category_id",
+                "Walmart category id: either a leaf id ('1095191') or the full "
+                "underscore-joined path ('3944_133251_1095191'). Both are accepted.",
+            ),
+            _lit(
+                "domain",
+                ("com", "ca", "com.mx"),
+                "Marketplace: 'com' (US, default, 1 credit), 'ca' (1 credit), 'com.mx' "
+                "(2 credits). Sets the currency and product URLs of the response.",
+            ),
+            _int("page", "Results page, 1-based (integer >= 1). One page per call."),
+            _int(
+                "limit",
+                "Trim the returned products to at most this many (integer >= 1). Applied after "
+                "fetching, so it does not reduce the credit cost of the call.",
+            ),
+            _lit(
+                "sort_by",
+                (
+                    "best_match",
+                    "price_low",
+                    "price_high",
+                    "best_seller",
+                    "rating_high",
+                    "new",
+                ),
+                "Result sort order. Defaults to 'best_match'.",
+            ),
+            _float(
+                "min_price",
+                "Minimum price filter in the marketplace's own currency; decimals allowed (e.g. "
+                "19.99).",
+            ),
+            _float(
+                "max_price",
+                "Maximum price filter in the marketplace's own currency; decimals allowed (e.g. "
+                "199.5).",
+            ),
+            _lit(
+                "fulfillment_speed",
+                ("today", "tomorrow"),
+                "Only items deliverable today, or by tomorrow. '2_days' and 'anytime' are not "
+                "accepted - for anytime, omit this parameter.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is a "
+            "function of the request body, not a constant for the route."
+        ),
+    ),
+    Endpoint(
+        key="walmart_offers",
+        namespace="walmart",
+        method="offers",
+        http="POST",
+        path="/api/v1/walmart/offers",
+        summary=(
+            "The buy-box offer for a Walmart product: price, seller, condition and buy-box flag. "
+            "BUY-BOX SELLER ONLY - this is not the full offer list, and there is no way to page "
+            "through the other sellers."
+        ),
+        params=(
+            _req("product_id", "Walmart item id (usItemId), e.g. '2979510112'."),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
+            "domain, so it is always 1."
+        ),
+    ),
+    Endpoint(
+        key="walmart_seller",
+        namespace="walmart",
+        method="seller",
+        http="POST",
+        path="/api/v1/walmart/seller",
+        summary=(
+            "Marketplace seller storefront: name, rating, review count, Pro Seller badge and "
+            "business details."
+        ),
+        params=(
+            _req(
+                "seller_id",
+                "Numeric Walmart catalog seller id, as returned in `seller_catalog_id` on a "
+                "product, search or offers response (e.g. '101480084'). The GUID `seller_id` is "
+                "not accepted here - it 404s.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
+            "domain, so it is always 1."
+        ),
+    ),
+    Endpoint(
+        key="walmart_seller_products",
+        namespace="walmart",
+        method="seller_products",
+        http="POST",
+        path="/api/v1/walmart/seller-products",
+        summary=(
+            "A marketplace seller's catalog. Roughly the first 40 items are server-rendered and "
+            "returned; total_count reports the seller's real catalog size. There is no "
+            "pagination - the rest of the catalog is not reachable."
+        ),
+        params=(
+            _req(
+                "seller_id",
+                "Numeric Walmart catalog seller id, as returned in `seller_catalog_id` on a "
+                "product, search or offers response (e.g. '101480084'). The GUID `seller_id` "
+                "404s.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
+            "domain, so it is always 1."
+        ),
+    ),
+    # ============================== Threads ==============================
+    # BODY-PRICED: threadsCreditCost(hasUsername) - 2 credits addressed by
+    # user_id, 4 by username, because TikHub's handle lookup is dead and a handle
+    # buys a second upstream call. Only profile / user_posts / user_replies are
+    # username-keyed; the other three are always 2. Sending both identifiers
+    # bills the cheap rate (the route only charges 4 when user_id is absent).
+    # credits_note carries that rule into the generated docstring on the three
+    # username-keyed endpoints so it never claims a flat price.
+    #
+    # There is NO Threads content search: search_top and search_recent 400 on
+    # every attempt upstream. search_users (people search) is the only search.
+    Endpoint(
+        key="threads_profile",
+        namespace="threads",
+        method="profile",
+        http="POST",
+        path="/api/v1/threads/profile",
+        summary=(
+            "Profile details for a Threads user. Costs 2 credits addressed by user_id and 4 by "
+            "username; pass user_id whenever you have it."
+        ),
+        params=(
+            _str(
+                "user_id",
+                "Numeric Threads user id, e.g. '63625256886'. The cheap path: 2 credits.",
+            ),
+            _str(
+                "username",
+                "Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 "
+                "total): the upstream handle lookup is down, so the handle is resolved through "
+                "people search first. Pass user_id instead to avoid that.",
+            ),
+        ),
+        one_of=(("user_id", "username"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits addressed by user_id and 4 credits addressed by username - the price "
+            "is a function of the request body, not a constant for the route."
+        ),
+    ),
+    Endpoint(
+        key="threads_user_posts",
+        namespace="threads",
+        method="user_posts",
+        http="POST",
+        path="/api/v1/threads/user/posts",
+        summary=(
+            "A user's Threads posts, cursor-paginated via next_cursor. Costs 2 credits addressed "
+            "by user_id and 4 by username."
+        ),
+        params=(
+            _str(
+                "user_id",
+                "Numeric Threads user id, e.g. '63625256886'. The cheap path: 2 credits.",
+            ),
+            _str(
+                "username",
+                "Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 "
+                "total) because the handle has to be resolved through people search first.",
+            ),
+            _str(
+                "cursor",
+                "Pagination cursor from a prior response's next_cursor. Omit for the first page.",
+            ),
+        ),
+        one_of=(("user_id", "username"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits addressed by user_id and 4 credits addressed by username - the price "
+            "is a function of the request body, not a constant for the route."
+        ),
+    ),
+    Endpoint(
+        key="threads_user_replies",
+        namespace="threads",
+        method="user_replies",
+        http="POST",
+        path="/api/v1/threads/user/replies",
+        summary=(
+            "A user's Threads replies, cursor-paginated via next_cursor. Costs 2 credits "
+            "addressed by user_id and 4 by username."
+        ),
+        params=(
+            _str(
+                "user_id",
+                "Numeric Threads user id, e.g. '63625256886'. The cheap path: 2 credits.",
+            ),
+            _str(
+                "username",
+                "Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 "
+                "total) because the handle has to be resolved through people search first.",
+            ),
+            _str(
+                "cursor",
+                "Pagination cursor from a prior response's next_cursor. Omit for the first page.",
+            ),
+        ),
+        one_of=(("user_id", "username"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits addressed by user_id and 4 credits addressed by username - the price "
+            "is a function of the request body, not a constant for the route."
+        ),
+    ),
+    Endpoint(
+        key="threads_post",
+        namespace="threads",
+        method="post",
+        http="POST",
+        path="/api/v1/threads/post",
+        summary="A single Threads post, addressed by post_id or by its threads.net URL.",
+        params=(
+            _str("post_id", "Threads post id, e.g. '3349029093483693129'."),
+            _str(
+                "url",
+                "Full threads.net post URL (e.g. 'https://www.threads.net/@natgeo/post/C8xY'), "
+                "as an alternative to post_id.",
+            ),
+        ),
+        one_of=(("post_id", "url"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits. Threads is body-priced by identifier, but this endpoint has no "
+            "username form, so it is always 2."
+        ),
+    ),
+    Endpoint(
+        key="threads_post_comments",
+        namespace="threads",
+        method="post_comments",
+        http="POST",
+        path="/api/v1/threads/post/comments",
+        summary=(
+            "Replies to a Threads post, cursor-paginated via next_cursor. Post-keyed only: "
+            "there is no username form, so this endpoint always costs 2 credits."
+        ),
+        params=(
+            _req("post_id", "Threads post id, e.g. '3349029093483693129'."),
+            _str(
+                "cursor",
+                "Pagination cursor from a prior response's next_cursor. Omit for the first page.",
+            ),
+        ),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits. Threads is body-priced by identifier, but this endpoint has no "
+            "username form, so it is always 2."
+        ),
+    ),
+    Endpoint(
+        key="threads_search_users",
+        namespace="threads",
+        method="search_users",
+        http="POST",
+        path="/api/v1/threads/search/users",
+        summary=(
+            "Search Threads profiles by name or handle. This is the only search Threads exposes "
+            "- there is no post or content search - and it returns a single unpaginated page."
+        ),
+        params=(
+            _req("query", "Name or handle to search for (1-200 characters)."),
+        ),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits. Threads is body-priced by identifier, but this endpoint has no "
+            "username form, so it is always 2."
+        ),
+    ),
+    # ========================== Kuaishou (China) =========================
+    Endpoint(
+        key="kuaishou_profile",
+        namespace="kuaishou",
+        method="profile",
+        http="POST",
+        path="/api/v1/kuaishou/profile",
+        summary=(
+            "Profile details for a Kuaishou user. Costs 10 credits, the dearest single-object "
+            "call on the platform."
+        ),
+        params=(
+            _req(
+                "user_id",
+                "Kuaishou user id (non-empty); get one from user_resolve or search_users.",
+            ),
+        ),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_user_posts",
+        namespace="kuaishou",
+        method="user_posts",
+        http="POST",
+        path="/api/v1/kuaishou/user/posts",
+        summary="A Kuaishou user's top posts, cursor-paginated via next_cursor.",
+        params=(
+            _req(
+                "user_id",
+                "Kuaishou user id (non-empty); get one from user_resolve or search_users.",
+            ),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_user_live",
+        namespace="kuaishou",
+        method="user_live",
+        http="POST",
+        path="/api/v1/kuaishou/user/live",
+        summary="A Kuaishou user's current live-stream status. Not paginated.",
+        params=(
+            _req(
+                "user_id",
+                "Kuaishou user id (non-empty); get one from user_resolve or search_users.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_user_resolve",
+        namespace="kuaishou",
+        method="user_resolve",
+        http="POST",
+        path="/api/v1/kuaishou/user/resolve",
+        summary=(
+            "Turns a Kuaishou share link into a user id. Only kuaishou.com and v.kuaishou.com "
+            "links are accepted; Kwai international (kwai.com) is not served upstream."
+        ),
+        params=(
+            _req(
+                "share_link",
+                "A kuaishou.com or v.kuaishou.com URL; kwai.com links are rejected.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_video",
+        namespace="kuaishou",
+        method="video",
+        http="POST",
+        path="/api/v1/kuaishou/video",
+        summary=(
+            "A single Kuaishou video by photo id or URL. Provide photo_id or url. "
+            "Costs 2 credits."
+        ),
+        params=(
+            _str("photo_id", "Kuaishou photo (video) id, non-empty."),
+            _str("url", "Full kuaishou.com video URL, as an alternative to photo_id."),
+        ),
+        one_of=(("photo_id", "url"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_video_comments",
+        namespace="kuaishou",
+        method="video_comments",
+        http="POST",
+        path="/api/v1/kuaishou/video/comments",
+        summary="Comments on a Kuaishou video, cursor-paginated via next_cursor.",
+        params=(
+            _req("photo_id", "Kuaishou photo (video) id, non-empty."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_comment_replies",
+        namespace="kuaishou",
+        method="comment_replies",
+        http="POST",
+        path="/api/v1/kuaishou/video/sub-comments",
+        summary=(
+            "Replies under a root comment on a Kuaishou video, cursor-paginated via next_cursor; "
+            "count sizes the page (1-50)."
+        ),
+        params=(
+            _req("photo_id", "Kuaishou photo (video) id, non-empty."),
+            _req(
+                "root_comment_id",
+                "Id of the top-level comment whose replies you want, from video_comments.",
+            ),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+            _int("count", "Replies per page, 1-50. Omit to use the upstream default."),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_videos_batch",
+        namespace="kuaishou",
+        method="videos_batch",
+        http="POST",
+        path="/api/v1/kuaishou/videos/batch",
+        summary=(
+            "Several Kuaishou videos in one call, hard-capped at 20 photo ids. Costs 40 credits, "
+            "the dearest call on the platform."
+        ),
+        params=(
+            _str_list(
+                "photo_ids",
+                "Kuaishou photo (video) ids, 1-20 per call; more than 20 is rejected.",
+                required=True,
+            ),
+        ),
+        credits=40,
+        credits_note=(
+            "Costs 40 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_search",
+        namespace="kuaishou",
+        method="search",
+        http="POST",
+        path="/api/v1/kuaishou/search",
+        summary=(
+            "Mixed-result search across Kuaishou, cursor-paginated via next_cursor. "
+            "Costs 10 credits per page."
+        ),
+        params=(
+            _req("keyword", "Search keyword, 1-200 characters."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_search_videos",
+        namespace="kuaishou",
+        method="search_videos",
+        http="POST",
+        path="/api/v1/kuaishou/search/videos",
+        summary=(
+            "Kuaishou video search results, cursor-paginated via next_cursor. "
+            "Costs 10 credits per page."
+        ),
+        params=(
+            _req("keyword", "Search keyword, 1-200 characters."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_search_users",
+        namespace="kuaishou",
+        method="search_users",
+        http="POST",
+        path="/api/v1/kuaishou/search/users",
+        summary=(
+            "Kuaishou user search results, cursor-paginated via next_cursor. "
+            "Costs 10 credits per page."
+        ),
+        params=(
+            _req("keyword", "Search keyword, 1-200 characters."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_search_live",
+        namespace="kuaishou",
+        method="search_live",
+        http="POST",
+        path="/api/v1/kuaishou/search/live",
+        summary=(
+            "Kuaishou live-stream search results, cursor-paginated via next_cursor. "
+            "Costs 10 credits per page."
+        ),
+        params=(
+            _req("keyword", "Search keyword, 1-200 characters."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_tag_feed",
+        namespace="kuaishou",
+        method="tag_feed",
+        http="POST",
+        path="/api/v1/kuaishou/tag/feed",
+        summary="Posts under a Kuaishou hashtag, cursor-paginated via next_cursor.",
+        params=(
+            _req("tag", "Hashtag text without the leading '#', 1-200 characters."),
+            _str(
+                "cursor",
+                "Opaque next_cursor from a prior response; omit for the first page.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    Endpoint(
+        key="kuaishou_trending",
+        namespace="kuaishou",
+        method="trending",
+        http="POST",
+        path="/api/v1/kuaishou/trending",
+        summary=(
+            "Kuaishou hot / live / shopping / brand / music leaderboards. "
+            "One board per call, not paginated."
+        ),
+        params=(
+            _lit(
+                "board",
+                ("hot", "live", "shopping", "brand", "music"),
+                "Leaderboard to return; defaults to 'hot' when omitted.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit. Kuaishou is priced PER ENDPOINT (1, 2, 10 or 40), never per "
+            "platform."
+        ),
+    ),
+    # ================================ eBay ===============================
+    Endpoint(
+        key="ebay_search",
+        namespace="ebay",
+        method="search",
+        http="POST",
+        path="/api/v1/ebay/search",
+        summary=(
+            "Search live or SOLD eBay listings: price, condition, bids, shipping, seller, "
+            "feedback. Provide query or seller; per_page accepts only 60, 120 or 240."
+        ),
+        params=(
+            _str(
+                "query",
+                "Keyword to search (1-500 characters). Optional: a seller-only search pages "
+                "that seller's whole catalogue.",
+            ),
+            _str(
+                "seller",
+                "Restrict results to one seller's listings (1-64 characters), as in "
+                "ebay.com/usr/<name>. Can be sent with no query.",
+            ),
+            _int("page", "Results page, 1-based."),
+            _lit(
+                "sort_by",
+                ("best_match", "ending_soonest", "newly_listed", "price_low", "price_high"),
+                "Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' "
+                "is deliberately unsupported (it ranks against our proxy exit, not the caller).",
+            ),
+            _float(
+                "min_price",
+                "Minimum price, inclusive. Must be 0 or greater.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price, inclusive. Must be 0 or greater.",
+            ),
+            _lit(
+                "condition",
+                ("new", "open_box", "refurbished", "used", "for_parts"),
+                "Item condition filter. 'refurbished' is eBay's parent condition, not one of "
+                "its three graded tiers.",
+            ),
+            _lit(
+                "buying_format",
+                ("auction", "buy_it_now", "best_offer"),
+                "Listing format: auction, fixed price (buy_it_now), or fixed price accepting "
+                "offers (best_offer).",
+            ),
+            _bool("free_shipping", "Only listings with free shipping."),
+            _bool(
+                "sold",
+                "Search completed listings that actually SOLD, for price research. eBay "
+                "publishes no headline count on this view, so total_results is null.",
+            ),
+            _str(
+                "category_id",
+                "eBay category id; must be numeric (e.g. '112529'). An unrecognised id returns "
+                "the UNFILTERED set under a 200.",
+            ),
+            _ilit(
+                "per_page",
+                (60, 120, 240),
+                "Listings per page: 60, 120 or 240 only. Defaults to 60; eBay silently falls back "
+                "to 60 for anything else.",
+            ),
+        ),
+        one_of=(("query", "seller"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="ebay_product",
+        namespace="ebay",
+        method="product",
+        http="POST",
+        path="/api/v1/ebay/product",
+        summary=(
+            "One eBay listing in full: price, condition, images, item specifics, shipping, "
+            "returns, auction state, seller."
+        ),
+        params=(
+            _req(
+                "item_id",
+                "eBay item number (e.g. '168591664725'), or a full ebay.com/itm/... listing "
+                "URL; tracking parameters on a pasted URL are discarded.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="ebay_seller",
+        namespace="ebay",
+        method="seller",
+        http="POST",
+        path="/api/v1/ebay/seller",
+        summary=(
+            "eBay seller profile card: store name, feedback score and %, items sold, followers, "
+            "location, categories. Profile only: page a catalogue with search(seller=...)."
+        ),
+        params=(
+            _req(
+                "seller",
+                "eBay username as it appears in ebay.com/usr/<name> (1-64 characters), which is "
+                "what seller_name on a search or product result returns.",
+            ),
+        ),
+        credits=1,
+    ),
+    # =============================== Target ==============================
+    Endpoint(
+        key="target_search",
+        namespace="target",
+        method="search",
+        http="POST",
+        path="/api/v1/target/search",
+        summary=(
+            "Search Target.com, the US retailer: prices, ratings, badges and promotions. "
+            "Up to 28 results per page; rendered upstream, so expect around 9 seconds."
+        ),
+        params=(
+            _req("keyword", "Search keyword (1-500 characters)."),
+            _int("page", "Results page, 1-based."),
+            _int(
+                "count",
+                "Results per page, 1-28. Defaults to 24; Target rejects anything above 28 "
+                "outright.",
+            ),
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "featured",
+                    "price_low",
+                    "price_high",
+                    "rating_high",
+                    "best_seller",
+                    "newest",
+                ),
+                "Result sort order. Defaults to 'relevance'.",
+            ),
+            _str(
+                "store_id",
+                "Numeric Target store id whose prices and availability the response reflects. "
+                "Defaults to '3991', the store target.com uses with no store context.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="target_category",
+        namespace="target",
+        method="category",
+        http="POST",
+        path="/api/v1/target/category",
+        summary=(
+            "Products in a Target category, same shape as search plus the category breadcrumb. "
+            "Up to 28 per page; the slowest Target endpoint at around 37 seconds."
+        ),
+        params=(
+            _req(
+                "category_id",
+                "Target category id: the segment after 'N-' in a target.com /c/ URL "
+                "(target.com/c/apple/-/N-5xtg6 -> '5xtg6').",
+            ),
+            _int("page", "Results page, 1-based."),
+            _int(
+                "count",
+                "Results per page, 1-28. Defaults to 24; Target rejects anything above 28 "
+                "outright.",
+            ),
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "featured",
+                    "price_low",
+                    "price_high",
+                    "rating_high",
+                    "best_seller",
+                    "newest",
+                ),
+                "Result sort order. Defaults to 'relevance'.",
+            ),
+            _str(
+                "store_id",
+                "Numeric Target store id whose prices and availability the response reflects. "
+                "Defaults to '3991'.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="target_product",
+        namespace="target",
+        method="product",
+        http="POST",
+        path="/api/v1/target/product",
+        summary=(
+            "Target product details by TCIN: price, rating, images, specifications, variants, "
+            "return policy, fulfillment. seller_id/seller_name are null for stock sold by Target."
+        ),
+        params=(
+            _req(
+                "tcin",
+                "Target catalog id (tcin, e.g. '1010453160'). A colour/size child tcin is "
+                "answered by its variation parent, with the child present in 'variants'.",
+            ),
+            _str(
+                "store_id",
+                "Numeric Target store id whose prices and availability the response reflects. "
+                "Defaults to '3991'.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="target_reviews",
+        namespace="target",
+        method="reviews",
+        http="POST",
+        path="/api/v1/target/reviews",
+        summary=(
+            "Target reviews with the rating breakdown, per-attribute averages and guest photos. "
+            "8 review bodies maximum and no paging; expect around 40 seconds."
+        ),
+        params=(
+            _req("tcin", "Target catalog id (tcin, e.g. '1010453160')."),
+            _int(
+                "limit",
+                "Trim the returned reviews to at most this many (1 or greater). Target "
+                "publishes 8 anonymously and offers no paging, so this only trims.",
+            ),
+            _str(
+                "store_id",
+                "Numeric Target store id whose prices and availability the response reflects. "
+                "Defaults to '3991'.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ============================= Home Depot ============================
+    Endpoint(
+        key="home_depot_search",
+        namespace="home_depot",
+        method="search",
+        http="POST",
+        path="/api/v1/homedepot/search",
+        summary=(
+            "Search Home Depot: price and promotions, brand and model, ratings, badges, "
+            "per-store pickup/delivery. Page size is fixed at 12 and cannot be changed."
+        ),
+        params=(
+            _req("query", "Search keyword (1-500 characters)."),
+            _int(
+                "page",
+                "Results page, 1-based. Home Depot serves 12 products per page and offers no "
+                "way to change that, so paging is the only way to read further.",
+            ),
+            _lit(
+                "sort_by",
+                ("best_match", "top_sellers", "top_rated", "price_low", "price_high"),
+                "Result sort order. Defaults to 'best_match'. Closed enum: Home Depot answers "
+                "an unknown sort with an empty page that is still billed. 'Newest' is absent - "
+                "it is rejected on keyword search.",
+            ),
+            _float(
+                "min_price",
+                "Minimum price, inclusive. Must be 0 or greater.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price, inclusive. Must be 0 or greater.",
+            ),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="home_depot_product",
+        namespace="home_depot",
+        method="product",
+        http="POST",
+        path="/api/v1/homedepot/product",
+        summary=(
+            "Full Home Depot item detail: pricing, images and videos, spec table, dimensions, "
+            "bullets, documents, return policy. Carries a 10-review preview only."
+        ),
+        params=(
+            _req(
+                "item_id",
+                "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
+                "URL; tracking parameters on a pasted URL are discarded.",
+            ),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="home_depot_reviews",
+        namespace="home_depot",
+        method="reviews",
+        http="POST",
+        path="/api/v1/homedepot/reviews",
+        summary=(
+            "One page of full Home Depot review bodies, the rating distribution, per-attribute "
+            "ratings, photos and seller responses. 30 reviews per page."
+        ),
+        params=(
+            _req(
+                "item_id",
+                "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
+                "URL; tracking parameters on a pasted URL are discarded.",
+            ),
+            _int(
+                "page",
+                "Reviews page, 1-based. 30 reviews per page; 'total_pages' in the response is "
+                "the last one that exists, and asking past it is a 404.",
+            ),
+        ),
+        credits=2,
+    ),
+    # =============================== Zillow ==============================
+    Endpoint(
+        key="zillow_search",
+        namespace="zillow",
+        method="search",
+        http="POST",
+        path="/api/v1/zillow/search",
+        summary=(
+            "Zillow listings in a region: price, beds, baths, living area, Zestimate, "
+            "coordinates, images, days on market. A bare ZIP works alone but cannot be "
+            "combined with a filter or a sort."
+        ),
+        params=(
+            _req(
+                "location",
+                "Region to search (1-200 characters): a Zillow slug ('austin-tx'), a human form "
+                "('Austin, TX'), a ZIP, or a pasted zillow.com search URL. A ZIP works alone but "
+                "cannot be combined with a filter or sort; an unresolvable region is a 404.",
+            ),
+            _lit(
+                "listing_status",
+                ("for_sale", "for_rent", "sold"),
+                "Which listings to return. Defaults to 'for_sale'.",
+            ),
+            _int("page", "Results page, 1-based."),
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "recommended",
+                    "newest",
+                    "price_low",
+                    "price_high",
+                    "payment_low",
+                    "payment_high",
+                    "beds",
+                    "baths",
+                    "sqft",
+                    "lot_size",
+                    "zestimate_low",
+                    "zestimate_high",
+                    "recent_change",
+                ),
+                "Result sort order. Sorts that rank against a signed-in profile "
+                "(saved/featured/personalised) are unsupported - we are never signed in.",
+            ),
+            _float(
+                "min_price",
+                "Minimum price, inclusive (0 or greater). On listing_status='for_rent' this is "
+                "MONTHLY RENT - Zillow files rent under its payment filter.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price, inclusive (0 or greater). On listing_status='for_rent' this is "
+                "MONTHLY RENT.",
+            ),
+            _int("beds_min", "Minimum bedrooms; whole number, 0 or greater."),
+            _int("beds_max", "Maximum bedrooms; whole number, 0 or greater."),
+            _float(
+                "baths_min",
+                "Minimum bathrooms, 0 or greater. Half-baths are allowed (1.5).",
+            ),
+            _float(
+                "baths_max",
+                "Maximum bathrooms, 0 or greater. Half-baths are allowed (1.5).",
+            ),
+            _int("sqft_min", "Minimum living area in square feet; whole number, 0 or greater."),
+            _int("sqft_max", "Maximum living area in square feet; whole number, 0 or greater."),
+            _int("lot_size_min", "Minimum lot size in square feet; whole number, 0 or greater."),
+            _int("lot_size_max", "Maximum lot size in square feet; whole number, 0 or greater."),
+            _int("year_built_min", "Earliest year built; whole number, 0 or greater."),
+            _int("year_built_max", "Latest year built; whole number, 0 or greater."),
+            _float(
+                "max_hoa",
+                "Maximum monthly HOA fee in dollars, 0 or greater.",
+            ),
+            _lit(
+                "home_type",
+                (
+                    "houses",
+                    "townhomes",
+                    "multi_family",
+                    "condos",
+                    "apartments",
+                    "manufactured",
+                    "lots_land",
+                ),
+                "Property type filter.",
+            ),
+            _lit(
+                "days_on_zillow",
+                ("1", "7", "14", "30", "90", "6m", "12m", "24m", "36m"),
+                "Listed - or, with listing_status='sold', sold - within the last N days. Closed "
+                "enum: an unrecognised value returns the UNFILTERED set under a 200.",
+            ),
+            _str(
+                "keywords",
+                "Free-text match against the listing description (1-200 characters).",
+            ),
+            _bool("has_pool", "Only listings with a pool."),
+            _bool("has_garage", "Only listings with a garage."),
+            _bool("has_air_conditioning", "Only listings with air conditioning."),
+            _bool("is_waterfront", "Only waterfront listings."),
+            _bool("has_basement", "Only listings with a basement."),
+            _bool("is_new_construction", "Only new-construction listings."),
+            _bool("has_open_house", "Only listings with an upcoming open house."),
+            _bool("price_reduced", "Only listings whose price was reduced."),
+            _bool("is_3d_tour", "Only listings with a 3D tour."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="zillow_property",
+        namespace="zillow",
+        method="property",
+        http="POST",
+        path="/api/v1/zillow/property",
+        summary=(
+            "Full Zillow listing: price and price history, Zestimate, tax history, RESO facts, "
+            "rooms, schools, open houses, photos. Rental buildings return floor plans instead."
+        ),
+        params=(
+            _req(
+                "zpid",
+                "Zillow property id (e.g. '29414894'), a full /homedetails/ URL, or a rental "
+                "building URL (zillow.com/apartments/...). The building form is required for "
+                "buildings: they have no zpid a caller can see.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="zillow_agent_reviews",
+        namespace="zillow",
+        method="agent_reviews",
+        http="POST",
+        path="/api/v1/zillow/reviews",
+        summary=(
+            "A Zillow AGENT's profile and reviews: rating, bodies with sub-ratings, specialties, "
+            "licenses, service areas, sales counts. Zillow server-renders the first five."
+        ),
+        params=(
+            _req(
+                "screen_name",
+                "Zillow agent profile screen name as it appears in zillow.com/profile/<name>/ "
+                "(1-200 characters, may contain spaces), or a full profile URL.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ============================ Booking.com ============================
+    # 1 credit flat on all three endpoints (BOOKING_CREDIT_COST =
+    # scrapedoCreditCost(1)). Booking prices a STAY, so every endpoint takes the
+    # occupancy/date set: checkin and checkout must travel TOGETHER, because a
+    # lone checkin is ignored and Booking prices a range of its own choosing,
+    # returning real prices for dates the caller never asked for. currency
+    # defaults to USD in the transport - without it Booking prices off the proxy
+    # exit and two identical requests disagree.
+    Endpoint(
+        key="booking_search",
+        namespace="booking",
+        method="search",
+        http="POST",
+        path="/api/v1/booking/search",
+        summary=(
+            "Booking.com properties for a destination and stay: live nightly price, review score, "
+            "star rating, location, room type, deal badges. 25 properties per page. Provide "
+            "destination or dest_id."
+        ),
+        params=(
+            _str("destination", "Destination to search, e.g. 'Paris' (1-200 characters). Required unless dest_id is given."),
+            _str("dest_id", "Numeric Booking.com destination id, as an alternative to destination."),
+            _lit(
+                "dest_type",
+                ("city", "region", "country", "district", "landmark", "airport", "hotel"),
+                "What dest_id refers to. Requires dest_id and is rejected without it, because Booking silently ignores a lone dest_type.",
+            ),
+            _int("page", "Results page, 1-based. 25 properties per page, 1 credit each."),
+            _lit(
+                "sort_by",
+                (
+                    "popularity",
+                    "price_low",
+                    "price_high",
+                    "stars_high",
+                    "stars_low",
+                    "stars_and_price",
+                    "distance",
+                    "review_score",
+                ),
+                "Result sort order (default 'popularity').",
+            ),
+            _float(
+                "min_price",
+                "Minimum price PER NIGHT in `currency`, >= 0. Must not exceed max_price.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price PER NIGHT in `currency`, >= 0.",
+            ),
+            _int_list(
+                "stars",
+                "Star ratings to include, each 1-5, 1-5 values, OR'd together (e.g. [4, 5]).",
+            ),
+            _lit(
+                "min_review_score",
+                ("6", "7", "8", "9"),
+                "Minimum guest review score. Only '6', '7', '8' and '9' exist upstream; any other threshold is silently dropped.",
+            ),
+            _lit_or_int(
+                "property_type",
+                (
+                    "apartments",
+                    "hostels",
+                    "hotels",
+                    "motels",
+                    "resorts",
+                    "bed_and_breakfasts",
+                    "villas",
+                    "campgrounds",
+                    "vacation_homes",
+                    "lodges",
+                    "homestays",
+                ),
+                "Accommodation type by name, or a raw numeric Booking accommodation-type id (>= "
+                "1).",
+            ),
+            _bool("free_cancellation", "Only properties offering free cancellation."),
+            _bool("no_prepayment", "Only properties that take no prepayment."),
+            _bool("breakfast_included", "Only rates that include breakfast."),
+            _str("checkin", "Check-in date, YYYY-MM-DD. Must be sent together with checkout: a lone checkin is ignored and Booking prices a default range of its own."),
+            _str("checkout", "Check-out date, YYYY-MM-DD. Must be later than checkin and sent together with it."),
+            _int("adults", "Adult guests, >= 1 (default 2)."),
+            _int_list(
+                "children_ages",
+                "AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.",
+            ),
+            _int("rooms", "Rooms required, >= 1 (default 1)."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree."),
+        ),
+        one_of=(("destination", "dest_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="booking_hotel",
+        namespace="booking",
+        method="hotel",
+        http="POST",
+        path="/api/v1/booking/hotel",
+        summary=(
+            "One Booking.com property in full: rooms and rate plans, facilities, house rules, "
+            "check-in windows, policies, images, location and review scores, priced for the stay "
+            "asked for. Chaining the `url` a search row returns is cheaper than a bare slug."
+        ),
+        params=(
+            _req("hotel", "Booking.com property URL or the bare page slug (1-500 characters); query params are discarded."),
+            _str("country_code", "Two-letter country code for the property page (default 'us'). Only consulted for a bare slug, where a wrong one is a real, BILLED 404."),
+            _str("checkin", "Check-in date, YYYY-MM-DD. Must be sent together with checkout; omitting both prices a two-night range Booking chose, echoed back in the response."),
+            _str("checkout", "Check-out date, YYYY-MM-DD. Must be later than checkin and sent together with it."),
+            _int("adults", "Adult guests, >= 1 (default 2)."),
+            _int_list(
+                "children_ages",
+                "AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.",
+            ),
+            _int("rooms", "Rooms required, >= 1 (default 1)."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="booking_reviews",
+        namespace="booking",
+        method="reviews",
+        http="POST",
+        path="/api/v1/booking/reviews",
+        summary=(
+            "Booking.com guest reviews for a property with the score breakdown by category and "
+            "Booking's own praise/complaint summary. No page param: total_count is the whole "
+            "review history, count is what this response holds."
+        ),
+        params=(
+            _req("hotel", "Booking.com property URL or the bare page slug (1-500 characters); query params are discarded."),
+            _str("country_code", "Two-letter country code for the property page (default 'us'). Only consulted for a bare slug, where a wrong one is a real, BILLED 404."),
+            _str("checkin", "Check-in date, YYYY-MM-DD. Must be sent together with checkout; it prices the stay the review page is rendered for."),
+            _str("checkout", "Check-out date, YYYY-MM-DD. Must be later than checkin and sent together with it."),
+            _int("adults", "Adult guests, >= 1 (default 2)."),
+            _int_list(
+                "children_ages",
+                "AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.",
+            ),
+            _int("rooms", "Rooms required, >= 1 (default 1)."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD')."),
+        ),
+        credits=1,
+    ),
+    # ============================ Tripadvisor ============================
+    # 2 credits flat on all four endpoints (TRIPADVISOR_CREDIT_COST =
+    # scrapedoCreditCost(10), premium per-domain table). LOOKUP FIRST: every
+    # endpoint below locations() is keyed by ids that exist only inside
+    # TripAdvisor's own URLs, so a caller holding a place NAME has no other entry
+    # point. A geo row from locations() answers geo_id for search(); a business
+    # row answers the geo_id + location_id pair location() and reviews() take.
+    Endpoint(
+        key="tripadvisor_locations",
+        namespace="tripadvisor",
+        method="locations",
+        http="POST",
+        path="/api/v1/tripadvisor/locations",
+        summary=(
+            "START HERE: resolve a place or business NAME to the TripAdvisor geo_id / location_id "
+            "pair every other TripAdvisor endpoint is keyed by. Up to 20 rows."
+        ),
+        params=(
+            _req("query", "Place or business name to resolve (1-120 characters)."),
+            _int("limit", "Rows to return, 1-20 (default 12). Sizes the response only; there is no paging here."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="tripadvisor_search",
+        namespace="tripadvisor",
+        method="search",
+        http="POST",
+        path="/api/v1/tripadvisor/search",
+        summary=(
+            "Restaurants, hotels or attractions in a TripAdvisor geo, TripAdvisor-ranked: rating, "
+            "review count, price band, address, coordinates, phone, hours, Travelers' Choice badge; "
+            "each row carries the location_id + geo_id pair. 30 locations per page. Provide geo_id "
+            "or url."
+        ),
+        params=(
+            _str("geo_id", "TripAdvisor geo id (1-500 characters): 30196, g30196, or a URL carrying one. Required unless url is given."),
+            _lit(
+                "category",
+                ("restaurants", "hotels", "attractions"),
+                "Listing family to search (default 'restaurants').",
+            ),
+            _int("page", "Results page, 1-based. 30 locations per page; a page beyond the last is a 404, not an empty result."),
+            _str("url", "Full tripadvisor.com listing URL (1-500 characters), as an alternative to geo_id; country sites are accepted."),
+        ),
+        one_of=(("geo_id", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="tripadvisor_location",
+        namespace="tripadvisor",
+        method="location",
+        http="POST",
+        path="/api/v1/tripadvisor/location",
+        summary=(
+            "One TripAdvisor location in full: rating, review histogram and per-aspect sub-ratings, "
+            "city ranking, price band, cuisines, amenities, address, coordinates, contact, photos, "
+            "and the FIRST PAGE OF REVIEWS. Provide location_id or url."
+        ),
+        params=(
+            _str("location_id", "TripAdvisor location id (1-500 characters): 1899234, d1899234, or a full _Review URL. Required unless url is given."),
+            _str("geo_id", "Geo the location sits in; required when location_id is a bare d-id."),
+            _lit(
+                "category",
+                ("restaurants", "hotels", "attractions"),
+                "Location family (default 'restaurants'); match the location's own type.",
+            ),
+            _str("url", "Full tripadvisor.com _Review URL (1-500 characters), as an alternative to location_id."),
+        ),
+        one_of=(("location_id", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="tripadvisor_reviews",
+        namespace="tripadvisor",
+        method="reviews",
+        http="POST",
+        path="/api/v1/tripadvisor/reviews",
+        summary=(
+            "A page of TripAdvisor reviews: rating, trip date and type, reviewer home town and "
+            "contribution count, management response. Page 1 already rides along in location(), so "
+            "use this to page PAST it; consecutive pages can repeat one review at the boundary, so "
+            "de-duplicate on review_id. Provide location_id or url."
+        ),
+        params=(
+            _str("location_id", "TripAdvisor location id (1-500 characters): 1899234, d1899234, or a full _Review URL. Required unless url is given."),
+            _str("geo_id", "Geo the location sits in; required when location_id is a bare d-id."),
+            _lit(
+                "category",
+                ("restaurants", "hotels", "attractions"),
+                "Location family (default 'restaurants'). It sets the page size, so it must match the location's own type on any page past the first.",
+            ),
+            _str("url", "Full tripadvisor.com _Review URL (1-500 characters), as an alternative to location_id."),
+            _int("page", "Reviews page, 1-based. 15 per page for restaurants, 10 for hotels and attractions; past the last page is a 404."),
+        ),
+        one_of=(("location_id", "url"),),
+        credits=2,
+    ),
+    # =============================== Indeed ==============================
+    # 2 credits flat on all four endpoints (INDEED_CREDIT_COST =
+    # scrapedoCreditCost(10), premium per-domain table). radius and max_age_days
+    # are CLOSED sets: Indeed ignores any other value and returns the unfiltered
+    # set, so a caller asking for 7 miles is billed for a search covering fifty.
+    # An unknown job key or company slug is a real 404 that scrape.do BILLS.
+    Endpoint(
+        key="indeed_search",
+        namespace="indeed",
+        method="search",
+        http="POST",
+        path="/api/v1/indeed/search",
+        summary=(
+            "Indeed job postings: title, employer, rating, location, salary range, job type, "
+            "benefits, posting age, apply route. 10 postings per page. Provide query or location - "
+            "a location-only search (every posting in a metro) is valid."
+        ),
+        params=(
+            _str("query", "Job title, keywords or employer (1-500 characters). Required unless location is given."),
+            _str("location", "City and state, postal code, state, country, or 'Remote' (1-200 characters). Valid on its own with no query."),
+            _int("page", "Results page, 1-based. 10 postings per page, 1 call each."),
+            _ilit(
+                "radius",
+                (0, 5, 10, 15, 25, 35, 50, 100),
+                "Search radius in miles around location. Closed set: Indeed IGNORES any other "
+                "value and returns the unfiltered set. Upstream default 50.",
+            ),
+            _ilit(
+                "max_age_days",
+                (1, 3, 7, 14),
+                "Maximum posting age in days. Closed set: Indeed IGNORES any other value and "
+                "returns postings of every age.",
+            ),
+            _lit(
+                "job_type",
+                ("full_time", "part_time", "contract", "temporary", "internship"),
+                "Employment type filter.",
+            ),
+            _float(
+                "min_salary",
+                "Minimum annual salary, >= 0. Filters on INDEED'S OWN ESTIMATE for the role, not "
+                "a posted figure, so postings publishing no salary still match.",
+            ),
+            _bool("remote", "Remote postings only."),
+        ),
+        one_of=(("query", "location"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="indeed_job",
+        namespace="indeed",
+        method="job",
+        http="POST",
+        path="/api/v1/indeed/job",
+        summary=(
+            "One Indeed posting in full: description text and HTML, structured salary, employment "
+            "types, benefits, geocoded address, employer rating, applicant count, original ATS "
+            "link. An unknown job key is a real 404 that is still billed."
+        ),
+        params=(
+            _req("job_id", "16-hex Indeed job key, or any indeed.com URL carrying jk= (/viewjob, /rc/clk, /pagead/clk)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="indeed_company",
+        namespace="indeed",
+        method="company",
+        http="POST",
+        path="/api/v1/indeed/company",
+        summary=(
+            "Indeed employer profile: description, industry, HQ, size, revenue, CEO approval, "
+            "overall and per-category ratings, reported salaries, open roles, locations. An unknown "
+            "slug is a real 404 that is still billed."
+        ),
+        params=(
+            _req("company", "indeed.com/cmp/<slug> slug or a full profile URL (1-200 characters); slugs are untidy, e.g. 'Tata-Consultancy-Services-(tcs)'."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="indeed_company_reviews",
+        namespace="indeed",
+        method="company_reviews",
+        http="POST",
+        path="/api/v1/indeed/company/reviews",
+        summary=(
+            "Indeed employee reviews, 20 per page, with per-category ratings, pros/cons, reviewer "
+            "job title and location, plus aggregated sentiment and topic/location/job-title "
+            "breakdowns."
+        ),
+        params=(
+            _req("company", "indeed.com/cmp/<slug> slug or a full profile URL (1-200 characters)."),
+            _int("page", "Reviews page, 1-based. 20 reviews per page."),
+        ),
+        credits=2,
+    ),
+    # =============================== Airbnb ==============================
+    # 1 credit flat on all three endpoints (AIRBNB_CREDIT_COST =
+    # scrapedoCreditCost(1); render was tested and returns the same body for 5x
+    # the price). PRICES ARE SEARCH-ONLY: the room page carries no nightly rate
+    # under any parameters, with or without dates, even under render. check_in
+    # and check_out must travel together - a dateless search defaults to +30d for
+    # 5 nights and A/Bs both the window and the prices, which the response flags
+    # as dates_are_defaulted. room_type and amenity names are validated before
+    # the scrape because an unrecognised value returns the UNFILTERED set under a
+    # 200.
+    Endpoint(
+        key="airbnb_search",
+        namespace="airbnb",
+        method="search",
+        http="POST",
+        path="/api/v1/airbnb/search",
+        summary=(
+            "Airbnb stays: stay-total and per-night price with the full discount ledger, rating and "
+            "review count, bedrooms/beds/baths, coordinates, badges, images, dates_are_defaulted. "
+            "18 listings per page; page and cursor are mutually exclusive."
+        ),
+        params=(
+            _req("location", "City, region, ZIP, or a pasted airbnb.com/s/ URL (1-200 characters). An unresolvable location is a 404."),
+            _str("check_in", "Check-in date, YYYY-MM-DD. Must be sent with check_out; omitting both defaults to +30 days and flags dates_are_defaulted in the response."),
+            _str("check_out", "Check-out date, YYYY-MM-DD. Must be later than check_in; defaults to check_in plus 5 nights when omitted."),
+            _int("adults", "Adult guests, >= 1."),
+            _int("children", "Children aged 2-12, >= 0."),
+            _int("infants", "Infants under 2, >= 0."),
+            _int("pets", "Pets, >= 0."),
+            _float(
+                "min_price",
+                "Minimum price for the WHOLE STAY in `currency`, not per night, >= 0. Must not "
+                "exceed max_price.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price for the WHOLE STAY in `currency`, not per night, >= 0.",
+            ),
+            _lit(
+                "room_type",
+                ("entire_home", "private_room", "shared_room", "hotel_room"),
+                "Room type. Validated before the scrape, because an unrecognised value returns the UNFILTERED set under a 200.",
+            ),
+            _int("min_bedrooms", "Minimum bedrooms, >= 0."),
+            _int("min_beds", "Minimum beds, >= 0."),
+            _int("min_bathrooms", "Minimum bathrooms, >= 0."),
+            _bool("superhost", "Superhost listings only."),
+            _bool("instant_book", "Instant Book listings only."),
+            _bool("guest_favorite", "Guest Favorite listings only."),
+            _bool("free_cancellation", "Listings with free cancellation only."),
+            _str("amenities", "Comma-separated amenities (1-200 characters): wifi, air_conditioning, pool, kitchen, free_parking, washer, self_check_in, tv, or raw numeric Airbnb amenity ids. An unrecognised NAME is rejected before the scrape."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb prices off the proxy exit and identical requests disagree."),
+            _int("page", "Results page, 1-based. 18 listings per page. Cannot be combined with cursor."),
+            _str("cursor", "next_cursor from a previous response (1-500 characters); wins over page, so sending both is rejected."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="airbnb_listing",
+        namespace="airbnb",
+        method="listing",
+        http="POST",
+        path="/api/v1/airbnb/listing",
+        summary=(
+            "One Airbnb listing in full: description, property/room type, capacity and room counts, "
+            "the complete grouped amenity list (including what the place does NOT have), host "
+            "profile and stats, house rules, cancellation policy, sleeping arrangements, photo tour "
+            "and the RATING BREAKDOWN. Carries NO nightly price - prices are search-only."
+        ),
+        params=(
+            _req("listing_id", "Airbnb listing id or a full /rooms/ URL (1-500 characters); query params are discarded, since they carry someone else's dates."),
+            _str("check_in", "Check-in date, YYYY-MM-DD. Must be sent with check_out. Does not produce a price: the room page has no nightly rate."),
+            _str("check_out", "Check-out date, YYYY-MM-DD. Must be later than check_in and sent together with it."),
+            _int("adults", "Adult guests, >= 1."),
+            _int("children", "Children aged 2-12, >= 0."),
+            _int("infants", "Infants under 2, >= 0."),
+            _int("pets", "Pets, >= 0."),
+            _str("currency", "ISO 4217 currency, 3 letters (default 'USD')."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="airbnb_reviews",
+        namespace="airbnb",
+        method="reviews",
+        http="POST",
+        path="/api/v1/airbnb/reviews",
+        summary=(
+            "Airbnb review BODIES with per-review rating, date and reviewer name/photo/location, "
+            "limit/offset paged at up to 50 per call. `count` is the listing's TOTAL review count, "
+            "`returned` is how many this page holds. The rating breakdown lives on listing(), not here."
+        ),
+        params=(
+            _req("listing_id", "Airbnb listing id or a full /rooms/ URL (1-500 characters)."),
+            _str("currency", "ISO 4217 currency, 3 letters (default 'USD')."),
+            _int("limit", "Reviews to return, 1-50 (default 30). Upstream returns a fixed 7 when no explicit limit is sent."),
+            _int("offset", "Reviews to skip before this page, >= 0 (default 0)."),
+        ),
+        credits=1,
+    ),
+    # ============================= Glassdoor =============================
+    Endpoint(
+        key="glassdoor_companies",
+        namespace="glassdoor",
+        method="companies",
+        http="POST",
+        path="/api/v1/glassdoor/companies",
+        summary=(
+            "START HERE. Resolve a company NAME to the employer_id every other Glassdoor method is "
+            "keyed by, ranked by Glassdoor and de-duplicated."
+        ),
+        params=(
+            _req("query", "Company name to resolve (1-120 characters)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="glassdoor_company",
+        namespace="glassdoor",
+        method="company",
+        http="POST",
+        path="/api/v1/glassdoor/company",
+        summary=(
+            "Glassdoor employer profile: description, mission, industry, sector, HQ, size and revenue "
+            "bands, stock symbol, year founded, overall and per-category ratings, star distribution, "
+            "CEO approval, awards, FAQ and the five server-rendered reviews. Also returns reviews_url "
+            "and salaries_url, which reviews() and salaries() accept as url to save a fetch. Provide "
+            "employer_id or url."
+        ),
+        params=(
+            _str(
+                "employer_id",
+                "Glassdoor employer id (1-50 characters) in any form Glassdoor writes it: '1699', "
+                "'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected.",
+            ),
+            _str(
+                "company",
+                "Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: the "
+                "profile resolves on employer_id alone, it is ignored entirely when url is set, and it "
+                "does not satisfy the employer_id-or-url requirement.",
+            ),
+            _str(
+                "url",
+                "Any glassdoor.com employer URL (1-500 characters): /Overview/, /Reviews/ or /Salary/. "
+                "A non-glassdoor.com host is rejected.",
+            ),
+        ),
+        one_of=(("employer_id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="glassdoor_reviews",
+        namespace="glassdoor",
+        method="reviews",
+        http="POST",
+        path="/api/v1/glassdoor/reviews",
+        summary=(
+            "Up to THREE full Glassdoor reviews - the cap is Glassdoor's login wall - with per-axis "
+            "scores, pros, cons, advice, job title, location, employment status and employer response, "
+            "plus complete rating statistics, star distribution, aggregate pro/con highlight terms and "
+            "per-job-title review counts. There is no page param: move the window with category and "
+            "employment_status. Provide employer_id or url."
+        ),
+        params=(
+            _str(
+                "employer_id",
+                "Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a "
+                "STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the "
+                "customer price is unchanged.",
+            ),
+            _str(
+                "company",
+                "Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored "
+                "when url is set, and it does not satisfy the employer_id-or-url requirement.",
+            ),
+            _str(
+                "url",
+                "Any glassdoor.com employer URL (1-500 characters). Pass back reviews_url from "
+                "company() to skip the resolve fetch. A non-glassdoor.com host is rejected.",
+            ),
+            _lit(
+                "category",
+                (
+                    "career_development",
+                    "compensation",
+                    "culture",
+                    "diversity_and_inclusion",
+                    "management",
+                    "work_life_balance",
+                ),
+                "Restrict to reviews Glassdoor files under one topic. Closed enum: Glassdoor IGNORES an "
+                "unknown value and serves the unfiltered set under a 200. Read filtered_review_count on "
+                "the response to see how many match.",
+            ),
+            _lit(
+                "employment_status",
+                ("full_time", "part_time", "contract", "intern"),
+                "Restrict to one kind of employment. Closed enum for the same reason as category; "
+                "FREELANCE is deliberately absent because it was never confirmed to change the result "
+                "set.",
+            ),
+        ),
+        one_of=(("employer_id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="glassdoor_salaries",
+        namespace="glassdoor",
+        method="salaries",
+        http="POST",
+        path="/api/v1/glassdoor/salaries",
+        summary=(
+            "Glassdoor salaries by job title, 10 titles per page: base-pay and total-pay percentiles "
+            "P10-P90 with medians called out, sample counts, currency, pay period and last-reported "
+            "date. The figures are Glassdoor's ESTIMATES for the title, not individual reported "
+            "salaries. Provide employer_id or url."
+        ),
+        params=(
+            _str(
+                "employer_id",
+                "Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a "
+                "STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the "
+                "customer price is unchanged.",
+            ),
+            _str(
+                "company",
+                "Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored "
+                "when url is set, and it does not satisfy the employer_id-or-url requirement.",
+            ),
+            _str(
+                "url",
+                "Any glassdoor.com employer URL (1-500 characters). Pass back salaries_url from "
+                "company() to skip the resolve fetch. A non-glassdoor.com host is rejected.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-based. Ten job titles per page; page_count on the response is how many "
+                "pages exist.",
+            ),
+        ),
+        one_of=(("employer_id", "url"),),
+        credits=1,
+    ),
+    # ================================ Yelp ===============================
+    Endpoint(
+        key="yelp_search",
+        namespace="yelp",
+        method="search",
+        http="POST",
+        path="/api/v1/yelp/search",
+        summary=(
+            "Businesses in Yelp's ranked order: rating, review count, price band, categories, address, "
+            "contact rails, hours, photos and a review snippet; every row carries both business_id and "
+            "alias. Yelp fixes the page size at 10. Provide term and location, or url. Costs 2 credits."
+        ),
+        params=(
+            _str(
+                "term",
+                "What to look for (1-200 characters): a category ('plumbers'), a dish, or a business "
+                "name. Required together with location unless url is given.",
+            ),
+            _str(
+                "location",
+                "Where to look (1-200 characters): city and region, a full address, or a postcode. "
+                "Effectively required - Yelp geolocates a location-less search off the proxy exit, so "
+                "the same request answers about a different metro run to run.",
+            ),
+            _int("page", "Results page, 1-based. Yelp fixes the page size at 10."),
+            _lit(
+                "sort",
+                ("recommended", "rating", "review_count"),
+                "Result ordering (upstream default 'recommended'). Closed enum: Yelp IGNORES an "
+                "unrecognised sortby and serves default ranking under a 200, billing a premium scrape "
+                "for a sort that never ran.",
+            ),
+            _ilit_list(
+                "price",
+                (1, 2, 3, 4),
+                "Price bands to include, 1 ($) to 4 ($$$$); 1-4 values, combined freely - [1, 2] "
+                "means $ or $$.",
+            ),
+            _bool("open_now", "Only businesses open at the moment of the request."),
+            _str_list(
+                "attributes",
+                "Raw Yelp filter aliases, max 20, each 1-100 characters ('RestaurantsDelivery', "
+                "'GoodForKids', 'WheelchairAccessible'). A deliberate PASSTHROUGH, not an enum - "
+                "Yelp's vocabulary runs to ~117 values per vertical and an alias it does not know "
+                "is ignored upstream, returning unfiltered results.",
+            ),
+            _str(
+                "url",
+                "A full yelp.com/search URL (1-1000 characters) as an alternative to term + location; "
+                "the query, offset and sort are read out of it and the URL is rebuilt.",
+            ),
+        ),
+        one_of=(("term", "url"), ("location", "url")),
+        credits=2,
+    ),
+    Endpoint(
+        key="yelp_business",
+        namespace="yelp",
+        method="business",
+        http="POST",
+        path="/api/v1/yelp/business",
+        summary=(
+            "One business in full: rating and per-star histogram, review count, price band, categories, "
+            "address and coordinates, phone, website and menu links, hours and holidays, amenities, "
+            "photos and videos, popular items, health inspections, Q&A, licences and claim status - "
+            "plus the first page of reviews at no extra cost. Provide business_id or url. "
+            "Costs 2 credits."
+        ),
+        params=(
+            _str(
+                "business_id",
+                "A Yelp business alias ('desnudo-coffee-austin-2'), its opaque encid, or any "
+                "yelp.com/biz URL carrying one (1-500 characters). Search rows return both id forms.",
+            ),
+            _str(
+                "url",
+                "A full yelp.com/biz URL (1-1000 characters) as an alternative to business_id.",
+            ),
+        ),
+        one_of=(("business_id", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="yelp_reviews",
+        namespace="yelp",
+        method="reviews",
+        http="POST",
+        path="/api/v1/yelp/reviews",
+        summary=(
+            "A page of reviews: rating, full text, language, author profile and expertise counts, "
+            "attached photos, reaction counts and owner response. 10 per page. PAGE 1 IS REDUNDANT - it "
+            "re-fetches the document business() already returned - so start at page 2. Provide "
+            "business_id or url. Costs 2 credits."
+        ),
+        params=(
+            _str(
+                "business_id",
+                "A Yelp business alias ('desnudo-coffee-austin-2'), its opaque encid, or any "
+                "yelp.com/biz URL carrying one (1-500 characters).",
+            ),
+            _str(
+                "url",
+                "A full yelp.com/biz URL (1-1000 characters) as an alternative to business_id.",
+            ),
+            _int(
+                "page",
+                "Reviews page, 1-based, 10 per page. Page 1 duplicates the reviews business() already "
+                "returned and costs another 2 credits - start at 2. A page past the last review is a "
+                "404, not an empty result.",
+            ),
+            _lit(
+                "sort",
+                ("relevance", "newest", "oldest", "rating_high", "rating_low", "elites"),
+                "Review ordering (upstream default 'relevance'). Closed enum: Yelp IGNORES an "
+                "unrecognised value and serves default ranking under a billed 200.",
+            ),
+            _ilit(
+                "rating",
+                (1, 2, 3, 4, 5),
+                "Only reviews at this star rating, 1-5. Changes filtered_review_count on the "
+                "response, not review_count.",
+            ),
+        ),
+        one_of=(("business_id", "url"),),
+        credits=2,
+    ),
+    # ========================== Apple App Store ==========================
+    Endpoint(
+        key="app_store_search",
+        namespace="app_store",
+        method="search",
+        http="POST",
+        path="/api/v1/appstore/search",
+        summary=(
+            "Search the App Store and get up to 200 fully-shaped app rows - the same 43-field row as "
+            "app() - so a search doubles as a bulk metadata fetch and as a publisher lookup. NO "
+            "PAGINATION: raise limit, there is no second page."
+        ),
+        params=(
+            _req(
+                "term",
+                "What to search for (1-500 characters). Apple matches an app name, a keyword OR a "
+                "publisher name, so searching a developer returns their catalogue.",
+            ),
+            _int(
+                "limit",
+                "Apps to return, 1-200 (default 25). The ONLY lever on result volume: the search API "
+                "has no pagination and every offset spelling is silently ignored.",
+            ),
+            _str(
+                "country",
+                "Two-letter ISO storefront code (default 'us'); decides price, currency, localised "
+                "title and whether the app is sold there at all. Anything that is not exactly two "
+                "letters is rejected with a free 400.",
+            ),
+            _lit(
+                "entity",
+                ("software", "ipad_software", "mac_software"),
+                "Which catalogue to search: iPhone/iPad apps ('software', the default), iPad apps, or "
+                "Mac App Store apps. These are separate stores, not a filter - Mac rows carry no "
+                "iPad/Apple TV screenshots, advisories, features, supported devices or Game Center "
+                "flag, returning them empty rather than absent.",
+            ),
+            _str(
+                "lang",
+                "Listing text language as a five-letter code ('en_us', 'ja_jp'); any other shape is "
+                "rejected. Independent of country: the storefront sets the price, this sets the words.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="app_store_app",
+        namespace="app_store",
+        method="app",
+        http="POST",
+        path="/api/v1/appstore/app",
+        summary=(
+            "Full App Store listing: title, description, developer and seller identity, price and "
+            "currency, all-time and current-version ratings, version and release notes, genres, content "
+            "rating and advisories, icons at three sizes, screenshots, download size, minimum OS, "
+            "languages, supported devices and the Game Center and VPP flags."
+        ),
+        params=(
+            _req(
+                "app_id",
+                "App Store id - the digits after 'id' in an apps.apple.com URL - or the app's bundle id "
+                "('notion.id', 'com.burbn.instagram'); both resolve to the identical payload. 1-255 "
+                "characters matching ^[A-Za-z0-9][A-Za-z0-9._-]*$, so a pasted apps.apple.com URL is "
+                "rejected with a free 400. An id Apple cannot resolve is a billed 404.",
+            ),
+            _str(
+                "country",
+                "Two-letter ISO storefront code (default 'us'); decides price, currency, localised "
+                "title and whether the app is sold there at all. Anything that is not exactly two "
+                "letters is rejected with a free 400.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="app_store_reviews",
+        namespace="app_store",
+        method="reviews",
+        http="POST",
+        path="/api/v1/appstore/reviews",
+        summary=(
+            "A page of App Store reviews: star rating, title, full text, author and the APP VERSION the "
+            "review was written against. 50 per page, hard-stopped at page 10 - 500 reviews per "
+            "storefront is Apple's anonymous ceiling. This endpoint cannot 404: an unknown id and a "
+            "real app with no reviews return the same empty feed."
+        ),
+        params=(
+            _req(
+                "app_id",
+                "App Store id, NUMERIC ONLY - unlike app(), the reviews feed has no bundle-id form.",
+            ),
+            _str(
+                "country",
+                "Two-letter ISO storefront code (default 'us'). Anything that is not exactly two "
+                "letters is rejected with a free 400. Ask a different country to reach past the "
+                "500-review ceiling.",
+            ),
+            _int(
+                "page",
+                "Reviews page, 1-10, 50 reviews each (default 1). Apple hard-stops at page 10.",
+            ),
+            _lit(
+                "sort",
+                ("most_recent", "most_helpful"),
+                "Review ordering (default 'most_recent'). The choice decides whether the vote fields "
+                "mean anything: under most_recent almost every review is too new to have been voted on "
+                "and returns zeroes, while most_helpful returns them densely populated.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ============================ Google Play ============================
+    Endpoint(
+        key="google_play_search",
+        namespace="google_play",
+        method="search",
+        http="POST",
+        path="/api/v1/googleplay/search",
+        summary=(
+            "Ranked Google Play apps: package name, title, developer, rating, install count, price and "
+            "IAP range, content rating, icon and screenshots. A branded query returns the hero card as "
+            "result 1 in the same row shape, plus Play's related-query rail. NO PAGINATION - one shelf "
+            "of about 30 apps. Costs 2 credits."
+        ),
+        params=(
+            _req(
+                "query",
+                "What to search the store for (1-200 characters): an app name, a publisher, or a "
+                "category phrase. Apps only - games are folded into the apps vertical, but books and "
+                "films use a different card shape and are not covered.",
+            ),
+            _str(
+                "hl",
+                "UI language, 2-20 characters (default 'en'). Changes the STOREFRONT, not only the "
+                "strings: at hl=pt-BR the title, description, install formatting and content rating all "
+                "move with it. Play silently falls back to English on a value it does not serve.",
+            ),
+            _str(
+                "gl",
+                "Country code, 2-10 characters (default 'us'), deciding which storefront's price and "
+                "availability are returned. Play silently falls back to the US storefront on a country "
+                "it does not serve.",
+            ),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="google_play_app",
+        namespace="google_play",
+        method="app",
+        http="POST",
+        path="/api/v1/googleplay/app",
+        summary=(
+            "Full Google Play store listing: installs including the REAL count Play publishes but never "
+            "renders, rating and star histogram, description, developer identity and legal contact, "
+            "price and IAPs, categories and gameplay tags, screenshots and trailer, version and Android "
+            "requirement, release and update dates, changelog, the full permission tree, the Data "
+            "safety table, the 20 server-rendered reviews and the similar-apps and more-by-developer "
+            "rails. Costs 2 credits."
+        ),
+        params=(
+            _req(
+                "app_id",
+                "Android package name ('com.spotify.music') or any play.google.com URL carrying one in "
+                "its id param (1-500 characters).",
+            ),
+            _str(
+                "hl",
+                "UI language, 2-20 characters (default 'en'). Changes the STOREFRONT, not only the "
+                "strings: title, description, install formatting and content rating all move with it. "
+                "Play silently falls back to English on a value it does not serve.",
+            ),
+            _str(
+                "gl",
+                "Country code, 2-10 characters (default 'us'), deciding which storefront's price and "
+                "availability are returned. Play silently falls back to the US storefront on a country "
+                "it does not serve.",
+            ),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="google_play_reviews",
+        namespace="google_play",
+        method="reviews",
+        http="POST",
+        path="/api/v1/googleplay/reviews",
+        summary=(
+            "A page of Google Play reviews: star score, full text, author, thumbs-up count, developer "
+            "reply and the APP VERSION the reviewer was running. Paged by cursor, up to 200 per call. "
+            "app() already returns the 20 reviews Play server-renders; use this to page past them or "
+            "sort differently. Costs 2 credits."
+        ),
+        params=(
+            _req(
+                "app_id",
+                "Android package name ('com.spotify.music') or any play.google.com URL carrying one in "
+                "its id param (1-500 characters).",
+            ),
+            _lit(
+                "sort",
+                ("relevance", "newest", "rating"),
+                "Review ordering (default 'newest'). Closed enum. The cursor encodes the sort, so keep "
+                "this identical when paging.",
+            ),
+            _int(
+                "count",
+                "Reviews to return, 1-200 (default 50); 200 is our cap, not Play's. Play honours more, "
+                "but a single page that large is megabytes for one credit - page with cursor instead.",
+            ),
+            _str(
+                "cursor",
+                "Continuation token from a prior response's next_cursor (1-4000 characters). Opaque and "
+                "SINGLE-USE, and it encodes the sort as well as the position - send it back with the "
+                "SAME sort it came from. A cursor past the last review is a 404, not an empty page.",
+            ),
+            _str(
+                "hl",
+                "UI language, 2-20 characters (default 'en'). Changes the STOREFRONT, not only the "
+                "strings. Play silently falls back to English on a value it does not serve.",
+            ),
+            _str(
+                "gl",
+                "Country code, 2-10 characters (default 'us'), deciding which storefront's price and "
+                "availability are returned. Play silently falls back to the US storefront on a country "
+                "it does not serve.",
+            ),
+        ),
+        credits=2,
+    ),
+    # ============================= SEC EDGAR =============================
+    Endpoint(
+        key="sec_lookup",
+        namespace="sec",
+        method="lookup",
+        http="POST",
+        path="/api/v1/sec/lookup",
+        summary=(
+            "START HERE. Resolve a company name or ticker (AAPL) to the CIK (0000320193) every "
+            "other SEC EDGAR endpoint is keyed by. Up to 100 rows, tiered by match quality."
+        ),
+        params=(
+            _req(
+                "query",
+                "Ticker ('AAPL', 'BRK.B'), company name, or a fragment of one (1-200 characters); "
+                "each row carries its match tier as 'match'.",
+            ),
+            _int("limit", "Rows to return, 1-100. Defaults to 10. Sizes the response; it is not a page param."),
+            _lit(
+                "exchange",
+                ("NASDAQ", "NYSE", "OTC", "CBOE"),
+                "Restrict to one listing venue; matched case-insensitively, so 'Nasdaq' also "
+                "works. Filers the SEC lists with no exchange at all are excluded by any value.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sec_company",
+        namespace="sec",
+        method="company",
+        http="POST",
+        path="/api/v1/sec/company",
+        summary=(
+            "SEC filer profile: legal and former names, SIC industry, filer category, EIN, LEI, "
+            "state of incorporation, fiscal year end, addresses, every ticker with its exchange, "
+            "and a preview of its 10 most recent filings. Provide cik or ticker."
+        ),
+        params=(
+            _str(
+                "cik",
+                "Filer CIK in any spelling (1-20 characters): 320193, 0000320193 or CIK0000320193. "
+                "A ticker is accepted here too.",
+            ),
+            _str(
+                "ticker",
+                "Ticker symbol (1-20 characters), dotted or dashed (BRK.B / BRK-B). Wins over cik "
+                "when both are given.",
+            ),
+        ),
+        one_of=(("cik", "ticker"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="sec_filings",
+        namespace="sec",
+        method="filings",
+        http="POST",
+        path="/api/v1/sec/filings",
+        summary=(
+            "A page of one filer's filings: accession number, form and root form, filing and "
+            "period dates, 8-K item codes, direct links to the primary document, filing index and "
+            "attachment directory. Up to 500 per page. Provide cik or ticker."
+        ),
+        params=(
+            _str("cik", "Filer CIK, zero-padded or bare (1-20 characters). A ticker is accepted here too."),
+            _str("ticker", "Ticker symbol (1-20 characters), as an alternative to cik."),
+            _str_or_list(
+                "form",
+                "Form types to keep: '10-K', ['10-K', '10-Q'] or the comma-joined '10-K,8-K'; "
+                "each value 1-50 characters, at most 25 values. Matched against the form AND its "
+                "root form, so 10-K also returns 10-K/A amendments; ask for '10-K/A' to get only "
+                "amendments.",
+            ),
+            _str("date_from", "Earliest filing date, inclusive (YYYY-MM-DD)."),
+            _str("date_to", "Latest filing date, inclusive (YYYY-MM-DD)."),
+            _int("page", "Results page, 1-based; page size is whatever limit is set to. No upper bound."),
+            _int("limit", "Filings per page, 1-500. Defaults to 50."),
+            _bool(
+                "include_history",
+                "Also fetch the archived filing history beyond EDGAR's 'recent' block, which is "
+                "not a fixed window (a decade for a quiet filer, about a year for a prolific one). "
+                "Off by default; at most 10 archived shards are fetched, history_truncated says "
+                "when a filer had more, and it is still 1 credit.",
+            ),
+        ),
+        one_of=(("cik", "ticker"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="sec_concept",
+        namespace="sec",
+        method="concept",
+        http="POST",
+        path="/api/v1/sec/concept",
+        summary=(
+            "Every value a filer reported for one XBRL concept, newest period first, with the form "
+            "and filing each number came from. Restatements are kept, not collapsed. Up to 2000 "
+            "rows. Provide cik or ticker."
+        ),
+        params=(
+            _req(
+                "concept",
+                "XBRL concept tag, CASE-SENSITIVE (1-120 characters, ^[A-Za-z][A-Za-z0-9]*$): "
+                "'NetIncomeLoss' matches, 'netincomeloss' is a 404 upstream. Use facts() to list "
+                "what a filer actually reports.",
+            ),
+            _str("cik", "Filer CIK, zero-padded or bare (1-20 characters). A ticker is accepted here too."),
+            _str("ticker", "Ticker symbol (1-20 characters), as an alternative to cik."),
+            _str(
+                "taxonomy",
+                "Reporting taxonomy (1-40 characters, ^[A-Za-z][A-Za-z0-9-]*$): us-gaap, dei, "
+                "ifrs-full or srt. Defaults to 'us-gaap'.",
+            ),
+            _str("unit", "Unit of measure to keep (1-40 characters), e.g. 'USD' vs 'USD/shares'."),
+            _str(
+                "form",
+                "Form to keep (1-50 characters). EXACT match here, unlike filings(), so '10-K' "
+                "excludes 10-K/A.",
+            ),
+            _int("limit", "Rows to return, 1-2000. Defaults to 250. Sizes the response; it is not a page param."),
+        ),
+        one_of=(("cik", "ticker"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="sec_facts",
+        namespace="sec",
+        method="facts",
+        http="POST",
+        path="/api/v1/sec/facts",
+        summary=(
+            "The index of every XBRL concept a filer reports - tag, label, description, units and "
+            "most recent value - across us-gaap, dei and any other taxonomy it uses. This is how "
+            "you find what to ask concept() for. Up to 2000 rows. Provide cik or ticker."
+        ),
+        params=(
+            _str("cik", "Filer CIK, zero-padded or bare (1-20 characters). A ticker is accepted here too."),
+            _str("ticker", "Ticker symbol (1-20 characters), as an alternative to cik."),
+            _str("taxonomy", "Restrict to one taxonomy (1-40 characters), e.g. 'us-gaap' or 'dei'."),
+            _str(
+                "query",
+                "Case-insensitive substring matched against the tag name and label (1-200 characters).",
+            ),
+            _int("limit", "Rows to return, 1-2000. Defaults to 250. Sizes the response; it is not a page param."),
+        ),
+        one_of=(("cik", "ticker"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="sec_search",
+        namespace="sec",
+        method="search",
+        http="POST",
+        path="/api/v1/sec/search",
+        summary=(
+            "EDGAR full-text search, coverage starting 2001: each hit is the matching DOCUMENT "
+            "with its URL, form, filing date and filer identity, plus facets by company, form, "
+            "industry and state. 100 documents per page, last page is 100."
+        ),
+        params=(
+            _str(
+                "query",
+                "Full-text query over filing documents (1-500 characters); a quoted phrase is "
+                "matched exactly, bare words as a bag of terms. Optional - a cik, ticker, form or "
+                "date filter on its own is a valid search.",
+            ),
+            _str_or_list(
+                "cik",
+                "Restrict to one or more filers by CIK: a single value, a list, or a comma-joined "
+                "string; each 1-20 characters, at most 25 values. Tickers are accepted here too.",
+            ),
+            _str_or_list(
+                "ticker",
+                "Restrict to one or more filers by ticker symbol: a single value, a list, or a "
+                "comma-joined string; each 1-20 characters, at most 25 values.",
+            ),
+            _str_or_list(
+                "form",
+                "Form types to keep: '8-K', ['10-K', '10-Q'] or the comma-joined '10-K,10-Q'; "
+                "each 1-50 characters, at most 25 values.",
+            ),
+            _str("date_from", "Earliest filing date, inclusive (YYYY-MM-DD). Full-text coverage starts in 2001."),
+            _str("date_to", "Latest filing date, inclusive (YYYY-MM-DD)."),
+            _str_or_list(
+                "location",
+                "Filer business-address locations as EDGAR's own 2-character codes (CA, NY, and "
+                "its alphanumeric codes for foreign jurisdictions): a single value, a list, or a "
+                "comma-joined string; at most 25 values.",
+            ),
+            _lit(
+                "sort",
+                ("relevance", "newest", "oldest"),
+                "Result ordering. Defaults to the index's own relevance ranking.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-based, 1-100, 100 documents per page. The SEC's index refuses a "
+                "result window past 10,000, so 100 is the last page for any query.",
+            ),
+        ),
+        credits=1,
+    ),
+    # =============================== Redfin ==============================
+    Endpoint(
+        key="redfin_search",
+        namespace="redfin",
+        method="search",
+        http="POST",
+        path="/api/v1/redfin/search",
+        summary=(
+            "Redfin listings: price, price per sqft, beds, baths, living area, lot size, year "
+            "built, coordinates, listing remarks and full photo galleries, for sale, sold or for "
+            "rent. Up to 350 per page. Provide location, or region_id together with region_type."
+        ),
+        params=(
+            _str(
+                "location",
+                "A redfin.com region URL (/city/, /neighborhood/, /county/, /zipcode/) or a bare "
+                "5-digit ZIP (1-500 characters). CITY NAMES ARE NOT ACCEPTED - Redfin's own name "
+                "lookup is blocked to us; use region_id + region_type instead.",
+            ),
+            _int(
+                "region_id",
+                "Redfin internal region id (>= 1), used together with region_type. NOT a ZIP code "
+                "- the two are different number spaces and a ZIP here resolves to another city "
+                "rather than failing.",
+            ),
+            _ilit(
+                "region_type",
+                (1, 2, 5, 6),
+                "Region kind that region_id belongs to: 1 neighborhood, 2 ZIP, 5 county, 6 city. "
+                "Must be sent together with region_id or both are ignored in favour of location.",
+            ),
+            _lit(
+                "listing_status",
+                ("for_sale", "sold", "for_rent"),
+                "Market to search. Defaults to 'for_sale'.",
+            ),
+            _int(
+                "sold_within_days",
+                "Sold within the last N days (>= 1). REJECTED unless listing_status='sold', where "
+                "it defaults to 90.",
+            ),
+            _int("page", "Results page, 1-based; page size is whatever limit is set to. No upper bound."),
+            _int("limit", "Listings per page, 1-350. Defaults to 100."),
+            _lit(
+                "sort",
+                (
+                    "recommended",
+                    "price_low",
+                    "price_high",
+                    "newest",
+                    "oldest",
+                    "sqft_low",
+                    "sqft_high",
+                    "price_per_sqft_low",
+                    "price_per_sqft_high",
+                ),
+                "Result sort order. Defaults to 'recommended', Redfin's own ranking.",
+            ),
+            _float(
+                "min_price",
+                "Minimum price, inclusive (>= 0). Monthly rent when listing_status='for_rent'.",
+            ),
+            _float(
+                "max_price",
+                "Maximum price, inclusive (>= 0). Monthly rent when listing_status='for_rent'.",
+            ),
+            _int("beds_min", "Minimum bedrooms (whole number >= 0); fractional values are rejected."),
+            _int("beds_max", "Maximum bedrooms (whole number >= 0); fractional values are rejected."),
+            _int(
+                "baths_min",
+                "Minimum bathrooms (whole number >= 0). WHOLE BATHS ONLY - 1.5 is rejected rather "
+                "than silently truncated to 1. There is no baths_max.",
+            ),
+            _int("sqft_min", "Minimum living area in square feet (whole number >= 0)."),
+            _int("sqft_max", "Maximum living area in square feet (whole number >= 0)."),
+            _int("lot_size_min", "Minimum lot size in square feet (whole number >= 0). There is no lot_size_max."),
+            _int("year_built_min", "Earliest year built (whole number >= 0)."),
+            _int("year_built_max", "Latest year built (whole number >= 0)."),
+            _float(
+                "max_hoa",
+                "Maximum monthly HOA fee in dollars (>= 0).",
+            ),
+            _lit(
+                "property_type",
+                ("house", "condo", "townhouse", "multi_family", "land", "other", "co_op"),
+                "Restrict to one property type.",
+            ),
+            _bool("has_pool", "Only listings with a pool."),
+            _int(
+                "max_days_on_market",
+                "Listed at most N days ago (whole number >= 0). Cannot be combined with "
+                "min_days_on_market - Redfin expresses both bounds through one param.",
+            ),
+            _int(
+                "min_days_on_market",
+                "Listed at least N days ago (whole number >= 0). Cannot be combined with "
+                "max_days_on_market.",
+            ),
+        ),
+        one_of=(("location", "region_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="redfin_property",
+        namespace="redfin",
+        method="property",
+        http="POST",
+        path="/api/v1/redfin/property",
+        summary=(
+            "One Redfin listing in full: price, Redfin Estimate and rental estimate, complete MLS "
+            "fact sheet, price and tax history, listing agents, open houses, schools, climate "
+            "risk, walkability, sun exposure, monthly weather, permits, zoning, comparable sales "
+            "and photos."
+        ),
+        params=(
+            _req(
+                "property_id",
+                "Redfin property id, or any redfin.com listing URL carrying one (1-500 characters).",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="redfin_market",
+        namespace="redfin",
+        method="market",
+        http="POST",
+        path="/api/v1/redfin/market",
+        summary=(
+            "Redfin housing-market stats for a region: median list and sale price, price per sqft, "
+            "sale-to-list ratio, average offers and days on market, YoY movement, 0-100 compete "
+            "score, live inventory by property type and by bedroom count, and Redfin agent "
+            "presence. Provide location, or region_id together with region_type."
+        ),
+        params=(
+            _str(
+                "location",
+                "A redfin.com region URL (/city/, /neighborhood/, /county/, /zipcode/) or a bare "
+                "5-digit ZIP (1-500 characters). City names are not accepted.",
+            ),
+            _int("region_id", "Redfin internal region id (>= 1), used together with region_type. Not a ZIP code."),
+            _ilit(
+                "region_type",
+                (1, 2, 5, 6),
+                "Region kind that region_id belongs to: 1 neighborhood, 2 ZIP, 5 county, 6 city. "
+                "Must be sent together with region_id or both are ignored in favour of location.",
+            ),
+        ),
+        one_of=(("location", "region_id"),),
+        credits=1,
+    ),
+    # ========================== Companies House ==========================
+    Endpoint(
+        key="companies_house_search",
+        namespace="companies_house",
+        method="search",
+        http="POST",
+        path="/api/v1/companieshouse/search",
+        summary=(
+            "START HERE. Search the UK register by name and get the company_number every other "
+            "Companies House endpoint is keyed by, plus status, incorporation or dissolution "
+            "date, registered office and matched former names. 20 per page, last page is 50."
+        ),
+        params=(
+            _req(
+                "query",
+                "Company name or fragment (1-200 characters, non-blank). Matches CURRENT AND "
+                "FORMER names.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-based, 1-50, 20 results per page. Defaults to 1. The register "
+                "serves only a 1000-result window per term whatever hit count it prints, and "
+                "answers page 51 with HTTP 416.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="companies_house_company",
+        namespace="companies_house",
+        method="company",
+        http="POST",
+        path="/api/v1/companieshouse/company",
+        summary=(
+            "Full UK register entry: status, type, incorporation and dissolution dates, registered "
+            "office, SIC codes, previous names, accounts and confirmation-statement due dates with "
+            "overdue flags, and whether it has charges, insolvency history, officers or UK "
+            "establishments."
+        ),
+        params=(
+            _req(
+                "company_number",
+                "UK company number (1-20 characters), zero-padded and upper-cased for you, so "
+                "'445790' and 'sc090312' both work. Registry prefixes supported: SC, NI, OC, SO, "
+                "NC, FC, BR, CE.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="companies_house_officers",
+        namespace="companies_house",
+        method="officers",
+        http="POST",
+        path="/api/v1/companieshouse/officers",
+        summary=(
+            "UK company officers, current and resigned, 35 per page: name, role, appointment and "
+            "resignation dates, correspondence address, nationality, country of residence, "
+            "month-and-year date of birth and identity-verification status."
+        ),
+        params=(
+            _req(
+                "company_number",
+                "UK company number (1-20 characters), zero-padded and upper-cased for you.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-based, 35 per page. Defaults to 1. No upper bound: past the last "
+                "page the register answers an ordinary 200 with an empty list, identical to a "
+                "company with no officers.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="companies_house_filing_history",
+        namespace="companies_house",
+        method="filing_history",
+        http="POST",
+        path="/api/v1/companieshouse/filing-history",
+        summary=(
+            "UK filings, most recent first: date, filing type code (AA, CS01, SH03), description, "
+            "register annotations and child documents, and a link to the filed PDF with its page "
+            "count. A filing the register has not finished processing carries a processing_note "
+            "instead of a document."
+        ),
+        params=(
+            _req(
+                "company_number",
+                "UK company number (1-20 characters), zero-padded and upper-cased for you.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-based. Defaults to 1. No upper bound: past the last page the "
+                "register answers an ordinary 200 with an empty list.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ================================= G2 ================================
+    Endpoint(
+        key="g2_search",
+        namespace="g2",
+        method="search",
+        http="POST",
+        path="/api/v1/g2/search",
+        summary=(
+            "Search G2, the B2B software review site, for products: star rating, review count, "
+            "vendor, categories, seller description and logo, with product_id and slug on every "
+            "row. Up to 100 results per page (server default 20) and page-paginated; "
+            "total_results is G2's Products-tab headline and caps at 10000, while total_by_type "
+            "splits the query across products, sellers, categories and discussions. Provide "
+            "query or url."
+        ),
+        params=(
+            _str("query", "Search term (1-200 characters). Provide this or url."),
+            _int(
+                "page",
+                "1-based page number; page size follows limit (server default 20). G2 keeps "
+                "paginating well past its own widget's page links.",
+            ),
+            _int(
+                "limit",
+                "Results per page (1-100; server default 20). The 100 ceiling is ours, to keep a "
+                "single request inside the 60s deadline; G2 itself paginates at any size.",
+            ),
+            _lit(
+                "sort",
+                ("relevance", "popular", "alphabetical", "rating"),
+                "Result sort order (server default 'relevance'). Closed enum: G2 silently accepts "
+                "an unknown sort and answers 200 with an unstated ordering.",
+            ),
+            _ilit(
+                "rating",
+                (1, 2, 3, 4, 5),
+                "Only products at or above this star rating (1-5, sent as an integer). Omit for "
+                "no rating floor.",
+            ),
+            _str(
+                "url",
+                "Full g2.com/search URL, as an alternative to query (1-1000 characters; the host "
+                "is checked by the transport).",
+            ),
+        ),
+        one_of=(("query", "url"),),
+        credits=5,
+    ),
+    Endpoint(
+        key="g2_product",
+        namespace="g2",
+        method="product",
+        http="POST",
+        path="/api/v1/g2/product",
+        summary=(
+            "Full G2 product profile: rating with per-star histogram, review count, vendor, "
+            "description and seller website, pricing editions with parsed amounts, feature "
+            "groups, categories and breadcrumbs, supported languages, integrations, "
+            "alternatives, head-to-head comparisons, media, community discussions and G2's "
+            "AI-derived pros and cons. Carries NO review text at all -- G2 loads review bodies in "
+            "a separate frame, so call reviews() for those. Provide product_id or url."
+        ),
+        params=(
+            _str(
+                "product_id",
+                "G2 product slug ('notion') or the numeric G2 id ('82623') as a string "
+                "(1-200 characters); both resolve on the same upstream path.",
+            ),
+            _str(
+                "url",
+                "Full g2.com product URL, as an alternative to product_id (1-1000 characters).",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=5,
+    ),
+    Endpoint(
+        key="g2_reviews",
+        namespace="g2",
+        method="reviews",
+        http="POST",
+        path="/api/v1/g2/reviews",
+        summary=(
+            "A page of G2 reviews: rating, title, likes and dislikes, problems solved, reviewer "
+            "job title, industry and company size, validated and incentivized flags -- plus what "
+            "the profile page has no form of: exact per-star counts, pros and cons with per-theme "
+            "counts, and company-size, role, industry, region and category facets with counts. "
+            "Fixed at 10 reviews per page and paginates well past the 10 pages G2's own widget "
+            "links to. Provide product_id or url."
+        ),
+        params=(
+            _str(
+                "product_id",
+                "G2 product slug or numeric G2 id as a string (1-200 characters).",
+            ),
+            _str(
+                "url",
+                "Full g2.com reviews URL, as an alternative to product_id (1-1000 characters).",
+            ),
+            _int("page", "1-based page number; fixed at 10 reviews per page."),
+            _lit(
+                "sort",
+                ("relevance", "newest", "most_helpful", "rating_high", "rating_low"),
+                "Review sort order (server default 'relevance'). Closed enum: an unknown sort is "
+                "silently accepted upstream and never runs.",
+            ),
+            _ilit(
+                "rating",
+                (1, 2, 3, 4, 5),
+                "Only reviews in this star bucket (1-5, sent as an integer). Buckets are half- "
+                "star-inclusive: 1 returns 0, 0.5 and 1-star reviews.",
+            ),
+            _lit(
+                "company_size",
+                ("small_business", "mid_market", "enterprise"),
+                "Reviewer company size: small_business is 50 employees or fewer, mid_market "
+                "51-1000, enterprise over 1000. Closed enum -- an unknown value matches nothing "
+                "and returns a billed 'Reviews (0)'.",
+            ),
+            _lit(
+                "role",
+                (
+                    "user",
+                    "administrator",
+                    "executive_sponsor",
+                    "internal_consultant",
+                    "consultant",
+                    "agency",
+                    "industry_analyst",
+                ),
+                "Reviewer role. Closed enum -- an unknown value matches nothing rather than "
+                "erroring.",
+            ),
+            _lit(
+                "region",
+                (
+                    "north_america",
+                    "europe",
+                    "asia",
+                    "latin_america",
+                    "anz",
+                    "middle_east",
+                    "africa",
+                ),
+                "Reviewer region. Closed enum -- an unknown value matches nothing rather than "
+                "erroring.",
+            ),
+            _str(
+                "query",
+                "Full-text search within this product's reviews (1-200 characters); narrows the "
+                "review list AND every facet count.",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=5,
+    ),
+    # ============================== Capterra =============================
+    Endpoint(
+        key="capterra_search",
+        namespace="capterra",
+        method="search",
+        http="POST",
+        path="/api/v1/capterra/search",
+        summary=(
+            "Search Capterra, the B2B software review site: 20 ranked products with name, vendor "
+            "description, rating, review count, logo and paid-placement flag, each row carrying "
+            "product_id and slug. The result set is fixed at 20 and does NOT paginate -- Capterra "
+            "serves identical rows for page 2, so there is deliberately no page parameter. "
+            "Provide query or url."
+        ),
+        params=(
+            _str(
+                "query",
+                "Search term (1-200 characters). Required in practice: a term-less Capterra "
+                "search serves a fixed popular-products list unrelated to the caller.",
+            ),
+            _str(
+                "url",
+                "Full capterra.com search URL, as an alternative to query (1-1000 characters; "
+                "the transport also accepts capterra.co.uk and capterra.com.br hosts).",
+            ),
+        ),
+        one_of=(("query", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="capterra_product",
+        namespace="capterra",
+        method="product",
+        http="POST",
+        path="/api/v1/capterra/product",
+        summary=(
+            "Full Capterra profile: rating with per-star histogram and the four scored criteria, "
+            "likelihood to recommend, review sentiment and topics, the complete pricing table "
+            "with every plan and its features, every rated feature and integration, AI-derived "
+            "pros and cons with the quoted review, FAQs, screenshots, badges and awards, "
+            "competitor comparisons and alternatives, and the buyer profile by company size, "
+            "industry and job function -- PLUS the 25 most recent reviews at no extra cost. "
+            "vendor is always null here: Capterra does not publish it as structured data on the "
+            "product page. Provide product_id or url."
+        ),
+        params=(
+            _str(
+                "product_id",
+                "The number in a Capterra product path such as /p/186596/Notion/ (1-50 "
+                "characters). Must be a STRING -- a JSON number is rejected.",
+            ),
+            _str(
+                "slug",
+                "Product slug (1-200 characters). Cosmetic on this endpoint -- a wrong slug still "
+                "returns the right profile -- but load-bearing on reviews().",
+            ),
+            _str(
+                "url",
+                "Full Capterra product URL, as an alternative to product_id (1-1000 characters).",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="capterra_reviews",
+        namespace="capterra",
+        method="reviews",
+        http="POST",
+        path="/api/v1/capterra/reviews",
+        summary=(
+            "A page of Capterra reviews: overall score plus five per-criterion scores, title, "
+            "pros, cons, advice, usage duration, incentivized flag, alternatives considered and "
+            "what they switched from, reviewer job title, industry and company size, and the "
+            "vendor response -- plus a competitor list richer than the profile's, each "
+            "alternative with its own rating histogram and starting price. 25 reviews per page, "
+            "capped at page 100. Page 1 already rides along inside product(), so use this to page "
+            "past it. Provide product_id or url."
+        ),
+        params=(
+            _str("product_id", "Capterra product id as a string (1-50 characters)."),
+            _str(
+                "slug",
+                "Product slug (1-200 characters). LOAD-BEARING here: it is case-sensitive "
+                "upstream and a wrong one silently serves page one under a billed 200. Pass back "
+                "the slug from search() or product().",
+            ),
+            _str(
+                "url",
+                "Full Capterra reviews URL, as an alternative to product_id (1-1000 characters). "
+                "Passing back reviews_url from product() is the reliable way to page.",
+            ),
+            _int(
+                "page",
+                "1-based page number (1-100); 25 reviews per page. 100 is a hard cap whatever the "
+                "review count says -- past it Capterra answers 200 with page one.",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+    ),
+    # ====================== Google Ads Transparency ======================
+    Endpoint(
+        key="google_ads_advertisers",
+        namespace="google_ads",
+        method="advertisers",
+        http="POST",
+        path="/api/v1/googleads/advertisers",
+        summary=(
+            "Resolve a brand name or domain to the advertiser_id that search() and creative() are "
+            "keyed by. Returns two row kinds in one list: 'advertiser' rows carrying the id, "
+            "verified name, verification country and total ad count as a range, and 'domain' rows "
+            "carrying a website. A name query returns both kinds; a domain-shaped query returns "
+            "domains only. Autocomplete-backed, roughly 20 rows per arm, and it does not "
+            "paginate."
+        ),
+        params=(
+            _req("query", "Brand name or domain to resolve (1-200 characters)."),
+            _str(
+                "region",
+                "ISO 3166-1 alpha-2 country ('US', 'GB', 'DE') or a Google geo criteria id as a "
+                "string (2-12 characters). Default: no region filter.",
+            ),
+            _int(
+                "limit",
+                "Rows per arm (1-20; server default 10). Advertisers and domains are capped "
+                "separately, so a name query can return up to twice this many rows.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="google_ads_search",
+        namespace="google_ads",
+        method="search",
+        http="POST",
+        path="/api/v1/googleads/search",
+        summary=(
+            "Every ad Google Ads Transparency holds for one advertiser: the creative (archived "
+            "image, rich-media bundle, Google's renderer link, dimensions), advertiser id and "
+            "name, format, first and last seen dates and days actually run, plus total_ads_min "
+            "and total_ads_max -- Google publishes the advertiser's ad total as a range, never an "
+            "exact figure. Up to 100 ads per page (server default 40); paginate by sending "
+            "next_cursor back as cursor alongside the SAME filters. Provide domain or "
+            "advertiser_id."
+        ),
+        params=(
+            _str(
+                "domain",
+                "Advertiser website (1-253 characters): bare host, www host or full URL, reduced "
+                "to the registrable host. The only way to get `domain` back on each row.",
+            ),
+            _str(
+                "advertiser_id",
+                "Google advertiser id, e.g. 'AR16735076323512287233' (3-40 characters). The shape "
+                "is checked before any request, so a typo costs no credits. Querying by id drops "
+                "`domain` from every row.",
+            ),
+            _str(
+                "region",
+                "ISO 3166-1 alpha-2 country ('US', 'GB', 'DE') or a Google geo criteria id as a "
+                "string (2-12 characters). Scopes the deep links on every row, and the same "
+                "advertiser can share zero creatives between two countries. Default: worldwide.",
+            ),
+            _lit(
+                "format",
+                ("text", "image", "video"),
+                "Creative format. The three sets are disjoint -- an advertiser's text, image and "
+                "video ads share no creatives. Default: all formats.",
+            ),
+            _lit(
+                "platform",
+                ("play", "maps", "search", "shopping", "youtube"),
+                "Google surface the ad ran on. Default: all surfaces.",
+            ),
+            _lit(
+                "topic",
+                ("all", "political"),
+                "Ad topic (server default 'all').",
+            ),
+            _int(
+                "limit",
+                "Ads per page (1-100; server default 40). 100 is a hard upstream ceiling, not our "
+                "policy: Google answers a larger request with zero rows rather than an error.",
+            ),
+            _str(
+                "cursor",
+                "next_cursor from the previous response (1-4000 characters), 100 ads per page. "
+                "Re-send the same filters alongside it; next_cursor is null once exhausted.",
+            ),
+        ),
+        one_of=(("domain", "advertiser_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="google_ads_creative",
+        namespace="google_ads",
+        method="creative",
+        http="POST",
+        path="/api/v1/googleads/creative",
+        summary=(
+            "One creative in full, and the only endpoint carrying its history: every size "
+            "variation of the asset, the impression bucket, the per-region breakdown with first "
+            "and last shown dates and a per-surface impression split inside each region, the "
+            "format, Google's category label and the funder disclosure on political ads. "
+            "Impressions and first_shown are EEA-only (DSA-compelled) and come back null for US "
+            "creatives, and an impression bucket may carry only a lower or only an upper bound."
+        ),
+        params=(
+            _req(
+                "advertiser_id",
+                "Google advertiser id, e.g. 'AR16735076323512287233' (3-40 characters).",
+            ),
+            _req(
+                "creative_id",
+                "Creative id (3-40 characters). It must belong to the advertiser_id sent with it "
+                "-- the lookup is keyed by the pair and a mismatched pair is a 404.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ========================== Meta Ad Library ==========================
+    Endpoint(
+        key="meta_ads_search",
+        namespace="meta_ads",
+        method="search",
+        http="POST",
+        path="/api/v1/meta-ads/search",
+        summary=(
+            "Search the Meta Ad Library by keyword: 30 ads on page 1 with the full creative -- "
+            "page name, ad copy, headline, CTA, images and videos, the platforms each ran on and "
+            "its run dates -- then 10 ads per cursor page, walking has_next_page to the end of "
+            "the query. total_results caps at 50000 with total_is_capped true, because Meta only "
+            "reports '>50,000'; never present it as an exact count. Every page costs 1 credit."
+        ),
+        params=(
+            _req("query", "Keyword to search the ad library for (1-200 characters)."),
+            _str(
+                "country",
+                "Ad library country as an exactly 2-character ISO 3166-1 alpha-2 code (server "
+                "default 'US').",
+            ),
+            _lit(
+                "active_status",
+                ("all", "active", "inactive"),
+                "Whether the ad is still running (server default 'all').",
+            ),
+            _lit(
+                "ad_type",
+                ("all", "political_and_issue_ads"),
+                "Set 'political_and_issue_ads' to expose spend, reach, impressions and the "
+                "paid-for-by disclosure; commercial ads leave all four null (server default "
+                "'all').",
+            ),
+            _lit(
+                "media_type",
+                ("all", "image", "video", "meme", "image_and_meme", "none"),
+                "Creative media filter. Default: no media filter.",
+            ),
+            _lit(
+                "search_type",
+                ("keyword_unordered", "keyword_exact_phrase"),
+                "How the query is matched (server default 'keyword_unordered').",
+            ),
+            _str(
+                "cursor",
+                "next_cursor from the previous response: page 1 is 30 ads, every cursor page is "
+                "10. The cursor is a self-contained blob, so ALL other filters are ignored when "
+                "it is present.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="meta_ads_advertiser",
+        namespace="meta_ads",
+        method="advertiser",
+        http="POST",
+        path="/api/v1/meta-ads/advertiser",
+        summary=(
+            "Every ad a Facebook Page is running, by numeric page id: 30 ads on page 1 with the "
+            "same creative detail as search(), then 10 ads per cursor page, walking has_next_page "
+            "to the end of the advertiser. Every page costs 1 credit."
+        ),
+        params=(
+            _req(
+                "page_id",
+                "The advertiser's numeric Facebook Page id (3-25 digits, as a string).",
+            ),
+            _str(
+                "country",
+                "Ad library country as an exactly 2-character ISO 3166-1 alpha-2 code (server "
+                "default 'US').",
+            ),
+            _lit(
+                "active_status",
+                ("all", "active", "inactive"),
+                "Whether the ad is still running (server default 'all').",
+            ),
+            _lit(
+                "ad_type",
+                ("all", "political_and_issue_ads"),
+                "Set 'political_and_issue_ads' to expose spend, reach, impressions and the "
+                "paid-for-by disclosure; commercial ads leave all four null (server default "
+                "'all').",
+            ),
+            _lit(
+                "media_type",
+                ("all", "image", "video", "meme", "image_and_meme", "none"),
+                "Creative media filter. Default: no media filter.",
+            ),
+            _str(
+                "cursor",
+                "next_cursor from the previous response: page 1 is 30 ads, every cursor page is "
+                "10. ALL other filters are ignored when it is present.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="meta_ads_ad",
+        namespace="meta_ads",
+        method="ad",
+        http="POST",
+        path="/api/v1/meta-ads/ad",
+        summary=(
+            "One Meta ad in full by archive id: creative, advertiser, run dates, the platforms it "
+            "ran on, and the political disclosure when the ad carries one. Commercial ads leave "
+            "spend, reach and impressions null."
+        ),
+        params=(
+            _req("ad_archive_id", "Meta ad archive id (3-25 digits, as a string)."),
+        ),
+        credits=1,
+    ),
+    # =========================== Extract (core) ==========================
+    # NOT a platform and NOT a namespace: surfaced as the top-level method
+    # scavio.extract(url, format=, mode=). namespace="_core" keeps it out of
+    # NAMESPACES so the generator never emits a class for it -- the method is
+    # hand-written on the client. Cost is TIER-PRICED by `mode`
+    # (normal 1, advanced 1, ultra 2), so credits=1 is only the floor and
+    # credits_note carries the tiers.
+    Endpoint(
+        key="extract",
+        namespace="_core",
+        method="extract",
+        http="POST",
+        path="/api/v1/extract",
+        summary=(
+            "Read any URL and get the page back as raw HTML, readability Markdown or plain text: "
+            "{ url, format, mode, content, content_length }. Tier-priced by mode -- normal and "
+            "advanced cost 1 credit, ultra costs 2 -- and only a successful extraction is billed, "
+            "so a dead link, bot wall or timeout costs nothing."
+        ),
+        params=(
+            _req(
+                "url",
+                "Page to read (1-2048 characters). http(s) only; a bare host is upgraded to "
+                "https, and loopback, private, link-local and metadata hosts are rejected with a "
+                "400.",
+            ),
+            _lit(
+                "format",
+                ("html", "markdown", "text"),
+                "Output format: 'html' is the raw page, 'markdown' a readability extraction, "
+                "'text' that markdown flattened to plain text (server default 'markdown').",
+            ),
+            _lit(
+                "mode",
+                ("normal", "advanced", "ultra"),
+                "Fetch tier, and the price-bearing parameter: 'normal' plain datacenter fetch "
+                "(1 credit), 'advanced' full browser render (1 credit), 'ultra' the "
+                "hardest-target tier (2 credits). Server default 'normal'.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Tier-priced by mode: 'normal' and 'advanced' cost 1 credit, 'ultra' costs 2. Only a "
+            "successful extraction is billed - a dead link, bot wall or timeout costs nothing."
+        ),
+    ),
 )
 
 
 ENDPOINTS: Mapping[str, Endpoint] = {ep.key: ep for ep in _ENDPOINTS}
 
 # Namespaces in the order they are exposed on the client.
+#
+# `extract` is deliberately absent: it is a CORE endpoint (namespace "_core"),
+# surfaced as the top-level method client.extract(...), never a namespace. The
+# generator emits one class per entry here, so listing it would produce a
+# client.extract.extract().
 NAMESPACES: tuple[str, ...] = (
     "google",
     "amazon",
@@ -1821,6 +4975,27 @@ NAMESPACES: tuple[str, ...] = (
     "instagram",
     "linkedin",
     "tiktok_shop",
+    "threads",
+    "kuaishou",
+    "ebay",
+    "target",
+    "home_depot",
+    "zillow",
+    "booking",
+    "tripadvisor",
+    "indeed",
+    "airbnb",
+    "glassdoor",
+    "yelp",
+    "app_store",
+    "google_play",
+    "sec",
+    "redfin",
+    "companies_house",
+    "g2",
+    "capterra",
+    "google_ads",
+    "meta_ads",
 )
 
 

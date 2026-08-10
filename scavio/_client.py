@@ -1,20 +1,41 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from ._exceptions import ScavioError
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
+    _AirbnbNamespace,
     _AmazonNamespace,
+    _AppStoreNamespace,
+    _BookingNamespace,
+    _CapterraNamespace,
+    _CompaniesHouseNamespace,
+    _EbayNamespace,
+    _G2Namespace,
+    _GlassdoorNamespace,
+    _GoogleAdsNamespace,
     _GoogleNamespace,
+    _GooglePlayNamespace,
+    _HomeDepotNamespace,
+    _IndeedNamespace,
     _InstagramNamespace,
+    _KuaishouNamespace,
     _LinkedInNamespace,
+    _MetaAdsNamespace,
     _RedditNamespace,
+    _RedfinNamespace,
+    _SECNamespace,
+    _TargetNamespace,
+    _ThreadsNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
+    _TripadvisorNamespace,
     _WalmartNamespace,
     _XNamespace,
+    _YelpNamespace,
     _YouTubeNamespace,
+    _ZillowNamespace,
 )
 from ._params import build_body
 from ._ratelimit import SyncRateLimiter
@@ -26,10 +47,19 @@ from ._types import UsageResponse
 class ScavioClient:
     """Synchronous client for the Scavio Search API.
 
-    A unified API over Google, YouTube, Amazon, Walmart, Reddit, X,
-    TikTok, TikTok Shop, Instagram, and LinkedIn. Every provider is exposed as a namespace
-    (``client.google``, ``client.amazon``, ...) whose methods return the raw
-    JSON response as a ``dict``.
+    A unified API over 31 providers: search and SERP (Google), retail (Amazon,
+    Walmart, eBay, Target, Home Depot), social and video (YouTube, Reddit, X,
+    TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou), travel and
+    local (Booking.com, Tripadvisor, Airbnb, Yelp), real estate (Zillow,
+    Redfin), jobs and employers (Indeed, Glassdoor), app stores (Apple App
+    Store, Google Play), business registries (SEC EDGAR, Companies House),
+    software reviews (G2, Capterra), and ad transparency (Google Ads, Meta Ad
+    Library). Every provider is exposed as a namespace (``client.google``,
+    ``client.amazon``, ...) whose methods return the raw JSON response as a
+    ``dict``.
+
+    ``client.extract(url)`` is the one exception: reading an arbitrary URL is a
+    core capability rather than a platform, so it is a top-level method.
 
     Args:
         api_key: Your Scavio API key. Falls back to the ``SCAVIO_API_KEY``
@@ -73,6 +103,27 @@ class ScavioClient:
         self.instagram = _InstagramNamespace(self)
         self.linkedin = _LinkedInNamespace(self)
         self.tiktok_shop = _TikTokShopNamespace(self)
+        self.threads = _ThreadsNamespace(self)
+        self.kuaishou = _KuaishouNamespace(self)
+        self.ebay = _EbayNamespace(self)
+        self.target = _TargetNamespace(self)
+        self.home_depot = _HomeDepotNamespace(self)
+        self.zillow = _ZillowNamespace(self)
+        self.booking = _BookingNamespace(self)
+        self.tripadvisor = _TripadvisorNamespace(self)
+        self.indeed = _IndeedNamespace(self)
+        self.airbnb = _AirbnbNamespace(self)
+        self.glassdoor = _GlassdoorNamespace(self)
+        self.yelp = _YelpNamespace(self)
+        self.app_store = _AppStoreNamespace(self)
+        self.google_play = _GooglePlayNamespace(self)
+        self.sec = _SECNamespace(self)
+        self.redfin = _RedfinNamespace(self)
+        self.companies_house = _CompaniesHouseNamespace(self)
+        self.g2 = _G2Namespace(self)
+        self.capterra = _CapterraNamespace(self)
+        self.google_ads = _GoogleAdsNamespace(self)
+        self.meta_ads = _MetaAdsNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
@@ -115,6 +166,37 @@ class ScavioClient:
     def search(self, query: str, **extra: Any) -> dict[str, Any]:
         """Shortcut for :meth:`google.search` (Google SERP via /api/v2/google)."""
         return self.google.search(query, **extra)
+
+    def extract(
+        self,
+        url: str,
+        *,
+        format: Optional[Literal["html", "markdown", "text"]] = None,
+        mode: Optional[Literal["normal", "advanced", "ultra"]] = None,
+    ) -> dict[str, Any]:
+        """Read any URL and return it as raw HTML, readability Markdown, or plain text.
+
+        A CORE endpoint, not a platform: it is a top-level method, never a
+        namespace. Tier-priced by ``mode`` - 'normal' and 'advanced' cost 1
+        credit, 'ultra' costs 2 - and only a successful extraction is billed, so
+        a dead link, bot wall, or timeout costs nothing.
+
+        Args:
+            url: Page to read (1-2048 characters). http(s) only; a bare host is
+                upgraded to https, and loopback, private, link-local, and
+                metadata hosts are rejected with a 400.
+            format: 'html' is the raw page, 'markdown' a readability extraction,
+                'text' that markdown flattened to plain text. Server default
+                'markdown'.
+            mode: Fetch tier, and the price-bearing parameter: 'normal' plain
+                datacenter fetch (1 credit), 'advanced' full browser render
+                (1 credit), 'ultra' the hardest-target tier (2 credits). Server
+                default 'normal'.
+
+        Returns:
+            ``{"url", "format", "mode", "content", "content_length"}``.
+        """
+        return self._call("extract", {"url": url, "format": format, "mode": mode}, {})
 
     def get_usage(self) -> UsageResponse:
         """Return the account's plan, credit balance, and usage for the period."""

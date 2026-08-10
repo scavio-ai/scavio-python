@@ -1,22 +1,43 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 import httpx
 
 from ._exceptions import ScavioError
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
+    _AsyncAirbnbNamespace,
     _AsyncAmazonNamespace,
+    _AsyncAppStoreNamespace,
+    _AsyncBookingNamespace,
+    _AsyncCapterraNamespace,
+    _AsyncCompaniesHouseNamespace,
+    _AsyncEbayNamespace,
+    _AsyncG2Namespace,
+    _AsyncGlassdoorNamespace,
+    _AsyncGoogleAdsNamespace,
     _AsyncGoogleNamespace,
+    _AsyncGooglePlayNamespace,
+    _AsyncHomeDepotNamespace,
+    _AsyncIndeedNamespace,
     _AsyncInstagramNamespace,
+    _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncMetaAdsNamespace,
     _AsyncRedditNamespace,
+    _AsyncRedfinNamespace,
+    _AsyncSECNamespace,
+    _AsyncTargetNamespace,
+    _AsyncThreadsNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
+    _AsyncTripadvisorNamespace,
     _AsyncWalmartNamespace,
     _AsyncXNamespace,
+    _AsyncYelpNamespace,
     _AsyncYouTubeNamespace,
+    _AsyncZillowNamespace,
 )
 from ._params import build_body
 from ._ratelimit import AsyncRateLimiter
@@ -79,6 +100,27 @@ class AsyncScavioClient:
         self.instagram = _AsyncInstagramNamespace(self)
         self.linkedin = _AsyncLinkedInNamespace(self)
         self.tiktok_shop = _AsyncTikTokShopNamespace(self)
+        self.threads = _AsyncThreadsNamespace(self)
+        self.kuaishou = _AsyncKuaishouNamespace(self)
+        self.ebay = _AsyncEbayNamespace(self)
+        self.target = _AsyncTargetNamespace(self)
+        self.home_depot = _AsyncHomeDepotNamespace(self)
+        self.zillow = _AsyncZillowNamespace(self)
+        self.booking = _AsyncBookingNamespace(self)
+        self.tripadvisor = _AsyncTripadvisorNamespace(self)
+        self.indeed = _AsyncIndeedNamespace(self)
+        self.airbnb = _AsyncAirbnbNamespace(self)
+        self.glassdoor = _AsyncGlassdoorNamespace(self)
+        self.yelp = _AsyncYelpNamespace(self)
+        self.app_store = _AsyncAppStoreNamespace(self)
+        self.google_play = _AsyncGooglePlayNamespace(self)
+        self.sec = _AsyncSECNamespace(self)
+        self.redfin = _AsyncRedfinNamespace(self)
+        self.companies_house = _AsyncCompaniesHouseNamespace(self)
+        self.g2 = _AsyncG2Namespace(self)
+        self.capterra = _AsyncCapterraNamespace(self)
+        self.google_ads = _AsyncGoogleAdsNamespace(self)
+        self.meta_ads = _AsyncMetaAdsNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
@@ -130,6 +172,37 @@ class AsyncScavioClient:
     async def search(self, query: str, **extra: Any) -> dict[str, Any]:
         """Shortcut for :meth:`google.search` (Google SERP via /api/v2/google)."""
         return await self.google.search(query, **extra)
+
+    async def extract(
+        self,
+        url: str,
+        *,
+        format: Optional[Literal["html", "markdown", "text"]] = None,
+        mode: Optional[Literal["normal", "advanced", "ultra"]] = None,
+    ) -> dict[str, Any]:
+        """Read any URL and return it as raw HTML, readability Markdown, or plain text.
+
+        A CORE endpoint, not a platform: it is a top-level method, never a
+        namespace. Tier-priced by ``mode`` - 'normal' and 'advanced' cost 1
+        credit, 'ultra' costs 2 - and only a successful extraction is billed, so
+        a dead link, bot wall, or timeout costs nothing.
+
+        Args:
+            url: Page to read (1-2048 characters). http(s) only; a bare host is
+                upgraded to https, and loopback, private, link-local, and
+                metadata hosts are rejected with a 400.
+            format: 'html' is the raw page, 'markdown' a readability extraction,
+                'text' that markdown flattened to plain text. Server default
+                'markdown'.
+            mode: Fetch tier, and the price-bearing parameter: 'normal' plain
+                datacenter fetch (1 credit), 'advanced' full browser render
+                (1 credit), 'ultra' the hardest-target tier (2 credits). Server
+                default 'normal'.
+
+        Returns:
+            ``{"url", "format", "mode", "content", "content_length"}``.
+        """
+        return await self._call("extract", {"url": url, "format": format, "mode": mode}, {})
 
     async def get_usage(self) -> UsageResponse:
         """Return the account's plan, credit balance, and usage for the period."""
