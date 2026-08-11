@@ -2075,8 +2075,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     ),
     # ============================== Threads ==============================
     # BODY-PRICED: threadsCreditCost(hasUsername) - 2 credits addressed by
-    # user_id, 4 by username, because TikHub's handle lookup is dead and a handle
-    # buys a second upstream call. Only profile / user_posts / user_replies are
+    # user_id, 4 by username, because the upstream handle lookup is unavailable
+    # and a handle buys a second upstream call. Only profile / user_posts / user_replies are
     # username-keyed; the other three are always 2. Sending both identifiers
     # bills the cheap rate (the route only charges 4 when user_id is absent).
     # credits_note carries that rule into the generated docstring on the three
