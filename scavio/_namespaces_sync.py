@@ -4342,7 +4342,7 @@ class _GoogleAdsNamespace:
 
         Args:
             query: Brand name or domain to resolve (1-200 characters).
-            region: ISO 3166-1 alpha-2 country ('US', 'GB', 'DE') or a Google geo criteria id as a string (2-12 characters). Default: no region filter.
+            region: ISO 3166-1 alpha-2 country ('US', 'GB', 'DE') or a Google geo criteria id as a string (2-12 characters). Defaults to the UNITED STATES, not worldwide -- the lookup runs against one country's index at a time, so an advertiser who runs no US ads comes back as an empty list. Set it to a country the advertiser actually advertises in.
             limit: Rows per arm (1-20; server default 10). Advertisers and domains are capped separately, so a name query can return up to twice this many rows.
             extra: Additional wire parameters passed through verbatim.
         """

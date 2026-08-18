@@ -4693,7 +4693,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str(
                 "region",
                 "ISO 3166-1 alpha-2 country ('US', 'GB', 'DE') or a Google geo criteria id as a "
-                "string (2-12 characters). Default: no region filter.",
+                "string (2-12 characters). Defaults to the UNITED STATES, not worldwide -- the "
+                "lookup runs against one country's index at a time, so an advertiser who runs no "
+                "US ads comes back as an empty list. Set it to a country the advertiser "
+                "actually advertises in.",
             ),
             _int(
                 "limit",
