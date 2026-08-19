@@ -586,7 +586,7 @@ client = ScavioClient(
     api_key="sk_...",
     base_url="https://api.scavio.dev",  # custom base URL
     timeout=30.0,                        # request timeout in seconds
-    max_requests_per_second=1,           # client-side rate limit (1-10)
+    max_requests_per_second=1,           # client-side rate limit (1-50)
     max_retries=2,                       # retries on 429/5xx/network (0 disables)
 )
 ```
@@ -656,6 +656,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Changed in 0.16.0
+
+- **`max_requests_per_second` now accepts up to 50** (it was capped at 10),
+  matching the raised per-plan request limits -- the top plan allows 50, so
+  the old ceiling rejected a value the plan entitled you to. The default is
+  still 1, and the bound now lives in one place
+  (`scavio._ratelimit.MAX_REQUESTS_PER_SECOND`) shared by the sync and async
+  clients.
 
 ### Changed in 0.15.0
 

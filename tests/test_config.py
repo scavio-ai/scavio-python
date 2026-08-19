@@ -35,13 +35,13 @@ def test_default_timeout_is_float():
     assert isinstance(client._timeout, float)
 
 
-@pytest.mark.parametrize("rps", [0, 11, -1])
+@pytest.mark.parametrize("rps", [0, 51, -1])
 def test_invalid_rps_rejected(rps):
     with pytest.raises(ScavioError):
         ScavioClient(api_key="k", max_requests_per_second=rps)
 
 
-@pytest.mark.parametrize("rps", [1, 5, 10])
+@pytest.mark.parametrize("rps", [1, 5, 10, 15, 50])
 def test_valid_rps_accepted(rps):
     ScavioClient(api_key="k", max_requests_per_second=rps)
 

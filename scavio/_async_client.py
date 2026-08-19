@@ -40,7 +40,7 @@ from ._namespaces_async import (
     _AsyncZillowNamespace,
 )
 from ._params import build_body
-from ._ratelimit import AsyncRateLimiter
+from ._ratelimit import MAX_REQUESTS_PER_SECOND, AsyncRateLimiter
 from ._retry import RetryConfig
 from ._spec import ENDPOINTS
 from ._types import UsageResponse
@@ -59,7 +59,7 @@ class AsyncScavioClient:
             environment variable when omitted.
         base_url: API base URL (default ``https://api.scavio.dev``).
         timeout: Per-request timeout in seconds.
-        max_requests_per_second: Client-side rate limit; must be 1-10.
+        max_requests_per_second: Client-side rate limit; must be 1-50.
         max_retries: Automatic retries for 429/5xx and network errors
             (exponential backoff with jitter). ``0`` disables retries.
 
@@ -81,8 +81,10 @@ class AsyncScavioClient:
         max_requests_per_second: int = 1,
         max_retries: int = 2,
     ) -> None:
-        if not 1 <= max_requests_per_second <= 10:
-            raise ScavioError("max_requests_per_second must be between 1 and 10")
+        if not 1 <= max_requests_per_second <= MAX_REQUESTS_PER_SECOND:
+            raise ScavioError(
+                f"max_requests_per_second must be between 1 and {MAX_REQUESTS_PER_SECOND}"
+            )
         self._api_key = _resolve_api_key(api_key)
         self._base_url = base_url.rstrip("/")
         self._timeout = timeout

@@ -5,6 +5,11 @@ import collections
 import threading
 import time
 
+# Ceiling for the client-side rate limit, matching the highest per-plan request
+# limit the API allows. Shared by both clients so the sync and async validation
+# cannot drift apart.
+MAX_REQUESTS_PER_SECOND = 50
+
 
 class SyncRateLimiter:
     """Thread-safe sliding-window limiter (max N requests per rolling second)."""
