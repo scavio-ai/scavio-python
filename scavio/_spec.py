@@ -141,6 +141,11 @@ def _str_or_list(name: str, doc: str) -> Param:
     return Param(name=name, annotation="Optional[Union[str, list[str]]]", doc=doc)
 
 
+def _str_or_int(name: str, doc: str) -> Param:
+    """An id the backend takes as a numeric string or an integer (Walmart store_id)."""
+    return Param(name=name, annotation="Optional[Union[str, int]]", doc=doc)
+
+
 def _lit_or_int(name: str, choices: Sequence[str], doc: str) -> Param:
     """A named enum OR a raw numeric upstream id (Booking accommodation types)."""
     literal = "Literal[" + ", ".join(f'"{c}"' for c in choices) + "]"
@@ -1817,15 +1822,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(_req("url", "A TikTok Shop URL or share link."),),
     ),
     # ============================== Walmart ==============================
-    # search and product REPLACE the pre-0.15 entries of the same name: device /
-    # delivery_zip / store_id are retired, and the API answers 200 with a
-    # top-level `warnings` array if they are sent anyway, which is what old
-    # callers passing them through **extra now get.
+    # `device` is the only retired param: the API answers 200 with a top-level
+    # `warnings` array if it is sent. delivery_zip + store_id came back in 0.17:
+    # passed TOGETHER on search/product they target one store (walmart.com or
+    # walmart.ca), and `stores` turns a ZIP / postal code into the store_ids.
     #
-    # BODY-PRICED: walmartCreditCost(domain) - com=1, ca=1, com.mx=2. Only
-    # /search and /category accept `domain`, so only those two can cost 2; the
-    # other five are always 1. credits_note carries the rule into the generated
-    # docstring so it never claims a flat price on search or category.
+    # BODY-PRICED: a store-targeted search/product costs 2 on any domain;
+    # otherwise walmartCreditCost(domain) - com=1, ca=1, com.mx=2, and only
+    # /search and /category accept that domain. credits_note carries the rule
+    # into the generated docstring so it never claims a flat price.
     Endpoint(
         key="walmart_search",
         namespace="walmart",
@@ -1834,8 +1839,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/walmart/search",
         summary=(
             "Search Walmart and get structured product rows (products, products_count and the "
-            "store the results were priced against). Costs 1 credit on domain 'com' or 'ca' and "
-            "2 credits on 'com.mx'."
+            "store the results were priced against). Pass delivery_zip + store_id to get one "
+            "store's assortment and availability (walmart.com and walmart.ca)."
         ),
         params=(
             _req("query", "Product search query (1-500 characters)."),
@@ -1881,11 +1886,25 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 ("in_store",),
                 "Set to 'in_store' to return only items available for in-store pickup.",
             ),
+            _str(
+                "delivery_zip",
+                "Shopper's postal code for store targeting: a 5-digit US ZIP, or a Canadian "
+                "postal code (e.g. 'M5V 2T6') with domain 'ca'. Must be passed together with "
+                "store_id.",
+            ),
+            _str_or_int(
+                "store_id",
+                "Walmart store to price and stock against, from walmart.stores() on the same "
+                "domain (e.g. '1389'). Must be passed together with delivery_zip; the store "
+                "used is echoed in data.location. Store-targeted calls cost 2 credits and take "
+                "10-60 seconds.",
+            ),
         ),
         credits=1,
         credits_note=(
-            "Costs 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is a "
-            "function of the request body, not a constant for the route."
+            "Costs 2 credits when store-targeted (delivery_zip + store_id, domain 'com' or 'ca'); "
+            "otherwise 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is "
+            "a function of the request body, not a constant for the route."
         ),
     ),
     Endpoint(
@@ -1896,17 +1915,63 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/walmart/product",
         summary=(
             "Full detail for a single Walmart product: price, rating, images, specifications, "
-            "availability and seller. US marketplace only - walmart.ca product pages could not "
-            "be fetched at all, so this endpoint takes no domain."
+            "availability and seller. Pass delivery_zip + store_id for one store's view; "
+            "domain 'ca' (walmart.ca) is only available together with that store pair."
         ),
         params=(
             _req("product_id", "Walmart item id (usItemId), e.g. '13544111159'."),
+            _lit(
+                "domain",
+                ("com", "ca"),
+                "Marketplace: 'com' (US, default) or 'ca'. 'ca' requires delivery_zip + "
+                "store_id.",
+            ),
+            _str(
+                "delivery_zip",
+                "Shopper's postal code for store targeting: a 5-digit US ZIP, or a Canadian "
+                "postal code (e.g. 'M5V 2T6') with domain 'ca'. Must be passed together with "
+                "store_id.",
+            ),
+            _str_or_int(
+                "store_id",
+                "Walmart store to price and stock against, from walmart.stores() on the same "
+                "domain (e.g. '1389'). Must be passed together with delivery_zip; the store "
+                "used is echoed in data.location. Store-targeted calls cost 2 credits and take "
+                "10-60 seconds.",
+            ),
         ),
         credits=1,
         credits_note=(
-            "Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no "
-            "domain, so it is always 1."
+            "Costs 1 credit, or 2 credits when store-targeted (delivery_zip + store_id)."
         ),
+    ),
+    Endpoint(
+        key="walmart_stores",
+        namespace="walmart",
+        method="stores",
+        http="POST",
+        path="/api/v1/walmart/stores",
+        summary=(
+            "Walmart stores near a US ZIP code (walmart.com) or Canadian postal code "
+            "(walmart.ca), nearest first, with store_id, name, distance_miles, address, "
+            "coordinates and hours. Pass a store_id with delivery_zip to search() or product() "
+            "on the same domain to target that store."
+        ),
+        params=(
+            _req(
+                "zipcode",
+                "A 5-digit US ZIP (e.g. '50036'), or a Canadian postal code (e.g. 'M5V 2T6', "
+                "with or without the space) with domain 'ca'.",
+            ),
+            _lit(
+                "domain",
+                ("com", "ca"),
+                "Marketplace: 'com' (US, default) or 'ca' (Canada). Use the returned store_id "
+                "on the same domain.",
+            ),
+        ),
+        credits=1,
+        credits_note="Costs 1 credit on either domain.",
     ),
     Endpoint(
         key="walmart_reviews",

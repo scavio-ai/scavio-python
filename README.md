@@ -622,7 +622,7 @@ Scavio works with popular AI/LLM frameworks:
 |---------|-----------|---------|
 | Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
 | Amazon | `search`, `product`, `offers`, `options` | 1 each (`options` free) |
-| Walmart | `search`, `product`, `reviews`, `category`, `offers`, `seller`, `seller_products` | 1, except `search`/`category` on `domain="com.mx"`, which cost 2 |
+| Walmart | `search`, `product`, `stores`, `reviews`, `category`, `offers`, `seller`, `seller_products` | 1, except `search`/`category` on `domain="com.mx"` and store-targeted `search`/`product` (`delivery_zip` + `store_id`), which cost 2 |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
@@ -656,6 +656,26 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Changed in 0.17.0
+
+- **Walmart store targeting.** `walmart.stores(zipcode, domain=...)` is new: it
+  returns the Walmart stores near a US ZIP (walmart.com) or a Canadian postal
+  code (`domain="ca"`, walmart.ca), nearest first, each with its `store_id`.
+  Pass that `store_id` together with `delivery_zip` to `walmart.search()` or
+  `walmart.product()` on the same domain to get that store's assortment and
+  availability; `data.location` echoes the store used. Store-targeted calls
+  cost 2 credits and take 10-60 seconds, so give them a generous timeout.
+  `walmart.product()` also accepts `domain="ca"`, together with a store pair.
+
+  ```python
+  stores = client.walmart.stores("50036")
+  store_id = stores["data"]["stores"][0]["store_id"]  # "1389", Boone Supercenter
+  milk = client.walmart.search("whole milk", delivery_zip="50036", store_id=store_id)
+  print(milk["data"]["location"])  # {"city": "Boone", "state": "IA", "store_id": "1389", ...}
+  ```
+- `delivery_zip` and `store_id` are no longer retired; `device` is now the only
+  retired Walmart parameter.
 
 ### Changed in 0.16.0
 

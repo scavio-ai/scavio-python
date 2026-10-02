@@ -613,11 +613,14 @@ class _WalmartNamespace:
         max_price: Optional[float] = None,
         fulfillment_speed: Optional[Literal["today", "tomorrow"]] = None,
         fulfillment_type: Optional[Literal["in_store"]] = None,
+        delivery_zip: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Walmart and get structured product rows (products, products_count and the store the results were priced against). Costs 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx'.
+        """Search Walmart and get structured product rows (products, products_count and the store the results were priced against). Pass delivery_zip + store_id to get one store's assortment and availability (walmart.com and walmart.ca).
 
-        Costs 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is a
+        Costs 2 credits when store-targeted (delivery_zip + store_id, domain 'com' or 'ca');
+        otherwise 1 credit on domain 'com' or 'ca' and 2 credits on 'com.mx' - the price is a
         function of the request body, not a constant for the route. Returns the API response as
         a dict.
 
@@ -631,25 +634,52 @@ class _WalmartNamespace:
             max_price: Maximum price filter in the marketplace's own currency; decimals allowed (e.g. 199.5).
             fulfillment_speed: Only items deliverable today, or by tomorrow. '2_days' and 'anytime' are not accepted - for anytime, omit this parameter.
             fulfillment_type: Set to 'in_store' to return only items available for in-store pickup.
+            delivery_zip: Shopper's postal code for store targeting: a 5-digit US ZIP, or a Canadian postal code (e.g. 'M5V 2T6') with domain 'ca'. Must be passed together with store_id.
+            store_id: Walmart store to price and stock against, from walmart.stores() on the same domain (e.g. '1389'). Must be passed together with delivery_zip; the store used is echoed in data.location. Store-targeted calls cost 2 credits and take 10-60 seconds.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("walmart_search", {"query": query, "domain": domain, "page": page, "start_page": start_page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "fulfillment_speed": fulfillment_speed, "fulfillment_type": fulfillment_type}, extra)
+        return self._client._call("walmart_search", {"query": query, "domain": domain, "page": page, "start_page": start_page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "fulfillment_speed": fulfillment_speed, "fulfillment_type": fulfillment_type, "delivery_zip": delivery_zip, "store_id": store_id}, extra)
 
     def product(
         self,
         product_id: str,
+        *,
+        domain: Optional[Literal["com", "ca"]] = None,
+        delivery_zip: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full detail for a single Walmart product: price, rating, images, specifications, availability and seller. US marketplace only - walmart.ca product pages could not be fetched at all, so this endpoint takes no domain.
+        """Full detail for a single Walmart product: price, rating, images, specifications, availability and seller. Pass delivery_zip + store_id for one store's view; domain 'ca' (walmart.ca) is only available together with that store pair.
 
-        Costs 1 credit. Walmart is body-priced through `domain`, but this endpoint takes no
-        domain, so it is always 1. Returns the API response as a dict.
+        Costs 1 credit, or 2 credits when store-targeted (delivery_zip + store_id). Returns the
+        API response as a dict.
 
         Args:
             product_id: Walmart item id (usItemId), e.g. '13544111159'.
+            domain: Marketplace: 'com' (US, default) or 'ca'. 'ca' requires delivery_zip + store_id.
+            delivery_zip: Shopper's postal code for store targeting: a 5-digit US ZIP, or a Canadian postal code (e.g. 'M5V 2T6') with domain 'ca'. Must be passed together with store_id.
+            store_id: Walmart store to price and stock against, from walmart.stores() on the same domain (e.g. '1389'). Must be passed together with delivery_zip; the store used is echoed in data.location. Store-targeted calls cost 2 credits and take 10-60 seconds.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("walmart_product", {"product_id": product_id}, extra)
+        return self._client._call("walmart_product", {"product_id": product_id, "domain": domain, "delivery_zip": delivery_zip, "store_id": store_id}, extra)
+
+    def stores(
+        self,
+        zipcode: str,
+        *,
+        domain: Optional[Literal["com", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Walmart stores near a US ZIP code (walmart.com) or Canadian postal code (walmart.ca), nearest first, with store_id, name, distance_miles, address, coordinates and hours. Pass a store_id with delivery_zip to search() or product() on the same domain to target that store.
+
+        Costs 1 credit on either domain. Returns the API response as a dict.
+
+        Args:
+            zipcode: A 5-digit US ZIP (e.g. '50036'), or a Canadian postal code (e.g. 'M5V 2T6', with or without the space) with domain 'ca'.
+            domain: Marketplace: 'com' (US, default) or 'ca' (Canada). Use the returned store_id on the same domain.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("walmart_stores", {"zipcode": zipcode, "domain": domain}, extra)
 
     def reviews(
         self,

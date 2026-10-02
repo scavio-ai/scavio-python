@@ -796,7 +796,7 @@ def test_sec_list_fields_accept_a_scalar_a_list_or_a_joined_string(monkeypatch):
 def test_new_platform_endpoint_counts():
     """Guards against a fragment being half-merged."""
     expected = {
-        "walmart": 7,
+        "walmart": 8,
         "threads": 6,
         "kuaishou": 14,
         "ebay": 3,
@@ -825,4 +825,34 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 93
+    assert sum(expected.values()) == 94
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+@pytest.mark.parametrize("method", ["search", "product"])
+def test_walmart_store_targeting_docstrings_state_the_2_credit_rule(module, method):
+    """A store-targeted call costs 2; the docstring must not imply a flat 1."""
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_WalmartNamespace", None) or mod._AsyncWalmartNamespace
+    doc = getattr(cls, method).__doc__ or ""
+    assert "2 credits when store-targeted" in doc
+    assert "delivery_zip" in doc and "store_id" in doc
+
+
+def test_walmart_store_targeting_wire(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.walmart.search("milk", delivery_zip="50036", store_id=1389)
+    assert captured["json"] == {"query": "milk", "delivery_zip": "50036", "store_id": 1389}
+    client.walmart.product("10220526", domain="ca", delivery_zip="M5V 2T6", store_id="3106")
+    assert captured["json"] == {
+        "product_id": "10220526",
+        "domain": "ca",
+        "delivery_zip": "M5V 2T6",
+        "store_id": "3106",
+    }
+    client.walmart.stores("M5V 2T6", domain="ca")
+    assert captured["path"] == "/api/v1/walmart/stores"
+    assert captured["json"] == {"zipcode": "M5V 2T6", "domain": "ca"}
