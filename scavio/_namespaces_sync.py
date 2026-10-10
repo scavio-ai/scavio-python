@@ -4955,7 +4955,7 @@ class _TrustpilotNamespace:
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Businesses ranked in a Trustpilot category for one country, with TrustScore, review count, location, website, email and phone. Sort by relevance, review count or latest review, set a minimum TrustScore, or keep claimed profiles only. 20 per page.
+        """Businesses ranked in a Trustpilot category for one country, with TrustScore, review count, location, website, email and phone. Sort by relevance, review count or latest review, set a minimum star rating, or keep claimed profiles only. 20 per page.
 
         Costs 2 credits. Returns the API response as a dict.
 
@@ -4963,7 +4963,7 @@ class _TrustpilotNamespace:
             category_id: Category id from categories() (e.g. 'vpn_service').
             country: 2-letter country code (server default 'US').
             sort: Result order (server default 'most_relevant').
-            min_trust_score: Only businesses with at least this TrustScore: 3, 4 or 4.5.
+            min_trust_score: Minimum star rating: 3, 4 or 4.5. Trustpilot rounds TrustScore to stars, so 4 includes TrustScore 3.8 and up.
             claimed_only: Only businesses that have claimed their Trustpilot profile.
             page: Results page, 1-based (20 businesses per page).
             extra: Additional wire parameters passed through verbatim.

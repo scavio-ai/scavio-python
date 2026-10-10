@@ -5453,7 +5453,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Businesses ranked in a Trustpilot category for one country, with TrustScore, review "
             "count, location, website, email and phone. Sort by relevance, review count or latest "
-            "review, set a minimum TrustScore, or keep claimed profiles only. 20 per page."
+            "review, set a minimum star rating, or keep claimed profiles only. 20 per page."
         ),
         params=(
             _req("category_id", "Category id from categories() (e.g. 'vpn_service')."),
@@ -5465,7 +5465,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             # z.union([z.literal(3), z.literal(4), z.literal(4.5)]): a float
             # literal is not valid typing, so the annotation is the honest float.
-            _float("min_trust_score", "Only businesses with at least this TrustScore: 3, 4 or 4.5."),
+            _float(
+                "min_trust_score",
+                "Minimum star rating: 3, 4 or 4.5. Trustpilot rounds TrustScore to stars, so 4 "
+                "includes TrustScore 3.8 and up.",
+            ),
             _bool("claimed_only", "Only businesses that have claimed their Trustpilot profile."),
             _int("page", "Results page, 1-based (20 businesses per page)."),
         ),

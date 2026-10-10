@@ -626,7 +626,8 @@ print(bad["total_filtered"], "1-2 star reviews in 30 days; pages:", bad["max_pag
 for review in bad["reviews"]:
     print(review["rating"], review["title"], (review["reply"] or {}).get("text"))
 
-# The category tree, then ranked businesses in one category.
+# The category tree, then ranked businesses in one category. min_trust_score is
+# a star-rating floor: Trustpilot rounds TrustScore to stars, so 4 includes 3.8+.
 tree = client.trustpilot.categories()["data"]
 print(tree["count"], "top-level,", tree["subcategory_count"], "subcategories")
 ranked = client.trustpilot.category(
@@ -760,6 +761,12 @@ Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
 
+### Changed in 0.19.1
+
+- `trustpilot.category(min_trust_score=...)` docstring corrected: the filter
+  is a minimum star rating (3, 4 or 4.5). Trustpilot rounds TrustScore to
+  stars, so 4 includes TrustScore 3.8 and up. No code changes.
+
 ### Changed in 0.19.0
 
 - **New `trustpilot` namespace, 6 methods, 2 credits each.** `search`
@@ -767,7 +774,7 @@ for field-level details.
   domain or Trustpilot URL), `reviews` (stars, language, date range, sort,
   verified-only, with-replies, topics and text filters; up to 200 per filter
   combination), `categories` (the tree or a name lookup), `category` (ranked
-  businesses with sort, minimum TrustScore and claimed-only) and `review` (one
+  businesses with sort, minimum star rating and claimed-only) and `review` (one
   review by id). See example 21 above.
 
 ### Changed in 0.18.1
