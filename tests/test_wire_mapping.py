@@ -611,11 +611,14 @@ def test_extract_signature_is_url_plus_two_keywords(client_cls):
 # --- Body-priced surfaces: no flat "Costs N credits." -----------------------
 
 BODY_PRICED = {"walmart", "threads", "kuaishou", "_core"}
+# Namespaces priced per endpoint: only these keys scale with the body
+# (warehouse count, or country "ca"); the rest of the namespace is flat.
+BODY_PRICED_KEYS = {"costco_prices", "costco_availability", "costco_warehouses", "costco_gas"}
 
 
 def test_every_body_priced_endpoint_carries_a_credits_note():
     for ep in ENDPOINTS.values():
-        if ep.namespace in BODY_PRICED:
+        if ep.namespace in BODY_PRICED or ep.key in BODY_PRICED_KEYS:
             assert ep.credits_note, ep.key
             assert ep.credits_note.endswith("."), ep.key
         else:
@@ -722,6 +725,129 @@ def test_meta_ads_cursor_paging(monkeypatch):
     assert captured["json"] == {"query": "black friday", "cursor": "c1"}
 
 
+def test_costco_method_names_match_the_dashboard_playground():
+    """The Playground advertises costco.<endpoint>(); a rename breaks its snippets."""
+    costco = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "costco"}
+    assert sorted(costco) == sorted(
+        [
+            "search", "category", "categories", "product", "prices", "availability",
+            "reviews", "warehouses", "gas", "coupons", "deals", "clearance", "autocomplete",
+        ]
+    )
+    for method, ep in costco.items():
+        assert ep.path == f"/api/v1/costco/{method}", method
+    # The positional argument the Playground snippet passes first, per method.
+    positional = {
+        "search": "query",
+        "category": "category",
+        "product": "item_id",
+        "availability": "item_number",
+        "reviews": "product_id",
+        "deals": "type",
+        "autocomplete": "query",
+    }
+    client = ScavioClient(api_key="sk_test")
+    for method, name in positional.items():
+        params = list(inspect.signature(getattr(client.costco, method)).parameters.values())
+        assert params[0].name == name, method
+        assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD, method
+
+
+def test_costco_search_with_warehouse_pricing(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.search(
+        "olive oil", warehouse_id="1062", page_size=5, brands=["Kirkland Signature"]
+    )
+    assert captured["path"] == "/api/v1/costco/search"
+    assert captured["json"] == {
+        "query": "olive oil",
+        "warehouse_id": "1062",
+        "page_size": 5,
+        "brands": ["Kirkland Signature"],
+    }
+
+
+def test_costco_product_takes_one_id_positionally_or_a_list(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.product("100334960")
+    assert captured["json"] == {"item_id": "100334960"}
+    client.costco.product(item_ids=["100334960", "1492456"])
+    assert captured["json"] == {"item_ids": ["100334960", "1492456"]}
+    with pytest.raises(ScavioError):
+        client.costco.product()
+
+
+def test_costco_prices_requires_ids_and_keyword_only_warehouses(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.prices(item_id="1492456", warehouse_ids=["1062", "1107"])
+    assert captured["path"] == "/api/v1/costco/prices"
+    assert captured["json"] == {"item_id": "1492456", "warehouse_ids": ["1062", "1107"]}
+    with pytest.raises(ScavioError):
+        client.costco.prices(item_id="1492456")
+    with pytest.raises(ScavioError):
+        client.costco.prices(warehouse_ids=["1062"])
+    # An item number passed positionally must never land in warehouse_ids.
+    with pytest.raises(TypeError):
+        client.costco.prices("1492456")  # type: ignore[misc]
+
+
+def test_costco_availability_item_and_warehouses_positional(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.availability("1492456", ["1062"])
+    assert captured["json"] == {"item_number": "1492456", "warehouse_ids": ["1062"]}
+
+
+def test_costco_location_endpoints_need_a_location(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        client.costco.warehouses()
+    with pytest.raises(ScavioError):
+        client.costco.gas()
+    client.costco.gas(warehouse_ids=["1062"])
+    assert captured["json"] == {"warehouse_ids": ["1062"]}
+    client.costco.warehouses(latitude=40.8, longitude=-73.96, limit=3)
+    assert captured["json"] == {"latitude": 40.8, "longitude": -73.96, "limit": 3}
+
+
+def test_costco_coupons_sends_an_empty_body(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.coupons()
+    assert captured["path"] == "/api/v1/costco/coupons"
+    assert captured["json"] == {}
+
+
+def test_costco_clearance_price_codes_are_a_list(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.costco.clearance("1062", query="snacks", price_codes=["clearance", "special_buy"])
+    assert captured["json"] == {
+        "warehouse_id": "1062",
+        "query": "snacks",
+        "price_codes": ["clearance", "special_buy"],
+    }
+    annotation = next(
+        p for p in ENDPOINTS["costco_clearance"].params if p.name == "price_codes"
+    ).annotation
+    assert annotation.startswith("Optional[list[Literal[")
+    with pytest.raises(ScavioError):
+        client.costco.clearance("1062")
+
+
+@pytest.mark.parametrize("method", ["prices", "availability", "warehouses", "gas"])
+def test_costco_body_priced_docstrings_do_not_claim_a_flat_price(method):
+    from scavio._namespaces_sync import _CostcoNamespace
+
+    doc = getattr(_CostcoNamespace, method).__doc__ or ""
+    assert "Costs 1 credit. Returns" not in doc
+    assert "2" in doc
+
+
 def test_walmart_seller_products_path_is_hyphenated():
     assert ENDPOINTS["walmart_seller_products"].path == "/api/v1/walmart/seller-products"
 
@@ -818,6 +944,7 @@ def test_new_platform_endpoint_counts():
         "capterra": 3,
         "google_ads": 3,
         "meta_ads": 3,
+        "costco": 13,
         "_core": 1,
     }
     counts: dict[str, int] = {}
@@ -825,7 +952,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 94
+    assert sum(expected.values()) == 107
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

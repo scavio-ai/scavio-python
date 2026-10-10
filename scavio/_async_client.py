@@ -13,6 +13,7 @@ from ._namespaces_async import (
     _AsyncBookingNamespace,
     _AsyncCapterraNamespace,
     _AsyncCompaniesHouseNamespace,
+    _AsyncCostcoNamespace,
     _AsyncEbayNamespace,
     _AsyncG2Namespace,
     _AsyncGlassdoorNamespace,
@@ -123,6 +124,7 @@ class AsyncScavioClient:
         self.capterra = _AsyncCapterraNamespace(self)
         self.google_ads = _AsyncGoogleAdsNamespace(self)
         self.meta_ads = _AsyncMetaAdsNamespace(self)
+        self.costco = _AsyncCostcoNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

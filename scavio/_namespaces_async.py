@@ -39,6 +39,7 @@ __all__ = [
     "_AsyncCapterraNamespace",
     "_AsyncGoogleAdsNamespace",
     "_AsyncMetaAdsNamespace",
+    "_AsyncCostcoNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -4499,3 +4500,343 @@ class _AsyncMetaAdsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("meta_ads_ad", {"ad_archive_id": ad_archive_id}, extra)
+
+class _AsyncCostcoNamespace:
+    """Costco search, product, warehouse price, stock, gas, coupon, deal, and clearance endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "mx", "jp", "kr", "tw"]] = None,
+        warehouse_id: Optional[str] = None,
+        sort_by: Optional[Literal["best_match", "price_low", "price_high", "top_rated", "newest"]] = None,
+        brands: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        in_warehouse: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Costco by keyword or item number: online price and original price, ratings, member-only and stock flags, promotions and facets. Pass warehouse_id to add that warehouse's in-store price, stock status and price code to every result. US and Canada support every filter; UK, Australia, Mexico, Japan, Korea and Taiwan support keyword, sort and paging only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, or a Costco item number (1-200 characters).
+            country: Costco site ('us' default). us and ca support every filter; uk, au, mx, jp, kr and tw support keyword, sort and paging only.
+            warehouse_id: Costco warehouse number (e.g. '1062'). Adds that warehouse's in-store price, stock status and price code to every result; omit for online prices only.
+            sort_by: Result order (server default 'best_match'). Costco broadens matching under any other sort.
+            brands: Brand names to keep, up to 20 (e.g. ['Kirkland Signature']).
+            min_price: Minimum online price, inclusive.
+            max_price: Maximum online price, inclusive.
+            min_rating: Minimum average star rating (1-5).
+            on_sale: Only items with an active discount.
+            in_stock: Hide out-of-stock items.
+            in_warehouse: Only items sold and in stock at warehouse_id (requires warehouse_id).
+            page: Results page, 1-based (1-500).
+            page_size: Results per page (1-120; server default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_search", {"query": query, "country": country, "warehouse_id": warehouse_id, "sort_by": sort_by, "brands": brands, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "on_sale": on_sale, "in_stock": in_stock, "in_warehouse": in_warehouse, "page": page, "page_size": page_size}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        warehouse_id: Optional[str] = None,
+        sort_by: Optional[Literal["best_match", "price_low", "price_high", "top_rated", "newest"]] = None,
+        brands: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        in_warehouse: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in a Costco category, with the same sort, filters and per-warehouse pricing as search().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Category slug from categories() (e.g. 'televisions'), or a costco.com category URL (1-200 characters).
+            country: costco.com ('us', default) or costco.ca ('ca').
+            warehouse_id: Costco warehouse number (e.g. '1062'). Adds that warehouse's in-store price, stock status and price code to every result; omit for online prices only.
+            sort_by: Result order (server default 'best_match'). Costco broadens matching under any other sort.
+            brands: Brand names to keep, up to 20 (e.g. ['Kirkland Signature']).
+            min_price: Minimum online price, inclusive.
+            max_price: Maximum online price, inclusive.
+            min_rating: Minimum average star rating (1-5).
+            on_sale: Only items with an active discount.
+            in_stock: Hide out-of-stock items.
+            in_warehouse: Only items sold and in stock at warehouse_id (requires warehouse_id).
+            page: Results page, 1-based (1-500).
+            page_size: Results per page (1-120; server default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_category", {"category": category, "country": country, "warehouse_id": warehouse_id, "sort_by": sort_by, "brands": brands, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "on_sale": on_sale, "in_stock": in_stock, "in_warehouse": in_warehouse, "page": page, "page_size": page_size}, extra)
+
+    async def categories(
+        self,
+        *,
+        category_id: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Costco department list, or the full subcategory tree under one department.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: Numeric Costco category id (e.g. '30001'). Omit for the top-level departments; pass one for its full subcategory tree.
+            country: costco.com ('us', default) or costco.ca ('ca').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_categories", {"category_id": category_id, "country": country}, extra)
+
+    async def product(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        item_ids: Optional[list[str]] = None,
+        country: Optional[Literal["us", "ca", "uk", "au", "mx", "jp", "kr", "tw"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full details for up to 20 Costco items: description, features, specifications, variants, member-only and purchase limits, delivery fee, and promotions with start and end dates. Pass item_id for one item or item_ids for several.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: Costco item number or product id, or a costco.com product URL.
+            item_ids: Up to 20 item numbers / product ids in one call (us and ca only; the other countries look up one product per call).
+            country: Costco site ('us' default). us and ca support every filter; uk, au, mx, jp, kr and tw support keyword, sort and paging only.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_product", {"item_id": item_id, "item_ids": item_ids, "country": country}, extra)
+
+    async def prices(
+        self,
+        *,
+        item_id: Optional[str] = None,
+        item_ids: Optional[list[str]] = None,
+        warehouse_ids: Optional[list[str]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online price versus in-warehouse price for up to 20 items across up to 10 warehouses, with each location's discount, final price, promotion dates and price code. Pass item_id or item_ids.
+
+        Costs 1 credit for up to 9 warehouses and 2 credits for 10 (the online price is always
+        included and does not count toward the 10). Returns the API response as a dict.
+
+        Args:
+            item_id: Costco item number or product id, or a costco.com product URL.
+            item_ids: Up to 20 item numbers / product ids in one call.
+            warehouse_ids: Required. Costco warehouse numbers to price (1-10, e.g. ['1062', '1107']), from warehouses(). The online price is always included.
+            country: costco.com ('us', default) or costco.ca ('ca').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_prices", {"item_id": item_id, "item_ids": item_ids, "warehouse_ids": warehouse_ids, "country": country}, extra)
+
+    async def availability(
+        self,
+        item_number: str,
+        warehouse_ids: list[str],
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """In-warehouse stock status for one item at up to 10 warehouses, plus pickup and same-day delivery availability. Stock is a status, never a quantity.
+
+        Costs 1 credit per 5 warehouses (2 credits for 6-10). Returns the API response as a
+        dict.
+
+        Args:
+            item_number: Costco item number or product id, or a costco.com product URL.
+            warehouse_ids: Costco warehouse numbers to check (1-10), from warehouses().
+            country: costco.com ('us', default) or costco.ca ('ca').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_availability", {"item_number": item_number, "warehouse_ids": warehouse_ids, "country": country}, extra)
+
+    async def reviews(
+        self,
+        product_id: str,
+        *,
+        sort_by: Optional[Literal["newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"]] = None,
+        rating: Optional[int] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews for a Costco product with the rating distribution and recommend count; sort, star filter and up to 100 reviews per page.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Costco product id (the product_id field from search() or product()).
+            sort_by: Review order (server default 'newest').
+            rating: Only reviews with this star rating (1-5).
+            page: Results page, 1-based (1-500).
+            limit: Reviews per page (1-100; server default 25).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_reviews", {"product_id": product_id, "sort_by": sort_by, "rating": rating, "page": page, "limit": limit}, extra)
+
+    async def warehouses(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        country: Optional[Literal["us", "ca", "uk", "au", "mx", "jp", "kr", "tw"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Costco warehouses near a US zip code or coordinates, nearest first: warehouse_id, address, hours, departments, services, and gas station hours and prices. Pass zip, or latitude and longitude.
+
+        Costs 1 credit, or 2 credits with country 'ca'. Returns the API response as a dict.
+
+        Args:
+            zip: US zip code (5-10 characters). Zip lookup is US-only.
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            country: Costco site ('us' default). us and ca support every filter; uk, au, mx, jp, kr and tw support keyword, sort and paging only.
+            limit: Nearest warehouses to return (1-50; server default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_warehouses", {"zip": zip, "latitude": latitude, "longitude": longitude, "country": country, "limit": limit}, extra)
+
+    async def gas(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        warehouse_ids: Optional[list[str]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current regular, premium and diesel prices at Costco gas stations near a location, or at specific warehouses. Pass zip, latitude and longitude, or warehouse_ids.
+
+        Costs 1 credit by location (2 with country 'ca'); by warehouse_ids, 1 credit per 5
+        warehouses on us and 2 credits per warehouse on ca. Returns the API response as a dict.
+
+        Args:
+            zip: US zip code (5-10 characters).
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            warehouse_ids: Specific Costco warehouse numbers instead of a location (1-10).
+            country: costco.com ('us', default) or costco.ca ('ca').
+            limit: Nearest stations to return (1-50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_gas", {"zip": zip, "latitude": latitude, "longitude": longitude, "warehouse_ids": warehouse_ids, "country": country, "limit": limit}, extra)
+
+    async def coupons(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current Costco member coupon book (US): every offer with its item number, discount, final price, warehouse/online scope, limits and the book's valid dates. Takes no parameters.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_coupons", {}, extra)
+
+    async def deals(
+        self,
+        type: Literal["new", "while_supplies_last", "treasure_hunt", "member_favorites", "online_only", "on_sale"],
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        warehouse_id: Optional[str] = None,
+        sort_by: Optional[Literal["best_match", "price_low", "price_high", "top_rated", "newest"]] = None,
+        brands: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        in_warehouse: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Costco deal feeds: new items, while supplies last, treasure hunt, member favorites, online-only and everything on sale, with the same filters and optional per-warehouse pricing as search().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: Deal feed: new, while_supplies_last, treasure_hunt, member_favorites, online_only or on_sale.
+            country: costco.com ('us', default) or costco.ca ('ca').
+            warehouse_id: Costco warehouse number (e.g. '1062'). Adds that warehouse's in-store price, stock status and price code to every result; omit for online prices only.
+            sort_by: Result order (server default 'best_match'). Costco broadens matching under any other sort.
+            brands: Brand names to keep, up to 20 (e.g. ['Kirkland Signature']).
+            min_price: Minimum online price, inclusive.
+            max_price: Maximum online price, inclusive.
+            min_rating: Minimum average star rating (1-5).
+            on_sale: Only items with an active discount.
+            in_stock: Hide out-of-stock items.
+            in_warehouse: Only items sold and in stock at warehouse_id (requires warehouse_id).
+            page: Results page, 1-based (1-500).
+            page_size: Results per page (1-120; server default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_deals", {"type": type, "country": country, "warehouse_id": warehouse_id, "sort_by": sort_by, "brands": brands, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "on_sale": on_sale, "in_stock": in_stock, "in_warehouse": in_warehouse, "page": page, "page_size": page_size}, extra)
+
+    async def clearance(
+        self,
+        warehouse_id: str,
+        *,
+        query: Optional[str] = None,
+        category: Optional[str] = None,
+        pages: Optional[int] = None,
+        price_codes: Optional[list[Literal["clearance", "manager_markdown", "special_buy"]]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Markdown finder for one warehouse: scans a query or category and keeps the items whose in-warehouse price ends in a markdown code -- .97 clearance and .00/.88 manager markdown by default, .49/.79/.89 special buys on request. The codes are the member-community decode; Costco does not publish them. Only items Costco lists online are covered.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            warehouse_id: Costco warehouse number to scan, from warehouses() (e.g. '1062').
+            query: Keywords to scan (1-200 characters).
+            category: Category slug to scan instead of a query.
+            pages: Result pages of 120 to scan (1-5; server default 3).
+            price_codes: Markdown codes to keep. Server default clearance + manager_markdown; add special_buy for .49/.79/.89 endings, which are common on regular grocery prices.
+            country: costco.com ('us', default) or costco.ca ('ca').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_clearance", {"warehouse_id": warehouse_id, "query": query, "category": category, "pages": pages, "price_codes": price_codes, "country": country}, extra)
+
+    async def autocomplete(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Costco search-box suggestions for a partial query.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Partial search text (1-100 characters).
+            country: costco.com ('us', default) or costco.ca ('ca').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("costco_autocomplete", {"query": query, "country": country}, extra)

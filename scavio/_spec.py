@@ -152,6 +152,12 @@ def _lit_or_int(name: str, choices: Sequence[str], doc: str) -> Param:
     return Param(name=name, annotation=f"Optional[Union[{literal}, int]]", doc=doc)
 
 
+def _lit_list(name: str, choices: Sequence[str], doc: str) -> Param:
+    """An array of string literals, e.g. Costco's ``price_codes``."""
+    literal = "Optional[list[Literal[" + ", ".join(f'"{c}"' for c in choices) + "]]]"
+    return Param(name=name, annotation=literal, doc=doc)
+
+
 # Reusable Google locale params (identical across most Google endpoints).
 _HL = _str("hl", "UI language (ISO 639-1, e.g. 'en').")
 _GL = _str("gl", "Country of the search (ISO 3166-1 alpha-2, e.g. 'us').")
@@ -171,6 +177,41 @@ _AMAZON_COUNTRY = _str(
 _AMAZON_DOMAIN = _str(
     "domain",
     "Deprecated: Amazon domain suffix ('com', 'co.uk'). Use country instead.",
+)
+
+
+# Costco site selection. Most endpoints are costco.com / costco.ca only; search,
+# product and warehouses also take the six international sites.
+_COSTCO_NA_COUNTRY = _lit("country", ("us", "ca"), "costco.com ('us', default) or costco.ca ('ca').")
+_COSTCO_ANY_COUNTRY = _lit(
+    "country",
+    ("us", "ca", "uk", "au", "mx", "jp", "kr", "tw"),
+    "Costco site ('us' default). us and ca support every filter; uk, au, mx, jp, kr and tw "
+    "support keyword, sort and paging only.",
+)
+
+# Filters shared by costco search, category and deals (us/ca).
+_COSTCO_LISTING_FILTERS = (
+    _str(
+        "warehouse_id",
+        "Costco warehouse number (e.g. '1062'). Adds that warehouse's in-store price, stock "
+        "status and price code to every result; omit for online prices only.",
+    ),
+    _lit(
+        "sort_by",
+        ("best_match", "price_low", "price_high", "top_rated", "newest"),
+        "Result order (server default 'best_match'). Costco broadens matching under any other "
+        "sort.",
+    ),
+    _str_list("brands", "Brand names to keep, up to 20 (e.g. ['Kirkland Signature'])."),
+    _float("min_price", "Minimum online price, inclusive."),
+    _float("max_price", "Maximum online price, inclusive."),
+    _float("min_rating", "Minimum average star rating (1-5)."),
+    _bool("on_sale", "Only items with an active discount."),
+    _bool("in_stock", "Hide out-of-stock items."),
+    _bool("in_warehouse", "Only items sold and in stock at warehouse_id (requires warehouse_id)."),
+    _int("page", "Results page, 1-based (1-500)."),
+    _int("page_size", "Results per page (1-120; server default 24)."),
 )
 
 
@@ -4975,6 +5016,318 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
     ),
+    # ============================== Costco ===============================
+    # 13 endpoints. Most cost 1 credit; the multi-warehouse ones are
+    # BODY-PRICED (backend costcoRequestCost): prices/availability/gas scale
+    # with warehouse_ids, and country "ca" warehouses/gas cost 2 per lookup.
+    # credits_note states the rule wherever the price is not a constant.
+    Endpoint(
+        key="costco_search",
+        namespace="costco",
+        method="search",
+        http="POST",
+        path="/api/v1/costco/search",
+        summary=(
+            "Search Costco by keyword or item number: online price and original price, ratings, "
+            "member-only and stock flags, promotions and facets. Pass warehouse_id to add that "
+            "warehouse's in-store price, stock status and price code to every result. US and "
+            "Canada support every filter; UK, Australia, Mexico, Japan, Korea and Taiwan support "
+            "keyword, sort and paging only."
+        ),
+        params=(
+            _req("query", "Keywords, or a Costco item number (1-200 characters)."),
+            _COSTCO_ANY_COUNTRY,
+            *_COSTCO_LISTING_FILTERS,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_category",
+        namespace="costco",
+        method="category",
+        http="POST",
+        path="/api/v1/costco/category",
+        summary=(
+            "Products in a Costco category, with the same sort, filters and per-warehouse "
+            "pricing as search()."
+        ),
+        params=(
+            _req(
+                "category",
+                "Category slug from categories() (e.g. 'televisions'), or a costco.com category "
+                "URL (1-200 characters).",
+            ),
+            _COSTCO_NA_COUNTRY,
+            *_COSTCO_LISTING_FILTERS,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_categories",
+        namespace="costco",
+        method="categories",
+        http="POST",
+        path="/api/v1/costco/categories",
+        summary=(
+            "The Costco department list, or the full subcategory tree under one department."
+        ),
+        params=(
+            _str(
+                "category_id",
+                "Numeric Costco category id (e.g. '30001'). Omit for the top-level departments; "
+                "pass one for its full subcategory tree.",
+            ),
+            _COSTCO_NA_COUNTRY,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_product",
+        namespace="costco",
+        method="product",
+        http="POST",
+        path="/api/v1/costco/product",
+        summary=(
+            "Full details for up to 20 Costco items: description, features, specifications, "
+            "variants, member-only and purchase limits, delivery fee, and promotions with start "
+            "and end dates. Pass item_id for one item or item_ids for several."
+        ),
+        params=(
+            # item_id stays positional (with a None default) so the common
+            # single-item call is costco.product("100334960").
+            Param(
+                "item_id",
+                "Optional[str]",
+                positional=True,
+                doc="Costco item number or product id, or a costco.com product URL.",
+            ),
+            _str_list(
+                "item_ids",
+                "Up to 20 item numbers / product ids in one call (us and ca only; the other "
+                "countries look up one product per call).",
+            ),
+            _COSTCO_ANY_COUNTRY,
+        ),
+        one_of=(("item_id", "item_ids"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_prices",
+        namespace="costco",
+        method="prices",
+        http="POST",
+        path="/api/v1/costco/prices",
+        summary=(
+            "Online price versus in-warehouse price for up to 20 items across up to 10 "
+            "warehouses, with each location's discount, final price, promotion dates and price "
+            "code. Pass item_id or item_ids."
+        ),
+        params=(
+            _str("item_id", "Costco item number or product id, or a costco.com product URL."),
+            _str_list("item_ids", "Up to 20 item numbers / product ids in one call."),
+            # Required, but keyword-only: a positional list here would let
+            # prices("1492456") silently send an item number as warehouse_ids.
+            # The one-member one_of group enforces it client-side.
+            _str_list(
+                "warehouse_ids",
+                "Required. Costco warehouse numbers to price (1-10, e.g. ['1062', '1107']), "
+                "from warehouses(). The online price is always included.",
+            ),
+            _COSTCO_NA_COUNTRY,
+        ),
+        one_of=(("item_id", "item_ids"), ("warehouse_ids",)),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit for up to 9 warehouses and 2 credits for 10 (the online price is "
+            "always included and does not count toward the 10)."
+        ),
+    ),
+    Endpoint(
+        key="costco_availability",
+        namespace="costco",
+        method="availability",
+        http="POST",
+        path="/api/v1/costco/availability",
+        summary=(
+            "In-warehouse stock status for one item at up to 10 warehouses, plus pickup and "
+            "same-day delivery availability. Stock is a status, never a quantity."
+        ),
+        params=(
+            _req(
+                "item_number",
+                "Costco item number or product id, or a costco.com product URL.",
+            ),
+            _str_list(
+                "warehouse_ids",
+                "Costco warehouse numbers to check (1-10), from warehouses().",
+                required=True,
+            ),
+            _COSTCO_NA_COUNTRY,
+        ),
+        credits=1,
+        credits_note="Costs 1 credit per 5 warehouses (2 credits for 6-10).",
+    ),
+    Endpoint(
+        key="costco_reviews",
+        namespace="costco",
+        method="reviews",
+        http="POST",
+        path="/api/v1/costco/reviews",
+        summary=(
+            "Customer reviews for a Costco product with the rating distribution and recommend "
+            "count; sort, star filter and up to 100 reviews per page."
+        ),
+        params=(
+            _req(
+                "product_id",
+                "Costco product id (the product_id field from search() or product()).",
+            ),
+            _lit(
+                "sort_by",
+                ("newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"),
+                "Review order (server default 'newest').",
+            ),
+            _int("rating", "Only reviews with this star rating (1-5)."),
+            _int("page", "Results page, 1-based (1-500)."),
+            _int("limit", "Reviews per page (1-100; server default 25)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_warehouses",
+        namespace="costco",
+        method="warehouses",
+        http="POST",
+        path="/api/v1/costco/warehouses",
+        summary=(
+            "Costco warehouses near a US zip code or coordinates, nearest first: warehouse_id, "
+            "address, hours, departments, services, and gas station hours and prices. Pass zip, "
+            "or latitude and longitude."
+        ),
+        params=(
+            _str("zip", "US zip code (5-10 characters). Zip lookup is US-only."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _COSTCO_ANY_COUNTRY,
+            _int("limit", "Nearest warehouses to return (1-50; server default 10)."),
+        ),
+        one_of=(("zip", "latitude"),),
+        credits=1,
+        credits_note="Costs 1 credit, or 2 credits with country 'ca'.",
+    ),
+    Endpoint(
+        key="costco_gas",
+        namespace="costco",
+        method="gas",
+        http="POST",
+        path="/api/v1/costco/gas",
+        summary=(
+            "Current regular, premium and diesel prices at Costco gas stations near a location, "
+            "or at specific warehouses. Pass zip, latitude and longitude, or warehouse_ids."
+        ),
+        params=(
+            _str("zip", "US zip code (5-10 characters)."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _str_list(
+                "warehouse_ids",
+                "Specific Costco warehouse numbers instead of a location (1-10).",
+            ),
+            _COSTCO_NA_COUNTRY,
+            _int("limit", "Nearest stations to return (1-50)."),
+        ),
+        one_of=(("zip", "latitude", "warehouse_ids"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit by location (2 with country 'ca'); by warehouse_ids, 1 credit per 5 "
+            "warehouses on us and 2 credits per warehouse on ca."
+        ),
+    ),
+    Endpoint(
+        key="costco_coupons",
+        namespace="costco",
+        method="coupons",
+        http="POST",
+        path="/api/v1/costco/coupons",
+        summary=(
+            "The current Costco member coupon book (US): every offer with its item number, "
+            "discount, final price, warehouse/online scope, limits and the book's valid dates. "
+            "Takes no parameters."
+        ),
+        params=(),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_deals",
+        namespace="costco",
+        method="deals",
+        http="POST",
+        path="/api/v1/costco/deals",
+        summary=(
+            "Costco deal feeds: new items, while supplies last, treasure hunt, member favorites, "
+            "online-only and everything on sale, with the same filters and optional "
+            "per-warehouse pricing as search()."
+        ),
+        params=(
+            Param(
+                "type",
+                'Literal["new", "while_supplies_last", "treasure_hunt", "member_favorites", '
+                '"online_only", "on_sale"]',
+                required=True,
+                doc="Deal feed: new, while_supplies_last, treasure_hunt, member_favorites, "
+                "online_only or on_sale.",
+            ),
+            _COSTCO_NA_COUNTRY,
+            *_COSTCO_LISTING_FILTERS,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_clearance",
+        namespace="costco",
+        method="clearance",
+        http="POST",
+        path="/api/v1/costco/clearance",
+        summary=(
+            "Markdown finder for one warehouse: scans a query or category and keeps the items "
+            "whose in-warehouse price ends in a markdown code -- .97 clearance and .00/.88 "
+            "manager markdown by default, .49/.79/.89 special buys on request. The codes are the "
+            "member-community decode; Costco does not publish them. Only items Costco lists "
+            "online are covered."
+        ),
+        params=(
+            _req(
+                "warehouse_id",
+                "Costco warehouse number to scan, from warehouses() (e.g. '1062').",
+            ),
+            _str("query", "Keywords to scan (1-200 characters)."),
+            _str("category", "Category slug to scan instead of a query."),
+            _int("pages", "Result pages of 120 to scan (1-5; server default 3)."),
+            _lit_list(
+                "price_codes",
+                ("clearance", "manager_markdown", "special_buy"),
+                "Markdown codes to keep. Server default clearance + manager_markdown; add "
+                "special_buy for .49/.79/.89 endings, which are common on regular grocery "
+                "prices.",
+            ),
+            _COSTCO_NA_COUNTRY,
+        ),
+        one_of=(("query", "category"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="costco_autocomplete",
+        namespace="costco",
+        method="autocomplete",
+        http="POST",
+        path="/api/v1/costco/autocomplete",
+        summary="Costco search-box suggestions for a partial query.",
+        params=(
+            _req("query", "Partial search text (1-100 characters)."),
+            _COSTCO_NA_COUNTRY,
+        ),
+        credits=1,
+    ),
     # =========================== Extract (core) ==========================
     # NOT a platform and NOT a namespace: surfaced as the top-level method
     # scavio.extract(url, format=, mode=). namespace="_core" keeps it out of
@@ -5064,6 +5417,7 @@ NAMESPACES: tuple[str, ...] = (
     "capterra",
     "google_ads",
     "meta_ads",
+    "costco",
 )
 
 

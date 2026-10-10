@@ -11,6 +11,7 @@ from ._namespaces_sync import (
     _BookingNamespace,
     _CapterraNamespace,
     _CompaniesHouseNamespace,
+    _CostcoNamespace,
     _EbayNamespace,
     _G2Namespace,
     _GlassdoorNamespace,
@@ -126,6 +127,7 @@ class ScavioClient:
         self.capterra = _CapterraNamespace(self)
         self.google_ads = _GoogleAdsNamespace(self)
         self.meta_ads = _MetaAdsNamespace(self)
+        self.costco = _CostcoNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

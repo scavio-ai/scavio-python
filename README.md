@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from 31 sources -- Google, Amazon, Walmart, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from 32 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 31 data sources, 195 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 32 data sources, 209 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -17,6 +17,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Google Search | Yes | Yes | Yes | Yes |
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
+| Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -31,7 +32,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 31 | 1 | 1 per plan | 1 |
+| Data Sources | 32 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -542,6 +543,52 @@ political = client.meta_ads.search("vote", ad_type="political_and_issue_ads")["d
 # is set, so do not "change the filter and keep paging" -- start a new walk.
 ```
 
+### 20. Costco -- Warehouse Prices, Stock, Gas, Coupons and Clearance
+
+`costco` covers costco.com and costco.ca (`country="ca"`); `search`, `product`
+and `warehouses` also take the international sites (uk, au, mx, jp, kr, tw).
+Warehouse numbers come from `warehouses()`; pass one as `warehouse_id` to add
+that warehouse's in-store price, stock status and price code to every search,
+category or deals result.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Nearest warehouses to a US zip code, with hours, services and gas prices.
+near = client.costco.warehouses(zip="10025", limit=3)["data"]
+
+# Search with one warehouse's in-store price alongside the online price.
+oil = client.costco.search("olive oil", warehouse_id="1062", page_size=5)["data"]
+for item in oil["results"]:
+    print(item["title"], item["price"], item["warehouse"]["price"])
+
+# Online vs in-warehouse price at up to 10 warehouses, with discount, final
+# price and promotion dates. 1 credit for up to 9 warehouses, 2 for 10.
+prices = client.costco.prices(item_id="1492456", warehouse_ids=["1062", "1107"])["data"]
+for row in prices["items"][0]["warehouses"]:
+    print(row["warehouse_id"], row["price"], row["final_price"])
+
+# In-warehouse stock status (a status, never a quantity). 1 credit per 5 warehouses.
+stock = client.costco.availability("1492456", ["1062"])["data"]
+
+# Regular, premium and diesel prices near a location, or at given warehouses.
+gas = client.costco.gas(zip="90001")["data"]
+for station in gas["stations"]:
+    print(station["name"], station["prices"]["regular"], station["prices"]["premium"])
+
+# The current member coupon book (US), and the deal feeds.
+book = client.costco.coupons()["data"]
+hunt = client.costco.deals("treasure_hunt")["data"]
+
+# Markdown finder at one warehouse: .97 clearance and .00/.88 manager markdowns
+# by default; add special_buy for .49/.79/.89 endings. The codes are the
+# member-community decode -- Costco does not publish them.
+marked_down = client.costco.clearance("1062", query="snacks")["data"]
+print(marked_down["count"], "of", marked_down["products_scanned"], "items marked down")
+```
+
 ## Error Handling
 
 ```python
@@ -651,11 +698,22 @@ Scavio works with popular AI/LLM frameworks:
 | Capterra | `search`, `product`, `reviews` | 2 each |
 | Google Ads Transparency | `advertisers` (start here), `search`, `creative` | 1 each |
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
+| Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
 | Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
 for field-level details.
+
+### Changed in 0.18.0
+
+- **New `costco` namespace, 13 methods.** `search`, `category`, `categories`,
+  `product` (up to 20 ids per call), `prices` (online vs in-warehouse price at up
+  to 10 warehouses), `availability` (in-warehouse stock status), `reviews`,
+  `warehouses`, `gas`, `coupons` (the member coupon book), `deals`
+  (new, while_supplies_last, treasure_hunt, member_favorites, online_only,
+  on_sale), `clearance` (price-code markdown finder) and `autocomplete`. See
+  example 20 above.
 
 ### Changed in 0.17.0
 

@@ -34,7 +34,8 @@ def value_for(param: Param) -> Any:
     annotation = param.annotation
     str_literal = re.search(r'Literal\["([^"]+)"', annotation)
     if str_literal:
-        return str_literal.group(1)
+        value = str_literal.group(1)
+        return [value] if "list[Literal[" in annotation else value
     int_literal = re.search(r"Literal\[(\d+)", annotation)
     if int_literal:
         value = int(int_literal.group(1))
