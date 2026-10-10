@@ -1,16 +1,24 @@
 name: Publish to PyPI
 
+# Publishes on every push to main, matching scavio-js: bump the version in
+# pyproject.toml and push. A push that does not bump it is a no-op (the version
+# check below skips the upload), so ordinary commits never fail this job.
+
 on:
-  release:
-    types: [published]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-jobs:
-  publish:
-    runs-on: ubuntu-latest
+concurrency:
+  group: publish-pypi
+  cancel-in-progress: false
 
+jobs:
+  test:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -19,13 +27,54 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev]" 2>/dev/null || pip install -e .
+          pip install pytest pytest-asyncio ruff
+
+      - name: Lint
+        run: ruff check scavio/ tests/
+
+      - name: Generated namespaces up to date
+        run: python scripts/gen_namespaces.py --check
+
+      - name: Test
+        run: pytest tests/
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check if version is new
+        id: check
+        run: |
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/scavio/$VERSION/json")
+          if [ "$STATUS" = "200" ]; then
+            echo "new=false" >> "$GITHUB_OUTPUT"
+            echo "scavio $VERSION already on PyPI, skipping"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+            echo "scavio $VERSION not on PyPI (HTTP $STATUS), publishing"
+          fi
+
       - name: Install build tools
+        if: steps.check.outputs.new == 'true'
         run: pip install build twine
 
       - name: Build
+        if: steps.check.outputs.new == 'true'
         run: python -m build
 
       - name: Publish to PyPI
+        if: steps.check.outputs.new == 'true'
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
