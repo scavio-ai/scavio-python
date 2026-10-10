@@ -41,6 +41,8 @@ __all__ = [
     "_AsyncMetaAdsNamespace",
     "_AsyncCostcoNamespace",
     "_AsyncTrustpilotNamespace",
+    "_AsyncRealtorNamespace",
+    "_AsyncRightmoveNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -4984,3 +4986,351 @@ class _AsyncTrustpilotNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("trustpilot_review", {"review_id": review_id}, extra)
+
+class _AsyncRealtorNamespace:
+    """Realtor.com listing search, property, location, market, and agent endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        location: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius_miles: Optional[float] = None,
+        agent_id: Optional[str] = None,
+        listing_status: Optional[Literal["for_sale", "pending", "for_rent", "sold"]] = None,
+        exclude_pending: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        beds_min: Optional[int] = None,
+        beds_max: Optional[int] = None,
+        baths_min: Optional[float] = None,
+        baths_max: Optional[float] = None,
+        sqft_min: Optional[int] = None,
+        sqft_max: Optional[int] = None,
+        lot_sqft_min: Optional[int] = None,
+        lot_sqft_max: Optional[int] = None,
+        year_built_min: Optional[int] = None,
+        year_built_max: Optional[int] = None,
+        garage_min: Optional[int] = None,
+        max_hoa: Optional[float] = None,
+        property_types: Optional[list[Literal["single_family", "condos", "townhomes", "multi_family", "land", "mobile", "farm"]]] = None,
+        listed_within_days: Optional[int] = None,
+        sold_within_days: Optional[int] = None,
+        price_reduced_within_days: Optional[int] = None,
+        keywords: Optional[list[str]] = None,
+        new_construction: Optional[bool] = None,
+        foreclosure: Optional[bool] = None,
+        has_open_house: Optional[bool] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low", "price_high", "sold_newest", "sqft_high", "lot_size_high", "year_built_new", "recently_updated", "recently_reduced"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Realtor.com for-sale, pending, for-rent and sold listings by location, radius or agent, filtered by price, beds, baths, square feet, lot size, year built, garage, HOA, property type, listing/sold/price-cut recency, listing-text keywords, new construction, foreclosure and open houses. Up to 200 listings per call with price, sold price and date, lot size, address with coordinates, MLS id and listing agent. Realtor.com serves the first 10,000 results of a search. Sold prices are null in US sold-price non-disclosure states (Texas, Utah, Wyoming and others); sold dates are still returned.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: City ('Austin, TX'), county ('Travis County, TX'), ZIP code, state or neighborhood. Alternative to latitude/longitude/radius_miles and agent_id.
+            latitude: Center latitude for a radius search (with longitude and radius_miles).
+            longitude: Center longitude for a radius search.
+            radius_miles: Radius around latitude/longitude, 0.1 to 50 miles.
+            agent_id: Only this agent's listings (numeric agent_id from search rows or agents()).
+            listing_status: for_sale (server default; includes pending and contingent listings, as on the site), pending (only pending or contingent), for_rent, or sold.
+            exclude_pending: for_sale only: leave out pending and contingent listings.
+            min_price: Minimum price in USD: list price, sold price on sold, monthly rent on for_rent.
+            max_price: Maximum price in USD (same meaning as min_price).
+            beds_min: Minimum bedrooms.
+            beds_max: Maximum bedrooms.
+            baths_min: Minimum bathrooms.
+            baths_max: Maximum bathrooms.
+            sqft_min: Minimum interior square feet.
+            sqft_max: Maximum interior square feet.
+            lot_sqft_min: Minimum lot size in square feet (1 acre = 43,560).
+            lot_sqft_max: Maximum lot size in square feet.
+            year_built_min: Built in or after this year (1700-2100).
+            year_built_max: Built in or before this year (1700-2100).
+            garage_min: Minimum garage spaces.
+            max_hoa: Maximum monthly HOA fee in USD (listings without an HOA fee are kept).
+            property_types: Only these property types (e.g. ['land']).
+            listed_within_days: Only listings listed in the last N days (1-3650).
+            sold_within_days: sold only: only sales in the last N days (1-3650).
+            price_reduced_within_days: Only listings with a price cut in the last N days (1-3650).
+            keywords: Only listings whose listing text matches these keywords, up to 10 (e.g. ['workshop']).
+            new_construction: Only new construction.
+            foreclosure: Only foreclosures.
+            has_open_house: Only listings with an open house in the next 7 days.
+            sort: Result order (server default 'relevance'). price_high uses sold price on sold; sold_newest is sold only.
+            page: Results page, 1-based.
+            page_size: Listings per page (1-200; server default 50). page x page_size may not exceed 10,000.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_search", {"location": location, "latitude": latitude, "longitude": longitude, "radius_miles": radius_miles, "agent_id": agent_id, "listing_status": listing_status, "exclude_pending": exclude_pending, "min_price": min_price, "max_price": max_price, "beds_min": beds_min, "beds_max": beds_max, "baths_min": baths_min, "baths_max": baths_max, "sqft_min": sqft_min, "sqft_max": sqft_max, "lot_sqft_min": lot_sqft_min, "lot_sqft_max": lot_sqft_max, "year_built_min": year_built_min, "year_built_max": year_built_max, "garage_min": garage_min, "max_hoa": max_hoa, "property_types": property_types, "listed_within_days": listed_within_days, "sold_within_days": sold_within_days, "price_reduced_within_days": price_reduced_within_days, "keywords": keywords, "new_construction": new_construction, "foreclosure": foreclosure, "has_open_house": has_open_house, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    async def property(
+        self,
+        *,
+        property_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Realtor.com property: description and detail groups, price history, tax history with assessed and market values, three home value estimates with ranges plus their history and forecast, nearby schools with ratings, flood/wildfire/noise risk, listing popularity, the listing agent and office, mortgage estimate and photos. Valuations, schools and risk can be null for land or new construction. Pass exactly one of property_id or url.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            property_id: Numeric property id from search() or locations().
+            url: A realtor.com property or rental URL. Alternative to property_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_property", {"property_id": property_id, "url": url}, extra)
+
+    async def locations(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Location suggestions for a partial name: cities, counties, ZIP codes, neighborhoods, schools and addresses, each with its slug_id (for market()) and, for an address, the property_id (for property()).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: City, county, ZIP, neighborhood, school or street address (1-200 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_locations", {"query": query}, extra)
+
+    async def market(
+        self,
+        location: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Housing market statistics for a city, county or ZIP: median listing, sold and rent price, price per square foot, days on market, lot size, listing and rental counts, year-over-year and month-over-month changes, and a breakdown by property type. Some medians are null at some geography levels.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: A slug_id from locations() (e.g. 'Austin_TX', 'Travis-County_TX') or 'City, ST'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_market", {"location": location}, extra)
+
+    async def agents(
+        self,
+        *,
+        location: Optional[str] = None,
+        postal_code: Optional[str] = None,
+        name: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find real estate agents by city, ZIP code or name: rating, review and recommendation counts, active listing count and price range, homes sold in the last year, broker and office, first year in business and services. Pass exactly one of location, postal_code or name.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: City as 'City, ST' (e.g. 'Austin, TX').
+            postal_code: 5-digit ZIP code.
+            name: Agent name (2-100 characters).
+            page: Results page, 1-based (1-1000).
+            page_size: Agents per page (1-50; server default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_agents", {"location": location, "postal_code": postal_code, "name": name, "page": page, "page_size": page_size}, extra)
+
+    async def agent(
+        self,
+        agent_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One agent's profile with all reviews: bio, phones, website, license number and state, MLS memberships, languages, specializations, served areas, designations, office address, social links, listing and sales stats, and every review with responsiveness, market expertise, negotiation and professionalism sub-ratings and the agent's reply.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            agent_id: Numeric agent id from search rows (agent.agent_id) or agents().
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("realtor_agent", {"agent_id": agent_id}, extra)
+
+class _AsyncRightmoveNamespace:
+    """Rightmove UK property search, listing, sold price, and agent endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def locations(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Look up UK places by name, outcode, postcode or station and get the location_id that search() and agents() take.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Town, area, outcode (SW11), postcode or station (1-100 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_locations", {"query": query}, extra)
+
+    async def search(
+        self,
+        *,
+        location_id: Optional[str] = None,
+        location: Optional[str] = None,
+        branch_id: Optional[str] = None,
+        listing_status: Optional[Literal["for_sale", "for_rent"]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        beds_min: Optional[int] = None,
+        beds_max: Optional[int] = None,
+        baths_min: Optional[int] = None,
+        property_types: Optional[list[Literal["detached", "semi_detached", "terraced", "flat", "bungalow", "land", "park_home"]]] = None,
+        must_have: Optional[list[Literal["garden", "parking", "new_home"]]] = None,
+        exclude: Optional[list[Literal["auction", "retirement", "shared_ownership", "new_home"]]] = None,
+        tenure: Optional[Literal["freehold", "leasehold"]] = None,
+        added_within_days: Optional[Literal[1, 3, 7, 14]] = None,
+        include_under_offer: Optional[bool] = None,
+        radius_miles: Optional[float] = None,
+        furnishing: Optional[list[Literal["furnished", "part_furnished", "unfurnished"]]] = None,
+        let_type: Optional[Literal["long_term", "short_term"]] = None,
+        sort: Optional[Literal["newest", "oldest", "price_low", "price_high"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Rightmove properties for sale or to rent by location_id, place name or agent branch, filtered by price (GBP; monthly on for_rent), beds, baths, property type, must-have and exclude features, tenure, days since added, under offer, radius, and furnishing and let type for rentals. 24 listings per page, up to 42 pages (about 1,000 listings) per search. Pass exactly one of location_id, location or branch_id. There is no keyword filter; match on summary and key_features in the results.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location_id: A location_id from locations() (REGION^, OUTCODE^, POSTCODE^ or STATION^, e.g. 'REGION^219').
+            location: A place name, resolved to its first location match (echoed in the response). Alternative to location_id.
+            branch_id: Only this agent branch's listings (numeric branch_id from agents()).
+            listing_status: for_sale (server default) or for_rent.
+            min_price: Minimum price in GBP (monthly rent on for_rent).
+            max_price: Maximum price in GBP (monthly rent on for_rent).
+            beds_min: Minimum bedrooms (0-10).
+            beds_max: Maximum bedrooms (0-10).
+            baths_min: Minimum bathrooms (1-5).
+            property_types: Only these property types (e.g. ['detached', 'semi_detached']).
+            must_have: Only listings with all of these.
+            exclude: Leave these listing kinds out.
+            tenure: for_sale only: freehold or leasehold.
+            added_within_days: Only listings added in the last 1, 3, 7 or 14 days.
+            include_under_offer: Include listings under offer / sold STC (for_sale) or let agreed (for_rent).
+            radius_miles: Widen the area by this many miles: 0 (default), 0.25, 0.5, 1, 3, 5, 10, 15, 20, 30 or 40.
+            furnishing: for_rent only.
+            let_type: for_rent only: long_term or short_term.
+            sort: Result order (server default 'newest').
+            page: Results page, 1-42 (24 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_search", {"location_id": location_id, "location": location, "branch_id": branch_id, "listing_status": listing_status, "min_price": min_price, "max_price": max_price, "beds_min": beds_min, "beds_max": beds_max, "baths_min": baths_min, "property_types": property_types, "must_have": must_have, "exclude": exclude, "tenure": tenure, "added_within_days": added_within_days, "include_under_offer": include_under_offer, "radius_miles": radius_miles, "furnishing": furnishing, "let_type": let_type, "sort": sort, "page": page}, extra)
+
+    async def property(
+        self,
+        *,
+        property_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Rightmove listing in full: price and qualifier, description, key features, rooms, images, floorplans, brochures, EPC, tenure and lease years remaining, council tax band, service charge and ground rent, heating, parking, garden, accessibility and flood-risk details, broadband, nearest stations, letting terms and the agent branch with phone. Live listings carry no price history; use sold_property() for an address's past sales. A removed listing is a 404. Pass exactly one of property_id or url.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            property_id: Numeric listing id from search().
+            url: A rightmove.co.uk/properties/<id> URL. Alternative to property_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_property", {"property_id": property_id, "url": url}, extra)
+
+    async def sold(
+        self,
+        location: str,
+        *,
+        property_type: Optional[Literal["flat", "detached", "semi_detached", "terraced", "other"]] = None,
+        tenure: Optional[Literal["freehold", "leasehold"]] = None,
+        sold_within_years: Optional[Literal[1, 2, 3, 5, 10, 15, 20, 30]] = None,
+        radius_miles: Optional[float] = None,
+        sort: Optional[Literal["newest", "price_low", "price_high"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sold house prices for a town, outcode or postcode in England or Wales: every address with its sale history since 1995 (price, date, tenure, new build) plus an area summary. 25 addresses per page, up to 40 pages per search.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: A town, outcode (SW11) or full postcode (SW11 1AA) in England or Wales.
+            property_type: Only this property type.
+            tenure: freehold or leasehold.
+            sold_within_years: Only addresses sold in the last 1, 2, 3, 5, 10, 15, 20 or 30 years.
+            radius_miles: Widen the area by this many miles: 0 (default), 0.25, 0.5, 1, 3, 5, 10, 15, 20, 30 or 40.
+            sort: Newest sale first (server default), price_low or price_high.
+            page: Results page, 1-40 (25 addresses per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_sold", {"location": location, "property_type": property_type, "tenure": tenure, "sold_within_years": sold_within_years, "radius_miles": radius_miles, "sort": sort, "page": page}, extra)
+
+    async def sold_property(
+        self,
+        *,
+        sold_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One sold address on Rightmove: every recorded sale with price, date, tenure, new build flag and percent change, plus the last listing's beds, baths, key features, photos and floorplans when it was advertised. Pass exactly one of sold_id or url.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sold_id: sold_id from sold() (36-character id).
+            url: A rightmove.co.uk/house-prices/details/<id> URL. Alternative to sold_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_sold_property", {"sold_id": sold_id, "url": url}, extra)
+
+    async def agents(
+        self,
+        *,
+        location_id: Optional[str] = None,
+        location: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Estate agent branches in a Rightmove area: name, brand, phones, address, sales and lettings flags, description and profile URL. 20 branches per page, up to 50 pages. Pass exactly one of location_id or location.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location_id: A location_id from locations() (REGION^, OUTCODE^, POSTCODE^ or STATION^).
+            location: A place name, resolved to its first location match. Alternative to location_id.
+            page: Results page, 1-50 (20 branches per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_agents", {"location_id": location_id, "location": location, "page": page}, extra)
+
+    async def agent(
+        self,
+        *,
+        url: Optional[str] = None,
+        branch_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Rightmove agent branch: address, phones, coordinates, company, sales/lettings/commercial/development flags, descriptions, logo, industry affiliations, and the count plus a teaser of its listings for sale and to rent. Use search(branch_id=...) for the full listings. Pass exactly one of url or branch_id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A branch profile URL (profile_url from agents()).
+            branch_id: Numeric branch_id from agents() or a listing's agent. Alternative to url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rightmove_agent", {"url": url, "branch_id": branch_id}, extra)

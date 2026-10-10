@@ -24,8 +24,10 @@ from ._namespaces_sync import (
     _KuaishouNamespace,
     _LinkedInNamespace,
     _MetaAdsNamespace,
+    _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
+    _RightmoveNamespace,
     _SECNamespace,
     _TargetNamespace,
     _ThreadsNamespace,
@@ -130,6 +132,8 @@ class ScavioClient:
         self.meta_ads = _MetaAdsNamespace(self)
         self.costco = _CostcoNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
+        self.realtor = _RealtorNamespace(self)
+        self.rightmove = _RightmoveNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

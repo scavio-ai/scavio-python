@@ -5493,6 +5493,424 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=2,
     ),
+    # ============================ Realtor.com ============================
+    # 6 endpoints, 1 credit each. search() takes location, a point
+    # (latitude + longitude + radius_miles) or agent_id; one_of only enforces
+    # "at least one" client-side and the backend enforces the rest. property()
+    # takes exactly one of property_id or url.
+    Endpoint(
+        key="realtor_search",
+        namespace="realtor",
+        method="search",
+        http="POST",
+        path="/api/v1/realtor/search",
+        summary=(
+            "Search Realtor.com for-sale, pending, for-rent and sold listings by location, radius "
+            "or agent, filtered by price, beds, baths, square feet, lot size, year built, garage, "
+            "HOA, property type, listing/sold/price-cut recency, listing-text keywords, new "
+            "construction, foreclosure and open houses. Up to 200 listings per call with price, "
+            "sold price and date, lot size, address with coordinates, MLS id and listing agent. "
+            "Realtor.com serves the first 10,000 results of a search. Sold prices are null in US "
+            "sold-price non-disclosure states (Texas, Utah, Wyoming and others); sold dates are "
+            "still returned."
+        ),
+        params=(
+            _str(
+                "location",
+                "City ('Austin, TX'), county ('Travis County, TX'), ZIP code, state or "
+                "neighborhood. Alternative to latitude/longitude/radius_miles and agent_id.",
+            ),
+            _float("latitude", "Center latitude for a radius search (with longitude and radius_miles)."),
+            _float("longitude", "Center longitude for a radius search."),
+            _float("radius_miles", "Radius around latitude/longitude, 0.1 to 50 miles."),
+            _str("agent_id", "Only this agent's listings (numeric agent_id from search rows or agents())."),
+            _lit(
+                "listing_status",
+                ("for_sale", "pending", "for_rent", "sold"),
+                "for_sale (server default; includes pending and contingent listings, as on the "
+                "site), pending (only pending or contingent), for_rent, or sold.",
+            ),
+            _bool("exclude_pending", "for_sale only: leave out pending and contingent listings."),
+            _float(
+                "min_price",
+                "Minimum price in USD: list price, sold price on sold, monthly rent on for_rent.",
+            ),
+            _float("max_price", "Maximum price in USD (same meaning as min_price)."),
+            _int("beds_min", "Minimum bedrooms."),
+            _int("beds_max", "Maximum bedrooms."),
+            _float("baths_min", "Minimum bathrooms."),
+            _float("baths_max", "Maximum bathrooms."),
+            _int("sqft_min", "Minimum interior square feet."),
+            _int("sqft_max", "Maximum interior square feet."),
+            _int("lot_sqft_min", "Minimum lot size in square feet (1 acre = 43,560)."),
+            _int("lot_sqft_max", "Maximum lot size in square feet."),
+            _int("year_built_min", "Built in or after this year (1700-2100)."),
+            _int("year_built_max", "Built in or before this year (1700-2100)."),
+            _int("garage_min", "Minimum garage spaces."),
+            _float(
+                "max_hoa",
+                "Maximum monthly HOA fee in USD (listings without an HOA fee are kept).",
+            ),
+            _lit_list(
+                "property_types",
+                ("single_family", "condos", "townhomes", "multi_family", "land", "mobile", "farm"),
+                "Only these property types (e.g. ['land']).",
+            ),
+            _int("listed_within_days", "Only listings listed in the last N days (1-3650)."),
+            _int("sold_within_days", "sold only: only sales in the last N days (1-3650)."),
+            _int("price_reduced_within_days", "Only listings with a price cut in the last N days (1-3650)."),
+            _str_list(
+                "keywords",
+                "Only listings whose listing text matches these keywords, up to 10 "
+                "(e.g. ['workshop']).",
+            ),
+            _bool("new_construction", "Only new construction."),
+            _bool("foreclosure", "Only foreclosures."),
+            _bool("has_open_house", "Only listings with an open house in the next 7 days."),
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "newest",
+                    "price_low",
+                    "price_high",
+                    "sold_newest",
+                    "sqft_high",
+                    "lot_size_high",
+                    "year_built_new",
+                    "recently_updated",
+                    "recently_reduced",
+                ),
+                "Result order (server default 'relevance'). price_high uses sold price on sold; "
+                "sold_newest is sold only.",
+            ),
+            _int("page", "Results page, 1-based."),
+            _int(
+                "page_size",
+                "Listings per page (1-200; server default 50). page x page_size may not exceed "
+                "10,000.",
+            ),
+        ),
+        one_of=(("location", "latitude", "agent_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="realtor_property",
+        namespace="realtor",
+        method="property",
+        http="POST",
+        path="/api/v1/realtor/property",
+        summary=(
+            "One Realtor.com property: description and detail groups, price history, tax history "
+            "with assessed and market values, three home value estimates with ranges plus their "
+            "history and forecast, nearby schools with ratings, flood/wildfire/noise risk, listing "
+            "popularity, the listing agent and office, mortgage estimate and photos. Valuations, "
+            "schools and risk can be null for land or new construction. Pass exactly one of "
+            "property_id or url."
+        ),
+        params=(
+            _str("property_id", "Numeric property id from search() or locations()."),
+            _str("url", "A realtor.com property or rental URL. Alternative to property_id."),
+        ),
+        one_of=(("property_id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="realtor_locations",
+        namespace="realtor",
+        method="locations",
+        http="POST",
+        path="/api/v1/realtor/locations",
+        summary=(
+            "Location suggestions for a partial name: cities, counties, ZIP codes, neighborhoods, "
+            "schools and addresses, each with its slug_id (for market()) and, for an address, the "
+            "property_id (for property())."
+        ),
+        params=(
+            _req("query", "City, county, ZIP, neighborhood, school or street address (1-200 characters)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="realtor_market",
+        namespace="realtor",
+        method="market",
+        http="POST",
+        path="/api/v1/realtor/market",
+        summary=(
+            "Housing market statistics for a city, county or ZIP: median listing, sold and rent "
+            "price, price per square foot, days on market, lot size, listing and rental counts, "
+            "year-over-year and month-over-month changes, and a breakdown by property type. Some "
+            "medians are null at some geography levels."
+        ),
+        params=(
+            _req(
+                "location",
+                "A slug_id from locations() (e.g. 'Austin_TX', 'Travis-County_TX') or 'City, ST'.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="realtor_agents",
+        namespace="realtor",
+        method="agents",
+        http="POST",
+        path="/api/v1/realtor/agents",
+        summary=(
+            "Find real estate agents by city, ZIP code or name: rating, review and recommendation "
+            "counts, active listing count and price range, homes sold in the last year, broker and "
+            "office, first year in business and services. Pass exactly one of location, "
+            "postal_code or name."
+        ),
+        params=(
+            _str("location", "City as 'City, ST' (e.g. 'Austin, TX')."),
+            _str("postal_code", "5-digit ZIP code."),
+            _str("name", "Agent name (2-100 characters)."),
+            _int("page", "Results page, 1-based (1-1000)."),
+            _int("page_size", "Agents per page (1-50; server default 20)."),
+        ),
+        one_of=(("location", "postal_code", "name"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="realtor_agent",
+        namespace="realtor",
+        method="agent",
+        http="POST",
+        path="/api/v1/realtor/agent",
+        summary=(
+            "One agent's profile with all reviews: bio, phones, website, license number and state, "
+            "MLS memberships, languages, specializations, served areas, designations, office "
+            "address, social links, listing and sales stats, and every review with "
+            "responsiveness, market expertise, negotiation and professionalism sub-ratings and the "
+            "agent's reply."
+        ),
+        params=(
+            _req("agent_id", "Numeric agent id from search rows (agent.agent_id) or agents()."),
+        ),
+        credits=1,
+    ),
+    # ============================== Rightmove ============================
+    # 7 endpoints, 1 credit each, UK. search() and agents() take exactly one
+    # place selector; property(), sold_property() and agent() take exactly one
+    # of an id or a URL. Rightmove search has NO keyword filter: the backend
+    # rejects a keywords field with a free 400, so none is declared here.
+    Endpoint(
+        key="rightmove_locations",
+        namespace="rightmove",
+        method="locations",
+        http="POST",
+        path="/api/v1/rightmove/locations",
+        summary=(
+            "Look up UK places by name, outcode, postcode or station and get the location_id that "
+            "search() and agents() take."
+        ),
+        params=(
+            _req("query", "Town, area, outcode (SW11), postcode or station (1-100 characters)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_search",
+        namespace="rightmove",
+        method="search",
+        http="POST",
+        path="/api/v1/rightmove/search",
+        summary=(
+            "Search Rightmove properties for sale or to rent by location_id, place name or agent "
+            "branch, filtered by price (GBP; monthly on for_rent), beds, baths, property type, "
+            "must-have and exclude features, tenure, days since added, under offer, radius, and "
+            "furnishing and let type for rentals. 24 listings per page, up to 42 pages (about "
+            "1,000 listings) per search. Pass exactly one of location_id, location or branch_id. "
+            "There is no keyword filter; match on summary and key_features in the results."
+        ),
+        params=(
+            _str(
+                "location_id",
+                "A location_id from locations() (REGION^, OUTCODE^, POSTCODE^ or STATION^, "
+                "e.g. 'REGION^219').",
+            ),
+            _str(
+                "location",
+                "A place name, resolved to its first location match (echoed in the response). "
+                "Alternative to location_id.",
+            ),
+            _str("branch_id", "Only this agent branch's listings (numeric branch_id from agents())."),
+            _lit("listing_status", ("for_sale", "for_rent"), "for_sale (server default) or for_rent."),
+            _float("min_price", "Minimum price in GBP (monthly rent on for_rent)."),
+            _float("max_price", "Maximum price in GBP (monthly rent on for_rent)."),
+            _int("beds_min", "Minimum bedrooms (0-10)."),
+            _int("beds_max", "Maximum bedrooms (0-10)."),
+            _int("baths_min", "Minimum bathrooms (1-5)."),
+            _lit_list(
+                "property_types",
+                ("detached", "semi_detached", "terraced", "flat", "bungalow", "land", "park_home"),
+                "Only these property types (e.g. ['detached', 'semi_detached']).",
+            ),
+            _lit_list("must_have", ("garden", "parking", "new_home"), "Only listings with all of these."),
+            _lit_list(
+                "exclude",
+                ("auction", "retirement", "shared_ownership", "new_home"),
+                "Leave these listing kinds out.",
+            ),
+            _lit("tenure", ("freehold", "leasehold"), "for_sale only: freehold or leasehold."),
+            _ilit("added_within_days", (1, 3, 7, 14), "Only listings added in the last 1, 3, 7 or 14 days."),
+            _bool(
+                "include_under_offer",
+                "Include listings under offer / sold STC (for_sale) or let agreed (for_rent).",
+            ),
+            # One of 0, 0.25, 0.5, 1, 3, 5, 10, 15, 20, 30, 40: a float literal
+            # is not valid typing, so the annotation is the honest float.
+            _float(
+                "radius_miles",
+                "Widen the area by this many miles: 0 (default), 0.25, 0.5, 1, 3, 5, 10, 15, 20, "
+                "30 or 40.",
+            ),
+            _lit_list(
+                "furnishing",
+                ("furnished", "part_furnished", "unfurnished"),
+                "for_rent only.",
+            ),
+            _lit("let_type", ("long_term", "short_term"), "for_rent only: long_term or short_term."),
+            _lit(
+                "sort",
+                ("newest", "oldest", "price_low", "price_high"),
+                "Result order (server default 'newest').",
+            ),
+            _int("page", "Results page, 1-42 (24 per page)."),
+        ),
+        one_of=(("location_id", "location", "branch_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_property",
+        namespace="rightmove",
+        method="property",
+        http="POST",
+        path="/api/v1/rightmove/property",
+        summary=(
+            "One Rightmove listing in full: price and qualifier, description, key features, "
+            "rooms, images, floorplans, brochures, EPC, tenure and lease years remaining, council "
+            "tax band, service charge and ground rent, heating, parking, garden, accessibility and "
+            "flood-risk details, broadband, nearest stations, letting terms and the agent branch "
+            "with phone. Live listings carry no price history; use sold_property() for an "
+            "address's past sales. A removed listing is a 404. Pass exactly one of property_id or "
+            "url."
+        ),
+        params=(
+            _str("property_id", "Numeric listing id from search()."),
+            _str("url", "A rightmove.co.uk/properties/<id> URL. Alternative to property_id."),
+        ),
+        one_of=(("property_id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_sold",
+        namespace="rightmove",
+        method="sold",
+        http="POST",
+        path="/api/v1/rightmove/sold",
+        summary=(
+            "Sold house prices for a town, outcode or postcode in England or Wales: every address "
+            "with its sale history since 1995 (price, date, tenure, new build) plus an area "
+            "summary. 25 addresses per page, up to 40 pages per search."
+        ),
+        params=(
+            _req(
+                "location",
+                "A town, outcode (SW11) or full postcode (SW11 1AA) in England or Wales.",
+            ),
+            _lit(
+                "property_type",
+                ("flat", "detached", "semi_detached", "terraced", "other"),
+                "Only this property type.",
+            ),
+            _lit("tenure", ("freehold", "leasehold"), "freehold or leasehold."),
+            _ilit(
+                "sold_within_years",
+                (1, 2, 3, 5, 10, 15, 20, 30),
+                "Only addresses sold in the last 1, 2, 3, 5, 10, 15, 20 or 30 years.",
+            ),
+            _float(
+                "radius_miles",
+                "Widen the area by this many miles: 0 (default), 0.25, 0.5, 1, 3, 5, 10, 15, 20, "
+                "30 or 40.",
+            ),
+            _lit(
+                "sort",
+                ("newest", "price_low", "price_high"),
+                "Newest sale first (server default), price_low or price_high.",
+            ),
+            _int("page", "Results page, 1-40 (25 addresses per page)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_sold_property",
+        namespace="rightmove",
+        method="sold_property",
+        http="POST",
+        path="/api/v1/rightmove/sold-property",
+        summary=(
+            "One sold address on Rightmove: every recorded sale with price, date, tenure, new "
+            "build flag and percent change, plus the last listing's beds, baths, key features, "
+            "photos and floorplans when it was advertised. Pass exactly one of sold_id or url."
+        ),
+        params=(
+            _str("sold_id", "sold_id from sold() (36-character id)."),
+            _str(
+                "url",
+                "A rightmove.co.uk/house-prices/details/<id> URL. Alternative to sold_id.",
+            ),
+        ),
+        one_of=(("sold_id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_agents",
+        namespace="rightmove",
+        method="agents",
+        http="POST",
+        path="/api/v1/rightmove/agents",
+        summary=(
+            "Estate agent branches in a Rightmove area: name, brand, phones, address, sales and "
+            "lettings flags, description and profile URL. 20 branches per page, up to 50 pages. "
+            "Pass exactly one of location_id or location."
+        ),
+        params=(
+            _str(
+                "location_id",
+                "A location_id from locations() (REGION^, OUTCODE^, POSTCODE^ or STATION^).",
+            ),
+            _str(
+                "location",
+                "A place name, resolved to its first location match. Alternative to location_id.",
+            ),
+            _int("page", "Results page, 1-50 (20 branches per page)."),
+        ),
+        one_of=(("location_id", "location"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="rightmove_agent",
+        namespace="rightmove",
+        method="agent",
+        http="POST",
+        path="/api/v1/rightmove/agent",
+        summary=(
+            "One Rightmove agent branch: address, phones, coordinates, company, "
+            "sales/lettings/commercial/development flags, descriptions, logo, industry "
+            "affiliations, and the count plus a teaser of its listings for sale and to rent. Use "
+            "search(branch_id=...) for the full listings. Pass exactly one of url or branch_id."
+        ),
+        params=(
+            _str("url", "A branch profile URL (profile_url from agents())."),
+            _str("branch_id", "Numeric branch_id from agents() or a listing's agent. Alternative to url."),
+        ),
+        one_of=(("url", "branch_id"),),
+        credits=1,
+    ),
     # =========================== Extract (core) ==========================
     # NOT a platform and NOT a namespace: surfaced as the top-level method
     # scavio.extract(url, format=, mode=). namespace="_core" keeps it out of
@@ -5584,6 +6002,8 @@ NAMESPACES: tuple[str, ...] = (
     "meta_ads",
     "costco",
     "trustpilot",
+    "realtor",
+    "rightmove",
 )
 
 

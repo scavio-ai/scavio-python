@@ -26,8 +26,10 @@ from ._namespaces_async import (
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
     _AsyncMetaAdsNamespace,
+    _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
+    _AsyncRightmoveNamespace,
     _AsyncSECNamespace,
     _AsyncTargetNamespace,
     _AsyncThreadsNamespace,
@@ -127,6 +129,8 @@ class AsyncScavioClient:
         self.meta_ads = _AsyncMetaAdsNamespace(self)
         self.costco = _AsyncCostcoNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
+        self.realtor = _AsyncRealtorNamespace(self)
+        self.rightmove = _AsyncRightmoveNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

@@ -959,6 +959,195 @@ async def test_trustpilot_async_reviews(monkeypatch):
     assert captured["json"] == {"url": "https://www.trustpilot.com/review/nordvpn.com"}
 
 
+def test_realtor_rightmove_method_names_match_the_dashboard_playground():
+    """The Playground advertises realtor.<m>() / rightmove.<m>(); a rename breaks its snippets."""
+    expected = {
+        "realtor": {
+            "search": "search",
+            "property": "property",
+            "locations": "locations",
+            "market": "market",
+            "agents": "agents",
+            "agent": "agent",
+        },
+        "rightmove": {
+            "locations": "locations",
+            "search": "search",
+            "property": "property",
+            "sold": "sold",
+            "sold_property": "sold-property",
+            "agents": "agents",
+            "agent": "agent",
+        },
+    }
+    for ns, methods in expected.items():
+        eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}
+        assert sorted(eps) == sorted(methods), ns
+        for method, slug in methods.items():
+            assert eps[method].path == f"/api/v1/{ns}/{slug}", method
+            assert eps[method].credits == 1, method
+            assert eps[method].credits_note is None, method
+    # The positional argument the Playground snippet passes first, per method.
+    positional = {
+        ("realtor", "locations"): "query",
+        ("realtor", "market"): "location",
+        ("realtor", "agent"): "agent_id",
+        ("rightmove", "locations"): "query",
+        ("rightmove", "sold"): "location",
+    }
+    client = ScavioClient(api_key="sk_test")
+    for (ns, method), name in positional.items():
+        params = list(inspect.signature(getattr(getattr(client, ns), method)).parameters.values())
+        assert params[0].name == name, method
+        assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD, method
+    for ns, methods in expected.items():
+        for method in methods:
+            if (ns, method) in positional:
+                continue
+            fn = getattr(getattr(client, ns), method)
+            params = list(inspect.signature(fn).parameters.values())
+            assert params[0].kind is inspect.Parameter.KEYWORD_ONLY, (ns, method)
+
+
+def test_realtor_search_filters(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.realtor.search(
+        location="Maricopa County, AZ",
+        listing_status="sold",
+        property_types=["land"],
+        sold_within_days=365,
+        lot_sqft_min=43560,
+        max_price=150000,
+        keywords=["workshop"],
+        sort="sold_newest",
+        page_size=200,
+    )
+    assert captured["path"] == "/api/v1/realtor/search"
+    assert captured["json"] == {
+        "location": "Maricopa County, AZ",
+        "listing_status": "sold",
+        "max_price": 150000,
+        "lot_sqft_min": 43560,
+        "property_types": ["land"],
+        "sold_within_days": 365,
+        "keywords": ["workshop"],
+        "sort": "sold_newest",
+        "page_size": 200,
+    }
+    client.realtor.search(latitude=30.27, longitude=-97.74, radius_miles=2.5)
+    assert captured["json"] == {"latitude": 30.27, "longitude": -97.74, "radius_miles": 2.5}
+    client.realtor.search(agent_id="1918615")
+    assert captured["json"] == {"agent_id": "1918615"}
+    with pytest.raises(ScavioError):
+        client.realtor.search(beds_min=3)
+
+
+def test_realtor_property_locations_market_agents_agent(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.realtor.property(property_id="9564057635")
+    assert captured["path"] == "/api/v1/realtor/property"
+    assert captured["json"] == {"property_id": "9564057635"}
+    with pytest.raises(ScavioError):
+        client.realtor.property()
+    client.realtor.locations("Austin")
+    assert captured["path"] == "/api/v1/realtor/locations"
+    assert captured["json"] == {"query": "Austin"}
+    client.realtor.market("Austin_TX")
+    assert captured["path"] == "/api/v1/realtor/market"
+    assert captured["json"] == {"location": "Austin_TX"}
+    client.realtor.agents(postal_code="78744", page_size=50)
+    assert captured["path"] == "/api/v1/realtor/agents"
+    assert captured["json"] == {"postal_code": "78744", "page_size": 50}
+    with pytest.raises(ScavioError):
+        client.realtor.agents(page=2)
+    client.realtor.agent("1918615")
+    assert captured["path"] == "/api/v1/realtor/agent"
+    assert captured["json"] == {"agent_id": "1918615"}
+
+
+def test_rightmove_search_filters(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.rightmove.search(
+        location_id="REGION^219",
+        listing_status="for_rent",
+        max_price=1800,
+        beds_min=2,
+        property_types=["flat"],
+        furnishing=["furnished"],
+        let_type="long_term",
+        added_within_days=7,
+        radius_miles=0.5,
+        page=2,
+    )
+    assert captured["path"] == "/api/v1/rightmove/search"
+    assert captured["json"] == {
+        "location_id": "REGION^219",
+        "listing_status": "for_rent",
+        "max_price": 1800,
+        "beds_min": 2,
+        "property_types": ["flat"],
+        "added_within_days": 7,
+        "radius_miles": 0.5,
+        "furnishing": ["furnished"],
+        "let_type": "long_term",
+        "page": 2,
+    }
+    with pytest.raises(ScavioError):
+        client.rightmove.search(beds_min=2)
+    # No keyword filter is declared: Rightmove ignores it and the API rejects it.
+    assert "keywords" not in {p.name for p in ENDPOINTS["rightmove_search"].params}
+
+
+def test_rightmove_sold_and_sold_property(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.rightmove.sold("SW11", property_type="flat", sold_within_years=5, sort="price_high")
+    assert captured["path"] == "/api/v1/rightmove/sold"
+    assert captured["json"] == {
+        "location": "SW11",
+        "property_type": "flat",
+        "sold_within_years": 5,
+        "sort": "price_high",
+    }
+    client.rightmove.sold_property(sold_id="921d33f4-d206-4991-be4d-75cbe71981ce")
+    assert captured["path"] == "/api/v1/rightmove/sold-property"
+    assert captured["json"] == {"sold_id": "921d33f4-d206-4991-be4d-75cbe71981ce"}
+    with pytest.raises(ScavioError):
+        client.rightmove.sold_property()
+
+
+def test_rightmove_property_agents_agent(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.rightmove.property(url="https://www.rightmove.co.uk/properties/93577917")
+    assert captured["path"] == "/api/v1/rightmove/property"
+    assert captured["json"] == {"url": "https://www.rightmove.co.uk/properties/93577917"}
+    client.rightmove.agents(location="Bristol", page=3)
+    assert captured["path"] == "/api/v1/rightmove/agents"
+    assert captured["json"] == {"location": "Bristol", "page": 3}
+    with pytest.raises(ScavioError):
+        client.rightmove.agents(page=1)
+    client.rightmove.agent(branch_id="201404")
+    assert captured["path"] == "/api/v1/rightmove/agent"
+    assert captured["json"] == {"branch_id": "201404"}
+    with pytest.raises(ScavioError):
+        client.rightmove.agent()
+
+
+async def test_realtor_rightmove_async(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.realtor.locations("Austin")
+    assert captured["path"] == "/api/v1/realtor/locations"
+    assert captured["json"] == {"query": "Austin"}
+    await client.rightmove.sold_property(sold_id="921d33f4-d206-4991-be4d-75cbe71981ce")
+    assert captured["path"] == "/api/v1/rightmove/sold-property"
+    assert captured["json"] == {"sold_id": "921d33f4-d206-4991-be4d-75cbe71981ce"}
+
+
 def test_walmart_seller_products_path_is_hyphenated():
     assert ENDPOINTS["walmart_seller_products"].path == "/api/v1/walmart/seller-products"
 
@@ -1057,6 +1246,8 @@ def test_new_platform_endpoint_counts():
         "meta_ads": 3,
         "costco": 13,
         "trustpilot": 6,
+        "realtor": 6,
+        "rightmove": 7,
         "_core": 1,
     }
     counts: dict[str, int] = {}
@@ -1064,7 +1255,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 113
+    assert sum(expected.values()) == 126
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 33 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 35 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 33 data sources, 215 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 35 data sources, 228 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -27,13 +27,14 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Instagram Data (12 endpoints) | Yes | No | No | No |
 | LinkedIn Data (9 endpoints) | Yes | No | No | No |
 | eBay Sold-Listing Price History | Yes | No | No | No |
-| Real Estate (Zillow + Redfin, 6 endpoints) | Yes | No | No | No |
+| Real Estate (Zillow + Redfin + Realtor.com + Rightmove, 19 endpoints) | Yes | No | No | No |
+| UK Sold House Prices since 1995 (Rightmove) | Yes | No | No | No |
 | Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
 | Jobs & Employers (Indeed + Glassdoor, 8 endpoints) | Yes | No | No | No |
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 33 | 1 | 1 per plan | 1 |
+| Data Sources | 35 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -644,6 +645,72 @@ print(one["review"]["text"], one["business"]["name"])
 An unknown business, review or category returns a 404 (`NotFoundError`) and is
 billed 2 credits. Trustpilot keeps no TrustScore history, so none is returned.
 
+### 22. Realtor.com and Rightmove -- Listings, Sold Comps and Agents
+
+`realtor` covers US listings (for sale, pending, for rent and sold) with up to
+200 rows per call, full property detail, market stats and agents. `rightmove`
+covers UK listings, sold house prices since 1995 and agent branches. Every call
+on both costs 1 credit.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Sold land comps: 200 rows per call, filtered by lot size, price and recency.
+# Realtor.com serves the first 10,000 results of a search; slice by price band,
+# property type or area to go further. Sold prices are null in US non-disclosure
+# states (Texas, Utah, Wyoming and others); sold dates still come back.
+comps = client.realtor.search(
+    location="Maricopa County, AZ",
+    listing_status="sold",
+    property_types=["land"],
+    sold_within_days=365,
+    lot_sqft_min=43560,
+    page_size=200,
+)["data"]
+print(comps["total"], "sold; pages:", comps["max_page"])
+for row in comps["listings"]:
+    print(row["sold_price"], row["sold_date"], row["lot_sqft"], row["address"]["line"])
+
+# Listing-text keyword watch, then one property in full.
+shops = client.realtor.search(location="Austin, TX", keywords=["workshop"])["data"]
+detail = client.realtor.property(property_id=shops["listings"][0]["property_id"])["data"]
+print(detail["list_price"], detail["risk"]["flood_factor"], len(detail["property_history"]))
+
+# Autocomplete -> market stats, and agents by ZIP code.
+slug = client.realtor.locations("Austin")["data"]["locations"][0]["slug_id"]
+market = client.realtor.market(slug)["data"]
+print(market["median_listing_price"], market["median_days_on_market"])
+agents = client.realtor.agents(postal_code="78744")["data"]
+profile = client.realtor.agent(agents["agents"][0]["agent_id"])["data"]
+print(profile["name"], profile["rating"], len(profile["reviews"]))
+
+# Rightmove: resolve a place, search for sale (24 per page, up to 42 pages).
+# There is no keyword filter; match on summary and key_features yourself.
+loc = client.rightmove.locations("Bristol")["data"]["locations"][0]["location_id"]
+homes = client.rightmove.search(location_id=loc, property_types=["terraced"], max_price=350000)
+for home in homes["data"]["listings"]:
+    print(home["price_display"], home["address"], home["tenure"])
+
+# Sold prices since 1995 for an outcode, then one address's full history.
+sold = client.rightmove.sold("BS3", sold_within_years=5)["data"]
+print(sold["summary"]["average_price_last_year"])
+history = client.rightmove.sold_property(sold_id=sold["properties"][0]["sold_id"])["data"]
+for sale in history["transactions"]:
+    print(sale["date"], sale["price_display"], sale["tenure"], sale["percent_change"])
+
+# Agent branches in an area, then one branch.
+branches = client.rightmove.agents(location="Bristol")["data"]
+branch = client.rightmove.agent(branch_id=branches["agents"][0]["branch_id"])["data"]
+print(branch["name"], branch["listings"]["for_sale_count"], branch["listings"]["to_rent_count"])
+```
+
+An unknown property, listing, sold id, agent or branch returns a 404
+(`NotFoundError`) and is billed 1 credit; a removed Rightmove listing is also a
+404. Rightmove serves 42 search pages, 40 sold pages and 50 agent pages per
+query.
+
 ## Error Handling
 
 ```python
@@ -739,6 +806,8 @@ Scavio works with popular AI/LLM frameworks:
 | Home Depot | `search`, `product`, `reviews` | 2 each |
 | Zillow | `search`, `property`, `agent_reviews` | 1 each |
 | Redfin | `search`, `property`, `market` | 1 each |
+| Realtor.com | `search`, `property`, `locations`, `market`, `agents`, `agent` | 1 each |
+| Rightmove | `locations` (start here), `search`, `property`, `sold`, `sold_property`, `agents`, `agent` | 1 each |
 | Booking.com | `search`, `hotel`, `reviews` | 1 each |
 | Tripadvisor | `locations` (start here), `search`, `location`, `reviews` | 2 each |
 | Airbnb | `search`, `listing`, `reviews` | 1 each |
@@ -760,6 +829,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.20.0
+
+- **New `realtor` namespace, 6 methods, 1 credit each.** `search` (for sale,
+  pending, for rent or sold by location, radius or agent; price, beds, baths,
+  sqft, lot, garage, HOA, year built, property type, recency, listing-text
+  keywords and more; up to 200 rows per call), `property` (price and tax
+  history, valuations, schools, risk, listing agent), `locations`, `market`,
+  `agents` and `agent`.
+- **New `rightmove` namespace, 7 methods, 1 credit each.** `locations`,
+  `search` (buy or rent by location, place name or branch), `property`, `sold`
+  (sale history since 1995 per address plus an area summary), `sold_property`,
+  `agents` and `agent`. See example 22 above.
 
 ### Changed in 0.19.1
 
