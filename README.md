@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access real-time data from 32 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 32 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 32 data sources, 209 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -42,7 +42,7 @@ The official Python SDK for the [Scavio](https://scavio.dev) Search API. Access 
 | Fully Typed Parameters | Yes | No | No | No |
 | Type Hints (PEP 561) | Yes | Yes | No | No |
 
-Tavily focuses on AI-optimized web search. SerpAPI offers SERP parsing across search engines with separate plans. ScraperAPI provides raw web scraping with proxy rotation. Scavio combines multi-source structured data in a single [search API for AI agents](https://scavio.dev/search-api-for-ai-agents) with one SDK and one API key.
+Tavily focuses on AI-optimized web search. SerpAPI offers SERP parsing across search engines with separate plans. ScraperAPI provides raw web scraping with proxy rotation. Scavio combines multi-source structured data in a single [search API for AI agents](https://scavio.dev/search-api-for-ai-agents?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) with one SDK and one API key.
 
 ## Installation
 
@@ -52,7 +52,7 @@ pip install scavio
 
 ## Quick Start
 
-Get your free API key at [dashboard.scavio.dev](https://dashboard.scavio.dev).
+Get your free API key at [dashboard.scavio.dev](https://dashboard.scavio.dev/sign-up?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
 
 ```python
 from scavio import ScavioClient
@@ -702,8 +702,14 @@ Scavio works with popular AI/LLM frameworks:
 | Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
 
 Every method's full parameter list is available inline in your editor (typed
-keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs)
+keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.18.1
+
+- Documentation links only; no code changes. The client already identifies
+  itself on every call with `User-Agent: scavio-python/<version>` and
+  `X-Client-Source: scavio-python`.
 
 ### Changed in 0.18.0
 
@@ -803,11 +809,11 @@ instead of the previous raw provider payload.
 
 ## Links
 
-- [Website](https://scavio.dev)
+- [Website](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 - [Documentation](https://docs.scavio.dev)
-- [Dashboard & API Keys](https://dashboard.scavio.dev)
+- [Dashboard & API Keys](https://dashboard.scavio.dev/sign-up?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 - [API Reference](https://docs.scavio.dev/api-reference)
-- [Compare Scavio vs alternatives](https://scavio.dev/compare)
+- [Compare Scavio vs alternatives](https://scavio.dev/compare?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 
 ## License
 
@@ -816,15 +822,15 @@ MIT
 
 ## About Scavio
 
-[Scavio](https://scavio.dev) is a unified [search API](https://scavio.dev/docs/search-api) built for AI agents — one API key, structured JSON, no scraping or proxies. A real-time [Tavily alternative](https://scavio.dev/alternatives/tavily) and [SerpAPI alternative](https://scavio.dev/alternatives/serpapi) with data from:
+[Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) is a unified [search API](https://scavio.dev/docs/search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) built for AI agents — one API key, structured JSON, no scraping or proxies. A real-time [Tavily alternative](https://scavio.dev/alternatives/tavily?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [SerpAPI alternative](https://scavio.dev/alternatives/serpapi?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) with data from:
 
-- [Google Search API](https://scavio.dev/google-search-api) — SERP results, news, images, maps, and knowledge graph
-- [Amazon Product API](https://scavio.dev/amazon-product-api) and [Walmart Product API](https://scavio.dev/walmart-product-api) — product search and details
-- [YouTube API](https://scavio.dev/youtube-transcript-api), [TikTok API](https://scavio.dev/tiktok-api), and [Instagram API](https://scavio.dev/instagram-api) — video and social media data
-- [TikTok Shop API](https://scavio.dev/docs/tiktok-shop-search) — product search, detail, reviews, categories, and shop catalogs
-- [Reddit API](https://scavio.dev/reddit-api) — posts, comments, subreddits, and trending
-- [X API](https://scavio.dev/docs/x-search) and [LinkedIn API](https://scavio.dev/docs/linkedin-person) — tweets, profiles, companies, and jobs
+- [Google Search API](https://scavio.dev/google-search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — SERP results, news, images, maps, and knowledge graph
+- [Amazon Product API](https://scavio.dev/amazon-product-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [Walmart Product API](https://scavio.dev/walmart-product-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — product search and details
+- [YouTube API](https://scavio.dev/youtube-transcript-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [TikTok API](https://scavio.dev/tiktok-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), and [Instagram API](https://scavio.dev/instagram-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — video and social media data
+- [TikTok Shop API](https://scavio.dev/docs/tiktok-shop-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — product search, detail, reviews, categories, and shop catalogs
+- [Reddit API](https://scavio.dev/reddit-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — posts, comments, subreddits, and trending
+- [X API](https://scavio.dev/docs/x-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [LinkedIn API](https://scavio.dev/docs/linkedin-person?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — tweets, profiles, companies, and jobs
 
-For a detailed head-to-head breakdown, see [Tavily vs Scavio](https://scavio.dev/compare/tavily/vs-scavio).
+For a detailed head-to-head breakdown, see [Tavily vs Scavio](https://scavio.dev/compare/tavily/vs-scavio?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
 
-Get a free [API key](https://dashboard.scavio.dev) and explore the [documentation](https://scavio.dev/docs/introduction).
+Get a free [API key](https://dashboard.scavio.dev/sign-up?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and explore the [documentation](https://scavio.dev/docs/introduction?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
