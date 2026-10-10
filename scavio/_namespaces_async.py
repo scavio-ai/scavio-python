@@ -5228,7 +5228,7 @@ class _AsyncRightmoveNamespace:
             furnishing: for_rent only.
             let_type: for_rent only: long_term or short_term.
             sort: Result order (server default 'newest').
-            page: Results page, 1-42 (24 per page).
+            page: Results page, 1-42 (24-25 per page).
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("rightmove_search", {"location_id": location_id, "location": location, "branch_id": branch_id, "listing_status": listing_status, "min_price": min_price, "max_price": max_price, "beds_min": beds_min, "beds_max": beds_max, "baths_min": baths_min, "property_types": property_types, "must_have": must_have, "exclude": exclude, "tenure": tenure, "added_within_days": added_within_days, "include_under_offer": include_under_offer, "radius_miles": radius_miles, "furnishing": furnishing, "let_type": let_type, "sort": sort, "page": page}, extra)

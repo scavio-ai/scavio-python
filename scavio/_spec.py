@@ -5778,7 +5778,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 ("newest", "oldest", "price_low", "price_high"),
                 "Result order (server default 'newest').",
             ),
-            _int("page", "Results page, 1-42 (24 per page)."),
+            _int("page", "Results page, 1-42 (24-25 per page)."),
         ),
         one_of=(("location_id", "location", "branch_id"),),
         credits=1,

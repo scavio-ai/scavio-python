@@ -28,7 +28,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | LinkedIn Data (9 endpoints) | Yes | No | No | No |
 | eBay Sold-Listing Price History | Yes | No | No | No |
 | Real Estate (Zillow + Redfin + Realtor.com + Rightmove, 19 endpoints) | Yes | No | No | No |
-| UK Sold House Prices since 1995 (Rightmove) | Yes | No | No | No |
+| UK Sold House Prices since 1995 (Rightmove, England and Wales) | Yes | No | No | No |
 | Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
 | Jobs & Employers (Indeed + Glassdoor, 8 endpoints) | Yes | No | No | No |
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
@@ -649,8 +649,11 @@ billed 2 credits. Trustpilot keeps no TrustScore history, so none is returned.
 
 `realtor` covers US listings (for sale, pending, for rent and sold) with up to
 200 rows per call, full property detail, market stats and agents. `rightmove`
-covers UK listings, sold house prices since 1995 and agent branches. Every call
-on both costs 1 credit.
+covers UK listings, England and Wales sold house prices since 1995 and agent
+branches. Every call on both costs 1 credit.
+
+Docs: Realtor.com [search](https://scavio.dev/docs/realtor-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [property](https://scavio.dev/docs/realtor-property?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [locations](https://scavio.dev/docs/realtor-locations?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [market](https://scavio.dev/docs/realtor-market?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [agents](https://scavio.dev/docs/realtor-agents?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [agent](https://scavio.dev/docs/realtor-agent?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme); overview at the [Realtor.com API](https://scavio.dev/realtor-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) page.
+Rightmove [search](https://scavio.dev/docs/rightmove-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [property](https://scavio.dev/docs/rightmove-property?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [sold](https://scavio.dev/docs/rightmove-sold?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [sold property](https://scavio.dev/docs/rightmove-sold-property?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [locations](https://scavio.dev/docs/rightmove-locations?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [agents](https://scavio.dev/docs/rightmove-agents?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [agent](https://scavio.dev/docs/rightmove-agent?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme); overview at the [Rightmove API](https://scavio.dev/rightmove-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) page.
 
 ```python
 from scavio import ScavioClient
@@ -686,14 +689,15 @@ agents = client.realtor.agents(postal_code="78744")["data"]
 profile = client.realtor.agent(agents["agents"][0]["agent_id"])["data"]
 print(profile["name"], profile["rating"], len(profile["reviews"]))
 
-# Rightmove: resolve a place, search for sale (24 per page, up to 42 pages).
+# Rightmove: resolve a place, search for sale (24-25 per page, up to 42 pages).
 # There is no keyword filter; match on summary and key_features yourself.
 loc = client.rightmove.locations("Bristol")["data"]["locations"][0]["location_id"]
 homes = client.rightmove.search(location_id=loc, property_types=["terraced"], max_price=350000)
 for home in homes["data"]["listings"]:
     print(home["price_display"], home["address"], home["tenure"])
 
-# Sold prices since 1995 for an outcode, then one address's full history.
+# Sold prices since 1995 for an outcode (England and Wales only), then one
+# address's full history.
 sold = client.rightmove.sold("BS3", sold_within_years=5)["data"]
 print(sold["summary"]["average_price_last_year"])
 history = client.rightmove.sold_property(sold_id=sold["properties"][0]["sold_id"])["data"]
@@ -829,6 +833,12 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.20.1
+
+- README: Realtor.com and Rightmove docs links; Rightmove sold prices cover
+  England and Wales only, and search pages return 24-25 rows (the
+  `rightmove.search(page=...)` docstring now says so). No behavior changes.
 
 ### Changed in 0.20.0
 
