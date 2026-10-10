@@ -5328,6 +5328,167 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
     ),
+    # ============================= Trustpilot ============================
+    # 6 endpoints, 2 credits each. business() and reviews() take exactly one
+    # of domain or url (the server rejects both); one_of only enforces "at
+    # least one" client-side, the backend enforces "not both".
+    Endpoint(
+        key="trustpilot_search",
+        namespace="trustpilot",
+        method="search",
+        http="POST",
+        path="/api/v1/trustpilot/search",
+        summary=(
+            "Search Trustpilot businesses by keyword in one country: TrustScore, star rating, "
+            "review count, categories, website, and the email, phone and address the business "
+            "published. Up to 100 businesses per page."
+        ),
+        params=(
+            _req("query", "Business name, keyword or category (1-200 characters)."),
+            _str("country", "2-letter country code to search in (server default 'US')."),
+            _int("page", "Results page, 1-based (1-1000)."),
+            _int("page_size", "Businesses per page (1-100; server default 20)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="trustpilot_business",
+        namespace="trustpilot",
+        method="business",
+        http="POST",
+        path="/api/v1/trustpilot/business",
+        summary=(
+            "A Trustpilot business profile: TrustScore, rating distribution, review languages, "
+            "categories, contact details, claimed and verification status, reply rate and reply "
+            "speed on negative reviews, consumer alerts, the AI review summary and topics, "
+            "similar businesses, and the 20 newest reviews in the chosen language. Pass exactly "
+            "one of domain or url."
+        ),
+        params=(
+            _str(
+                "domain",
+                "The business's website domain as listed on Trustpilot (e.g. 'www.amazon.com').",
+            ),
+            _str(
+                "url",
+                "A trustpilot.com/review/<domain> page URL, from any Trustpilot country site. "
+                "Alternative to domain.",
+            ),
+            _str(
+                "language",
+                "2-letter language code (server default 'en'). The 20 included reviews are this "
+                "language's newest, and the AI summary and topics come back in it when Trustpilot "
+                "has them for that language (null / empty otherwise). The rating distribution and "
+                "review-language breakdown cover every language.",
+            ),
+        ),
+        one_of=(("domain", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="trustpilot_reviews",
+        namespace="trustpilot",
+        method="reviews",
+        http="POST",
+        path="/api/v1/trustpilot/reviews",
+        summary=(
+            "One page of 20 Trustpilot reviews for a business, filtered by stars, language, date "
+            "range, topics, text search, verified-only and with-replies, sorted by recency or "
+            "relevance. Returns total_filtered, so a date range doubles as review velocity. Up "
+            "to 10 pages (200 reviews) per filter combination; slice by stars, language, topics "
+            "or search to reach more. Pass exactly one of domain or url."
+        ),
+        params=(
+            _str(
+                "domain",
+                "The business's website domain as listed on Trustpilot (e.g. 'www.amazon.com').",
+            ),
+            _str(
+                "url",
+                "A trustpilot.com/review/<domain> page URL, from any Trustpilot country site. "
+                "Alternative to domain.",
+            ),
+            _int("page", "Reviews page, 1-10 (20 per page)."),
+            _ilit_list("stars", (1, 2, 3, 4, 5), "Only reviews with these star ratings (e.g. [1, 2])."),
+            _str("language", "Review language (2-letter code) or 'all' (server default 'all')."),
+            _lit(
+                "date_range",
+                ("last30days", "last3months", "last6months", "last12months"),
+                "Only reviews published in this window.",
+            ),
+            _lit("sort", ("recency", "relevance"), "Review order (server default 'recency')."),
+            _bool("verified_only", "Only verified reviews."),
+            _bool("with_replies", "Only reviews the business replied to."),
+            _str_list(
+                "topics",
+                "Topic ids from business()'s topics, up to 10 (e.g. ['delivery_service']).",
+            ),
+            _str("search", "Only reviews containing this text (1-100 characters)."),
+        ),
+        one_of=(("domain", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="trustpilot_categories",
+        namespace="trustpilot",
+        method="categories",
+        http="POST",
+        path="/api/v1/trustpilot/categories",
+        summary=(
+            "The full Trustpilot category tree (top-level categories and their subcategories), "
+            "or categories matching a name. Every category_id works with category()."
+        ),
+        params=(
+            _str("query", "Find categories by name (1-100 characters). Omit for the full tree."),
+            _str("country", "2-letter country code for the name lookup (server default 'US')."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="trustpilot_category",
+        namespace="trustpilot",
+        method="category",
+        http="POST",
+        path="/api/v1/trustpilot/category",
+        summary=(
+            "Businesses ranked in a Trustpilot category for one country, with TrustScore, review "
+            "count, location, website, email and phone. Sort by relevance, review count or latest "
+            "review, set a minimum TrustScore, or keep claimed profiles only. 20 per page."
+        ),
+        params=(
+            _req("category_id", "Category id from categories() (e.g. 'vpn_service')."),
+            _str("country", "2-letter country code (server default 'US')."),
+            _lit(
+                "sort",
+                ("most_relevant", "reviews_count", "latest_review"),
+                "Result order (server default 'most_relevant').",
+            ),
+            # z.union([z.literal(3), z.literal(4), z.literal(4.5)]): a float
+            # literal is not valid typing, so the annotation is the honest float.
+            _float("min_trust_score", "Only businesses with at least this TrustScore: 3, 4 or 4.5."),
+            _bool("claimed_only", "Only businesses that have claimed their Trustpilot profile."),
+            _int("page", "Results page, 1-based (20 businesses per page)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="trustpilot_review",
+        namespace="trustpilot",
+        method="review",
+        http="POST",
+        path="/api/v1/trustpilot/review",
+        summary=(
+            "One Trustpilot review by id: rating, title, full text, dates, verification, the "
+            "reviewer's public profile summary, the business reply, and the business it is about."
+        ),
+        params=(
+            _req(
+                "review_id",
+                "24-character review id, as returned in review_id by business() or reviews().",
+            ),
+        ),
+        credits=2,
+    ),
     # =========================== Extract (core) ==========================
     # NOT a platform and NOT a namespace: surfaced as the top-level method
     # scavio.extract(url, format=, mode=). namespace="_core" keeps it out of
@@ -5418,6 +5579,7 @@ NAMESPACES: tuple[str, ...] = (
     "google_ads",
     "meta_ads",
     "costco",
+    "trustpilot",
 )
 
 

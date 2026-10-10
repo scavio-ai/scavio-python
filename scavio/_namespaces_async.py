@@ -40,6 +40,7 @@ __all__ = [
     "_AsyncGoogleAdsNamespace",
     "_AsyncMetaAdsNamespace",
     "_AsyncCostcoNamespace",
+    "_AsyncTrustpilotNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -4840,3 +4841,146 @@ class _AsyncCostcoNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("costco_autocomplete", {"query": query, "country": country}, extra)
+
+class _AsyncTrustpilotNamespace:
+    """Trustpilot business search, profile, review, and category endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Trustpilot businesses by keyword in one country: TrustScore, star rating, review count, categories, website, and the email, phone and address the business published. Up to 100 businesses per page.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Business name, keyword or category (1-200 characters).
+            country: 2-letter country code to search in (server default 'US').
+            page: Results page, 1-based (1-1000).
+            page_size: Businesses per page (1-100; server default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_search", {"query": query, "country": country, "page": page, "page_size": page_size}, extra)
+
+    async def business(
+        self,
+        *,
+        domain: Optional[str] = None,
+        url: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Trustpilot business profile: TrustScore, rating distribution, review languages, categories, contact details, claimed and verification status, reply rate and reply speed on negative reviews, consumer alerts, the AI review summary and topics, similar businesses, and the 20 newest reviews in the chosen language. Pass exactly one of domain or url.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            domain: The business's website domain as listed on Trustpilot (e.g. 'www.amazon.com').
+            url: A trustpilot.com/review/<domain> page URL, from any Trustpilot country site. Alternative to domain.
+            language: 2-letter language code (server default 'en'). The 20 included reviews are this language's newest, and the AI summary and topics come back in it when Trustpilot has them for that language (null / empty otherwise). The rating distribution and review-language breakdown cover every language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_business", {"domain": domain, "url": url, "language": language}, extra)
+
+    async def reviews(
+        self,
+        *,
+        domain: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        stars: Optional[list[Literal[1, 2, 3, 4, 5]]] = None,
+        language: Optional[str] = None,
+        date_range: Optional[Literal["last30days", "last3months", "last6months", "last12months"]] = None,
+        sort: Optional[Literal["recency", "relevance"]] = None,
+        verified_only: Optional[bool] = None,
+        with_replies: Optional[bool] = None,
+        topics: Optional[list[str]] = None,
+        search: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One page of 20 Trustpilot reviews for a business, filtered by stars, language, date range, topics, text search, verified-only and with-replies, sorted by recency or relevance. Returns total_filtered, so a date range doubles as review velocity. Up to 10 pages (200 reviews) per filter combination; slice by stars, language, topics or search to reach more. Pass exactly one of domain or url.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            domain: The business's website domain as listed on Trustpilot (e.g. 'www.amazon.com').
+            url: A trustpilot.com/review/<domain> page URL, from any Trustpilot country site. Alternative to domain.
+            page: Reviews page, 1-10 (20 per page).
+            stars: Only reviews with these star ratings (e.g. [1, 2]).
+            language: Review language (2-letter code) or 'all' (server default 'all').
+            date_range: Only reviews published in this window.
+            sort: Review order (server default 'recency').
+            verified_only: Only verified reviews.
+            with_replies: Only reviews the business replied to.
+            topics: Topic ids from business()'s topics, up to 10 (e.g. ['delivery_service']).
+            search: Only reviews containing this text (1-100 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_reviews", {"domain": domain, "url": url, "page": page, "stars": stars, "language": language, "date_range": date_range, "sort": sort, "verified_only": verified_only, "with_replies": with_replies, "topics": topics, "search": search}, extra)
+
+    async def categories(
+        self,
+        *,
+        query: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The full Trustpilot category tree (top-level categories and their subcategories), or categories matching a name. Every category_id works with category().
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Find categories by name (1-100 characters). Omit for the full tree.
+            country: 2-letter country code for the name lookup (server default 'US').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_categories", {"query": query, "country": country}, extra)
+
+    async def category(
+        self,
+        category_id: str,
+        *,
+        country: Optional[str] = None,
+        sort: Optional[Literal["most_relevant", "reviews_count", "latest_review"]] = None,
+        min_trust_score: Optional[float] = None,
+        claimed_only: Optional[bool] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Businesses ranked in a Trustpilot category for one country, with TrustScore, review count, location, website, email and phone. Sort by relevance, review count or latest review, set a minimum TrustScore, or keep claimed profiles only. 20 per page.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: Category id from categories() (e.g. 'vpn_service').
+            country: 2-letter country code (server default 'US').
+            sort: Result order (server default 'most_relevant').
+            min_trust_score: Only businesses with at least this TrustScore: 3, 4 or 4.5.
+            claimed_only: Only businesses that have claimed their Trustpilot profile.
+            page: Results page, 1-based (20 businesses per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_category", {"category_id": category_id, "country": country, "sort": sort, "min_trust_score": min_trust_score, "claimed_only": claimed_only, "page": page}, extra)
+
+    async def review(
+        self,
+        review_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Trustpilot review by id: rating, title, full text, dates, verification, the reviewer's public profile summary, the business reply, and the business it is about.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            review_id: 24-character review id, as returned in review_id by business() or reviews().
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trustpilot_review", {"review_id": review_id}, extra)

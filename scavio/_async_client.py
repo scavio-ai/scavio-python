@@ -34,6 +34,7 @@ from ._namespaces_async import (
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
     _AsyncTripadvisorNamespace,
+    _AsyncTrustpilotNamespace,
     _AsyncWalmartNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
@@ -125,6 +126,7 @@ class AsyncScavioClient:
         self.google_ads = _AsyncGoogleAdsNamespace(self)
         self.meta_ads = _AsyncMetaAdsNamespace(self)
         self.costco = _AsyncCostcoNamespace(self)
+        self.trustpilot = _AsyncTrustpilotNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

@@ -848,6 +848,117 @@ def test_costco_body_priced_docstrings_do_not_claim_a_flat_price(method):
     assert "2" in doc
 
 
+def test_trustpilot_method_names_match_the_dashboard_playground():
+    """The Playground advertises trustpilot.<endpoint>(); a rename breaks its snippets."""
+    tp = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "trustpilot"}
+    assert sorted(tp) == sorted(
+        ["search", "business", "reviews", "categories", "category", "review"]
+    )
+    for method, ep in tp.items():
+        assert ep.path == f"/api/v1/trustpilot/{method}", method
+        assert ep.credits == 2, method
+        assert ep.credits_note is None, method
+    # The positional argument the Playground snippet passes first, per method.
+    positional = {"search": "query", "category": "category_id", "review": "review_id"}
+    client = ScavioClient(api_key="sk_test")
+    for method, name in positional.items():
+        params = list(inspect.signature(getattr(client.trustpilot, method)).parameters.values())
+        assert params[0].name == name, method
+        assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD, method
+    # business / reviews / categories take keywords only.
+    for method in ("business", "reviews", "categories"):
+        params = list(inspect.signature(getattr(client.trustpilot, method)).parameters.values())
+        assert params[0].kind is inspect.Parameter.KEYWORD_ONLY, method
+
+
+def test_trustpilot_search(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.trustpilot.search("vpn", country="GB", page_size=50)
+    assert captured["path"] == "/api/v1/trustpilot/search"
+    assert captured["json"] == {"query": "vpn", "country": "GB", "page_size": 50}
+
+
+def test_trustpilot_business_needs_domain_or_url(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.trustpilot.business(domain="nordvpn.com", language="de")
+    assert captured["path"] == "/api/v1/trustpilot/business"
+    assert captured["json"] == {"domain": "nordvpn.com", "language": "de"}
+    client.trustpilot.business(url="https://www.trustpilot.com/review/nordvpn.com")
+    assert captured["json"] == {"url": "https://www.trustpilot.com/review/nordvpn.com"}
+    with pytest.raises(ScavioError):
+        client.trustpilot.business()
+    with pytest.raises(ScavioError):
+        client.trustpilot.reviews(stars=[1])
+
+
+def test_trustpilot_reviews_filters(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.trustpilot.reviews(
+        domain="nordvpn.com",
+        stars=[1, 2],
+        language="en",
+        date_range="last30days",
+        verified_only=True,
+        topics=["customer_service"],
+        search="refund",
+        page=3,
+    )
+    assert captured["path"] == "/api/v1/trustpilot/reviews"
+    assert captured["json"] == {
+        "domain": "nordvpn.com",
+        "page": 3,
+        "stars": [1, 2],
+        "language": "en",
+        "date_range": "last30days",
+        "verified_only": True,
+        "topics": ["customer_service"],
+        "search": "refund",
+    }
+    annotation = next(
+        p for p in ENDPOINTS["trustpilot_reviews"].params if p.name == "stars"
+    ).annotation
+    assert annotation == "Optional[list[Literal[1, 2, 3, 4, 5]]]"
+
+
+def test_trustpilot_categories_takes_no_required_args(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.trustpilot.categories()
+    assert captured["path"] == "/api/v1/trustpilot/categories"
+    assert captured["json"] == {}
+    client.trustpilot.categories(query="insurance")
+    assert captured["json"] == {"query": "insurance"}
+
+
+def test_trustpilot_category_and_review_positional(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.trustpilot.category(
+        "vpn_service", sort="reviews_count", min_trust_score=4.5, claimed_only=True
+    )
+    assert captured["path"] == "/api/v1/trustpilot/category"
+    assert captured["json"] == {
+        "category_id": "vpn_service",
+        "sort": "reviews_count",
+        "min_trust_score": 4.5,
+        "claimed_only": True,
+    }
+    client.trustpilot.review("6aca2504b52cc4b518bf4b75")
+    assert captured["path"] == "/api/v1/trustpilot/review"
+    assert captured["json"] == {"review_id": "6aca2504b52cc4b518bf4b75"}
+
+
+async def test_trustpilot_async_reviews(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.trustpilot.reviews(url="https://www.trustpilot.com/review/nordvpn.com")
+    assert captured["path"] == "/api/v1/trustpilot/reviews"
+    assert captured["json"] == {"url": "https://www.trustpilot.com/review/nordvpn.com"}
+
+
 def test_walmart_seller_products_path_is_hyphenated():
     assert ENDPOINTS["walmart_seller_products"].path == "/api/v1/walmart/seller-products"
 
@@ -945,6 +1056,7 @@ def test_new_platform_endpoint_counts():
         "google_ads": 3,
         "meta_ads": 3,
         "costco": 13,
+        "trustpilot": 6,
         "_core": 1,
     }
     counts: dict[str, int] = {}
@@ -952,7 +1064,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 107
+    assert sum(expected.values()) == 113
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

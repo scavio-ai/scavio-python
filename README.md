@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 32 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 33 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 32 data sources, 209 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 33 data sources, 215 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -18,6 +18,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
+| Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -32,7 +33,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 32 | 1 | 1 per plan | 1 |
+| Data Sources | 33 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -589,6 +590,59 @@ marked_down = client.costco.clearance("1062", query="snacks")["data"]
 print(marked_down["count"], "of", marked_down["products_scanned"], "items marked down")
 ```
 
+### 21. Trustpilot -- Business Search, Profiles, Reviews and Categories
+
+`trustpilot` finds businesses by keyword or category, reads a full profile
+(TrustScore, rating distribution, reply rate and days to reply on negative
+reviews, AI summary and topics when Trustpilot has them), and pages filtered
+reviews. Every call costs 2 credits. `business()` and `reviews()` take exactly
+one of `domain` or `url`.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Businesses matching a keyword, up to 100 per page. Email and phone appear
+# only when the business published them.
+found = client.trustpilot.search("vpn", country="US", page_size=10)["data"]
+for biz in found["businesses"]:
+    print(biz["name"], biz["domain"], biz["trust_score"], biz["review_count"], biz["email"])
+
+# One profile with the rating distribution, reply behavior and 20 newest reviews.
+profile = client.trustpilot.business(domain="nordvpn.com")["data"]
+print(profile["trust_score"], profile["rating_distribution"])
+print(profile["reply_behavior"]["reply_rate"], profile["reply_behavior"]["avg_days_to_reply"])
+topic_ids = [t["id"] for t in profile["topics"]]  # feed these to reviews(topics=...)
+
+# Filtered reviews, 20 per page. Trustpilot serves up to 10 pages (200 reviews)
+# per filter combination; max_page says how far this one goes. Slice by stars,
+# language, date_range, topics or search to reach more. total_filtered counts
+# every match, so a date range doubles as review velocity.
+bad = client.trustpilot.reviews(
+    domain="nordvpn.com", stars=[1, 2], language="en", date_range="last30days"
+)["data"]
+print(bad["total_filtered"], "1-2 star reviews in 30 days; pages:", bad["max_page"])
+for review in bad["reviews"]:
+    print(review["rating"], review["title"], (review["reply"] or {}).get("text"))
+
+# The category tree, then ranked businesses in one category.
+tree = client.trustpilot.categories()["data"]
+print(tree["count"], "top-level,", tree["subcategory_count"], "subcategories")
+ranked = client.trustpilot.category(
+    "vpn_service", sort="reviews_count", min_trust_score=4, claimed_only=True
+)["data"]
+for biz in ranked["businesses"]:
+    print(biz["name"], biz["trust_score"], biz["website"])
+
+# One review by id, with the business it is about.
+one = client.trustpilot.review("6aca2504b52cc4b518bf4b75")["data"]
+print(one["review"]["text"], one["business"]["name"])
+```
+
+An unknown business, review or category returns a 404 (`NotFoundError`) and is
+billed 2 credits. Trustpilot keeps no TrustScore history, so none is returned.
+
 ## Error Handling
 
 ```python
@@ -699,11 +753,22 @@ Scavio works with popular AI/LLM frameworks:
 | Google Ads Transparency | `advertisers` (start here), `search`, `creative` | 1 each |
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
+| Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.19.0
+
+- **New `trustpilot` namespace, 6 methods, 2 credits each.** `search`
+  (businesses by keyword, up to 100 per page), `business` (full profile by
+  domain or Trustpilot URL), `reviews` (stars, language, date range, sort,
+  verified-only, with-replies, topics and text filters; up to 200 per filter
+  combination), `categories` (the tree or a name lookup), `category` (ranked
+  businesses with sort, minimum TrustScore and claimed-only) and `review` (one
+  review by id). See example 21 above.
 
 ### Changed in 0.18.1
 

@@ -32,6 +32,7 @@ from ._namespaces_sync import (
     _TikTokNamespace,
     _TikTokShopNamespace,
     _TripadvisorNamespace,
+    _TrustpilotNamespace,
     _WalmartNamespace,
     _XNamespace,
     _YelpNamespace,
@@ -128,6 +129,7 @@ class ScavioClient:
         self.google_ads = _GoogleAdsNamespace(self)
         self.meta_ads = _MetaAdsNamespace(self)
         self.costco = _CostcoNamespace(self)
+        self.trustpilot = _TrustpilotNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
