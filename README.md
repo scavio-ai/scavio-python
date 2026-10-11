@@ -68,8 +68,8 @@ for r in results["organic_results"]:
 ```
 
 Every method returns the API response as a plain `dict`. Amazon responses are
-normalized to a stable, documented shape; the other endpoints pass the upstream
-provider's shape through, so fields vary by endpoint.
+normalized to a stable, documented shape; the other endpoints keep each
+platform's own field names, so fields vary by endpoint.
 
 ## Fully typed parameters
 
@@ -330,9 +330,9 @@ post = client.linkedin.post(post_id="7488618410256523265")
 comments = client.linkedin.post_comments(post_id="7488618410256523265", page=1)
 ```
 
-> **Retired endpoints.** The upstream provider withdrew the datasets behind
-> `person_contact`, `company_people`, `company_jobs`, `search_people` and
-> `search_posts`. They remain callable but always return HTTP 410 and are never
+> **Retired endpoints.** The LinkedIn data behind `person_contact`,
+> `company_people`, `company_jobs`, `search_people` and `search_posts` is no
+> longer available. They remain callable but always return HTTP 410 and are never
 > billed. `company()` still returns `featured_employees` (a small sample of
 > staff), and `search_jobs()` with a company name substitutes for `company_jobs`.
 
@@ -349,7 +349,7 @@ for p in results["data"]["products"][:5]:
     print(p["title"], p["price"]["current"], p["shop"]["shop_name"])
 
 # Detail adds description, variants, stock and shipping -- but NOT a price
-# (upstream masks it), and it resolves only about 44% of the ids search returns.
+# (TikTok masks it), and it resolves only about 44% of the ids search returns.
 # A 404 there is a normal outcome, not an error: skip the item, do not retry.
 from scavio import NotFoundError
 
@@ -358,7 +358,7 @@ try:
     detail = client.tiktok_shop.product(product_id)
     print(detail["data"]["title"], len(detail["data"]["variants"]), "variants")
 except NotFoundError:
-    pass  # no detail data upstream for this product; skip it, do not retry
+    pass  # TikTok Shop has no detail data for this product; skip it, do not retry
 
 reviews = client.tiktok_shop.product_reviews(product_id, page_size=200, sort="relevant")
 catalog = client.tiktok_shop.shop_products("7495514739648989419")   # exact prices
@@ -453,7 +453,7 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-# Default: readability Markdown, plain datacenter fetch. 1 credit.
+# Default: readability Markdown, normal mode. 1 credit.
 page = client.extract("https://example.com/blog/post")["data"]
 print(page["content_length"], "chars of", page["format"])
 print(page["content"][:500])
@@ -724,6 +724,8 @@ Mercado Livre in Brazil (`country="mx"`, `"br"`, `"ar"` or `"co"`; prices come
 back in MXN, BRL, ARS or COP). `reviews` costs 1 credit; `search`, `product`,
 `questions` and `best_sellers` cost 2. Chile is not supported.
 
+Docs: Mercado Libre [search](https://scavio.dev/docs/mercadolibre-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [product](https://scavio.dev/docs/mercadolibre-product?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [reviews](https://scavio.dev/docs/mercadolibre-reviews?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [questions](https://scavio.dev/docs/mercadolibre-questions?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme), [best sellers](https://scavio.dev/docs/mercadolibre-best-sellers?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme); overview at the [Mercado Libre API](https://scavio.dev/mercadolibre-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) page.
+
 ```python
 from scavio import ScavioClient
 
@@ -895,6 +897,11 @@ Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
 
+### Changed in 0.21.1
+
+- README: Mercado Libre docs and landing page links; wording cleanup. No
+  behavior changes.
+
 ### Changed in 0.21.0
 
 - **New `mercadolibre` namespace, 5 methods.** `search` (keyword or seller in
@@ -1034,8 +1041,8 @@ for field-level details.
 
 ### Amazon changed in 0.12.0 (breaking)
 
-Amazon moved to a new upstream and the API now returns a normalized shape
-instead of the previous raw provider payload.
+The Amazon API now returns a normalized shape instead of the previous raw
+payload.
 
 - `search` returns `{query, page, total_results, total_results_text, count, products[], filters[], related_searches[]}`.
   Each product is `{asin, title, url, image, price, currency, rating, reviews_count, is_sponsored, position, badge, sales_volume, delivery{is_free, date, fastest_date}}`.
@@ -1060,7 +1067,7 @@ MIT
 
 ## About Scavio
 
-[Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) is a unified [search API](https://scavio.dev/docs/search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) built for AI agents — one API key, structured JSON, no scraping or proxies. A real-time [Tavily alternative](https://scavio.dev/alternatives/tavily?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [SerpAPI alternative](https://scavio.dev/alternatives/serpapi?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) with data from:
+[Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) is a unified [search API](https://scavio.dev/docs/search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) built for AI agents — one API key, structured JSON. A real-time [Tavily alternative](https://scavio.dev/alternatives/tavily?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [SerpAPI alternative](https://scavio.dev/alternatives/serpapi?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) with data from:
 
 - [Google Search API](https://scavio.dev/google-search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — SERP results, news, images, maps, and knowledge graph
 - [Amazon Product API](https://scavio.dev/amazon-product-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and [Walmart Product API](https://scavio.dev/walmart-product-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) — product search and details
