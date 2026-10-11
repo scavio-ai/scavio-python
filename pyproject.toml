@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.20.1"
-description = "Python SDK for the Scavio Search API - real-time data from 35 sources (Google, Amazon, Walmart, Costco, eBay, Zillow, Redfin, Realtor.com, Rightmove, Booking, Airbnb, Yelp, Trustpilot, Indeed, Glassdoor, SEC EDGAR, G2, Meta Ad Library and more) plus URL extraction"
+version = "0.21.0"
+description = "Python SDK for the Scavio Search API - real-time data from 36 sources (Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Zillow, Redfin, Realtor.com, Rightmove, Booking, Airbnb, Yelp, Trustpilot, Indeed, Glassdoor, SEC EDGAR, G2, Meta Ad Library and more) plus URL extraction"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -44,6 +44,8 @@ keywords = [
     "redfin",
     "realtor",
     "rightmove",
+    "mercadolibre",
+    "mercado-livre",
     "booking",
     "tripadvisor",
     "airbnb",

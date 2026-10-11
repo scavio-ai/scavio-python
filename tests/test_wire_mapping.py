@@ -1148,6 +1148,120 @@ async def test_realtor_rightmove_async(monkeypatch):
     assert captured["json"] == {"sold_id": "921d33f4-d206-4991-be4d-75cbe71981ce"}
 
 
+def test_mercadolibre_method_names_match_the_dashboard_playground():
+    """The Playground advertises mercadolibre.<m>(); a rename breaks its snippets."""
+    expected = {
+        "search": ("search", 2),
+        "product": ("product", 2),
+        "reviews": ("reviews", 1),
+        "questions": ("questions", 2),
+        "best_sellers": ("best-sellers", 2),
+    }
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "mercadolibre"}
+    assert sorted(eps) == sorted(expected)
+    for method, (slug, credits) in expected.items():
+        assert eps[method].path == f"/api/v1/mercadolibre/{slug}", method
+        assert eps[method].credits == credits, method
+        assert eps[method].credits_note is None, method
+    # The positional argument the Playground snippet passes first, per method.
+    positional = {"search": "query", "questions": "item_id", "best_sellers": "category_id"}
+    client = ScavioClient(api_key="sk_test")
+    for method in expected:
+        params = list(inspect.signature(getattr(client.mercadolibre, method)).parameters.values())
+        if method in positional:
+            assert params[0].name == positional[method], method
+            assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD, method
+        else:
+            assert params[0].kind is inspect.Parameter.KEYWORD_ONLY, method
+    # country is required by the API but keyword-only, so search("iphone 15")
+    # can never send the query as the country.
+    for method in ("search", "best_sellers"):
+        sig = inspect.signature(getattr(client.mercadolibre, method))
+        assert sig.parameters["country"].kind is inspect.Parameter.KEYWORD_ONLY, method
+
+
+def test_mercadolibre_search(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.mercadolibre.search(
+        "iphone 15",
+        country="mx",
+        condition="new",
+        min_price=5000,
+        max_price=30000,
+        min_discount=10,
+        free_shipping=True,
+        full_fulfillment=True,
+        official_stores_only=True,
+        interest_free_installments=True,
+        sort="price_asc",
+        page=2,
+    )
+    assert captured["path"] == "/api/v1/mercadolibre/search"
+    assert captured["json"] == {
+        "query": "iphone 15",
+        "country": "mx",
+        "condition": "new",
+        "min_price": 5000,
+        "max_price": 30000,
+        "min_discount": 10,
+        "free_shipping": True,
+        "full_fulfillment": True,
+        "official_stores_only": True,
+        "interest_free_installments": True,
+        "sort": "price_asc",
+        "page": 2,
+    }
+    client.mercadolibre.search(country="br", seller_id="527927603")
+    assert captured["json"] == {"country": "br", "seller_id": "527927603"}
+    client.mercadolibre.search(country="mx", seller_nickname="MERCADOLIBRE ELECTRONICA_MX")
+    assert captured["json"] == {"country": "mx", "seller_nickname": "MERCADOLIBRE ELECTRONICA_MX"}
+    with pytest.raises(ScavioError):
+        client.mercadolibre.search(country="mx")
+    with pytest.raises(ScavioError):
+        client.mercadolibre.search("iphone 15")
+
+
+def test_mercadolibre_product_reviews_questions_best_sellers(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.mercadolibre.product(product_id="MLM1027172667")
+    assert captured["path"] == "/api/v1/mercadolibre/product"
+    assert captured["json"] == {"product_id": "MLM1027172667"}
+    client.mercadolibre.product(item_id="MLM-2746152281")
+    assert captured["json"] == {"item_id": "MLM-2746152281"}
+    with pytest.raises(ScavioError):
+        client.mercadolibre.product()
+    client.mercadolibre.reviews(product_id="MLM1027172667", rating=1, page=3)
+    assert captured["path"] == "/api/v1/mercadolibre/reviews"
+    assert captured["json"] == {"product_id": "MLM1027172667", "rating": 1, "page": 3}
+    with pytest.raises(ScavioError):
+        client.mercadolibre.reviews(rating=5)
+    client.mercadolibre.questions("MLM3571336480", offset=20)
+    assert captured["path"] == "/api/v1/mercadolibre/questions"
+    assert captured["json"] == {"item_id": "MLM3571336480", "offset": 20}
+    client.mercadolibre.questions(url="https://www.mercadolibre.com.mx/x/p/MLM1027172667")
+    assert captured["json"] == {"url": "https://www.mercadolibre.com.mx/x/p/MLM1027172667"}
+    with pytest.raises(ScavioError):
+        client.mercadolibre.questions()
+    client.mercadolibre.best_sellers("MLM1055", country="mx")
+    assert captured["path"] == "/api/v1/mercadolibre/best-sellers"
+    assert captured["json"] == {"category_id": "MLM1055", "country": "mx"}
+    with pytest.raises(ScavioError):
+        client.mercadolibre.best_sellers("MLM1055")
+
+
+async def test_mercadolibre_async(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.mercadolibre.search("iphone 15", country="mx")
+    assert captured["path"] == "/api/v1/mercadolibre/search"
+    assert captured["json"] == {"query": "iphone 15", "country": "mx"}
+    await client.mercadolibre.best_sellers("MCO1055", country="co")
+    assert captured["path"] == "/api/v1/mercadolibre/best-sellers"
+    assert captured["json"] == {"category_id": "MCO1055", "country": "co"}
+
+
 def test_walmart_seller_products_path_is_hyphenated():
     assert ENDPOINTS["walmart_seller_products"].path == "/api/v1/walmart/seller-products"
 
@@ -1248,6 +1362,7 @@ def test_new_platform_endpoint_counts():
         "trustpilot": 6,
         "realtor": 6,
         "rightmove": 7,
+        "mercadolibre": 5,
         "_core": 1,
     }
     counts: dict[str, int] = {}
@@ -1255,7 +1370,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 126
+    assert sum(expected.values()) == 131
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

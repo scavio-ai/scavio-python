@@ -23,6 +23,7 @@ from ._namespaces_sync import (
     _InstagramNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
+    _MercadoLibreNamespace,
     _MetaAdsNamespace,
     _RealtorNamespace,
     _RedditNamespace,
@@ -134,6 +135,7 @@ class ScavioClient:
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
+        self.mercadolibre = _MercadoLibreNamespace(self)
 
     # -- transport ---------------------------------------------------------
 

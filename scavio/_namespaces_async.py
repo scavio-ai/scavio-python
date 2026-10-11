@@ -43,6 +43,7 @@ __all__ = [
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
+    "_AsyncMercadoLibreNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -5060,7 +5061,7 @@ class _AsyncRealtorNamespace:
             listed_within_days: Only listings listed in the last N days (1-3650).
             sold_within_days: sold only: only sales in the last N days (1-3650).
             price_reduced_within_days: Only listings with a price cut in the last N days (1-3650).
-            keywords: Only listings whose listing text matches these keywords, up to 10 (e.g. ['workshop']).
+            keywords: Only listings whose listing text contains ALL of these keywords, up to 10 (e.g. ['workshop']); each extra keyword narrows the results.
             new_construction: Only new construction.
             foreclosure: Only foreclosures.
             has_open_house: Only listings with an open house in the next 7 days.
@@ -5334,3 +5335,133 @@ class _AsyncRightmoveNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("rightmove_agent", {"url": url, "branch_id": branch_id}, extra)
+
+class _AsyncMercadoLibreNamespace:
+    """Mercado Libre listing search, product, review, question, and best-seller endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        country: Optional[Literal["mx", "br", "ar", "co"]] = None,
+        seller_id: Optional[str] = None,
+        seller_nickname: Optional[str] = None,
+        condition: Optional[Literal["new", "used", "refurbished", "open_box"]] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        min_discount: Optional[Literal[5, 10, 15, 20, 25, 30, 40]] = None,
+        free_shipping: Optional[bool] = None,
+        full_fulfillment: Optional[bool] = None,
+        official_stores_only: Optional[bool] = None,
+        interest_free_installments: Optional[bool] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Mercado Libre listings in Mexico, Brazil (Mercado Livre), Argentina or Colombia by keyword or seller, with condition, price range, discount, free shipping, Full fulfillment, official stores and interest-free installment filters, sorted by relevance or price. Each row has price, list price, discount, installments, seller and official-store flag where shown, rating, units sold as a lower bound ("at least 500"), shipping flags, a sponsored flag and catalog ids. About 48 rows per page and 42 pages (about 2,000 results) per query. Pass country and one of query, seller_id or seller_nickname.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords (1-200 characters). Mercado Libre may narrow a query to a category, brand or line on its own; the response lists those in auto_applied_filters.
+            country: Required. Mexico (mx), Brazil (br, Mercado Livre), Argentina (ar) or Colombia (co). Prices come back in MXN, BRL, ARS or COP. Chile is not supported.
+            seller_id: Only this seller's listings (numeric id, as returned in product's seller.seller_id). Combines with query, filters, sort and page.
+            seller_nickname: A seller's public nickname. Returns the seller's first page of listings without filters, plus their seller_id; use seller_id for filters, sort and further pages.
+            condition: Item condition. Without it, Mercado Libre may show new items only for some queries (listed in auto_applied_filters).
+            min_price: Minimum price in the country's currency (MXN, BRL, ARS or COP).
+            max_price: Maximum price in the country's currency.
+            min_discount: Only listings at least this many percent off: 5, 10, 15, 20, 25, 30 or 40.
+            free_shipping: Only listings with free shipping.
+            full_fulfillment: Only listings shipped by Mercado Libre Full fulfillment.
+            official_stores_only: Only listings from official brand stores.
+            interest_free_installments: Only listings payable in interest-free installments.
+            sort: relevance (server default), price_asc or price_desc. Mercado Libre offers no newest or best-selling sort.
+            page: Results page, 1-42 (about 48 per page, so about 2,000 results per query). Narrow by price range, condition or seller to reach more.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercadolibre_search", {"query": query, "country": country, "seller_id": seller_id, "seller_nickname": seller_nickname, "condition": condition, "min_price": min_price, "max_price": max_price, "min_discount": min_discount, "free_shipping": free_shipping, "full_fulfillment": full_fulfillment, "official_stores_only": official_stores_only, "interest_free_installments": interest_free_installments, "sort": sort, "page": page}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        item_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Mercado Libre catalog product or listing: title, price, list price, installments, promotions, the buy-box seller with reputation level and seller tier, stock, shipping, rating with its star distribution, variations with sibling product ids, specs, description, pictures and categories. Only the buy-box seller is returned; units sold is a lower bound. Some fields are null where the page omits them. Pass exactly one of url, product_id or item_id; the id prefix (MLM, MLB, MLA, MCO) sets the country.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Catalog product id, as returned in product_id by search() (e.g. 'MLM1027172667').
+            item_id: Item (listing) id, as returned in item_id by search() (e.g. 'MLM2746152281'; 'MLM-2746152281' is accepted too).
+            url: A Mercado Libre or Mercado Livre product (/p/), user product (/up/) or listing page URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercadolibre_product", {"product_id": product_id, "item_id": item_id, "url": url}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        item_id: Optional[str] = None,
+        url: Optional[str] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One page of up to 15 Mercado Libre product reviews (page until a page comes back empty), optionally filtered by star rating: rating, text, the original text when Mercado Libre translated it, exact date, likes, the review's country and photos. Catalog products pool reviews from several countries. Totals and the star distribution come from product(). Pass exactly one of url, product_id or item_id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Catalog product id, as returned in product_id by search().
+            item_id: Item (listing) id, as returned in item_id by search().
+            url: A Mercado Libre or Mercado Livre product (/p/), user product (/up/) or listing page URL.
+            rating: Only reviews with this star rating (1-5).
+            page: Reviews page, 1-based (up to 15 per page; a page past the last one comes back empty).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercadolibre_reviews", {"product_id": product_id, "item_id": item_id, "url": url, "rating": rating, "page": page}, extra)
+
+    async def questions(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A page of buyer questions on a Mercado Libre listing with the seller's answers and answer dates (Mercado Libre shows no question dates). Page through with next_offset. A listing with no public questions returns 404. Pass exactly one of item_id or url.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            item_id: Item (listing) id, as returned in item_id by search() (e.g. 'MLM3571336480').
+            url: A listing page URL, or a product (/p/, /up/) URL: a product's questions are those of the listing in its buy box. Alternative to item_id.
+            offset: Where to start, from next_offset of the previous page. Defaults to 0.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercadolibre_questions", {"item_id": item_id, "url": url, "offset": offset}, extra)
+
+    async def best_sellers(
+        self,
+        category_id: str,
+        *,
+        country: Optional[Literal["mx", "ar", "co"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ranked top 20 best sellers in a Mercado Libre category in Mexico, Argentina or Colombia, with price, discount, installments, rating, units sold as a lower bound and seller where shown. Not available for Brazil.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: Category id, as returned in category_id or category_path by search(), or category_id by product() (e.g. 'MLM1055'). Its prefix must match the country.
+            country: Required. mx, ar or co. Not available for Brazil.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercadolibre_best_sellers", {"category_id": category_id, "country": country}, extra)

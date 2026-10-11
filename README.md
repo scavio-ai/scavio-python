@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 35 sources -- Google, Amazon, Walmart, Costco, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 36 sources -- Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 35 data sources, 228 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 36 data sources, 233 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -19,6 +19,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
+| Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -34,7 +35,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 35 | 1 | 1 per plan | 1 |
+| Data Sources | 36 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -676,7 +677,8 @@ print(comps["total"], "sold; pages:", comps["max_page"])
 for row in comps["listings"]:
     print(row["sold_price"], row["sold_date"], row["lot_sqft"], row["address"]["line"])
 
-# Listing-text keyword watch, then one property in full.
+# Listing-text keyword watch, then one property in full. A listing must contain
+# ALL the keywords you pass, so each extra keyword narrows the results.
 shops = client.realtor.search(location="Austin, TX", keywords=["workshop"])["data"]
 detail = client.realtor.property(property_id=shops["listings"][0]["property_id"])["data"]
 print(detail["list_price"], detail["risk"]["flood_factor"], len(detail["property_history"]))
@@ -714,6 +716,64 @@ An unknown property, listing, sold id, agent or branch returns a 404
 (`NotFoundError`) and is billed 1 credit; a removed Rightmove listing is also a
 404. Rightmove serves 42 search pages, 40 sold pages and 50 agent pages per
 query.
+
+### 23. Mercado Libre -- Listings, Products, Reviews, Questions and Best Sellers
+
+`mercadolibre` covers Mercado Libre in Mexico, Argentina and Colombia and
+Mercado Livre in Brazil (`country="mx"`, `"br"`, `"ar"` or `"co"`; prices come
+back in MXN, BRL, ARS or COP). `reviews` costs 1 credit; `search`, `product`,
+`questions` and `best_sellers` cost 2. Chile is not supported.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Search by keyword (about 48 rows per page, up to 42 pages, so about 2,000
+# results per query; slice by price range, condition or seller to reach more).
+found = client.mercadolibre.search(
+    "iphone 15",
+    country="mx",
+    free_shipping=True,
+    sort="price_asc",
+)["data"]
+print(found["total"], found["auto_applied_filters"])
+for row in found["results"]:
+    # sold_quantity_min is a lower bound ("+1000 vendidos"), never an exact count.
+    print(row["price"], row["original_price"], row["sold_quantity_min"], row["title"])
+
+# One catalog product: price, buy-box seller with reputation, star distribution.
+product = client.mercadolibre.product(product_id="MLM1027172667")["data"]
+print(product["price"], product["seller"]["nickname"], product["rating"]["distribution"])
+
+# A seller's catalogue: the buy-box seller_id feeds a filtered search.
+catalogue = client.mercadolibre.search(
+    country="mx", seller_id=str(product["seller"]["seller_id"]), condition="new"
+)["data"]
+
+# Reviews (15 per page, 1 credit), e.g. only 1-star; original_text keeps the
+# untranslated review and country says where it was written.
+reviews = client.mercadolibre.reviews(product_id="MLM1027172667", rating=1)["data"]
+for review in reviews["reviews"]:
+    print(review["rating"], review["country"], review["text"])
+
+# Buyer questions with the seller's answers; page with next_offset.
+qa = client.mercadolibre.questions(product["item_id"])["data"]
+for q in qa["questions"]:
+    print(q["text"], "->", q["answer"]["text"] if q["answer"] else None)
+
+# Top 20 best sellers in a category (mx, ar or co; not Brazil). The category
+# prefix must match the country.
+top = client.mercadolibre.best_sellers(product["category_id"], country="mx")["data"]
+for row in top["results"]:
+    print(row["rank"], row["price"], row["sold_label"], row["title"])
+```
+
+A zero-result search returns an empty page and is billed. An unknown product,
+item or seller nickname returns a 404 (`NotFoundError`) and is billed, as does a
+listing with no public questions. Only the buy-box seller is returned per
+product, and Brazil and Argentina may auto-apply a "new" condition (listed in
+`auto_applied_filters`).
 
 ## Error Handling
 
@@ -828,11 +888,25 @@ Scavio works with popular AI/LLM frameworks:
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
+| Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.21.0
+
+- **New `mercadolibre` namespace, 5 methods.** `search` (keyword or seller in
+  Mexico, Brazil, Argentina or Colombia; condition, price, discount, free
+  shipping, Full fulfillment, official store and interest-free installment
+  filters; relevance or price sort; 2 credits), `product` (buy-box seller,
+  variations, star distribution, specs; 2), `reviews` (15 per page with a star
+  filter; 1), `questions` (buyer questions with seller answers; 2) and
+  `best_sellers` (top 20 in a category, not Brazil; 2). `country` is required
+  on `search` and `best_sellers` and is keyword-only. See example 23 above.
+- `realtor.search(keywords=...)` docstring: a listing must contain ALL the
+  keywords, so each extra keyword narrows the results.
 
 ### Changed in 0.20.1
 

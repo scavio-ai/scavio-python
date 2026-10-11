@@ -5561,8 +5561,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _int("price_reduced_within_days", "Only listings with a price cut in the last N days (1-3650)."),
             _str_list(
                 "keywords",
-                "Only listings whose listing text matches these keywords, up to 10 "
-                "(e.g. ['workshop']).",
+                "Only listings whose listing text contains ALL of these keywords, up to 10 "
+                "(e.g. ['workshop']); each extra keyword narrows the results.",
             ),
             _bool("new_construction", "Only new construction."),
             _bool("foreclosure", "Only foreclosures."),
@@ -5911,6 +5911,210 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         one_of=(("url", "branch_id"),),
         credits=1,
     ),
+    # ============================ Mercado Libre ==========================
+    # 5 endpoints: reviews 1 credit, every other endpoint 2. Countries mx, br
+    # (Mercado Livre), ar, co; Chile is not supported. search() takes query,
+    # seller_id or seller_nickname (query stays positional, as the Playground
+    # snippet passes it); country is required but keyword-only, enforced by a
+    # one-member one_of group. product()/reviews() take exactly one of url,
+    # product_id or item_id; questions() one of item_id or url (the backend
+    # enforces "exactly one"). best_sellers() is mx, ar or co only.
+    Endpoint(
+        key="mercadolibre_search",
+        namespace="mercadolibre",
+        method="search",
+        http="POST",
+        path="/api/v1/mercadolibre/search",
+        summary=(
+            "Search Mercado Libre listings in Mexico, Brazil (Mercado Livre), Argentina or "
+            "Colombia by keyword or seller, with condition, price range, discount, free shipping, "
+            "Full fulfillment, official stores and interest-free installment filters, sorted by "
+            "relevance or price. Each row has price, list price, discount, installments, seller "
+            "and official-store flag where shown, rating, units sold as a lower bound (\"at least "
+            "500\"), shipping flags, a sponsored flag and catalog ids. About 48 rows per page and "
+            "42 pages (about 2,000 results) per query. Pass country and one of query, seller_id "
+            "or seller_nickname."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Keywords (1-200 characters). Mercado Libre may narrow a query to a category, "
+                    "brand or line on its own; the response lists those in auto_applied_filters."
+                ),
+            ),
+            _lit(
+                "country",
+                ("mx", "br", "ar", "co"),
+                "Required. Mexico (mx), Brazil (br, Mercado Livre), Argentina (ar) or Colombia "
+                "(co). Prices come back in MXN, BRL, ARS or COP. Chile is not supported.",
+            ),
+            _str(
+                "seller_id",
+                "Only this seller's listings (numeric id, as returned in product's "
+                "seller.seller_id). Combines with query, filters, sort and page.",
+            ),
+            _str(
+                "seller_nickname",
+                "A seller's public nickname. Returns the seller's first page of listings without "
+                "filters, plus their seller_id; use seller_id for filters, sort and further pages.",
+            ),
+            _lit(
+                "condition",
+                ("new", "used", "refurbished", "open_box"),
+                "Item condition. Without it, Mercado Libre may show new items only for some "
+                "queries (listed in auto_applied_filters).",
+            ),
+            _int("min_price", "Minimum price in the country's currency (MXN, BRL, ARS or COP)."),
+            _int("max_price", "Maximum price in the country's currency."),
+            _ilit(
+                "min_discount",
+                (5, 10, 15, 20, 25, 30, 40),
+                "Only listings at least this many percent off: 5, 10, 15, 20, 25, 30 or 40.",
+            ),
+            _bool("free_shipping", "Only listings with free shipping."),
+            _bool("full_fulfillment", "Only listings shipped by Mercado Libre Full fulfillment."),
+            _bool("official_stores_only", "Only listings from official brand stores."),
+            _bool("interest_free_installments", "Only listings payable in interest-free installments."),
+            _lit(
+                "sort",
+                ("relevance", "price_asc", "price_desc"),
+                "relevance (server default), price_asc or price_desc. Mercado Libre offers no "
+                "newest or best-selling sort.",
+            ),
+            _int(
+                "page",
+                "Results page, 1-42 (about 48 per page, so about 2,000 results per query). Narrow "
+                "by price range, condition or seller to reach more.",
+            ),
+        ),
+        one_of=(("query", "seller_id", "seller_nickname"), ("country",)),
+        credits=2,
+    ),
+    Endpoint(
+        key="mercadolibre_product",
+        namespace="mercadolibre",
+        method="product",
+        http="POST",
+        path="/api/v1/mercadolibre/product",
+        summary=(
+            "One Mercado Libre catalog product or listing: title, price, list price, "
+            "installments, promotions, the buy-box seller with reputation level and seller tier, "
+            "stock, shipping, rating with its star distribution, variations with sibling product "
+            "ids, specs, description, pictures and categories. Only the buy-box seller is "
+            "returned; units sold is a lower bound. Some fields are null where the page omits "
+            "them. Pass exactly one of url, product_id or item_id; the id prefix (MLM, MLB, MLA, "
+            "MCO) sets the country."
+        ),
+        params=(
+            _str(
+                "product_id",
+                "Catalog product id, as returned in product_id by search() (e.g. 'MLM1027172667').",
+            ),
+            _str(
+                "item_id",
+                "Item (listing) id, as returned in item_id by search() (e.g. 'MLM2746152281'; "
+                "'MLM-2746152281' is accepted too).",
+            ),
+            _str(
+                "url",
+                "A Mercado Libre or Mercado Livre product (/p/), user product (/up/) or listing "
+                "page URL.",
+            ),
+        ),
+        one_of=(("url", "product_id", "item_id"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="mercadolibre_reviews",
+        namespace="mercadolibre",
+        method="reviews",
+        http="POST",
+        path="/api/v1/mercadolibre/reviews",
+        summary=(
+            "One page of up to 15 Mercado Libre product reviews (page until a page comes back "
+            "empty), optionally filtered by star rating: rating, text, the original text when "
+            "Mercado Libre translated it, exact date, likes, the review's country and photos. "
+            "Catalog products pool reviews from several countries. Totals and the star "
+            "distribution come from product(). Pass exactly one of url, product_id or item_id."
+        ),
+        params=(
+            _str("product_id", "Catalog product id, as returned in product_id by search()."),
+            _str("item_id", "Item (listing) id, as returned in item_id by search()."),
+            _str(
+                "url",
+                "A Mercado Libre or Mercado Livre product (/p/), user product (/up/) or listing "
+                "page URL.",
+            ),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this star rating (1-5)."),
+            _int(
+                "page",
+                "Reviews page, 1-based (up to 15 per page; a page past the last one comes back "
+                "empty).",
+            ),
+        ),
+        one_of=(("url", "product_id", "item_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="mercadolibre_questions",
+        namespace="mercadolibre",
+        method="questions",
+        http="POST",
+        path="/api/v1/mercadolibre/questions",
+        summary=(
+            "A page of buyer questions on a Mercado Libre listing with the seller's answers and "
+            "answer dates (Mercado Libre shows no question dates). Page through with next_offset. "
+            "A listing with no public questions returns 404. Pass exactly one of item_id or url."
+        ),
+        params=(
+            Param(
+                "item_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Item (listing) id, as returned in item_id by search() (e.g. "
+                    "'MLM3571336480')."
+                ),
+            ),
+            _str(
+                "url",
+                "A listing page URL, or a product (/p/, /up/) URL: a product's questions are those "
+                "of the listing in its buy box. Alternative to item_id.",
+            ),
+            _int("offset", "Where to start, from next_offset of the previous page. Defaults to 0."),
+        ),
+        one_of=(("item_id", "url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="mercadolibre_best_sellers",
+        namespace="mercadolibre",
+        method="best_sellers",
+        http="POST",
+        path="/api/v1/mercadolibre/best-sellers",
+        summary=(
+            "The ranked top 20 best sellers in a Mercado Libre category in Mexico, Argentina or "
+            "Colombia, with price, discount, installments, rating, units sold as a lower bound "
+            "and seller where shown. Not available for Brazil."
+        ),
+        params=(
+            _req(
+                "category_id",
+                "Category id, as returned in category_id or category_path by search(), or "
+                "category_id by product() (e.g. 'MLM1055'). Its prefix must match the country.",
+            ),
+            _lit(
+                "country",
+                ("mx", "ar", "co"),
+                "Required. mx, ar or co. Not available for Brazil.",
+            ),
+        ),
+        one_of=(("country",),),
+        credits=2,
+    ),
     # =========================== Extract (core) ==========================
     # NOT a platform and NOT a namespace: surfaced as the top-level method
     # scavio.extract(url, format=, mode=). namespace="_core" keeps it out of
@@ -6004,6 +6208,7 @@ NAMESPACES: tuple[str, ...] = (
     "trustpilot",
     "realtor",
     "rightmove",
+    "mercadolibre",
 )
 
 

@@ -25,6 +25,7 @@ from ._namespaces_async import (
     _AsyncInstagramNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
@@ -131,6 +132,7 @@ class AsyncScavioClient:
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)
+        self.mercadolibre = _AsyncMercadoLibreNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
