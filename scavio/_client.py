@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 
 from ._exceptions import ScavioError
+from ._extract import ExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
     _AirbnbNamespace,
@@ -63,8 +64,10 @@ class ScavioClient:
     ``client.amazon``, ...) whose methods return the raw JSON response as a
     ``dict``.
 
-    ``client.extract(url)`` is the one exception: reading an arbitrary URL is a
-    core capability rather than a platform, so it is a top-level method.
+    ``client.extract`` is the one exception: reading arbitrary URLs is a core
+    capability rather than a platform. Call it for one page
+    (``client.extract(url)``) or use ``client.extract.map`` / ``.crawl`` /
+    ``.batch`` (and their status and cancel calls) for whole sites and URL lists.
 
     Args:
         api_key: Your Scavio API key. Falls back to the ``SCAVIO_API_KEY``
@@ -136,6 +139,7 @@ class ScavioClient:
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
         self.mercadolibre = _MercadoLibreNamespace(self)
+        self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
@@ -162,6 +166,29 @@ class ScavioClient:
             retry=self._retry,
         )
 
+    def _send(
+        self,
+        method: str,
+        path: str,
+        *,
+        json: Optional[dict[str, Any]] = None,
+        params: Optional[dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
+    ) -> dict[str, Any]:
+        """Any method, with an optional query string and extra headers (extract jobs)."""
+        return sync_request(
+            method,
+            path,
+            api_key=self._api_key,
+            base_url=self._base_url,
+            timeout=self._timeout,
+            rate_limiter=self._rate_limiter,
+            retry=self._retry,
+            json=json,
+            params=params,
+            extra_headers=headers,
+        )
+
     def _call(
         self,
         key: str,
@@ -179,36 +206,21 @@ class ScavioClient:
         """Shortcut for :meth:`google.search` (Google SERP via /api/v2/google)."""
         return self.google.search(query, **extra)
 
-    def extract(
-        self,
-        url: str,
-        *,
-        format: Optional[Literal["html", "markdown", "text"]] = None,
-        mode: Optional[Literal["normal", "advanced", "ultra"]] = None,
-    ) -> dict[str, Any]:
+    @property
+    def extract(self) -> ExtractNamespace:
         """Read any URL and return it as raw HTML, readability Markdown, or plain text.
 
-        A CORE endpoint, not a platform: it is a top-level method, never a
-        namespace. Tier-priced by ``mode`` - 'normal' and 'advanced' cost 1
-        credit, 'ultra' costs 2 - and only a successful extraction is billed, so
-        a dead link, bot wall, or timeout costs nothing.
+        ``client.extract(url, format=..., mode=...)`` is the single-page call it
+        has always been. The same object carries the Extract family's multi-page
+        operations: ``map``, ``crawl``, ``crawl_status``, ``cancel_crawl``,
+        ``batch``, ``batch_status`` and ``cancel_batch``.
 
-        Args:
-            url: Page to read (1-2048 characters). http(s) only; a bare host is
-                upgraded to https, and loopback, private, link-local, and
-                metadata hosts are rejected with a 400.
-            format: 'html' is the raw page, 'markdown' a readability extraction,
-                'text' that markdown flattened to plain text. Server default
-                'markdown'.
-            mode: Fetch tier, and the price-bearing parameter: 'normal' plain
-                datacenter fetch (1 credit), 'advanced' full browser render
-                (1 credit), 'ultra' the hardest-target tier (2 credits). Server
-                default 'normal'.
-
-        Returns:
-            ``{"url", "format", "mode", "content", "content_length"}``.
+        Tier-priced by ``mode`` - 'normal' and 'advanced' cost 1 credit,
+        'ultra' costs 2 - and only a successful extraction is billed, so a dead
+        link, bot wall, or timeout costs nothing. Crawl and batch bill the same
+        price per successful page; map costs 1 credit on the normal tier.
         """
-        return self._call("extract", {"url": url, "format": format, "mode": mode}, {})
+        return self._extract
 
     def get_usage(self) -> UsageResponse:
         """Return the account's plan, credit balance, and usage for the period."""

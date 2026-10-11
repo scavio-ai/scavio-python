@@ -87,16 +87,24 @@ def sync_request(
     rate_limiter: SyncRateLimiter,
     retry: RetryConfig,
     json: Optional[dict[str, Any]] = None,
+    params: Optional[dict[str, str]] = None,
+    extra_headers: Optional[dict[str, str]] = None,
 ) -> dict[str, Any]:
     url = f"{base_url}{path}"
     headers = _build_headers(api_key)
+    if extra_headers:
+        headers.update(extra_headers)
+    # Only passed when set, so a plain GET/POST goes out exactly as it always has.
+    query: dict[str, Any] = {"params": params} if params else {}
     attempt = 0
 
     while True:
         rate_limiter.wait()
         try:
             if method == "GET":
-                resp = requests.get(url, headers=headers, timeout=timeout)
+                resp = requests.get(url, headers=headers, timeout=timeout, **query)
+            elif method == "DELETE":
+                resp = requests.delete(url, headers=headers, timeout=timeout, **query)
             else:
                 resp = requests.post(url, json=json, headers=headers, timeout=timeout)
         except requests.Timeout as exc:
@@ -112,7 +120,8 @@ def sync_request(
                 continue
             raise ScavioConnectionError(str(exc)) from exc
 
-        if resp.status_code == 200:
+        # 200 everywhere, 202 when a crawl or batch job is accepted.
+        if 200 <= resp.status_code < 300:
             return _safe_json(resp)
 
         if retry.should_retry_status(resp.status_code, attempt):
@@ -135,16 +144,23 @@ async def async_request(
     rate_limiter: AsyncRateLimiter,
     retry: RetryConfig,
     json: Optional[dict[str, Any]] = None,
+    params: Optional[dict[str, str]] = None,
+    extra_headers: Optional[dict[str, str]] = None,
 ) -> dict[str, Any]:
     url = f"{base_url}{path}"
     headers = _build_headers(api_key)
+    if extra_headers:
+        headers.update(extra_headers)
+    query: dict[str, Any] = {"params": params} if params else {}
     attempt = 0
 
     while True:
         await rate_limiter.wait()
         try:
             if method == "GET":
-                resp = await http_client.get(url, headers=headers, timeout=timeout)
+                resp = await http_client.get(url, headers=headers, timeout=timeout, **query)
+            elif method == "DELETE":
+                resp = await http_client.delete(url, headers=headers, timeout=timeout, **query)
             else:
                 resp = await http_client.post(url, json=json, headers=headers, timeout=timeout)
         except httpx.TimeoutException as exc:
@@ -160,7 +176,8 @@ async def async_request(
                 continue
             raise ScavioConnectionError(str(exc)) from exc
 
-        if resp.status_code == 200:
+        # 200 everywhere, 202 when a crawl or batch job is accepted.
+        if 200 <= resp.status_code < 300:
             return _safe_json(resp)
 
         if retry.should_retry_status(resp.status_code, attempt):

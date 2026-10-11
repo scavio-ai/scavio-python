@@ -1073,6 +1073,33 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(_req("video_id", "TikTok video id."),),
     ),
     Endpoint(
+        key="tiktok_video_transcript",
+        namespace="tiktok",
+        method="video_transcript",
+        http="POST",
+        path="/api/v1/tiktok/video/transcript",
+        summary=(
+            "Spoken-word transcript of a TikTok video as timestamped segments and full text. "
+            "Returns available: false for videos with no spoken captions (music, dance or muted "
+            "clips). Provide video_id or url."
+        ),
+        params=(
+            Param(
+                name="video_id",
+                annotation="Optional[str]",
+                positional=True,
+                doc="TikTok video id (numeric string).",
+            ),
+            _str("url", "A TikTok video URL or share link (alternative to video_id)."),
+            _str(
+                "language",
+                "Preferred transcript language (2-letter code, e.g. 'en'); defaults to the "
+                "original spoken language.",
+            ),
+        ),
+        one_of=(("video_id", "url"),),
+    ),
+    Endpoint(
         key="tiktok_video_comments",
         namespace="tiktok",
         method="video_comments",
@@ -6405,15 +6432,189 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _lit(
                 "mode",
                 ("normal", "advanced", "ultra"),
-                "Fetch tier, and the price-bearing parameter: 'normal' plain datacenter fetch "
-                "(1 credit), 'advanced' full browser render (1 credit), 'ultra' the "
-                "hardest-target tier (2 credits). Server default 'normal'.",
+                "Tier, and the price-bearing parameter: 'normal' (1 credit), 'advanced' for "
+                "JavaScript-built pages (1 credit), 'ultra' for the hardest pages (2 credits). "
+                "Server default 'normal'.",
             ),
         ),
         credits=1,
         credits_note=(
             "Tier-priced by mode: 'normal' and 'advanced' cost 1 credit, 'ultra' costs 2. Only a "
             "successful extraction is billed - a dead link, bot wall or timeout costs nothing."
+        ),
+    ),
+    # ================= Extract: map / crawl / batch (core) ================
+    # The request bodies of the Extract family's multi-page operations,
+    # mirroring backend/src/routes/extract-web.ts. Like `extract` these are
+    # namespace "_core": they hang off the callable client.extract namespace
+    # (client.extract.map / .crawl / .batch), which is hand-written in
+    # scavio/_extract.py together with the status and cancel calls, so the
+    # generator never emits a class for them. build_body uses these entries for
+    # the argument -> wire mapping, and tests pin the hand-written signatures
+    # to them.
+    Endpoint(
+        key="extract_map",
+        namespace="_core",
+        method="map",
+        http="POST",
+        path="/api/v1/extract/map",
+        summary=(
+            "List a site's page URLs, gathered from its sitemaps and its start page, deduplicated, "
+            "filtered by path and limited: { url, links: [{ url, source, lastmod? }], total_found, "
+            "returned, truncated, sitemaps_read }. Pages disallowed by robots.txt are left out."
+        ),
+        params=(
+            _req("url", "The site to map (1-2048 characters). A bare host is upgraded to https."),
+            _str("search", "Only return URLs containing every word of this text (case-insensitive)."),
+            _int(
+                "limit",
+                "Maximum links to return, 1-5,000. Server default 1,000 (or the plan's limit if "
+                "lower): Free 500, PAYG 1,000, paid plans 5,000.",
+            ),
+            _lit(
+                "sitemap",
+                ("include", "only", "skip"),
+                "'include' (default) combines sitemaps with the start page's links; 'only' uses "
+                "sitemaps alone; 'skip' uses page links alone.",
+            ),
+            _bool(
+                "include_subdomains",
+                "Also return URLs on subdomains (server default False; www and the bare domain "
+                "always count as one site).",
+            ),
+            _str_list(
+                "include_paths",
+                "Path globs to keep (max 20), e.g. ['/blog/**']. '*' matches within one segment, "
+                "'**' across segments.",
+            ),
+            _str_list("exclude_paths", "Path globs to drop (max 20). Excludes win over includes."),
+            _bool(
+                "ignore_query_parameters",
+                "Treat URLs that differ only by query string as one URL (server default True).",
+            ),
+            _lit(
+                "mode",
+                ("normal", "advanced", "ultra"),
+                "Tier, as on extract: 'normal' (default), 'advanced' for JavaScript-built pages, "
+                "'ultra' for the hardest pages.",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit on the normal tier; up to 2 on 'advanced' and up to 10 on 'ultra'."
+        ),
+    ),
+    Endpoint(
+        key="extract_crawl",
+        namespace="_core",
+        method="crawl",
+        http="POST",
+        path="/api/v1/extract/crawl",
+        summary=(
+            "Start a crawl from one URL: same-site pages are discovered and extracted breadth-first "
+            "within the depth, page and path limits, each returned as Markdown, text or HTML "
+            "exactly like extract. Pages disallowed by robots.txt are skipped. Returns the queued "
+            "job: { data: { id, status, status_url, credits_per_page, webhook_secret? }, "
+            "credits_used: 0 }."
+        ),
+        params=(
+            _req(
+                "url",
+                "Where the crawl starts (1-2048 characters). Only pages on the same site are "
+                "crawled; URLs under the start path go first.",
+            ),
+            _int(
+                "max_pages",
+                "Maximum pages to fetch, 1-10,000 (server default 100). Plan limits: Free 10, "
+                "PAYG 100, Project 500, Bootstrap 2,000, Startup 5,000, Growth 10,000.",
+            ),
+            _int(
+                "max_depth",
+                "Links away from the start page to follow, 0-10 (server default 3). 0 fetches "
+                "only the start page.",
+            ),
+            _str_list(
+                "include_paths",
+                "Path globs to crawl (max 20), e.g. ['/docs/**']. '*' matches within one segment, "
+                "'**' across segments.",
+            ),
+            _str_list("exclude_paths", "Path globs to skip (max 20)."),
+            _bool("allow_subdomains", "Also crawl subdomains of the site (server default False)."),
+            _bool(
+                "ignore_query_parameters",
+                "Treat URLs that differ only by query string as one page (server default True).",
+            ),
+            _lit(
+                "sitemap",
+                ("include", "skip", "only"),
+                "'include' (default) also starts from the sitemap; 'skip' follows links only; "
+                "'only' fetches sitemap pages without following links.",
+            ),
+            _lit(
+                "format",
+                ("html", "markdown", "text"),
+                "Format of each page, as on extract (server default 'markdown').",
+            ),
+            _lit(
+                "mode",
+                ("normal", "advanced", "ultra"),
+                "Price-bearing tier for every page: 'normal' (default) and 'advanced' (JavaScript-"
+                "built pages) cost 1 credit per page, 'ultra' (hardest pages) 2.",
+            ),
+            _str(
+                "webhook_url",
+                "Optional https URL that gets a signed POST when the job completes, fails or is "
+                "cancelled. Verify it with scavio.verify_webhook().",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Billed per SUCCESSFUL page at extract's price for the tier: 'normal' and 'advanced' "
+            "1 credit, 'ultra' 2. Failed and skipped pages are free; starting the job costs "
+            "nothing, and it stops cleanly if the balance runs out."
+        ),
+    ),
+    Endpoint(
+        key="extract_batch",
+        namespace="_core",
+        method="batch",
+        http="POST",
+        path="/api/v1/extract/batch",
+        summary=(
+            "Extract a list of URLs in one job, each returned as Markdown, text or HTML exactly "
+            "like extract. Invalid URLs are reported in invalid_urls and never billed. Returns the "
+            "queued job: { data: { id, status, status_url, urls_count, invalid_urls, "
+            "credits_per_page, webhook_secret? }, credits_used: 0 }."
+        ),
+        params=(
+            _str_list(
+                "urls",
+                "The pages to extract, 1-1,000 (duplicates removed). Plan limits: Free 10, PAYG "
+                "50, Project 100, Bootstrap 500, Startup and Growth 1,000.",
+                required=True,
+            ),
+            _lit(
+                "format",
+                ("html", "markdown", "text"),
+                "Format of each page, as on extract (server default 'markdown').",
+            ),
+            _lit(
+                "mode",
+                ("normal", "advanced", "ultra"),
+                "Price-bearing tier for every page: 'normal' (default) and 'advanced' cost 1 "
+                "credit per page, 'ultra' 2.",
+            ),
+            _str(
+                "webhook_url",
+                "Optional https URL that gets a signed POST when the job completes, fails or is "
+                "cancelled. Verify it with scavio.verify_webhook().",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Billed per SUCCESSFUL page at extract's price for the tier: 'normal' and 'advanced' "
+            "1 credit, 'ultra' 2. Failed pages and invalid URLs are free; starting the job costs "
+            "nothing."
         ),
     ),
 )

@@ -110,3 +110,26 @@ class ScavioAPIError(ScavioAPIStatusError):
         self.status_code = status_code
         self.response_body = response_body
         ScavioError.__init__(self, rendered)
+
+
+class ScavioJobTimeoutError(ScavioTimeoutError):
+    """A crawl or batch started with ``wait=True`` did not finish within ``wait_timeout``.
+
+    The job keeps running on the server: poll it with ``client.extract.crawl_status``
+    / ``client.extract.batch_status`` using ``job_id``, or stop it with
+    ``cancel_crawl`` / ``cancel_batch``.
+
+    Attributes:
+        job_id: The id of the job that was still running.
+        job_type: ``"crawl"`` or ``"batch"``.
+        last_status: The last status response seen while waiting.
+    """
+
+    def __init__(self, job_id: str, job_type: str, last_status: Optional[dict[str, Any]]) -> None:
+        self.job_id = job_id
+        self.job_type = job_type
+        self.last_status = last_status
+        super().__init__(
+            f"{job_type} {job_id} was still running when wait_timeout elapsed; "
+            f"poll it with extract.{job_type}_status('{job_id}')"
+        )

@@ -53,7 +53,7 @@ _NS_META = {
     "youtube": ("YouTube", "YouTube search, video, transcript, channel, comment, and streams endpoints."),
     "reddit": ("Reddit", "Reddit search, post, comment, subreddit, user, and trending endpoints."),
     "x": ("X", "X search, tweet, and user endpoints."),
-    "tiktok": ("TikTok", "TikTok profile, video, hashtag, and search endpoints."),
+    "tiktok": ("TikTok", "TikTok profile, video, transcript, hashtag, and search endpoints."),
     "instagram": ("Instagram", "Instagram profile, media, and search endpoints."),
     "linkedin": ("LinkedIn", "LinkedIn person, company, job, post, and search endpoints."),
     "tiktok_shop": (

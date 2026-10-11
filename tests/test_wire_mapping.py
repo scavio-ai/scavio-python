@@ -1363,14 +1363,15 @@ def test_new_platform_endpoint_counts():
         "realtor": 6,
         "rightmove": 7,
         "mercadolibre": 5,
-        "_core": 1,
+        # extract + extract_map / extract_crawl / extract_batch (0.23.0).
+        "_core": 4,
     }
     counts: dict[str, int] = {}
     for ep in ENDPOINTS.values():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 131
+    assert sum(expected.values()) == 134
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

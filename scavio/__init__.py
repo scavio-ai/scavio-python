@@ -11,10 +11,12 @@ from ._exceptions import (
     ScavioAPIStatusError,
     ScavioConnectionError,
     ScavioError,
+    ScavioJobTimeoutError,
     ScavioTimeoutError,
 )
 from ._types import UsageResponse
 from ._version import __version__
+from ._webhooks import verify_webhook
 
 __all__ = [
     "ScavioClient",
@@ -24,6 +26,7 @@ __all__ = [
     "MissingAPIKeyError",
     "ScavioConnectionError",
     "ScavioTimeoutError",
+    "ScavioJobTimeoutError",
     "ScavioAPIStatusError",
     "BadRequestError",
     "InvalidAPIKeyError",
@@ -31,5 +34,6 @@ __all__ = [
     "NotFoundError",
     "RateLimitError",
     "ScavioAPIError",
+    "verify_webhook",
     "__version__",
 ]

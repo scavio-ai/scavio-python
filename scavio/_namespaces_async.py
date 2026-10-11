@@ -1643,7 +1643,7 @@ class _AsyncXNamespace:
         return await self._client._call("x_community_tweets", {"community_id": community_id, "ranking": ranking, "cursor": cursor}, extra)
 
 class _AsyncTikTokNamespace:
-    """TikTok profile, video, hashtag, and search endpoints."""
+    """TikTok profile, video, transcript, hashtag, and search endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -1702,6 +1702,26 @@ class _AsyncTikTokNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("tiktok_video", {"video_id": video_id}, extra)
+
+    async def video_transcript(
+        self,
+        video_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Spoken-word transcript of a TikTok video as timestamped segments and full text. Returns available: false for videos with no spoken captions (music, dance or muted clips). Provide video_id or url.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            video_id: TikTok video id (numeric string).
+            url: A TikTok video URL or share link (alternative to video_id).
+            language: Preferred transcript language (2-letter code, e.g. 'en'); defaults to the original spoken language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tiktok_video_transcript", {"video_id": video_id, "url": url, "language": language}, extra)
 
     async def video_comments(
         self,

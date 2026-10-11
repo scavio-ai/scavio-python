@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 36 sources -- Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract()` for reading any URL, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 36 sources -- Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 36 data sources, 233 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -23,7 +23,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
-| TikTok Data (11 endpoints) | Yes | No | No | No |
+| TikTok Data (24 endpoints) | Yes | No | No | No |
 | TikTok Shop Data (8 endpoints) | Yes | No | No | No |
 | Instagram Data (12 endpoints) | Yes | No | No | No |
 | LinkedIn Data (9 endpoints) | Yes | No | No | No |
@@ -443,10 +443,10 @@ print(f"Credits remaining: {usage['credit_balance']}")
 
 ### 17. Read Any URL -- `extract()`
 
-`extract` is a core capability, not a platform, so it is a top-level method:
-`client.extract(url)`, never `client.extract.extract()`. It is the "read this
-page" primitive an agent reaches for when the page is not on a site Scavio has
-a dedicated namespace for.
+`extract` is a core capability, not a platform. `client.extract(url)` reads one
+page; the same `client.extract` object also maps, crawls and batch-extracts
+whole sites (example 17b). It is the "read this page" primitive an agent
+reaches for when the page is not on a site Scavio has a dedicated namespace for.
 
 ```python
 from scavio import ScavioClient
@@ -462,13 +462,140 @@ print(page["content"][:500])
 raw = client.extract("https://example.com/blog/post", format="html")
 
 # mode is the price-bearing parameter, and the only knob that matters on a
-# hard target: "normal" (1 credit) -> "advanced", a full browser render
-# (1 credit) -> "ultra", the hardest-target tier (2 credits).
+# hard target: "normal" (1 credit) -> "advanced" for JavaScript-built pages
+# (1 credit) -> "ultra" for the hardest pages (2 credits).
 hard = client.extract("https://example.com/spa", format="markdown", mode="ultra")
 
 # Billing is charged only on a successful extraction: a dead link, a bot wall
 # or a timeout costs nothing, so retrying up a tier is safe.
 ```
+
+### 17b. Map, Crawl and Batch-Extract Whole Sites -- `extract.map / crawl / batch`
+
+Three multi-page operations hang off `client.extract`:
+
+| Call | What it returns | Price |
+|---|---|---|
+| `extract.map(url, ...)` | A site's page URLs from its sitemaps and start page, deduplicated and path-filtered (synchronous) | 1 credit on the normal tier (up to 2 on `advanced`, up to 10 on `ultra`) |
+| `extract.crawl(url, ...)` | A job that discovers and extracts same-site pages breadth-first, each as Markdown, text or HTML | Per **successful** page at extract's price: 1 (`normal`, `advanced`) or 2 (`ultra`) |
+| `extract.batch(urls, ...)` | A job that extracts a list of URLs, results in input order | Same per-page price; invalid URLs are reported and never billed |
+| `extract.crawl_status(job_id)` / `extract.batch_status(job_id)` | Progress (`status`, `pages`, `credits_used`, `stopped_reason`) and one page of results with `next_cursor` | Free |
+| `extract.cancel_crawl(job_id)` / `extract.cancel_batch(job_id)` | Stops a queued or running job; results so far stay available (409 if it already finished) | Free |
+
+Failed and skipped pages cost nothing, starting a job costs nothing, and credits
+are taken page by page: if your balance runs out the job stops cleanly with
+`stopped_reason="insufficient_credits"`. robots.txt is always obeyed for map
+and crawl. A crawl stays on the start URL's site (subdomains optional via
+`allow_subdomains=True`) and visits URLs under the start path first. Results
+are kept for 3 days after a job finishes (up to 2 MB per page, 250 MB per job);
+a job runs for at most 6 hours.
+
+| Plan | Max pages per crawl | Active jobs | URLs per batch |
+|---|---|---|---|
+| Free | 10 | 1 | 10 |
+| PAYG | 100 | 1 | 50 |
+| Project | 500 | 2 | 100 |
+| Bootstrap | 2,000 | 3 | 500 |
+| Startup | 5,000 | 5 | 1,000 |
+| Growth | 10,000 | 10 | 1,000 |
+
+Starting a job beyond your active-job limit raises `RateLimitError` (429).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# Map: every URL on a site, filtered. Synchronous, 1 credit.
+site = client.extract.map("https://scavio.dev", include_paths=["/docs/**"], limit=200)
+for link in site["data"]["links"]:
+    print(link["url"], link["source"], link.get("lastmod"))
+
+# Crawl and wait: polls until the job finishes, then pages through every
+# result for you. Two pages here, so 2 credits on the normal tier.
+crawl = client.extract.crawl("https://scavio.dev/docs", max_pages=2, wait=True)
+for page in crawl["data"]["results"]:
+    print(page["url"], page["status"], page["content_length"])
+
+# Or start it and poll yourself (better for large crawls).
+job = client.extract.crawl(
+    "https://example.com/blog",
+    max_pages=500,
+    max_depth=2,
+    exclude_paths=["/blog/tag/**"],
+    format="markdown",
+)["data"]
+status = client.extract.crawl_status(job["id"], include_content=False)
+print(status["data"]["status"], status["data"]["pages"])
+
+# Page through results with next_cursor (1-100 per call, default 25).
+cursor = None
+while True:
+    page = client.extract.crawl_status(job["id"], cursor=cursor, limit=100)["data"]
+    for result in page["results"]:
+        ...  # result["url"], result["status"], result["content"]
+    cursor = page["next_cursor"]
+    if not cursor:
+        break
+
+# Batch: a list of URLs in one job, results in input order.
+batch = client.extract.batch(
+    ["https://example.com/a", "https://example.com/b"], format="text", wait=True
+)
+print(batch["data"]["pages"])
+```
+
+`wait=True` is a convenience: it polls every `poll_interval` seconds (default
+2) and returns `{"data": {...final status..., "results": [...every page...],
+"next_cursor": None}, "created": {...the job as created...}}`. Pass
+`wait_timeout=` (seconds) to bound it; on expiry it raises
+`ScavioJobTimeoutError`, whose `job_id` you can keep polling, while the job
+keeps running on the server. Without `wait` you get the queued job back at once
+(`id`, `status`, `status_url`, `credits_per_page`, and for batch `urls_count`
+and `invalid_urls`).
+
+Every crawl and batch POST carries an `Idempotency-Key` header. Pass your own
+with `idempotency_key=` to make a retried request return the original job
+within 24 hours; when you pass none, the SDK generates one per call so its own
+automatic retries never start a second job. The async client has the same
+surface: `await client.extract.crawl(...)`.
+
+#### Completion webhooks
+
+Pass `webhook_url="https://..."` to `crawl` or `batch` and Scavio POSTs the
+final job status there when it completes, fails or is cancelled (retried after
+30 seconds and 5 minutes on failure). The job creation response carries a
+`webhook_secret`, returned only once; store it. Each delivery is signed with
+`Scavio-Signature: t=<unix>,v1=<hex>`, an HMAC-SHA256 of `"<t>.<raw body>"`.
+Verify it with `scavio.verify_webhook`, passing the RAW request body:
+
+```python
+import scavio
+
+job = client.extract.crawl(
+    "https://example.com/docs", webhook_url="https://hooks.example.com/scavio"
+)["data"]
+secret = job["webhook_secret"]  # store it: it is returned only once
+
+# In your webhook handler (Flask shown):
+from flask import Flask, abort, request
+
+app = Flask(__name__)
+
+@app.post("/scavio")
+def scavio_webhook():
+    if not scavio.verify_webhook(
+        secret, request.headers.get("Scavio-Signature"), request.get_data()
+    ):
+        abort(401)
+    event = request.get_json()
+    print(event["id"], event["status"])
+    return "", 204
+```
+
+`verify_webhook(secret, header, body, tolerance=300)` returns `False` for a
+missing, malformed, tampered or stale (older than `tolerance` seconds)
+signature, and compares in constant time.
 
 ### 18. eBay Price Research -- Sold Listings, Not Asking Prices
 
@@ -861,7 +988,7 @@ Scavio works with popular AI/LLM frameworks:
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams`, `community_post`, `community_post_comments` | `search`/`shorts` 2, `transcript` 5, `streams` 3, rest 1 each |
 | Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending`, `search_comments`, `search_subreddits` | 1 each |
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending`, `search_communities`, `community`, `community_tweets` | 1 each |
-| TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings`, `trending_searches`, `trending_videos`, `search_suggestions`, `music`, `music_videos`, `search_music`, `music_chart`, `user_similar`, `user_playlists`, `playlist_videos`, `user_live`, `user_region` | 1 each |
+| TikTok | `profile`, `user_posts`, `video`, `video_transcript`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings`, `trending_searches`, `trending_videos`, `search_suggestions`, `music`, `music_videos`, `search_music`, `music_chart`, `user_similar`, `user_playlists`, `playlist_videos`, `user_live`, `user_region` | 1 each |
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | `user_posts` 2, `post`/`comment_replies` 8, the other nine 10 each |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
@@ -891,11 +1018,35 @@ Scavio works with popular AI/LLM frameworks:
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
-| Extract (core, not a namespace) | `client.extract(url)` | 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`; only a successful extraction is billed |
+| Extract (core, callable) | `client.extract(url)`, `extract.map`, `extract.crawl`, `extract.crawl_status`, `extract.cancel_crawl`, `extract.batch`, `extract.batch_status`, `extract.cancel_batch` | `extract`: 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`, only on success. `map`: 1 on normal. `crawl` / `batch`: that same price per successful page. Status and cancel: free |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.23.0
+
+- **`client.extract` is now a callable namespace.** `client.extract(url,
+  format=..., mode=...)` works exactly as before (same signature, same request
+  on the wire, sync and async), and the same object adds the website map,
+  crawl and batch operations: `extract.map`, `extract.crawl`,
+  `extract.crawl_status`, `extract.cancel_crawl`, `extract.batch`,
+  `extract.batch_status`, `extract.cancel_batch`. `crawl` and `batch` take
+  `wait=True` to poll until done and return every result. See example 17b.
+- **`scavio.verify_webhook(secret, header, body)`** verifies the signed
+  completion webhooks crawl and batch jobs send.
+- New `ScavioJobTimeoutError` (a `ScavioTimeoutError`) when `wait_timeout`
+  elapses; it carries `job_id`.
+- **`tiktok.video_transcript(video_id=None, *, url=None, language=None)`**:
+  the spoken-word transcript of a TikTok video as timestamped segments and full
+  text, 1 credit. Returns `available: false` for videos with no spoken captions.
+- 2xx responses other than 200 (a job's 202) are now treated as success.
+
+```python
+site = client.extract.map("https://scavio.dev", limit=50)
+crawl = client.extract.crawl("https://scavio.dev/docs", max_pages=2, wait=True)
+words = client.tiktok.video_transcript("7609177768793787679")
+```
 
 ### Changed in 0.22.0
 
