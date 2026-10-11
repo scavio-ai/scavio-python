@@ -643,13 +643,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="transcript",
         http="POST",
         path="/api/v1/youtube/transcript",
-        summary="Transcript / captions for a YouTube video. Costs 8 credits.",
+        summary="Transcript / captions for a YouTube video. Costs 5 credits.",
         params=(
             _req("video_id", "YouTube video id."),
             _str("language", "Caption language code (default 'en')."),
             _lit("format", ("text", "srt"), "'text' plain transcript or 'srt' timed subtitles."),
         ),
-        credits=8,
+        credits=5,
     ),
     Endpoint(
         key="youtube_related",
@@ -744,6 +744,32 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _req("video_id", "YouTube video id."),
         ),
         credits=3,
+    ),
+    Endpoint(
+        key="youtube_community_post",
+        namespace="youtube",
+        method="community_post",
+        http="POST",
+        path="/api/v1/youtube/community/post",
+        summary=(
+            "A single YouTube community post: text, author, likes, comment count, attached "
+            "images, and a comments_cursor for community_post_comments."
+        ),
+        params=(
+            _req("post_id", "Community post id or post URL."),
+        ),
+    ),
+    Endpoint(
+        key="youtube_community_post_comments",
+        namespace="youtube",
+        method="community_post_comments",
+        http="POST",
+        path="/api/v1/youtube/community/post/comments",
+        summary="Comments on a YouTube community post, with likes, reply counts and pagination.",
+        params=(
+            _req("post_id", "Community post id or post URL."),
+            _str("cursor", "next_cursor from a prior page, or comments_cursor from community_post."),
+        ),
     ),
     # =============================== Amazon ==============================
     # Amazon moved to a new upstream in 2026-07 and the API now returns a
@@ -981,6 +1007,34 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary="Current trending Reddit search queries.",
         params=(),
     ),
+    Endpoint(
+        key="reddit_search_comments",
+        namespace="reddit",
+        method="search_comments",
+        http="POST",
+        path="/api/v1/reddit/search/comments",
+        summary=(
+            "Search Reddit comments by keyword. Each result carries the comment text, author, "
+            "score and date, plus the post and subreddit it was left on."
+        ),
+        params=(
+            _req("query", "Search query (1-500 characters)."),
+            _lit("sort", ("RELEVANCE", "HOT", "TOP", "NEW"), "Sort order; server default 'RELEVANCE'."),
+            _str("cursor", "Pagination cursor from a prior response."),
+        ),
+    ),
+    Endpoint(
+        key="reddit_search_subreddits",
+        namespace="reddit",
+        method="search_subreddits",
+        http="POST",
+        path="/api/v1/reddit/search/subreddits",
+        summary="Find subreddits by keyword, with subscriber counts, descriptions and NSFW flags.",
+        params=(
+            _req("query", "Search query (1-500 characters)."),
+            _str("cursor", "Pagination cursor from a prior response."),
+        ),
+    ),
     # =============================== TikTok ==============================
     Endpoint(
         key="tiktok_profile",
@@ -1129,6 +1183,173 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _int("count", "Results per page (1-20)."),
             _str("page_token", "Pagination token from a prior response."),
             _int("min_time", "Minimum timestamp cursor."),
+        ),
+    ),
+    # TikTok depth endpoints (2026-10). These return TikTok's raw payload: large
+    # numeric ids can lose precision as JSON numbers, so use id_str / sec_uid.
+    Endpoint(
+        key="tiktok_trending_searches",
+        namespace="tiktok",
+        method="trending_searches",
+        http="POST",
+        path="/api/v1/tiktok/trending/searches",
+        summary="Search terms trending on TikTok now (about 90 per call, US-weighted, no region filter).",
+        params=(),
+    ),
+    Endpoint(
+        key="tiktok_trending_videos",
+        namespace="tiktok",
+        method="trending_videos",
+        http="POST",
+        path="/api/v1/tiktok/trending/videos",
+        summary=(
+            "A sample of videos trending on TikTok now, with author, stats, sound and hashtags. "
+            "Each call returns about 6 videos whatever count is set; call again for a fresh "
+            "sample. No region filter."
+        ),
+        params=(
+            _int("count", "Requested videos (1-15, server default 15); about 6 come back per call."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_search_suggestions",
+        namespace="tiktok",
+        method="search_suggestions",
+        http="POST",
+        path="/api/v1/tiktok/search/suggestions",
+        summary=(
+            "TikTok search autocomplete suggestions for a keyword. Long-tail keywords can "
+            "return none, which is still a billed answer."
+        ),
+        params=(
+            _req("keyword", "Seed keyword (1-500 characters)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_music",
+        namespace="tiktok",
+        method="music",
+        http="POST",
+        path="/api/v1/tiktok/music",
+        summary=(
+            "A TikTok sound by id: title, artist, album, duration, how many videos use it, "
+            "original vs commercial, play URL, cover, and chart rank when charting."
+        ),
+        params=(
+            _req("music_id", "The sound's numeric id (as a string)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_music_videos",
+        namespace="tiktok",
+        method="music_videos",
+        http="POST",
+        path="/api/v1/tiktok/music/videos",
+        summary="Videos that use a TikTok sound, about 14 per page (count is ignored upstream).",
+        params=(
+            _req("music_id", "The sound's numeric id (as a string)."),
+            _str("cursor", "Pagination cursor (default '0')."),
+            _int("count", "Videos per page (1-30); ignored upstream."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_search_music",
+        namespace="tiktok",
+        method="search_music",
+        http="POST",
+        path="/api/v1/tiktok/search/music",
+        summary="Search TikTok sounds by keyword: id, title, artist, duration, usage count and play URL.",
+        params=(
+            _req("keyword", "Search query (1-500 characters)."),
+            _str("cursor", "Pagination offset (the previous response's cursor, default '0')."),
+            _int("count", "Sounds per page (1-20)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_music_chart",
+        namespace="tiktok",
+        method="music_chart",
+        http="POST",
+        path="/api/v1/tiktok/music/chart",
+        summary="TikTok's Top 50 or Viral 50 sound chart, with each sound's details and trend. One global chart.",
+        params=(
+            _lit("chart", ("top", "viral"), "'top' = Top 50 (server default), 'viral' = Viral 50."),
+            _str("cursor", "Pagination cursor (default '0')."),
+            _int("count", "Sounds per page (1-50)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_user_similar",
+        namespace="tiktok",
+        method="user_similar",
+        http="POST",
+        path="/api/v1/tiktok/user/similar",
+        summary=(
+            "Creators similar to a TikTok user (about 30 per page), with follower, following, "
+            "video and like counts, bio and verification."
+        ),
+        params=(
+            _req("sec_user_id", "TikTok sec_user_id."),
+            _str("page_token", "next_page_token from a prior response."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_user_playlists",
+        namespace="tiktok",
+        method="user_playlists",
+        http="POST",
+        path="/api/v1/tiktok/user/playlists",
+        summary=(
+            "A TikTok user's playlists (series), with each playlist's id, name, video count "
+            "and cover. Accounts without playlists return an empty list."
+        ),
+        params=(
+            _req("sec_user_id", "TikTok sec_user_id."),
+            _str("cursor", "Pagination cursor (default '0')."),
+            _int("count", "Playlists per page (1-30)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_playlist_videos",
+        namespace="tiktok",
+        method="playlist_videos",
+        http="POST",
+        path="/api/v1/tiktok/playlist/videos",
+        summary="Videos in a TikTok playlist, with pagination.",
+        params=(
+            _req("playlist_id", "The playlist's numeric id (mixId from user_playlists)."),
+            _str("cursor", "Pagination cursor (default '0')."),
+            _int("count", "Videos per page (1-30)."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_user_live",
+        namespace="tiktok",
+        method="user_live",
+        http="POST",
+        path="/api/v1/tiktok/user/live",
+        summary=(
+            "Whether a TikTok user is live now: the user, live room status (2 = live, "
+            "4 = not live), title, start time and viewer counts. An unknown username is a "
+            "billed 404."
+        ),
+        params=(
+            _req("username", "TikTok username, with or without the @."),
+        ),
+    ),
+    Endpoint(
+        key="tiktok_user_region",
+        namespace="tiktok",
+        method="user_region",
+        http="POST",
+        path="/api/v1/tiktok/user/region",
+        summary=(
+            "The region a TikTok account is registered in (ISO country code, not the "
+            "creator's nationality), plus its user id and sec_user_id. An unknown username "
+            "is a 404 and is not billed."
+        ),
+        params=(
+            _req("username", "TikTok username, with or without the @."),
         ),
     ),
     # ============================= Instagram =============================
@@ -1440,6 +1661,40 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/x/trending",
         summary="Trending topics for a country.",
         params=(_str("country", "Country name (server default 'UnitedStates')."),),
+    ),
+    Endpoint(
+        key="x_search_communities",
+        namespace="x",
+        method="search_communities",
+        http="POST",
+        path="/api/v1/x/search/communities",
+        summary="Find X Communities by keyword, with member counts, topic and NSFW flag.",
+        params=(
+            _req("keyword", "Search query (1-500 characters)."),
+            _str("cursor", "Pagination cursor from a prior response."),
+        ),
+    ),
+    Endpoint(
+        key="x_community",
+        namespace="x",
+        method="community",
+        http="POST",
+        path="/api/v1/x/community",
+        summary="An X Community: name, description, creation date, member count, topic and rules.",
+        params=(_req("community_id", "Numeric X Community id (as a string)."),),
+    ),
+    Endpoint(
+        key="x_community_tweets",
+        namespace="x",
+        method="community_tweets",
+        http="POST",
+        path="/api/v1/x/community/tweets",
+        summary="Posts in an X Community, by relevance or recency, with pagination.",
+        params=(
+            _req("community_id", "Numeric X Community id (as a string)."),
+            _lit("ranking", ("Relevance", "Recency"), "Ordering; server default is the community's own."),
+            _str("cursor", "Pagination cursor from a prior response."),
+        ),
     ),
     # =============================== LinkedIn ============================
     # The provider retired the `linkedin/web/*` namespace it was built on; these

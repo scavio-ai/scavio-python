@@ -1401,3 +1401,60 @@ def test_walmart_store_targeting_wire(monkeypatch):
     client.walmart.stores("M5V 2T6", domain="ca")
     assert captured["path"] == "/api/v1/walmart/stores"
     assert captured["json"] == {"zipcode": "M5V 2T6", "domain": "ca"}
+
+
+# --- Social depth batch (TikTok, YouTube, Reddit, X; 0.22.0) ----------------
+
+SOCIAL_DEPTH = {
+    # key: (namespace, method, positional args, expected path, expected body)
+    "tiktok_trending_searches": ("tiktok", "trending_searches", (), "/api/v1/tiktok/trending/searches", {}),
+    "tiktok_trending_videos": ("tiktok", "trending_videos", (), "/api/v1/tiktok/trending/videos", {}),
+    "tiktok_search_suggestions": ("tiktok", "search_suggestions", ("cooking",), "/api/v1/tiktok/search/suggestions", {"keyword": "cooking"}),
+    "tiktok_music": ("tiktok", "music", ("7364498342501435408",), "/api/v1/tiktok/music", {"music_id": "7364498342501435408"}),
+    "tiktok_music_videos": ("tiktok", "music_videos", ("7364498342501435408",), "/api/v1/tiktok/music/videos", {"music_id": "7364498342501435408"}),
+    "tiktok_search_music": ("tiktok", "search_music", ("espresso",), "/api/v1/tiktok/search/music", {"keyword": "espresso"}),
+    "tiktok_music_chart": ("tiktok", "music_chart", (), "/api/v1/tiktok/music/chart", {}),
+    "tiktok_user_similar": ("tiktok", "user_similar", ("MS4wLjABAAAA",), "/api/v1/tiktok/user/similar", {"sec_user_id": "MS4wLjABAAAA"}),
+    "tiktok_user_playlists": ("tiktok", "user_playlists", ("MS4wLjABAAAA",), "/api/v1/tiktok/user/playlists", {"sec_user_id": "MS4wLjABAAAA"}),
+    "tiktok_playlist_videos": ("tiktok", "playlist_videos", ("7596415294902389534",), "/api/v1/tiktok/playlist/videos", {"playlist_id": "7596415294902389534"}),
+    "tiktok_user_live": ("tiktok", "user_live", ("mrbeast",), "/api/v1/tiktok/user/live", {"username": "mrbeast"}),
+    "tiktok_user_region": ("tiktok", "user_region", ("mrbeast",), "/api/v1/tiktok/user/region", {"username": "mrbeast"}),
+    "youtube_community_post": ("youtube", "community_post", ("Ugkx_post",), "/api/v1/youtube/community/post", {"post_id": "Ugkx_post"}),
+    "youtube_community_post_comments": ("youtube", "community_post_comments", ("Ugkx_post",), "/api/v1/youtube/community/post/comments", {"post_id": "Ugkx_post"}),
+    "reddit_search_comments": ("reddit", "search_comments", ("web scraping api",), "/api/v1/reddit/search/comments", {"query": "web scraping api"}),
+    "reddit_search_subreddits": ("reddit", "search_subreddits", ("web scraping",), "/api/v1/reddit/search/subreddits", {"query": "web scraping"}),
+    "x_search_communities": ("x", "search_communities", ("crypto",), "/api/v1/x/search/communities", {"keyword": "crypto"}),
+    "x_community": ("x", "community", ("1508567430188126209",), "/api/v1/x/community", {"community_id": "1508567430188126209"}),
+    "x_community_tweets": ("x", "community_tweets", ("1508567430188126209",), "/api/v1/x/community/tweets", {"community_id": "1508567430188126209"}),
+}
+
+
+@pytest.mark.parametrize("key", sorted(SOCIAL_DEPTH))
+def test_social_depth_positional_wire(monkeypatch, key):
+    ns, method, args, path, body = SOCIAL_DEPTH[key]
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, ns), method)(*args)
+    assert captured["path"] == path
+    assert captured["json"] == body
+    ep = ENDPOINTS[key]
+    assert ep.credits == 1 and ep.http == "POST" and ep.credits_note is None
+
+
+async def test_social_depth_async_wire(monkeypatch):
+    captured = patch_async(monkeypatch)
+    client = AsyncScavioClient(api_key="sk_test")
+    await client.x.community_tweets("1508567430188126209", ranking="Recency", cursor="c2")
+    assert captured["path"] == "/api/v1/x/community/tweets"
+    assert captured["json"] == {"community_id": "1508567430188126209", "ranking": "Recency", "cursor": "c2"}
+    await client.tiktok.music_chart(chart="viral", count=10)
+    assert captured["json"] == {"chart": "viral", "count": 10}
+    await client.reddit.search_comments("q", sort="NEW")
+    assert captured["json"] == {"query": "q", "sort": "NEW"}
+
+
+def test_youtube_transcript_costs_5_credits():
+    assert ENDPOINTS["youtube_transcript"].credits == 5
+    from scavio._namespaces_sync import _YouTubeNamespace
+
+    assert "Costs 5 credits." in (_YouTubeNamespace.transcript.__doc__ or "")

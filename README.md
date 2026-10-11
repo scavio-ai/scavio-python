@@ -858,10 +858,10 @@ Scavio works with popular AI/LLM frameworks:
 | Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
 | Amazon | `search`, `product`, `offers`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product`, `stores`, `reviews`, `category`, `offers`, `seller`, `seller_products` | 1, except `search`/`category` on `domain="com.mx"` and store-targeted `search`/`product` (`delivery_zip` + `store_id`), which cost 2 |
-| YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams` | `search`/`shorts` 2, `transcript` 8, `streams` 3, rest 1 each |
-| Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending` | 1 each |
-| X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending` | 1 each |
-| TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings` | 1 each |
+| YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams`, `community_post`, `community_post_comments` | `search`/`shorts` 2, `transcript` 5, `streams` 3, rest 1 each |
+| Reddit | `search`, `search_suggestions`, `post`, `post_comments`, `comment_replies`, `subreddit`, `subreddit_posts`, `user`, `user_posts`, `user_comments`, `popular`, `trending`, `search_comments`, `search_subreddits` | 1 each |
+| X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending`, `search_communities`, `community`, `community_tweets` | 1 each |
+| TikTok | `profile`, `user_posts`, `video`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings`, `trending_searches`, `trending_videos`, `search_suggestions`, `music`, `music_videos`, `search_music`, `music_chart`, `user_similar`, `user_playlists`, `playlist_videos`, `user_live`, `user_region` | 1 each |
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
 | Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | `user_posts` 2, `post`/`comment_replies` 8, the other nine 10 each |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
@@ -896,6 +896,34 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.22.0
+
+- **19 new methods across TikTok, YouTube, Reddit and X, 1 credit each.**
+  - `tiktok`: `trending_searches()`, `trending_videos()` (about 6 videos per
+    call whatever `count` says), `search_suggestions(keyword)`,
+    `music(music_id)`, `music_videos(music_id)` (`count` is ignored upstream,
+    about 14 per page), `search_music(keyword)`, `music_chart()` (Top 50 or
+    Viral 50, one global chart), `user_similar(sec_user_id)`,
+    `user_playlists(sec_user_id)`, `playlist_videos(playlist_id)`,
+    `user_live(username)` (an unknown username is a billed 404) and
+    `user_region(username)` (an unknown username is an unbilled 404; also
+    returns `sec_user_id`). These return TikTok's raw payload: large numeric
+    ids can lose precision as JSON numbers, so use `id_str` / `sec_uid`.
+  - `youtube`: `community_post(post_id)`, `community_post_comments(post_id)`.
+  - `reddit`: `search_comments(query)` (sort `RELEVANCE`, `HOT`, `TOP` or
+    `NEW`), `search_subreddits(query)`.
+  - `x`: `search_communities(keyword)`, `community(community_id)`,
+    `community_tweets(community_id)` (ranking `Relevance` or `Recency`).
+- `youtube.transcript` now costs 5 credits (was 8); the docstring says so.
+
+```python
+chart = client.tiktok.music_chart(chart="viral", count=10)
+region = client.tiktok.user_region("mrbeast")
+similar = client.tiktok.user_similar(region["data"]["sec_user_id"])
+threads = client.reddit.search_comments("web scraping api", sort="NEW")
+posts = client.x.community_tweets("1508567430188126209", ranking="Recency")
+```
 
 ### Changed in 0.21.1
 

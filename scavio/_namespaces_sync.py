@@ -955,9 +955,9 @@ class _YouTubeNamespace:
         format: Optional[Literal["text", "srt"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Transcript / captions for a YouTube video. Costs 8 credits.
+        """Transcript / captions for a YouTube video. Costs 5 credits.
 
-        Costs 8 credits. Returns the API response as a dict.
+        Costs 5 credits. Returns the API response as a dict.
 
         Args:
             video_id: YouTube video id.
@@ -1101,6 +1101,39 @@ class _YouTubeNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("youtube_streams", {"video_id": video_id}, extra)
+
+    def community_post(
+        self,
+        post_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A single YouTube community post: text, author, likes, comment count, attached images, and a comments_cursor for community_post_comments.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            post_id: Community post id or post URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("youtube_community_post", {"post_id": post_id}, extra)
+
+    def community_post_comments(
+        self,
+        post_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Comments on a YouTube community post, with likes, reply counts and pagination.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            post_id: Community post id or post URL.
+            cursor: next_cursor from a prior page, or comments_cursor from community_post.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("youtube_community_post_comments", {"post_id": post_id, "cursor": cursor}, extra)
 
 class _RedditNamespace:
     """Reddit search, post, comment, subreddit, user, and trending endpoints."""
@@ -1318,6 +1351,44 @@ class _RedditNamespace:
         """
         return self._client._call("reddit_trending", {}, extra)
 
+    def search_comments(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["RELEVANCE", "HOT", "TOP", "NEW"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Reddit comments by keyword. Each result carries the comment text, author, score and date, plus the post and subreddit it was left on.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            sort: Sort order; server default 'RELEVANCE'.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_search_comments", {"query": query, "sort": sort, "cursor": cursor}, extra)
+
+    def search_subreddits(
+        self,
+        query: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find subreddits by keyword, with subscriber counts, descriptions and NSFW flags.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search query (1-500 characters).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("reddit_search_subreddits", {"query": query, "cursor": cursor}, extra)
+
 class _XNamespace:
     """X search, tweet, and user endpoints."""
 
@@ -1517,6 +1588,59 @@ class _XNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("x_trending", {"country": country}, extra)
+
+    def search_communities(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find X Communities by keyword, with member counts, topic and NSFW flag.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            keyword: Search query (1-500 characters).
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("x_search_communities", {"keyword": keyword, "cursor": cursor}, extra)
+
+    def community(
+        self,
+        community_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """An X Community: name, description, creation date, member count, topic and rules.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            community_id: Numeric X Community id (as a string).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("x_community", {"community_id": community_id}, extra)
+
+    def community_tweets(
+        self,
+        community_id: str,
+        *,
+        ranking: Optional[Literal["Relevance", "Recency"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Posts in an X Community, by relevance or recency, with pagination.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            community_id: Numeric X Community id (as a string).
+            ranking: Ordering; server default is the community's own.
+            cursor: Pagination cursor from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("x_community_tweets", {"community_id": community_id, "ranking": ranking, "cursor": cursor}, extra)
 
 class _TikTokNamespace:
     """TikTok profile, video, hashtag, and search endpoints."""
@@ -1746,6 +1870,213 @@ class _TikTokNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("tiktok_user_followings", {"sec_user_id": sec_user_id, "count": count, "page_token": page_token, "min_time": min_time}, extra)
+
+    def trending_searches(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search terms trending on TikTok now (about 90 per call, US-weighted, no region filter).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_trending_searches", {}, extra)
+
+    def trending_videos(
+        self,
+        *,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A sample of videos trending on TikTok now, with author, stats, sound and hashtags. Each call returns about 6 videos whatever count is set; call again for a fresh sample. No region filter.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            count: Requested videos (1-15, server default 15); about 6 come back per call.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_trending_videos", {"count": count}, extra)
+
+    def search_suggestions(
+        self,
+        keyword: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """TikTok search autocomplete suggestions for a keyword. Long-tail keywords can return none, which is still a billed answer.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            keyword: Seed keyword (1-500 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_search_suggestions", {"keyword": keyword}, extra)
+
+    def music(
+        self,
+        music_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A TikTok sound by id: title, artist, album, duration, how many videos use it, original vs commercial, play URL, cover, and chart rank when charting.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            music_id: The sound's numeric id (as a string).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_music", {"music_id": music_id}, extra)
+
+    def music_videos(
+        self,
+        music_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Videos that use a TikTok sound, about 14 per page (count is ignored upstream).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            music_id: The sound's numeric id (as a string).
+            cursor: Pagination cursor (default '0').
+            count: Videos per page (1-30); ignored upstream.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_music_videos", {"music_id": music_id, "cursor": cursor, "count": count}, extra)
+
+    def search_music(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search TikTok sounds by keyword: id, title, artist, duration, usage count and play URL.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            keyword: Search query (1-500 characters).
+            cursor: Pagination offset (the previous response's cursor, default '0').
+            count: Sounds per page (1-20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_search_music", {"keyword": keyword, "cursor": cursor, "count": count}, extra)
+
+    def music_chart(
+        self,
+        *,
+        chart: Optional[Literal["top", "viral"]] = None,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """TikTok's Top 50 or Viral 50 sound chart, with each sound's details and trend. One global chart.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            chart: 'top' = Top 50 (server default), 'viral' = Viral 50.
+            cursor: Pagination cursor (default '0').
+            count: Sounds per page (1-50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_music_chart", {"chart": chart, "cursor": cursor, "count": count}, extra)
+
+    def user_similar(
+        self,
+        sec_user_id: str,
+        *,
+        page_token: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Creators similar to a TikTok user (about 30 per page), with follower, following, video and like counts, bio and verification.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sec_user_id: TikTok sec_user_id.
+            page_token: next_page_token from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_user_similar", {"sec_user_id": sec_user_id, "page_token": page_token}, extra)
+
+    def user_playlists(
+        self,
+        sec_user_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A TikTok user's playlists (series), with each playlist's id, name, video count and cover. Accounts without playlists return an empty list.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sec_user_id: TikTok sec_user_id.
+            cursor: Pagination cursor (default '0').
+            count: Playlists per page (1-30).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_user_playlists", {"sec_user_id": sec_user_id, "cursor": cursor, "count": count}, extra)
+
+    def playlist_videos(
+        self,
+        playlist_id: str,
+        *,
+        cursor: Optional[str] = None,
+        count: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Videos in a TikTok playlist, with pagination.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            playlist_id: The playlist's numeric id (mixId from user_playlists).
+            cursor: Pagination cursor (default '0').
+            count: Videos per page (1-30).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_playlist_videos", {"playlist_id": playlist_id, "cursor": cursor, "count": count}, extra)
+
+    def user_live(
+        self,
+        username: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Whether a TikTok user is live now: the user, live room status (2 = live, 4 = not live), title, start time and viewer counts. An unknown username is a billed 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: TikTok username, with or without the @.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_user_live", {"username": username}, extra)
+
+    def user_region(
+        self,
+        username: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The region a TikTok account is registered in (ISO country code, not the creator's nationality), plus its user id and sec_user_id. An unknown username is a 404 and is not billed.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: TikTok username, with or without the @.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("tiktok_user_region", {"username": username}, extra)
 
 class _InstagramNamespace:
     """Instagram profile, media, and search endpoints."""
