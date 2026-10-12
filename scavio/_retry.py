@@ -50,10 +50,10 @@ def parse_retry_after(header: Optional[str]) -> Optional[float]:
     if not header:
         return None
     header = header.strip()
-    try:
+    # Retry-After delta-seconds is an ASCII non-negative decimal integer.
+    # Do not treat signed, non-finite, fractional, or Unicode numerals as it.
+    if header.isascii() and header.isdecimal():
         return float(header)
-    except ValueError:
-        pass
     try:
         parsed = email.utils.parsedate_to_datetime(header)
     except (TypeError, ValueError):
