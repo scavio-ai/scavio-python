@@ -416,8 +416,7 @@ def test_linkedin_retired_endpoints_documented_as_retired():
         "linkedin_search_people",
         "linkedin_search_posts",
     }
-    # Live costs mirror the upstream price tiers the backend bills on: 0.001 usd
-    # -> 1 credit, 0.01 -> 10, 0.03 -> 30. Pinned per key so a drift from the
+    # Live costs: 1, 10 or 30 credits. Pinned per key so a drift from the
     # backend's COST map shows up here.
     live_credits = {
         "linkedin_person": 1,

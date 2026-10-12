@@ -1031,6 +1031,10 @@ Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
 
+### Changed in 0.24.1
+
+- Docstring wording only: parameter notes describe what each endpoint returns. No price, parameter or behavior changed.
+
 ### Changed in 0.24.0
 
 - **Instagram is cheaper.** Typical costs are now 1-2 credits instead of 8-10:

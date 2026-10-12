@@ -2577,7 +2577,7 @@ class _LinkedInNamespace:
         username: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """RETIRED: contact-info scraping was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
+        """RETIRED: contact-info scraping was withdrawn. This endpoint always returns HTTP 410 and is never billed.
 
         Costs 0 credits. Returns the API response as a dict.
 
@@ -2632,7 +2632,7 @@ class _LinkedInNamespace:
         company: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """RETIRED: the employee directory was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed. company() returns featured_employees, a small sample of staff profiles.
+        """RETIRED: the employee directory was withdrawn. This endpoint always returns HTTP 410 and is never billed. company() returns featured_employees, a small sample of staff profiles.
 
         Costs 0 credits. Returns the API response as a dict.
 
@@ -2650,7 +2650,7 @@ class _LinkedInNamespace:
         company: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """RETIRED: per-company job listings were withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed. Use search_jobs() with the company name as the search term.
+        """RETIRED: per-company job listings were withdrawn. This endpoint always returns HTTP 410 and is never billed. Use search_jobs() with the company name as the search term.
 
         Costs 0 credits. Returns the API response as a dict.
 
@@ -2671,7 +2671,7 @@ class _LinkedInNamespace:
         location: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """RETIRED: people search was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
+        """RETIRED: people search was withdrawn. This endpoint always returns HTTP 410 and is never billed.
 
         Costs 0 credits. Returns the API response as a dict.
 
@@ -2711,7 +2711,7 @@ class _LinkedInNamespace:
         search: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """RETIRED: post search was withdrawn by the upstream provider. This endpoint always returns HTTP 410 and is never billed.
+        """RETIRED: post search was withdrawn. This endpoint always returns HTTP 410 and is never billed.
 
         Costs 0 credits. Returns the API response as a dict.
 
@@ -2968,7 +2968,7 @@ class _ThreadsNamespace:
 
         Args:
             user_id: Numeric Threads user id, e.g. '63625256886'. The cheap path: 2 credits.
-            username: Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 total): the upstream handle lookup is down, so the handle is resolved through people search first. Pass user_id instead to avoid that.
+            username: Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 total): the handle is resolved through people search first. Pass user_id instead to avoid that.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("threads_profile", {"user_id": user_id, "username": username}, extra)
@@ -3364,7 +3364,7 @@ class _EbayNamespace:
             query: Keyword to search (1-500 characters). Optional: a seller-only search pages that seller's whole catalogue.
             seller: Restrict results to one seller's listings (1-64 characters), as in ebay.com/usr/<name>. Can be sent with no query.
             page: Results page, 1-based.
-            sort_by: Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' is deliberately unsupported (it ranks against our proxy exit, not the caller).
+            sort_by: Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' is deliberately unsupported (it would not rank by the location of the caller).
             min_price: Minimum price, inclusive. Must be 0 or greater.
             max_price: Maximum price, inclusive. Must be 0 or greater.
             condition: Item condition filter. 'refurbished' is eBay's parent condition, not one of its three graded tiers.
@@ -3423,7 +3423,7 @@ class _TargetNamespace:
         store_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Target.com, the US retailer: prices, ratings, badges and promotions. Up to 28 results per page; rendered upstream, so expect around 9 seconds.
+        """Search Target.com, the US retailer: prices, ratings, badges and promotions. Up to 28 results per page; expect around 9 seconds.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -3723,7 +3723,7 @@ class _BookingNamespace:
             adults: Adult guests, >= 1 (default 2).
             children_ages: AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.
             rooms: Rooms required, >= 1 (default 1).
-            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree.
+            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("booking_search", {"destination": destination, "dest_id": dest_id, "dest_type": dest_type, "page": page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "stars": stars, "min_review_score": min_review_score, "property_type": property_type, "free_cancellation": free_cancellation, "no_prepayment": no_prepayment, "breakfast_included": breakfast_included, "checkin": checkin, "checkout": checkout, "adults": adults, "children_ages": children_ages, "rooms": rooms, "currency": currency}, extra)
@@ -3753,7 +3753,7 @@ class _BookingNamespace:
             adults: Adult guests, >= 1 (default 2).
             children_ages: AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.
             rooms: Rooms required, >= 1 (default 1).
-            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree.
+            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("booking_hotel", {"hotel": hotel, "country_code": country_code, "checkin": checkin, "checkout": checkout, "adults": adults, "children_ages": children_ages, "rooms": rooms, "currency": currency}, extra)
@@ -4019,7 +4019,7 @@ class _AirbnbNamespace:
             guest_favorite: Guest Favorite listings only.
             free_cancellation: Listings with free cancellation only.
             amenities: Comma-separated amenities (1-200 characters): wifi, air_conditioning, pool, kitchen, free_parking, washer, self_check_in, tv, or raw numeric Airbnb amenity ids. An unrecognised NAME is rejected before the scrape.
-            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb prices off the proxy exit and identical requests disagree.
+            currency: ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb picks a currency itself and identical requests can disagree.
             page: Results page, 1-based. 18 listings per page. Cannot be combined with cursor.
             cursor: next_cursor from a previous response (1-500 characters); wins over page, so sending both is rejected.
             extra: Additional wire parameters passed through verbatim.
@@ -4134,7 +4134,7 @@ class _GlassdoorNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the customer price is unchanged.
+            employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two lookups; the customer price is unchanged.
             company: Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored when url is set, and it does not satisfy the employer_id-or-url requirement.
             url: Any glassdoor.com employer URL (1-500 characters). Pass back reviews_url from company() to skip the resolve fetch. A non-glassdoor.com host is rejected.
             category: Restrict to reviews Glassdoor files under one topic. Closed enum: Glassdoor IGNORES an unknown value and serves the unfiltered set under a 200. Read filtered_review_count on the response to see how many match.
@@ -4157,7 +4157,7 @@ class _GlassdoorNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the customer price is unchanged.
+            employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two lookups; the customer price is unchanged.
             company: Employer name as it appears in a Glassdoor slug (1-200 characters). COSMETIC: ignored when url is set, and it does not satisfy the employer_id-or-url requirement.
             url: Any glassdoor.com employer URL (1-500 characters). Pass back salaries_url from company() to skip the resolve fetch. A non-glassdoor.com host is rejected.
             page: Results page, 1-based. Ten job titles per page; page_count on the response is how many pages exist.
@@ -4190,7 +4190,7 @@ class _YelpNamespace:
 
         Args:
             term: What to look for (1-200 characters): a category ('plumbers'), a dish, or a business name. Required together with location unless url is given.
-            location: Where to look (1-200 characters): city and region, a full address, or a postcode. Effectively required - Yelp geolocates a location-less search off the proxy exit, so the same request answers about a different metro run to run.
+            location: Where to look (1-200 characters): city and region, a full address, or a postcode. Effectively required - without it Yelp picks a location itself, so the same request can answer about a different metro run to run.
             page: Results page, 1-based. Yelp fixes the page size at 10.
             sort: Result ordering (upstream default 'recommended'). Closed enum: Yelp IGNORES an unrecognised sortby and serves default ranking under a 200, billing a premium scrape for a sort that never ran.
             price: Price bands to include, 1 ($) to 4 ($$$$); 1-4 values, combined freely - [1, 2] means $ or $$.

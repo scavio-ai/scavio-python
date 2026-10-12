@@ -772,9 +772,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
     ),
     # =============================== Amazon ==============================
-    # Amazon moved to a new upstream in 2026-07 and the API now returns a
-    # normalized shape instead of the old raw passthrough. Nine params went with
-    # the old provider: language, currency, device, sort_by, pages, category_id,
+    # The Amazon API changed in 2026-07 and now returns a normalized shape
+    # instead of the old raw passthrough. Nine params were removed: language, currency, device, sort_by, pages, category_id,
     # merchant_id, zip_code and autoselect_variant. They are gone from the
     # signatures below rather than kept as no-ops - notably `sort_by`, which the
     # marketplace was verified to ignore entirely (every sort value returned the
@@ -1931,10 +1930,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     # The provider retired the `linkedin/web/*` namespace it was built on; these
     # now run on `linkedin/web_v2/*`, which is URL-native. Public params are
     # unchanged (the permalink is built server-side) and `url` is accepted
-    # everywhere as a direct alternative. Credits follow the upstream price tier:
+    # everywhere as a direct alternative. Credits are set per endpoint:
     # profile, company and single-post reads are 1, the paginated list endpoints
     # are 10 per page, and job detail is 30.
-    # Five endpoints have no upstream left and always return HTTP 410 unbilled;
+    # Five endpoints are retired and always return HTTP 410 unbilled;
     # they are kept so existing code fails loudly rather than silently vanishing.
     Endpoint(
         key="linkedin_person",
@@ -2000,7 +1999,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/person/contact",
         summary=(
-            "RETIRED: contact-info scraping was withdrawn by the upstream provider. This endpoint "
+            "RETIRED: contact-info scraping was withdrawn. This endpoint "
             "always returns HTTP 410 and is never billed."
         ),
         params=(_str("username", "Public identifier (vanity handle)."),),
@@ -2047,7 +2046,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/company/people",
         summary=(
-            "RETIRED: the employee directory was withdrawn by the upstream provider. This endpoint "
+            "RETIRED: the employee directory was withdrawn. This endpoint "
             "always returns HTTP 410 and is never billed. company() returns featured_employees, a "
             "small sample of staff profiles."
         ),
@@ -2064,7 +2063,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/company/jobs",
         summary=(
-            "RETIRED: per-company job listings were withdrawn by the upstream provider. This "
+            "RETIRED: per-company job listings were withdrawn. This "
             "endpoint always returns HTTP 410 and is never billed. Use search_jobs() with the "
             "company name as the search term."
         ),
@@ -2081,7 +2080,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/search/people",
         summary=(
-            "RETIRED: people search was withdrawn by the upstream provider. This endpoint always "
+            "RETIRED: people search was withdrawn. This endpoint always "
             "returns HTTP 410 and is never billed."
         ),
         params=(
@@ -2118,7 +2117,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/linkedin/search/posts",
         summary=(
-            "RETIRED: post search was withdrawn by the upstream provider. This endpoint always "
+            "RETIRED: post search was withdrawn. This endpoint always "
             "returns HTTP 410 and is never billed."
         ),
         params=(_str("search", "Search keyword."),),
@@ -2667,15 +2666,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     ),
     # ============================== Threads ==============================
     # BODY-PRICED: threadsCreditCost(hasUsername) - 2 credits addressed by
-    # user_id, 4 by username, because the upstream handle lookup is unavailable
-    # and a handle buys a second upstream call. Only profile / user_posts / user_replies are
+    # user_id, 4 by username, because a handle buys a second lookup. Only profile / user_posts / user_replies are
     # username-keyed; the other three are always 2. Sending both identifiers
     # bills the cheap rate (the route only charges 4 when user_id is absent).
     # credits_note carries that rule into the generated docstring on the three
     # username-keyed endpoints so it never claims a flat price.
     #
-    # There is NO Threads content search: search_top and search_recent 400 on
-    # every attempt upstream. search_users (people search) is the only search.
+    # There is NO Threads content search. search_users (people search) is the only search.
     Endpoint(
         key="threads_profile",
         namespace="threads",
@@ -2694,7 +2691,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str(
                 "username",
                 "Threads handle without the @ (1-60 characters). Costs 2 extra credits (4 "
-                "total): the upstream handle lookup is down, so the handle is resolved through "
+                "total): the handle is resolved through "
                 "people search first. Pass user_id instead to avoid that.",
             ),
         ),
@@ -3174,7 +3171,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "sort_by",
                 ("best_match", "ending_soonest", "newly_listed", "price_low", "price_high"),
                 "Result sort order. Defaults to 'best_match'. eBay's 'Distance: nearest first' "
-                "is deliberately unsupported (it ranks against our proxy exit, not the caller).",
+                "is deliberately unsupported (it would not rank by the location of the caller).",
             ),
             _float(
                 "min_price",
@@ -3264,7 +3261,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/target/search",
         summary=(
             "Search Target.com, the US retailer: prices, ratings, badges and promotions. "
-            "Up to 28 results per page; rendered upstream, so expect around 9 seconds."
+            "Up to 28 results per page; expect around 9 seconds."
         ),
         params=(
             _req("keyword", "Search keyword (1-500 characters)."),
@@ -3617,13 +3614,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================ Booking.com ============================
-    # 1 credit flat on all three endpoints (BOOKING_CREDIT_COST =
-    # scrapedoCreditCost(1)). Booking prices a STAY, so every endpoint takes the
+    # 1 credit flat on all three endpoints. Booking prices a STAY, so every endpoint takes the
     # occupancy/date set: checkin and checkout must travel TOGETHER, because a
     # lone checkin is ignored and Booking prices a range of its own choosing,
     # returning real prices for dates the caller never asked for. currency
-    # defaults to USD in the transport - without it Booking prices off the proxy
-    # exit and two identical requests disagree.
+    # defaults to USD in the transport - without it Booking picks a currency itself and two identical requests can disagree.
     Endpoint(
         key="booking_search",
         namespace="booking",
@@ -3704,7 +3699,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.",
             ),
             _int("rooms", "Rooms required, >= 1 (default 1)."),
-            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree."),
         ),
         one_of=(("destination", "dest_id"),),
         credits=1,
@@ -3731,7 +3726,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "AGES of accompanying children, each 0-17, max 10 entries. Ages, not a count.",
             ),
             _int("rooms", "Rooms required, >= 1 (default 1)."),
-            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking prices off the proxy exit and identical requests disagree."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Booking picks a currency itself and identical requests can disagree."),
         ),
         credits=1,
     ),
@@ -3762,8 +3757,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================ Tripadvisor ============================
-    # 2 credits flat on all four endpoints (TRIPADVISOR_CREDIT_COST =
-    # scrapedoCreditCost(10), premium per-domain table). LOOKUP FIRST: every
+    # 2 credits flat on all four endpoints. LOOKUP FIRST: every
     # endpoint below locations() is keyed by ids that exist only inside
     # TripAdvisor's own URLs, so a caller holding a place NAME has no other entry
     # point. A geo row from locations() answers geo_id for search(); a business
@@ -3860,11 +3854,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
     ),
     # =============================== Indeed ==============================
-    # 2 credits flat on all four endpoints (INDEED_CREDIT_COST =
-    # scrapedoCreditCost(10), premium per-domain table). radius and max_age_days
+    # 2 credits flat on all four endpoints. radius and max_age_days
     # are CLOSED sets: Indeed ignores any other value and returns the unfiltered
     # set, so a caller asking for 7 miles is billed for a search covering fifty.
-    # An unknown job key or company slug is a real 404 that scrape.do BILLS.
+    # An unknown job key or company slug is a real 404 and IS BILLED.
     Endpoint(
         key="indeed_search",
         namespace="indeed",
@@ -3957,10 +3950,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
     ),
     # =============================== Airbnb ==============================
-    # 1 credit flat on all three endpoints (AIRBNB_CREDIT_COST =
-    # scrapedoCreditCost(1); render was tested and returns the same body for 5x
-    # the price). PRICES ARE SEARCH-ONLY: the room page carries no nightly rate
-    # under any parameters, with or without dates, even under render. check_in
+    # 1 credit flat on all three endpoints. PRICES ARE SEARCH-ONLY: the room page carries no nightly rate
+    # under any parameters, with or without dates. check_in
     # and check_out must travel together - a dateless search defaults to +30d for
     # 5 nights and A/Bs both the window and the prices, which the response flags
     # as dates_are_defaulted. room_type and amenity names are validated before
@@ -4007,7 +3998,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _bool("guest_favorite", "Guest Favorite listings only."),
             _bool("free_cancellation", "Listings with free cancellation only."),
             _str("amenities", "Comma-separated amenities (1-200 characters): wifi, air_conditioning, pool, kitchen, free_parking, washer, self_check_in, tv, or raw numeric Airbnb amenity ids. An unrecognised NAME is rejected before the scrape."),
-            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb prices off the proxy exit and identical requests disagree."),
+            _str("currency", "ISO 4217 currency for prices, 3 letters (default 'USD'). Without it Airbnb picks a currency itself and identical requests can disagree."),
             _int("page", "Results page, 1-based. 18 listings per page. Cannot be combined with cursor."),
             _str("cursor", "next_cursor from a previous response (1-500 characters); wins over page, so sending both is rejected."),
         ),
@@ -4123,7 +4114,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str(
                 "employer_id",
                 "Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a "
-                "STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the "
+                "STRING - a JSON number is rejected. Addressing by id costs two lookups; the "
                 "customer price is unchanged.",
             ),
             _str(
@@ -4177,7 +4168,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str(
                 "employer_id",
                 "Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a "
-                "STRING - a JSON number is rejected. Addressing by id costs two upstream fetches; the "
+                "STRING - a JSON number is rejected. Addressing by id costs two lookups; the "
                 "customer price is unchanged.",
             ),
             _str(
@@ -4220,8 +4211,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str(
                 "location",
                 "Where to look (1-200 characters): city and region, a full address, or a postcode. "
-                "Effectively required - Yelp geolocates a location-less search off the proxy exit, so "
-                "the same request answers about a different metro run to run.",
+                "Effectively required - without it Yelp picks a location itself, so the same request can answer about a different metro run to run.",
             ),
             _int("page", "Results page, 1-based. Yelp fixes the page size at 10."),
             _lit(
