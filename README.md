@@ -25,7 +25,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | X Data (11 endpoints) | Yes | No | No | No |
 | TikTok Data (24 endpoints) | Yes | No | No | No |
 | TikTok Shop Data (8 endpoints) | Yes | No | No | No |
-| Instagram Data (12 endpoints) | Yes | No | No | No |
+| Instagram Data (20 endpoints) | Yes | No | No | No |
 | LinkedIn Data (9 endpoints) | Yes | No | No | No |
 | eBay Sold-Listing Price History | Yes | No | No | No |
 | Real Estate (Zillow + Redfin + Realtor.com + Rightmove, 19 endpoints) | Yes | No | No | No |
@@ -277,13 +277,20 @@ from scavio import ScavioClient
 
 client = ScavioClient()
 
-profile = client.instagram.profile(username="instagram")
-user = profile["data"]["user"]
-print(f"@{user['username']} - {user['edge_followed_by']['count']:,} followers")
+# Profile and reels: typically 1 credit each; most other calls 2
+profile = client.instagram.profile(username="nike")
+user = profile["data"]
+print(f"@{user['username']} - {user['follower_count']:,} followers")
 
-posts = client.instagram.user_posts(username="instagram", count=12)
-reels = client.instagram.user_reels(username="instagram")
+posts = client.instagram.user_posts(username="nike", count=12)
+reels = client.instagram.user_reels(username="nike")
 hashtags = client.instagram.search_hashtags("fashion")
+
+# Highlights, similar accounts, likers, and Reels / audio / place search
+highlights = client.instagram.user_highlights(username="natgeo")
+reels_found = client.instagram.search_reels("latte art")
+tracks = client.instagram.search_music("espresso")
+places = client.instagram.search_locations("blue bottle coffee")
 ```
 
 ### 10. X Search and Profiles
@@ -990,7 +997,7 @@ Scavio works with popular AI/LLM frameworks:
 | X | `search`, `tweet`, `tweet_comments`, `tweet_retweeters`, `user`, `user_tweets`, `user_replies`, `user_media`, `user_followers`, `user_followings`, `trending`, `search_communities`, `community`, `community_tweets` | 1 each |
 | TikTok | `profile`, `user_posts`, `video`, `video_transcript`, `video_comments`, `comment_replies`, `search_videos`, `search_users`, `hashtag`, `hashtag_videos`, `user_followers`, `user_followings`, `trending_searches`, `trending_videos`, `search_suggestions`, `music`, `music_videos`, `search_music`, `music_chart`, `user_similar`, `user_playlists`, `playlist_videos`, `user_live`, `user_region` | 1 each |
 | TikTok Shop | `search`, `search_suggestions`, `product`, `product_reviews`, `categories`, `category_products`, `shop_products`, `resolve` | 1 each |
-| Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings` | `user_posts` 2, `post`/`comment_replies` 8, the other nine 10 each |
+| Instagram | `profile`, `user_posts`, `user_reels`, `user_tagged`, `user_stories`, `post`, `post_comments`, `comment_replies`, `search_users`, `search_hashtags`, `user_followers`, `user_followings`, `user_highlights`, `highlight_stories`, `search_reels`, `search_music`, `music_posts`, `search_locations`, `user_similar`, `post_likers` | Typically `profile`/`user_reels`/`user_tagged`/`music_posts` 1 (`user_reels`/`user_tagged` 2 the first time a username is looked up), every other method 2; `search_users`/`search_hashtags` with a `cursor` 8. Any call can cost up to 10 when it needs extra work; `credits_used` is the exact charge |
 | LinkedIn | `person`, `person_about`, `person_posts`, `person_contact`, `company`, `company_posts`, `company_people`, `company_jobs`, `search_people`, `search_jobs`, `search_posts`, `job`, `post`, `post_comments` | `job` 30, `person_posts`/`company_posts`/`search_jobs`/`post_comments` 10 each, `person`/`person_about`/`company`/`post` 1 each; the five retired endpoints (`person_contact`, `company_people`, `company_jobs`, `search_people`, `search_posts`) return 410 and are never billed |
 | Threads | `profile`, `user_posts`, `user_replies`, `post`, `post_comments`, `search_users` | 2, but `profile`/`user_posts`/`user_replies` cost 4 when addressed by `username` instead of `user_id` |
 | Kuaishou | `profile`, `user_posts`, `user_live`, `user_resolve`, `video`, `video_comments`, `comment_replies`, `videos_batch`, `search`, `search_videos`, `search_users`, `search_live`, `tag_feed`, `trending` | priced per endpoint: `videos_batch` 40, `profile` and the four `search*` 10 each, `video` 2, the rest 1 |
@@ -1023,6 +1030,29 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.24.0
+
+- **Instagram is cheaper.** Typical costs are now 1-2 credits instead of 8-10:
+  `profile`, `user_reels`, `user_tagged` and `music_posts` 1 (`user_reels` /
+  `user_tagged` 2 the first time a username is looked up), everything else 2.
+  `search_users` / `search_hashtags` with a `cursor` cost 8. Any call can cost
+  up to 10 when it needs extra work; `credits_used` is always the exact charge.
+- **8 new Instagram methods**, sync and async:
+  `user_highlights(*, username=None, user_id=None)`,
+  `highlight_stories(highlight_id)`,
+  `user_similar(*, username=None, user_id=None)`,
+  `post_likers(*, shortcode=None, url=None)`,
+  `search_reels(keyword, *, cursor=None)`, `search_music(keyword)`,
+  `music_posts(music_id, *, cursor=None)` and `search_locations(keyword)`.
+- `user_posts` still returns its existing shape: items under `data.data.items`,
+  next page via `data.pagination_token`.
+
+```python
+hl = client.instagram.user_highlights(username="natgeo")
+stories = client.instagram.highlight_stories("highlight:18149897764550869")
+track_reels = client.instagram.music_posts("1747512212697470")
+```
 
 ### Changed in 0.23.0
 

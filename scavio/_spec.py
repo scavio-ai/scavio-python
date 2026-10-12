@@ -48,8 +48,8 @@ class Endpoint:
     Attributes:
         credits: The constant credit cost, used to build the generated
             "Costs N credits." docstring line.
-        credits_note: A complete sentence replacing that line on the four
-            BODY-PRICED surfaces (walmart, threads, kuaishou, extract), whose
+        credits_note: A complete sentence replacing that line on the
+            BODY-PRICED surfaces (walmart, threads, kuaishou, instagram, extract), whose
             real cost is a function of the request body and cannot be stated as
             a single number. ``credits`` stays the floor so nothing that reads
             it has to learn a second type.
@@ -1386,13 +1386,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="profile",
         http="POST",
         path="/api/v1/instagram/profile",
-        summary="Instagram profile. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Instagram profile. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=1,
+        credits_note=(
+            'Typically 1 credit. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_posts",
@@ -1400,7 +1405,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_posts",
         http="POST",
         path="/api/v1/instagram/user/posts",
-        summary="Posts from an Instagram user. Provide username or user_id. Costs 2 credits.",
+        summary=(
+            'Posts from an Instagram user, about 12 per page; page with data.pagination_token. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1409,6 +1416,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         one_of=(("username", "user_id"),),
         credits=2,
+        credits_note=(
+            'Typically 2 credits per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_reels",
@@ -1416,7 +1426,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_reels",
         http="POST",
         path="/api/v1/instagram/user/reels",
-        summary="Reels from an Instagram user. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Reels from an Instagram user. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1424,7 +1436,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=1,
+        credits_note=(
+            'Typically 1 credit (2 the first time a username is looked up). Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_tagged",
@@ -1432,7 +1447,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_tagged",
         http="POST",
         path="/api/v1/instagram/user/tagged",
-        summary="Posts an Instagram user is tagged in. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Posts an Instagram user is tagged in. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1440,7 +1457,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=1,
+        credits_note=(
+            'Typically 1 credit (2 the first time a username is looked up). Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_stories",
@@ -1448,13 +1468,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_stories",
         http="POST",
         path="/api/v1/instagram/user/stories",
-        summary="Active stories for an Instagram user. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Active stories for an Instagram user. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_post",
@@ -1462,14 +1487,19 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post",
         http="POST",
         path="/api/v1/instagram/post",
-        summary="An Instagram post. Provide url, media_id, or shortcode. Costs 8 credits.",
+        summary=(
+            'An Instagram post. Provide url, media_id, or shortcode.'
+        ),
         params=(
             _str("url", "Full Instagram post URL."),
             _str("media_id", "Instagram media id."),
             _str("shortcode", "Instagram shortcode (from the post URL)."),
         ),
         one_of=(("url", "media_id", "shortcode"),),
-        credits=8,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_post_comments",
@@ -1477,7 +1507,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="post_comments",
         http="POST",
         path="/api/v1/instagram/post/comments",
-        summary="Comments on an Instagram post. Provide shortcode or url. Costs 10 credits.",
+        summary=(
+            'Comments on an Instagram post; page with next_min_id. Provide shortcode or url.'
+        ),
         params=(
             _str("shortcode", "Instagram shortcode (from the post URL)."),
             _str("url", "Full Instagram post URL."),
@@ -1485,7 +1517,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _lit("sort_order", ("popular", "newest"), "Comment sort order."),
         ),
         one_of=(("shortcode", "url"),),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_comment_replies",
@@ -1493,13 +1528,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="comment_replies",
         http="POST",
         path="/api/v1/instagram/post/comments/replies",
-        summary="Replies to an Instagram comment. Costs 8 credits.",
+        summary=(
+            'Replies to an Instagram comment.'
+        ),
         params=(
             _req("media_id", "Instagram media id."),
             _req("comment_id", "Parent comment id."),
             _str("cursor", "Pagination cursor from a prior response."),
         ),
-        credits=8,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_search_users",
@@ -1507,12 +1547,17 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_users",
         http="POST",
         path="/api/v1/instagram/search/users",
-        summary="Search Instagram users by keyword. Costs 10 credits.",
+        summary=(
+            'Search Instagram users by keyword.'
+        ),
         params=(
             _req("keyword", "Search keyword (1-500 characters)."),
-            _str("cursor", "Pagination cursor from a prior response."),
+            _str("cursor", "Rank token from a prior response (next page)."),
         ),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits; a request with a cursor costs 8. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_search_hashtags",
@@ -1520,12 +1565,17 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="search_hashtags",
         http="POST",
         path="/api/v1/instagram/search/hashtags",
-        summary="Search Instagram hashtags by keyword. Costs 10 credits.",
+        summary=(
+            'Search Instagram hashtags by keyword.'
+        ),
         params=(
             _req("keyword", "Search keyword (1-500 characters)."),
-            _str("cursor", "Pagination cursor from a prior response."),
+            _str("cursor", "Rank token from a prior response (next page)."),
         ),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits; a request with a cursor costs 8. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_followers",
@@ -1533,7 +1583,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_followers",
         http="POST",
         path="/api/v1/instagram/user/followers",
-        summary="Followers of an Instagram user. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Followers of an Instagram user; page with next_max_id. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1541,7 +1593,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     Endpoint(
         key="instagram_user_followings",
@@ -1549,7 +1604,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         method="user_followings",
         http="POST",
         path="/api/v1/instagram/user/followings",
-        summary="Accounts an Instagram user follows. Provide username or user_id. Costs 10 credits.",
+        summary=(
+            'Accounts an Instagram user follows; page with next_max_id. Provide username or user_id.'
+        ),
         params=(
             _str("username", "Instagram username (without the @)."),
             _str("user_id", "Instagram numeric user id."),
@@ -1557,7 +1614,154 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("cursor", "Pagination cursor from a prior response."),
         ),
         one_of=(("username", "user_id"),),
-        credits=10,
+        credits=2,
+        credits_note=(
+            'Typically 2 credits per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_user_highlights",
+        namespace="instagram",
+        method="user_highlights",
+        http="POST",
+        path="/api/v1/instagram/user/highlights",
+        summary=(
+            "An Instagram user's story highlights (id, title, cover, item count). Provide username or user_id."
+        ),
+        params=(
+            _str("username", "Instagram username (without the @)."),
+            _str("user_id", "Instagram numeric user id."),
+        ),
+        one_of=(("username", "user_id"),),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_highlight_stories",
+        namespace="instagram",
+        method="highlight_stories",
+        http="POST",
+        path="/api/v1/instagram/highlight/stories",
+        summary=(
+            'Every story saved in one Instagram highlight, with media URLs.'
+        ),
+        params=(
+            _req("highlight_id", "Highlight id from user_highlights, with or without the highlight: prefix (e.g. 'highlight:18149897764550869')."),
+        ),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_search_reels",
+        namespace="instagram",
+        method="search_reels",
+        http="POST",
+        path="/api/v1/instagram/search/reels",
+        summary=(
+            'Search Instagram Reels by keyword.'
+        ),
+        params=(
+            _req("keyword", "Search keyword (1-500 characters)."),
+            _str("cursor", "Pagination cursor (pagination_token) from a prior response."),
+        ),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_search_music",
+        namespace="instagram",
+        method="search_music",
+        http="POST",
+        path="/api/v1/instagram/search/music",
+        summary=(
+            'Search Instagram audio tracks by song or artist; returns the id that music_posts takes.'
+        ),
+        params=(
+            _req("keyword", "Search keyword (1-500 characters)."),
+        ),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_music_posts",
+        namespace="instagram",
+        method="music_posts",
+        http="POST",
+        path="/api/v1/instagram/music/posts",
+        summary=(
+            'The Reels that use an Instagram audio track, plus its total reel count.'
+        ),
+        params=(
+            _req("music_id", "Numeric audio id (the id field from search_music)."),
+            _str("cursor", "Pagination cursor (paging_info.max_id) from a prior response."),
+        ),
+        credits=1,
+        credits_note=(
+            'Typically 1 credit per page. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_search_locations",
+        namespace="instagram",
+        method="search_locations",
+        http="POST",
+        path="/api/v1/instagram/search/locations",
+        summary=(
+            'Search Instagram places by name (id, name, address, coordinates).'
+        ),
+        params=(
+            _req("keyword", "Search keyword (1-500 characters)."),
+        ),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_user_similar",
+        namespace="instagram",
+        method="user_similar",
+        http="POST",
+        path="/api/v1/instagram/user/similar",
+        summary=(
+            'Accounts similar to an Instagram user. Available for most creator accounts; some brand accounts return none. Provide username or user_id.'
+        ),
+        params=(
+            _str("username", "Instagram username (without the @)."),
+            _str("user_id", "Instagram numeric user id."),
+        ),
+        one_of=(("username", "user_id"),),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
+    ),
+    Endpoint(
+        key="instagram_post_likers",
+        namespace="instagram",
+        method="post_likers",
+        http="POST",
+        path="/api/v1/instagram/post/likers",
+        summary=(
+            'Accounts that liked an Instagram post (up to about 1,000 per post) and its total like count. Provide shortcode or url.'
+        ),
+        params=(
+            _str("shortcode", "Instagram shortcode (from the post URL)."),
+            _str("url", "Full Instagram post URL."),
+        ),
+        one_of=(("shortcode", "url"),),
+        credits=2,
+        credits_note=(
+            'Typically 2 credits. Any request can cost up to 10 when it needs extra work; credits_used in the response is the exact charge.'
+        ),
     ),
     # =============================== X ===================================
     Endpoint(

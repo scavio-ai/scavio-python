@@ -610,7 +610,7 @@ def test_extract_signature_is_url_plus_two_keywords(client_cls):
 
 # --- Body-priced surfaces: no flat "Costs N credits." -----------------------
 
-BODY_PRICED = {"walmart", "threads", "kuaishou", "_core"}
+BODY_PRICED = {"walmart", "threads", "kuaishou", "instagram", "_core"}
 # Namespaces priced per endpoint: only these keys scale with the body
 # (warehouse count, or country "ca"); the rest of the namespace is flat.
 BODY_PRICED_KEYS = {"costco_prices", "costco_availability", "costco_warehouses", "costco_gas"}
@@ -653,6 +653,20 @@ def test_threads_username_priced_docstrings_state_both_rates(module, method):
     assert "Costs 2 credits." not in doc
     assert "2 credits addressed by user_id" in doc
     assert "4 credits addressed by username" in doc
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_instagram_docstrings_state_typical_and_ceiling(module):
+    """Instagram is 1-2 credits typically, up to 10; a flat line would be wrong."""
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_InstagramNamespace", None) or mod._AsyncInstagramNamespace
+    for method in ("profile", "user_reels", "music_posts", "post", "search_users", "post_likers"):
+        doc = " ".join((getattr(cls, method).__doc__ or "").split())
+        assert "Typically" in doc, method
+        assert "up to 10" in doc, method
+    assert "costs 8" in (cls.search_users.__doc__ or "")
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

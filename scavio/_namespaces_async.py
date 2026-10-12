@@ -2111,9 +2111,10 @@ class _AsyncInstagramNamespace:
         user_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Instagram profile. Provide username or user_id. Costs 10 credits.
+        """Instagram profile. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 1 credit. Any request can cost up to 10 when it needs extra work; credits_used
+        in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2131,9 +2132,10 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Posts from an Instagram user. Provide username or user_id. Costs 2 credits.
+        """Posts from an Instagram user, about 12 per page; page with data.pagination_token. Provide username or user_id.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Typically 2 credits per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2153,9 +2155,11 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Reels from an Instagram user. Provide username or user_id. Costs 10 credits.
+        """Reels from an Instagram user. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 1 credit (2 the first time a username is looked up). Any request can cost up
+        to 10 when it needs extra work; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2175,9 +2179,11 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Posts an Instagram user is tagged in. Provide username or user_id. Costs 10 credits.
+        """Posts an Instagram user is tagged in. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 1 credit (2 the first time a username is looked up). Any request can cost up
+        to 10 when it needs extra work; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2195,9 +2201,10 @@ class _AsyncInstagramNamespace:
         user_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Active stories for an Instagram user. Provide username or user_id. Costs 10 credits.
+        """Active stories for an Instagram user. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2214,9 +2221,10 @@ class _AsyncInstagramNamespace:
         shortcode: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """An Instagram post. Provide url, media_id, or shortcode. Costs 8 credits.
+        """An Instagram post. Provide url, media_id, or shortcode.
 
-        Costs 8 credits. Returns the API response as a dict.
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             url: Full Instagram post URL.
@@ -2235,9 +2243,10 @@ class _AsyncInstagramNamespace:
         sort_order: Optional[Literal["popular", "newest"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Comments on an Instagram post. Provide shortcode or url. Costs 10 credits.
+        """Comments on an Instagram post; page with next_min_id. Provide shortcode or url.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             shortcode: Instagram shortcode (from the post URL).
@@ -2256,9 +2265,10 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Replies to an Instagram comment. Costs 8 credits.
+        """Replies to an Instagram comment.
 
-        Costs 8 credits. Returns the API response as a dict.
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             media_id: Instagram media id.
@@ -2275,13 +2285,15 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Instagram users by keyword. Costs 10 credits.
+        """Search Instagram users by keyword.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits; a request with a cursor costs 8. Any request can cost up to 10 when
+        it needs extra work; credits_used in the response is the exact charge. Returns the API
+        response as a dict.
 
         Args:
             keyword: Search keyword (1-500 characters).
-            cursor: Pagination cursor from a prior response.
+            cursor: Rank token from a prior response (next page).
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("instagram_search_users", {"keyword": keyword, "cursor": cursor}, extra)
@@ -2293,13 +2305,15 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Instagram hashtags by keyword. Costs 10 credits.
+        """Search Instagram hashtags by keyword.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits; a request with a cursor costs 8. Any request can cost up to 10 when
+        it needs extra work; credits_used in the response is the exact charge. Returns the API
+        response as a dict.
 
         Args:
             keyword: Search keyword (1-500 characters).
-            cursor: Pagination cursor from a prior response.
+            cursor: Rank token from a prior response (next page).
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("instagram_search_hashtags", {"keyword": keyword, "cursor": cursor}, extra)
@@ -2313,9 +2327,10 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Followers of an Instagram user. Provide username or user_id. Costs 10 credits.
+        """Followers of an Instagram user; page with next_max_id. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2335,9 +2350,10 @@ class _AsyncInstagramNamespace:
         cursor: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Accounts an Instagram user follows. Provide username or user_id. Costs 10 credits.
+        """Accounts an Instagram user follows; page with next_max_id. Provide username or user_id.
 
-        Costs 10 credits. Returns the API response as a dict.
+        Typically 2 credits per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
 
         Args:
             username: Instagram username (without the @).
@@ -2347,6 +2363,149 @@ class _AsyncInstagramNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("instagram_user_followings", {"username": username, "user_id": user_id, "count": count, "cursor": cursor}, extra)
+
+    async def user_highlights(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """An Instagram user's story highlights (id, title, cover, item count). Provide username or user_id.
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            username: Instagram username (without the @).
+            user_id: Instagram numeric user id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_user_highlights", {"username": username, "user_id": user_id}, extra)
+
+    async def highlight_stories(
+        self,
+        highlight_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every story saved in one Instagram highlight, with media URLs.
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            highlight_id: Highlight id from user_highlights, with or without the highlight: prefix (e.g. 'highlight:18149897764550869').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_highlight_stories", {"highlight_id": highlight_id}, extra)
+
+    async def search_reels(
+        self,
+        keyword: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Instagram Reels by keyword.
+
+        Typically 2 credits per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            keyword: Search keyword (1-500 characters).
+            cursor: Pagination cursor (pagination_token) from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_search_reels", {"keyword": keyword, "cursor": cursor}, extra)
+
+    async def search_music(
+        self,
+        keyword: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Instagram audio tracks by song or artist; returns the id that music_posts takes.
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            keyword: Search keyword (1-500 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_search_music", {"keyword": keyword}, extra)
+
+    async def music_posts(
+        self,
+        music_id: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Reels that use an Instagram audio track, plus its total reel count.
+
+        Typically 1 credit per page. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            music_id: Numeric audio id (the id field from search_music).
+            cursor: Pagination cursor (paging_info.max_id) from a prior response.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_music_posts", {"music_id": music_id, "cursor": cursor}, extra)
+
+    async def search_locations(
+        self,
+        keyword: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Instagram places by name (id, name, address, coordinates).
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            keyword: Search keyword (1-500 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_search_locations", {"keyword": keyword}, extra)
+
+    async def user_similar(
+        self,
+        *,
+        username: Optional[str] = None,
+        user_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Accounts similar to an Instagram user. Available for most creator accounts; some brand accounts return none. Provide username or user_id.
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            username: Instagram username (without the @).
+            user_id: Instagram numeric user id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_user_similar", {"username": username, "user_id": user_id}, extra)
+
+    async def post_likers(
+        self,
+        *,
+        shortcode: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Accounts that liked an Instagram post (up to about 1,000 per post) and its total like count. Provide shortcode or url.
+
+        Typically 2 credits. Any request can cost up to 10 when it needs extra work;
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            shortcode: Instagram shortcode (from the post URL).
+            url: Full Instagram post URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("instagram_post_likers", {"shortcode": shortcode, "url": url}, extra)
 
 class _AsyncLinkedInNamespace:
     """LinkedIn person, company, job, post, and search endpoints."""
