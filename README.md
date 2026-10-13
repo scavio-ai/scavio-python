@@ -189,6 +189,32 @@ for r in results["organic_results"]:
     print(f"   {r['link']}")
 ```
 
+### 4b. Migrating from the Google Custom Search JSON API -- `google.custom_search`
+
+`google.custom_search` takes the Custom Search JSON API (`cse.list`) parameters and returns
+the same `customsearch#search` response: `items[]` with `title`, `link`, `snippet` and
+`displayLink`, `searchInformation.totalResults`, and `queries.nextPage`. Parsing code written
+for the Custom Search JSON API keeps working. 1 credit per call.
+
+```python
+results = client.google.custom_search(
+    "abortcontroller fetch timeout",
+    num=5,
+    site_search="stackoverflow.com",   # enforced on the returned results
+    date_restrict="y1",
+)
+for item in results.get("items", []):
+    print(item["displayLink"], item["title"], item["link"])
+next_page = results["queries"].get("nextPage", [{}])[0].get("startIndex")
+```
+
+Not using this SDK? Keep your existing Custom Search code and change the host:
+`https://api.scavio.dev/customsearch/v1?key=YOUR_SCAVIO_KEY&q=...`. `cx` is accepted and
+ignored (use `site_search` to restrict). Parameters that cannot be honoured (image search,
+`sort`, `rights`) raise `BadRequestError` instead of being silently dropped. For the full SERP
+(knowledge graph, AI overview, People Also Ask) use `google.search`.
+[Docs](https://scavio.dev/docs/google-custom-search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
 ### 5. News Aggregation
 
 ```python
@@ -989,7 +1015,7 @@ Scavio works with popular AI/LLM frameworks:
 
 | Service | Endpoints | Credits |
 |---------|-----------|---------|
-| Google | `search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
+| Google | `search`, `custom_search`, `ai_mode`, `maps_search`, `maps_place`, `maps_reviews`, `shopping`, `shopping_product`, `shopping_stores`, `flights`, `hotels`, `hotels_detail`, `news`, `trends`, `trending` | 1 each |
 | Amazon | `search`, `product`, `offers`, `options` | 1 each (`options` free) |
 | Walmart | `search`, `product`, `stores`, `reviews`, `category`, `offers`, `seller`, `seller_products` | 1, except `search`/`category` on `domain="com.mx"` and store-targeted `search`/`product` (`delivery_zip` + `store_id`), which cost 2 |
 | YouTube | `search`, `shorts`, `suggestions`, `video`, `metadata` (deprecated alias of `video`), `comments`, `comment_replies`, `transcript`, `related`, `channel_search`, `channel`, `channel_videos`, `channel_shorts`, `channel_community`, `channel_resolve`, `streams`, `community_post`, `community_post_comments` | `search`/`shorts` 2, `transcript` 5, `streams` 3, rest 1 each |
@@ -1030,6 +1056,12 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.25.0
+
+- New `google.custom_search` (sync and async): Google search in the Custom Search JSON API
+  format (`POST /api/v1/google/customsearch`). Snake_case arguments map to the CSE wire names
+  (`site_search` -> `siteSearch`, `date_restrict` -> `dateRestrict`, ...). 1 credit.
 
 ### Changed in 0.24.1
 

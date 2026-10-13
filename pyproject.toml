@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.24.1"
+version = "0.25.0"
 description = "Python SDK for the Scavio Search API - real-time data from 36 sources (Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Zillow, Redfin, Realtor.com, Rightmove, Booking, Airbnb, Yelp, Trustpilot, Indeed, Glassdoor, SEC EDGAR, G2, Meta Ad Library and more) plus URL extraction and website map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"

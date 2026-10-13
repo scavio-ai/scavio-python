@@ -55,3 +55,26 @@ def test_specific_errors_carry_defaults():
     err = RateLimitError()
     assert "Rate limit" in str(err)
     assert err.status_code is None
+
+
+def test_google_error_envelope_message_extracted():
+    # Custom Search compatible endpoint errors use Google's envelope.
+    body = {
+        "error": {
+            "code": 400,
+            "message": "Image search is not supported.",
+            "errors": [
+                {
+                    "message": "Image search is not supported.",
+                    "domain": "global",
+                    "reason": "invalid",
+                }
+            ],
+            "status": "INVALID_ARGUMENT",
+            "details": {"param": "searchType"},
+        }
+    }
+    with pytest.raises(BadRequestError) as info:
+        _handle_error(400, body)
+    assert "Image search is not supported." in str(info.value)
+    assert info.value.response_body == body

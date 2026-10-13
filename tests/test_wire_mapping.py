@@ -1487,3 +1487,35 @@ def test_youtube_transcript_costs_5_credits():
     from scavio._namespaces_sync import _YouTubeNamespace
 
     assert "Costs 5 credits." in (_YouTubeNamespace.transcript.__doc__ or "")
+
+
+def test_custom_search_wire_names(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.google.custom_search(
+        "cold brew",
+        num=5,
+        start=11,
+        site_search="example.com",
+        site_search_filter="e",
+        date_restrict="m6",
+        exact_terms="ratio",
+        exclude_terms="starbucks",
+        or_terms="pdf guide",
+        file_type="pdf",
+        cx="abc",
+    )
+    assert captured["path"] == "/api/v1/google/customsearch"
+    assert captured["json"] == {
+        "q": "cold brew",
+        "num": 5,
+        "start": 11,
+        "siteSearch": "example.com",
+        "siteSearchFilter": "e",
+        "dateRestrict": "m6",
+        "exactTerms": "ratio",
+        "excludeTerms": "starbucks",
+        "orTerms": "pdf guide",
+        "fileType": "pdf",
+        "cx": "abc",
+    }

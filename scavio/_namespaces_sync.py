@@ -98,6 +98,66 @@ class _GoogleNamespace:
         """
         return self._client._call("google_search", {"query": query, "device": device, "start": start, "include_html": include_html, "hl": hl, "gl": gl, "google_domain": google_domain, "location": location, "uule": uule, "lr": lr, "cr": cr, "safe": safe, "nfpr": nfpr, "filter": filter, "time_period": time_period, "resolve_ai_overview": resolve_ai_overview}, extra)
 
+    def custom_search(
+        self,
+        q: str,
+        *,
+        cx: Optional[str] = None,
+        num: Optional[int] = None,
+        start: Optional[int] = None,
+        gl: Optional[str] = None,
+        hl: Optional[str] = None,
+        lr: Optional[str] = None,
+        cr: Optional[str] = None,
+        safe: Optional[Literal["active", "off"]] = None,
+        filter: Optional[Literal["0", "1"]] = None,
+        date_restrict: Optional[str] = None,
+        site_search: Optional[str] = None,
+        site_search_filter: Optional[Literal["i", "e"]] = None,
+        exact_terms: Optional[str] = None,
+        exclude_terms: Optional[str] = None,
+        or_terms: Optional[str] = None,
+        hq: Optional[str] = None,
+        file_type: Optional[str] = None,
+        googlehost: Optional[str] = None,
+        location: Optional[str] = None,
+        device: Optional[Literal["desktop", "mobile"]] = None,
+        nfpr: Optional[bool] = None,
+        no_cache: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Google search in the Custom Search JSON API format (drop-in for cse.list): returns customsearch#search with items[], searchInformation and queries.nextPage, plus a scavio billing object. For the full SERP (knowledge graph, AI overview, People Also Ask) use google.search. Unsupported CSE params (image search, sort, rights) raise BadRequestError.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            q: Search query.
+            cx: Accepted and echoed back; results come from the whole web.
+            num: Results to return, 1-10 (default 10).
+            start: 1-based index of the first result (default 1); start + num <= 100.
+            gl: Country of the search (ISO 3166-1 alpha-2, e.g. 'us').
+            hl: UI language (ISO 639-1, e.g. 'en').
+            lr: Language restrict (e.g. 'lang_en').
+            cr: Country restrict, a single value (e.g. 'countryUS').
+            safe: SafeSearch (default 'off').
+            filter: '0' turns off duplicate-content filtering.
+            date_restrict: d[N], w[N], m[N] or y[N] (e.g. 'm6').
+            site_search: Site to include or exclude (e.g. 'example.com'); enforced on results.
+            site_search_filter: 'i' include site_search (default), 'e' exclude it.
+            exact_terms: Phrase every result must contain.
+            exclude_terms: Word or phrase no result may contain.
+            or_terms: Space-separated terms; each result contains at least one.
+            hq: Extra terms ANDed onto the query.
+            file_type: File extension to restrict to (e.g. 'pdf').
+            googlehost: Google domain to search (e.g. 'google.co.uk').
+            location: Canonical location name; auto-encoded to a UULE string.
+            device: Device to emulate.
+            nfpr: Disable spelling autocorrection when True.
+            no_cache: Skip the 24h result cache when True.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("google_custom_search", {"q": q, "cx": cx, "num": num, "start": start, "gl": gl, "hl": hl, "lr": lr, "cr": cr, "safe": safe, "filter": filter, "date_restrict": date_restrict, "site_search": site_search, "site_search_filter": site_search_filter, "exact_terms": exact_terms, "exclude_terms": exclude_terms, "or_terms": or_terms, "hq": hq, "file_type": file_type, "googlehost": googlehost, "location": location, "device": device, "nfpr": nfpr, "no_cache": no_cache}, extra)
+
     def ai_mode(
         self,
         query: str,

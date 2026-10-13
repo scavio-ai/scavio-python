@@ -248,6 +248,45 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
     ),
     Endpoint(
+        key="google_custom_search",
+        namespace="google",
+        method="custom_search",
+        http="POST",
+        path="/api/v1/google/customsearch",
+        summary=(
+            "Google search in the Custom Search JSON API format (drop-in for cse.list): returns "
+            "customsearch#search with items[], searchInformation and queries.nextPage, plus a "
+            "scavio billing object. For the full SERP (knowledge graph, AI overview, People Also "
+            "Ask) use google.search. Unsupported CSE params (image search, sort, rights) raise "
+            "BadRequestError."
+        ),
+        params=(
+            _req("q", "Search query."),
+            _str("cx", "Accepted and echoed back; results come from the whole web."),
+            _int("num", "Results to return, 1-10 (default 10)."),
+            _int("start", "1-based index of the first result (default 1); start + num <= 100."),
+            _GL,
+            _HL,
+            _str("lr", "Language restrict (e.g. 'lang_en')."),
+            _str("cr", "Country restrict, a single value (e.g. 'countryUS')."),
+            _lit("safe", ("active", "off"), "SafeSearch (default 'off')."),
+            _lit("filter", ("0", "1"), "'0' turns off duplicate-content filtering."),
+            _str("date_restrict", "d[N], w[N], m[N] or y[N] (e.g. 'm6').", wire="dateRestrict"),
+            _str("site_search", "Site to include or exclude (e.g. 'example.com'); enforced on results.", wire="siteSearch"),
+            _lit("site_search_filter", ("i", "e"), "'i' include site_search (default), 'e' exclude it.", wire="siteSearchFilter"),
+            _str("exact_terms", "Phrase every result must contain.", wire="exactTerms"),
+            _str("exclude_terms", "Word or phrase no result may contain.", wire="excludeTerms"),
+            _str("or_terms", "Space-separated terms; each result contains at least one.", wire="orTerms"),
+            _str("hq", "Extra terms ANDed onto the query."),
+            _str("file_type", "File extension to restrict to (e.g. 'pdf').", wire="fileType"),
+            _str("googlehost", "Google domain to search (e.g. 'google.co.uk')."),
+            _LOCATION,
+            _lit("device", ("desktop", "mobile"), "Device to emulate."),
+            _bool("nfpr", "Disable spelling autocorrection when True."),
+            _bool("no_cache", "Skip the 24h result cache when True."),
+        ),
+    ),
+    Endpoint(
         key="google_ai_mode",
         namespace="google",
         method="ai_mode",
