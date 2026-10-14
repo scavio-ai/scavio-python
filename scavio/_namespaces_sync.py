@@ -44,6 +44,8 @@ __all__ = [
     "_RealtorNamespace",
     "_RightmoveNamespace",
     "_MercadoLibreNamespace",
+    "_ChatGPTNamespace",
+    "_GeminiNamespace",
 ]
 
 class _GoogleNamespace:
@@ -6035,3 +6037,52 @@ class _MercadoLibreNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("mercadolibre_best_sellers", {"category_id": category_id, "country": country}, extra)
+
+class _ChatGPTNamespace:
+    """ChatGPT answers with cited sources, web searches and recommended products."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def prompt(
+        self,
+        prompt: str,
+        *,
+        model: Optional[str] = None,
+        country: Optional[str] = None,
+        include_html: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Send a prompt to ChatGPT and get the answer it gives: the full Markdown answer, every page it cites (title, publisher, date), the web searches it ran and the products it recommended. Built for AI visibility monitoring. Failed prompts are not charged.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            prompt: The prompt (1-1024 characters).
+            model: Model to answer with (server default 'auto').
+            country: 2-letter country code the answer is localized for (server default 'us').
+            include_html: Also return the answer as HTML in data.answer.html.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("chatgpt_prompt", {"prompt": prompt, "model": model, "country": country, "include_html": include_html}, extra)
+
+class _GeminiNamespace:
+    """Google Gemini answers with cited sources and recommended products."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def prompt(
+        self,
+        prompt: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Send a prompt to Google Gemini and get the answer it gives as Markdown, with the URLs it cites and the products it recommended. Same response shape as chatgpt.prompt(). Failed prompts are not charged.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            prompt: The prompt (1-4000 characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gemini_prompt", {"prompt": prompt}, extra)

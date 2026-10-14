@@ -26,6 +26,8 @@ from ._namespaces_async import (
     _AsyncInstagramNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncChatGPTNamespace,
+    _AsyncGeminiNamespace,
     _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncRealtorNamespace,
@@ -134,6 +136,8 @@ class AsyncScavioClient:
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)
         self.mercadolibre = _AsyncMercadoLibreNamespace(self)
+        self.chatgpt = _AsyncChatGPTNamespace(self)
+        self.gemini = _AsyncGeminiNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
@@ -145,13 +149,15 @@ class AsyncScavioClient:
             self._http_client = httpx.AsyncClient()
         return self._http_client
 
-    async def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+    async def _post(
+        self, path: str, body: dict[str, Any], timeout: Optional[float] = None
+    ) -> dict[str, Any]:
         return await async_request(
             "POST",
             path,
             api_key=self._api_key,
             base_url=self._base_url,
-            timeout=self._timeout,
+            timeout=timeout if timeout is not None else self._timeout,
             http_client=self._ensure_client(),
             rate_limiter=self._rate_limiter,
             retry=self._retry,
@@ -203,7 +209,10 @@ class AsyncScavioClient:
         endpoint = ENDPOINTS[key]
         if endpoint.http == "GET":
             return await self._get(endpoint.path)
-        return await self._post(endpoint.path, build_body(endpoint, values, extra))
+        timeout = None
+        if endpoint.min_timeout is not None and endpoint.min_timeout > self._timeout:
+            timeout = endpoint.min_timeout
+        return await self._post(endpoint.path, build_body(endpoint, values, extra), timeout)
 
     # -- convenience -------------------------------------------------------
 

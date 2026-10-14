@@ -1519,3 +1519,66 @@ def test_custom_search_wire_names(monkeypatch):
         "fileType": "pdf",
         "cx": "abc",
     }
+
+
+def test_ai_chat_method_names_match_the_dashboard_playground():
+    """The Playground advertises chatgpt.prompt() / gemini.prompt(); a rename breaks its snippets."""
+    for ns in ("chatgpt", "gemini"):
+        eps = [ep for ep in ENDPOINTS.values() if ep.namespace == ns]
+        assert [ep.method for ep in eps] == ["prompt"]
+        assert eps[0].path == f"/api/v1/{ns}/prompt"
+        assert eps[0].credits == 5
+        assert eps[0].min_timeout == 120.0
+    client = ScavioClient(api_key="sk_test")
+    for ns in ("chatgpt", "gemini"):
+        params = list(inspect.signature(getattr(client, ns).prompt).parameters.values())
+        assert params[0].name == "prompt"
+        assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD
+
+
+def test_chatgpt_prompt(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.chatgpt.prompt("best crm", model="gpt-5", country="gb", include_html=True)
+    assert captured["path"] == "/api/v1/chatgpt/prompt"
+    assert captured["json"] == {"prompt": "best crm", "model": "gpt-5", "country": "gb", "include_html": True}
+    client.chatgpt.prompt("best crm")
+    assert captured["json"] == {"prompt": "best crm"}
+
+
+def test_gemini_prompt(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.gemini.prompt("best crm")
+    assert captured["path"] == "/api/v1/gemini/prompt"
+    assert captured["json"] == {"prompt": "best crm"}
+
+
+def test_ai_chat_raises_the_timeout_but_never_lowers_it(monkeypatch):
+    seen: list[float] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append(timeout)
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    ScavioClient(api_key="sk_test").chatgpt.prompt("hi")
+    ScavioClient(api_key="sk_test", timeout=300).gemini.prompt("hi")
+    ScavioClient(api_key="sk_test").trustpilot.search("vpn")
+    assert seen == [120.0, 300, 30.0]
+
+
+def test_ai_chat_async(monkeypatch):
+    import asyncio
+
+    from scavio import AsyncScavioClient
+
+    seen: dict = {}
+
+    async def fake_request(method, path, *, timeout, json=None, **_):
+        seen.update(path=path, json=json, timeout=timeout)
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._async_client.async_request", fake_request)
+    asyncio.run(AsyncScavioClient(api_key="sk_test").gemini.prompt("hi"))
+    assert seen == {"path": "/api/v1/gemini/prompt", "json": {"prompt": "hi"}, "timeout": 120.0}

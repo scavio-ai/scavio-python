@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 36 sources -- Google, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 38 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 36 data sources, 233 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -15,6 +15,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Feature | Scavio | Tavily | SerpAPI | ScraperAPI |
 |---------|--------|--------|---------|------------|
 | Google Search | Yes | Yes | Yes | Yes |
+| ChatGPT and Gemini Answers with Cited Sources | Yes | No | No | No |
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
@@ -35,7 +36,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 36 | 1 | 1 per plan | 1 |
+| Data Sources | 38 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -214,6 +215,33 @@ ignored (use `site_search` to restrict). Parameters that cannot be honoured (ima
 `sort`, `rights`) raise `BadRequestError` instead of being silently dropped. For the full SERP
 (knowledge graph, AI overview, People Also Ask) use `google.search`.
 [Docs](https://scavio.dev/docs/google-custom-search-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+### 4c. AI Visibility -- What ChatGPT and Gemini Recommend -- `chatgpt.prompt` / `gemini.prompt`
+
+Send the prompt a buyer would ask and get the answer the assistant gives: the full Markdown
+answer, the pages it cites, the web searches it ran (ChatGPT) and the products it recommended.
+Both return the same shape under `data`, so one parser tracks both. 5 credits per answered
+prompt; a failed prompt is not charged. Answers take 10-40 seconds, so both methods raise the
+request timeout to 120s when your client's is shorter.
+
+```python
+prompt = "What are the best CRM tools for small agencies?"
+
+for res in (client.chatgpt.prompt(prompt, country="us"), client.gemini.prompt(prompt)):
+    data = res["data"]
+    answer = data["answer"]["markdown"]
+    print(data["platform"], "mentions HubSpot:", "HubSpot" in answer)
+    print("  cited:", [s["url"] for s in data["sources"]][:5])
+    print("  products:", [p["title"] for p in data["shopping"]])
+
+# ChatGPT also reports the web searches it ran and each source's title and publisher
+data = client.chatgpt.prompt(prompt)["data"]
+print(data["search_queries"])
+print([(s["source"], s["title"]) for s in data["sources"]][:5])
+```
+
+[ChatGPT docs](https://scavio.dev/docs/chatgpt-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) |
+[Gemini docs](https://scavio.dev/docs/gemini-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
 
 ### 5. News Aggregation
 
@@ -1051,11 +1079,21 @@ Scavio works with popular AI/LLM frameworks:
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
+| ChatGPT | `prompt` | 5 per answered prompt |
+| Gemini | `prompt` | 5 per answered prompt |
 | Extract (core, callable) | `client.extract(url)`, `extract.map`, `extract.crawl`, `extract.crawl_status`, `extract.cancel_crawl`, `extract.batch`, `extract.batch_status`, `extract.cancel_batch` | `extract`: 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`, only on success. `map`: 1 on normal. `crawl` / `batch`: that same price per successful page. Status and cancel: free |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.26.0
+
+- New `chatgpt.prompt` and `gemini.prompt` (sync and async): send a prompt, get the assistant's
+  answer with cited sources, web searches (ChatGPT) and recommended products
+  (`POST /api/v1/chatgpt/prompt`, `POST /api/v1/gemini/prompt`). 5 credits per answered prompt.
+- Endpoints can now declare a minimum request timeout; these two raise it to 120s when the
+  client's `timeout` is shorter. A longer client timeout is always kept.
 
 ### Changed in 0.25.0
 

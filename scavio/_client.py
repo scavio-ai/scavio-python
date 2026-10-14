@@ -24,6 +24,8 @@ from ._namespaces_sync import (
     _InstagramNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
+    _ChatGPTNamespace,
+    _GeminiNamespace,
     _MercadoLibreNamespace,
     _MetaAdsNamespace,
     _RealtorNamespace,
@@ -139,17 +141,21 @@ class ScavioClient:
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
         self.mercadolibre = _MercadoLibreNamespace(self)
+        self.chatgpt = _ChatGPTNamespace(self)
+        self.gemini = _GeminiNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
 
-    def _post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+    def _post(
+        self, path: str, body: dict[str, Any], timeout: Optional[float] = None
+    ) -> dict[str, Any]:
         return sync_request(
             "POST",
             path,
             api_key=self._api_key,
             base_url=self._base_url,
-            timeout=self._timeout,
+            timeout=timeout if timeout is not None else self._timeout,
             rate_limiter=self._rate_limiter,
             retry=self._retry,
             json=body,
@@ -198,7 +204,10 @@ class ScavioClient:
         endpoint = ENDPOINTS[key]
         if endpoint.http == "GET":
             return self._get(endpoint.path)
-        return self._post(endpoint.path, build_body(endpoint, values, extra))
+        timeout = None
+        if endpoint.min_timeout is not None and endpoint.min_timeout > self._timeout:
+            timeout = endpoint.min_timeout
+        return self._post(endpoint.path, build_body(endpoint, values, extra), timeout)
 
     # -- convenience -------------------------------------------------------
 

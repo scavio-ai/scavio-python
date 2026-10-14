@@ -53,6 +53,9 @@ class Endpoint:
             real cost is a function of the request body and cannot be stated as
             a single number. ``credits`` stays the floor so nothing that reads
             it has to learn a second type.
+        min_timeout: Seconds this endpoint's request timeout is raised to when
+            the client's own timeout is shorter. For endpoints that routinely
+            answer slower than the 30s default (chatgpt, gemini).
     """
 
     key: str
@@ -65,6 +68,7 @@ class Endpoint:
     one_of: Sequence[Sequence[str]] = field(default_factory=tuple)
     credits: int = 1
     credits_note: Optional[str] = None
+    min_timeout: Optional[float] = None
 
     @property
     def required_params(self) -> list[Param]:
@@ -6850,6 +6854,44 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "nothing."
         ),
     ),
+    # ========================== ChatGPT + Gemini ==========================
+    # 1 endpoint each, 5 credits per answered prompt (failed prompts are free).
+    # Answers take 10-40s, so both raise the request timeout to 120s.
+    Endpoint(
+        key="chatgpt_prompt",
+        namespace="chatgpt",
+        method="prompt",
+        http="POST",
+        path="/api/v1/chatgpt/prompt",
+        summary=(
+            "Send a prompt to ChatGPT and get the answer it gives: the full Markdown answer, every "
+            "page it cites (title, publisher, date), the web searches it ran and the products it "
+            "recommended. Built for AI visibility monitoring. Failed prompts are not charged."
+        ),
+        params=(
+            _req("prompt", "The prompt (1-1024 characters)."),
+            _str("model", "Model to answer with (server default 'auto')."),
+            _str("country", "2-letter country code the answer is localized for (server default 'us')."),
+            _bool("include_html", "Also return the answer as HTML in data.answer.html."),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="gemini_prompt",
+        namespace="gemini",
+        method="prompt",
+        http="POST",
+        path="/api/v1/gemini/prompt",
+        summary=(
+            "Send a prompt to Google Gemini and get the answer it gives as Markdown, with the URLs "
+            "it cites and the products it recommended. Same response shape as chatgpt.prompt(). "
+            "Failed prompts are not charged."
+        ),
+        params=(_req("prompt", "The prompt (1-4000 characters)."),),
+        credits=5,
+        min_timeout=120.0,
+    ),
 )
 
 
@@ -6898,6 +6940,8 @@ NAMESPACES: tuple[str, ...] = (
     "realtor",
     "rightmove",
     "mercadolibre",
+    "chatgpt",
+    "gemini",
 )
 
 
