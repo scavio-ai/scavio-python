@@ -1522,7 +1522,7 @@ def test_custom_search_wire_names(monkeypatch):
 
 
 def test_ai_chat_method_names_match_the_dashboard_playground():
-    """The Playground advertises chatgpt.prompt() / gemini.prompt(); a rename breaks its snippets."""
+    """The Playground advertises chatgpt.prompt() / gemini.prompt(); renaming breaks it."""
     for ns in ("chatgpt", "gemini"):
         eps = [ep for ep in ENDPOINTS.values() if ep.namespace == ns]
         assert [ep.method for ep in eps] == ["prompt"]
@@ -1541,7 +1541,12 @@ def test_chatgpt_prompt(monkeypatch):
     client = ScavioClient(api_key="sk_test")
     client.chatgpt.prompt("best crm", model="gpt-5", country="gb", include_html=True)
     assert captured["path"] == "/api/v1/chatgpt/prompt"
-    assert captured["json"] == {"prompt": "best crm", "model": "gpt-5", "country": "gb", "include_html": True}
+    assert captured["json"] == {
+        "prompt": "best crm",
+        "model": "gpt-5",
+        "country": "gb",
+        "include_html": True,
+    }
     client.chatgpt.prompt("best crm")
     assert captured["json"] == {"prompt": "best crm"}
 
