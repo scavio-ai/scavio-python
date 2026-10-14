@@ -1523,7 +1523,7 @@ def test_custom_search_wire_names(monkeypatch):
 
 def test_ai_chat_method_names_match_the_dashboard_playground():
     """The Playground advertises chatgpt.prompt() / gemini.prompt(); renaming breaks it."""
-    for ns, credits in (("chatgpt", 1), ("gemini", 5)):
+    for ns, credits in (("chatgpt", 2), ("gemini", 5)):
         eps = [ep for ep in ENDPOINTS.values() if ep.namespace == ns]
         assert [ep.method for ep in eps] == ["prompt"]
         assert eps[0].path == f"/api/v1/{ns}/prompt"

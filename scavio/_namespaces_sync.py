@@ -6055,7 +6055,7 @@ class _ChatGPTNamespace:
     ) -> dict[str, Any]:
         """Send a prompt to ChatGPT and get the answer it gives: the full Markdown answer, every page it cites (title, publisher, date), the web searches it ran and the products it recommended. Built for AI visibility monitoring. Failed prompts are not charged.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             prompt: The prompt (1-1024 characters).
