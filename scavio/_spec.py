@@ -6855,7 +6855,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
     ),
     # ========================== ChatGPT + Gemini ==========================
-    # 1 endpoint each, 5 credits per answered prompt (failed prompts are free).
+    # 1 endpoint each: ChatGPT 1 credit, Gemini 5 per answered prompt (failed prompts are free).
     # Answers take 10-40s, so both raise the request timeout to 120s.
     Endpoint(
         key="chatgpt_prompt",
@@ -6874,7 +6874,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("country", "2-letter country code the answer is localized for (server default 'us')."),
             _bool("include_html", "Also return the answer as HTML in data.answer.html."),
         ),
-        credits=5,
+        credits=1,
         min_timeout=120.0,
     ),
     Endpoint(

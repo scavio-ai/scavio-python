@@ -220,8 +220,8 @@ ignored (use `site_search` to restrict). Parameters that cannot be honoured (ima
 
 Send the prompt a buyer would ask and get the answer the assistant gives: the full Markdown
 answer, the pages it cites, the web searches it ran (ChatGPT) and the products it recommended.
-Both return the same shape under `data`, so one parser tracks both. 5 credits per answered
-prompt; a failed prompt is not charged. Answers take 10-40 seconds, so both methods raise the
+Both return the same shape under `data`, so one parser tracks both. ChatGPT costs 1 credit and
+Gemini 5 credits per answered prompt; a failed prompt is not charged. Answers take 10-40 seconds, so both methods raise the
 request timeout to 120s when your client's is shorter.
 
 ```python
@@ -1087,11 +1087,15 @@ Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
 
+### Changed in 0.26.1
+
+- `chatgpt.prompt` now costs 1 credit per answered prompt (was 5). Gemini stays at 5.
+
 ### Changed in 0.26.0
 
 - New `chatgpt.prompt` and `gemini.prompt` (sync and async): send a prompt, get the assistant's
   answer with cited sources, web searches (ChatGPT) and recommended products
-  (`POST /api/v1/chatgpt/prompt`, `POST /api/v1/gemini/prompt`). 5 credits per answered prompt.
+  (`POST /api/v1/chatgpt/prompt`, `POST /api/v1/gemini/prompt`). 5 credits per answered prompt at launch.
 - Endpoints can now declare a minimum request timeout; these two raise it to 120s when the
   client's `timeout` is shorter. A longer client timeout is always kept.
 

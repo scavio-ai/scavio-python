@@ -1523,11 +1523,11 @@ def test_custom_search_wire_names(monkeypatch):
 
 def test_ai_chat_method_names_match_the_dashboard_playground():
     """The Playground advertises chatgpt.prompt() / gemini.prompt(); renaming breaks it."""
-    for ns in ("chatgpt", "gemini"):
+    for ns, credits in (("chatgpt", 1), ("gemini", 5)):
         eps = [ep for ep in ENDPOINTS.values() if ep.namespace == ns]
         assert [ep.method for ep in eps] == ["prompt"]
         assert eps[0].path == f"/api/v1/{ns}/prompt"
-        assert eps[0].credits == 5
+        assert eps[0].credits == credits
         assert eps[0].min_timeout == 120.0
     client = ScavioClient(api_key="sk_test")
     for ns in ("chatgpt", "gemini"):
