@@ -930,7 +930,8 @@ found = client.mercadolibre.search(
 print(found["total"], found["auto_applied_filters"])
 for row in found["results"]:
     # sold_quantity_min is a lower bound ("+1000 vendidos"), never an exact count.
-    print(row["price"], row["original_price"], row["sold_quantity_min"], row["title"])
+    # review_count is null when the page shows none (most sponsored rows).
+    print(row["price"], row["brand"], row["rating"], row["review_count"], row["sold_quantity_min"], row["title"])
 
 # One catalog product: price, buy-box seller with reputation, star distribution.
 product = client.mercadolibre.product(product_id="MLM1027172667")["data"]
