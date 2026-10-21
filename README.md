@@ -89,6 +89,11 @@ results = client.google.search(
     device="mobile",
 )
 
+# Organic rankings as seen from a city: web_only=True returns Google's Web
+# results (organic only, localized to location). For now the standard page
+# localizes only the local pack.
+local = client.google.search("emergency plumber", location="Austin,Texas,United States", web_only=True)
+
 # YouTube filters. The digit-named API fields (4k, 360, 3d) are exposed as
 # valid Python identifiers: four_k, video_360, video_3d.
 client.youtube.search("drone footage", four_k=True, hdr=True, duration="long")

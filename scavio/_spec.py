@@ -236,7 +236,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _HL,
             _GL,
             _GOOGLE_DOMAIN,
-            _LOCATION,
+            _str(
+                "location",
+                "Canonical location name; auto-encoded to a UULE string. On the standard results "
+                "page it currently localizes the local pack only; set web_only=True for organic "
+                "results localized to this location.",
+            ),
             _UULE,
             _str("lr", "Language restrict (e.g. 'lang_en')."),
             _str("cr", "Country restrict (e.g. 'countryUS')."),
@@ -249,6 +254,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "Restrict results to a recent time window.",
             ),
             _bool("resolve_ai_overview", "Resolve a deferred AI Overview (server default True)."),
+            _bool(
+                "web_only",
+                "Return Google's Web results only: organic results localized to location, with no "
+                "local pack, ads, related questions, knowledge graph or AI Overview.",
+            ),
         ),
     ),
     Endpoint(

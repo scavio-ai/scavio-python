@@ -73,6 +73,7 @@ class _AsyncGoogleNamespace:
         filter: Optional[Literal["0", "1"]] = None,
         time_period: Optional[Literal["last_hour", "last_day", "last_week", "last_month", "last_year"]] = None,
         resolve_ai_overview: Optional[bool] = None,
+        web_only: Optional[bool] = None,
         **extra: Any,
     ) -> dict[str, Any]:
         """Google SERP search (organic results, ads, and the AI Overview when present).
@@ -87,7 +88,7 @@ class _AsyncGoogleNamespace:
             hl: UI language (ISO 639-1, e.g. 'en').
             gl: Country of the search (ISO 3166-1 alpha-2, e.g. 'us').
             google_domain: Regional Google domain (e.g. 'google.co.uk').
-            location: Canonical location name; auto-encoded to a UULE string.
+            location: Canonical location name; auto-encoded to a UULE string. On the standard results page it currently localizes the local pack only; set web_only=True for organic results localized to this location.
             uule: Pre-encoded UULE location string (takes priority over location).
             lr: Language restrict (e.g. 'lang_en').
             cr: Country restrict (e.g. 'countryUS').
@@ -96,9 +97,10 @@ class _AsyncGoogleNamespace:
             filter: '0' disables the omitted/similar-results filter.
             time_period: Restrict results to a recent time window.
             resolve_ai_overview: Resolve a deferred AI Overview (server default True).
+            web_only: Return Google's Web results only: organic results localized to location, with no local pack, ads, related questions, knowledge graph or AI Overview.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("google_search", {"query": query, "device": device, "start": start, "include_html": include_html, "hl": hl, "gl": gl, "google_domain": google_domain, "location": location, "uule": uule, "lr": lr, "cr": cr, "safe": safe, "nfpr": nfpr, "filter": filter, "time_period": time_period, "resolve_ai_overview": resolve_ai_overview}, extra)
+        return await self._client._call("google_search", {"query": query, "device": device, "start": start, "include_html": include_html, "hl": hl, "gl": gl, "google_domain": google_domain, "location": location, "uule": uule, "lr": lr, "cr": cr, "safe": safe, "nfpr": nfpr, "filter": filter, "time_period": time_period, "resolve_ai_overview": resolve_ai_overview, "web_only": web_only}, extra)
 
     async def custom_search(
         self,
