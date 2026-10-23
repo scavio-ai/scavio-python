@@ -1353,7 +1353,7 @@ def test_new_platform_endpoint_counts():
         "threads": 6,
         "kuaishou": 14,
         "ebay": 3,
-        "target": 4,
+        "target": 5,
         "home_depot": 3,
         "zillow": 3,
         "booking": 3,
@@ -1384,7 +1384,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 134
+    assert sum(expected.values()) == 135
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])

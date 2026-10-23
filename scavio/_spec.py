@@ -3339,7 +3339,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _str(
                 "store_id",
-                "Numeric Target store id whose prices and availability the response reflects. "
+                "Numeric Target store id whose prices the response reflects. "
                 "Defaults to '3991', the store target.com uses with no store context.",
             ),
         ),
@@ -3382,7 +3382,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _str(
                 "store_id",
-                "Numeric Target store id whose prices and availability the response reflects. "
+                "Numeric Target store id whose prices the response reflects. "
                 "Defaults to '3991'.",
             ),
         ),
@@ -3406,7 +3406,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _str(
                 "store_id",
-                "Numeric Target store id whose prices and availability the response reflects. "
+                "Numeric Target store id whose prices the response reflects. "
                 "Defaults to '3991'.",
             ),
         ),
@@ -3431,9 +3431,28 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _str(
                 "store_id",
-                "Numeric Target store id whose prices and availability the response reflects. "
+                "Numeric Target store id whose prices the response reflects. "
                 "Defaults to '3991'.",
             ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="target_availability",
+        namespace="target",
+        method="availability",
+        http="POST",
+        path="/api/v1/target/availability",
+        summary=(
+            "In-store stock for a Target product at every Target store near a ZIP: units, "
+            "in-store, pickup, curbside and ship-to-store status, distance, address and hours. "
+            "Up to 20 stores."
+        ),
+        params=(
+            _req("tcin", "Target catalog id (tcin, e.g. '85978609')."),
+            _req("zip", "5-digit US ZIP code to search around (e.g. '79407')."),
+            _int("radius", "Search radius in miles, 1-100. Defaults to 25."),
+            _str("store_id", "Return only this Target store id. It must be within radius of zip."),
         ),
         credits=1,
     ),

@@ -3496,7 +3496,7 @@ class _TargetNamespace:
             page: Results page, 1-based.
             count: Results per page, 1-28. Defaults to 24; Target rejects anything above 28 outright.
             sort: Result sort order. Defaults to 'relevance'.
-            store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991', the store target.com uses with no store context.
+            store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991', the store target.com uses with no store context.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("target_search", {"keyword": keyword, "page": page, "count": count, "sort": sort, "store_id": store_id}, extra)
@@ -3520,7 +3520,7 @@ class _TargetNamespace:
             page: Results page, 1-based.
             count: Results per page, 1-28. Defaults to 24; Target rejects anything above 28 outright.
             sort: Result sort order. Defaults to 'relevance'.
-            store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+            store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("target_category", {"category_id": category_id, "page": page, "count": count, "sort": sort, "store_id": store_id}, extra)
@@ -3538,7 +3538,7 @@ class _TargetNamespace:
 
         Args:
             tcin: Target catalog id (tcin, e.g. '1010453160'). A colour/size child tcin is answered by its variation parent, with the child present in 'variants'.
-            store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+            store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("target_product", {"tcin": tcin, "store_id": store_id}, extra)
@@ -3558,10 +3558,32 @@ class _TargetNamespace:
         Args:
             tcin: Target catalog id (tcin, e.g. '1010453160').
             limit: Trim the returned reviews to at most this many (1 or greater). Target publishes 8 anonymously and offers no paging, so this only trims.
-            store_id: Numeric Target store id whose prices and availability the response reflects. Defaults to '3991'.
+            store_id: Numeric Target store id whose prices the response reflects. Defaults to '3991'.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("target_reviews", {"tcin": tcin, "limit": limit, "store_id": store_id}, extra)
+
+    def availability(
+        self,
+        tcin: str,
+        zip: str,
+        *,
+        radius: Optional[int] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """In-store stock for a Target product at every Target store near a ZIP: units, in-store, pickup, curbside and ship-to-store status, distance, address and hours. Up to 20 stores.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            tcin: Target catalog id (tcin, e.g. '85978609').
+            zip: 5-digit US ZIP code to search around (e.g. '79407').
+            radius: Search radius in miles, 1-100. Defaults to 25.
+            store_id: Return only this Target store id. It must be within radius of zip.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("target_availability", {"tcin": tcin, "zip": zip, "radius": radius, "store_id": store_id}, extra)
 
 class _HomeDepotNamespace:
     """Home Depot search, product, and review endpoints."""

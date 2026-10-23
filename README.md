@@ -1062,7 +1062,7 @@ Scavio works with popular AI/LLM frameworks:
 | Threads | `profile`, `user_posts`, `user_replies`, `post`, `post_comments`, `search_users` | 2, but `profile`/`user_posts`/`user_replies` cost 4 when addressed by `username` instead of `user_id` |
 | Kuaishou | `profile`, `user_posts`, `user_live`, `user_resolve`, `video`, `video_comments`, `comment_replies`, `videos_batch`, `search`, `search_videos`, `search_users`, `search_live`, `tag_feed`, `trending` | priced per endpoint: `videos_batch` 40, `profile` and the four `search*` 10 each, `video` 2, the rest 1 |
 | eBay | `search` (live or sold listings), `product`, `seller` | 1 each |
-| Target | `search`, `category`, `product`, `reviews` | 1 each |
+| Target | `search`, `category`, `product`, `reviews`, `availability` | 1 each |
 | Home Depot | `search`, `product`, `reviews` | 2 each |
 | Zillow | `search`, `property`, `agent_reviews` | 1 each |
 | Redfin | `search`, `property`, `market` | 1 each |
@@ -1092,6 +1092,22 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.27.0
+
+- **New `target.availability(tcin, zip, radius=None, store_id=None)`.** In-store
+  stock for one product at every Target store near a 5-digit US ZIP: units,
+  in-store, pickup, curbside and ship-to-store status, distance, address and
+  hours, up to 20 stores. `store_id` narrows the result to one store. 1 credit.
+
+  ```python
+  stock = client.target.availability("85978609", "79407")
+  for s in stock["data"]["stores"]:
+      print(s["store_id"], s["name"], s["quantity"], s["in_store"], s["pickup"])
+  ```
+- `store_id` on `target.search`, `category`, `product` and `reviews` sets the
+  store for prices only; its docstring no longer mentions availability. No
+  behaviour change.
 
 ### Changed in 0.26.2
 
