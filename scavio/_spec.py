@@ -5876,6 +5876,111 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
     ),
+    # ================================= HEB ================================
+    # 3 endpoints, 2 credits each. Texas-based grocery chain. Product detail
+    # requires product_url or slug + product_id (HEB URLs need the slug).
+    Endpoint(
+        key="heb_search",
+        namespace="heb",
+        method="search",
+        http="POST",
+        path="/api/v1/heb/search",
+        summary=(
+            "Search HEB grocery products by keyword: price (cents), sale status, unit price, "
+            "size, UPC, stock, EBT/SNAP eligibility, aisle location and product URL."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("page_size", "Results per page (1-60; server default 30)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="heb_product",
+        namespace="heb",
+        method="product",
+        http="POST",
+        path="/api/v1/heb/product",
+        summary=(
+            "Full HEB product detail: nutrition facts, ingredients, description, images, "
+            "similar products, coupons, EBT/SNAP eligibility and breadcrumbs. Pass product_url "
+            "(from search()) or slug + product_id."
+        ),
+        params=(
+            _str(
+                "product_url",
+                "Full or relative product URL from heb.com (e.g. "
+                "'/product-detail/central-market-organics-whole-milk-1-gal/931316'). Preferred.",
+            ),
+            _str("product_id", "HEB product id (numeric id at the end of a product URL). Requires slug."),
+            _str("slug", "Product slug (readable part of the URL). Required with product_id."),
+        ),
+        one_of=(("product_url", "product_id"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="heb_stores",
+        namespace="heb",
+        method="stores",
+        http="POST",
+        path="/api/v1/heb/stores",
+        summary=(
+            "HEB stores near a US ZIP code or city: store number, address, phone, hours, "
+            "pharmacy availability, fulfillment channels, distance and store URL."
+        ),
+        params=(
+            _str("zip", "5-digit US ZIP code (e.g. '78701')."),
+            _str("city", "City name (e.g. 'Austin'). Pass zip or city."),
+        ),
+        one_of=(("zip", "city"),),
+        credits=2,
+    ),
+    # ================================ Kroger ===============================
+    # 2 endpoints, 2 credits each. Operates Kroger, Ralphs, Fred Meyer,
+    # Harris Teeter, King Soopers, Fry's and other banners.
+    Endpoint(
+        key="kroger_search",
+        namespace="kroger",
+        method="search",
+        http="POST",
+        path="/api/v1/kroger/search",
+        summary=(
+            "Search Kroger grocery products by keyword: price (cents), promo/n-for deals, "
+            "unit price, UPC, stock, SNAP eligibility, dietary info, rating and category. "
+            "Kroger operates Kroger, Ralphs, Fred Meyer, Harris Teeter, King Soopers, Fry's "
+            "and other banners."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="kroger_product",
+        namespace="kroger",
+        method="product",
+        http="POST",
+        path="/api/v1/kroger/product",
+        summary=(
+            "Full Kroger product detail: nutrition facts with allergens and ingredients, "
+            "rating distribution, store aisle location, dietary flags (organic, non-GMO, "
+            "gluten-free), SNAP eligibility, dimensions and country of origin. Pass "
+            "product_url (from search()) or upc."
+        ),
+        params=(
+            _str(
+                "product_url",
+                "Full or relative product URL from kroger.com (e.g. "
+                "'/p/kroger-2-reduced-fat-milk-gallon/0001111041700'). Preferred.",
+            ),
+            _str("upc", "Kroger product UPC (from search() or product URLs: /p/{slug}/{upc})."),
+            _str("slug", "Product slug for readable URL. Optional with upc."),
+        ),
+        one_of=(("product_url", "upc"),),
+        credits=2,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
