@@ -5981,6 +5981,51 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         one_of=(("product_url", "upc"),),
         credits=2,
     ),
+    # ============================= Decathlon =============================
+    # 2 endpoints, 2 credits each. Supports 7 country domains:
+    # FR, ES, IT, IN, UK, PT and NET (international).
+    Endpoint(
+        key="decathlon_search",
+        namespace="decathlon",
+        method="search",
+        http="POST",
+        path="/api/v1/decathlon/search",
+        summary=(
+            "Search Decathlon products by keyword across 7 country domains (FR, ES, "
+            "IT, IN, UK, PT, NET). Returns product name, brand, price (cents), "
+            "currency, availability, rating, review count and image."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _req("country", 'Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".'),
+            _int("page", "Results page, 1-based (1-50)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="decathlon_product",
+        namespace="decathlon",
+        method="product",
+        http="POST",
+        path="/api/v1/decathlon/product",
+        summary=(
+            "Full Decathlon product detail: description, images, SKU, GTIN, color, "
+            "price (cents), list price, availability, offers/variants, rating, review "
+            "count, category and breadcrumbs. Pass product_url (from search()) or "
+            "product_id."
+        ),
+        params=(
+            _str(
+                "product_url",
+                "Full or relative product URL from any Decathlon domain (e.g. "
+                "'/p/mens-running-shoes/123456/...'). Preferred.",
+            ),
+            _str("product_id", "Decathlon numeric product ID (from the /p/{slug}/{id}/... URL pattern)."),
+            _req("country", 'Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".'),
+        ),
+        one_of=(("product_url", "product_id"),),
+        credits=2,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -7070,6 +7115,7 @@ NAMESPACES: tuple[str, ...] = (
     "google_ads",
     "meta_ads",
     "costco",
+    "decathlon",
     "trustpilot",
     "realtor",
     "rightmove",

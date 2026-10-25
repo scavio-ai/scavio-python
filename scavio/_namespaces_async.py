@@ -40,6 +40,7 @@ __all__ = [
     "_AsyncGoogleAdsNamespace",
     "_AsyncMetaAdsNamespace",
     "_AsyncCostcoNamespace",
+    "_AsyncDecathlonNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -5440,6 +5441,52 @@ class _AsyncCostcoNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("costco_autocomplete", {"query": query, "country": country}, extra)
+
+class _AsyncDecathlonNamespace:
+    """Decathlon sporting goods search and product detail across 7 country domains."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        country: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Decathlon products by keyword across 7 country domains (FR, ES, IT, IN, UK, PT, NET). Returns product name, brand, price (cents), currency, availability, rating, review count and image.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            country: Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".
+            page: Results page, 1-based (1-50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("decathlon_search", {"query": query, "country": country, "page": page}, extra)
+
+    async def product(
+        self,
+        country: str,
+        *,
+        product_url: Optional[str] = None,
+        product_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full Decathlon product detail: description, images, SKU, GTIN, color, price (cents), list price, availability, offers/variants, rating, review count, category and breadcrumbs. Pass product_url (from search()) or product_id.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_url: Full or relative product URL from any Decathlon domain (e.g. '/p/mens-running-shoes/123456/...'). Preferred.
+            product_id: Decathlon numeric product ID (from the /p/{slug}/{id}/... URL pattern).
+            country: Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("decathlon_product", {"product_url": product_url, "product_id": product_id, "country": country}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
