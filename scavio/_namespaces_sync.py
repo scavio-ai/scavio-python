@@ -47,6 +47,8 @@ __all__ = [
     "_MercadoLibreNamespace",
     "_ChatGPTNamespace",
     "_GeminiNamespace",
+    "_HebNamespace",
+    "_KrogerNamespace",
 ]
 
 class _GoogleNamespace:
@@ -5481,12 +5483,12 @@ class _DecathlonNamespace:
         Costs 2 credits. Returns the API response as a dict.
 
         Args:
+            country: Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".
             product_url: Full or relative product URL from any Decathlon domain (e.g. '/p/mens-running-shoes/123456/...'). Preferred.
             product_id: Decathlon numeric product ID (from the /p/{slug}/{id}/... URL pattern).
-            country: Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("decathlon_product", {"product_url": product_url, "product_id": product_id, "country": country}, extra)
+        return self._client._call("decathlon_product", {"country": country, "product_url": product_url, "product_id": product_id}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
@@ -6157,3 +6159,115 @@ class _GeminiNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("gemini_prompt", {"prompt": prompt}, extra)
+
+class _HebNamespace:
+    """HEB grocery search, product detail, and store locator endpoints, store-targetable."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search HEB grocery products by keyword: price (cents), sale status, unit price, size, UPC, stock, EBT/SNAP eligibility, aisle location and product URL. Pass store_id for one store's prices, stock and assortment.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100).
+            page_size: Results per page (1-60; server default 60).
+            store_id: HEB store number from heb.stores() (field store_number), e.g. '441'. Prices, stock, aisle location and assortment come from that store, echoed in data.store. US only. Omit for HEB's default store.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("heb_search", {"query": query, "page": page, "page_size": page_size, "store_id": store_id}, extra)
+
+    def product(
+        self,
+        *,
+        product_url: Optional[str] = None,
+        product_id: Optional[str] = None,
+        slug: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full HEB product detail: nutrition facts, ingredients, description, images, similar products, coupons, EBT/SNAP eligibility and breadcrumbs. Pass product_url (from search()) or slug + product_id, or product_id alone with store_id.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_url: Full or relative product URL from heb.com (e.g. '/product-detail/central-market-organics-whole-milk-1-gal/931316'). Preferred.
+            product_id: HEB product id (numeric id at the end of a product URL). Requires slug, unless store_id is set.
+            slug: Product slug (readable part of the URL). Required with product_id, unless store_id is set.
+            store_id: HEB store number from heb.stores() (field store_number), e.g. '441'. Price, stock and aisle location come from that store, echoed in data.store. US only. Omit for HEB's default store.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("heb_product", {"product_url": product_url, "product_id": product_id, "slug": slug, "store_id": store_id}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEB stores near a US ZIP code or city: store number, address, phone, hours, pharmacy availability, fulfillment channels, distance and store URL.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: 5-digit US ZIP code (e.g. '78701').
+            city: City name (e.g. 'Austin'). Pass zip or city.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("heb_stores", {"zip": zip, "city": city}, extra)
+
+class _KrogerNamespace:
+    """Kroger grocery search and product detail endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Kroger grocery products by keyword: price (cents), promo/n-for deals, unit price, UPC, stock, SNAP eligibility, dietary info, rating and category. Kroger operates Kroger, Ralphs, Fred Meyer, Harris Teeter, King Soopers, Fry's and other banners.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kroger_search", {"query": query, "page": page}, extra)
+
+    def product(
+        self,
+        *,
+        product_url: Optional[str] = None,
+        upc: Optional[str] = None,
+        slug: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Full Kroger product detail: nutrition facts with allergens and ingredients, rating distribution, store aisle location, dietary flags (organic, non-GMO, gluten-free), SNAP eligibility, dimensions and country of origin. Pass product_url (from search()) or upc.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_url: Full or relative product URL from kroger.com (e.g. '/p/kroger-2-reduced-fat-milk-gallon/0001111041700'). Preferred.
+            upc: Kroger product UPC (from search() or product URLs: /p/{slug}/{upc}).
+            slug: Product slug for readable URL. Optional with upc.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kroger_product", {"product_url": product_url, "upc": upc, "slug": slug}, extra)

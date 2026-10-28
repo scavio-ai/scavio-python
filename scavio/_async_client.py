@@ -16,6 +16,7 @@ from ._namespaces_async import (
     _AsyncChatGPTNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCostcoNamespace,
+    _AsyncDecathlonNamespace,
     _AsyncEbayNamespace,
     _AsyncG2Namespace,
     _AsyncGeminiNamespace,
@@ -23,9 +24,11 @@ from ._namespaces_async import (
     _AsyncGoogleAdsNamespace,
     _AsyncGoogleNamespace,
     _AsyncGooglePlayNamespace,
+    _AsyncHebNamespace,
     _AsyncHomeDepotNamespace,
     _AsyncIndeedNamespace,
     _AsyncInstagramNamespace,
+    _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
     _AsyncMercadoLibreNamespace,
@@ -132,12 +135,15 @@ class AsyncScavioClient:
         self.google_ads = _AsyncGoogleAdsNamespace(self)
         self.meta_ads = _AsyncMetaAdsNamespace(self)
         self.costco = _AsyncCostcoNamespace(self)
+        self.decathlon = _AsyncDecathlonNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)
         self.mercadolibre = _AsyncMercadoLibreNamespace(self)
         self.chatgpt = _AsyncChatGPTNamespace(self)
         self.gemini = _AsyncGeminiNamespace(self)
+        self.heb = _AsyncHebNamespace(self)
+        self.kroger = _AsyncKrogerNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -5878,7 +5878,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     ),
     # ================================= HEB ================================
     # 3 endpoints, 2 credits each. Texas-based grocery chain. Product detail
-    # requires product_url or slug + product_id (HEB URLs need the slug).
+    # requires product_url or slug + product_id (HEB URLs need the slug), or
+    # product_id alone with store_id. store_id (store_number from stores())
+    # targets one store's prices, stock, aisle and assortment; echoed in
+    # data.store. US only.
     Endpoint(
         key="heb_search",
         namespace="heb",
@@ -5887,12 +5890,19 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/heb/search",
         summary=(
             "Search HEB grocery products by keyword: price (cents), sale status, unit price, "
-            "size, UPC, stock, EBT/SNAP eligibility, aisle location and product URL."
+            "size, UPC, stock, EBT/SNAP eligibility, aisle location and product URL. Pass "
+            "store_id for one store's prices, stock and assortment."
         ),
         params=(
             _req("query", "Search keywords (1-200 characters)."),
             _int("page", "Results page, 1-based (1-100)."),
-            _int("page_size", "Results per page (1-60; server default 30)."),
+            _int("page_size", "Results per page (1-60; server default 60)."),
+            _str_or_int(
+                "store_id",
+                "HEB store number from heb.stores() (field store_number), e.g. '441'. Prices, "
+                "stock, aisle location and assortment come from that store, echoed in "
+                "data.store. US only. Omit for HEB's default store.",
+            ),
         ),
         credits=2,
     ),
@@ -5905,7 +5915,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Full HEB product detail: nutrition facts, ingredients, description, images, "
             "similar products, coupons, EBT/SNAP eligibility and breadcrumbs. Pass product_url "
-            "(from search()) or slug + product_id."
+            "(from search()) or slug + product_id, or product_id alone with store_id."
         ),
         params=(
             _str(
@@ -5913,8 +5923,22 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "Full or relative product URL from heb.com (e.g. "
                 "'/product-detail/central-market-organics-whole-milk-1-gal/931316'). Preferred.",
             ),
-            _str("product_id", "HEB product id (numeric id at the end of a product URL). Requires slug."),
-            _str("slug", "Product slug (readable part of the URL). Required with product_id."),
+            _str(
+                "product_id",
+                "HEB product id (numeric id at the end of a product URL). Requires slug, "
+                "unless store_id is set.",
+            ),
+            _str(
+                "slug",
+                "Product slug (readable part of the URL). Required with product_id, unless "
+                "store_id is set.",
+            ),
+            _str_or_int(
+                "store_id",
+                "HEB store number from heb.stores() (field store_number), e.g. '441'. Price, "
+                "stock and aisle location come from that store, echoed in data.store. US only. "
+                "Omit for HEB's default store.",
+            ),
         ),
         one_of=(("product_url", "product_id"),),
         credits=2,
@@ -6015,13 +6039,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "product_id."
         ),
         params=(
+            _req("country", 'Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".'),
             _str(
                 "product_url",
                 "Full or relative product URL from any Decathlon domain (e.g. "
                 "'/p/mens-running-shoes/123456/...'). Preferred.",
             ),
             _str("product_id", "Decathlon numeric product ID (from the /p/{slug}/{id}/... URL pattern)."),
-            _req("country", 'Country domain: "fr", "es", "it", "in", "uk", "pt" or "net".'),
         ),
         one_of=(("product_url", "product_id"),),
         credits=2,
@@ -7122,6 +7146,8 @@ NAMESPACES: tuple[str, ...] = (
     "mercadolibre",
     "chatgpt",
     "gemini",
+    "heb",
+    "kroger",
 )
 
 

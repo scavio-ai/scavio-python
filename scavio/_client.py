@@ -14,6 +14,7 @@ from ._namespaces_sync import (
     _ChatGPTNamespace,
     _CompaniesHouseNamespace,
     _CostcoNamespace,
+    _DecathlonNamespace,
     _EbayNamespace,
     _G2Namespace,
     _GeminiNamespace,
@@ -21,9 +22,11 @@ from ._namespaces_sync import (
     _GoogleAdsNamespace,
     _GoogleNamespace,
     _GooglePlayNamespace,
+    _HebNamespace,
     _HomeDepotNamespace,
     _IndeedNamespace,
     _InstagramNamespace,
+    _KrogerNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
     _MercadoLibreNamespace,
@@ -137,12 +140,15 @@ class ScavioClient:
         self.google_ads = _GoogleAdsNamespace(self)
         self.meta_ads = _MetaAdsNamespace(self)
         self.costco = _CostcoNamespace(self)
+        self.decathlon = _DecathlonNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
         self.mercadolibre = _MercadoLibreNamespace(self)
         self.chatgpt = _ChatGPTNamespace(self)
         self.gemini = _GeminiNamespace(self)
+        self.heb = _HebNamespace(self)
+        self.kroger = _KrogerNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
