@@ -6050,6 +6050,119 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         one_of=(("product_url", "product_id"),),
         credits=2,
     ),
+    # ============================= Total Wine ============================
+    # 3 endpoints, 2 credits each. Prices and stock are per store, so store_id
+    # (store_id from stores()) is required on search and product. A response
+    # is only returned when Total Wine answered for that store.
+    Endpoint(
+        key="totalwine_search",
+        namespace="totalwine",
+        method="search",
+        http="POST",
+        path="/api/v1/totalwine/search",
+        summary=(
+            "Search Total Wine & More at one store: that store's price (cents), units in stock, "
+            "purchase limit, aisle, size, rating and pickup/delivery/shipping availability."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _req("store_id", "Total Wine store number from totalwine.stores(), e.g. '503'."),
+            _int("page", "Results page, 1-based (1-50). 24 results per page."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="totalwine_product",
+        namespace="totalwine",
+        method="product",
+        http="POST",
+        path="/api/v1/totalwine/product",
+        summary=(
+            "One Total Wine product at one store: price (cents), units in stock, aisle, bay, "
+            "shelf, last restock date, ABV, taste profile, characteristics and breadcrumbs."
+        ),
+        params=(
+            _req("store_id", "Total Wine store number from totalwine.stores(), e.g. '503'."),
+            _str("product_id", "Numeric product id from search() or the URL's /p/<id>, e.g. '96260175'."),
+            _str("product_url", "Total Wine product URL ending in /p/<id>."),
+        ),
+        one_of=(("product_id", "product_url"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="totalwine_stores",
+        namespace="totalwine",
+        method="stores",
+        http="POST",
+        path="/api/v1/totalwine/stores",
+        summary=(
+            "Total Wine stores near a ZIP code or city, nearest first: store_id, address, phone, "
+            "coordinates, distance in miles and delivery availability."
+        ),
+        params=(
+            _req("query", "ZIP code, city, or 'city, state' (e.g. '78801')."),
+            _int("radius", "Radius in miles (1-200; default 50)."),
+        ),
+        credits=2,
+    ),
+    # =============================== Spec's ==============================
+    # 3 endpoints, 1 credit each. Texas liquor chain. Search returns the
+    # online price; product returns every store's price and stock in
+    # store_prices, with store_id putting one store on top.
+    Endpoint(
+        key="specs_search",
+        namespace="specs",
+        method="search",
+        http="POST",
+        path="/api/v1/specs/search",
+        summary=(
+            "Search Spec's Wines, Spirits & Finer Foods: online price (cents), case price and "
+            "quantity, promo and Keyclub flags, stock, size, SKU, UPC and slug."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-50). 24 results per page."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="specs_product",
+        namespace="specs",
+        method="product",
+        http="POST",
+        path="/api/v1/specs/product",
+        summary=(
+            "One Spec's product with every store's price and stock in store_prices (about 200 "
+            "stores), the online price, and ABV, origin, region, vintage and tasting notes."
+        ),
+        params=(
+            _str("slug", "Product slug from search(), e.g. 'titos-texas-vodka-5'."),
+            _str("product_url", "Spec's product URL, https://specsonline.com/shop/<type>/<slug>/."),
+            _str("store_id", "Spec's store number from specs.stores(), e.g. '169'. Puts that store's price and stock at the top."),
+        ),
+        one_of=(("slug", "product_url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="specs_stores",
+        namespace="specs",
+        method="stores",
+        http="POST",
+        path="/api/v1/specs/stores",
+        summary=(
+            "Spec's stores in a Texas region: store_id, name, status, address, phone, "
+            "coordinates and opening hours."
+        ),
+        params=(
+            Param(
+                name="region",
+                annotation='Literal["austin", "corpus-christi", "dallas", "el-paso", "fort-worth", "houston", "san-antonio"]',
+                required=True,
+                doc="Store region: austin, corpus-christi, dallas, el-paso, fort-worth, houston or san-antonio.",
+            ),
+        ),
+        credits=1,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -7140,6 +7253,8 @@ NAMESPACES: tuple[str, ...] = (
     "meta_ads",
     "costco",
     "decathlon",
+    "totalwine",
+    "specs",
     "trustpilot",
     "realtor",
     "rightmove",

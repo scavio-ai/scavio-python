@@ -15,6 +15,8 @@ from ._namespaces_sync import (
     _CompaniesHouseNamespace,
     _CostcoNamespace,
     _DecathlonNamespace,
+    _TotalWineNamespace,
+    _SpecsNamespace,
     _EbayNamespace,
     _G2Namespace,
     _GeminiNamespace,
@@ -141,6 +143,8 @@ class ScavioClient:
         self.meta_ads = _MetaAdsNamespace(self)
         self.costco = _CostcoNamespace(self)
         self.decathlon = _DecathlonNamespace(self)
+        self.totalwine = _TotalWineNamespace(self)
+        self.specs = _SpecsNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

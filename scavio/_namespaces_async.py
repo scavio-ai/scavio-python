@@ -41,6 +41,8 @@ __all__ = [
     "_AsyncMetaAdsNamespace",
     "_AsyncCostcoNamespace",
     "_AsyncDecathlonNamespace",
+    "_AsyncTotalWineNamespace",
+    "_AsyncSpecsNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -5489,6 +5491,129 @@ class _AsyncDecathlonNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("decathlon_product", {"country": country, "product_url": product_url, "product_id": product_id}, extra)
+
+class _AsyncTotalWineNamespace:
+    """Total Wine & More store-level search, product detail, and store locator endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        store_id: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Total Wine & More at one store: that store's price (cents), units in stock, purchase limit, aisle, size, rating and pickup/delivery/shipping availability.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            store_id: Total Wine store number from totalwine.stores(), e.g. '503'.
+            page: Results page, 1-based (1-50). 24 results per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("totalwine_search", {"query": query, "store_id": store_id, "page": page}, extra)
+
+    async def product(
+        self,
+        store_id: str,
+        *,
+        product_id: Optional[str] = None,
+        product_url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Total Wine product at one store: price (cents), units in stock, aisle, bay, shelf, last restock date, ABV, taste profile, characteristics and breadcrumbs.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: Total Wine store number from totalwine.stores(), e.g. '503'.
+            product_id: Numeric product id from search() or the URL's /p/<id>, e.g. '96260175'.
+            product_url: Total Wine product URL ending in /p/<id>.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("totalwine_product", {"store_id": store_id, "product_id": product_id, "product_url": product_url}, extra)
+
+    async def stores(
+        self,
+        query: str,
+        *,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Total Wine stores near a ZIP code or city, nearest first: store_id, address, phone, coordinates, distance in miles and delivery availability.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: ZIP code, city, or 'city, state' (e.g. '78801').
+            radius: Radius in miles (1-200; default 50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("totalwine_stores", {"query": query, "radius": radius}, extra)
+
+class _AsyncSpecsNamespace:
+    """Spec's search, product detail with every store's price, and store locator endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Spec's Wines, Spirits & Finer Foods: online price (cents), case price and quantity, promo and Keyclub flags, stock, size, SKU, UPC and slug.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-50). 24 results per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("specs_search", {"query": query, "page": page}, extra)
+
+    async def product(
+        self,
+        *,
+        slug: Optional[str] = None,
+        product_url: Optional[str] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Spec's product with every store's price and stock in store_prices (about 200 stores), the online price, and ABV, origin, region, vintage and tasting notes.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: Product slug from search(), e.g. 'titos-texas-vodka-5'.
+            product_url: Spec's product URL, https://specsonline.com/shop/<type>/<slug>/.
+            store_id: Spec's store number from specs.stores(), e.g. '169'. Puts that store's price and stock at the top.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("specs_product", {"slug": slug, "product_url": product_url, "store_id": store_id}, extra)
+
+    async def stores(
+        self,
+        region: Literal["austin", "corpus-christi", "dallas", "el-paso", "fort-worth", "houston", "san-antonio"],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Spec's stores in a Texas region: store_id, name, status, address, phone, coordinates and opening hours.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            region: Store region: austin, corpus-christi, dallas, el-paso, fort-worth, houston or san-antonio.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("specs_stores", {"region": region}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
