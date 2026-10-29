@@ -6051,7 +6051,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
     ),
     # ============================= Total Wine ============================
-    # 3 endpoints, 2 credits each. Prices and stock are per store, so store_id
+    # 3 endpoints, 10 credits each. Prices and stock are per store, so store_id
     # (store_id from stores()) is required on search and product. A response
     # is only returned when Total Wine answered for that store.
     Endpoint(
@@ -6069,7 +6069,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _req("store_id", "Total Wine store number from totalwine.stores(), e.g. '503'."),
             _int("page", "Results page, 1-based (1-50). 24 results per page."),
         ),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="totalwine_product",
@@ -6087,7 +6087,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("product_url", "Total Wine product URL ending in /p/<id>."),
         ),
         one_of=(("product_id", "product_url"),),
-        credits=2,
+        credits=10,
     ),
     Endpoint(
         key="totalwine_stores",
@@ -6103,10 +6103,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _req("query", "ZIP code, city, or 'city, state' (e.g. '78801')."),
             _int("radius", "Radius in miles (1-200; default 50)."),
         ),
-        credits=2,
+        credits=10,
     ),
     # =============================== Spec's ==============================
-    # 3 endpoints, 1 credit each. Texas liquor chain. Search returns the
+    # 3 endpoints, 5 credits each. Texas liquor chain. Search returns the
     # online price; product returns every store's price and stock in
     # store_prices, with store_id putting one store on top.
     Endpoint(
@@ -6123,7 +6123,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _req("query", "Search keywords (1-200 characters)."),
             _int("page", "Results page, 1-based (1-50). 24 results per page."),
         ),
-        credits=1,
+        credits=5,
     ),
     Endpoint(
         key="specs_product",
@@ -6141,7 +6141,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("store_id", "Spec's store number from specs.stores(), e.g. '169'. Puts that store's price and stock at the top."),
         ),
         one_of=(("slug", "product_url"),),
-        credits=1,
+        credits=5,
     ),
     Endpoint(
         key="specs_stores",
@@ -6161,7 +6161,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 doc="Store region: austin, corpus-christi, dallas, el-paso, fort-worth, houston or san-antonio.",
             ),
         ),
-        credits=1,
+        credits=5,
     ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one

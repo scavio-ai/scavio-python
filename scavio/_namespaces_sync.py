@@ -5508,7 +5508,7 @@ class _TotalWineNamespace:
     ) -> dict[str, Any]:
         """Search Total Wine & More at one store: that store's price (cents), units in stock, purchase limit, aisle, size, rating and pickup/delivery/shipping availability.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             query: Search keywords (1-200 characters).
@@ -5528,7 +5528,7 @@ class _TotalWineNamespace:
     ) -> dict[str, Any]:
         """One Total Wine product at one store: price (cents), units in stock, aisle, bay, shelf, last restock date, ABV, taste profile, characteristics and breadcrumbs.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             store_id: Total Wine store number from totalwine.stores(), e.g. '503'.
@@ -5547,7 +5547,7 @@ class _TotalWineNamespace:
     ) -> dict[str, Any]:
         """Total Wine stores near a ZIP code or city, nearest first: store_id, address, phone, coordinates, distance in miles and delivery availability.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 10 credits. Returns the API response as a dict.
 
         Args:
             query: ZIP code, city, or 'city, state' (e.g. '78801').
@@ -5571,7 +5571,7 @@ class _SpecsNamespace:
     ) -> dict[str, Any]:
         """Search Spec's Wines, Spirits & Finer Foods: online price (cents), case price and quantity, promo and Keyclub flags, stock, size, SKU, UPC and slug.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 5 credits. Returns the API response as a dict.
 
         Args:
             query: Search keywords (1-200 characters).
@@ -5590,7 +5590,7 @@ class _SpecsNamespace:
     ) -> dict[str, Any]:
         """One Spec's product with every store's price and stock in store_prices (about 200 stores), the online price, and ABV, origin, region, vintage and tasting notes.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 5 credits. Returns the API response as a dict.
 
         Args:
             slug: Product slug from search(), e.g. 'titos-texas-vodka-5'.
@@ -5607,7 +5607,7 @@ class _SpecsNamespace:
     ) -> dict[str, Any]:
         """Spec's stores in a Texas region: store_id, name, status, address, phone, coordinates and opening hours.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 5 credits. Returns the API response as a dict.
 
         Args:
             region: Store region: austin, corpus-christi, dallas, el-paso, fort-worth, houston or san-antonio.
