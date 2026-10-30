@@ -4181,7 +4181,7 @@ class _AsyncGlassdoorNamespace:
     ) -> dict[str, Any]:
         """START HERE. Resolve a company NAME to the employer_id every other Glassdoor method is keyed by, ranked by Glassdoor and de-duplicated.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             query: Company name to resolve (1-120 characters).
@@ -4199,7 +4199,7 @@ class _AsyncGlassdoorNamespace:
     ) -> dict[str, Any]:
         """Glassdoor employer profile: description, mission, industry, sector, HQ, size and revenue bands, stock symbol, year founded, overall and per-category ratings, star distribution, CEO approval, awards, FAQ and the five server-rendered reviews. Also returns reviews_url and salaries_url, which reviews() and salaries() accept as url to save a fetch. Provide employer_id or url.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             employer_id: Glassdoor employer id (1-50 characters) in any form Glassdoor writes it: '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected.
@@ -4221,7 +4221,7 @@ class _AsyncGlassdoorNamespace:
     ) -> dict[str, Any]:
         """Up to THREE full Glassdoor reviews - the cap is Glassdoor's login wall - with per-axis scores, pros, cons, advice, job title, location, employment status and employer response, plus complete rating statistics, star distribution, aggregate pro/con highlight terms and per-job-title review counts. There is no page param: move the window with category and employment_status. Provide employer_id or url.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two lookups; the customer price is unchanged.
@@ -4244,7 +4244,7 @@ class _AsyncGlassdoorNamespace:
     ) -> dict[str, Any]:
         """Glassdoor salaries by job title, 10 titles per page: base-pay and total-pay percentiles P10-P90 with medians called out, sample counts, currency, pay period and last-reported date. The figures are Glassdoor's ESTIMATES for the title, not individual reported salaries. Provide employer_id or url.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             employer_id: Glassdoor employer id (1-50 characters): '1699', 'E1699' or 'IE1699'. Must be a STRING - a JSON number is rejected. Addressing by id costs two lookups; the customer price is unchanged.

@@ -4133,7 +4133,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(
             _req("query", "Company name to resolve (1-120 characters)."),
         ),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="glassdoor_company",
@@ -4167,7 +4167,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
         ),
         one_of=(("employer_id", "url"),),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="glassdoor_reviews",
@@ -4222,7 +4222,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
         ),
         one_of=(("employer_id", "url"),),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="glassdoor_salaries",
@@ -4260,7 +4260,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
         ),
         one_of=(("employer_id", "url"),),
-        credits=1,
+        credits=2,
     ),
     # ================================ Yelp ===============================
     Endpoint(
