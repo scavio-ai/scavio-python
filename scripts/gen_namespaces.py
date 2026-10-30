@@ -134,10 +134,6 @@ _NS_META = {
         "Decathlon",
         "Decathlon sporting goods search and product detail across 7 country domains.",
     ),
-    "totalwine": (
-        "TotalWine",
-        "Total Wine & More store-level search, product detail, and store locator endpoints.",
-    ),
     "specs": (
         "Specs",
         "Spec's search, product detail with every store's price, and store locator endpoints.",

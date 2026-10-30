@@ -43,7 +43,6 @@ from ._namespaces_async import (
     _AsyncThreadsNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
-    _AsyncTotalWineNamespace,
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
     _AsyncWalmartNamespace,
@@ -138,7 +137,6 @@ class AsyncScavioClient:
         self.meta_ads = _AsyncMetaAdsNamespace(self)
         self.costco = _AsyncCostcoNamespace(self)
         self.decathlon = _AsyncDecathlonNamespace(self)
-        self.totalwine = _AsyncTotalWineNamespace(self)
         self.specs = _AsyncSpecsNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)

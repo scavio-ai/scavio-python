@@ -6050,61 +6050,6 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         one_of=(("product_url", "product_id"),),
         credits=2,
     ),
-    # ============================= Total Wine ============================
-    # 3 endpoints, 10 credits each. Prices and stock are per store, so store_id
-    # (store_id from stores()) is required on search and product. A response
-    # is only returned when Total Wine answered for that store.
-    Endpoint(
-        key="totalwine_search",
-        namespace="totalwine",
-        method="search",
-        http="POST",
-        path="/api/v1/totalwine/search",
-        summary=(
-            "Search Total Wine & More at one store: that store's price (cents), units in stock, "
-            "purchase limit, aisle, size, rating and pickup/delivery/shipping availability."
-        ),
-        params=(
-            _req("query", "Search keywords (1-200 characters)."),
-            _req("store_id", "Total Wine store number from totalwine.stores(), e.g. '503'."),
-            _int("page", "Results page, 1-based (1-50). 24 results per page."),
-        ),
-        credits=10,
-    ),
-    Endpoint(
-        key="totalwine_product",
-        namespace="totalwine",
-        method="product",
-        http="POST",
-        path="/api/v1/totalwine/product",
-        summary=(
-            "One Total Wine product at one store: price (cents), units in stock, aisle, bay, "
-            "shelf, last restock date, ABV, taste profile, characteristics and breadcrumbs."
-        ),
-        params=(
-            _req("store_id", "Total Wine store number from totalwine.stores(), e.g. '503'."),
-            _str("product_id", "Numeric product id from search() or the URL's /p/<id>, e.g. '96260175'."),
-            _str("product_url", "Total Wine product URL ending in /p/<id>."),
-        ),
-        one_of=(("product_id", "product_url"),),
-        credits=10,
-    ),
-    Endpoint(
-        key="totalwine_stores",
-        namespace="totalwine",
-        method="stores",
-        http="POST",
-        path="/api/v1/totalwine/stores",
-        summary=(
-            "Total Wine stores near a ZIP code or city, nearest first: store_id, address, phone, "
-            "coordinates, distance in miles and delivery availability."
-        ),
-        params=(
-            _req("query", "ZIP code, city, or 'city, state' (e.g. '78801')."),
-            _int("radius", "Radius in miles (1-200; default 50)."),
-        ),
-        credits=10,
-    ),
     # =============================== Spec's ==============================
     # 3 endpoints, 5 credits each. Texas liquor chain. Search returns the
     # online price; product returns every store's price and stock in
@@ -7253,7 +7198,6 @@ NAMESPACES: tuple[str, ...] = (
     "meta_ads",
     "costco",
     "decathlon",
-    "totalwine",
     "specs",
     "trustpilot",
     "realtor",

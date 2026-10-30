@@ -41,7 +41,6 @@ __all__ = [
     "_MetaAdsNamespace",
     "_CostcoNamespace",
     "_DecathlonNamespace",
-    "_TotalWineNamespace",
     "_SpecsNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
@@ -5491,70 +5490,6 @@ class _DecathlonNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("decathlon_product", {"country": country, "product_url": product_url, "product_id": product_id}, extra)
-
-class _TotalWineNamespace:
-    """Total Wine & More store-level search, product detail, and store locator endpoints."""
-
-    def __init__(self, client: "ScavioClient") -> None:
-        self._client = client
-
-    def search(
-        self,
-        query: str,
-        store_id: str,
-        *,
-        page: Optional[int] = None,
-        **extra: Any,
-    ) -> dict[str, Any]:
-        """Search Total Wine & More at one store: that store's price (cents), units in stock, purchase limit, aisle, size, rating and pickup/delivery/shipping availability.
-
-        Costs 10 credits. Returns the API response as a dict.
-
-        Args:
-            query: Search keywords (1-200 characters).
-            store_id: Total Wine store number from totalwine.stores(), e.g. '503'.
-            page: Results page, 1-based (1-50). 24 results per page.
-            extra: Additional wire parameters passed through verbatim.
-        """
-        return self._client._call("totalwine_search", {"query": query, "store_id": store_id, "page": page}, extra)
-
-    def product(
-        self,
-        store_id: str,
-        *,
-        product_id: Optional[str] = None,
-        product_url: Optional[str] = None,
-        **extra: Any,
-    ) -> dict[str, Any]:
-        """One Total Wine product at one store: price (cents), units in stock, aisle, bay, shelf, last restock date, ABV, taste profile, characteristics and breadcrumbs.
-
-        Costs 10 credits. Returns the API response as a dict.
-
-        Args:
-            store_id: Total Wine store number from totalwine.stores(), e.g. '503'.
-            product_id: Numeric product id from search() or the URL's /p/<id>, e.g. '96260175'.
-            product_url: Total Wine product URL ending in /p/<id>.
-            extra: Additional wire parameters passed through verbatim.
-        """
-        return self._client._call("totalwine_product", {"store_id": store_id, "product_id": product_id, "product_url": product_url}, extra)
-
-    def stores(
-        self,
-        query: str,
-        *,
-        radius: Optional[int] = None,
-        **extra: Any,
-    ) -> dict[str, Any]:
-        """Total Wine stores near a ZIP code or city, nearest first: store_id, address, phone, coordinates, distance in miles and delivery availability.
-
-        Costs 10 credits. Returns the API response as a dict.
-
-        Args:
-            query: ZIP code, city, or 'city, state' (e.g. '78801').
-            radius: Radius in miles (1-200; default 50).
-            extra: Additional wire parameters passed through verbatim.
-        """
-        return self._client._call("totalwine_stores", {"query": query, "radius": radius}, extra)
 
 class _SpecsNamespace:
     """Spec's search, product detail with every store's price, and store locator endpoints."""
