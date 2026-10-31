@@ -6108,6 +6108,454 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=5,
     ),
+    # =============================== Lowe's ==============================
+    # 4 endpoints. search, product and stores 2 credits each; reviews 1.
+    # Prices and stock are one store's: store_id and that store's zip (both
+    # from stores()) are required on search and product. Deals are
+    # search(on_sale=True); there is no clearance endpoint.
+    Endpoint(
+        key="lowes_search",
+        namespace="lowes",
+        method="search",
+        http="POST",
+        path="/api/v1/lowes/search",
+        summary=(
+            "Search Lowe's by keyword or category at one store: the store's price, was-price and "
+            "savings with the sale end date, brand, model number, rating, review count, and stock "
+            "for pickup, truck delivery, parcel shipping and same-day delivery. Pass query or "
+            "category_id; on_sale=True returns that store's deals."
+        ),
+        params=(
+            _req("store_id", "Lowe's store number (up to 4 digits) from lowes.stores(), e.g. '0595'."),
+            _req("zip", "The store's own 5-digit ZIP code from lowes.stores(), e.g. '28117'."),
+            _str("query", "Search keywords (1-200 characters). Pass this or category_id."),
+            _str("category_id", "Category id, the number at the end of a lowes.com/pl/ URL. Pass this or query."),
+            _int("page", "Results page, 1-based (1-31). 24 results per page."),
+            _bool("on_sale", "Only items on sale at this store (with a was-price). A page can then hold fewer than 24."),
+        ),
+        one_of=(("query", "category_id"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="lowes_product",
+        namespace="lowes",
+        method="product",
+        http="POST",
+        path="/api/v1/lowes/product",
+        summary=(
+            "One Lowe's item at one store: price, was-price and savings, on-hand stock with lead "
+            "time per fulfillment method, stock at nearby stores, aisle and bay, grouped "
+            "specifications, UPC, dimensions, weight, rating, images, and the store's hours."
+        ),
+        params=(
+            _req("item_id", "Lowe's item id (the number at the end of a lowes.com/pd/ URL) or the full product URL."),
+            _req("store_id", "Lowe's store number (up to 4 digits) from lowes.stores(), e.g. '0595'."),
+            _req("zip", "The store's own 5-digit ZIP code from lowes.stores(), e.g. '28117'."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="lowes_stores",
+        namespace="lowes",
+        method="stores",
+        http="POST",
+        path="/api/v1/lowes/stores",
+        summary=(
+            "Lowe's stores near a ZIP code, nearest first: store_id, name, address, phone, "
+            "coordinates, distance, time zone, opening hours and features."
+        ),
+        params=(
+            _req("zip", "5-digit US ZIP code to find stores near."),
+            _int("limit", "Stores to return, nearest first (1-10; default 10)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="lowes_reviews",
+        namespace="lowes",
+        method="reviews",
+        http="POST",
+        path="/api/v1/lowes/reviews",
+        summary=(
+            "One page of a Lowe's item's customer reviews (10 per page): rating, title, text, "
+            "date, reviewer, recommended, helpful votes, verified and incentivized flags, photos "
+            "and brand replies, plus the average rating and count per star."
+        ),
+        params=(
+            _req("item_id", "Lowe's item id (the number at the end of a lowes.com/pd/ URL) or the full product URL."),
+            _int("page", "Reviews page, 1-based (1-1000). 10 reviews per page."),
+            _lit("sort", ("newest", "oldest", "most_helpful"), "newest (default), oldest or most_helpful."),
+        ),
+        credits=1,
+    ),
+    # ============================= Sam's Club ============================
+    # 6 endpoints, 1 credit each. search, savings and category answer for a
+    # club picked by location (echoed in data.club); product(club_id=...)
+    # prices and stocks one specific club. available_quantity is capped at 8
+    # by the site (8 means 8 or more). Clearance is category 1150109.
+    Endpoint(
+        key="sams_club_search",
+        namespace="sams_club",
+        method="search",
+        http="POST",
+        path="/api/v1/samsclub/search",
+        summary=(
+            "Search Sam's Club: item_id, price, was_price, savings_amount, unit price, Instant "
+            "Savings (amount, end date, purchase limit), rating, review count, stock, "
+            "pickup/delivery/shipping availability and aisle. The club is picked by location and "
+            "returned in data.club; use product(club_id=...) for a specific club."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100). Up to 45 results per page."),
+            _lit(
+                "sort",
+                ("relevance", "price_low", "price_high", "top_selling"),
+                "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sams_club_product",
+        namespace="sams_club",
+        method="product",
+        http="POST",
+        path="/api/v1/samsclub/product",
+        summary=(
+            "One Sam's Club item: online price and the club shelf price (club_price) with was "
+            "price, savings and unit price, Instant Savings, rating histogram, UPC, model, "
+            "specifications, and per-method fulfillment with stock and aisle. available_quantity "
+            "is capped at 8 by the site; 8 means 8 or more."
+        ),
+        params=(
+            _req("item_id", "Sam's Club item id: the number at the end of a sams_club.com/ip/ URL, or item_id from search()."),
+            _str("club_id", "Club number from sams_club.clubs(), e.g. '6372'. Prices and stocks that club."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sams_club_clubs",
+        namespace="sams_club",
+        method="clubs",
+        http="POST",
+        path="/api/v1/samsclub/clubs",
+        summary=(
+            "Sam's Club clubs near a US ZIP within 100 miles, nearest first: club_id, name, "
+            "address, coordinates, distance in miles, phone, opening hours, services and whether "
+            "the club is temporarily closed."
+        ),
+        params=(
+            _req("zip", "5-digit US ZIP code, e.g. '75201'."),
+            _int("limit", "Clubs to return, nearest first (1-20; default 10)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sams_club_savings",
+        namespace="sams_club",
+        method="savings",
+        http="POST",
+        path="/api/v1/samsclub/savings",
+        summary=(
+            "Every item on Sam's Club Instant Savings, paged: price, was price and savings "
+            "amount, plus each offer's amount, end date, purchase limit and channels. The club is "
+            "picked by location and returned in data.club."
+        ),
+        params=(
+            _int("page", "Results page, 1-based (1-100). Up to 45 items per page."),
+            _lit(
+                "sort",
+                ("relevance", "price_low", "price_high", "top_selling"),
+                "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sams_club_category",
+        namespace="sams_club",
+        method="category",
+        http="POST",
+        path="/api/v1/samsclub/category",
+        summary=(
+            "Products in a Sam's Club category, paged, with the same fields as search(). "
+            "Clearance is category '1150109'. An empty shelf returns an empty list. The club is "
+            "picked by location and returned in data.club."
+        ),
+        params=(
+            _req("category_id", "Category id, the number at the end of a sams_club.com /browse/ or /cp/ URL. Clearance is '1150109'."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _lit(
+                "sort",
+                ("relevance", "price_low", "price_high", "top_selling"),
+                "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sams_club_reviews",
+        namespace="sams_club",
+        method="reviews",
+        http="POST",
+        path="/api/v1/samsclub/reviews",
+        summary=(
+            "Customer reviews for a Sam's Club item, 10 per page: rating, title, text, author, "
+            "date, verified purchase and helpful votes, plus the average rating, total count and "
+            "1-5 star breakdown."
+        ),
+        params=(
+            _req("item_id", "Sam's Club item id from search() or a sams_club.com/ip/ URL."),
+            _int("page", "Reviews page, 1-based (1-100). 10 reviews per page."),
+            _lit(
+                "sort",
+                ("newest", "oldest", "highest", "lowest", "most_helpful"),
+                "newest, oldest, highest, lowest or most_helpful.",
+            ),
+        ),
+        credits=1,
+    ),
+    # ============================ Canadian Tire ==========================
+    # 6 endpoints, 1 credit each. Prices (CAD) and stock are one store's, so
+    # store_id (from stores()) is required everywhere but stores(). Prices
+    # differ by store and province (Quebec prices differ). No review text:
+    # rating and review_count only.
+    Endpoint(
+        key="canadian_tire_search",
+        namespace="canadian_tire",
+        method="search",
+        http="POST",
+        path="/api/v1/canadiantire/search",
+        summary=(
+            "Search Canadian Tire by keyword or category at one store: the store's price and "
+            "regular price (CAD), price range for multi-variant items, savings, badges "
+            "(clearance, sale, rebate), rating, review count, brand, part number, SKU, and stock "
+            "at the store and online. Pass query or category_id."
+        ),
+        params=(
+            _req("store_id", "Canadian Tire store number from canadian_tire.stores(), e.g. '600'."),
+            _str("query", "Search keywords (up to 200 characters). Pass this or category_id."),
+            _str("category_id", "Category id (DC followed by 7 digits, e.g. 'DC0002209') or a canadian_tire.ca category URL. Pass this or query."),
+            _int("page", "Results page, 1-based (1-100). 24 results per page."),
+            _lit(
+                "sort",
+                ("relevance", "price_asc", "price_desc", "newest", "rating", "bestseller"),
+                "relevance (default), price_asc, price_desc, newest, rating or bestseller.",
+            ),
+            _bool("in_stock_only", "Only items in stock at store_id."),
+        ),
+        one_of=(("query", "category_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="canadian_tire_product",
+        namespace="canadian_tire",
+        method="product",
+        http="POST",
+        path="/api/v1/canadiantire/product",
+        summary=(
+            "One Canadian Tire product by code at one store: breadcrumb, images, rating, review "
+            "count, descriptions, features, specifications, price and regular price, warranty, "
+            "manuals, variants with their SKUs, and the store's price, stock, and pickup and "
+            "ship-to-home dates."
+        ),
+        params=(
+            _req("product_code", "Product code, the `code` field of a search result, e.g. '0547273P'."),
+            _req("store_id", "Canadian Tire store number from canadian_tire.stores(), e.g. '600'."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="canadian_tire_stores",
+        namespace="canadian_tire",
+        method="stores",
+        http="POST",
+        path="/api/v1/canadiantire/stores",
+        summary=(
+            "Canadian Tire stores near a postal code or coordinates, nearest first: store_id, "
+            "name, address, phone, coordinates, distance, weekly hours and services. Pass sku to "
+            "get each store's stock quantity and aisle for that item."
+        ),
+        params=(
+            _str("postal_code", "Canadian postal code or its first 3 characters, e.g. 'M5V 2T6'. Pass this or latitude and longitude."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _float("radius_km", "Search radius in km (1-200; default 25)."),
+            _int("limit", "Stores to return, nearest first (1-50; default 10)."),
+            _str("sku", "7-digit SKU, e.g. '0438858'. Adds each store's stock quantity and aisle for it."),
+        ),
+        one_of=(("postal_code", "latitude"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="canadian_tire_availability",
+        namespace="canadian_tire",
+        method="availability",
+        http="POST",
+        path="/api/v1/canadiantire/availability",
+        summary=(
+            "Up to 50 Canadian Tire SKUs at one store in one call: the store's price and regular "
+            "price, clearance and sale flags, price valid-until date, stock quantity, aisle, "
+            "online stock, and pickup and delivery dates. Unknown SKUs are listed in not_found."
+        ),
+        params=(
+            _req("store_id", "Canadian Tire store number from canadian_tire.stores(), e.g. '600'."),
+            _str_list("skus", "1-50 SKUs (7 digits, the `sku` field of a search result or product variant).", required=True),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="canadian_tire_clearance",
+        namespace="canadian_tire",
+        method="clearance",
+        http="POST",
+        path="/api/v1/canadiantire/clearance",
+        summary=(
+            "Every clearance item at one Canadian Tire store, 100 per page, with clearance price, "
+            "regular price, stock at the store and the same fields as search(). In-stock items "
+            "only by default."
+        ),
+        params=(
+            _req("store_id", "Canadian Tire store number from canadian_tire.stores(), e.g. '600'."),
+            _int("page", "Results page, 1-based (1-100). 100 results per page."),
+            _bool("in_stock_only", "Only clearance items in stock at store_id. Defaults to True."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="canadian_tire_deals",
+        namespace="canadian_tire",
+        method="deals",
+        http="POST",
+        path="/api/v1/canadiantire/deals",
+        summary=(
+            "Items on a deal at one Canadian Tire store, 100 per page: sale prices, instant "
+            "rebates, special buys or Triangle Rewards loyalty offers, with the same fields as "
+            "search()."
+        ),
+        params=(
+            _req("store_id", "Canadian Tire store number from canadian_tire.stores(), e.g. '600'."),
+            Param(
+                "type",
+                'Literal["sale", "instant_rebate", "special_buy", "loyalty"]',
+                required=True,
+                doc="sale (this week's sale prices), instant_rebate, special_buy or loyalty (Triangle Rewards offers).",
+            ),
+            _int("page", "Results page, 1-based (1-100). 100 results per page."),
+        ),
+        credits=1,
+    ),
+    # =========================== Dollar General ==========================
+    # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
+    # store's, so store_id (from stores()) is required on search, product and
+    # deals. stores(upc=...) returns that product's unit count at up to 25
+    # nearby stores in one call. No review text: rating and review_count only.
+    Endpoint(
+        key="dollar_general_search",
+        namespace="dollar_general",
+        method="search",
+        http="POST",
+        path="/api/v1/dollargeneral/search",
+        summary=(
+            "Search Dollar General at one store: that store's price and original price, "
+            "available_quantity (units on hand at that store), inventory_status, rating, review "
+            "count, categories, digital coupons and promotions, UPC and product URL."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _req("store_id", "Dollar General store number from dollar_general.stores(), e.g. '12629'."),
+            _int("page", "Results page, 1-based (1-100). 24 results per page."),
+            _lit(
+                "sort",
+                ("recommended", "price_low", "price_high", "rating"),
+                "recommended (default), price_low, price_high or rating.",
+            ),
+            _bool("in_stock_only", "Only products with units on hand at the store. Defaults to False."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="dollar_general_product",
+        namespace="dollar_general",
+        method="product",
+        http="POST",
+        path="/api/v1/dollargeneral/product",
+        summary=(
+            "One Dollar General product by UPC at one store: price, original price, "
+            "available_quantity, stock_status, nearby_stores_with_stock, rating, review count, "
+            "SKU, brand, description, highlights, images, categories, digital coupons and "
+            "promotions. An unknown UPC or store number is a 404."
+        ),
+        params=(
+            _req("upc", "Product UPC, the `upc` field of a search result, e.g. '030772156629'."),
+            _req("store_id", "Dollar General store number from dollar_general.stores(), e.g. '12629'."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="dollar_general_stores",
+        namespace="dollar_general",
+        method="stores",
+        http="POST",
+        path="/api/v1/dollargeneral/stores",
+        summary=(
+            "Dollar General stores near a US ZIP code or coordinates, nearest first (up to 25): "
+            "store_id, address, phone, coordinates, distance in miles, opening hours and "
+            "services. Pass upc and each store also carries its unit count of that product."
+        ),
+        params=(
+            _str("zip", "US ZIP code, e.g. '75203'. Pass this or latitude and longitude."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _float("radius", "Search radius in miles (1-100; default 25)."),
+            _str("upc", "Product UPC. Every store then carries quantity, in_stock and inventory_status for it."),
+        ),
+        one_of=(("zip", "latitude"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="dollar_general_deals",
+        namespace="dollar_general",
+        method="deals",
+        http="POST",
+        path="/api/v1/dollargeneral/deals",
+        summary=(
+            "Dollar General products on sale or on clearance, priced and stocked at one store, 24 "
+            "per page. available_quantity > 0 means in stock at that store; the listing covers "
+            "the whole chain. Clearance items carry the current price only (no was-price)."
+        ),
+        params=(
+            _req("store_id", "Dollar General store number from dollar_general.stores(), e.g. '12629'."),
+            Param(
+                "type",
+                'Literal["on_sale", "clearance"]',
+                required=True,
+                doc="on_sale (everything on sale) or clearance (the clearance event).",
+            ),
+            _int("page", "Results page, 1-based (1-100). 24 results per page."),
+            _lit(
+                "sort",
+                ("recommended", "price_low", "price_high", "rating"),
+                "recommended (default), price_low, price_high or rating.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="dollar_general_coupons",
+        namespace="dollar_general",
+        method="coupons",
+        http="POST",
+        path="/api/v1/dollargeneral/coupons",
+        summary=(
+            "Dollar General's current digital coupons, 30 per page: offer id and code, summary, "
+            "description, brand, company, value, offer type, category, minimum quantity, start "
+            "and expiration dates, and whether it is a manufacturer coupon."
+        ),
+        params=(_int("page", "Results page, 1-based (1-50). 30 coupons per page."),),
+        credits=1,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -7199,6 +7647,10 @@ NAMESPACES: tuple[str, ...] = (
     "costco",
     "decathlon",
     "specs",
+    "lowes",
+    "sams_club",
+    "canadian_tire",
+    "dollar_general",
     "trustpilot",
     "realtor",
     "rightmove",

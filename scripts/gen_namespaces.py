@@ -138,6 +138,22 @@ _NS_META = {
         "Specs",
         "Spec's search, product detail with every store's price, and store locator endpoints.",
     ),
+    "lowes": (
+        "Lowes",
+        "Lowe's store-level search, product detail, store locator, and review endpoints.",
+    ),
+    "sams_club": (
+        "SamsClub",
+        "Sam's Club search, club-level product detail, club locator, Instant Savings, category, and review endpoints.",
+    ),
+    "canadian_tire": (
+        "CanadianTire",
+        "Canadian Tire store-level search, product, store locator, availability, clearance, and deal endpoints.",
+    ),
+    "dollar_general": (
+        "DollarGeneral",
+        "Dollar General store-level search, product, store locator with unit counts, deal, and coupon endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

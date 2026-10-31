@@ -42,6 +42,10 @@ __all__ = [
     "_CostcoNamespace",
     "_DecathlonNamespace",
     "_SpecsNamespace",
+    "_LowesNamespace",
+    "_SamsClubNamespace",
+    "_CanadianTireNamespace",
+    "_DollarGeneralNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -5549,6 +5553,456 @@ class _SpecsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("specs_stores", {"region": region}, extra)
+
+class _LowesNamespace:
+    """Lowe's store-level search, product detail, store locator, and review endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        store_id: str,
+        zip: str,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        on_sale: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Lowe's by keyword or category at one store: the store's price, was-price and savings with the sale end date, brand, model number, rating, review count, and stock for pickup, truck delivery, parcel shipping and same-day delivery. Pass query or category_id; on_sale=True returns that store's deals.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: Lowe's store number (up to 4 digits) from lowes.stores(), e.g. '0595'.
+            zip: The store's own 5-digit ZIP code from lowes.stores(), e.g. '28117'.
+            query: Search keywords (1-200 characters). Pass this or category_id.
+            category_id: Category id, the number at the end of a lowes.com/pl/ URL. Pass this or query.
+            page: Results page, 1-based (1-31). 24 results per page.
+            on_sale: Only items on sale at this store (with a was-price). A page can then hold fewer than 24.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("lowes_search", {"store_id": store_id, "zip": zip, "query": query, "category_id": category_id, "page": page, "on_sale": on_sale}, extra)
+
+    def product(
+        self,
+        item_id: str,
+        store_id: str,
+        zip: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Lowe's item at one store: price, was-price and savings, on-hand stock with lead time per fulfillment method, stock at nearby stores, aisle and bay, grouped specifications, UPC, dimensions, weight, rating, images, and the store's hours.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            item_id: Lowe's item id (the number at the end of a lowes.com/pd/ URL) or the full product URL.
+            store_id: Lowe's store number (up to 4 digits) from lowes.stores(), e.g. '0595'.
+            zip: The store's own 5-digit ZIP code from lowes.stores(), e.g. '28117'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("lowes_product", {"item_id": item_id, "store_id": store_id, "zip": zip}, extra)
+
+    def stores(
+        self,
+        zip: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Lowe's stores near a ZIP code, nearest first: store_id, name, address, phone, coordinates, distance, time zone, opening hours and features.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: 5-digit US ZIP code to find stores near.
+            limit: Stores to return, nearest first (1-10; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("lowes_stores", {"zip": zip, "limit": limit}, extra)
+
+    def reviews(
+        self,
+        item_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest", "most_helpful"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One page of a Lowe's item's customer reviews (10 per page): rating, title, text, date, reviewer, recommended, helpful votes, verified and incentivized flags, photos and brand replies, plus the average rating and count per star.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: Lowe's item id (the number at the end of a lowes.com/pd/ URL) or the full product URL.
+            page: Reviews page, 1-based (1-1000). 10 reviews per page.
+            sort: newest (default), oldest or most_helpful.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("lowes_reviews", {"item_id": item_id, "page": page, "sort": sort}, extra)
+
+class _SamsClubNamespace:
+    """Sam's Club search, club-level product detail, club locator, Instant Savings, category, and review endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "top_selling"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Sam's Club: item_id, price, was_price, savings_amount, unit price, Instant Savings (amount, end date, purchase limit), rating, review count, stock, pickup/delivery/shipping availability and aisle. The club is picked by location and returned in data.club; use product(club_id=...) for a specific club.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100). Up to 45 results per page.
+            sort: relevance, price_low, price_high or top_selling. Defaults to the site's own order.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_search", {"query": query, "page": page, "sort": sort}, extra)
+
+    def product(
+        self,
+        item_id: str,
+        *,
+        club_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Sam's Club item: online price and the club shelf price (club_price) with was price, savings and unit price, Instant Savings, rating histogram, UPC, model, specifications, and per-method fulfillment with stock and aisle. available_quantity is capped at 8 by the site; 8 means 8 or more.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: Sam's Club item id: the number at the end of a sams_club.com/ip/ URL, or item_id from search().
+            club_id: Club number from sams_club.clubs(), e.g. '6372'. Prices and stocks that club.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_product", {"item_id": item_id, "club_id": club_id}, extra)
+
+    def clubs(
+        self,
+        zip: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sam's Club clubs near a US ZIP within 100 miles, nearest first: club_id, name, address, coordinates, distance in miles, phone, opening hours, services and whether the club is temporarily closed.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: 5-digit US ZIP code, e.g. '75201'.
+            limit: Clubs to return, nearest first (1-20; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_clubs", {"zip": zip, "limit": limit}, extra)
+
+    def savings(
+        self,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "top_selling"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every item on Sam's Club Instant Savings, paged: price, was price and savings amount, plus each offer's amount, end date, purchase limit and channels. The club is picked by location and returned in data.club.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            page: Results page, 1-based (1-100). Up to 45 items per page.
+            sort: relevance, price_low, price_high or top_selling. Defaults to the site's own order.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_savings", {"page": page, "sort": sort}, extra)
+
+    def category(
+        self,
+        category_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "top_selling"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in a Sam's Club category, paged, with the same fields as search(). Clearance is category '1150109'. An empty shelf returns an empty list. The club is picked by location and returned in data.club.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: Category id, the number at the end of a sams_club.com /browse/ or /cp/ URL. Clearance is '1150109'.
+            page: Results page, 1-based (1-100).
+            sort: relevance, price_low, price_high or top_selling. Defaults to the site's own order.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_category", {"category_id": category_id, "page": page, "sort": sort}, extra)
+
+    def reviews(
+        self,
+        item_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest", "highest", "lowest", "most_helpful"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews for a Sam's Club item, 10 per page: rating, title, text, author, date, verified purchase and helpful votes, plus the average rating, total count and 1-5 star breakdown.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: Sam's Club item id from search() or a sams_club.com/ip/ URL.
+            page: Reviews page, 1-based (1-100). 10 reviews per page.
+            sort: newest, oldest, highest, lowest or most_helpful.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sams_club_reviews", {"item_id": item_id, "page": page, "sort": sort}, extra)
+
+class _CanadianTireNamespace:
+    """Canadian Tire store-level search, product, store locator, availability, clearance, and deal endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        store_id: str,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "rating", "bestseller"]] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Canadian Tire by keyword or category at one store: the store's price and regular price (CAD), price range for multi-variant items, savings, badges (clearance, sale, rebate), rating, review count, brand, part number, SKU, and stock at the store and online. Pass query or category_id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Canadian Tire store number from canadian_tire.stores(), e.g. '600'.
+            query: Search keywords (up to 200 characters). Pass this or category_id.
+            category_id: Category id (DC followed by 7 digits, e.g. 'DC0002209') or a canadian_tire.ca category URL. Pass this or query.
+            page: Results page, 1-based (1-100). 24 results per page.
+            sort: relevance (default), price_asc, price_desc, newest, rating or bestseller.
+            in_stock_only: Only items in stock at store_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_search", {"store_id": store_id, "query": query, "category_id": category_id, "page": page, "sort": sort, "in_stock_only": in_stock_only}, extra)
+
+    def product(
+        self,
+        product_code: str,
+        store_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Canadian Tire product by code at one store: breadcrumb, images, rating, review count, descriptions, features, specifications, price and regular price, warranty, manuals, variants with their SKUs, and the store's price, stock, and pickup and ship-to-home dates.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_code: Product code, the `code` field of a search result, e.g. '0547273P'.
+            store_id: Canadian Tire store number from canadian_tire.stores(), e.g. '600'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_product", {"product_code": product_code, "store_id": store_id}, extra)
+
+    def stores(
+        self,
+        *,
+        postal_code: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius_km: Optional[float] = None,
+        limit: Optional[int] = None,
+        sku: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Canadian Tire stores near a postal code or coordinates, nearest first: store_id, name, address, phone, coordinates, distance, weekly hours and services. Pass sku to get each store's stock quantity and aisle for that item.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            postal_code: Canadian postal code or its first 3 characters, e.g. 'M5V 2T6'. Pass this or latitude and longitude.
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            radius_km: Search radius in km (1-200; default 25).
+            limit: Stores to return, nearest first (1-50; default 10).
+            sku: 7-digit SKU, e.g. '0438858'. Adds each store's stock quantity and aisle for it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_stores", {"postal_code": postal_code, "latitude": latitude, "longitude": longitude, "radius_km": radius_km, "limit": limit, "sku": sku}, extra)
+
+    def availability(
+        self,
+        store_id: str,
+        skus: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 50 Canadian Tire SKUs at one store in one call: the store's price and regular price, clearance and sale flags, price valid-until date, stock quantity, aisle, online stock, and pickup and delivery dates. Unknown SKUs are listed in not_found.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Canadian Tire store number from canadian_tire.stores(), e.g. '600'.
+            skus: 1-50 SKUs (7 digits, the `sku` field of a search result or product variant).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_availability", {"store_id": store_id, "skus": skus}, extra)
+
+    def clearance(
+        self,
+        store_id: str,
+        *,
+        page: Optional[int] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every clearance item at one Canadian Tire store, 100 per page, with clearance price, regular price, stock at the store and the same fields as search(). In-stock items only by default.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Canadian Tire store number from canadian_tire.stores(), e.g. '600'.
+            page: Results page, 1-based (1-100). 100 results per page.
+            in_stock_only: Only clearance items in stock at store_id. Defaults to True.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_clearance", {"store_id": store_id, "page": page, "in_stock_only": in_stock_only}, extra)
+
+    def deals(
+        self,
+        store_id: str,
+        type: Literal["sale", "instant_rebate", "special_buy", "loyalty"],
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Items on a deal at one Canadian Tire store, 100 per page: sale prices, instant rebates, special buys or Triangle Rewards loyalty offers, with the same fields as search().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Canadian Tire store number from canadian_tire.stores(), e.g. '600'.
+            type: sale (this week's sale prices), instant_rebate, special_buy or loyalty (Triangle Rewards offers).
+            page: Results page, 1-based (1-100). 100 results per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("canadian_tire_deals", {"store_id": store_id, "type": type, "page": page}, extra)
+
+class _DollarGeneralNamespace:
+    """Dollar General store-level search, product, store locator with unit counts, deal, and coupon endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        store_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_low", "price_high", "rating"]] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Dollar General at one store: that store's price and original price, available_quantity (units on hand at that store), inventory_status, rating, review count, categories, digital coupons and promotions, UPC and product URL.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            store_id: Dollar General store number from dollar_general.stores(), e.g. '12629'.
+            page: Results page, 1-based (1-100). 24 results per page.
+            sort: recommended (default), price_low, price_high or rating.
+            in_stock_only: Only products with units on hand at the store. Defaults to False.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollar_general_search", {"query": query, "store_id": store_id, "page": page, "sort": sort, "in_stock_only": in_stock_only}, extra)
+
+    def product(
+        self,
+        upc: str,
+        store_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dollar General product by UPC at one store: price, original price, available_quantity, stock_status, nearby_stores_with_stock, rating, review count, SKU, brand, description, highlights, images, categories, digital coupons and promotions. An unknown UPC or store number is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            upc: Product UPC, the `upc` field of a search result, e.g. '030772156629'.
+            store_id: Dollar General store number from dollar_general.stores(), e.g. '12629'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollar_general_product", {"upc": upc, "store_id": store_id}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[float] = None,
+        upc: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dollar General stores near a US ZIP code or coordinates, nearest first (up to 25): store_id, address, phone, coordinates, distance in miles, opening hours and services. Pass upc and each store also carries its unit count of that product.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code, e.g. '75203'. Pass this or latitude and longitude.
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            radius: Search radius in miles (1-100; default 25).
+            upc: Product UPC. Every store then carries quantity, in_stock and inventory_status for it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollar_general_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius, "upc": upc}, extra)
+
+    def deals(
+        self,
+        store_id: str,
+        type: Literal["on_sale", "clearance"],
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_low", "price_high", "rating"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dollar General products on sale or on clearance, priced and stocked at one store, 24 per page. available_quantity > 0 means in stock at that store; the listing covers the whole chain. Clearance items carry the current price only (no was-price).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Dollar General store number from dollar_general.stores(), e.g. '12629'.
+            type: on_sale (everything on sale) or clearance (the clearance event).
+            page: Results page, 1-based (1-100). 24 results per page.
+            sort: recommended (default), price_low, price_high or rating.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollar_general_deals", {"store_id": store_id, "type": type, "page": page, "sort": sort}, extra)
+
+    def coupons(
+        self,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dollar General's current digital coupons, 30 per page: offer id and code, summary, description, brand, company, value, offer type, category, minimum quantity, start and expiration dates, and whether it is a manufacturer coupon.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            page: Results page, 1-based (1-50). 30 coupons per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollar_general_coupons", {"page": page}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

@@ -12,11 +12,13 @@ from ._namespaces_async import (
     _AsyncAmazonNamespace,
     _AsyncAppStoreNamespace,
     _AsyncBookingNamespace,
+    _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
     _AsyncChatGPTNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCostcoNamespace,
     _AsyncDecathlonNamespace,
+    _AsyncDollarGeneralNamespace,
     _AsyncEbayNamespace,
     _AsyncG2Namespace,
     _AsyncGeminiNamespace,
@@ -31,12 +33,14 @@ from ._namespaces_async import (
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncLowesNamespace,
     _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncRightmoveNamespace,
+    _AsyncSamsClubNamespace,
     _AsyncSECNamespace,
     _AsyncSpecsNamespace,
     _AsyncTargetNamespace,
@@ -138,6 +142,10 @@ class AsyncScavioClient:
         self.costco = _AsyncCostcoNamespace(self)
         self.decathlon = _AsyncDecathlonNamespace(self)
         self.specs = _AsyncSpecsNamespace(self)
+        self.lowes = _AsyncLowesNamespace(self)
+        self.sams_club = _AsyncSamsClubNamespace(self)
+        self.canadian_tire = _AsyncCanadianTireNamespace(self)
+        self.dollar_general = _AsyncDollarGeneralNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

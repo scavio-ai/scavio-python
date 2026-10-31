@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 38 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 42 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 36 data sources, 233 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -19,6 +19,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
+| Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -36,7 +37,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 38 | 1 | 1 per plan | 1 |
+| Data Sources | 42 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -971,6 +972,97 @@ listing with no public questions. Only the buy-box seller is returned per
 product, and Brazil and Argentina may auto-apply a "new" condition (listed in
 `auto_applied_filters`).
 
+### 24. Store-Level Retail -- Lowe's, Sam's Club, Canadian Tire and Dollar General
+
+Four retailers whose prices and stock are per store. Each answers for ONE
+store you choose: find its number with the locator (`lowes.stores`,
+`sams_club.clubs`, `canadian_tire.stores`, `dollar_general.stores`) and pass it
+on every call. Lowe's `search`, `product` and `stores` cost 2 credits and
+`reviews` 1; every Sam's Club, Canadian Tire and Dollar General method costs 1.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# --- Lowe's: store_id AND that store's own ZIP are required on search/product.
+store = client.lowes.stores("28117", limit=1)["data"]["stores"][0]
+sid, zip_code = store["store_id"], store["address"]["postal_code"]
+
+drills = client.lowes.search(sid, zip_code, query="cordless drill")["data"]
+for p in drills["products"]:
+    print(p["item_id"], p["price"], p["original_price"], p["stock_quantity"], p["title"])
+
+# Deals are search(on_sale=True); there is no clearance endpoint.
+deals = client.lowes.search(sid, zip_code, query="cordless drill", on_sale=True)["data"]
+
+item = client.lowes.product("5016412045", sid, zip_code)["data"]
+print(item["price"], item["stock_quantity"], item["aisle_locations"])
+for near in item["pickup"]["nearby_stores"]:
+    print(near["store_id"], near["distance_miles"], near["quantity"])
+
+reviews = client.lowes.reviews("5016412045", sort="most_helpful")["data"]  # 1 credit
+for r in reviews["reviews"]:
+    print(r["rating"], r["verified_purchase"], r["title"])
+
+# --- Sam's Club: search, savings and category answer for a club picked by
+# location (echoed in data.club). For one specific club, use product(club_id=).
+club = client.sams_club.clubs("75201", limit=1)["data"]["clubs"][0]
+found = client.sams_club.search("paper towels", sort="price_low")["data"]
+for p in found["products"]:
+    print(p["item_id"], p["price"], p["was_price"], p["availability_status"], p["title"])
+
+product = client.sams_club.product("15325822107", club_id=club["club_id"])["data"]
+print(product["club_price"]["price"], product["in_stock_at_club"], product["aisle"])
+for option in product["fulfillment"]["options"]:
+    # available_quantity is capped at 8 by the site: 8 means 8 or more.
+    print(option["method"], option["availability_status"], option["available_quantity"])
+
+savings = client.sams_club.savings(sort="top_selling")["data"]        # Instant Savings
+clearance = client.sams_club.category("1150109")["data"]              # clearance
+reviews = client.sams_club.reviews("15325822107", sort="lowest")["data"]
+
+# --- Canadian Tire: prices are in CAD and differ by store and province.
+stores = client.canadian_tire.stores(postal_code="M5V 2T6", sku="0438858")["data"]
+for s in stores["stores"]:
+    print(s["store_id"], s["name"], s["distance_km"], s["quantity"], s["aisle"])
+
+found = client.canadian_tire.search("600", query="dewalt drill")["data"]
+for p in found["products"]:
+    print(p["code"], p["sku"], p["price"], p["was_price"], p["store_quantity"], p["title"])
+
+detail = client.canadian_tire.product("0547273P", "600")["data"]
+stock = client.canadian_tire.availability("600", ["0438858", "0547273"])["data"]  # up to 50 SKUs
+for i in stock["items"]:
+    print(i["sku"], i["price"], i["is_clearance"], i["quantity"], i["aisle"])
+print("unknown:", stock["not_found"])
+
+clearance = client.canadian_tire.clearance("600")["data"]             # in-stock only by default
+sale = client.canadian_tire.deals("600", "sale")["data"]              # or instant_rebate, special_buy, loyalty
+
+# --- Dollar General: one call gives a product's unit count at up to 25 stores.
+nearby = client.dollar_general.stores(zip="75203", upc="030772156629")["data"]
+for s in nearby["stores"]:
+    print(s["store_id"], s["address"], s["city"], s["distance_miles"], s["quantity"], s["in_stock"])
+
+found = client.dollar_general.search("paper towels", "12629", in_stock_only=True)["data"]
+for p in found["products"]:
+    print(p["upc"], p["price"], p["original_price"], p["available_quantity"], p["title"])
+
+item = client.dollar_general.product("030772156629", "12629")["data"]
+print(item["price"], item["available_quantity"], item["nearby_stores_with_stock"])
+
+# Clearance items carry the current price only (no was-price).
+on_sale = client.dollar_general.deals("12629", "on_sale")["data"]
+clearance = client.dollar_general.deals("12629", "clearance")["data"]
+for c in client.dollar_general.coupons()["data"]["coupons"]:
+    print(c["summary"], c["brand"], c["expiration_date"])
+```
+
+Canadian Tire and Dollar General return a rating and review count but no review
+text. Sam's Club's search, savings and category results reflect the club in
+`data.club`, not a club you pick.
+
 ## Error Handling
 
 ```python
@@ -1083,6 +1175,10 @@ Scavio works with popular AI/LLM frameworks:
 | Google Ads Transparency | `advertisers` (start here), `search`, `creative` | 1 each |
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
+| Lowe's | `stores` (start here), `search`, `product`, `reviews` | `reviews` 1, the rest 2 each |
+| Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | 1 each |
+| Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
+| Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1092,6 +1188,23 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.31.0
+
+- **Four new store-level retail namespaces, 21 methods** (sync and async). Every
+  method answers for one store or club you choose.
+  - `lowes`: `search`, `product`, `stores` (2 credits each), `reviews` (1).
+    `store_id` and the store's `zip` are required on `search` and `product`;
+    `search(on_sale=True)` returns that store's deals.
+  - `sams_club`: `search`, `product`, `clubs`, `savings`, `category`, `reviews`
+    (1 each). `product(club_id=...)` prices and stocks one club; clearance is
+    `category("1150109")`.
+  - `canadian_tire`: `search`, `product`, `stores`, `availability` (up to 50
+    SKUs), `clearance`, `deals` (1 each). `store_id` is required except on
+    `stores`.
+  - `dollar_general`: `search`, `product`, `stores` (pass `upc` for per-store
+    unit counts at up to 25 stores), `deals` (`on_sale` or `clearance`),
+    `coupons` (1 each).
 
 ### Changed in 0.27.0
 

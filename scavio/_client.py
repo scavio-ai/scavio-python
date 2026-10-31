@@ -10,11 +10,13 @@ from ._namespaces_sync import (
     _AmazonNamespace,
     _AppStoreNamespace,
     _BookingNamespace,
+    _CanadianTireNamespace,
     _CapterraNamespace,
     _ChatGPTNamespace,
     _CompaniesHouseNamespace,
     _CostcoNamespace,
     _DecathlonNamespace,
+    _DollarGeneralNamespace,
     _EbayNamespace,
     _G2Namespace,
     _GeminiNamespace,
@@ -29,12 +31,14 @@ from ._namespaces_sync import (
     _KrogerNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
+    _LowesNamespace,
     _MercadoLibreNamespace,
     _MetaAdsNamespace,
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
     _RightmoveNamespace,
+    _SamsClubNamespace,
     _SECNamespace,
     _SpecsNamespace,
     _TargetNamespace,
@@ -143,6 +147,10 @@ class ScavioClient:
         self.costco = _CostcoNamespace(self)
         self.decathlon = _DecathlonNamespace(self)
         self.specs = _SpecsNamespace(self)
+        self.lowes = _LowesNamespace(self)
+        self.sams_club = _SamsClubNamespace(self)
+        self.canadian_tire = _CanadianTireNamespace(self)
+        self.dollar_general = _DollarGeneralNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
