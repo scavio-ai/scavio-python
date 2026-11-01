@@ -1587,3 +1587,38 @@ def test_ai_chat_async(monkeypatch):
     monkeypatch.setattr("scavio._async_client.async_request", fake_request)
     asyncio.run(AsyncScavioClient(api_key="sk_test").gemini.prompt("hi"))
     assert seen == {"path": "/api/v1/gemini/prompt", "json": {"prompt": "hi"}, "timeout": 120.0}
+
+
+def test_us_retail_batch_1_credits_and_paths():
+    """sephora/ulta/aldi/micro_center/walgreens/cvs (0.32.0): 20 endpoints, priced per method."""
+    expected = {
+        "sephora": {"search": 1, "category": 1, "product": 1},
+        "ulta": {"search": 1, "category": 1, "product": 1, "stores": 1},
+        "aldi": {"search": 1, "product": 1, "stores": 1},
+        "micro_center": {"search": 2, "product": 2, "stores": 1},
+        "walgreens": {"search": 2, "product": 2, "stores": 2, "stock": 4},
+        "cvs": {"search": 1, "product": 1, "stock": 1},
+    }
+    for ns, methods in expected.items():
+        eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}
+        assert {m: ep.credits for m, ep in eps.items()} == methods, ns
+        wire_ns = ns.replace("_", "")
+        for m, ep in eps.items():
+            assert ep.path == f"/api/v1/{wire_ns}/{m}", ep.key
+    assert sum(len(m) for m in expected.values()) == 20
+
+
+def test_cvs_product_raises_the_timeout(monkeypatch):
+    seen: list[float] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append(timeout)
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.cvs.product(product_id="789787")
+    client.cvs.search("toothpaste")
+    assert seen == [120.0, 30.0]
+    with pytest.raises(ScavioError):
+        client.cvs.product()

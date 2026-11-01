@@ -46,6 +46,12 @@ __all__ = [
     "_AsyncSamsClubNamespace",
     "_AsyncCanadianTireNamespace",
     "_AsyncDollarGeneralNamespace",
+    "_AsyncSephoraNamespace",
+    "_AsyncUltaNamespace",
+    "_AsyncAldiNamespace",
+    "_AsyncMicroCenterNamespace",
+    "_AsyncWalgreensNamespace",
+    "_AsyncCvsNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -6003,6 +6009,442 @@ class _AsyncDollarGeneralNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("dollar_general_coupons", {"page": page}, extra)
+
+class _AsyncSephoraNamespace:
+    """Sephora search, category, and product detail endpoints with per-shade stock and review sentiment."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "rating", "price_low", "price_high", "newest"]] = None,
+        zip: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search sephora.com (US), 60 products per page: product and sku id, brand, name, URL, price, list and sale price (price_range when sizes differ), value price for sets, rating, review count, extra colors, and bestseller, new, exclusive, online-only, limited-edition and sponsored flags, plus category facets and related searches. Pass zip for same-day delivery eligibility.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100). 60 products per page.
+            sort: relevance (default), best_selling, rating, price_low, price_high or newest.
+            zip: US ZIP code. Each product then carries same_day_eligible for that ZIP.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sephora_search", {"query": query, "page": page, "sort": sort, "zip": zip}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in a sephora.com (US) category, 60 per page, in the same shape as search(), plus the category's id, name and URL, total product count, parent category, subcategories with product counts and breadcrumbs. An unknown category is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or the full URL.
+            page: Results page, 1-based (1-100). 60 products per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sephora_category", {"category": category, "page": page}, extra)
+
+    async def product(
+        self,
+        *,
+        url: Optional[str] = None,
+        product_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One sephora.com (US) product: name, brand, rating, review count, loves count, price range, description, usage, category and breadcrumbs, a summary of what reviews say with pro and con sentiment counts (no review text), and every shade or size as a sku with price, list and sale price, in_stock, only_few_left, ingredients, images and pickup and same-day eligibility. An unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: sephora.com product URL (the `url` of a search result). Preferred: it answers faster.
+            product_id: Sephora product id, e.g. 'P510799'. Used when url is not given.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sephora_product", {"url": url, "product_id": product_id}, extra)
+
+class _AsyncUltaNamespace:
+    """Ulta Beauty search, category, product detail, and nearby-store availability endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Ulta Beauty, 64 products per page plus sponsored placements: product_id, sku_id, brand, name, URL, image, list and sale price (with ranges when shades differ), discount, promo text, rating, review count, badge, variant label and sponsored flag. Sponsored placements can repeat across pages; dedupe by product_id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100). 64 products per page plus sponsored placements.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ulta_search", {"query": query, "page": page}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in an Ulta Beauty category, 64 per page plus sponsored placements, with the category title and total_results, in the same shape as search().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category that lists products: the ulta.com URL or its path, e.g. '/shop/makeup/lips/lipstick'. Landing pages without a product grid are a 404.
+            page: Results page, 1-based (1-100). 64 products per page plus sponsored placements.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ulta_category", {"category": category, "page": page}, extra)
+
+    async def product(
+        self,
+        url: str,
+        *,
+        sku: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Ulta Beauty product for the selected shade or size: list and sale price, discount, availability, GTIN, rating, review count, badges, description, usage, ingredients, category and breadcrumbs, images, every shade or size variant, ship / pickup / same-day eligibility, and the five most recent reviews. An unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: Ulta product page URL, /p/<name>-<productId> (the `url` of a search result).
+            sku: Shade or size to select, by sku id (a `variants[].sku_id`). Defaults to the product's default.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ulta_product", {"url": url, "sku": sku}, extra)
+
+    async def stores(
+        self,
+        product_id: str,
+        sku_id: str,
+        zip: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """In-store pickup availability of one shade or size at the 10 Ulta Beauty stores nearest a US ZIP: store id, name, address, distance in miles, open-now label, curbside label, in_stock and the availability label. In stock / out of stock per store, not unit counts.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Ulta product id, the `product_id` of a search or product result, e.g. 'pimprod2057119'.
+            sku_id: Sku id of the shade or size, a `sku_id` or `variants[].sku_id`.
+            zip: US ZIP code to search around, e.g. '10001'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ulta_stores", {"product_id": product_id, "sku_id": sku_id, "zip": zip}, extra)
+
+class _AsyncAldiNamespace:
+    """ALDI store-level search, product detail, and store locator endpoints (in-store, pickup or delivery prices)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        store_id: Optional[str] = None,
+        zip: Optional[str] = None,
+        service_type: Optional[Literal["instore", "pickup", "delivery"]] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high"]] = None,
+        limit: Optional[int] = None,
+        page: Optional[int] = None,
+        include_related: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search ALDI US at one store (store_id, or the nearest store to zip): product_id, name, brand, size, price and was_price for that store and service_type, discount label, unit price, in_stock and stock level, category, in-store aisle location, ALDI-exclusive brand flag, dietary labels, image and URL. Exact matches only unless include_related=True.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            store_id: ALDI store id from aldi.stores(), e.g. '151248'. Pass this or zip.
+            zip: US ZIP code; without store_id the nearest ALDI store is used. Pass this or store_id.
+            service_type: instore (default, the shelf price), pickup or delivery (online prices, often higher).
+            sort: best_match (default), price_low or price_high.
+            limit: Products per page (1-60; default 30).
+            page: Results page, 1-based (1-100).
+            include_related: Also return the related items listed after the exact matches. Defaults to False.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("aldi_search", {"query": query, "store_id": store_id, "zip": zip, "service_type": service_type, "sort": sort, "limit": limit, "page": page, "include_related": include_related}, extra)
+
+    async def product(
+        self,
+        product_id: str,
+        *,
+        store_id: Optional[str] = None,
+        zip: Optional[str] = None,
+        service_type: Optional[Literal["instore", "pickup", "delivery"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One ALDI US product at one store (store_id, or the nearest store to zip): price and was_price for that store and service_type, unit price, stock, category, brand, size, description, ingredients, allergen warnings, dietary labels and images. An unknown product id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: ALDI product id (the `product_id` of a search result) or an aldi.us product URL.
+            store_id: ALDI store id from aldi.stores(), e.g. '151248'. Pass this or zip.
+            zip: US ZIP code; without store_id the nearest ALDI store is used. Pass this or store_id.
+            service_type: instore (default, the shelf price), pickup or delivery (online prices, often higher).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("aldi_product", {"product_id": product_id, "store_id": store_id, "zip": zip, "service_type": service_type}, extra)
+
+    async def stores(
+        self,
+        zip: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """ALDI US stores near a ZIP code, nearest first: store_id (for search and product), name, street address, city, state, ZIP, coordinates and distance in miles.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: 5-digit US ZIP code to search around.
+            limit: Stores to return, nearest first (1-50; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("aldi_stores", {"zip": zip, "limit": limit}, extra)
+
+class _AsyncMicroCenterNamespace:
+    """Micro Center store-level search, product detail with open-box units, and store list endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        query: Optional[str] = None,
+        category: Optional[str] = None,
+        store_id: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[Literal[24, 48, 96]] = None,
+        sort: Optional[Literal["best_match", "rating", "review_count", "price_low", "price_high", "newest"]] = None,
+        include_out_of_stock: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Micro Center by keyword or category at one store, up to 96 per page: product_id, SKU, name, brand, category, price and original price, image, URL, highlights, and that store's stock (label, quantity, quantity_capped at 25+, in_stock, not_carried), plus open-box count and lowest price, rebate text and an in-store-only flag where shown. Pass query, category or both.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters). Pass this, category, or both.
+            category: Category id (e.g. '518' = Graphics Cards) or a microcenter.com listing URL carrying one.
+            store_id: 3-digit store id from micro_center.stores(), e.g. '131' (Dallas). Omit for the web store (029).
+            page: Results page, 1-based (1-100).
+            per_page: Results per page: 24, 48 or 96 (default).
+            sort: best_match (default), rating, review_count, price_low, price_high or newest.
+            include_out_of_stock: Also list products the store has no stock of or does not carry. Defaults to False.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("micro_center_search", {"query": query, "category": category, "store_id": store_id, "page": page, "per_page": per_page, "sort": sort, "include_out_of_stock": include_out_of_stock}, extra)
+
+    async def product(
+        self,
+        product_id: str,
+        *,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Micro Center product: SKU, MPN, UPC, name, brand, description, price, original price, ship and pickup flags, images, rating, review count, up to 10 recent reviews, breadcrumbs with category ids, the spec table, the selected store's stock (counts capped at 25+) and open-box units, and every store with an in_stock flag. An unknown product id is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Micro Center product id (the number after /product/ in a URL) or the product URL. Not the SKU.
+            store_id: 3-digit store id from micro_center.stores(), e.g. '131' (Dallas). Omit for the web store (029).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("micro_center_product", {"product_id": product_id, "store_id": store_id}, extra)
+
+    async def stores(
+        self,
+        *,
+        state: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every Micro Center store with its 3-digit store_id (for search and product), name, city, state and store page URL; street address and ZIP where known. The web store 029 is not listed but is accepted as a store_id.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: 2-letter US state code to filter by, e.g. 'TX'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("micro_center_stores", {"state": state}, extra)
+
+class _AsyncWalgreensNamespace:
+    """Walgreens search, product detail, store locator, and multi-store stock endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "top_sellers", "price_low_to_high", "price_high_to_low", "unit_price_low_to_high", "brand_name_asc", "brand_name_desc", "most_reviewed", "highest_rated", "most_viewed", "newest_arrival"]] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Walgreens retail products, up to 70 per page: product id, SKU, UPC, name, brand, size, regular and sale price (national), unit price, promotion, coupon, loyalty and rebate messages, rating, review count, image, URL, ship/pickup/delivery availability, online stock status and clearance flag. Pass store_id for that store's availability text.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100). Up to 70 results per page.
+            sort: relevance (default), top_sellers, price_low_to_high, price_high_to_low, unit_price_low_to_high, brand_name_asc, brand_name_desc, most_reviewed, highest_rated, most_viewed or newest_arrival.
+            store_id: Walgreens store number from walgreens.stores(), e.g. '9438'. Sets the availability text.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("walgreens_search", {"query": query, "page": page, "sort": sort, "store_id": store_id}, extra)
+
+    async def product(
+        self,
+        product_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Walgreens retail product: SKU, UPC, GTIN, name, brand, size, regular and sale price (national), savings, unit price, rewards and rebate offers, description, ingredients, warnings, rating, review count, category path, images, ship and pickup availability and clearance flag. An unknown id is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Walgreens product id (the `product_id` of a search result, e.g. '300452904') or a product URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("walgreens_product", {"product_id": product_id}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[float] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Walgreens and Duane Reade stores near a US ZIP or coordinates, nearest first: store number, name, brand, address, phone, coordinates, distance in miles, opening and closing time, time zone and store page URL. Paged with total_results and has_more.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code, e.g. '60601'. Pass this or latitude and longitude.
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            radius: Search radius in miles (1-100; default 25).
+            page: Results page, 1-based (1-100).
+            limit: Stores per page (1-25; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("walgreens_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius, "page": page, "limit": limit}, extra)
+
+    async def stock(
+        self,
+        product_id: str,
+        store_ids: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Live in-store stock of one product at up to 20 Walgreens stores in one call: per store the status (In Stock, Out of Stock, or Not Available when not carried), the unit count and in_stock. Unrecognised store numbers are listed in unknown_store_ids. An unknown product id is a 404.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Walgreens product id (the `product_id` of a search result) or a product URL.
+            store_ids: 1-20 Walgreens store numbers from walgreens.stores().
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("walgreens_stock", {"product_id": product_id, "store_ids": store_ids}, extra)
+
+class _AsyncCvsNamespace:
+    """CVS search, product detail, and per-store stock endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        store_id: Optional[str] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search CVS front-store products: product_id and sku_id, name, brand, URL, regular and sale price, unit price, promotion text, rating, review count, size, image, coupons (ExtraBucks and manufacturer), and units at one store in store, for pickup and for same-day delivery, plus online ship stock. Prices are the same at every store. Includes brand, price-range and rating facets.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords or a CVS item number (1-200 characters).
+            store_id: CVS store number for the stock fields, shown on every cvs.com store page ('Store ID: #7019'). Defaults to 7019 (New York, NY).
+            page: Results page, 1-based (1-100).
+            limit: Results per page (1-48; default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cvs_search", {"query": query, "store_id": store_id, "page": page, "limit": limit}, extra)
+
+    async def product(
+        self,
+        *,
+        url: Optional[str] = None,
+        product_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One CVS product by URL or id: regular and sale price, unit price, promotion and its end date, rating, review count, UPC, size, description, highlights, ingredients, directions, warnings, attributes, breadcrumbs, images and every variant (SKU id, UPC, size, price, rating). Can take 10-30+ seconds. An unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: cvs.com product URL (https://www.cvs.com/shop/<name>-prodid-<id>). Pass this or product_id.
+            product_id: CVS product id or SKU id, e.g. '789787' (a search result's product_id or sku_id). Pass this or url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cvs_product", {"url": url, "product_id": product_id}, extra)
+
+    async def stock(
+        self,
+        sku_ids: list[str],
+        store_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units available at one CVS store for up to 20 SKUs: in_store (on the shelf), pickup and ship (online stock, chain-wide). same_day_delivery is always None here; search returns same-day units. An unknown SKU or store number reads as 0.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku_ids: 1-20 CVS SKU ids: a search result's sku_id or a product's variants[].sku_id.
+            store_id: CVS store number, shown on every cvs.com store page ('Store ID: #7019').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cvs_stock", {"sku_ids": sku_ids, "store_id": store_id}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

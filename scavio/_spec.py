@@ -6556,6 +6556,468 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(_int("page", "Results page, 1-based (1-50). 30 coupons per page."),),
         credits=1,
     ),
+    # ============================== Sephora ==============================
+    # 3 endpoints, 1 credit each. sephora.com (US). Prices are national.
+    # product() carries a summary of what reviews say plus pro/con sentiment
+    # counts, but no review text.
+    Endpoint(
+        key="sephora_search",
+        namespace="sephora",
+        method="search",
+        http="POST",
+        path="/api/v1/sephora/search",
+        summary=(
+            "Search sephora.com (US), 60 products per page: product and sku id, brand, name, URL, "
+            "price, list and sale price (price_range when sizes differ), value price for sets, "
+            "rating, review count, extra colors, and bestseller, new, exclusive, online-only, "
+            "limited-edition and sponsored flags, plus category facets and related searches. "
+            "Pass zip for same-day delivery eligibility."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100). 60 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "best_selling", "rating", "price_low", "price_high", "newest"),
+                "relevance (default), best_selling, rating, price_low, price_high or newest.",
+            ),
+            _str("zip", "US ZIP code. Each product then carries same_day_eligible for that ZIP."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sephora_category",
+        namespace="sephora",
+        method="category",
+        http="POST",
+        path="/api/v1/sephora/category",
+        summary=(
+            "Products in a sephora.com (US) category, 60 per page, in the same shape as search(), "
+            "plus the category's id, name and URL, total product count, parent category, "
+            "subcategories with product counts and breadcrumbs. An unknown category is a 404."
+        ),
+        params=(
+            _req(
+                "category",
+                "Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or the full URL.",
+            ),
+            _int("page", "Results page, 1-based (1-100). 60 products per page."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="sephora_product",
+        namespace="sephora",
+        method="product",
+        http="POST",
+        path="/api/v1/sephora/product",
+        summary=(
+            "One sephora.com (US) product: name, brand, rating, review count, loves count, price "
+            "range, description, usage, category and breadcrumbs, a summary of what reviews say "
+            "with pro and con sentiment counts (no review text), and every shade or size as a sku "
+            "with price, list and sale price, in_stock, only_few_left, ingredients, images and "
+            "pickup and same-day eligibility. An unknown product is a 404."
+        ),
+        params=(
+            _str("url", "sephora.com product URL (the `url` of a search result). Preferred: it answers faster."),
+            _str("product_id", "Sephora product id, e.g. 'P510799'. Used when url is not given."),
+        ),
+        one_of=(("url", "product_id"),),
+        credits=1,
+    ),
+    # ============================ Ulta Beauty ============================
+    # 4 endpoints, 1 credit each. stores() reports in stock / out of stock for
+    # one shade or size at the 10 stores nearest a ZIP, not unit counts.
+    Endpoint(
+        key="ulta_search",
+        namespace="ulta",
+        method="search",
+        http="POST",
+        path="/api/v1/ulta/search",
+        summary=(
+            "Search Ulta Beauty, 64 products per page plus sponsored placements: product_id, "
+            "sku_id, brand, name, URL, image, list and sale price (with ranges when shades differ), "
+            "discount, promo text, rating, review count, badge, variant label and sponsored flag. "
+            "Sponsored placements can repeat across pages; dedupe by product_id."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100). 64 products per page plus sponsored placements."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="ulta_category",
+        namespace="ulta",
+        method="category",
+        http="POST",
+        path="/api/v1/ulta/category",
+        summary=(
+            "Products in an Ulta Beauty category, 64 per page plus sponsored placements, with the "
+            "category title and total_results, in the same shape as search()."
+        ),
+        params=(
+            _req(
+                "category",
+                "A category that lists products: the ulta.com URL or its path, e.g. "
+                "'/shop/makeup/lips/lipstick'. Landing pages without a product grid are a 404.",
+            ),
+            _int("page", "Results page, 1-based (1-100). 64 products per page plus sponsored placements."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="ulta_product",
+        namespace="ulta",
+        method="product",
+        http="POST",
+        path="/api/v1/ulta/product",
+        summary=(
+            "One Ulta Beauty product for the selected shade or size: list and sale price, "
+            "discount, availability, GTIN, rating, review count, badges, description, usage, "
+            "ingredients, category and breadcrumbs, images, every shade or size variant, ship / "
+            "pickup / same-day eligibility, and the five most recent reviews. An unknown product "
+            "is a 404."
+        ),
+        params=(
+            _req("url", "Ulta product page URL, /p/<name>-<productId> (the `url` of a search result)."),
+            _str("sku", "Shade or size to select, by sku id (a `variants[].sku_id`). Defaults to the product's default."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="ulta_stores",
+        namespace="ulta",
+        method="stores",
+        http="POST",
+        path="/api/v1/ulta/stores",
+        summary=(
+            "In-store pickup availability of one shade or size at the 10 Ulta Beauty stores "
+            "nearest a US ZIP: store id, name, address, distance in miles, open-now label, "
+            "curbside label, in_stock and the availability label. In stock / out of stock per "
+            "store, not unit counts."
+        ),
+        params=(
+            _req("product_id", "Ulta product id, the `product_id` of a search or product result, e.g. 'pimprod2057119'."),
+            _req("sku_id", "Sku id of the shade or size, a `sku_id` or `variants[].sku_id`."),
+            _req("zip", "US ZIP code to search around, e.g. '10001'."),
+        ),
+        credits=1,
+    ),
+    # =============================== ALDI ================================
+    # 3 endpoints, 1 credit each. Prices and stock are one store's and one
+    # shopping mode's: service_type instore (default, the shelf price), pickup
+    # or delivery (online prices, often higher). Pass store_id (from stores())
+    # or zip to use the nearest store. No product ratings.
+    Endpoint(
+        key="aldi_search",
+        namespace="aldi",
+        method="search",
+        http="POST",
+        path="/api/v1/aldi/search",
+        summary=(
+            "Search ALDI US at one store (store_id, or the nearest store to zip): product_id, "
+            "name, brand, size, price and was_price for that store and service_type, discount "
+            "label, unit price, in_stock and stock level, category, in-store aisle location, "
+            "ALDI-exclusive brand flag, dietary labels, image and URL. Exact matches only unless "
+            "include_related=True."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _str("store_id", "ALDI store id from aldi.stores(), e.g. '151248'. Pass this or zip."),
+            _str("zip", "US ZIP code; without store_id the nearest ALDI store is used. Pass this or store_id."),
+            _lit(
+                "service_type",
+                ("instore", "pickup", "delivery"),
+                "instore (default, the shelf price), pickup or delivery (online prices, often higher).",
+            ),
+            _lit("sort", ("best_match", "price_low", "price_high"), "best_match (default), price_low or price_high."),
+            _int("limit", "Products per page (1-60; default 30)."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _bool("include_related", "Also return the related items listed after the exact matches. Defaults to False."),
+        ),
+        one_of=(("store_id", "zip"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="aldi_product",
+        namespace="aldi",
+        method="product",
+        http="POST",
+        path="/api/v1/aldi/product",
+        summary=(
+            "One ALDI US product at one store (store_id, or the nearest store to zip): price and "
+            "was_price for that store and service_type, unit price, stock, category, brand, size, "
+            "description, ingredients, allergen warnings, dietary labels and images. An unknown "
+            "product id is a 404."
+        ),
+        params=(
+            _req("product_id", "ALDI product id (the `product_id` of a search result) or an aldi.us product URL."),
+            _str("store_id", "ALDI store id from aldi.stores(), e.g. '151248'. Pass this or zip."),
+            _str("zip", "US ZIP code; without store_id the nearest ALDI store is used. Pass this or store_id."),
+            _lit(
+                "service_type",
+                ("instore", "pickup", "delivery"),
+                "instore (default, the shelf price), pickup or delivery (online prices, often higher).",
+            ),
+        ),
+        one_of=(("store_id", "zip"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="aldi_stores",
+        namespace="aldi",
+        method="stores",
+        http="POST",
+        path="/api/v1/aldi/stores",
+        summary=(
+            "ALDI US stores near a ZIP code, nearest first: store_id (for search and product), "
+            "name, street address, city, state, ZIP, coordinates and distance in miles."
+        ),
+        params=(
+            _req("zip", "5-digit US ZIP code to search around."),
+            _int("limit", "Stores to return, nearest first (1-50; default 10)."),
+        ),
+        credits=1,
+    ),
+    # ============================ Micro Center ===========================
+    # 3 endpoints. search and product 2 credits each, stores 1. Stock is per
+    # 3-digit store_id (omit for the web store 029, shippable items only);
+    # counts are capped at 25+ (quantity_capped). stores_in_stock on product
+    # is a yes/no per store, not a unit count.
+    Endpoint(
+        key="micro_center_search",
+        namespace="micro_center",
+        method="search",
+        http="POST",
+        path="/api/v1/microcenter/search",
+        summary=(
+            "Search Micro Center by keyword or category at one store, up to 96 per page: "
+            "product_id, SKU, name, brand, category, price and original price, image, URL, "
+            "highlights, and that store's stock (label, quantity, quantity_capped at 25+, "
+            "in_stock, not_carried), plus open-box count and lowest price, rebate text and an "
+            "in-store-only flag where shown. Pass query, category or both."
+        ),
+        params=(
+            _str("query", "Search keywords (1-200 characters). Pass this, category, or both."),
+            _str("category", "Category id (e.g. '518' = Graphics Cards) or a microcenter.com listing URL carrying one."),
+            _str("store_id", "3-digit store id from micro_center.stores(), e.g. '131' (Dallas). Omit for the web store (029)."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _ilit("per_page", (24, 48, 96), "Results per page: 24, 48 or 96 (default)."),
+            _lit(
+                "sort",
+                ("best_match", "rating", "review_count", "price_low", "price_high", "newest"),
+                "best_match (default), rating, review_count, price_low, price_high or newest.",
+            ),
+            _bool(
+                "include_out_of_stock",
+                "Also list products the store has no stock of or does not carry. Defaults to False.",
+            ),
+        ),
+        one_of=(("query", "category"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="micro_center_product",
+        namespace="micro_center",
+        method="product",
+        http="POST",
+        path="/api/v1/microcenter/product",
+        summary=(
+            "One Micro Center product: SKU, MPN, UPC, name, brand, description, price, original "
+            "price, ship and pickup flags, images, rating, review count, up to 10 recent reviews, "
+            "breadcrumbs with category ids, the spec table, the selected store's stock (counts "
+            "capped at 25+) and open-box units, and every store with an in_stock flag. An unknown "
+            "product id is a 404."
+        ),
+        params=(
+            _req("product_id", "Micro Center product id (the number after /product/ in a URL) or the product URL. Not the SKU."),
+            _str("store_id", "3-digit store id from micro_center.stores(), e.g. '131' (Dallas). Omit for the web store (029)."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="micro_center_stores",
+        namespace="micro_center",
+        method="stores",
+        http="POST",
+        path="/api/v1/microcenter/stores",
+        summary=(
+            "Every Micro Center store with its 3-digit store_id (for search and product), name, "
+            "city, state and store page URL; street address and ZIP where known. The web store "
+            "029 is not listed but is accepted as a store_id."
+        ),
+        params=(_str("state", "2-letter US state code to filter by, e.g. 'TX'."),),
+        credits=1,
+    ),
+    # ============================= Walgreens =============================
+    # 4 endpoints. search, product and stores 2 credits each; stock 4. Retail
+    # products only (no pharmacy). Prices are national; stock() gives live
+    # unit counts at up to 20 stores in one call.
+    Endpoint(
+        key="walgreens_search",
+        namespace="walgreens",
+        method="search",
+        http="POST",
+        path="/api/v1/walgreens/search",
+        summary=(
+            "Search Walgreens retail products, up to 70 per page: product id, SKU, UPC, name, "
+            "brand, size, regular and sale price (national), unit price, promotion, coupon, "
+            "loyalty and rebate messages, rating, review count, image, URL, ship/pickup/delivery "
+            "availability, online stock status and clearance flag. Pass store_id for that store's "
+            "availability text."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100). Up to 70 results per page."),
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "top_sellers",
+                    "price_low_to_high",
+                    "price_high_to_low",
+                    "unit_price_low_to_high",
+                    "brand_name_asc",
+                    "brand_name_desc",
+                    "most_reviewed",
+                    "highest_rated",
+                    "most_viewed",
+                    "newest_arrival",
+                ),
+                "relevance (default), top_sellers, price_low_to_high, price_high_to_low, "
+                "unit_price_low_to_high, brand_name_asc, brand_name_desc, most_reviewed, "
+                "highest_rated, most_viewed or newest_arrival.",
+            ),
+            _str("store_id", "Walgreens store number from walgreens.stores(), e.g. '9438'. Sets the availability text."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="walgreens_product",
+        namespace="walgreens",
+        method="product",
+        http="POST",
+        path="/api/v1/walgreens/product",
+        summary=(
+            "One Walgreens retail product: SKU, UPC, GTIN, name, brand, size, regular and sale "
+            "price (national), savings, unit price, rewards and rebate offers, description, "
+            "ingredients, warnings, rating, review count, category path, images, ship and pickup "
+            "availability and clearance flag. An unknown id is a 404."
+        ),
+        params=(
+            _req("product_id", "Walgreens product id (the `product_id` of a search result, e.g. '300452904') or a product URL."),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="walgreens_stores",
+        namespace="walgreens",
+        method="stores",
+        http="POST",
+        path="/api/v1/walgreens/stores",
+        summary=(
+            "Walgreens and Duane Reade stores near a US ZIP or coordinates, nearest first: store "
+            "number, name, brand, address, phone, coordinates, distance in miles, opening and "
+            "closing time, time zone and store page URL. Paged with total_results and has_more."
+        ),
+        params=(
+            _str("zip", "US ZIP code, e.g. '60601'. Pass this or latitude and longitude."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _float("radius", "Search radius in miles (1-100; default 25)."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("limit", "Stores per page (1-25; default 10)."),
+        ),
+        one_of=(("zip", "latitude"),),
+        credits=2,
+    ),
+    Endpoint(
+        key="walgreens_stock",
+        namespace="walgreens",
+        method="stock",
+        http="POST",
+        path="/api/v1/walgreens/stock",
+        summary=(
+            "Live in-store stock of one product at up to 20 Walgreens stores in one call: per "
+            "store the status (In Stock, Out of Stock, or Not Available when not carried), the "
+            "unit count and in_stock. Unrecognised store numbers are listed in unknown_store_ids. "
+            "An unknown product id is a 404."
+        ),
+        params=(
+            _req("product_id", "Walgreens product id (the `product_id` of a search result) or a product URL."),
+            _str_list("store_ids", "1-20 Walgreens store numbers from walgreens.stores().", required=True),
+        ),
+        credits=4,
+    ),
+    # ================================ CVS ================================
+    # 3 endpoints, 1 credit each. Front-store products only (no pharmacy).
+    # Prices are the same at every store; stock is one store's. There is no
+    # store locator: the store number is on every cvs.com store page. search
+    # defaults to store 7019 (New York). product() can take 10-30+ seconds, so
+    # its timeout is raised to 120s.
+    Endpoint(
+        key="cvs_search",
+        namespace="cvs",
+        method="search",
+        http="POST",
+        path="/api/v1/cvs/search",
+        summary=(
+            "Search CVS front-store products: product_id and sku_id, name, brand, URL, regular and "
+            "sale price, unit price, promotion text, rating, review count, size, image, coupons "
+            "(ExtraBucks and manufacturer), and units at one store in store, for pickup and for "
+            "same-day delivery, plus online ship stock. Prices are the same at every store. "
+            "Includes brand, price-range and rating facets."
+        ),
+        params=(
+            _req("query", "Search keywords or a CVS item number (1-200 characters)."),
+            _str(
+                "store_id",
+                "CVS store number for the stock fields, shown on every cvs.com store page "
+                "('Store ID: #7019'). Defaults to 7019 (New York, NY).",
+            ),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("limit", "Results per page (1-48; default 20)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="cvs_product",
+        namespace="cvs",
+        method="product",
+        http="POST",
+        path="/api/v1/cvs/product",
+        summary=(
+            "One CVS product by URL or id: regular and sale price, unit price, promotion and its "
+            "end date, rating, review count, UPC, size, description, highlights, ingredients, "
+            "directions, warnings, attributes, breadcrumbs, images and every variant (SKU id, UPC, "
+            "size, price, rating). Can take 10-30+ seconds. An unknown product is a 404."
+        ),
+        params=(
+            _str("url", "cvs.com product URL (https://www.cvs.com/shop/<name>-prodid-<id>). Pass this or product_id."),
+            _str("product_id", "CVS product id or SKU id, e.g. '789787' (a search result's product_id or sku_id). Pass this or url."),
+        ),
+        one_of=(("url", "product_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="cvs_stock",
+        namespace="cvs",
+        method="stock",
+        http="POST",
+        path="/api/v1/cvs/stock",
+        summary=(
+            "Units available at one CVS store for up to 20 SKUs: in_store (on the shelf), pickup "
+            "and ship (online stock, chain-wide). same_day_delivery is always None here; search "
+            "returns same-day units. An unknown SKU or store number reads as 0."
+        ),
+        params=(
+            _str_list("sku_ids", "1-20 CVS SKU ids: a search result's sku_id or a product's variants[].sku_id.", required=True),
+            _req("store_id", "CVS store number, shown on every cvs.com store page ('Store ID: #7019')."),
+        ),
+        credits=1,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -7651,6 +8113,12 @@ NAMESPACES: tuple[str, ...] = (
     "sams_club",
     "canadian_tire",
     "dollar_general",
+    "sephora",
+    "ulta",
+    "aldi",
+    "micro_center",
+    "walgreens",
+    "cvs",
     "trustpilot",
     "realtor",
     "rightmove",

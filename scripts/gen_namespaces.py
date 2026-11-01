@@ -154,6 +154,30 @@ _NS_META = {
         "DollarGeneral",
         "Dollar General store-level search, product, store locator with unit counts, deal, and coupon endpoints.",
     ),
+    "sephora": (
+        "Sephora",
+        "Sephora search, category, and product detail endpoints with per-shade stock and review sentiment.",
+    ),
+    "ulta": (
+        "Ulta",
+        "Ulta Beauty search, category, product detail, and nearby-store availability endpoints.",
+    ),
+    "aldi": (
+        "Aldi",
+        "ALDI store-level search, product detail, and store locator endpoints (in-store, pickup or delivery prices).",
+    ),
+    "micro_center": (
+        "MicroCenter",
+        "Micro Center store-level search, product detail with open-box units, and store list endpoints.",
+    ),
+    "walgreens": (
+        "Walgreens",
+        "Walgreens search, product detail, store locator, and multi-store stock endpoints.",
+    ),
+    "cvs": (
+        "Cvs",
+        "CVS search, product detail, and per-store stock endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

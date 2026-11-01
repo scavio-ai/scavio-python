@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 42 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 52 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 36 data sources, 233 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 52 data sources, 314 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -20,6 +20,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
+| Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -37,7 +38,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 42 | 1 | 1 per plan | 1 |
+| Data Sources | 52 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -1063,6 +1064,95 @@ Canadian Tire and Dollar General return a rating and review count but no review
 text. Sam's Club's search, savings and category results reflect the club in
 `data.club`, not a club you pick.
 
+### 25. US Retail -- Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens and CVS
+
+Six US retailers. Sephora and Ulta Beauty carry per-shade prices and stock;
+ALDI prices are per store and per shopping mode; Micro Center stock is per
+store; Walgreens and CVS prices are national while stock is per store. Every
+method costs 1 credit except Micro Center `search` and `product` (2), Walgreens
+`search`, `product` and `stores` (2) and Walgreens `stock` (4).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# --- Sephora: search, then one product with every shade and the review summary.
+found = client.sephora.search("lipstick", sort="best_selling", zip="10001")["data"]
+for p in found["products"]:
+    print(p["product_id"], p["brand"], p["price"], p["rating"], p["same_day_eligible"], p["name"])
+
+lips = client.sephora.category("lipstick")["data"]                  # same product shape
+item = client.sephora.product(url=found["products"][0]["url"])["data"]  # url is faster than product_id
+print(item["review_summary"])                                       # no review text
+for s in item["review_sentiments"]:
+    print(s["type"], s["sentiment"], s["count"])                    # pros / cons with counts
+for sku in item["skus"]:
+    print(sku["sku_id"], sku["variation_value"], sku["price"], sku["in_stock"], sku["only_few_left"])
+
+# --- Ulta Beauty: stores() is in stock / out of stock at the 10 stores nearest a ZIP.
+found = client.ulta.search("lipstick")["data"]
+p = found["products"][0]
+print(p["product_id"], p["sku_id"], p["list_price"], p["sale_price"], p["variant_label"])
+
+detail = client.ulta.product(p["url"])["data"]
+print(detail["availability"], detail["gtin"], [v["sku_id"] for v in detail["variants"]])
+stores = client.ulta.stores(p["product_id"], p["sku_id"], "10001")["data"]
+for s in stores["stores"]:
+    print(s["store_id"], s["name"], s["distance_miles"], s["in_stock"], s["availability"])
+
+# --- ALDI: prices are one store's and one shopping mode's. service_type is
+# instore (default, the shelf price), pickup or delivery (often higher).
+store = client.aldi.stores("33131", limit=1)["data"]["stores"][0]
+milk = client.aldi.search("milk", store_id=store["store_id"])["data"]
+for p in milk["products"]:
+    print(p["product_id"], p["price"], p["was_price"], p["unit_price"], p["in_store_location"], p["name"])
+
+online = client.aldi.search("milk", zip="33131", service_type="delivery")["data"]  # nearest store
+item = client.aldi.product("16902710", store_id=store["store_id"])["data"]
+print(item["price"], item["in_stock"], item["ingredients"], item["warnings"])
+
+# --- Micro Center: stock is per 3-digit store_id; omit it for the web store
+# (029, shippable items only). Counts are capped at 25+ (quantity_capped).
+dallas = [s for s in client.micro_center.stores(state="TX")["data"]["stores"] if s["name"] == "Dallas"][0]
+gpus = client.micro_center.search(query="rtx 5070", store_id=dallas["store_id"])["data"]   # 2 credits
+for p in gpus["products"]:
+    print(p["product_id"], p["price"], p["stock"]["label"], p["stock"]["quantity"], p["open_box"])
+
+gpu = client.micro_center.product("691231", store_id=dallas["store_id"])["data"]          # 2 credits
+print(gpu["selected_store"]["stock"], gpu["selected_store"]["open_box"])
+print([s["store_id"] for s in gpu["stores_in_stock"] if s["in_stock"]])                  # yes/no per store
+
+# --- Walgreens: prices are national; stock() checks up to 20 stores in one call.
+nearby = client.walgreens.stores(zip="60614", limit=5)["data"]                # 2 credits
+numbers = [s["store_number"] for s in nearby["stores"]]
+found = client.walgreens.search("shampoo", sort="top_sellers", store_id=numbers[0])["data"]
+p = found["products"][0]
+print(p["product_id"], p["price"], p["sale_price"], p["availability"]["text"])
+
+stock = client.walgreens.stock(p["product_id"], numbers)["data"]              # 4 credits
+for s in stock["stores"]:
+    print(s["store_number"], s["status"], s["quantity"], s["in_stock"])
+print("unknown:", stock["unknown_store_ids"])
+
+# --- CVS: there is no store locator; the store number is on every cvs.com
+# store page ("Store ID: #7019"). search defaults to store 7019 (New York).
+found = client.cvs.search("toothpaste", store_id="7019")["data"]
+for p in found["products"]:
+    print(p["sku_id"], p["price"], p["sale_price"], p["stock"]["in_store"], p["stock"]["pickup"])
+
+# product() can take 10-30+ seconds; the SDK raises its timeout to 120s for it.
+item = client.cvs.product(product_id="832677")["data"]
+print(item["upc"], item["promo"], item["promo_end_date"], [v["sku_id"] for v in item["variants"]])
+
+units = client.cvs.stock(["832677", "789787"], "7019")["data"]                 # up to 20 SKUs
+for i in units["items"]:
+    print(i["sku_id"], i["in_store"], i["pickup"], i["ship"])
+```
+
+Walgreens and CVS cover retail (front-store) products, not the pharmacy. An
+unknown CVS SKU or store number reads as 0 units rather than an error.
+
 ## Error Handling
 
 ```python
@@ -1179,6 +1269,12 @@ Scavio works with popular AI/LLM frameworks:
 | Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | 1 each |
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
+| Sephora | `search`, `category`, `product` | 1 each |
+| Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
+| ALDI | `stores` (start here), `search`, `product` | 1 each |
+| Micro Center | `stores` (start here), `search`, `product` | `stores` 1, the rest 2 each |
+| Walgreens | `stores` (start here), `search`, `product`, `stock` | `stock` 4, the rest 2 each |
+| CVS | `search`, `product`, `stock` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1188,6 +1284,24 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.32.0
+
+- **Six new US retail namespaces, 20 methods** (sync and async).
+  - `sephora`: `search`, `category`, `product` (1 credit each). `product` takes
+    `url` or `product_id` and returns a review summary with pro/con sentiment
+    counts (no review text).
+  - `ulta`: `search`, `category`, `product`, `stores` (1 each). `stores` is in
+    stock / out of stock for one shade at the 10 stores nearest a ZIP.
+  - `aldi`: `search`, `product`, `stores` (1 each). Pass `store_id` or `zip`;
+    `service_type` picks the in-store (default), pickup or delivery price.
+  - `micro_center`: `search`, `product` (2 each), `stores` (1). Stock is per
+    3-digit `store_id` (web store 029 when omitted), capped at 25+.
+  - `walgreens`: `search`, `product`, `stores` (2 each), `stock` (4, up to 20
+    stores). Prices are national.
+  - `cvs`: `search`, `product`, `stock` (1 each, `stock` up to 20 SKUs). No
+    store locator; `search` defaults to store 7019. `product` can take 10-30+
+    seconds, so its request timeout is raised to 120s.
 
 ### Changed in 0.31.0
 

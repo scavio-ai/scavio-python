@@ -7,6 +7,7 @@ from ._extract import ExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
     _AirbnbNamespace,
+    _AldiNamespace,
     _AmazonNamespace,
     _AppStoreNamespace,
     _BookingNamespace,
@@ -15,6 +16,7 @@ from ._namespaces_sync import (
     _ChatGPTNamespace,
     _CompaniesHouseNamespace,
     _CostcoNamespace,
+    _CvsNamespace,
     _DecathlonNamespace,
     _DollarGeneralNamespace,
     _EbayNamespace,
@@ -34,12 +36,14 @@ from ._namespaces_sync import (
     _LowesNamespace,
     _MercadoLibreNamespace,
     _MetaAdsNamespace,
+    _MicroCenterNamespace,
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
     _RightmoveNamespace,
     _SamsClubNamespace,
     _SECNamespace,
+    _SephoraNamespace,
     _SpecsNamespace,
     _TargetNamespace,
     _ThreadsNamespace,
@@ -47,6 +51,8 @@ from ._namespaces_sync import (
     _TikTokShopNamespace,
     _TripadvisorNamespace,
     _TrustpilotNamespace,
+    _UltaNamespace,
+    _WalgreensNamespace,
     _WalmartNamespace,
     _XNamespace,
     _YelpNamespace,
@@ -151,6 +157,12 @@ class ScavioClient:
         self.sams_club = _SamsClubNamespace(self)
         self.canadian_tire = _CanadianTireNamespace(self)
         self.dollar_general = _DollarGeneralNamespace(self)
+        self.sephora = _SephoraNamespace(self)
+        self.ulta = _UltaNamespace(self)
+        self.aldi = _AldiNamespace(self)
+        self.micro_center = _MicroCenterNamespace(self)
+        self.walgreens = _WalgreensNamespace(self)
+        self.cvs = _CvsNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

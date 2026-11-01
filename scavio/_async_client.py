@@ -9,6 +9,7 @@ from ._extract import AsyncExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
     _AsyncAirbnbNamespace,
+    _AsyncAldiNamespace,
     _AsyncAmazonNamespace,
     _AsyncAppStoreNamespace,
     _AsyncBookingNamespace,
@@ -17,6 +18,7 @@ from ._namespaces_async import (
     _AsyncChatGPTNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCostcoNamespace,
+    _AsyncCvsNamespace,
     _AsyncDecathlonNamespace,
     _AsyncDollarGeneralNamespace,
     _AsyncEbayNamespace,
@@ -36,12 +38,14 @@ from ._namespaces_async import (
     _AsyncLowesNamespace,
     _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
+    _AsyncMicroCenterNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncRightmoveNamespace,
     _AsyncSamsClubNamespace,
     _AsyncSECNamespace,
+    _AsyncSephoraNamespace,
     _AsyncSpecsNamespace,
     _AsyncTargetNamespace,
     _AsyncThreadsNamespace,
@@ -49,6 +53,8 @@ from ._namespaces_async import (
     _AsyncTikTokShopNamespace,
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
+    _AsyncUltaNamespace,
+    _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
@@ -146,6 +152,12 @@ class AsyncScavioClient:
         self.sams_club = _AsyncSamsClubNamespace(self)
         self.canadian_tire = _AsyncCanadianTireNamespace(self)
         self.dollar_general = _AsyncDollarGeneralNamespace(self)
+        self.sephora = _AsyncSephoraNamespace(self)
+        self.ulta = _AsyncUltaNamespace(self)
+        self.aldi = _AsyncAldiNamespace(self)
+        self.micro_center = _AsyncMicroCenterNamespace(self)
+        self.walgreens = _AsyncWalgreensNamespace(self)
+        self.cvs = _AsyncCvsNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)
