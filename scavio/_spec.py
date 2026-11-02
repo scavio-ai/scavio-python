@@ -7710,11 +7710,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/chewy/search",
         summary=(
             "Search Chewy by keyword, or browse a category, 36 per page: one-time, offer and "
-            "strike-through price, Autoship price and discount, first-Autoship price, discount "
-            "and savings cap, per-unit price, rating, rating count, in_stock, deal, new, "
+            "strike-through price, Autoship price and discount, per-unit price, rating, rating "
+            "count, in_stock, deal, new, "
             "exclusive and prescription flags, brand, image and URL. Sponsored listings are "
-            "removed. When Chewy sends a query to a category, `redirect` names that category "
-            "and the results are its products."
+            "removed. The first-Autoship price, discount and savings cap are filled only on "
+            "Autoship-deal rows; product always has them and MAP. When Chewy sends a query to a "
+            "category, `redirect` names that category and the results are its products."
         ),
         params=(
             _str("query", "Search keywords (1-200 characters). Pass this or category_id."),

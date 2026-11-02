@@ -7105,7 +7105,7 @@ class _AsyncChewyNamespace:
         sort: Optional[Literal["relevance", "bestselling", "newest", "price_low", "price_high", "rating", "most_reviewed"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Chewy by keyword, or browse a category, 36 per page: one-time, offer and strike-through price, Autoship price and discount, first-Autoship price, discount and savings cap, per-unit price, rating, rating count, in_stock, deal, new, exclusive and prescription flags, brand, image and URL. Sponsored listings are removed. When Chewy sends a query to a category, `redirect` names that category and the results are its products.
+        """Search Chewy by keyword, or browse a category, 36 per page: one-time, offer and strike-through price, Autoship price and discount, per-unit price, rating, rating count, in_stock, deal, new, exclusive and prescription flags, brand, image and URL. Sponsored listings are removed. The first-Autoship price, discount and savings cap are filled only on Autoship-deal rows; product always has them and MAP. When Chewy sends a query to a category, `redirect` names that category and the results are its products.
 
         Costs 10 credits. Returns the API response as a dict.
 
