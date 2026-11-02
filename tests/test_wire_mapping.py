@@ -1706,7 +1706,13 @@ def test_menards_search_wire_body(monkeypatch):
     client = ScavioClient(api_key="sk_test")
     client.menards.search("sledge hammer", "3181")
     client.menards.search(
-        query="drill", store_id="3273", page=2, sort="price_asc", in_stock_today=True, min_price=0, max_price=60.0
+        query="drill",
+        store_id="3273",
+        page=2,
+        sort="price_asc",
+        in_stock_today=True,
+        min_price=0,
+        max_price=60.0,
     )
     assert seen[0] == ("/api/v1/menards/search", {"query": "sledge hammer", "store_id": "3181"})
     assert seen[1][1] == {
