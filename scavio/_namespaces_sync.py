@@ -7142,6 +7142,34 @@ class _MenardsNamespace:
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
 
+    def search(
+        self,
+        query: str,
+        store_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "brand_asc", "brand_desc"]] = None,
+        in_stock_today: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search menards.com at one store, 40 products a page: item id, SKU, name, URL, image, price, everyday price, sale price, price type (regular, sale, clearance, minimum_advertised), mail-in rebates, final price after rebates, and that store's stock quantity, stock message, pickup and delivery flags. Also total results, total pages and facets. An unknown store number is a 400.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'sledge hammer'.
+            store_id: Menards store number from menards.stores(), e.g. '3181'. Stock is that store's.
+            page: Results page, 1-based, 40 products a page. Defaults to 1.
+            sort: Result order. Defaults to relevance. Price sorts order by everyday_price, not the sale price.
+            in_stock_today: Only products in stock at the store today.
+            min_price: Lowest price in dollars.
+            max_price: Highest price in dollars.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("menards_search", {"query": query, "store_id": store_id, "page": page, "sort": sort, "in_stock_today": in_stock_today, "min_price": min_price, "max_price": max_price}, extra)
+
     def product(
         self,
         *,

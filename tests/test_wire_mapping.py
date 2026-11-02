@@ -1631,7 +1631,8 @@ def test_cvs_product_raises_the_timeout(monkeypatch):
 
 
 def test_us_retail_batch_2_credits_and_paths():
-    """whole_foods/harbor_freight/petsmart/petco/iherb/chewy/menards (0.33.0): 33 endpoints."""
+    """whole_foods/harbor_freight/petsmart/petco/iherb/chewy/menards (0.33.0): 33 endpoints,
+    plus menards.search (0.34.0)."""
     one = dict.fromkeys
     expected = {
         "whole_foods": one(
@@ -1646,7 +1647,7 @@ def test_us_retail_batch_2_credits_and_paths():
         "petco": one(("search", "category", "product", "stores", "store_inventory"), 1),
         "iherb": one(("search", "product", "prices", "reviews"), 2),
         "chewy": one(("search", "product"), 10),
-        "menards": one(("product", "stores"), 1),
+        "menards": {"search": 2, "product": 1, "stores": 1},
     }
     for ns, methods in expected.items():
         eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}
@@ -1654,7 +1655,7 @@ def test_us_retail_batch_2_credits_and_paths():
         wire_ns = ns.replace("_", "")
         for m, ep in eps.items():
             assert ep.path == f"/api/v1/{wire_ns}/{m.replace('_', '-')}", ep.key
-    assert sum(len(m) for m in expected.values()) == 33
+    assert sum(len(m) for m in expected.values()) == 34
     assert "store_id" in ENDPOINTS["menards_product"].credits_note
 
 
@@ -1691,3 +1692,30 @@ def test_us_retail_batch_2_one_of_groups(monkeypatch):
     ):
         with pytest.raises(ScavioError):
             call()
+
+
+def test_menards_search_wire_body(monkeypatch):
+    """menards.search (0.34.0): query and store_id required, filters passed through as sent."""
+    seen: list[tuple[str, dict]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.menards.search("sledge hammer", "3181")
+    client.menards.search(
+        query="drill", store_id="3273", page=2, sort="price_asc", in_stock_today=True, min_price=0, max_price=60.0
+    )
+    assert seen[0] == ("/api/v1/menards/search", {"query": "sledge hammer", "store_id": "3181"})
+    assert seen[1][1] == {
+        "query": "drill",
+        "store_id": "3273",
+        "page": 2,
+        "sort": "price_asc",
+        "in_stock_today": True,
+        "min_price": 0,
+        "max_price": 60.0,
+    }
+    assert ENDPOINTS["menards_search"].credits == 2

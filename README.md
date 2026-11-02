@@ -1246,11 +1246,14 @@ print(found["redirect"])                       # set when Chewy sends the query 
 item = client.chewy.product(product_id=found["products"][0]["product_id"])["data"]
 print(item["price"], item["autoship_price"], item["first_autoship_price"], item["map_price"], item["map_enforced"])
 
-# --- Menards: no search; look a product up by item id or URL. Prices carry the
-# mail-in rebate and the final price after it. store_id adds that store's stock
-# and aisle, costs 2 credits and can take 10-40 seconds (timeout raised to 120s).
+# --- Menards: search one store (2 credits), then open a product. Prices carry
+# the mail-in rebate and the final price after it. product's store_id adds that
+# store's stock and aisle, costs 2 credits and can take 10-40 seconds (timeout
+# raised to 120s).
 store = client.menards.stores(zip="55401")["data"]["stores"][0]
-item = client.menards.product(item_id="60893666613", store_id=store["store_id"])["data"]
+hits = client.menards.search("sledge hammer", store["store_id"], sort="price_asc")["data"]
+print(hits["total_results"], [(p["name"], p["final_price"], p["stock_quantity"]) for p in hits["products"][:3]])
+item = client.menards.product(item_id=hits["products"][0]["item_id"], store_id=store["store_id"])["data"]
 print(item["everyday_price"], item["sale_price"], item["rebates"], item["final_price"], item["you_save"])
 print(item["store"]["stock_quantity"], item["store"]["locations"])
 ```
@@ -1387,7 +1390,7 @@ Scavio works with popular AI/LLM frameworks:
 | Petco | `search`, `category`, `product`, `stores`, `store_inventory` | 1 each |
 | iHerb | `search`, `product`, `prices`, `reviews` | 2 each |
 | Chewy | `search`, `product` | 10 each |
-| Menards | `stores`, `product` | 1 each; `product` with `store_id` 2 |
+| Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1397,6 +1400,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.34.0
+
+- `menards.search(query, store_id, ...)` (sync and async), 2 credits: menards.com
+  search at one store, 40 products a page, with price, sale price, the mail-in
+  rebate, final price and that store's stock count. `sort` (relevance,
+  price_asc, price_desc, brand_asc, brand_desc; price sorts use the everyday
+  price), `in_stock_today`, `min_price`, `max_price`, `page`. An unknown store
+  number is a 400.
 
 ### Changed in 0.33.0
 

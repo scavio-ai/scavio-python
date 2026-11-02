@@ -7751,10 +7751,36 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=10,
     ),
     # ============================== Menards ==============================
-    # 2 endpoints. No search: product() takes an item id or URL. Prices carry
-    # the mail-in rebate (often 11%) and the final price after it. store_id
-    # adds that store's stock quantity and aisle and costs 2 credits instead
-    # of 1; it can take 10-40 seconds, so product()'s timeout is raised to 120s.
+    # 3 endpoints. search() is always at one store (store_id required, 2
+    # credits, 40 products a page). Prices carry the mail-in rebate (often 11%)
+    # and the final price after it. product()'s store_id adds that store's
+    # stock quantity and aisle and costs 2 credits instead of 1; it can take
+    # 10-40 seconds, so product()'s timeout is raised to 120s.
+    Endpoint(
+        key="menards_search",
+        namespace="menards",
+        method="search",
+        http="POST",
+        path="/api/v1/menards/search",
+        summary=(
+            "Search menards.com at one store, 40 products a page: item id, SKU, name, URL, image, "
+            "price, everyday price, sale price, price type (regular, sale, clearance, "
+            "minimum_advertised), mail-in rebates, final price after rebates, and that store's "
+            "stock quantity, stock message, pickup and delivery flags. Also total results, "
+            "total pages and facets. An unknown store number is a 400."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'sledge hammer'."),
+            _req("store_id", "Menards store number from menards.stores(), e.g. '3181'. Stock is that store's."),
+            _int("page", "Results page, 1-based, 40 products a page. Defaults to 1."),
+            _lit("sort", ("relevance", "price_asc", "price_desc", "brand_asc", "brand_desc"),
+                 "Result order. Defaults to relevance. Price sorts order by everyday_price, not the sale price."),
+            _bool("in_stock_today", "Only products in stock at the store today."),
+            _float("min_price", "Lowest price in dollars."),
+            _float("max_price", "Highest price in dollars."),
+        ),
+        credits=2,
+    ),
     Endpoint(
         key="menards_product",
         namespace="menards",
