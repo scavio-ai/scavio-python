@@ -8,6 +8,7 @@ def test_pypi_summary_fits():
 
     0.33.0 never reached PyPI because of it: the upload failed with 400 after tests passed.
     """
-    project = tomllib.loads((Path(__file__).parent.parent / "pyproject.toml").read_text())["project"]
+    pyproject = Path(__file__).parent.parent / "pyproject.toml"
+    project = tomllib.loads(pyproject.read_text())["project"]
     assert len(project["description"]) <= 512
     assert "\n" not in project["description"]
