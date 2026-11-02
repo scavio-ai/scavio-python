@@ -1700,8 +1700,10 @@ def test_menards_search_wire_body(monkeypatch):
 
     def fake_request(method, path, *, timeout, json=None, **_):
         seen.append((path, json))
+        timeouts.append(timeout)
         return {"ok": True}
 
+    timeouts: list[float] = []
     monkeypatch.setattr("scavio._client.sync_request", fake_request)
     client = ScavioClient(api_key="sk_test")
     client.menards.search("sledge hammer", "3181")
@@ -1725,3 +1727,5 @@ def test_menards_search_wire_body(monkeypatch):
         "max_price": 60.0,
     }
     assert ENDPOINTS["menards_search"].credits == 2
+    # The default 30 s client timeout is raised for search's slow spells.
+    assert timeouts[0] == 60.0

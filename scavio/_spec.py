@@ -7781,6 +7781,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _float("max_price", "Highest price in dollars."),
         ),
         credits=2,
+        # Usually a few seconds, but slow spells reach 30+ s; the API waits up to 40.
+        min_timeout=60.0,
     ),
     Endpoint(
         key="menards_product",
