@@ -14,6 +14,7 @@ from ._namespaces_sync import (
     _CanadianTireNamespace,
     _CapterraNamespace,
     _ChatGPTNamespace,
+    _ChewyNamespace,
     _CompaniesHouseNamespace,
     _CostcoNamespace,
     _CvsNamespace,
@@ -26,17 +27,22 @@ from ._namespaces_sync import (
     _GoogleAdsNamespace,
     _GoogleNamespace,
     _GooglePlayNamespace,
+    _HarborFreightNamespace,
     _HebNamespace,
     _HomeDepotNamespace,
+    _IherbNamespace,
     _IndeedNamespace,
     _InstagramNamespace,
     _KrogerNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
     _LowesNamespace,
+    _MenardsNamespace,
     _MercadoLibreNamespace,
     _MetaAdsNamespace,
     _MicroCenterNamespace,
+    _PetcoNamespace,
+    _PetsmartNamespace,
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
@@ -54,6 +60,7 @@ from ._namespaces_sync import (
     _UltaNamespace,
     _WalgreensNamespace,
     _WalmartNamespace,
+    _WholeFoodsNamespace,
     _XNamespace,
     _YelpNamespace,
     _YouTubeNamespace,
@@ -163,6 +170,13 @@ class ScavioClient:
         self.micro_center = _MicroCenterNamespace(self)
         self.walgreens = _WalgreensNamespace(self)
         self.cvs = _CvsNamespace(self)
+        self.whole_foods = _WholeFoodsNamespace(self)
+        self.harbor_freight = _HarborFreightNamespace(self)
+        self.petsmart = _PetsmartNamespace(self)
+        self.petco = _PetcoNamespace(self)
+        self.iherb = _IherbNamespace(self)
+        self.chewy = _ChewyNamespace(self)
+        self.menards = _MenardsNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

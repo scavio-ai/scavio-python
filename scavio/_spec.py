@@ -7020,6 +7020,785 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
     ),
+    # ======================== Whole Foods Market =========================
+    # 7 endpoints, 1 credit each. Prices are one store's (5-digit store_id,
+    # default 10145, Lamar in Austin TX): regular, sale and Prime member price.
+    # product() returns the in-store and the online price as separate blocks.
+    # No ratings, reviews or UPCs, and no per-store unit stock.
+    Endpoint(
+        key="whole_foods_search",
+        namespace="whole_foods",
+        method="search",
+        http="POST",
+        path="/api/v1/wholefoods/search",
+        summary=(
+            "Search Whole Foods Market products at one store: ASIN, slug, name, brand, image, URL, "
+            "that store's regular_price, sale_price and prime_price (Prime member price) with "
+            "sale dates and multi-buy quantities, price_unit (lb when priced per pound), on_sale "
+            "and is_local flags, plus total_results and category, featured and diet facets with "
+            "counts. Sorts by relevance or price only."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _str("store_id", "5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX)."),
+            _lit("sort", ("relevance", "price_asc", "price_desc"), "relevance (default), price_asc or price_desc."),
+            _bool("on_sale", "Only products on sale at the store. Defaults to False."),
+            _lit(
+                "diet",
+                ("vegan", "gluten-free", "organic", "dairy-free", "vegetarian"),
+                "Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.",
+            ),
+            _str("category", "Restrict to one category slug, e.g. 'milk-cream' (slugs are in the category facet)."),
+            _int("limit", "Products per page (1-60; default 60)."),
+            _int("offset", "Products to skip, for paging (0-10000; 60 = page 2 at the default limit)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_category",
+        namespace="whole_foods",
+        method="category",
+        http="POST",
+        path="/api/v1/wholefoods/category",
+        summary=(
+            "Browse one Whole Foods Market category at one store, in the same product shape as "
+            "search(), with the category breadcrumb, total_results and facets. An unknown "
+            "category slug is a 404."
+        ),
+        params=(
+            _req(
+                "category",
+                "Category slug, e.g. 'cheese', 'dairy-eggs' or 'produce' (slugs are in the category "
+                "facet of any search); 'all-products' lists the whole store.",
+            ),
+            _str("store_id", "5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX)."),
+            _lit(
+                "sort",
+                ("featured", "popular", "price_asc", "price_desc", "brand_az", "brand_za"),
+                "featured (default), popular, price_asc, price_desc, brand_az or brand_za.",
+            ),
+            _bool("on_sale", "Only products on sale at the store. Defaults to False."),
+            _lit(
+                "diet",
+                ("vegan", "gluten-free", "organic", "dairy-free", "vegetarian"),
+                "Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.",
+            ),
+            _int("limit", "Products per page (1-60; default 60)."),
+            _int("offset", "Products to skip, for paging (0-10000; 60 = page 2 at the default limit)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_deals",
+        namespace="whole_foods",
+        method="deals",
+        http="POST",
+        path="/api/v1/wholefoods/deals",
+        summary=(
+            "Every product on sale at one Whole Foods Market store, store-wide or in one category, "
+            "in the same product shape as search(): regular, sale and Prime price with the sale "
+            "start and end dates."
+        ),
+        params=(
+            _str("category", "Category slug, e.g. 'cheese'. Defaults to 'all-products' (every sale item at the store)."),
+            _str("store_id", "5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX)."),
+            _lit(
+                "sort",
+                ("featured", "popular", "price_asc", "price_desc", "brand_az", "brand_za"),
+                "featured (default), popular, price_asc, price_desc, brand_az or brand_za.",
+            ),
+            _lit(
+                "diet",
+                ("vegan", "gluten-free", "organic", "dairy-free", "vegetarian"),
+                "Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.",
+            ),
+            _int("limit", "Products per page (1-60; default 60)."),
+            _int("offset", "Products to skip, for paging (0-10000; 60 = page 2 at the default limit)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_product",
+        namespace="whole_foods",
+        method="product",
+        http="POST",
+        path="/api/v1/wholefoods/product",
+        summary=(
+            "One Whole Foods Market product by ASIN, URL or slug: name, brand, description, "
+            "ingredients, nutrition facts, diets, SNAP EBT eligibility and images. With store_id, "
+            "two separate price blocks: in_store (that store's shelf regular, sale and Prime "
+            "price; None when the store does not list it) and online (that store's delivery and "
+            "pickup price, list price, savings, Prime price, unit price and availability). Online "
+            "and in-store prices often differ. An unknown ASIN is a 404."
+        ),
+        params=(
+            _str("asin", "Product ASIN, the `asin` of a search result, e.g. 'B0BCBNG8LS'. Pass this, url or slug."),
+            _str("url", "A wholefoodsmarket.com product URL."),
+            _str("slug", "A product slug, the `slug` of a search result."),
+            _str("store_id", "5-digit Whole Foods store id. Adds that store's in_store and online price blocks."),
+        ),
+        one_of=(("asin", "url", "slug"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_stores",
+        namespace="whole_foods",
+        method="stores",
+        http="POST",
+        path="/api/v1/wholefoods/stores",
+        summary=(
+            "Whole Foods Market stores near a US ZIP code, nearest first (within 15 miles, "
+            "widening to 50): store_id, name, address, phone, coordinates, distance in miles, "
+            "time zone and seven days of in-store and pickup hours. No store in range is an "
+            "empty list."
+        ),
+        params=(_req("zip", "US ZIP code to search around, e.g. '78703'."),),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_store",
+        namespace="whole_foods",
+        method="store",
+        http="POST",
+        path="/api/v1/wholefoods/store",
+        summary=(
+            "One Whole Foods Market store by id: name, status, phone, Prime eligibility, opening "
+            "date, address, coordinates, time zone, store page URL and sales flyer URL. An "
+            "unknown store id is a 404."
+        ),
+        params=(_req("store_id", "5-digit Whole Foods store id from whole_foods.stores(), e.g. '10160'."),),
+        credits=1,
+    ),
+    Endpoint(
+        key="whole_foods_sales_flyer",
+        namespace="whole_foods",
+        method="sales_flyer",
+        http="POST",
+        path="/api/v1/wholefoods/sales-flyer",
+        summary=(
+            "The current weekly sales flyer of one Whole Foods Market store: per promotion the "
+            "product name, brand, headline, description, terms, regular, sale and Prime price as "
+            "printed (text such as '$3.99/lb' or '44% off'), start and end dates, image, rank "
+            "and the ASINs it covers. An unknown store id is a 404."
+        ),
+        params=(_req("store_id", "5-digit Whole Foods store id from whole_foods.stores(), e.g. '10160'."),),
+        credits=1,
+    ),
+    # =========================== Harbor Freight ==========================
+    # 7 endpoints, 1 credit each. Prices are national: price, regular price,
+    # sale (price and end date), coupon (public coupon price), member_deal
+    # (Inside Track Club price) and compare_at. Store stock is a status
+    # (in_stock, limited, out_of_stock, not_carried) plus aisle from a daily
+    # snapshot, not a unit count.
+    Endpoint(
+        key="harbor_freight_search",
+        namespace="harbor_freight",
+        method="search",
+        http="POST",
+        path="/api/v1/harborfreight/search",
+        summary=(
+            "Search Harbor Freight by keyword and/or category: item number (sku), id, title, "
+            "brand, URL, image, price, regular_price, on_sale and clearance flags, sale (price, "
+            "end date, savings), coupon (public coupon price, code, expiry, limit), member_deal "
+            "(Inside Track Club price), compare_at (the competitor brand, model and price quoted), "
+            "badges, rating, review count and where it sells. Also total_results, facets and, "
+            "when a keyword maps to a category page, redirect. Prices are national."
+        ),
+        params=(
+            _str("query", "Search keywords (1-200 characters). Pass this, category_id, or both."),
+            _str("category_id", "Category id, e.g. '1827' (Drills, Drivers & Drill Presses): the `value` of a category facet."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("page_size", "Results per page (1-48; default 36)."),
+            _lit(
+                "sort",
+                ("best_match", "price_low", "price_high", "member_price_low", "member_price_high", "top_rated", "newest"),
+                "best_match (default), price_low, price_high, member_price_low, member_price_high "
+                "(Inside Track Club price), top_rated or newest.",
+            ),
+            _str("brand", "Only this brand as listed in the brand facet, e.g. 'BAUER' (case-insensitive)."),
+            _bool("clearance", "Only clearance items. Defaults to False."),
+        ),
+        one_of=(("query", "category_id"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_clearance",
+        namespace="harbor_freight",
+        method="clearance",
+        http="POST",
+        path="/api/v1/harborfreight/clearance",
+        summary=(
+            "Harbor Freight clearance items, optionally narrowed by keyword, category or brand, "
+            "in the same shape as search(): each item's clearance price and end date are in `sale`."
+        ),
+        params=(
+            _str("query", "Keywords to narrow the clearance list (1-200 characters)."),
+            _str("category_id", "Category id, e.g. '1827': the `value` of a category facet."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("page_size", "Results per page (1-48; default 36)."),
+            _lit(
+                "sort",
+                ("best_match", "price_low", "price_high", "member_price_low", "member_price_high", "top_rated", "newest"),
+                "best_match (default), price_low, price_high, member_price_low, member_price_high "
+                "(Inside Track Club price), top_rated or newest.",
+            ),
+            _str("brand", "Only this brand as listed in the brand facet, e.g. 'BAUER' (case-insensitive)."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_product",
+        namespace="harbor_freight",
+        method="product",
+        http="POST",
+        path="/api/v1/harborfreight/product",
+        summary=(
+            "One Harbor Freight product by item number, id or URL: title, brand, UPC, the full "
+            "price set (price, regular_price, sale, coupon, member_deal, compare_at), rating, "
+            "review count, badges, description, highlights, the specification table, warranty, "
+            "shipping notes, owner's manuals, images and variants. An unknown item is a 404."
+        ),
+        params=(
+            _str("sku", "Harbor Freight item number, the `sku` of a search result, e.g. '73216'. Pass this, id or url."),
+            _int("id", "Numeric product id, the `id` of a search result, e.g. 48725."),
+            _str("url", "harborfreight.com product URL."),
+        ),
+        one_of=(("sku", "id", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_prices",
+        namespace="harbor_freight",
+        method="prices",
+        http="POST",
+        path="/api/v1/harborfreight/prices",
+        summary=(
+            "Current national prices for up to 50 Harbor Freight item numbers in one call: price, "
+            "regular_price, on_sale and clearance flags, sale, coupon, member_deal and compare_at "
+            "per item. Unknown item numbers are listed in not_found."
+        ),
+        params=(_str_list("skus", "1-50 Harbor Freight item numbers, e.g. ['73216', '59716'].", required=True),),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_stores",
+        namespace="harbor_freight",
+        method="stores",
+        http="POST",
+        path="/api/v1/harborfreight/stores",
+        summary=(
+            "Harbor Freight stores near a ZIP code, 'City, ST' or coordinates, nearest first: "
+            "store number, name, address, phone, coordinates, distance in miles, status, opening "
+            "date and hours."
+        ),
+        params=(
+            _str("query", "US ZIP code or 'City, ST', e.g. '60601' or 'Los Angeles, CA'. Pass this or latitude and longitude."),
+            _float("latitude", "Latitude (-90 to 90); pass with longitude."),
+            _float("longitude", "Longitude (-180 to 180); pass with latitude."),
+            _int("radius", "Search radius in miles (1-100; default 50)."),
+            _int("limit", "Most stores to return (1-50; default 10)."),
+        ),
+        one_of=(("query", "latitude"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_availability",
+        namespace="harbor_freight",
+        method="availability",
+        http="POST",
+        path="/api/v1/harborfreight/availability",
+        summary=(
+            "In-store stock for up to 20 Harbor Freight items at chosen stores, or at the stores "
+            "nearest a ZIP code or coordinates. Each store lists every item with stock_status "
+            "(in_stock, limited, out_of_stock or not_carried), stock_code, aisle and a nearby "
+            "store that has it. inventory_updated_at is the time of the daily stock snapshot. "
+            "Stock is a status, not a unit count."
+        ),
+        params=(
+            _str_list("skus", "1-20 Harbor Freight item numbers.", required=True),
+            _str_list("store_ids", "1-20 store numbers from harbor_freight.stores(). Or pass zip, or latitude and longitude."),
+            _str("zip", "US ZIP code: stock at the stores nearest to it."),
+            _float("latitude", "Latitude: stock at the stores nearest to it; pass with longitude."),
+            _float("longitude", "Longitude; pass with latitude."),
+            _int("limit", "Nearest stores to return with zip or coordinates (1-100; default 10)."),
+        ),
+        one_of=(("store_ids", "zip", "latitude"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="harbor_freight_reviews",
+        namespace="harbor_freight",
+        method="reviews",
+        http="POST",
+        path="/api/v1/harborfreight/reviews",
+        summary=(
+            "Customer reviews for one Harbor Freight item, newest first: title, text, star "
+            "rating, author, review and purchase dates, incentivized flag, helpful votes and the "
+            "reviewer's answers (would recommend...), plus the average rating and total review "
+            "count. An unknown item is a 404."
+        ),
+        params=(
+            _req("sku", "Harbor Freight item number, e.g. '73216'."),
+            _int("limit", "Reviews per call (1-50; default 10)."),
+            _int("offset", "Reviews to skip, for paging. Defaults to 0."),
+        ),
+        credits=1,
+    ),
+    # ============================== PetSmart =============================
+    # 6 endpoints, 1 credit each. Prices are national, with the Autoship
+    # first-order and recurring price per variant. Stock is a unit count per
+    # store. deals() rows carry on_sale: the Sale section also lists points
+    # and Autoship promotions whose price is not reduced.
+    Endpoint(
+        key="petsmart_search",
+        namespace="petsmart",
+        method="search",
+        http="POST",
+        path="/api/v1/petsmart/search",
+        summary=(
+            "Search PetSmart products, up to 40 per page: SKU, web_style_id, name, brand, UPC, "
+            "price, original and sale price, price range across sizes, rating, review count, "
+            "image, size, variations, category, pets, promotions, stores_in_stock (how many "
+            "stores stock it), pickup and Autoship eligibility and URL. Prices are national. "
+            "Pass store_id to list only products in stock at that store."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("limit", "Results per page (1-40; default 40)."),
+            _str("store_id", "PetSmart store number from petsmart.stores(), e.g. '1658'. Lists only products in stock there."),
+            _lit(
+                "sort",
+                ("relevance", "best_sellers", "price_low", "price_high", "top_rated", "new_arrivals"),
+                "relevance (default), best_sellers, price_low, price_high, top_rated or new_arrivals.",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="petsmart_product",
+        namespace="petsmart",
+        method="product",
+        http="POST",
+        path="/api/v1/petsmart/product",
+        summary=(
+            "One PetSmart product by web_style_id, SKU or URL, with every variant (size, flavor): "
+            "SKU, UPC, price, original price, sale price and end date, autoship (discount, "
+            "first_order_price, recurring_price), ship-to-home stock, pickup and same-day "
+            "options, images and promotions, plus brand, rating, review count, categories and "
+            "description. Prices are national. An unknown id is a 404."
+        ),
+        params=(
+            _str("web_style_id", "Product id, the number at the end of a product URL (...-570.html). One id covers every size and flavor."),
+            _str("sku", "One size or flavor's SKU, e.g. '5154856'. Returns the whole product it belongs to."),
+            _str("url", "A petsmart.com product URL. Pass exactly one of web_style_id, sku or url."),
+        ),
+        one_of=(("web_style_id", "sku", "url"),),
+        credits=1,
+    ),
+    Endpoint(
+        key="petsmart_stores",
+        namespace="petsmart",
+        method="stores",
+        http="POST",
+        path="/api/v1/petsmart/stores",
+        summary=(
+            "The 12 PetSmart stores nearest a US ZIP code: store number, name, address, phone, "
+            "coordinates, distance in miles, time zone, the next 7 days of hours and services "
+            "(grooming, PetsHotel, veterinary...). Pass sku and each store also carries quantity "
+            "and in_stock for that SKU."
+        ),
+        params=(
+            _req("zip", "US ZIP code to search around, e.g. '60601'."),
+            _int("radius", "Search radius in miles (1-100; default 30)."),
+            _str("sku", "A SKU: every store then carries its unit count of it."),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="petsmart_store_stock",
+        namespace="petsmart",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/petsmart/store-stock",
+        summary=(
+            "Stock of up to 20 SKUs at one PetSmart store: units for in-store pickup at that "
+            "store, units to ship to home, and an alternate nearby store with its count when the "
+            "store has none, plus the store's name, address, phone and pickup options. An "
+            "unknown store number is a 404; an unknown SKU reads 0."
+        ),
+        params=(
+            _req("store_id", "PetSmart store number from petsmart.stores(), e.g. '1658'."),
+            _str_list("skus", "1-20 SKUs, e.g. every variant of a product.", required=True),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="petsmart_availability",
+        namespace="petsmart",
+        method="availability",
+        http="POST",
+        path="/api/v1/petsmart/availability",
+        summary=(
+            "Unit counts for up to 20 PetSmart store and SKU pairs in one call, mixing stores and "
+            "SKUs freely: quantity and in_stock per pair. Unknown stores or SKUs read 0."
+        ),
+        params=(
+            Param(
+                "pairs",
+                "list[dict[str, str]]",
+                required=True,
+                doc="1-20 {'store_id': ..., 'sku': ...} pairs, e.g. [{'store_id': '1658', 'sku': '5252900'}].",
+            ),
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="petsmart_deals",
+        namespace="petsmart",
+        method="deals",
+        http="POST",
+        path="/api/v1/petsmart/deals",
+        summary=(
+            "Products in PetSmart's Sale section, up to 40 per page, in the same shape as "
+            "search(), plus the current sale events with product counts. The Sale section also "
+            "holds points and Autoship promotions, so on_sale marks the rows whose price is "
+            "actually reduced."
+        ),
+        params=(
+            _lit(
+                "pet",
+                ("dog", "cat", "fish", "small_pet", "reptile", "bird"),
+                "Only deals for this pet: dog, cat, fish, small_pet, reptile or bird.",
+            ),
+            _str("event", "One sale event by its exact name from a previous answer's events, e.g. 'Sale > November > Dog Sale'."),
+            _str("query", "Keywords to search within the sale."),
+            _int("page", "Results page, 1-based (1-100)."),
+            _int("limit", "Results per page (1-40; default 40)."),
+            _str("store_id", "PetSmart store number. Lists only products in stock there."),
+            _lit(
+                "sort",
+                ("relevance", "best_sellers", "price_low", "price_high", "top_rated", "new_arrivals"),
+                "relevance (default), best_sellers, price_low, price_high, top_rated or new_arrivals.",
+            ),
+        ),
+        credits=1,
+    ),
+    # =============================== Petco ===============================
+    # 5 endpoints, 1 credit each. Prices are national, with the Repeat
+    # Delivery (autoship) price. store_inventory() takes cat_entry_id values
+    # (from search or product), not part numbers. Every call can take 10-30
+    # seconds, so the timeout is raised to 120s.
+    Endpoint(
+        key="petco_search",
+        namespace="petco",
+        method="search",
+        http="POST",
+        path="/api/v1/petco/search",
+        summary=(
+            "Search Petco products, 48 per page: name, brand, part_number, cat_entry_id (for "
+            "store_inventory), price, list price and autoship (Repeat Delivery) price, rating, "
+            "review count, fulfillment flags (pickup, same-day, autoship, in-store only), "
+            "deal_group_ids and every size or flavor variation with its own prices, plus "
+            "total_results, facets and matching categories. Prices are national."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-100). 48 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "price", "rating", "top_sold", "newest", "name"),
+                "relevance (default), price, rating, top_sold, newest or name.",
+            ),
+            _lit("sort_order", ("asc", "desc"), "asc or desc. Defaults to asc for price and name, desc otherwise."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="petco_category",
+        namespace="petco",
+        method="category",
+        http="POST",
+        path="/api/v1/petco/category",
+        summary=(
+            "Products in a Petco category, e.g. dog/dog-food/dry-dog-food, 48 per page, in the "
+            "same shape as search(). Can take 10-30 seconds. An unknown category is a 404."
+        ),
+        params=(
+            _req(
+                "path",
+                "Category path ('dog/dog-food/dry-dog-food'), /category/<path>, or the petco.com URL. "
+                "A result's `categories[].url` works too.",
+            ),
+            _int("page", "Results page, 1-based (1-100). 48 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "price", "rating", "top_sold", "newest", "name"),
+                "relevance (default), price, rating, top_sold, newest or name.",
+            ),
+            _lit("sort_order", ("asc", "desc"), "asc or desc. Defaults to asc for price and name, desc otherwise."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="petco_product",
+        namespace="petco",
+        method="product",
+        http="POST",
+        path="/api/v1/petco/product",
+        summary=(
+            "One Petco product by part number or URL, with every variant (size, flavor): "
+            "cat_entry_id, part number, SKU, UPC, price, list price, autoship price, "
+            "first-autoship price, online quantity and status, fulfillment flags, ingredients, "
+            "guaranteed analysis, directions, specifications, dimensions and images, plus brand, "
+            "rating, review count and breadcrumbs. Prices are national. Can take 10-30 seconds. "
+            "An unknown product is a 404."
+        ),
+        params=(
+            _str("part_number", "Petco part number, a search result's `part_number`, e.g. '3748364'. Pass this or url."),
+            _str("url", "Petco product page URL (a search result's `url`). Answers faster than part_number."),
+        ),
+        one_of=(("part_number", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="petco_stores",
+        namespace="petco",
+        method="stores",
+        http="POST",
+        path="/api/v1/petco/stores",
+        summary=(
+            "Petco stores nearest a US ZIP code (up to 10): store_id (for store_inventory), store "
+            "number, name, address, phone, coordinates, distance in miles, in-store pickup and "
+            "opening hours per weekday."
+        ),
+        params=(
+            _req("zip", "US ZIP code to search around, e.g. '10001'."),
+            _int("limit", "Stores to return, nearest first (1-10; default 5)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="petco_store_inventory",
+        namespace="petco",
+        method="store_inventory",
+        http="POST",
+        path="/api/v1/petco/store-inventory",
+        summary=(
+            "Units on hand at one Petco store for up to 10 products: qty_available, alert_level "
+            "(GREEN, YELLOW, RED) and in_stock per cat_entry_id. Pass store_id, or zip to use "
+            "the nearest store. Takes catalog entry ids, not part numbers; one unknown id makes "
+            "the whole answer a 404."
+        ),
+        params=(
+            _str_list(
+                "cat_entry_ids",
+                "1-10 catalog entry ids: the `cat_entry_id` of a search result, variation or product variant. Not the part number.",
+                required=True,
+            ),
+            _str("store_id", "Petco store id, the `store_id` of petco.stores() (not the store number). Pass this or zip."),
+            _str("zip", "US ZIP code: stock is read at the nearest store, returned as `store`."),
+        ),
+        one_of=(("store_id", "zip"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    # =============================== iHerb ===============================
+    # 4 endpoints, 2 credits each. Online only (no stores), US store in USD.
+    # reviews() is the rating summary, star histogram and the top positive
+    # and top critical review, not a full review list.
+    Endpoint(
+        key="iherb_search",
+        namespace="iherb",
+        method="search",
+        http="POST",
+        path="/api/v1/iherb/search",
+        summary=(
+            "Search iHerb (US store, USD), 48 products per page: product_id, part_number, name, "
+            "brand, brand_code, URL, image, price, list price, original price and discount when "
+            "discounted, rating, review count, in_stock, badges and recent_sales, plus "
+            "total_results and brand_filters for narrowing with brand_code."
+        ),
+        params=(
+            _req("query", "Search keywords (1-200 characters)."),
+            _int("page", "Results page, 1-based (1-500). 48 results per page."),
+            _lit(
+                "sort",
+                ("relevance", "best_selling", "rating", "price_asc", "price_desc", "newest", "percent_off", "review_count"),
+                "relevance, best_selling, rating, price_asc, price_desc, newest, percent_off "
+                "(highest discount first) or review_count. Defaults to iHerb's featured order.",
+            ),
+            _str("brand_code", "Only this brand by iHerb brand code, e.g. 'CGN' or 'NOW' (a result's brand_code)."),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="iherb_product",
+        namespace="iherb",
+        method="product",
+        http="POST",
+        path="/api/v1/iherb/product",
+        summary=(
+            "One iHerb product (US store, USD): name, brand, part number, UPC, price, list "
+            "price, discount, price per serving or unit, stock status, quantity limit, "
+            "expiration date, package quantity, weight and dimensions, rating, review count, "
+            "breadcrumbs, best-seller rankings, badges, variants (size, potency, flavor) with "
+            "their product ids, supplement facts, description, suggested use, ingredients, "
+            "warnings and images. An unknown product id is a 404."
+        ),
+        params=(
+            _str_or_int("product_id", "iHerb product id, the number at the end of an iherb.com/pr/ URL, e.g. '62118'. Pass this or url."),
+            _str("url", "An iherb.com product URL. Data is always the US store's, whatever the URL's country."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="iherb_prices",
+        namespace="iherb",
+        method="prices",
+        http="POST",
+        path="/api/v1/iherb/prices",
+        summary=(
+            "Current price, list price, discount, in-stock flag, rating and review count for up "
+            "to 50 iHerb products in one call (US store, USD). One row per id in request order; "
+            "unknown ids come back with found False and are listed in not_found."
+        ),
+        params=(
+            Param(
+                "product_ids",
+                "list[Union[str, int]]",
+                required=True,
+                doc="1-50 iHerb product ids, e.g. ['62118', '70316']. Duplicates are answered once.",
+            ),
+        ),
+        credits=2,
+    ),
+    Endpoint(
+        key="iherb_reviews",
+        namespace="iherb",
+        method="reviews",
+        http="POST",
+        path="/api/v1/iherb/reviews",
+        summary=(
+            "The review summary of one iHerb product: average rating, review count, star "
+            "histogram (count and percent per star), review counts per language, and the full "
+            "text of the top positive and top critical review. Not a full review list."
+        ),
+        params=(
+            _str_or_int("product_id", "iHerb product id, e.g. '62118'. Pass this or url."),
+            _str("url", "An iherb.com product URL."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+    ),
+    # =============================== Chewy ===============================
+    # 2 endpoints, 10 credits each. One-time vs Autoship vs first-Autoship
+    # price, MAP fields and ratings. A search Chewy sends to a category page
+    # comes back with `redirect`. No stores.
+    Endpoint(
+        key="chewy_search",
+        namespace="chewy",
+        method="search",
+        http="POST",
+        path="/api/v1/chewy/search",
+        summary=(
+            "Search Chewy by keyword, or browse a category, 36 per page: one-time, offer and "
+            "strike-through price, Autoship price and discount, first-Autoship price, discount "
+            "and savings cap, per-unit price, rating, rating count, in_stock, deal, new, "
+            "exclusive and prescription flags, brand, image and URL. Sponsored listings are "
+            "removed. When Chewy sends a query to a category, `redirect` names that category "
+            "and the results are its products."
+        ),
+        params=(
+            _str("query", "Search keywords (1-200 characters). Pass this or category_id."),
+            _str("category_id", "Category to browse: the number at the end of a chewy.com /b/ URL (332 is Dog Food), or that URL."),
+            _int("page", "Results page, 1-based (1-100). 36 results per page."),
+            _lit(
+                "sort",
+                ("relevance", "bestselling", "newest", "price_low", "price_high", "rating", "most_reviewed"),
+                "relevance (default), bestselling, newest, price_low, price_high, rating or most_reviewed.",
+            ),
+        ),
+        one_of=(("query", "category_id"),),
+        credits=10,
+    ),
+    Endpoint(
+        key="chewy_product",
+        namespace="chewy",
+        method="product",
+        http="POST",
+        path="/api/v1/chewy/product",
+        summary=(
+            "One Chewy product: one-time, offer, list and strike-through price with savings, MAP "
+            "price and whether it is enforced, Autoship price and discount, first-Autoship price, "
+            "discount and savings cap, per-unit price, in_stock, rating, rating count, review "
+            "count and star distribution, brand, GTIN, description, key benefits, "
+            "specifications, breadcrumbs, images, promotions and every variant with its own "
+            "price, Autoship price and stock. An unknown product id is a 404."
+        ),
+        params=(
+            _str("product_id", "Chewy product id: the number after /dp/ in a product URL, e.g. '128666'. Pass this or url."),
+            _str("url", "A chewy.com product URL."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=10,
+    ),
+    # ============================== Menards ==============================
+    # 2 endpoints. No search: product() takes an item id or URL. Prices carry
+    # the mail-in rebate (often 11%) and the final price after it. store_id
+    # adds that store's stock quantity and aisle and costs 2 credits instead
+    # of 1; it can take 10-40 seconds, so product()'s timeout is raised to 120s.
+    Endpoint(
+        key="menards_product",
+        namespace="menards",
+        method="product",
+        http="POST",
+        path="/api/v1/menards/product",
+        summary=(
+            "One Menards product by item id or URL: name, brand, model number, SKU, description, "
+            "bullets, specifications, images, videos and documents, with everyday price, sale "
+            "price and end date, mail-in rebates (text, amount, dates), final price after "
+            "rebates and you-save amount, plus pickup, delivery and ship-to-store flags. With "
+            "store_id, that store's stock quantity, stock message and aisle location (10-40 "
+            "seconds); without it prices are the default store's and there is no stock. An "
+            "unknown item id or store number is a 404."
+        ),
+        params=(
+            _str("item_id", "Menards item id: the number after p- in a menards.com product URL. Not the SKU or model number. Pass this or url."),
+            _str("url", "A menards.com product URL."),
+            _str("store_id", "Menards store number from menards.stores(), e.g. '3181'. Adds stock and aisle; costs 2 credits."),
+        ),
+        one_of=(("item_id", "url"),),
+        credits=1,
+        credits_note="Costs 1 credit, or 2 when store_id is set.",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="menards_stores",
+        namespace="menards",
+        method="stores",
+        http="POST",
+        path="/api/v1/menards/stores",
+        summary=(
+            "Menards stores near a US ZIP code or a city and state, nearest first: store_id, "
+            "name, address, coordinates, distance in miles, open flag and services (garden "
+            "center, grocery, rental center, propane...)."
+        ),
+        params=(
+            _str("zip", "US ZIP code, e.g. '55401'. Pass this, or city and state."),
+            _str("city", "City to search around; pass with state."),
+            _str("state", "2-letter US state code; pass with city."),
+        ),
+        one_of=(("zip", "city"),),
+        credits=1,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -8121,6 +8900,13 @@ NAMESPACES: tuple[str, ...] = (
     "micro_center",
     "walgreens",
     "cvs",
+    "whole_foods",
+    "harbor_freight",
+    "petsmart",
+    "petco",
+    "iherb",
+    "chewy",
+    "menards",
     "trustpilot",
     "realtor",
     "rightmove",

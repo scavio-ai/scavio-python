@@ -52,6 +52,13 @@ __all__ = [
     "_AsyncMicroCenterNamespace",
     "_AsyncWalgreensNamespace",
     "_AsyncCvsNamespace",
+    "_AsyncWholeFoodsNamespace",
+    "_AsyncHarborFreightNamespace",
+    "_AsyncPetsmartNamespace",
+    "_AsyncPetcoNamespace",
+    "_AsyncIherbNamespace",
+    "_AsyncChewyNamespace",
+    "_AsyncMenardsNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -6445,6 +6452,735 @@ class _AsyncCvsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("cvs_stock", {"sku_ids": sku_ids, "store_id": store_id}, extra)
+
+class _AsyncWholeFoodsNamespace:
+    """Whole Foods Market store-level search, category, deal, product, store, and sales flyer endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        store_id: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        on_sale: Optional[bool] = None,
+        diet: Optional[Literal["vegan", "gluten-free", "organic", "dairy-free", "vegetarian"]] = None,
+        category: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Whole Foods Market products at one store: ASIN, slug, name, brand, image, URL, that store's regular_price, sale_price and prime_price (Prime member price) with sale dates and multi-buy quantities, price_unit (lb when priced per pound), on_sale and is_local flags, plus total_results and category, featured and diet facets with counts. Sorts by relevance or price only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            store_id: 5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX).
+            sort: relevance (default), price_asc or price_desc.
+            on_sale: Only products on sale at the store. Defaults to False.
+            diet: Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.
+            category: Restrict to one category slug, e.g. 'milk-cream' (slugs are in the category facet).
+            limit: Products per page (1-60; default 60).
+            offset: Products to skip, for paging (0-10000; 60 = page 2 at the default limit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_search", {"query": query, "store_id": store_id, "sort": sort, "on_sale": on_sale, "diet": diet, "category": category, "limit": limit, "offset": offset}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        store_id: Optional[str] = None,
+        sort: Optional[Literal["featured", "popular", "price_asc", "price_desc", "brand_az", "brand_za"]] = None,
+        on_sale: Optional[bool] = None,
+        diet: Optional[Literal["vegan", "gluten-free", "organic", "dairy-free", "vegetarian"]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one Whole Foods Market category at one store, in the same product shape as search(), with the category breadcrumb, total_results and facets. An unknown category slug is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Category slug, e.g. 'cheese', 'dairy-eggs' or 'produce' (slugs are in the category facet of any search); 'all-products' lists the whole store.
+            store_id: 5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX).
+            sort: featured (default), popular, price_asc, price_desc, brand_az or brand_za.
+            on_sale: Only products on sale at the store. Defaults to False.
+            diet: Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.
+            limit: Products per page (1-60; default 60).
+            offset: Products to skip, for paging (0-10000; 60 = page 2 at the default limit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_category", {"category": category, "store_id": store_id, "sort": sort, "on_sale": on_sale, "diet": diet, "limit": limit, "offset": offset}, extra)
+
+    async def deals(
+        self,
+        *,
+        category: Optional[str] = None,
+        store_id: Optional[str] = None,
+        sort: Optional[Literal["featured", "popular", "price_asc", "price_desc", "brand_az", "brand_za"]] = None,
+        diet: Optional[Literal["vegan", "gluten-free", "organic", "dairy-free", "vegetarian"]] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every product on sale at one Whole Foods Market store, store-wide or in one category, in the same product shape as search(): regular, sale and Prime price with the sale start and end dates.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Category slug, e.g. 'cheese'. Defaults to 'all-products' (every sale item at the store).
+            store_id: 5-digit Whole Foods store id from whole_foods.stores(). Defaults to 10145 (Lamar, Austin TX).
+            sort: featured (default), popular, price_asc, price_desc, brand_az or brand_za.
+            diet: Only products with this dietary attribute: vegan, gluten-free, organic, dairy-free or vegetarian.
+            limit: Products per page (1-60; default 60).
+            offset: Products to skip, for paging (0-10000; 60 = page 2 at the default limit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_deals", {"category": category, "store_id": store_id, "sort": sort, "diet": diet, "limit": limit, "offset": offset}, extra)
+
+    async def product(
+        self,
+        *,
+        asin: Optional[str] = None,
+        url: Optional[str] = None,
+        slug: Optional[str] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Whole Foods Market product by ASIN, URL or slug: name, brand, description, ingredients, nutrition facts, diets, SNAP EBT eligibility and images. With store_id, two separate price blocks: in_store (that store's shelf regular, sale and Prime price; None when the store does not list it) and online (that store's delivery and pickup price, list price, savings, Prime price, unit price and availability). Online and in-store prices often differ. An unknown ASIN is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            asin: Product ASIN, the `asin` of a search result, e.g. 'B0BCBNG8LS'. Pass this, url or slug.
+            url: A wholefoodsmarket.com product URL.
+            slug: A product slug, the `slug` of a search result.
+            store_id: 5-digit Whole Foods store id. Adds that store's in_store and online price blocks.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_product", {"asin": asin, "url": url, "slug": slug, "store_id": store_id}, extra)
+
+    async def stores(
+        self,
+        zip: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Whole Foods Market stores near a US ZIP code, nearest first (within 15 miles, widening to 50): store_id, name, address, phone, coordinates, distance in miles, time zone and seven days of in-store and pickup hours. No store in range is an empty list.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '78703'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_stores", {"zip": zip}, extra)
+
+    async def store(
+        self,
+        store_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Whole Foods Market store by id: name, status, phone, Prime eligibility, opening date, address, coordinates, time zone, store page URL and sales flyer URL. An unknown store id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: 5-digit Whole Foods store id from whole_foods.stores(), e.g. '10160'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_store", {"store_id": store_id}, extra)
+
+    async def sales_flyer(
+        self,
+        store_id: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current weekly sales flyer of one Whole Foods Market store: per promotion the product name, brand, headline, description, terms, regular, sale and Prime price as printed (text such as '$3.99/lb' or '44% off'), start and end dates, image, rank and the ASINs it covers. An unknown store id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: 5-digit Whole Foods store id from whole_foods.stores(), e.g. '10160'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("whole_foods_sales_flyer", {"store_id": store_id}, extra)
+
+class _AsyncHarborFreightNamespace:
+    """Harbor Freight search, clearance, product, batch price, store locator, store stock, and review endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "member_price_low", "member_price_high", "top_rated", "newest"]] = None,
+        brand: Optional[str] = None,
+        clearance: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Harbor Freight by keyword and/or category: item number (sku), id, title, brand, URL, image, price, regular_price, on_sale and clearance flags, sale (price, end date, savings), coupon (public coupon price, code, expiry, limit), member_deal (Inside Track Club price), compare_at (the competitor brand, model and price quoted), badges, rating, review count and where it sells. Also total_results, facets and, when a keyword maps to a category page, redirect. Prices are national.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters). Pass this, category_id, or both.
+            category_id: Category id, e.g. '1827' (Drills, Drivers & Drill Presses): the `value` of a category facet.
+            page: Results page, 1-based (1-100).
+            page_size: Results per page (1-48; default 36).
+            sort: best_match (default), price_low, price_high, member_price_low, member_price_high (Inside Track Club price), top_rated or newest.
+            brand: Only this brand as listed in the brand facet, e.g. 'BAUER' (case-insensitive).
+            clearance: Only clearance items. Defaults to False.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_search", {"query": query, "category_id": category_id, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "clearance": clearance}, extra)
+
+    async def clearance(
+        self,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "member_price_low", "member_price_high", "top_rated", "newest"]] = None,
+        brand: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Harbor Freight clearance items, optionally narrowed by keyword, category or brand, in the same shape as search(): each item's clearance price and end date are in `sale`.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords to narrow the clearance list (1-200 characters).
+            category_id: Category id, e.g. '1827': the `value` of a category facet.
+            page: Results page, 1-based (1-100).
+            page_size: Results per page (1-48; default 36).
+            sort: best_match (default), price_low, price_high, member_price_low, member_price_high (Inside Track Club price), top_rated or newest.
+            brand: Only this brand as listed in the brand facet, e.g. 'BAUER' (case-insensitive).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_clearance", {"query": query, "category_id": category_id, "page": page, "page_size": page_size, "sort": sort, "brand": brand}, extra)
+
+    async def product(
+        self,
+        *,
+        sku: Optional[str] = None,
+        id: Optional[int] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Harbor Freight product by item number, id or URL: title, brand, UPC, the full price set (price, regular_price, sale, coupon, member_deal, compare_at), rating, review count, badges, description, highlights, the specification table, warranty, shipping notes, owner's manuals, images and variants. An unknown item is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: Harbor Freight item number, the `sku` of a search result, e.g. '73216'. Pass this, id or url.
+            id: Numeric product id, the `id` of a search result, e.g. 48725.
+            url: harborfreight.com product URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_product", {"sku": sku, "id": id, "url": url}, extra)
+
+    async def prices(
+        self,
+        skus: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current national prices for up to 50 Harbor Freight item numbers in one call: price, regular_price, on_sale and clearance flags, sale, coupon, member_deal and compare_at per item. Unknown item numbers are listed in not_found.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1-50 Harbor Freight item numbers, e.g. ['73216', '59716'].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_prices", {"skus": skus}, extra)
+
+    async def stores(
+        self,
+        *,
+        query: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Harbor Freight stores near a ZIP code, 'City, ST' or coordinates, nearest first: store number, name, address, phone, coordinates, distance in miles, status, opening date and hours.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: US ZIP code or 'City, ST', e.g. '60601' or 'Los Angeles, CA'. Pass this or latitude and longitude.
+            latitude: Latitude (-90 to 90); pass with longitude.
+            longitude: Longitude (-180 to 180); pass with latitude.
+            radius: Search radius in miles (1-100; default 50).
+            limit: Most stores to return (1-50; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_stores", {"query": query, "latitude": latitude, "longitude": longitude, "radius": radius, "limit": limit}, extra)
+
+    async def availability(
+        self,
+        skus: list[str],
+        *,
+        store_ids: Optional[list[str]] = None,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """In-store stock for up to 20 Harbor Freight items at chosen stores, or at the stores nearest a ZIP code or coordinates. Each store lists every item with stock_status (in_stock, limited, out_of_stock or not_carried), stock_code, aisle and a nearby store that has it. inventory_updated_at is the time of the daily stock snapshot. Stock is a status, not a unit count.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1-20 Harbor Freight item numbers.
+            store_ids: 1-20 store numbers from harbor_freight.stores(). Or pass zip, or latitude and longitude.
+            zip: US ZIP code: stock at the stores nearest to it.
+            latitude: Latitude: stock at the stores nearest to it; pass with longitude.
+            longitude: Longitude; pass with latitude.
+            limit: Nearest stores to return with zip or coordinates (1-100; default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_availability", {"skus": skus, "store_ids": store_ids, "zip": zip, "latitude": latitude, "longitude": longitude, "limit": limit}, extra)
+
+    async def reviews(
+        self,
+        sku: str,
+        *,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews for one Harbor Freight item, newest first: title, text, star rating, author, review and purchase dates, incentivized flag, helpful votes and the reviewer's answers (would recommend...), plus the average rating and total review count. An unknown item is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: Harbor Freight item number, e.g. '73216'.
+            limit: Reviews per call (1-50; default 10).
+            offset: Reviews to skip, for paging. Defaults to 0.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("harbor_freight_reviews", {"sku": sku, "limit": limit, "offset": offset}, extra)
+
+class _AsyncPetsmartNamespace:
+    """PetSmart search, product detail, store locator with unit counts, store stock, and deal endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        store_id: Optional[str] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "price_low", "price_high", "top_rated", "new_arrivals"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search PetSmart products, up to 40 per page: SKU, web_style_id, name, brand, UPC, price, original and sale price, price range across sizes, rating, review count, image, size, variations, category, pets, promotions, stores_in_stock (how many stores stock it), pickup and Autoship eligibility and URL. Prices are national. Pass store_id to list only products in stock at that store.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100).
+            limit: Results per page (1-40; default 40).
+            store_id: PetSmart store number from petsmart.stores(), e.g. '1658'. Lists only products in stock there.
+            sort: relevance (default), best_sellers, price_low, price_high, top_rated or new_arrivals.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_search", {"query": query, "page": page, "limit": limit, "store_id": store_id, "sort": sort}, extra)
+
+    async def product(
+        self,
+        *,
+        web_style_id: Optional[str] = None,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One PetSmart product by web_style_id, SKU or URL, with every variant (size, flavor): SKU, UPC, price, original price, sale price and end date, autoship (discount, first_order_price, recurring_price), ship-to-home stock, pickup and same-day options, images and promotions, plus brand, rating, review count, categories and description. Prices are national. An unknown id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            web_style_id: Product id, the number at the end of a product URL (...-570.html). One id covers every size and flavor.
+            sku: One size or flavor's SKU, e.g. '5154856'. Returns the whole product it belongs to.
+            url: A petsmart.com product URL. Pass exactly one of web_style_id, sku or url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_product", {"web_style_id": web_style_id, "sku": sku, "url": url}, extra)
+
+    async def stores(
+        self,
+        zip: str,
+        *,
+        radius: Optional[int] = None,
+        sku: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 12 PetSmart stores nearest a US ZIP code: store number, name, address, phone, coordinates, distance in miles, time zone, the next 7 days of hours and services (grooming, PetsHotel, veterinary...). Pass sku and each store also carries quantity and in_stock for that SKU.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '60601'.
+            radius: Search radius in miles (1-100; default 30).
+            sku: A SKU: every store then carries its unit count of it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_stores", {"zip": zip, "radius": radius, "sku": sku}, extra)
+
+    async def store_stock(
+        self,
+        store_id: str,
+        skus: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Stock of up to 20 SKUs at one PetSmart store: units for in-store pickup at that store, units to ship to home, and an alternate nearby store with its count when the store has none, plus the store's name, address, phone and pickup options. An unknown store number is a 404; an unknown SKU reads 0.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: PetSmart store number from petsmart.stores(), e.g. '1658'.
+            skus: 1-20 SKUs, e.g. every variant of a product.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_store_stock", {"store_id": store_id, "skus": skus}, extra)
+
+    async def availability(
+        self,
+        pairs: list[dict[str, str]],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Unit counts for up to 20 PetSmart store and SKU pairs in one call, mixing stores and SKUs freely: quantity and in_stock per pair. Unknown stores or SKUs read 0.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            pairs: 1-20 {'store_id': ..., 'sku': ...} pairs, e.g. [{'store_id': '1658', 'sku': '5252900'}].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_availability", {"pairs": pairs}, extra)
+
+    async def deals(
+        self,
+        *,
+        pet: Optional[Literal["dog", "cat", "fish", "small_pet", "reptile", "bird"]] = None,
+        event: Optional[str] = None,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        store_id: Optional[str] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "price_low", "price_high", "top_rated", "new_arrivals"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in PetSmart's Sale section, up to 40 per page, in the same shape as search(), plus the current sale events with product counts. The Sale section also holds points and Autoship promotions, so on_sale marks the rows whose price is actually reduced.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            pet: Only deals for this pet: dog, cat, fish, small_pet, reptile or bird.
+            event: One sale event by its exact name from a previous answer's events, e.g. 'Sale > November > Dog Sale'.
+            query: Keywords to search within the sale.
+            page: Results page, 1-based (1-100).
+            limit: Results per page (1-40; default 40).
+            store_id: PetSmart store number. Lists only products in stock there.
+            sort: relevance (default), best_sellers, price_low, price_high, top_rated or new_arrivals.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petsmart_deals", {"pet": pet, "event": event, "query": query, "page": page, "limit": limit, "store_id": store_id, "sort": sort}, extra)
+
+class _AsyncPetcoNamespace:
+    """Petco search, category, product detail, store locator, and store inventory endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price", "rating", "top_sold", "newest", "name"]] = None,
+        sort_order: Optional[Literal["asc", "desc"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Petco products, 48 per page: name, brand, part_number, cat_entry_id (for store_inventory), price, list price and autoship (Repeat Delivery) price, rating, review count, fulfillment flags (pickup, same-day, autoship, in-store only), deal_group_ids and every size or flavor variation with its own prices, plus total_results, facets and matching categories. Prices are national.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-100). 48 products per page.
+            sort: relevance (default), price, rating, top_sold, newest or name.
+            sort_order: asc or desc. Defaults to asc for price and name, desc otherwise.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petco_search", {"query": query, "page": page, "sort": sort, "sort_order": sort_order}, extra)
+
+    async def category(
+        self,
+        path: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price", "rating", "top_sold", "newest", "name"]] = None,
+        sort_order: Optional[Literal["asc", "desc"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in a Petco category, e.g. dog/dog-food/dry-dog-food, 48 per page, in the same shape as search(). Can take 10-30 seconds. An unknown category is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: Category path ('dog/dog-food/dry-dog-food'), /category/<path>, or the petco.com URL. A result's `categories[].url` works too.
+            page: Results page, 1-based (1-100). 48 products per page.
+            sort: relevance (default), price, rating, top_sold, newest or name.
+            sort_order: asc or desc. Defaults to asc for price and name, desc otherwise.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petco_category", {"path": path, "page": page, "sort": sort, "sort_order": sort_order}, extra)
+
+    async def product(
+        self,
+        *,
+        part_number: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Petco product by part number or URL, with every variant (size, flavor): cat_entry_id, part number, SKU, UPC, price, list price, autoship price, first-autoship price, online quantity and status, fulfillment flags, ingredients, guaranteed analysis, directions, specifications, dimensions and images, plus brand, rating, review count and breadcrumbs. Prices are national. Can take 10-30 seconds. An unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            part_number: Petco part number, a search result's `part_number`, e.g. '3748364'. Pass this or url.
+            url: Petco product page URL (a search result's `url`). Answers faster than part_number.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petco_product", {"part_number": part_number, "url": url}, extra)
+
+    async def stores(
+        self,
+        zip: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Petco stores nearest a US ZIP code (up to 10): store_id (for store_inventory), store number, name, address, phone, coordinates, distance in miles, in-store pickup and opening hours per weekday.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '10001'.
+            limit: Stores to return, nearest first (1-10; default 5).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petco_stores", {"zip": zip, "limit": limit}, extra)
+
+    async def store_inventory(
+        self,
+        cat_entry_ids: list[str],
+        *,
+        store_id: Optional[str] = None,
+        zip: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units on hand at one Petco store for up to 10 products: qty_available, alert_level (GREEN, YELLOW, RED) and in_stock per cat_entry_id. Pass store_id, or zip to use the nearest store. Takes catalog entry ids, not part numbers; one unknown id makes the whole answer a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cat_entry_ids: 1-10 catalog entry ids: the `cat_entry_id` of a search result, variation or product variant. Not the part number.
+            store_id: Petco store id, the `store_id` of petco.stores() (not the store number). Pass this or zip.
+            zip: US ZIP code: stock is read at the nearest store, returned as `store`.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petco_store_inventory", {"cat_entry_ids": cat_entry_ids, "store_id": store_id, "zip": zip}, extra)
+
+class _AsyncIherbNamespace:
+    """iHerb search, product detail, batch price, and review summary endpoints (online only)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "rating", "price_asc", "price_desc", "newest", "percent_off", "review_count"]] = None,
+        brand_code: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search iHerb (US store, USD), 48 products per page: product_id, part_number, name, brand, brand_code, URL, image, price, list price, original price and discount when discounted, rating, review count, in_stock, badges and recent_sales, plus total_results and brand_filters for narrowing with brand_code.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters).
+            page: Results page, 1-based (1-500). 48 results per page.
+            sort: relevance, best_selling, rating, price_asc, price_desc, newest, percent_off (highest discount first) or review_count. Defaults to iHerb's featured order.
+            brand_code: Only this brand by iHerb brand code, e.g. 'CGN' or 'NOW' (a result's brand_code).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("iherb_search", {"query": query, "page": page, "sort": sort, "brand_code": brand_code}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One iHerb product (US store, USD): name, brand, part number, UPC, price, list price, discount, price per serving or unit, stock status, quantity limit, expiration date, package quantity, weight and dimensions, rating, review count, breadcrumbs, best-seller rankings, badges, variants (size, potency, flavor) with their product ids, supplement facts, description, suggested use, ingredients, warnings and images. An unknown product id is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: iHerb product id, the number at the end of an iherb.com/pr/ URL, e.g. '62118'. Pass this or url.
+            url: An iherb.com product URL. Data is always the US store's, whatever the URL's country.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("iherb_product", {"product_id": product_id, "url": url}, extra)
+
+    async def prices(
+        self,
+        product_ids: list[Union[str, int]],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current price, list price, discount, in-stock flag, rating and review count for up to 50 iHerb products in one call (US store, USD). One row per id in request order; unknown ids come back with found False and are listed in not_found.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_ids: 1-50 iHerb product ids, e.g. ['62118', '70316']. Duplicates are answered once.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("iherb_prices", {"product_ids": product_ids}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The review summary of one iHerb product: average rating, review count, star histogram (count and percent per star), review counts per language, and the full text of the top positive and top critical review. Not a full review list.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: iHerb product id, e.g. '62118'. Pass this or url.
+            url: An iherb.com product URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("iherb_reviews", {"product_id": product_id, "url": url}, extra)
+
+class _AsyncChewyNamespace:
+    """Chewy search and product detail endpoints with one-time and Autoship prices."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "bestselling", "newest", "price_low", "price_high", "rating", "most_reviewed"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Chewy by keyword, or browse a category, 36 per page: one-time, offer and strike-through price, Autoship price and discount, first-Autoship price, discount and savings cap, per-unit price, rating, rating count, in_stock, deal, new, exclusive and prescription flags, brand, image and URL. Sponsored listings are removed. When Chewy sends a query to a category, `redirect` names that category and the results are its products.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-200 characters). Pass this or category_id.
+            category_id: Category to browse: the number at the end of a chewy.com /b/ URL (332 is Dog Food), or that URL.
+            page: Results page, 1-based (1-100). 36 results per page.
+            sort: relevance (default), bestselling, newest, price_low, price_high, rating or most_reviewed.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("chewy_search", {"query": query, "category_id": category_id, "page": page, "sort": sort}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Chewy product: one-time, offer, list and strike-through price with savings, MAP price and whether it is enforced, Autoship price and discount, first-Autoship price, discount and savings cap, per-unit price, in_stock, rating, rating count, review count and star distribution, brand, GTIN, description, key benefits, specifications, breadcrumbs, images, promotions and every variant with its own price, Autoship price and stock. An unknown product id is a 404.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Chewy product id: the number after /dp/ in a product URL, e.g. '128666'. Pass this or url.
+            url: A chewy.com product URL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("chewy_product", {"product_id": product_id, "url": url}, extra)
+
+class _AsyncMenardsNamespace:
+    """Menards product detail with rebates and per-store stock, and store locator endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def product(
+        self,
+        *,
+        item_id: Optional[str] = None,
+        url: Optional[str] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Menards product by item id or URL: name, brand, model number, SKU, description, bullets, specifications, images, videos and documents, with everyday price, sale price and end date, mail-in rebates (text, amount, dates), final price after rebates and you-save amount, plus pickup, delivery and ship-to-store flags. With store_id, that store's stock quantity, stock message and aisle location (10-40 seconds); without it prices are the default store's and there is no stock. An unknown item id or store number is a 404.
+
+        Costs 1 credit, or 2 when store_id is set. Returns the API response as a dict.
+
+        Args:
+            item_id: Menards item id: the number after p- in a menards.com product URL. Not the SKU or model number. Pass this or url.
+            url: A menards.com product URL.
+            store_id: Menards store number from menards.stores(), e.g. '3181'. Adds stock and aisle; costs 2 credits.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("menards_product", {"item_id": item_id, "url": url, "store_id": store_id}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Menards stores near a US ZIP code or a city and state, nearest first: store_id, name, address, coordinates, distance in miles, open flag and services (garden center, grocery, rental center, propane...).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code, e.g. '55401'. Pass this, or city and state.
+            city: City to search around; pass with state.
+            state: 2-letter US state code; pass with city.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("menards_stores", {"zip": zip, "city": city, "state": state}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

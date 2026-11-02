@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 52 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 59 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 52 data sources, 314 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 59 data sources, 347 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -21,6 +21,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
+| Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -38,7 +39,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 52 | 1 | 1 per plan | 1 |
+| Data Sources | 59 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -1153,6 +1154,111 @@ for i in units["items"]:
 Walgreens and CVS cover retail (front-store) products, not the pharmacy. An
 unknown CVS SKU or store number reads as 0 units rather than an error.
 
+### 26. US Retail -- Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy and Menards
+
+Seven more US retailers. Whole Foods prices are per store; Harbor Freight,
+PetSmart, Petco, iHerb and Chewy prices are national; Menards prices carry the
+mail-in rebate. Every method costs 1 credit except iHerb (2 each), Chewy (10
+each) and Menards `product` with a `store_id` (2).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# --- Whole Foods Market: prices are one store's (5-digit store_id, default 10145,
+# Lamar in Austin TX): regular, sale and Prime member price. No per-store stock.
+store = client.whole_foods.stores("10019")["data"]["stores"][0]
+milk = client.whole_foods.search("milk", store_id=store["store_id"], sort="price_asc")["data"]
+for p in milk["products"]:
+    print(p["asin"], p["regular_price"], p["sale_price"], p["prime_price"], p["price_unit"], p["name"])
+
+deals = client.whole_foods.deals(store_id=store["store_id"], category="cheese")["data"]
+item = client.whole_foods.product(asin="B078WVT2BC", store_id=store["store_id"])["data"]
+print(item["in_store"]["regular_price"], item["online"]["price"], item["online"]["availability"])
+
+flyer = client.whole_foods.sales_flyer(store["store_id"])["data"]
+for promo in flyer["promotions"]:
+    print(promo["headline"], promo["sale_price"], promo["prime_price"], promo["end_date"], promo["asins"])
+
+# --- Harbor Freight: national prices with sale, public coupon, Inside Track Club
+# member price and the competitor price it quotes (compare_at).
+prices = client.harbor_freight.prices(["73216", "59716"])["data"]
+for p in prices["products"]:
+    print(p["sku"], p["price"], p["regular_price"], p["sale"], p["coupon"], p["member_deal"], p["compare_at"])
+
+found = client.harbor_freight.search(query="cordless drill")["data"]
+print(found["redirect"])                       # set when a keyword maps to a category page
+drills = client.harbor_freight.search(category_id="1827", sort="price_low")["data"]
+
+# Stock is a status (in_stock, limited, out_of_stock, not_carried) plus the
+# aisle, from a daily snapshot -- not a unit count.
+stock = client.harbor_freight.availability(["73216"], zip="90012", limit=5)["data"]
+print(stock["inventory_updated_at"])
+for s in stock["stores"]:
+    for i in s["items"]:
+        print(s["store_id"], s["name"], i["sku"], i["stock_status"], i["aisle"])
+
+# --- PetSmart: national prices with the Autoship first-order and recurring
+# price; stock is a unit count per store.
+found = client.petsmart.search("dog food", store_id="1658")["data"]   # in stock at that store
+p = found["products"][0]
+item = client.petsmart.product(web_style_id=p["web_style_id"])["data"]
+for v in item["variants"]:
+    print(v["sku"], v["options"], v["price"], v["sale_price"], v["autoship"])  # autoship: first_order_price, recurring_price
+
+stock = client.petsmart.store_stock("1658", [v["sku"] for v in item["variants"]])["data"]
+for i in stock["items"]:
+    print(i["sku"], i["store_quantity"], i["ship_to_home_quantity"])
+pairs = client.petsmart.availability([{"store_id": "1658", "sku": "5252900"}, {"store_id": "2528", "sku": "5252900"}])
+sale = client.petsmart.deals(pet="dog")["data"]
+print([p["name"] for p in sale["products"] if p["on_sale"]])   # the Sale section also lists non-price promotions
+
+# --- Petco: national price plus the Repeat Delivery (autoship) price. Store
+# inventory takes cat_entry_id (from search or product), not the part number.
+found = client.petco.search("dog food")["data"]
+p = found["products"][0]
+print(p["part_number"], p["cat_entry_id"], p["price"], p["list_price"], p["autoship_price"])
+
+# Petco calls can take 10-30 seconds; the SDK raises their timeout to 120s.
+item = client.petco.product(url=p["url"])["data"]
+for v in item["variants"]:
+    print(v["cat_entry_id"], v["price"], v["autoship_price"], v["first_autoship_price"], v["online_quantity"])
+
+store = client.petco.stores("10001", limit=1)["data"]["stores"][0]
+inv = client.petco.store_inventory([v["cat_entry_id"] for v in item["variants"]], store_id=store["store_id"])["data"]
+for i in inv["items"]:
+    print(i["cat_entry_id"], i["qty_available"], i["alert_level"], i["in_stock"])
+
+# --- iHerb: online only (no stores), US store in USD. 2 credits per call.
+# search() and product() can take 10-25 seconds; the SDK raises their timeout to 120s.
+found = client.iherb.search("vitamin d", sort="best_selling")["data"]
+ids = [p["product_id"] for p in found["products"][:10]]
+for row in client.iherb.prices(ids)["data"]["products"]:          # up to 50 ids
+    print(row["product_id"], row["found"], row["price"], row["list_price"], row["in_stock"])
+
+summary = client.iherb.reviews(product_id=ids[0])["data"]        # summary, not a review list
+print(summary["average_rating"], summary["rating_histogram"]["five"], summary["top_positive_review"])
+
+# --- Chewy: one-time vs Autoship vs first-Autoship price, MAP fields. 10 credits per call.
+found = client.chewy.search(query="kong classic dog toy", sort="bestselling")["data"]
+print(found["redirect"])                       # set when Chewy sends the query to a category
+item = client.chewy.product(product_id=found["products"][0]["product_id"])["data"]
+print(item["price"], item["autoship_price"], item["first_autoship_price"], item["map_price"], item["map_enforced"])
+
+# --- Menards: no search; look a product up by item id or URL. Prices carry the
+# mail-in rebate and the final price after it. store_id adds that store's stock
+# and aisle, costs 2 credits and can take 10-40 seconds (timeout raised to 120s).
+store = client.menards.stores(zip="55401")["data"]["stores"][0]
+item = client.menards.product(item_id="60893666613", store_id=store["store_id"])["data"]
+print(item["everyday_price"], item["sale_price"], item["rebates"], item["final_price"], item["you_save"])
+print(item["store"]["stock_quantity"], item["store"]["locations"])
+```
+
+Whole Foods returns no ratings, reviews or UPCs. iHerb and Chewy have no store
+endpoints. A Petco `store_inventory` call with one unknown `cat_entry_id` is a
+404 for the whole batch.
+
 ## Error Handling
 
 ```python
@@ -1275,6 +1381,13 @@ Scavio works with popular AI/LLM frameworks:
 | Micro Center | `stores` (start here), `search`, `product` | `stores` 1, the rest 2 each |
 | Walgreens | `stores` (start here), `search`, `product`, `stock` | `stock` 4, the rest 2 each |
 | CVS | `search`, `product`, `stock` | 1 each |
+| Whole Foods Market | `stores` (start here), `store`, `search`, `category`, `deals`, `product`, `sales_flyer` | 1 each |
+| Harbor Freight | `search`, `clearance`, `product`, `prices`, `stores`, `availability`, `reviews` | 1 each |
+| PetSmart | `search`, `product`, `stores`, `store_stock`, `availability`, `deals` | 1 each |
+| Petco | `search`, `category`, `product`, `stores`, `store_inventory` | 1 each |
+| iHerb | `search`, `product`, `prices`, `reviews` | 2 each |
+| Chewy | `search`, `product` | 10 each |
+| Menards | `stores`, `product` | 1 each; `product` with `store_id` 2 |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1284,6 +1397,33 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.33.0
+
+- **Seven new US retail namespaces, 33 methods** (sync and async).
+  - `whole_foods`: `search`, `category`, `deals`, `product`, `stores`, `store`,
+    `sales_flyer` (1 credit each). Prices are one store's (5-digit `store_id`,
+    default 10145): regular, sale and Prime member price. `product` returns the
+    in-store and online price as separate blocks. Search sorts by relevance or
+    price only.
+  - `harbor_freight`: `search`, `clearance`, `product`, `prices` (up to 50
+    item numbers), `stores`, `availability`, `reviews` (1 each). National
+    prices with sale end date, coupon, Inside Track Club member price and
+    compare-at. Store stock is a status plus aisle from a daily snapshot.
+  - `petsmart`: `search`, `product`, `stores`, `store_stock`, `availability`,
+    `deals` (1 each). Autoship first-order and recurring prices; stock is a unit
+    count per store. `availability` takes `pairs` of `{"store_id", "sku"}`.
+  - `petco`: `search`, `category`, `product`, `stores`, `store_inventory` (1
+    each). `store_inventory` takes `cat_entry_ids`, not part numbers.
+    `category` and `product` can take 10-30 seconds, so their request timeout
+    is raised to 120s.
+  - `iherb`: `search`, `product`, `prices` (up to 50 ids), `reviews` (2 each).
+    Online only, US/USD; `reviews` is the rating summary and histogram with the
+    top positive and top critical review.
+  - `chewy`: `search`, `product` (10 each). One-time, Autoship and
+    first-Autoship prices and MAP fields; `search` reports a category redirect.
+  - `menards`: `product`, `stores` (1 each; `product` with `store_id` 2, adds
+    stock quantity and aisle). No search. `product` timeout raised to 120s.
 
 ### Changed in 0.32.1
 

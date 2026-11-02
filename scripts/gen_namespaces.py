@@ -178,6 +178,34 @@ _NS_META = {
         "Cvs",
         "CVS search, product detail, and per-store stock endpoints.",
     ),
+    "whole_foods": (
+        "WholeFoods",
+        "Whole Foods Market store-level search, category, deal, product, store, and sales flyer endpoints.",
+    ),
+    "harbor_freight": (
+        "HarborFreight",
+        "Harbor Freight search, clearance, product, batch price, store locator, store stock, and review endpoints.",
+    ),
+    "petsmart": (
+        "Petsmart",
+        "PetSmart search, product detail, store locator with unit counts, store stock, and deal endpoints.",
+    ),
+    "petco": (
+        "Petco",
+        "Petco search, category, product detail, store locator, and store inventory endpoints.",
+    ),
+    "iherb": (
+        "Iherb",
+        "iHerb search, product detail, batch price, and review summary endpoints (online only).",
+    ),
+    "chewy": (
+        "Chewy",
+        "Chewy search and product detail endpoints with one-time and Autoship prices.",
+    ),
+    "menards": (
+        "Menards",
+        "Menards product detail with rebates and per-store stock, and store locator endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

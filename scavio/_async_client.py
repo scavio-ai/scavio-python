@@ -16,6 +16,7 @@ from ._namespaces_async import (
     _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
     _AsyncChatGPTNamespace,
+    _AsyncChewyNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCostcoNamespace,
     _AsyncCvsNamespace,
@@ -28,17 +29,22 @@ from ._namespaces_async import (
     _AsyncGoogleAdsNamespace,
     _AsyncGoogleNamespace,
     _AsyncGooglePlayNamespace,
+    _AsyncHarborFreightNamespace,
     _AsyncHebNamespace,
     _AsyncHomeDepotNamespace,
+    _AsyncIherbNamespace,
     _AsyncIndeedNamespace,
     _AsyncInstagramNamespace,
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
     _AsyncLowesNamespace,
+    _AsyncMenardsNamespace,
     _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncMicroCenterNamespace,
+    _AsyncPetcoNamespace,
+    _AsyncPetsmartNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
@@ -56,6 +62,7 @@ from ._namespaces_async import (
     _AsyncUltaNamespace,
     _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
+    _AsyncWholeFoodsNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
     _AsyncYouTubeNamespace,
@@ -158,6 +165,13 @@ class AsyncScavioClient:
         self.micro_center = _AsyncMicroCenterNamespace(self)
         self.walgreens = _AsyncWalgreensNamespace(self)
         self.cvs = _AsyncCvsNamespace(self)
+        self.whole_foods = _AsyncWholeFoodsNamespace(self)
+        self.harbor_freight = _AsyncHarborFreightNamespace(self)
+        self.petsmart = _AsyncPetsmartNamespace(self)
+        self.petco = _AsyncPetcoNamespace(self)
+        self.iherb = _AsyncIherbNamespace(self)
+        self.chewy = _AsyncChewyNamespace(self)
+        self.menards = _AsyncMenardsNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

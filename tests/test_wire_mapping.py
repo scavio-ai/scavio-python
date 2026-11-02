@@ -612,7 +612,13 @@ def test_extract_signature_is_url_plus_two_keywords(client_cls):
 BODY_PRICED = {"walmart", "threads", "kuaishou", "instagram", "_core"}
 # Namespaces priced per endpoint: only these keys scale with the body
 # (warehouse count, or country "ca"); the rest of the namespace is flat.
-BODY_PRICED_KEYS = {"costco_prices", "costco_availability", "costco_warehouses", "costco_gas"}
+BODY_PRICED_KEYS = {
+    "costco_prices",
+    "costco_availability",
+    "costco_warehouses",
+    "costco_gas",
+    "menards_product",
+}
 
 
 def test_every_body_priced_endpoint_carries_a_credits_note():
@@ -1622,3 +1628,66 @@ def test_cvs_product_raises_the_timeout(monkeypatch):
     assert seen == [120.0, 30.0]
     with pytest.raises(ScavioError):
         client.cvs.product()
+
+
+def test_us_retail_batch_2_credits_and_paths():
+    """whole_foods/harbor_freight/petsmart/petco/iherb/chewy/menards (0.33.0): 33 endpoints."""
+    one = dict.fromkeys
+    expected = {
+        "whole_foods": one(
+            ("search", "category", "deals", "product", "stores", "store", "sales_flyer"), 1
+        ),
+        "harbor_freight": one(
+            ("search", "clearance", "product", "prices", "stores", "availability", "reviews"), 1
+        ),
+        "petsmart": one(
+            ("search", "product", "stores", "store_stock", "availability", "deals"), 1
+        ),
+        "petco": one(("search", "category", "product", "stores", "store_inventory"), 1),
+        "iherb": one(("search", "product", "prices", "reviews"), 2),
+        "chewy": one(("search", "product"), 10),
+        "menards": one(("product", "stores"), 1),
+    }
+    for ns, methods in expected.items():
+        eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}
+        assert {m: ep.credits for m, ep in eps.items()} == methods, ns
+        wire_ns = ns.replace("_", "")
+        for m, ep in eps.items():
+            assert ep.path == f"/api/v1/{wire_ns}/{m.replace('_', '-')}", ep.key
+    assert sum(len(m) for m in expected.values()) == 33
+    assert "store_id" in ENDPOINTS["menards_product"].credits_note
+
+
+def test_slow_retail_endpoints_raise_the_timeout(monkeypatch):
+    seen: list[float] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append(timeout)
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.petco.product(part_number="3748364")
+    client.petco.category("dog/dog-food/dry-dog-food")
+    client.menards.product(item_id="60893666613", store_id="3181")
+    client.petco.search("dog food")
+    client.iherb.search("vitamin d")
+    client.iherb.product(product_id="62118")
+    client.chewy.search(query="kong classic dog toy")
+    assert seen == [120.0, 120.0, 120.0, 120.0, 120.0, 120.0, 30.0]
+
+
+def test_us_retail_batch_2_one_of_groups(monkeypatch):
+    monkeypatch.setattr("scavio._client.sync_request", lambda *a, **k: {"ok": True})
+    client = ScavioClient(api_key="sk_test")
+    for call in (
+        lambda: client.whole_foods.product(),
+        lambda: client.harbor_freight.search(),
+        lambda: client.harbor_freight.availability(["73216"]),
+        lambda: client.petco.store_inventory(["6131012"]),
+        lambda: client.iherb.reviews(),
+        lambda: client.chewy.search(),
+        lambda: client.menards.stores(),
+    ):
+        with pytest.raises(ScavioError):
+            call()
