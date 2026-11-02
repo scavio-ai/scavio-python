@@ -1285,6 +1285,12 @@ Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
 
+### Changed in 0.32.1
+
+- `cvs.search`: `same_day_delivery` is now always `None`, as on `cvs.stock`. CVS
+  reports one same-day count per SKU whichever store is sent, so it was not the
+  store's number.
+
 ### Changed in 0.32.0
 
 - **Six new US retail namespaces, 20 methods** (sync and async).

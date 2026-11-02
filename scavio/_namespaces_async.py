@@ -6398,7 +6398,7 @@ class _AsyncCvsNamespace:
         limit: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search CVS front-store products: product_id and sku_id, name, brand, URL, regular and sale price, unit price, promotion text, rating, review count, size, image, coupons (ExtraBucks and manufacturer), and units at one store in store, for pickup and for same-day delivery, plus online ship stock. Prices are the same at every store. Includes brand, price-range and rating facets.
+        """Search CVS front-store products: product_id and sku_id, name, brand, URL, regular and sale price, unit price, promotion text, rating, review count, size, image, coupons (ExtraBucks and manufacturer), and units at one store in store and for pickup, plus online ship stock; same_day_delivery is always None. Prices are the same at every store. Includes brand, price-range and rating facets.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -6435,7 +6435,7 @@ class _AsyncCvsNamespace:
         store_id: str,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Units available at one CVS store for up to 20 SKUs: in_store (on the shelf), pickup and ship (online stock, chain-wide). same_day_delivery is always None here; search returns same-day units. An unknown SKU or store number reads as 0.
+        """Units available at one CVS store for up to 20 SKUs: in_store (on the shelf), pickup and ship (online stock, chain-wide). same_day_delivery is always None (CVS does not report it per store). An unknown SKU or store number reads as 0.
 
         Costs 1 credit. Returns the API response as a dict.
 

@@ -6965,8 +6965,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Search CVS front-store products: product_id and sku_id, name, brand, URL, regular and "
             "sale price, unit price, promotion text, rating, review count, size, image, coupons "
-            "(ExtraBucks and manufacturer), and units at one store in store, for pickup and for "
-            "same-day delivery, plus online ship stock. Prices are the same at every store. "
+            "(ExtraBucks and manufacturer), and units at one store in store and for pickup, plus "
+            "online ship stock; same_day_delivery is always None. Prices are the same at every "
+            "store. "
             "Includes brand, price-range and rating facets."
         ),
         params=(
@@ -7009,8 +7010,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/cvs/stock",
         summary=(
             "Units available at one CVS store for up to 20 SKUs: in_store (on the shelf), pickup "
-            "and ship (online stock, chain-wide). same_day_delivery is always None here; search "
-            "returns same-day units. An unknown SKU or store number reads as 0."
+            "and ship (online stock, chain-wide). same_day_delivery is always None (CVS does not "
+            "report it per store). An unknown SKU or store number reads as 0."
         ),
         params=(
             _str_list("sku_ids", "1-20 CVS SKU ids: a search result's sku_id or a product's variants[].sku_id.", required=True),
