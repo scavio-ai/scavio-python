@@ -1,6 +1,9 @@
 from pathlib import Path
 
-import tomllib
+import pytest
+
+# tomllib is 3.11+; the guard only needs to run on one interpreter.
+tomllib = pytest.importorskip("tomllib")
 
 
 def test_pypi_summary_fits():
