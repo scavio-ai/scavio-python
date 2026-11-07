@@ -1733,7 +1733,11 @@ def test_menards_search_wire_body(monkeypatch):
 
 def test_nordstrom_credits_paths_and_wire(monkeypatch):
     """nordstrom (0.35.0): search + product, 5 credits each, 120 s timeout floor."""
-    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nordstrom"}
+    eps = {
+        ep.method: ep
+        for ep in ENDPOINTS.values()
+        if ep.namespace == "nordstrom" and ep.method in ("search", "product")
+    }
     assert {m: ep.credits for m, ep in eps.items()} == {"search": 5, "product": 5}
     for m, ep in eps.items():
         assert ep.path == f"/api/v1/nordstrom/{m}", ep.key
@@ -1768,3 +1772,71 @@ def test_nordstrom_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         client.nordstrom.product()
+
+
+def test_nordstrom_listing_stores_availability_suggestions_wire(monkeypatch):
+    """nordstrom (0.36.0): category, brand, stores, availability, suggestions.
+
+    availability is 10 credits (product page + store lookup), the rest 5; all
+    carry the same 120 s timeout floor as search/product.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nordstrom"}
+    assert {m: ep.credits for m, ep in eps.items()} == {
+        "search": 5,
+        "product": 5,
+        "category": 5,
+        "brand": 5,
+        "stores": 5,
+        "availability": 10,
+        "suggestions": 5,
+    }
+    for m, ep in eps.items():
+        assert ep.path == f"/api/v1/nordstrom/{m}", ep.key
+        assert ep.min_timeout == 120.0, ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.nordstrom.category("/browse/women/clothing/dresses", sort="price_low")
+    client.nordstrom.brand("/brands/astr-the-label--53360", page=2)
+    client.nordstrom.stores(zip="10001")
+    client.nordstrom.stores(latitude=41.8781, longitude=-87.6298, distance_miles=25)
+    client.nordstrom.stores(store_numbers=["210", 220])
+    client.nordstrom.stores(store_numbers="210,220")
+    client.nordstrom.availability(style_id="7737947")
+    client.nordstrom.availability(
+        url="https://www.nordstrom.com/s/maeve-midi-dress/7737947", sku_id="A7578713"
+    )
+    client.nordstrom.suggestions("nike air", limit=5)
+    assert seen == [
+        (
+            "/api/v1/nordstrom/category",
+            {"category": "/browse/women/clothing/dresses", "sort": "price_low"},
+            120.0,
+        ),
+        ("/api/v1/nordstrom/brand", {"brand": "/brands/astr-the-label--53360", "page": 2}, 120.0),
+        ("/api/v1/nordstrom/stores", {"zip": "10001"}, 120.0),
+        (
+            "/api/v1/nordstrom/stores",
+            {"latitude": 41.8781, "longitude": -87.6298, "distance_miles": 25},
+            120.0,
+        ),
+        ("/api/v1/nordstrom/stores", {"store_numbers": ["210", 220]}, 120.0),
+        ("/api/v1/nordstrom/stores", {"store_numbers": "210,220"}, 120.0),
+        ("/api/v1/nordstrom/availability", {"style_id": "7737947"}, 120.0),
+        (
+            "/api/v1/nordstrom/availability",
+            {"url": "https://www.nordstrom.com/s/maeve-midi-dress/7737947", "sku_id": "A7578713"},
+            120.0,
+        ),
+        ("/api/v1/nordstrom/suggestions", {"query": "nike air", "limit": 5}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        client.nordstrom.stores()
+    with pytest.raises(ScavioError):
+        client.nordstrom.availability(sku_id="A7578713")

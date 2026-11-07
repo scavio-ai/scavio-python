@@ -8,7 +8,7 @@
 
 The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 60 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 60 data sources, 349 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 60 data sources, 354 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -22,7 +22,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
-| Nordstrom Products with Per-Size UPC, Price and Stock (2 endpoints) | Yes | No | No | No |
+| Nordstrom Products, Categories, Brands, Store Pickup and Store Locator (7 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1265,11 +1265,14 @@ endpoints. A Petco `store_inventory` call with one unknown `cat_entry_id` is a
 
 ### 27. US Retail -- Nordstrom
 
-nordstrom.com (US site only). `search` returns 24 products a page with current
-and original price ranges, percent off and on-sale flag; `product` lists every
-color and size as a sku with UPC, price, price type and the quantity available
-to ship. 5 credits per call. Both calls can take several seconds, so the SDK
-raises their request timeout to 120s.
+nordstrom.com (US site only). `search`, `category` and `brand` return 24
+products a page with current and original price ranges, percent off and
+on-sale flag (`category` and `brand` add the filter sidebar with product
+counts); `product` lists every color and size as a sku with UPC, price, price
+type and the quantity available to ship; `availability` adds the stores that
+can do in-store pickup per sku; `stores` is the store locator; `suggestions`
+is the search-box autocomplete. 5 credits per call, `availability` 10. Every
+call can take several seconds, so the SDK raises their request timeout to 120s.
 
 ```python
 from scavio import ScavioClient
@@ -1283,8 +1286,17 @@ print(found["total_results"], found["page_count"], found["count"])
 for p in found["products"][:5]:
     print(p["style_id"], p["brand"], p["name"], p["price"], p["original_price_range"], p["percent_off"], p["badges"])
 
+# --- A category (/browse path or URL, incl. sale/women and /browse/new) or a
+# brand page: same product rows plus breadcrumbs, subcategories and filters.
+cat = client.nordstrom.category("/browse/women/clothing/dresses", sort="price_low")["data"]
+print(cat["category"]["title"], cat["total_results"], [s["path"] for s in cat["category"]["subcategories"][:3]])
+for f in cat["filters"][:3]:
+    print(f["name"], f["option_count"], [(o["label"], o["count"]) for o in f["options"][:3]])
+brand = client.nordstrom.brand("/brands/astr-the-label--53360")["data"]
+print(brand["brand"]["name"], brand["total_results"])
+
 # --- One product by url or style_id: per-size UPC, price and online stock.
-item = client.nordstrom.product(style_id=found["products"][0]["style_id"])["data"]
+item = client.nordstrom.product(style_id="7737947")["data"]
 print(item["price_range"], item["clearance_price_range"], item["rating"], item["review_count"])
 for color in item["colors"]:
     for sku in color["skus"]:
@@ -1292,12 +1304,29 @@ for color in item["colors"]:
 print(item["size_fit"]["average"], item["rating_histogram"])
 for r in item["reviews"]:
     print(r["rating"], r["size_rating"], r["title"], r["verified_purchase"])
+
+# --- Ship and pickup availability per sku, with the pickup stores (10 credits).
+avail = client.nordstrom.availability(style_id="7737947")["data"]
+print(avail["sku_count"], avail["in_stock_count"], avail["pickup_store_count"])
+for sku in avail["skus"][:3]:
+    print(sku["size"], sku["color"], sku["ship_quantity"], sku["pick_quantity"], [s["name"] for s in sku["pickup_stores"]])
+
+# --- Stores near a ZIP (or latitude/longitude, or store_numbers), up to 100 miles.
+for store in client.nordstrom.stores(zip="10001")["data"]["stores"][:3]:
+    print(store["store_number"], store["name"], store["type"], store["distance_miles"], store["hours"], store["curbside_pickup"])
+
+# --- Autocomplete.
+print(client.nordstrom.suggestions("nike air")["data"]["suggestions"])
 ```
 
-`reviews` are the 12-13 shown on the product page; there is no deeper review
-paging. `quantity` is units available to ship online: there is no store
-locator or store-level stock, and no category endpoint. An unknown style id is
-a 404.
+`reviews` are the ones shown on the product page (up to about 13), alongside
+the total `review_count` and `rating_histogram`; there is no deeper review
+paging. `quantity` and `ship_quantity` are units available to ship online;
+`in_stock` is true when a sku can be shipped or picked up, so a store-only sku
+reads in stock with quantity 0. `pick_quantity` is chain-wide: per store
+Nordstrom only says whether pickup is available, not how many. A ZIP with no
+store in range returns an empty list (billed). An unknown style id, sku id,
+category or brand is a 404.
 
 ## Error Handling
 
@@ -1428,7 +1457,7 @@ Scavio works with popular AI/LLM frameworks:
 | iHerb | `search`, `product`, `prices`, `reviews` | 2 each |
 | Chewy | `search`, `product` | 10 each |
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
-| Nordstrom | `search`, `product` | 5 each |
+| Nordstrom | `search`, `category`, `brand`, `product`, `availability`, `stores`, `suggestions` | `availability` 10, the rest 5 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1438,6 +1467,23 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.36.0
+
+- `nordstrom` gains five methods (sync and async), all with the 120s timeout floor:
+  - `category(category, *, page, sort)`, 5 credits: a /browse category path or
+    URL (departments, `sale/women`, `/browse/new`), 24 products a page plus the
+    category's breadcrumbs, subcategories and the filter sidebar with counts.
+  - `brand(brand, *, page, sort)`, 5 credits: a /brands path or URL (a product's
+    `brand_url` works), same rows and filters.
+  - `stores(*, zip, latitude, longitude, store_numbers, distance_miles)`, 5
+    credits: pass exactly one of `zip`, `latitude` + `longitude`, or
+    `store_numbers` (list or comma-separated string); radius 1-100 miles,
+    default 100.
+  - `availability(*, url, style_id, sku_id)`, 10 credits: per sku ship
+    quantity, pickup quantity (chain-wide) and the stores that can do pickup.
+  - `suggestions(query, *, limit)`, 5 credits: search-box autocomplete, 1-20,
+    default 8.
 
 ### Changed in 0.35.0
 

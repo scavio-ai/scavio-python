@@ -208,7 +208,7 @@ _NS_META = {
     ),
     "nordstrom": (
         "Nordstrom",
-        "Nordstrom search and product detail endpoints with per-size UPC, price and stock.",
+        "Nordstrom search, category, brand, product, pickup availability, store locator, and autocomplete endpoints.",
     ),
     "heb": (
         "Heb",

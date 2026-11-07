@@ -7829,9 +7829,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================= Nordstrom =============================
-    # 2 endpoints, 5 credits each. nordstrom.com (US). Prices are national and
-    # online; product() quantity is units available to ship, no store stock.
-    # The upstream page can take ~15 s and is retried once on a block page.
+    # 7 endpoints, 5 credits each except availability (10: the product page plus
+    # the store lookup). nordstrom.com (US). product() quantity is units
+    # available to ship; availability() adds the pickup stores per sku (yes/no
+    # per store, quantities are chain-wide). The upstream page can take ~15 s
+    # and is retried once on a block page.
     Endpoint(
         key="nordstrom_search",
         namespace="nordstrom",
@@ -7873,9 +7875,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "mentioned praised and criticized features with a quote each, breadcrumbs and "
             "images. Every color lists its images and every size as a sku with sku id, size, size "
             "type, UPC, price, original price, percent off, price type (regular, clearance, "
-            "promotion), in_stock and the quantity available to ship. Includes the 12-13 reviews "
-            "shown on the product page, with title, text, rating, size rating, author, date, "
-            "helpful votes and verified-purchase flag. An unknown style id is a 404."
+            "promotion), in_stock and the quantity available to ship. in_stock is true when the "
+            "sku can be shipped or picked up in a store, so a sku held only in a store reads in "
+            "stock with quantity 0 (availability() lists its pickup stores). Includes the reviews "
+            "shown on the product page (up to about 13), with the total review count; each review "
+            "has title, text, rating, size rating, author, date, helpful votes and "
+            "verified-purchase flag. An unknown style id is a 404."
         ),
         params=(
             _str("url", "nordstrom.com product URL (the `url` of a search result)."),
@@ -7886,6 +7891,179 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
         ),
         one_of=(("url", "style_id"),),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_category",
+        namespace="nordstrom",
+        method="category",
+        http="POST",
+        path="/api/v1/nordstrom/category",
+        summary=(
+            "Browse a nordstrom.com (US) category page, 24 products per page, sorted by relevance, "
+            "rating, price, newest or percent off. Works on any /browse category, including sale "
+            "(sale/women), new arrivals (/browse/new) and top-level departments (/browse/women). "
+            "Returns the category's name, page title, path, URL, breadcrumbs and subcategories "
+            "(name and path, for drilling down). Each product has the same fields as a search result: style id, URL, name, "
+            "brand, image, current price and price range in dollars, original price range, percent "
+            "off and on-sale flag, rating, review count, badges, a low-inventory flag, marketplace "
+            "seller and every color. Also returns the total result count, page count, and the "
+            "filter sidebar: each filter group (Product Type > Clothing, Size > Women's Clothing, "
+            "Color, Brand, Discount...) with its options and product counts (price buckets carry no "
+            "count on the site, so theirs are null; groups with more than 100 options, such as "
+            "Brand, list the 100 with the most products and give the full option_count). An unknown category is a 404."
+        ),
+        params=(
+            _req(
+                "category",
+                "A nordstrom.com category: the /browse path or full URL of a category page, e.g. "
+                "/browse/women/clothing/dresses, sale/women, /browse/new or "
+                "https://www.nordstrom.com/browse/men/shoes. The /browse prefix is optional. Query "
+                "parameters in a URL (filters) are ignored. Each result's category.subcategories "
+                "lists child paths.",
+            ),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_brand",
+        namespace="nordstrom",
+        method="brand",
+        http="POST",
+        path="/api/v1/nordstrom/brand",
+        summary=(
+            "List a brand's products on nordstrom.com (US) from its brand page, 24 per page, sorted "
+            "by relevance, rating, price, newest or percent off. Returns the brand's name, path, "
+            "URL, breadcrumbs and sub-pages (Women, Men, Kids...). Each product has the same fields as a search result: style id, URL, name, "
+            "brand, image, current price and price range in dollars, original price range, percent "
+            "off and on-sale flag, rating, review count, badges, a low-inventory flag, marketplace "
+            "seller and every color. Also returns the total result count, page count, and the "
+            "filter sidebar: each filter group (Product Type > Clothing, Size > Women's Clothing, "
+            "Color, Brand, Discount...) with its options and product counts (price buckets carry no "
+            "count on the site, so theirs are null; groups with more than 100 options, such as "
+            "Brand, list the 100 with the most products and give the full option_count). An unknown brand is a "
+            "404."
+        ),
+        params=(
+            _req(
+                "brand",
+                "A nordstrom.com brand: the /brands path or full URL of a brand page, usually ending "
+                "in the brand id, e.g. /brands/astr-the-label--53360 (a product's brand_url works). "
+                "A brand name without its id is a 404 except where it is the brand page's own path "
+                "(/brands/ugg-australia). Sub-pages such as /brands/astr-the-label--53360/women "
+                "work too.",
+            ),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_stores",
+        namespace="nordstrom",
+        method="stores",
+        http="POST",
+        path="/api/v1/nordstrom/stores",
+        summary=(
+            "Find Nordstrom stores (full-line stores and Nordstrom Local) near a US ZIP code or "
+            "latitude/longitude within up to 100 miles, nearest first, or look stores up by store "
+            "number. Each store has store number, name, type (full_line or local), address, city, "
+            "state, ZIP, country, phone, weekly hours, holiday hours when posted, open and close "
+            "times for the next 8 days, time zone, distance in miles, latitude and longitude, "
+            "whether it offers buy-online pickup and curbside pickup, its amenities (restaurants "
+            "and services, with phone and hours) and its store page URL. A ZIP with no store in "
+            "range returns an empty list."
+        ),
+        params=(
+            _str(
+                "zip",
+                "US ZIP code to search around. Pass exactly one of zip, latitude and longitude, or "
+                "store_numbers.",
+            ),
+            _float("latitude", "Latitude to search around (with longitude)."),
+            _float("longitude", "Longitude to search around (with latitude)."),
+            Param(
+                "store_numbers",
+                "Optional[Union[str, list[Union[str, int]]]]",
+                doc="Look up stores by number instead of location: a list or a comma-separated "
+                "string, up to 100 (an availability result's pickup_stores[].store_number).",
+            ),
+            _int(
+                "distance_miles",
+                "Search radius in miles around zip or latitude/longitude, 1-100 (the site's "
+                "maximum). Defaults to 100.",
+            ),
+        ),
+        # "At least one" here; the server rejects any mix of the three.
+        one_of=(("zip", "latitude", "longitude", "store_numbers"),),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_availability",
+        namespace="nordstrom",
+        method="availability",
+        http="POST",
+        path="/api/v1/nordstrom/availability",
+        summary=(
+            "Online and store-pickup availability for every size and color of one nordstrom.com "
+            "(US) product, by URL or style id, optionally one sku. Each sku has sku id, size, "
+            "color, UPC, in_stock, whether it ships and the quantity available to ship, the "
+            "quantity available for pickup, and the stores where it can be picked up (store "
+            "number, name, address, city, state, ZIP, phone). Quantities are chain-wide: per store "
+            "Nordstrom only says whether pickup is available, not how many. in_stock is true when "
+            "the sku can be shipped or picked up, so a sku with ship_quantity 0 can still be in "
+            "stock for pickup. Costs 10 credits (the product page plus the store lookup). An "
+            "unknown style id or sku id is a 404."
+        ),
+        params=(
+            _str(
+                "url",
+                "nordstrom.com product URL (the `url` of a search, category or brand result).",
+            ),
+            _str("style_id", "Nordstrom style id, used when url is not given."),
+            _str(
+                "sku_id",
+                "Only this sku (a product's colors[].skus[].sku_id). An id that is not a sku of the "
+                "product is a 404.",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=10,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_suggestions",
+        namespace="nordstrom",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/nordstrom/suggestions",
+        summary=(
+            "The search-box autocomplete of nordstrom.com: the queries Nordstrom suggests for a "
+            "partial search term, most likely first (e.g. \"dre\" -> women's dresses, dresses, "
+            "cocktail dresses for women). Useful for keyword research and for building queries "
+            "for search()."
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far."),
+            _int(
+                "limit",
+                "Suggestions to return, 1-20. Defaults to 8. The site may return fewer.",
+            ),
+        ),
         credits=5,
         min_timeout=120.0,
     ),

@@ -7212,7 +7212,7 @@ class _MenardsNamespace:
         return self._client._call("menards_stores", {"zip": zip, "city": city, "state": state}, extra)
 
 class _NordstromNamespace:
-    """Nordstrom search and product detail endpoints with per-size UPC, price and stock."""
+    """Nordstrom search, category, brand, product, pickup availability, store locator, and autocomplete endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -7244,7 +7244,7 @@ class _NordstromNamespace:
         style_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One nordstrom.com (US) product by URL or style id: name, brand, description, feature bullets, fit notes, final-sale flag, current, original and clearance price ranges, percent off, rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, original price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. Includes the 12-13 reviews shown on the product page, with title, text, rating, size rating, author, date, helpful votes and verified-purchase flag. An unknown style id is a 404.
+        """One nordstrom.com (US) product by URL or style id: name, brand, description, feature bullets, fit notes, final-sale flag, current, original and clearance price ranges, percent off, rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, original price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. in_stock is true when the sku can be shipped or picked up in a store, so a sku held only in a store reads in stock with quantity 0 (availability() lists its pickup stores). Includes the reviews shown on the product page (up to about 13), with the total review count; each review has title, text, rating, size rating, author, date, helpful votes and verified-purchase flag. An unknown style id is a 404.
 
         Costs 5 credits. Returns the API response as a dict.
 
@@ -7254,6 +7254,108 @@ class _NordstromNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("nordstrom_product", {"url": url, "style_id": style_id}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse a nordstrom.com (US) category page, 24 products per page, sorted by relevance, rating, price, newest or percent off. Works on any /browse category, including sale (sale/women), new arrivals (/browse/new) and top-level departments (/browse/women). Returns the category's name, page title, path, URL, breadcrumbs and subcategories (name and path, for drilling down). Each product has the same fields as a search result: style id, URL, name, brand, image, current price and price range in dollars, original price range, percent off and on-sale flag, rating, review count, badges, a low-inventory flag, marketplace seller and every color. Also returns the total result count, page count, and the filter sidebar: each filter group (Product Type > Clothing, Size > Women's Clothing, Color, Brand, Discount...) with its options and product counts (price buckets carry no count on the site, so theirs are null; groups with more than 100 options, such as Brand, list the 100 with the most products and give the full option_count). An unknown category is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            category: A nordstrom.com category: the /browse path or full URL of a category page, e.g. /browse/women/clothing/dresses, sale/women, /browse/new or https://www.nordstrom.com/browse/men/shoes. The /browse prefix is optional. Query parameters in a URL (filters) are ignored. Each result's category.subcategories lists child paths.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_category", {"category": category, "page": page, "sort": sort}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """List a brand's products on nordstrom.com (US) from its brand page, 24 per page, sorted by relevance, rating, price, newest or percent off. Returns the brand's name, path, URL, breadcrumbs and sub-pages (Women, Men, Kids...). Each product has the same fields as a search result: style id, URL, name, brand, image, current price and price range in dollars, original price range, percent off and on-sale flag, rating, review count, badges, a low-inventory flag, marketplace seller and every color. Also returns the total result count, page count, and the filter sidebar: each filter group (Product Type > Clothing, Size > Women's Clothing, Color, Brand, Discount...) with its options and product counts (price buckets carry no count on the site, so theirs are null; groups with more than 100 options, such as Brand, list the 100 with the most products and give the full option_count). An unknown brand is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A nordstrom.com brand: the /brands path or full URL of a brand page, usually ending in the brand id, e.g. /brands/astr-the-label--53360 (a product's brand_url works). A brand name without its id is a 404 except where it is the brand page's own path (/brands/ugg-australia). Sub-pages such as /brands/astr-the-label--53360/women work too.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_brand", {"brand": brand, "page": page, "sort": sort}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        store_numbers: Optional[Union[str, list[Union[str, int]]]] = None,
+        distance_miles: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find Nordstrom stores (full-line stores and Nordstrom Local) near a US ZIP code or latitude/longitude within up to 100 miles, nearest first, or look stores up by store number. Each store has store number, name, type (full_line or local), address, city, state, ZIP, country, phone, weekly hours, holiday hours when posted, open and close times for the next 8 days, time zone, distance in miles, latitude and longitude, whether it offers buy-online pickup and curbside pickup, its amenities (restaurants and services, with phone and hours) and its store page URL. A ZIP with no store in range returns an empty list.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around. Pass exactly one of zip, latitude and longitude, or store_numbers.
+            latitude: Latitude to search around (with longitude).
+            longitude: Longitude to search around (with latitude).
+            store_numbers: Look up stores by number instead of location: a list or a comma-separated string, up to 100 (an availability result's pickup_stores[].store_number).
+            distance_miles: Search radius in miles around zip or latitude/longitude, 1-100 (the site's maximum). Defaults to 100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "store_numbers": store_numbers, "distance_miles": distance_miles}, extra)
+
+    def availability(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        sku_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online and store-pickup availability for every size and color of one nordstrom.com (US) product, by URL or style id, optionally one sku. Each sku has sku id, size, color, UPC, in_stock, whether it ships and the quantity available to ship, the quantity available for pickup, and the stores where it can be picked up (store number, name, address, city, state, ZIP, phone). Quantities are chain-wide: per store Nordstrom only says whether pickup is available, not how many. in_stock is true when the sku can be shipped or picked up, so a sku with ship_quantity 0 can still be in stock for pickup. Costs 10 credits (the product page plus the store lookup). An unknown style id or sku id is a 404.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstrom.com product URL (the `url` of a search, category or brand result).
+            style_id: Nordstrom style id, used when url is not given.
+            sku_id: Only this sku (a product's colors[].skus[].sku_id). An id that is not a sku of the product is a 404.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_availability", {"url": url, "style_id": style_id, "sku_id": sku_id}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box autocomplete of nordstrom.com: the queries Nordstrom suggests for a partial search term, most likely first (e.g. "dre" -> women's dresses, dresses, cocktail dresses for women). Useful for keyword research and for building queries for search().
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            limit: Suggestions to return, 1-20. Defaults to 8. The site may return fewer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_suggestions", {"query": query, "limit": limit}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
