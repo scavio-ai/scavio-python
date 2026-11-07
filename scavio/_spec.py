@@ -7828,6 +7828,67 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         one_of=(("zip", "city"),),
         credits=1,
     ),
+    # ============================= Nordstrom =============================
+    # 2 endpoints, 5 credits each. nordstrom.com (US). Prices are national and
+    # online; product() quantity is units available to ship, no store stock.
+    # The upstream page can take ~15 s and is retried once on a block page.
+    Endpoint(
+        key="nordstrom_search",
+        namespace="nordstrom",
+        method="search",
+        http="POST",
+        path="/api/v1/nordstrom/search",
+        summary=(
+            "Search nordstrom.com (US) products, 24 per page, sorted by relevance, rating, price, "
+            "newest or percent off. Each result has style id, URL, name, brand, image, current "
+            "price and price range in dollars, original price range, percent off and on-sale "
+            "flag, rating, review count, badges such as new or new_markdown, a low-inventory "
+            "flag, whether it is sold by a marketplace seller (and the seller's name), and every "
+            "color with its color family and image. Also returns the total result count and page "
+            "count. Use a result's url or style_id with product()."
+        ),
+        params=(
+            _req("query", "Search keywords."),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_product",
+        namespace="nordstrom",
+        method="product",
+        http="POST",
+        path="/api/v1/nordstrom/product",
+        summary=(
+            "One nordstrom.com (US) product by URL or style id: name, brand, description, feature "
+            "bullets, fit notes, final-sale flag, current, original and clearance price ranges, "
+            "percent off, rating, review count, the star histogram, the size-fit distribution "
+            "(too small to too big), the AI review summary when the site shows one, the most "
+            "mentioned praised and criticized features with a quote each, breadcrumbs and "
+            "images. Every color lists its images and every size as a sku with sku id, size, size "
+            "type, UPC, price, original price, percent off, price type (regular, clearance, "
+            "promotion), in_stock and the quantity available to ship. Includes the 12-13 reviews "
+            "shown on the product page, with title, text, rating, size rating, author, date, "
+            "helpful votes and verified-purchase flag. An unknown style id is a 404."
+        ),
+        params=(
+            _str("url", "nordstrom.com product URL (the `url` of a search result)."),
+            _str(
+                "style_id",
+                "Nordstrom style id, the number at the end of a product URL (the `style_id` of a "
+                "search result). Used when url is not given.",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=5,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -8936,6 +8997,7 @@ NAMESPACES: tuple[str, ...] = (
     "iherb",
     "chewy",
     "menards",
+    "nordstrom",
     "trustpilot",
     "realtor",
     "rightmove",

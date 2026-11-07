@@ -59,6 +59,7 @@ __all__ = [
     "_AsyncIherbNamespace",
     "_AsyncChewyNamespace",
     "_AsyncMenardsNamespace",
+    "_AsyncNordstromNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -7209,6 +7210,50 @@ class _AsyncMenardsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("menards_stores", {"zip": zip, "city": city, "state": state}, extra)
+
+class _AsyncNordstromNamespace:
+    """Nordstrom search and product detail endpoints with per-size UPC, price and stock."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search nordstrom.com (US) products, 24 per page, sorted by relevance, rating, price, newest or percent off. Each result has style id, URL, name, brand, image, current price and price range in dollars, original price range, percent off and on-sale flag, rating, review count, badges such as new or new_markdown, a low-inventory flag, whether it is sold by a marketplace seller (and the seller's name), and every color with its color family and image. Also returns the total result count and page count. Use a result's url or style_id with product().
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nordstrom_search", {"query": query, "page": page, "sort": sort}, extra)
+
+    async def product(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One nordstrom.com (US) product by URL or style id: name, brand, description, feature bullets, fit notes, final-sale flag, current, original and clearance price ranges, percent off, rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, original price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. Includes the 12-13 reviews shown on the product page, with title, text, rating, size rating, author, date, helpful votes and verified-purchase flag. An unknown style id is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstrom.com product URL (the `url` of a search result).
+            style_id: Nordstrom style id, the number at the end of a product URL (the `style_id` of a search result). Used when url is not given.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nordstrom_product", {"url": url, "style_id": style_id}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

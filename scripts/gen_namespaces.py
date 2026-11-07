@@ -206,6 +206,10 @@ _NS_META = {
         "Menards",
         "Menards product detail with rebates and per-store stock, and store locator endpoints.",
     ),
+    "nordstrom": (
+        "Nordstrom",
+        "Nordstrom search and product detail endpoints with per-size UPC, price and stock.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

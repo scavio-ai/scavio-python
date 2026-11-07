@@ -1729,3 +1729,42 @@ def test_menards_search_wire_body(monkeypatch):
     assert ENDPOINTS["menards_search"].credits == 2
     # The default 30 s client timeout is raised for search's slow spells.
     assert timeouts[0] == 60.0
+
+
+def test_nordstrom_credits_paths_and_wire(monkeypatch):
+    """nordstrom (0.35.0): search + product, 5 credits each, 120 s timeout floor."""
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nordstrom"}
+    assert {m: ep.credits for m, ep in eps.items()} == {"search": 5, "product": 5}
+    for m, ep in eps.items():
+        assert ep.path == f"/api/v1/nordstrom/{m}", ep.key
+    sorts = ("relevance", "rating", "price_high", "price_low", "newest", "percent_off")
+    sort_param = ENDPOINTS["nordstrom_search"].params[2]
+    assert sort_param.name == "sort"
+    assert sort_param.annotation == "Optional[Literal[" + ", ".join(f'"{c}"' for c in sorts) + "]]"
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.nordstrom.search("dress")
+    client.nordstrom.search("dress", page=2, sort="percent_off")
+    client.nordstrom.product(style_id="8098974")
+    client.nordstrom.product(
+        url="https://www.nordstrom.com/s/betsy-and-adam-strapless-mixed-media-gown/8098974"
+    )
+    assert seen == [
+        ("/api/v1/nordstrom/search", {"query": "dress"}, 120.0),
+        ("/api/v1/nordstrom/search", {"query": "dress", "page": 2, "sort": "percent_off"}, 120.0),
+        ("/api/v1/nordstrom/product", {"style_id": "8098974"}, 120.0),
+        (
+            "/api/v1/nordstrom/product",
+            {"url": "https://www.nordstrom.com/s/betsy-and-adam-strapless-mixed-media-gown/8098974"},
+            120.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        client.nordstrom.product()

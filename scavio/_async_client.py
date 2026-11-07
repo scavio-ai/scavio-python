@@ -43,6 +43,7 @@ from ._namespaces_async import (
     _AsyncMercadoLibreNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncMicroCenterNamespace,
+    _AsyncNordstromNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
     _AsyncRealtorNamespace,
@@ -172,6 +173,7 @@ class AsyncScavioClient:
         self.iherb = _AsyncIherbNamespace(self)
         self.chewy = _AsyncChewyNamespace(self)
         self.menards = _AsyncMenardsNamespace(self)
+        self.nordstrom = _AsyncNordstromNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

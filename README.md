@@ -6,9 +6,9 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 59 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 60 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 59 data sources, 347 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 60 data sources, 349 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -22,6 +22,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
+| Nordstrom Products with Per-Size UPC, Price and Stock (2 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -39,7 +40,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
-| Data Sources | 59 | 1 | 1 per plan | 1 |
+| Data Sources | 60 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
 | Async Client | Yes | Yes | No | No |
@@ -1262,6 +1263,42 @@ Whole Foods returns no ratings, reviews or UPCs. iHerb and Chewy have no store
 endpoints. A Petco `store_inventory` call with one unknown `cat_entry_id` is a
 404 for the whole batch.
 
+### 27. US Retail -- Nordstrom
+
+nordstrom.com (US site only). `search` returns 24 products a page with current
+and original price ranges, percent off and on-sale flag; `product` lists every
+color and size as a sku with UPC, price, price type and the quantity available
+to ship. 5 credits per call. Both calls can take several seconds, so the SDK
+raises their request timeout to 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# --- Search, deepest markdowns first. sort: relevance (default), rating,
+# price_high, price_low, newest, percent_off.
+found = client.nordstrom.search("dress", sort="percent_off")["data"]
+print(found["total_results"], found["page_count"], found["count"])
+for p in found["products"][:5]:
+    print(p["style_id"], p["brand"], p["name"], p["price"], p["original_price_range"], p["percent_off"], p["badges"])
+
+# --- One product by url or style_id: per-size UPC, price and online stock.
+item = client.nordstrom.product(style_id=found["products"][0]["style_id"])["data"]
+print(item["price_range"], item["clearance_price_range"], item["rating"], item["review_count"])
+for color in item["colors"]:
+    for sku in color["skus"]:
+        print(color["name"], sku["size"], sku["upc"], sku["price"], sku["price_type"], sku["in_stock"], sku["quantity"])
+print(item["size_fit"]["average"], item["rating_histogram"])
+for r in item["reviews"]:
+    print(r["rating"], r["size_rating"], r["title"], r["verified_purchase"])
+```
+
+`reviews` are the 12-13 shown on the product page; there is no deeper review
+paging. `quantity` is units available to ship online: there is no store
+locator or store-level stock, and no category endpoint. An unknown style id is
+a 404.
+
 ## Error Handling
 
 ```python
@@ -1391,6 +1428,7 @@ Scavio works with popular AI/LLM frameworks:
 | iHerb | `search`, `product`, `prices`, `reviews` | 2 each |
 | Chewy | `search`, `product` | 10 each |
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
+| Nordstrom | `search`, `product` | 5 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1400,6 +1438,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.35.0
+
+- **New `nordstrom` namespace** (sync and async), 5 credits per call.
+  - `search(query, *, page, sort)`: nordstrom.com (US), 24 products a page.
+    `sort`: relevance, rating, price_high, price_low, newest, percent_off.
+  - `product(*, url, style_id)`: pass one. Every color and size as a sku with
+    sku id, UPC, price, original price, percent off, price type, in_stock and
+    quantity available to ship; star histogram, size-fit distribution and the
+    reviews shown on the product page.
+  - Both raise the request timeout to 120s.
 
 ### Changed in 0.34.0
 
