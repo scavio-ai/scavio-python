@@ -8,7 +8,7 @@
 
 The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 60 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
-> One API key, 60 data sources, 354 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
+> One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
 ## Why Scavio
 
@@ -22,7 +22,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
-| Nordstrom Products, Categories, Brands, Store Pickup and Store Locator (7 endpoints) | Yes | No | No | No |
+| Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1269,10 +1269,13 @@ nordstrom.com (US site only). `search`, `category` and `brand` return 24
 products a page with current and original price ranges, percent off and
 on-sale flag (`category` and `brand` add the filter sidebar with product
 counts); `product` lists every color and size as a sku with UPC, price, price
-type and the quantity available to ship; `availability` adds the stores that
-can do in-store pickup per sku; `stores` is the store locator; `suggestions`
-is the search-box autocomplete. 5 credits per call, `availability` 10. Every
-call can take several seconds, so the SDK raises their request timeout to 120s.
+type and the quantity available to ship; `reviews` pages a product's full
+review history with sort and filters; `availability` adds the stores that can
+do in-store pickup per sku; `stores` is the store locator; `suggestions` is
+the search-box autocomplete. 5 credits per call, `availability` and `reviews`
+10. Every call can take several seconds, so the SDK raises their request
+timeout to 120s; `reviews` takes 20-60s (up to about 100s at 200 reviews), so
+its floor is 150s.
 
 ```python
 from scavio import ScavioClient
@@ -1305,6 +1308,19 @@ print(item["size_fit"]["average"], item["rating_histogram"])
 for r in item["reviews"]:
     print(r["rating"], r["size_rating"], r["title"], r["verified_purchase"])
 
+# --- Full review history (10 credits): up to 200 per call, default 60.
+# sort: most_helpful (default), most_recent, highest_rated, lowest_rated.
+# Filters: stars, verified_only, with_photos, search (not combinable with sort).
+rev = client.nordstrom.reviews(style_id="7737947", sort="most_recent", max_reviews=100)["data"]
+s = rev["summary"]
+print(s["average_rating"], s["total_reviews"], s["ratings_histogram"], s["size_rating"], s["ratings_only_count"])
+print([(f["name"], f["mentions"], f["quote"]) for f in s["best_features"][:3]], rev["ai_summary"])
+print(rev["total_results"], rev["returned"], rev["has_more"])
+for r in rev["reviews"][:5]:
+    print(r["date"], r["rating"], r["title"], r["text"], r["size_purchased"], r["helpful_votes"], r["badges"], len(r["photos"]))
+critical = client.nordstrom.reviews(style_id="7737947", stars=[1, 2], verified_only=True)["data"]
+print(critical["total_results"], [r["text"] for r in critical["reviews"][:3]])
+
 # --- Ship and pickup availability per sku, with the pickup stores (10 credits).
 avail = client.nordstrom.availability(style_id="7737947")["data"]
 print(avail["sku_count"], avail["in_stock_count"], avail["pickup_store_count"])
@@ -1319,9 +1335,11 @@ for store in client.nordstrom.stores(zip="10001")["data"]["stores"][:3]:
 print(client.nordstrom.suggestions("nike air")["data"]["suggestions"])
 ```
 
-`reviews` are the ones shown on the product page (up to about 13), alongside
-the total `review_count` and `rating_histogram`; there is no deeper review
-paging. `quantity` and `ship_quantity` are units available to ship online;
+`product` reviews are the ones shown on the product page (up to about 13),
+alongside the total `review_count` and `rating_histogram`; `reviews()` returns
+the rest. Rating-only reviews come back with `title` and `text` null. If the
+upstream page still fails after the API's own retries, the call is an unbilled
+502. `quantity` and `ship_quantity` are units available to ship online;
 `in_stock` is true when a sku can be shipped or picked up, so a store-only sku
 reads in stock with quantity 0. `pick_quantity` is chain-wide: per store
 Nordstrom only says whether pickup is available, not how many. A ZIP with no
@@ -1457,7 +1475,7 @@ Scavio works with popular AI/LLM frameworks:
 | iHerb | `search`, `product`, `prices`, `reviews` | 2 each |
 | Chewy | `search`, `product` | 10 each |
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
-| Nordstrom | `search`, `category`, `brand`, `product`, `availability`, `stores`, `suggestions` | `availability` 10, the rest 5 each |
+| Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1467,6 +1485,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.37.0
+
+- `nordstrom.reviews(*, url, style_id, sort, stars, verified_only, with_photos,
+  search, max_reviews)` (sync and async), 10 credits: a product's full review
+  history, up to 200 per call (default 60), sorted `most_helpful` (default),
+  `most_recent`, `highest_rated` or `lowest_rated`, filtered by star ratings,
+  verified purchases, photos or a text search (`search` cannot be combined
+  with `sort`). Returns the review summary (average, histogram, size and width
+  rating, praised and criticized features with a quote, rating-only count),
+  the AI review summary, `total_results`, `returned` and `has_more`. Calls take
+  20-60s (up to about 100s at 200 reviews), so this method's timeout floor is
+  150s.
 
 ### Changed in 0.36.0
 

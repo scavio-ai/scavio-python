@@ -7829,11 +7829,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================= Nordstrom =============================
-    # 7 endpoints, 5 credits each except availability (10: the product page plus
-    # the store lookup). nordstrom.com (US). product() quantity is units
-    # available to ship; availability() adds the pickup stores per sku (yes/no
-    # per store, quantities are chain-wide). The upstream page can take ~15 s
-    # and is retried once on a block page.
+    # 8 endpoints, 5 credits each except availability (10: the product page plus
+    # the store lookup) and reviews (10: one browser render). nordstrom.com
+    # (US). product() quantity is units available to ship; availability() adds
+    # the pickup stores per sku (yes/no per store, quantities are chain-wide).
+    # The upstream page can take ~15 s and is retried once on a block page.
+    # reviews() takes 20-60 s, up to ~100 s at max_reviews 200, so its floor is
+    # 150 s rather than the namespace's 120 s.
     Endpoint(
         key="nordstrom_search",
         namespace="nordstrom",
@@ -7880,7 +7882,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "stock with quantity 0 (availability() lists its pickup stores). Includes the reviews "
             "shown on the product page (up to about 13), with the total review count; each review "
             "has title, text, rating, size rating, author, date, helpful votes and "
-            "verified-purchase flag. An unknown style id is a 404."
+            "verified-purchase flag (reviews() pages the full review history). An unknown style "
+            "id is a 404."
         ),
         params=(
             _str("url", "nordstrom.com product URL (the `url` of a search result)."),
@@ -8066,6 +8069,64 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=5,
         min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_reviews",
+        namespace="nordstrom",
+        method="reviews",
+        http="POST",
+        path="/api/v1/nordstrom/reviews",
+        summary=(
+            "Customer reviews of one nordstrom.com (US) product by URL or style id, up to 200 per "
+            "call (default 60), sorted most helpful (default), most recent, highest rated or "
+            "lowest rated, optionally filtered to star ratings, verified purchases, reviews with "
+            "photos, or a text search. Returns the product's review summary (average rating, "
+            "total reviews, star histogram, size rating 1 runs small to 5 runs big, width rating "
+            "where the site has one, the most mentioned praised and criticized features with a "
+            "quote each, and the count of rating-only reviews), the AI review summary when the "
+            "site shows one, the number of reviews matching the filters (total_results), "
+            "returned and has_more. Each review has id, title, text, star rating, size rating, "
+            "author, date, helpful votes, verified-purchase flag, reviewer badges "
+            "(verified_purchaser, top_250, top_1000), size and color purchased, the reviewer's "
+            "height, weight, body type and usual sizes when given, secondary ratings (Size, with "
+            "its scale), the site it was syndicated from (e.g. nordstromrack.com) and photos with "
+            "thumbnails. Rating-only reviews are included with title and text null. Takes "
+            "20-60s, up to about 100s at max_reviews 200. A product with no reviews returns an "
+            "empty list; an unknown style id is a 404."
+        ),
+        params=(
+            _str(
+                "url",
+                "nordstrom.com product URL (the `url` of a search, category or brand result).",
+            ),
+            _str("style_id", "Nordstrom style id, used when url is not given."),
+            _lit(
+                "sort",
+                ("most_helpful", "most_recent", "highest_rated", "lowest_rated"),
+                "most_helpful (default), most_recent, highest_rated or lowest_rated. Cannot be "
+                "combined with search: Nordstrom returns review search results in its own order.",
+            ),
+            _ilit_list(
+                "stars",
+                (1, 2, 3, 4, 5),
+                "Only reviews with these star ratings, e.g. [1, 2] for the critical ones.",
+            ),
+            _bool("verified_only", "Only reviews from verified purchasers."),
+            _bool("with_photos", "Only reviews that include customer photos."),
+            _str(
+                "search",
+                "Only reviews mentioning this text (the review search box), 1-100 characters. "
+                "Results come in Nordstrom's search order, so sort cannot be set with it.",
+            ),
+            _int(
+                "max_reviews",
+                "Reviews to return, 1-200. Defaults to 60. Larger values take longer (45-100s "
+                "for 200).",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=10,
+        min_timeout=150.0,
     ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one

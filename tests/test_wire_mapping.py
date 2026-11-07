@@ -1780,7 +1780,11 @@ def test_nordstrom_listing_stores_availability_suggestions_wire(monkeypatch):
     availability is 10 credits (product page + store lookup), the rest 5; all
     carry the same 120 s timeout floor as search/product.
     """
-    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nordstrom"}
+    eps = {
+        ep.method: ep
+        for ep in ENDPOINTS.values()
+        if ep.namespace == "nordstrom" and ep.method != "reviews"
+    }
     assert {m: ep.credits for m, ep in eps.items()} == {
         "search": 5,
         "product": 5,
@@ -1840,3 +1844,66 @@ def test_nordstrom_listing_stores_availability_suggestions_wire(monkeypatch):
         client.nordstrom.stores()
     with pytest.raises(ScavioError):
         client.nordstrom.availability(sku_id="A7578713")
+
+
+def test_nordstrom_reviews_wire(monkeypatch):
+    """nordstrom (0.37.0): reviews, 10 credits, 150 s timeout floor.
+
+    A 200-review call takes up to ~100 s, so the floor is above the 120 s the
+    rest of the namespace uses.
+    """
+    ep = ENDPOINTS["nordstrom_reviews"]
+    assert (ep.namespace, ep.method, ep.http) == ("nordstrom", "reviews", "POST")
+    assert ep.path == "/api/v1/nordstrom/reviews"
+    assert ep.credits == 10
+    assert ep.min_timeout == 150.0
+    assert [p.name for p in ep.params] == [
+        "url",
+        "style_id",
+        "sort",
+        "stars",
+        "verified_only",
+        "with_photos",
+        "search",
+        "max_reviews",
+    ]
+    sort_param = ep.params[2]
+    sorts = ("most_helpful", "most_recent", "highest_rated", "lowest_rated")
+    assert sort_param.annotation == "Optional[Literal[" + ", ".join(f'"{c}"' for c in sorts) + "]]"
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    client.nordstrom.reviews(style_id="7737947")
+    client.nordstrom.reviews(
+        url="https://www.nordstrom.com/s/maeve-midi-dress/7737947",
+        sort="lowest_rated",
+        stars=[1, 2],
+        verified_only=True,
+        with_photos=False,
+        max_reviews=200,
+    )
+    client.nordstrom.reviews(style_id="7737947", search="wedding")
+    assert seen == [
+        ("/api/v1/nordstrom/reviews", {"style_id": "7737947"}, 150.0),
+        (
+            "/api/v1/nordstrom/reviews",
+            {
+                "url": "https://www.nordstrom.com/s/maeve-midi-dress/7737947",
+                "sort": "lowest_rated",
+                "stars": [1, 2],
+                "verified_only": True,
+                "with_photos": False,
+                "max_reviews": 200,
+            },
+            150.0,
+        ),
+        ("/api/v1/nordstrom/reviews", {"style_id": "7737947", "search": "wedding"}, 150.0),
+    ]
+    with pytest.raises(ScavioError):
+        client.nordstrom.reviews(sort="most_recent")

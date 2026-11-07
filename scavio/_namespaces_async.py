@@ -7212,7 +7212,7 @@ class _AsyncMenardsNamespace:
         return await self._client._call("menards_stores", {"zip": zip, "city": city, "state": state}, extra)
 
 class _AsyncNordstromNamespace:
-    """Nordstrom search, category, brand, product, pickup availability, store locator, and autocomplete endpoints."""
+    """Nordstrom search, category, brand, product, reviews, pickup availability, store locator, and autocomplete endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -7244,7 +7244,7 @@ class _AsyncNordstromNamespace:
         style_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One nordstrom.com (US) product by URL or style id: name, brand, description, feature bullets, fit notes, final-sale flag, current, original and clearance price ranges, percent off, rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, original price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. in_stock is true when the sku can be shipped or picked up in a store, so a sku held only in a store reads in stock with quantity 0 (availability() lists its pickup stores). Includes the reviews shown on the product page (up to about 13), with the total review count; each review has title, text, rating, size rating, author, date, helpful votes and verified-purchase flag. An unknown style id is a 404.
+        """One nordstrom.com (US) product by URL or style id: name, brand, description, feature bullets, fit notes, final-sale flag, current, original and clearance price ranges, percent off, rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, original price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. in_stock is true when the sku can be shipped or picked up in a store, so a sku held only in a store reads in stock with quantity 0 (availability() lists its pickup stores). Includes the reviews shown on the product page (up to about 13), with the total review count; each review has title, text, rating, size rating, author, date, helpful votes and verified-purchase flag (reviews() pages the full review history). An unknown style id is a 404.
 
         Costs 5 credits. Returns the API response as a dict.
 
@@ -7356,6 +7356,36 @@ class _AsyncNordstromNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("nordstrom_suggestions", {"query": query, "limit": limit}, extra)
+
+    async def reviews(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        sort: Optional[Literal["most_helpful", "most_recent", "highest_rated", "lowest_rated"]] = None,
+        stars: Optional[list[Literal[1, 2, 3, 4, 5]]] = None,
+        verified_only: Optional[bool] = None,
+        with_photos: Optional[bool] = None,
+        search: Optional[str] = None,
+        max_reviews: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one nordstrom.com (US) product by URL or style id, up to 200 per call (default 60), sorted most helpful (default), most recent, highest rated or lowest rated, optionally filtered to star ratings, verified purchases, reviews with photos, or a text search. Returns the product's review summary (average rating, total reviews, star histogram, size rating 1 runs small to 5 runs big, width rating where the site has one, the most mentioned praised and criticized features with a quote each, and the count of rating-only reviews), the AI review summary when the site shows one, the number of reviews matching the filters (total_results), returned and has_more. Each review has id, title, text, star rating, size rating, author, date, helpful votes, verified-purchase flag, reviewer badges (verified_purchaser, top_250, top_1000), size and color purchased, the reviewer's height, weight, body type and usual sizes when given, secondary ratings (Size, with its scale), the site it was syndicated from (e.g. nordstromrack.com) and photos with thumbnails. Rating-only reviews are included with title and text null. Takes 20-60s, up to about 100s at max_reviews 200. A product with no reviews returns an empty list; an unknown style id is a 404.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstrom.com product URL (the `url` of a search, category or brand result).
+            style_id: Nordstrom style id, used when url is not given.
+            sort: most_helpful (default), most_recent, highest_rated or lowest_rated. Cannot be combined with search: Nordstrom returns review search results in its own order.
+            stars: Only reviews with these star ratings, e.g. [1, 2] for the critical ones.
+            verified_only: Only reviews from verified purchasers.
+            with_photos: Only reviews that include customer photos.
+            search: Only reviews mentioning this text (the review search box), 1-100 characters. Results come in Nordstrom's search order, so sort cannot be set with it.
+            max_reviews: Reviews to return, 1-200. Defaults to 60. Larger values take longer (45-100s for 200).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nordstrom_reviews", {"url": url, "style_id": style_id, "sort": sort, "stars": stars, "verified_only": verified_only, "with_photos": with_photos, "search": search, "max_reviews": max_reviews}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
