@@ -1907,3 +1907,79 @@ def test_nordstrom_reviews_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         client.nordstrom.reviews(sort="most_recent")
+
+
+def test_nordstrom_rack_credits_paths_and_wire(monkeypatch):
+    """nordstrom_rack (0.38.0): 8 endpoints on /api/v1/nordstromrack.
+
+    Same contract as nordstrom: availability and reviews 10 credits, the rest 5;
+    120 s timeout floor, reviews 150 s.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nordstrom_rack"}
+    assert {m: ep.credits for m, ep in eps.items()} == {
+        "search": 5,
+        "product": 5,
+        "category": 5,
+        "brand": 5,
+        "stores": 5,
+        "availability": 10,
+        "suggestions": 5,
+        "reviews": 10,
+    }
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/nordstromrack/{m}", ep.key
+        assert ep.min_timeout == (150.0 if m == "reviews" else 120.0), ep.key
+    # Same parameter names as nordstrom, endpoint for endpoint.
+    for m, ep in eps.items():
+        assert [p.name for p in ep.params] == [
+            p.name for p in ENDPOINTS[f"nordstrom_{m}"].params
+        ], ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    rack = client.nordstrom_rack
+    rack.search("dress", sort="percent_off")
+    rack.product(style_id="8816500")
+    rack.category("/clearance/women", sort="percent_off", page=2)
+    rack.brand("/brands/adidas")
+    rack.stores(zip="10001", distance_miles=25)
+    rack.stores(store_numbers=["229", 242])
+    rack.availability(url="https://www.nordstromrack.com/s/maeve-midi-dress/7737947", sku_id="A5819201")
+    rack.suggestions("dre", limit=5)
+    rack.reviews(style_id="7737947", stars=[1, 2], max_reviews=18)
+    assert seen == [
+        ("/api/v1/nordstromrack/search", {"query": "dress", "sort": "percent_off"}, 120.0),
+        ("/api/v1/nordstromrack/product", {"style_id": "8816500"}, 120.0),
+        (
+            "/api/v1/nordstromrack/category",
+            {"category": "/clearance/women", "sort": "percent_off", "page": 2},
+            120.0,
+        ),
+        ("/api/v1/nordstromrack/brand", {"brand": "/brands/adidas"}, 120.0),
+        ("/api/v1/nordstromrack/stores", {"zip": "10001", "distance_miles": 25}, 120.0),
+        ("/api/v1/nordstromrack/stores", {"store_numbers": ["229", 242]}, 120.0),
+        (
+            "/api/v1/nordstromrack/availability",
+            {"url": "https://www.nordstromrack.com/s/maeve-midi-dress/7737947", "sku_id": "A5819201"},
+            120.0,
+        ),
+        ("/api/v1/nordstromrack/suggestions", {"query": "dre", "limit": 5}, 120.0),
+        (
+            "/api/v1/nordstromrack/reviews",
+            {"style_id": "7737947", "stars": [1, 2], "max_reviews": 18},
+            150.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        rack.product()
+    with pytest.raises(ScavioError):
+        rack.stores()
+    with pytest.raises(ScavioError):
+        rack.reviews(sort="most_recent")

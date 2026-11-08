@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 60 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 61 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -23,6 +23,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
+| Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1344,7 +1345,71 @@ upstream page still fails after the API's own retries, the call is an unbilled
 reads in stock with quantity 0. `pick_quantity` is chain-wide: per store
 Nordstrom only says whether pickup is available, not how many. A ZIP with no
 store in range returns an empty list (billed). An unknown style id, sku id,
-category or brand is a 404.
+category or brand is a 404. For nordstromrack.com use `client.nordstrom_rack`
+(next section).
+
+### 28. US Retail -- Nordstrom Rack
+
+nordstromrack.com (US site only), its own namespace `nordstrom_rack`, separate
+from `nordstrom` but with the same methods, parameters and credit costs: 5 per
+call, `availability` and `reviews` 10. `category` takes Rack's `/shop` and
+`/clearance` paths, including Clear the Rack (`/clearance`) and flash events
+(`/shop/flash` lists the live events as subcategories, `/shop/flash/event-N`
+opens one); there is no `/browse`. `brand` takes `/brands/<slug>` with no id.
+Every product row carries `clearance_price_range`, and during Clear the Rack a
+clearance item can carry an extra percent off on top: `promotion_price_range`
+is the price after it and `promotion_percent_off` the extra percent (all three
+are null when not set). `stores` and `availability` cover Rack stores only.
+Rack has its own review pool, separate from nordstrom.com's, so the same style
+can show a different rating and review count on each. Same timeout floors as
+`nordstrom`: 120s, `reviews` 150s (15-60s typical, up to about 100s at 200
+reviews).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rack = client.nordstrom_rack
+
+# --- Clear the Rack: clearance listings, deepest markdowns first.
+clr = rack.category("/clearance/women", sort="percent_off")["data"]
+print(clr["category"]["title"], clr["total_results"], [s["path"] for s in clr["category"]["subcategories"][:3]])
+for p in clr["products"][:5]:
+    print(p["style_id"], p["brand"], p["name"], p["price"], p["original_price_range"],
+          p["clearance_price_range"], p["promotion_price_range"], p["promotion_percent_off"])
+
+# --- Flash events: /shop/flash lists them, each one is a listing.
+events = rack.category("/shop/flash")["data"]["category"]["subcategories"]
+print([(e["name"], e["path"]) for e in events[:5]])
+
+# --- Search, a brand page, one product.
+found = rack.search("dress", sort="percent_off")["data"]
+print(found["total_results"], found["page_count"], found["count"])
+brand = rack.brand("/brands/adidas")["data"]
+print(brand["brand"]["name"], brand["total_results"])
+item = rack.product(style_id="8816500")["data"]
+print(item["price_range"], item["original_price_range"], item["percent_off"], item["rating"], item["review_count"])
+for color in item["colors"]:
+    for sku in color["skus"]:
+        print(color["name"], sku["size"], sku["upc"], sku["price"], sku["price_type"], sku["in_stock"], sku["quantity"])
+
+# --- Rack's own reviews (10 credits), same sort and filters as nordstrom.
+rev = rack.reviews(style_id="7737947", max_reviews=50)["data"]
+print(rev["summary"]["average_rating"], rev["summary"]["total_reviews"], rev["has_more"])
+
+# --- In-store pickup per sku at Rack stores (10 credits), and the store locator.
+avail = rack.availability(style_id="7737947")["data"]
+for sku in avail["skus"][:3]:
+    print(sku["size"], sku["color"], sku["ship_quantity"], sku["pick_quantity"], [s["name"] for s in sku["pickup_stores"]])
+for store in rack.stores(zip="10001")["data"]["stores"][:3]:
+    print(store["store_number"], store["name"], store["type"], store["distance_miles"])
+
+print(rack.suggestions("dre")["data"]["suggestions"])
+```
+
+`pick_quantity` is chain-wide: per store the site only says whether pickup is
+available, not how many. Responses carry no event start or end dates. An
+unknown style id, sku id, category or brand is a 404.
 
 ## Error Handling
 
@@ -1476,6 +1541,7 @@ Scavio works with popular AI/LLM frameworks:
 | Chewy | `search`, `product` | 10 each |
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
 | Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
+| Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1485,6 +1551,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.38.0
+
+- **New `nordstrom_rack` namespace** (sync and async) for nordstromrack.com
+  (US): `search`, `category`, `brand`, `product`, `reviews`, `availability`,
+  `stores`, `suggestions`, with the same parameters, credits (5 each,
+  `availability` and `reviews` 10) and timeout floors (120s, `reviews` 150s)
+  as `nordstrom`. `category` takes `/shop` and `/clearance` paths, including
+  Clear the Rack and flash events (`/shop/flash/event-N`); `brand` takes
+  `/brands/<slug>`. Product and listing rows carry `clearance_price_range`,
+  `promotion_price_range` and `promotion_percent_off`.
 
 ### Changed in 0.37.0
 

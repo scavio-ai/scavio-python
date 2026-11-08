@@ -60,6 +60,7 @@ __all__ = [
     "_ChewyNamespace",
     "_MenardsNamespace",
     "_NordstromNamespace",
+    "_NordstromRackNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -7386,6 +7387,182 @@ class _NordstromNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("nordstrom_reviews", {"url": url, "style_id": style_id, "sort": sort, "stars": stars, "verified_only": verified_only, "with_photos": with_photos, "search": search, "max_reviews": max_reviews}, extra)
+
+class _NordstromRackNamespace:
+    """Nordstrom Rack search, category (clearance, flash events), brand, product, reviews, pickup availability, store locator, and autocomplete endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search nordstromrack.com (US) products, 24 per page, sorted by relevance, rating, price, newest or percent off. Each result has style id, URL, name, brand, image, current price and price range in dollars, the compare-at price range Rack strikes through, percent off and on-sale flag, the clearance price range, and any promotion on top (promotion_price_range, and promotion_percent_off: the extra percent off the clearance price during Clear the Rack, otherwise off Rack's regular price), rating, review count (Rack's own reviews), badges such as new_markdown or final_sale, a low-inventory flag, whether it is sold by a marketplace seller (and the seller's name), and every color with its color family and image. Also returns the total result count and page count. Use a result's url or style_id with product().
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_search", {"query": query, "page": page, "sort": sort}, extra)
+
+    def product(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One nordstromrack.com (US) product by URL or style id: name, brand, brand page URL, description, feature bullets, fit notes, final-sale flag, current, compare-at and clearance price ranges, percent off, any promotion on top (promotion_price_range and promotion_percent_off, e.g. Clear the Rack's extra 25% off clearance), rating, review count, the star histogram, the size-fit distribution (too small to too big), the AI review summary when the site shows one, the most mentioned praised and criticized features with a quote each, breadcrumbs and images. Every color lists its images and every size as a sku with sku id, size, size type, UPC, price, compare-at price, percent off, price type (regular, clearance, promotion), in_stock and the quantity available to ship. in_stock is true when the sku can be shipped or picked up in a Rack store, so a sku held only in a store reads in stock with quantity 0 (availability() lists its pickup stores). Includes the reviews shown on the product page (up to about 13), with the total review count; each review has title, text, rating, size rating, author, date, helpful votes and verified-purchase flag (reviews() pages the full review history). Ratings and reviews are Rack's own, separate from nordstrom.com's. An unknown style id is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstromrack.com product URL (the `url` of a search, category or brand result).
+            style_id: Nordstrom Rack style id, the number at the end of a product URL (a result's `style_id`). Used when url is not given.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_product", {"url": url, "style_id": style_id}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse a nordstromrack.com (US) category page, 24 products per page, sorted by relevance, rating, price, newest or percent off. Works on every /shop and /clearance listing: departments (/shop/women), deals (/shop/deals/black-friday), new arrivals (/shop/new-arrivals), Clear the Rack (/clearance, /clearance/women/clothing) and flash events: /shop/flash lists the live events as subcategories (it has no products of its own), and each event (/shop/flash/event-7) is a listing whose first page shows the event's featured products first, then the rest, with positions running on. Returns the category's name, page title, path, URL, breadcrumbs and subcategories (name and path, for drilling down). Each product has the same fields as a search result, including the clearance and promotion price ranges. Also returns the total result count, page count, and the filter sidebar: each filter group (Product Type, Size, Color, Brand, Price...) with its options and product counts (price buckets carry no count on the site, so theirs are null; groups with more than 100 options, such as Brand, list the 100 with the most products and give the full option_count). An unknown category is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            category: A nordstromrack.com category: the /shop or /clearance path or full URL of a category page, e.g. /shop/women/clothing/dresses, /shop/deals/black-friday, /shop/new-arrivals, /clearance, /clearance/women/clothing, /shop/flash or a flash event such as /shop/flash/event-7. A path without a prefix (women/clothing/dresses) is read as /shop/... . Query parameters in a URL (filters) are ignored. Each result's category.subcategories lists child paths.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_category", {"category": category, "page": page, "sort": sort}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "rating", "price_high", "price_low", "newest", "percent_off"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """List a brand's products on nordstromrack.com (US) from its brand page (/brands/adidas), 24 per page, sorted by relevance, rating, price, newest or percent off. Returns the brand's name, path, URL and breadcrumbs. Each product has the same fields as a search result, including the clearance and promotion price ranges. Also returns the total result count, page count, and the filter sidebar (filter groups with their options and product counts; groups with more than 100 options list the 100 with the most products and give the full option_count). An unknown brand is a 404.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A nordstromrack.com brand: the /brands path or full URL of a brand page, e.g. /brands/adidas, /brands/sam-edelman or https://www.nordstromrack.com/brands/ugg (a product's brand_url works). The /brands prefix is optional. Rack brand pages carry no brand id: the nordstrom.com form /brands/<name>--<id> is a 404 here.
+            page: Results page, 1-based. Defaults to 1. 24 products per page.
+            sort: relevance (default), rating, price_high, price_low, newest or percent_off.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_brand", {"brand": brand, "page": page, "sort": sort}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        store_numbers: Optional[Union[str, list[Union[str, int]]]] = None,
+        distance_miles: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find Nordstrom Rack stores near a US ZIP code or latitude/longitude within up to 100 miles, nearest first, or look Rack stores up by store number. Each store has store number, name, type (rack), address, city, state, ZIP, country, phone, weekly hours, holiday hours when posted, open and close times for the next 8 days, time zone, distance in miles, latitude and longitude, whether it offers buy-online pickup and curbside pickup, its amenities and its store page URL. A ZIP with no store in range returns an empty list.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around. Pass exactly one of zip, latitude and longitude, or store_numbers.
+            latitude: Latitude to search around (with longitude).
+            longitude: Longitude to search around (with latitude).
+            store_numbers: Look up Rack stores by number instead of location: a list or a comma-separated string, up to 100 (an availability result's pickup_stores[].store_number). Numbers of Nordstrom full-line stores are left out.
+            distance_miles: Search radius in miles around zip or latitude/longitude, 1-100 (the site's maximum). Defaults to 100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "store_numbers": store_numbers, "distance_miles": distance_miles}, extra)
+
+    def availability(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        sku_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online and Rack store-pickup availability for every size and color of one nordstromrack.com (US) product, by URL or style id, optionally one sku. Each sku has sku id, size, color, UPC, in_stock, whether it ships and the quantity available to ship, the quantity available for pickup, and the Rack stores where it can be picked up (store number, name, address, city, state, ZIP, phone). Quantities are chain-wide: per store the site only says whether pickup is available, not how many. in_stock is true when the sku can be shipped or picked up, so a sku with ship_quantity 0 can still be in stock for pickup. Costs 10 credits (the product page plus the store lookup). An unknown style id or sku id is a 404.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstromrack.com product URL (the `url` of a search, category or brand result).
+            style_id: Nordstrom Rack style id, used when url is not given.
+            sku_id: Only this sku (a product's colors[].skus[].sku_id). An id that is not a sku of the product is a 404.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_availability", {"url": url, "style_id": style_id, "sku_id": sku_id}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box autocomplete of nordstromrack.com: the queries Nordstrom Rack suggests for a partial search term, most likely first (e.g. "dre" -> dresses for women, dress, barefoot dreams, sweater dress). Useful for keyword research and for building queries for search().
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            limit: Suggestions to return, 1-20. Defaults to 8. The site may return fewer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_suggestions", {"query": query, "limit": limit}, extra)
+
+    def reviews(
+        self,
+        *,
+        url: Optional[str] = None,
+        style_id: Optional[str] = None,
+        sort: Optional[Literal["most_helpful", "most_recent", "highest_rated", "lowest_rated"]] = None,
+        stars: Optional[list[Literal[1, 2, 3, 4, 5]]] = None,
+        verified_only: Optional[bool] = None,
+        with_photos: Optional[bool] = None,
+        search: Optional[str] = None,
+        max_reviews: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one nordstromrack.com (US) product by URL or style id, up to 200 per call (default 60), sorted most helpful (default), most recent, highest rated or lowest rated, optionally filtered to star ratings, verified purchases, reviews with photos, or a text search. Rack has its own review pool, separate from nordstrom.com's. Returns the product's review summary (average rating, total reviews, star histogram, size rating 1 runs small to 5 runs big, width rating where the site has one, the most mentioned praised and criticized features with a quote each, and the count of rating-only reviews), the AI review summary when the site shows one, the number of reviews matching the filters (total_results), returned and has_more. Each review has id, title, text, star rating, size rating, author, date, helpful votes, verified-purchase flag, reviewer badges, size and color purchased, the reviewer's height, weight, body type and usual sizes when given, secondary ratings, the site it was syndicated from (e.g. a brand's own site) and photos with thumbnails. Rating-only reviews are included with title and text null. Takes 15-60s, up to about 100s at max_reviews 200. A product with no reviews returns an empty list; an unknown style id is a 404.
+
+        Costs 10 credits. Returns the API response as a dict.
+
+        Args:
+            url: nordstromrack.com product URL (the `url` of a search, category or brand result).
+            style_id: Nordstrom Rack style id, used when url is not given.
+            sort: most_helpful (default), most_recent, highest_rated or lowest_rated. Cannot be combined with search: Nordstrom Rack returns review search results in its own order.
+            stars: Only reviews with these star ratings, e.g. [1, 2] for the critical ones.
+            verified_only: Only reviews from verified purchasers.
+            with_photos: Only reviews that include customer photos.
+            search: Only reviews mentioning this text (the review search box), 1-100 characters. Results come in the site's search order, so sort cannot be set with it.
+            max_reviews: Reviews to return, 1-200. Defaults to 60. Larger values take longer (about 50-100s for 200).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("nordstrom_rack_reviews", {"url": url, "style_id": style_id, "sort": sort, "stars": stars, "verified_only": verified_only, "with_photos": with_photos, "search": search, "max_reviews": max_reviews}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

@@ -42,6 +42,7 @@ from ._namespaces_sync import (
     _MetaAdsNamespace,
     _MicroCenterNamespace,
     _NordstromNamespace,
+    _NordstromRackNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
     _RealtorNamespace,
@@ -179,6 +180,7 @@ class ScavioClient:
         self.chewy = _ChewyNamespace(self)
         self.menards = _MenardsNamespace(self)
         self.nordstrom = _NordstromNamespace(self)
+        self.nordstrom_rack = _NordstromRackNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

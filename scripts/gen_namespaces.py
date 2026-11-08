@@ -210,6 +210,10 @@ _NS_META = {
         "Nordstrom",
         "Nordstrom search, category, brand, product, reviews, pickup availability, store locator, and autocomplete endpoints.",
     ),
+    "nordstrom_rack": (
+        "NordstromRack",
+        "Nordstrom Rack search, category (clearance, flash events), brand, product, reviews, pickup availability, store locator, and autocomplete endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

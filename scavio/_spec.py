@@ -8128,6 +8128,316 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=10,
         min_timeout=150.0,
     ),
+    # ========================== Nordstrom Rack ===========================
+    # nordstromrack.com (US), a separate platform from nordstrom.com with the
+    # same request shapes and credit costs: 8 endpoints, 5 credits each except
+    # availability (10) and reviews (10). category() takes Rack's /shop and
+    # /clearance paths (Clear the Rack, flash events /shop/flash/event-N); brand()
+    # takes /brands/<slug> with no id. Stores are Rack stores only and reviews
+    # are Rack's own pool. Same timeout floors as nordstrom: 120 s, reviews 150 s
+    # (15-60 s typical, up to ~100 s at max_reviews 200).
+    Endpoint(
+        key="nordstrom_rack_search",
+        namespace="nordstrom_rack",
+        method="search",
+        http="POST",
+        path="/api/v1/nordstromrack/search",
+        summary=(
+            "Search nordstromrack.com (US) products, 24 per page, sorted by relevance, rating, "
+            "price, newest or percent off. Each result has style id, URL, name, brand, image, "
+            "current price and price range in dollars, the compare-at price range Rack strikes "
+            "through, percent off and on-sale flag, the clearance price range, and any promotion "
+            "on top (promotion_price_range, and promotion_percent_off: the extra percent off the "
+            "clearance price during Clear the Rack, otherwise off Rack's regular price), rating, "
+            "review count (Rack's own reviews), badges such as new_markdown or final_sale, a "
+            "low-inventory flag, whether it is sold by a marketplace seller (and the seller's "
+            "name), and every color with its color family and image. Also returns the total "
+            "result count and page count. Use a result's url or style_id with product()."
+        ),
+        params=(
+            _req("query", "Search keywords."),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_product",
+        namespace="nordstrom_rack",
+        method="product",
+        http="POST",
+        path="/api/v1/nordstromrack/product",
+        summary=(
+            "One nordstromrack.com (US) product by URL or style id: name, brand, brand page URL, "
+            "description, feature bullets, fit notes, final-sale flag, current, compare-at and "
+            "clearance price ranges, percent off, any promotion on top (promotion_price_range and "
+            "promotion_percent_off, e.g. Clear the Rack's extra 25% off clearance), rating, "
+            "review count, the star histogram, the size-fit distribution (too small to too big), "
+            "the AI review summary when the site shows one, the most mentioned praised and "
+            "criticized features with a quote each, breadcrumbs and images. Every color lists its "
+            "images and every size as a sku with sku id, size, size type, UPC, price, compare-at "
+            "price, percent off, price type (regular, clearance, promotion), in_stock and the "
+            "quantity available to ship. in_stock is true when the sku can be shipped or picked "
+            "up in a Rack store, so a sku held only in a store reads in stock with quantity 0 "
+            "(availability() lists its pickup stores). Includes the reviews shown on the product "
+            "page (up to about 13), with the total review count; each review has title, text, "
+            "rating, size rating, author, date, helpful votes and verified-purchase flag "
+            "(reviews() pages the full review history). Ratings and reviews are Rack's own, "
+            "separate from nordstrom.com's. An unknown style id is a 404."
+        ),
+        params=(
+            _str(
+                "url",
+                "nordstromrack.com product URL (the `url` of a search, category or brand result).",
+            ),
+            _str(
+                "style_id",
+                "Nordstrom Rack style id, the number at the end of a product URL (a result's "
+                "`style_id`). Used when url is not given.",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_category",
+        namespace="nordstrom_rack",
+        method="category",
+        http="POST",
+        path="/api/v1/nordstromrack/category",
+        summary=(
+            "Browse a nordstromrack.com (US) category page, 24 products per page, sorted by "
+            "relevance, rating, price, newest or percent off. Works on every /shop and /clearance "
+            "listing: departments (/shop/women), deals (/shop/deals/black-friday), new arrivals "
+            "(/shop/new-arrivals), Clear the Rack (/clearance, /clearance/women/clothing) and "
+            "flash events: /shop/flash lists the live events as subcategories (it has no products "
+            "of its own), and each event (/shop/flash/event-7) is a listing whose first page "
+            "shows the event's featured products first, then the rest, with positions running "
+            "on. Returns the category's name, page title, path, URL, breadcrumbs and "
+            "subcategories (name and path, for drilling down). Each product has the same fields "
+            "as a search result, including the clearance and promotion price ranges. Also "
+            "returns the total result count, page count, and the filter sidebar: each filter "
+            "group (Product Type, Size, Color, Brand, Price...) with its options and product "
+            "counts (price buckets carry no count on the site, so theirs are null; groups with "
+            "more than 100 options, such as Brand, list the 100 with the most products and give "
+            "the full option_count). An unknown category is a 404."
+        ),
+        params=(
+            _req(
+                "category",
+                "A nordstromrack.com category: the /shop or /clearance path or full URL of a "
+                "category page, e.g. /shop/women/clothing/dresses, /shop/deals/black-friday, "
+                "/shop/new-arrivals, /clearance, /clearance/women/clothing, /shop/flash or a flash "
+                "event such as /shop/flash/event-7. A path without a prefix "
+                "(women/clothing/dresses) is read as /shop/... . Query parameters in a URL "
+                "(filters) are ignored. Each result's category.subcategories lists child paths.",
+            ),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_brand",
+        namespace="nordstrom_rack",
+        method="brand",
+        http="POST",
+        path="/api/v1/nordstromrack/brand",
+        summary=(
+            "List a brand's products on nordstromrack.com (US) from its brand page "
+            "(/brands/adidas), 24 per page, sorted by relevance, rating, price, newest or percent "
+            "off. Returns the brand's name, path, URL and breadcrumbs. Each product has the same "
+            "fields as a search result, including the clearance and promotion price ranges. Also "
+            "returns the total result count, page count, and the filter sidebar (filter groups "
+            "with their options and product counts; groups with more than 100 options list the "
+            "100 with the most products and give the full option_count). An unknown brand is a "
+            "404."
+        ),
+        params=(
+            _req(
+                "brand",
+                "A nordstromrack.com brand: the /brands path or full URL of a brand page, e.g. "
+                "/brands/adidas, /brands/sam-edelman or https://www.nordstromrack.com/brands/ugg "
+                "(a product's brand_url works). The /brands prefix is optional. Rack brand pages "
+                "carry no brand id: the nordstrom.com form /brands/<name>--<id> is a 404 here.",
+            ),
+            _int("page", "Results page, 1-based. Defaults to 1. 24 products per page."),
+            _lit(
+                "sort",
+                ("relevance", "rating", "price_high", "price_low", "newest", "percent_off"),
+                "relevance (default), rating, price_high, price_low, newest or percent_off.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_stores",
+        namespace="nordstrom_rack",
+        method="stores",
+        http="POST",
+        path="/api/v1/nordstromrack/stores",
+        summary=(
+            "Find Nordstrom Rack stores near a US ZIP code or latitude/longitude within up to 100 "
+            "miles, nearest first, or look Rack stores up by store number. Each store has store "
+            "number, name, type (rack), address, city, state, ZIP, country, phone, weekly hours, "
+            "holiday hours when posted, open and close times for the next 8 days, time zone, "
+            "distance in miles, latitude and longitude, whether it offers buy-online pickup and "
+            "curbside pickup, its amenities and its store page URL. A ZIP with no store in range "
+            "returns an empty list."
+        ),
+        params=(
+            _str(
+                "zip",
+                "US ZIP code to search around. Pass exactly one of zip, latitude and longitude, or "
+                "store_numbers.",
+            ),
+            _float("latitude", "Latitude to search around (with longitude)."),
+            _float("longitude", "Longitude to search around (with latitude)."),
+            Param(
+                "store_numbers",
+                "Optional[Union[str, list[Union[str, int]]]]",
+                doc="Look up Rack stores by number instead of location: a list or a "
+                "comma-separated string, up to 100 (an availability result's "
+                "pickup_stores[].store_number). Numbers of Nordstrom full-line stores are left "
+                "out.",
+            ),
+            _int(
+                "distance_miles",
+                "Search radius in miles around zip or latitude/longitude, 1-100 (the site's "
+                "maximum). Defaults to 100.",
+            ),
+        ),
+        # "At least one" here; the server rejects any mix of the three.
+        one_of=(("zip", "latitude", "longitude", "store_numbers"),),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_availability",
+        namespace="nordstrom_rack",
+        method="availability",
+        http="POST",
+        path="/api/v1/nordstromrack/availability",
+        summary=(
+            "Online and Rack store-pickup availability for every size and color of one "
+            "nordstromrack.com (US) product, by URL or style id, optionally one sku. Each sku has "
+            "sku id, size, color, UPC, in_stock, whether it ships and the quantity available to "
+            "ship, the quantity available for pickup, and the Rack stores where it can be picked "
+            "up (store number, name, address, city, state, ZIP, phone). Quantities are "
+            "chain-wide: per store the site only says whether pickup is available, not how many. "
+            "in_stock is true when the sku can be shipped or picked up, so a sku with "
+            "ship_quantity 0 can still be in stock for pickup. Costs 10 credits (the product page "
+            "plus the store lookup). An unknown style id or sku id is a 404."
+        ),
+        params=(
+            _str(
+                "url",
+                "nordstromrack.com product URL (the `url` of a search, category or brand result).",
+            ),
+            _str("style_id", "Nordstrom Rack style id, used when url is not given."),
+            _str(
+                "sku_id",
+                "Only this sku (a product's colors[].skus[].sku_id). An id that is not a sku of the "
+                "product is a 404.",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=10,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_suggestions",
+        namespace="nordstrom_rack",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/nordstromrack/suggestions",
+        summary=(
+            "The search-box autocomplete of nordstromrack.com: the queries Nordstrom Rack "
+            "suggests for a partial search term, most likely first (e.g. \"dre\" -> dresses for "
+            "women, dress, barefoot dreams, sweater dress). Useful for keyword research and for "
+            "building queries for search()."
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far."),
+            _int(
+                "limit",
+                "Suggestions to return, 1-20. Defaults to 8. The site may return fewer.",
+            ),
+        ),
+        credits=5,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="nordstrom_rack_reviews",
+        namespace="nordstrom_rack",
+        method="reviews",
+        http="POST",
+        path="/api/v1/nordstromrack/reviews",
+        summary=(
+            "Customer reviews of one nordstromrack.com (US) product by URL or style id, up to 200 "
+            "per call (default 60), sorted most helpful (default), most recent, highest rated or "
+            "lowest rated, optionally filtered to star ratings, verified purchases, reviews with "
+            "photos, or a text search. Rack has its own review pool, separate from "
+            "nordstrom.com's. Returns the product's review summary (average rating, total "
+            "reviews, star histogram, size rating 1 runs small to 5 runs big, width rating where "
+            "the site has one, the most mentioned praised and criticized features with a quote "
+            "each, and the count of rating-only reviews), the AI review summary when the site "
+            "shows one, the number of reviews matching the filters (total_results), returned and "
+            "has_more. Each review has id, title, text, star rating, size rating, author, date, "
+            "helpful votes, verified-purchase flag, reviewer badges, size and color purchased, "
+            "the reviewer's height, weight, body type and usual sizes when given, secondary "
+            "ratings, the site it was syndicated from (e.g. a brand's own site) and photos with "
+            "thumbnails. Rating-only reviews are included with title and text null. Takes "
+            "15-60s, up to about 100s at max_reviews 200. A product with no reviews returns an "
+            "empty list; an unknown style id is a 404."
+        ),
+        params=(
+            _str(
+                "url",
+                "nordstromrack.com product URL (the `url` of a search, category or brand result).",
+            ),
+            _str("style_id", "Nordstrom Rack style id, used when url is not given."),
+            _lit(
+                "sort",
+                ("most_helpful", "most_recent", "highest_rated", "lowest_rated"),
+                "most_helpful (default), most_recent, highest_rated or lowest_rated. Cannot be "
+                "combined with search: Nordstrom Rack returns review search results in its own "
+                "order.",
+            ),
+            _ilit_list(
+                "stars",
+                (1, 2, 3, 4, 5),
+                "Only reviews with these star ratings, e.g. [1, 2] for the critical ones.",
+            ),
+            _bool("verified_only", "Only reviews from verified purchasers."),
+            _bool("with_photos", "Only reviews that include customer photos."),
+            _str(
+                "search",
+                "Only reviews mentioning this text (the review search box), 1-100 characters. "
+                "Results come in the site's search order, so sort cannot be set with it.",
+            ),
+            _int(
+                "max_reviews",
+                "Reviews to return, 1-200. Defaults to 60. Larger values take longer (about "
+                "50-100s for 200).",
+            ),
+        ),
+        one_of=(("url", "style_id"),),
+        credits=10,
+        min_timeout=150.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -9237,6 +9547,7 @@ NAMESPACES: tuple[str, ...] = (
     "chewy",
     "menards",
     "nordstrom",
+    "nordstrom_rack",
     "trustpilot",
     "realtor",
     "rightmove",

@@ -44,6 +44,7 @@ from ._namespaces_async import (
     _AsyncMetaAdsNamespace,
     _AsyncMicroCenterNamespace,
     _AsyncNordstromNamespace,
+    _AsyncNordstromRackNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
     _AsyncRealtorNamespace,
@@ -174,6 +175,7 @@ class AsyncScavioClient:
         self.chewy = _AsyncChewyNamespace(self)
         self.menards = _AsyncMenardsNamespace(self)
         self.nordstrom = _AsyncNordstromNamespace(self)
+        self.nordstrom_rack = _AsyncNordstromRackNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)
