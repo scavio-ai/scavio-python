@@ -618,6 +618,7 @@ BODY_PRICED_KEYS = {
     "costco_warehouses",
     "costco_gas",
     "menards_product",
+    "best_buy_category",
 }
 
 
@@ -1988,3 +1989,101 @@ def test_nordstrom_rack_credits_paths_and_wire(monkeypatch):
         rack.stores()
     with pytest.raises(ScavioError):
         rack.reviews(sort="most_recent")
+
+
+def test_best_buy_credits_paths_and_wire(monkeypatch):
+    """best_buy (0.39.0): 9 endpoints on /api/v1/bestbuy, 120 s timeout floor.
+
+    search, product, reviews and prices 2 credits; category 2 (3 on a pcmcat
+    page, stated in credits_note); deals 3; stores and suggestions 1;
+    availability 2 flat.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "best_buy"}
+    assert {m: ep.credits for m, ep in eps.items()} == {
+        "search": 2,
+        "product": 2,
+        "reviews": 2,
+        "category": 2,
+        "deals": 3,
+        "stores": 1,
+        "availability": 2,
+        "suggestions": 1,
+        "prices": 2,
+    }
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/bestbuy/{m}", ep.key
+        assert ep.min_timeout == 120.0, ep.key
+    assert "3 for a pcmcat page" in (eps["category"].credits_note or "")
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    bb = client.best_buy
+    bb.search(
+        "tv",
+        sort="best_selling",
+        filters={"brand": "Samsung", "min_price": 300, "max_price": 500},
+    )
+    bb.product(sku="6607832")
+    bb.reviews(sku="6607832", sort="newest", rating=1, page=2)
+    bb.category(category_id="abcat0101001", filters={"on_sale": True}, include_sponsored=True)
+    bb.deals()
+    bb.stores("94103")
+    bb.availability(sku="6607832", zip="94103", max_stores=3)
+    bb.availability(sku="6607832", store_ids=["187", "873"])
+    bb.suggestions("ps5 con")
+    bb.prices(["6607832", "6673112", "6679316"])
+    assert seen == [
+        (
+            "/api/v1/bestbuy/search",
+            {
+                "query": "tv",
+                "sort": "best_selling",
+                "filters": {"brand": "Samsung", "min_price": 300, "max_price": 500},
+            },
+            120.0,
+        ),
+        ("/api/v1/bestbuy/product", {"sku": "6607832"}, 120.0),
+        (
+            "/api/v1/bestbuy/reviews",
+            {"sku": "6607832", "page": 2, "sort": "newest", "rating": 1},
+            120.0,
+        ),
+        (
+            "/api/v1/bestbuy/category",
+            {
+                "category_id": "abcat0101001",
+                "filters": {"on_sale": True},
+                "include_sponsored": True,
+            },
+            120.0,
+        ),
+        ("/api/v1/bestbuy/deals", {}, 120.0),
+        ("/api/v1/bestbuy/stores", {"zip": "94103"}, 120.0),
+        (
+            "/api/v1/bestbuy/availability",
+            {"sku": "6607832", "zip": "94103", "max_stores": 3},
+            120.0,
+        ),
+        (
+            "/api/v1/bestbuy/availability",
+            {"sku": "6607832", "store_ids": ["187", "873"]},
+            120.0,
+        ),
+        ("/api/v1/bestbuy/suggestions", {"query": "ps5 con"}, 120.0),
+        ("/api/v1/bestbuy/prices", {"skus": ["6607832", "6673112", "6679316"]}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        bb.product()
+    with pytest.raises(ScavioError):
+        bb.category()
+    with pytest.raises(ScavioError):
+        bb.availability(sku="6607832")
+    with pytest.raises(ScavioError):
+        bb.availability(zip="94103")

@@ -10,6 +10,7 @@ from ._namespaces_sync import (
     _AldiNamespace,
     _AmazonNamespace,
     _AppStoreNamespace,
+    _BestBuyNamespace,
     _BookingNamespace,
     _CanadianTireNamespace,
     _CapterraNamespace,
@@ -181,6 +182,7 @@ class ScavioClient:
         self.menards = _MenardsNamespace(self)
         self.nordstrom = _NordstromNamespace(self)
         self.nordstrom_rack = _NordstromRackNamespace(self)
+        self.best_buy = _BestBuyNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

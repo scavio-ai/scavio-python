@@ -61,6 +61,7 @@ __all__ = [
     "_AsyncMenardsNamespace",
     "_AsyncNordstromNamespace",
     "_AsyncNordstromRackNamespace",
+    "_AsyncBestBuyNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -7563,6 +7564,187 @@ class _AsyncNordstromRackNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("nordstrom_rack_reviews", {"url": url, "style_id": style_id, "sort": sort, "stars": stars, "verified_only": verified_only, "with_photos": with_photos, "search": search, "max_reviews": max_reviews}, extra)
+
+class _AsyncBestBuyNamespace:
+    """Best Buy search, product (open-box offers), reviews, category, Deal of the Day, store locator, store pickup availability, autocomplete, and batch price endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "best_selling", "best_discount", "price_low", "price_high", "rating", "newest"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search bestbuy.com (US), 18 products per page, sorted by best match, best selling, best discount, price, rating or newest, filtered by brand, on sale, clearance, open box or a price range. Each product has SKU, BSIN, name, brand, model number, URL, image, price, regular price, savings in dollars and percent, on-sale flag, deal badge (e.g. Clearance, Holiday Deal), condition (new, refurbished excellent...), rating, review count, seller type (best_buy or marketplace), product type, badges and release date. Also returns the total result count and page count, the applied sort and filters, the category, the filter sidebar (every facet with its values and product counts; category_facet values carry category ids), the sort options, related searches and any spelling correction. Sponsored tiles are left out unless include_sponsored.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            page: Results page, 1-based, up to 100. Defaults to 1. 18 products per page.
+            sort: best_match (default), best_selling, best_discount, price_low, price_high, rating or newest.
+            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the response echoes what Best Buy applied.
+            include_sponsored: Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position null). Defaults to false.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_search", {"query": query, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def product(
+        self,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One bestbuy.com (US) product by SKU or URL: name, brand, model, UPC, URL, status, condition, product type, category path, price, regular price, savings, on-sale flag, deal badge, financing offer, every open-box offer by condition (fair, good, excellent) with its price, savings against new and against the regular price, other sellers' and conditions' SKUs of the same product, rating, review count, the AI review summary and what customers love, description, feature list, what's included, the full specification table by group, dimensions, full-size images, manuals and badges. An unknown SKU is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
+            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_product", {"sku": sku, "url": url}, extra)
+
+    async def reviews(
+        self,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["most_relevant", "most_helpful", "newest", "oldest", "highest_rated", "lowest_rated"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one bestbuy.com (US) product by SKU or URL, 20 per page, sorted most relevant (default), most helpful, newest, oldest, highest or lowest rated, optionally only one star rating. Returns the review summary (average rating, review count, recommended percent, star histogram, the most mentioned pros and cons with mention counts), total_results for the filter, page count and has_more. Each review has id, title, text, rating, author, date, recommended flag, verified-purchase and incentivized flags, days of ownership, helpful and not-helpful votes, badges, photos, the site it was syndicated from and the brand's response. An unknown SKU is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
+            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
+            page: Reviews page, 1-based, 20 reviews per page, up to 500. Defaults to 1.
+            sort: most_relevant (default), most_helpful, newest, oldest, highest_rated or lowest_rated.
+            rating: Only reviews with this many stars, 1-5.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_reviews", {"sku": sku, "url": url, "page": page, "sort": sort, "rating": rating}, extra)
+
+    async def category(
+        self,
+        *,
+        category_id: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_selling", "best_discount", "price_low", "price_high", "rating", "newest"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse a bestbuy.com (US) category or deals page by category id or URL, 18 products per page, sorted by best selling, best discount, price, rating or newest, with the same filters as search. Works on catalogue categories (abcat0101001 All Flat-Screen TVs) and merchandised pages such as All Electronics on Sale (pcmcat1674241939957), whose built-in filters are read from the page itself. Products and listing fields are the same as search(). An unknown category, or a page without a product grid, is a 404.
+
+        Costs 2 credits for an abcat id and 3 for a pcmcat page (the page is read first).
+        Returns the API response as a dict.
+
+        Args:
+            category_id: Best Buy category id: abcat... (catalogue categories, e.g. abcat0101001 All Flat-Screen TVs) or pcmcat... (merchandised pages, e.g. pcmcat1674241939957 All Electronics on Sale). A search result's facets list category ids under category_facet.
+            url: A bestbuy.com category page URL (.../<id>.c?id=<id>). Filters in the URL (qp=...) are kept; its sort is not, use sort.
+            page: Results page, 1-based, up to 100. Defaults to 1. 18 products per page.
+            sort: best_selling (the default on most pages), best_discount, price_low, price_high, rating or newest.
+            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the response echoes what Best Buy applied.
+            include_sponsored: Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position null). Defaults to false.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_category", {"category_id": category_id, "url": url, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def deals(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Today's Best Buy Deal of the Day and the more-deals row under it, with live prices: SKU, name, URL, image, rating, review count, price, regular price, savings in dollars and percent, on-sale flag and deal badge, plus the countdown end as the page shows it. Up to 15 products. No parameters.
+
+        Costs 3 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_deals", {}, extra)
+
+    async def stores(
+        self,
+        zip: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Best Buy stores near a US ZIP code, nearest first (up to 15): store id, name, address, city, state, ZIP, phone, open status, store type, distance in miles, and dated opening hours for the next 35 days (holiday hours and closed days included). Use a store_id with availability().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code, e.g. '94103'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_stores", {"zip": zip}, extra)
+
+    async def availability(
+        self,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        zip: Optional[str] = None,
+        max_stores: Optional[int] = None,
+        store_ids: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store pickup availability of one bestbuy.com SKU at up to 8 stores: the stores nearest a ZIP code or the store ids you pass. Each store has a status: in_stock, limited (with the real quantity when Best Buy shows "only N left"), ship_to_store (not on the shelf; can be shipped there for pickup by pickup_date), out_of_stock, not_available_for_pickup, or unknown (with a reason, when the store's answer did not include this SKU; never reported as out of stock). Also the pickup date, the minimum hours until pickup, and the nearby store Best Buy suggests when this one cannot fill it. Best Buy does not publish unit counts for well-stocked items, so quantity is null for in_stock. Takes 5-20s. Costs 2 credits flat. An unknown SKU is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
+            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
+            zip: Check the stores nearest this US ZIP code (max_stores of them). Pass exactly one of zip or store_ids.
+            max_stores: With zip: how many of the nearest stores to check, 1-8. Defaults to 5.
+            store_ids: Check these stores instead (store numbers, a stores() result's store_id), up to 8: a list or a comma-separated string.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_availability", {"sku": sku, "url": url, "zip": zip, "max_stores": max_stores, "store_ids": store_ids}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The bestbuy.com search-box autocomplete for a partial query (e.g. "ps5 con"): suggested search terms, each with the categories (id and name) and SKUs Best Buy shows for it, plus any spelling correction.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_suggestions", {"query": query}, extra)
+
+    async def prices(
+        self,
+        skus: Union[str, list[str]],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current bestbuy.com prices for up to 15 SKUs in one call: price, regular price, savings in dollars and percent, on-sale flag, deal badge and deal end time per SKU. A SKU Best Buy does not know comes back found: false; all unknown is a 404. Costs 2 credits per call, whatever the number of SKUs.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            skus: 1-15 Best Buy SKUs, a list or a comma-separated string, e.g. ['6607832', '6673112'].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_prices", {"skus": skus}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

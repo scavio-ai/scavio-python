@@ -219,6 +219,32 @@ _COSTCO_LISTING_FILTERS = (
 )
 
 
+
+# Best Buy params shared across endpoints.
+_BESTBUY_SKU = _str(
+    "sku",
+    "Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).",
+)
+_BESTBUY_URL = _str(
+    "url",
+    "bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or "
+    "/site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.",
+)
+_BESTBUY_FILTERS = Param(
+    "filters",
+    "Optional[dict[str, Any]]",
+    doc="Filters, the same as the site's filter sidebar: brand (as spelled in the Brand "
+    "facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, "
+    "pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the "
+    "response echoes what Best Buy applied.",
+)
+_BESTBUY_INCLUDE_SPONSORED = _bool(
+    "include_sponsored",
+    "Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position "
+    "null). Defaults to false.",
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -8438,6 +8464,272 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=10,
         min_timeout=150.0,
     ),
+    # ============================== Best Buy =============================
+    # bestbuy.com (US only), 9 endpoints. Credits: search, product, reviews and
+    # prices 2 (prices is per call, up to 15 SKUs); category 2 for an abcat id
+    # and 3 for a pcmcat page (credits_note); deals 3; stores and suggestions 1;
+    # availability 2 flat for up to 8 stores. product, reviews and availability
+    # take sku or url; category takes category_id or url; availability takes
+    # exactly one of zip or store_ids (one_of only enforces "at least one").
+    # filters is a nested object on the wire, so it is a dict here. 120 s
+    # timeout floor everywhere: availability alone typically takes 5-20 s.
+    Endpoint(
+        key="best_buy_search",
+        namespace="best_buy",
+        method="search",
+        http="POST",
+        path="/api/v1/bestbuy/search",
+        summary=(
+            "Search bestbuy.com (US), 18 products per page, sorted by best match, best selling, "
+            "best discount, price, rating or newest, filtered by brand, on sale, clearance, open "
+            "box or a price range. Each product has SKU, BSIN, name, brand, model number, URL, "
+            "image, price, regular price, savings in dollars and percent, on-sale flag, deal "
+            "badge (e.g. Clearance, Holiday Deal), condition (new, refurbished excellent...), "
+            "rating, review count, seller type (best_buy or marketplace), product type, badges "
+            "and release date. Also returns the total result count and page count, the applied "
+            "sort and filters, the category, the filter sidebar (every facet with its values and "
+            "product counts; category_facet values carry category ids), the sort options, "
+            "related searches and any spelling correction. Sponsored tiles are left out unless "
+            "include_sponsored."
+        ),
+        params=(
+            _req("query", "Search keywords."),
+            _int("page", "Results page, 1-based, up to 100. Defaults to 1. 18 products per page."),
+            _lit(
+                "sort",
+                (
+                    "best_match",
+                    "best_selling",
+                    "best_discount",
+                    "price_low",
+                    "price_high",
+                    "rating",
+                    "newest",
+                ),
+                "best_match (default), best_selling, best_discount, price_low, price_high, "
+                "rating or newest.",
+            ),
+            _BESTBUY_FILTERS,
+            _BESTBUY_INCLUDE_SPONSORED,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_product",
+        namespace="best_buy",
+        method="product",
+        http="POST",
+        path="/api/v1/bestbuy/product",
+        summary=(
+            "One bestbuy.com (US) product by SKU or URL: name, brand, model, UPC, URL, status, "
+            "condition, product type, category path, price, regular price, savings, on-sale "
+            "flag, deal badge, financing offer, every open-box offer by condition (fair, good, "
+            "excellent) with its price, savings against new and against the regular price, other "
+            "sellers' and conditions' SKUs of the same product, rating, review count, the AI "
+            "review summary and what customers love, description, feature list, what's "
+            "included, the full specification table by group, dimensions, full-size images, "
+            "manuals and badges. An unknown SKU is a 404."
+        ),
+        params=(_BESTBUY_SKU, _BESTBUY_URL),
+        one_of=(("sku", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_reviews",
+        namespace="best_buy",
+        method="reviews",
+        http="POST",
+        path="/api/v1/bestbuy/reviews",
+        summary=(
+            "Customer reviews of one bestbuy.com (US) product by SKU or URL, 20 per page, "
+            "sorted most relevant (default), most helpful, newest, oldest, highest or lowest "
+            "rated, optionally only one star rating. Returns the review summary (average rating, "
+            "review count, recommended percent, star histogram, the most mentioned pros and cons "
+            "with mention counts), total_results for the filter, page count and has_more. Each "
+            "review has id, title, text, rating, author, date, recommended flag, "
+            "verified-purchase and incentivized flags, days of ownership, helpful and "
+            "not-helpful votes, badges, photos, the site it was syndicated from and the brand's "
+            "response. An unknown SKU is a 404."
+        ),
+        params=(
+            _BESTBUY_SKU,
+            _BESTBUY_URL,
+            _int("page", "Reviews page, 1-based, 20 reviews per page, up to 500. Defaults to 1."),
+            _lit(
+                "sort",
+                (
+                    "most_relevant",
+                    "most_helpful",
+                    "newest",
+                    "oldest",
+                    "highest_rated",
+                    "lowest_rated",
+                ),
+                "most_relevant (default), most_helpful, newest, oldest, highest_rated or "
+                "lowest_rated.",
+            ),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this many stars, 1-5."),
+        ),
+        one_of=(("sku", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_category",
+        namespace="best_buy",
+        method="category",
+        http="POST",
+        path="/api/v1/bestbuy/category",
+        summary=(
+            "Browse a bestbuy.com (US) category or deals page by category id or URL, 18 products "
+            "per page, sorted by best selling, best discount, price, rating or newest, with the "
+            "same filters as search. Works on catalogue categories (abcat0101001 All Flat-Screen "
+            "TVs) and merchandised pages such as All Electronics on Sale (pcmcat1674241939957), "
+            "whose built-in filters are read from the page itself. Products and listing fields "
+            "are the same as search(). An unknown category, or a page without a product grid, "
+            "is a 404."
+        ),
+        params=(
+            _str(
+                "category_id",
+                "Best Buy category id: abcat... (catalogue categories, e.g. abcat0101001 All "
+                "Flat-Screen TVs) or pcmcat... (merchandised pages, e.g. pcmcat1674241939957 All "
+                "Electronics on Sale). A search result's facets list category ids under "
+                "category_facet.",
+            ),
+            _str(
+                "url",
+                "A bestbuy.com category page URL (.../<id>.c?id=<id>). Filters in the URL (qp=...) "
+                "are kept; its sort is not, use sort.",
+            ),
+            _int("page", "Results page, 1-based, up to 100. Defaults to 1. 18 products per page."),
+            _lit(
+                "sort",
+                ("best_selling", "best_discount", "price_low", "price_high", "rating", "newest"),
+                "best_selling (the default on most pages), best_discount, price_low, price_high, "
+                "rating or newest.",
+            ),
+            _BESTBUY_FILTERS,
+            _BESTBUY_INCLUDE_SPONSORED,
+        ),
+        one_of=(("category_id", "url"),),
+        credits=2,
+        credits_note="Costs 2 credits for an abcat id and 3 for a pcmcat page (the page is read first).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_deals",
+        namespace="best_buy",
+        method="deals",
+        http="POST",
+        path="/api/v1/bestbuy/deals",
+        summary=(
+            "Today's Best Buy Deal of the Day and the more-deals row under it, with live prices: "
+            "SKU, name, URL, image, rating, review count, price, regular price, savings in "
+            "dollars and percent, on-sale flag and deal badge, plus the countdown end as the "
+            "page shows it. Up to 15 products. No parameters."
+        ),
+        params=(),
+        credits=3,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_stores",
+        namespace="best_buy",
+        method="stores",
+        http="POST",
+        path="/api/v1/bestbuy/stores",
+        summary=(
+            "Best Buy stores near a US ZIP code, nearest first (up to 15): store id, name, "
+            "address, city, state, ZIP, phone, open status, store type, distance in miles, and "
+            "dated opening hours for the next 35 days (holiday hours and closed days included). "
+            "Use a store_id with availability()."
+        ),
+        params=(_req("zip", "US ZIP code, e.g. '94103'."),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_availability",
+        namespace="best_buy",
+        method="availability",
+        http="POST",
+        path="/api/v1/bestbuy/availability",
+        summary=(
+            "Store pickup availability of one bestbuy.com SKU at up to 8 stores: the stores "
+            "nearest a ZIP code or the store ids you pass. Each store has a status: in_stock, "
+            "limited (with the real quantity when Best Buy shows \"only N left\"), ship_to_store "
+            "(not on the shelf; can be shipped there for pickup by pickup_date), out_of_stock, "
+            "not_available_for_pickup, or unknown (with a reason, when the store's answer did not "
+            "include this SKU; never reported as out of stock). Also the pickup date, the minimum "
+            "hours until pickup, and the nearby store Best Buy suggests when this one cannot "
+            "fill it. Best Buy does not publish unit counts for well-stocked items, so quantity "
+            "is null for in_stock. Takes 5-20s. Costs 2 credits flat. An unknown SKU is a 404."
+        ),
+        params=(
+            _BESTBUY_SKU,
+            _BESTBUY_URL,
+            _str(
+                "zip",
+                "Check the stores nearest this US ZIP code (max_stores of them). Pass exactly one "
+                "of zip or store_ids.",
+            ),
+            _int(
+                "max_stores",
+                "With zip: how many of the nearest stores to check, 1-8. Defaults to 5.",
+            ),
+            _str_or_list(
+                "store_ids",
+                "Check these stores instead (store numbers, a stores() result's store_id), up to "
+                "8: a list or a comma-separated string.",
+            ),
+        ),
+        # sku or url, and (at least) one of zip or store_ids; the server rejects both.
+        one_of=(("sku", "url"), ("zip", "store_ids")),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_suggestions",
+        namespace="best_buy",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/bestbuy/suggestions",
+        summary=(
+            "The bestbuy.com search-box autocomplete for a partial query (e.g. \"ps5 con\"): "
+            "suggested search terms, each with the categories (id and name) and SKUs Best Buy "
+            "shows for it, plus any spelling correction."
+        ),
+        params=(_req("query", "What the shopper has typed so far."),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_prices",
+        namespace="best_buy",
+        method="prices",
+        http="POST",
+        path="/api/v1/bestbuy/prices",
+        summary=(
+            "Current bestbuy.com prices for up to 15 SKUs in one call: price, regular price, "
+            "savings in dollars and percent, on-sale flag, deal badge and deal end time per SKU. "
+            "A SKU Best Buy does not know comes back found: false; all unknown is a 404. Costs 2 "
+            "credits per call, whatever the number of SKUs."
+        ),
+        params=(
+            Param(
+                "skus",
+                "Union[str, list[str]]",
+                required=True,
+                doc="1-15 Best Buy SKUs, a list or a comma-separated string, e.g. "
+                "['6607832', '6673112'].",
+            ),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -9548,6 +9840,7 @@ NAMESPACES: tuple[str, ...] = (
     "menards",
     "nordstrom",
     "nordstrom_rack",
+    "best_buy",
     "trustpilot",
     "realtor",
     "rightmove",

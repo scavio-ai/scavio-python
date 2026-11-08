@@ -214,6 +214,11 @@ _NS_META = {
         "NordstromRack",
         "Nordstrom Rack search, category (clearance, flash events), brand, product, reviews, pickup availability, store locator, and autocomplete endpoints.",
     ),
+    "best_buy": (
+        "BestBuy",
+        "Best Buy search, product (open-box offers), reviews, category, Deal of the Day, "
+        "store locator, store pickup availability, autocomplete, and batch price endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

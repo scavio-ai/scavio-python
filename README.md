@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 61 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 62 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -24,6 +24,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
+| Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1411,6 +1412,66 @@ print(rack.suggestions("dre")["data"]["suggestions"])
 available, not how many. Responses carry no event start or end dates. An
 unknown style id, sku id, category or brand is a 404.
 
+### 29. US Retail -- Best Buy
+
+bestbuy.com (US site only), namespace `best_buy`, 9 endpoints. Credits:
+`search`, `product`, `reviews` and `prices` 2 each (`prices` is per call, up to
+15 SKUs); `category` 2 for an `abcat` id and 3 for a `pcmcat` page; `deals` 3;
+`stores` and `suggestions` 1; `availability` 2 flat for up to 8 stores.
+`product`, `reviews` and `availability` take `sku` or `url`; `availability`
+takes exactly one of `zip` or `store_ids`. `filters` is a dict: `brand`,
+`on_sale`, `clearance`, `open_box`, and `min_price` with `max_price` (both
+bounds). Search and category return 18 organic products per page; sponsored
+tiles only with `include_sponsored=True`. Every method raises the request
+timeout to at least 120s; `availability` typically takes 5-20s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bb = client.best_buy
+
+# --- Search with filters, then a category listing.
+found = bb.search("tv", sort="best_selling", filters={"brand": "Samsung", "on_sale": True})["data"]
+print(found["total_results"], found["total_pages"], found["count"], found["sponsored_count"])
+for p in found["products"][:5]:
+    print(p["sku"], p["model"], p["name"], p["price"], p["regular_price"], p["savings_percent"], p["badge"])
+tvs = bb.category(category_id="abcat0101001", sort="price_low")["data"]
+print(tvs["category"]["name"], tvs["total_results"])
+
+# --- One product: open-box offers by condition, UPC, specs.
+item = bb.product(sku="6607832")["data"]
+print(item["upc"], item["model"], item["price"], item["regular_price"], item["review_summary"])
+for ob in item["open_box"]:
+    print(ob["condition"], ob["price"], ob["savings_vs_new"], ob["savings_vs_regular"])
+
+# --- Store pickup status at the stores nearest a ZIP (2 credits flat).
+avail = bb.availability(sku="6607832", zip="94103", max_stores=5)["data"]
+print(avail["in_stock_count"], avail["status_counts"])
+for store in avail["stores"]:
+    print(store["store_id"], store["name"], store["status"], store["quantity"], store["pickup_date"])
+
+# --- Up to 15 prices in one call (2 credits), Deal of the Day, reviews.
+for row in bb.prices(["6607832", "6673112", "6679316"])["data"]["prices"]:
+    print(row["sku"], row["found"], row["price"], row["regular_price"], row["on_sale"])
+deals = bb.deals()["data"]
+print(deals["deal_of_the_day"]["name"], deals["deal_of_the_day"]["price"], deals["countdown_ends"])
+rev = bb.reviews(sku="6607832", sort="newest")["data"]
+print(rev["average_rating"], rev["recommended_percent"], [(c["feature"], c["mentions"]) for c in rev["pros"]])
+
+# --- Store locator and autocomplete.
+for store in bb.stores("94103")["data"]["stores"][:3]:
+    print(store["store_id"], store["name"], store["distance_miles"], store["hours"][0])
+print([s["term"] for s in bb.suggestions("ps5 con")["data"]["suggestions"]])
+```
+
+Availability is store pickup status, not a unit count: `quantity` is set only
+for `limited` (Best Buy's "only N left") and is null for `in_stock`. Statuses
+are `in_stock`, `limited`, `ship_to_store`, `out_of_stock`,
+`not_available_for_pickup` and `unknown` (with a `reason`). In `prices`, a SKU
+Best Buy does not know comes back `found: False`; all unknown is a 404. An
+unknown SKU or category is a 404.
+
 ## Error Handling
 
 ```python
@@ -1542,6 +1603,7 @@ Scavio works with popular AI/LLM frameworks:
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
 | Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
+| Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` | `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores) |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1551,6 +1613,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.39.0
+
+- **New `best_buy` namespace** (sync and async) for bestbuy.com (US):
+  `search`, `product`, `reviews`, `category`, `deals`, `stores`,
+  `availability`, `suggestions`, `prices`. `product` returns open-box offers
+  by condition (fair, good, excellent) with savings against new and regular;
+  `availability` returns per-store pickup status at up to 8 stores; `prices`
+  takes up to 15 SKUs per call. 120s timeout floor on every method.
 
 ### Changed in 0.38.0
 
