@@ -1951,7 +1951,9 @@ def test_nordstrom_rack_credits_paths_and_wire(monkeypatch):
     rack.brand("/brands/adidas")
     rack.stores(zip="10001", distance_miles=25)
     rack.stores(store_numbers=["229", 242])
-    rack.availability(url="https://www.nordstromrack.com/s/maeve-midi-dress/7737947", sku_id="A5819201")
+    rack.availability(
+        url="https://www.nordstromrack.com/s/maeve-midi-dress/7737947", sku_id="A5819201"
+    )
     rack.suggestions("dre", limit=5)
     rack.reviews(style_id="7737947", stars=[1, 2], max_reviews=18)
     assert seen == [
@@ -1967,7 +1969,10 @@ def test_nordstrom_rack_credits_paths_and_wire(monkeypatch):
         ("/api/v1/nordstromrack/stores", {"store_numbers": ["229", 242]}, 120.0),
         (
             "/api/v1/nordstromrack/availability",
-            {"url": "https://www.nordstromrack.com/s/maeve-midi-dress/7737947", "sku_id": "A5819201"},
+            {
+                "url": "https://www.nordstromrack.com/s/maeve-midi-dress/7737947",
+                "sku_id": "A5819201",
+            },
             120.0,
         ),
         ("/api/v1/nordstromrack/suggestions", {"query": "dre", "limit": 5}, 120.0),
