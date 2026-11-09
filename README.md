@@ -1594,9 +1594,11 @@ for fb in reviews["feedback"][:3]:
     print(fb["rating"], fb["created_at"], fb["is_automatic"], fb["text"])
 ```
 
-The EU sites share one cross-border listing pool, priced in the site's
-currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); `uk` (GBP), `us` (USD) and
-`au` (AUD) are separate catalogs. `search` returns 96 items per page and Vinted
+Every site, `uk` (GBP), `us` (USD) and `au` (AUD) included, can show listings
+from sellers in other countries, with the price converted to the site's
+currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK on the other sites); the EU sites
+share one cross-border pool. `product` returns the seller's own price and
+currency, which can differ from the site's. `search` returns 96 items per page and Vinted
 serves at most 10 pages (`total_is_capped` is true past 960 matches); price
 sorts also surface loosely matching cheap listings, so pair them with a
 category or price range. `search`'s `filters` echoes what Vinted actually
@@ -1748,6 +1750,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.41.1
+
+- **`vinted`:** the `country` docs now say what Vinted actually does: every
+  site, `uk`, `us` and `au` included, can show listings from sellers in other
+  countries, priced in the site's currency, and `product` returns the seller's
+  own price and currency. `filters(category_id=...)` now narrows the options
+  to that category (a server-side fix; no SDK signature change).
 
 ### Changed in 0.41.0
 

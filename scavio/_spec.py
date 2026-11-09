@@ -300,8 +300,10 @@ _VINTED_COUNTRY = _lit(
     "Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), "
     "pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au "
     "(vinted.com.au). Category, condition and filter names come back in the site's language. "
-    "The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or "
-    "CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.",
+    "Every site can show listings from sellers in other countries, with the price converted to "
+    "the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for "
+    "au); the EU sites share one cross-border pool. product() returns the seller's own price "
+    "and currency.",
 )
 _VINTED_USER_ID = Param(
     "user_id",

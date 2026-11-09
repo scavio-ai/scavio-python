@@ -8051,7 +8051,7 @@ class _AsyncVintedNamespace:
 
         Args:
             query: Search keywords, e.g. 'barbour jacket'. Optional when category_id or brand_ids is given.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             category_id: Only this category and its subcategories, by id from categories() (1907 is Women > Clothing > Outerwear > Coats).
             brand_ids: Only these brands, by id from brands() (Nike 53, Levi's 10, Barbour 46805). A list or a comma-separated string, up to 20.
             status_ids: Only these conditions: 6 New with tags, 1 New without tags, 2 Very good, 3 Good, 4 Satisfactory. A list or a comma-separated string, up to 20.
@@ -8081,7 +8081,7 @@ class _AsyncVintedNamespace:
         Args:
             item_id: Vinted item id (a search result's id, the number after /items/ in a Vinted URL), e.g. 10671938315.
             url: A Vinted item URL on any country site. Its own site is used (and echoed as country), whatever country says.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vinted_product", {"item_id": item_id, "url": url, "country": country}, extra)
@@ -8099,7 +8099,7 @@ class _AsyncVintedNamespace:
 
         Args:
             user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vinted_seller", {"user_id": user_id, "country": country}, extra)
@@ -8120,7 +8120,7 @@ class _AsyncVintedNamespace:
 
         Args:
             user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             sort: newest_first (default), price_low_to_high or relevance.
             page: Page, 1-based, up to 500. Defaults to 1.
             limit: Items per page, 1-96. Defaults to 20.
@@ -8143,7 +8143,7 @@ class _AsyncVintedNamespace:
 
         Args:
             user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             page: Page, 1-based, newest first, up to 500. Defaults to 1.
             limit: Feedback per page, 1-50. Defaults to 20.
             extra: Additional wire parameters passed through verbatim.
@@ -8163,7 +8163,7 @@ class _AsyncVintedNamespace:
 
         Args:
             query: Brand name or part of it, e.g. 'barbour'.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vinted_brands", {"query": query, "country": country}, extra)
@@ -8181,7 +8181,7 @@ class _AsyncVintedNamespace:
 
         Args:
             query: What the shopper has typed so far, e.g. 'barb'.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vinted_suggestions", {"query": query, "country": country}, extra)
@@ -8201,7 +8201,7 @@ class _AsyncVintedNamespace:
 
         Args:
             filter: size, status (condition), color or material.
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             query: Count options for this search, e.g. 'dress'.
             category_id: Count options within this category, e.g. 1904 (Women). Sizes are grouped per category, so pass one for size.
             extra: Additional wire parameters passed through verbatim.
@@ -8220,7 +8220,7 @@ class _AsyncVintedNamespace:
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. Every site can show listings from sellers in other countries, with the price converted to the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK, GBP for uk, USD for us, AUD for au); the EU sites share one cross-border pool. product() returns the seller's own price and currency.
             parent_id: Return only this category's subtree (1904 is Women). Omit for the whole tree.
             extra: Additional wire parameters passed through verbatim.
         """
