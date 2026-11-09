@@ -55,6 +55,7 @@ from ._namespaces_sync import (
     _SephoraNamespace,
     _SpecsNamespace,
     _TargetNamespace,
+    _TcgplayerNamespace,
     _ThreadsNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
@@ -183,6 +184,7 @@ class ScavioClient:
         self.nordstrom = _NordstromNamespace(self)
         self.nordstrom_rack = _NordstromRackNamespace(self)
         self.best_buy = _BestBuyNamespace(self)
+        self.tcgplayer = _TcgplayerNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

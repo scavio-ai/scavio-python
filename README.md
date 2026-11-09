@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 62 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 63 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -25,6 +25,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
+| TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1472,6 +1473,76 @@ are `in_stock`, `limited`, `ship_to_store`, `out_of_stock`,
 Best Buy does not know comes back `found: False`; all unknown is a 404. An
 unknown SKU or category is a 404.
 
+### 30. Trading Cards -- TCGplayer
+
+tcgplayer.com (US marketplace, USD), namespace `tcgplayer`, 13 endpoints, 1
+credit each: `search`, `product`, `listings`, `price_history`, `sales`,
+`games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`,
+`seller_feedback`, `seller_products`. Covers every game TCGplayer lists
+(Pokemon, Magic: The Gathering, Yu-Gi-Oh!, One Piece, Lorcana and 60+ more).
+`product`, `listings`, `price_history` and `sales` take `product_id` or a
+tcgplayer.com `/product/<id>/` `url`. `search` needs a query unless `game` or
+`set` is given. Every method raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tcg = client.tcgplayer
+
+# --- Search a game, then one product with market price per SKU.
+found = tcg.search("charizard", game="pokemon", sort="price_desc", limit=10)["data"]
+print(found["total_results"], found["count"], found["has_more"])
+for p in found["products"][:5]:
+    print(p["product_id"], p["name"], p["set_name"], p["market_price"], p["listing_count"])
+
+card = tcg.product(product_id=219058)["data"]
+print(card["name"], card["market_price"], card["median_price"], card["seller_count"])
+for sku in card["skus"]:
+    # lowest/highest_sale_price and sale_count are recent SALE stats, not listings.
+    print(sku["condition"], sku["printing"], sku["language"], sku["market_price"],
+          sku["lowest_sale_price"], sku["highest_sale_price"], sku["sale_count"])
+
+# --- Live offers, cheapest price plus shipping first.
+offers = tcg.listings(product_id=219058, condition=["Near Mint"], limit=10)["data"]
+for row in offers["listings"]:
+    s = row["seller"]
+    print(row["price"], row["shipping_price"], row["condition"], s["name"], s["rating_percent"])
+
+# --- Sold volume over a month (daily buckets) and the 5 newest sales.
+hist = tcg.price_history(product_id=219058, range="month")["data"]
+print(hist["totals"]["quantity_sold"], hist["totals"]["transaction_count"])
+for b in hist["skus"][0]["buckets"][:7]:
+    print(b["date"], b["market_price"], b["quantity_sold"], b["low_sale_price"])
+for sale in tcg.sales(product_id=219058)["data"]["sales"]:
+    print(sale["date"], sale["condition"], sale["price"], sale["shipping_price"])
+
+# --- Games -> sets -> a whole set's price guide.
+games = tcg.games()["data"]["games"]
+sets = tcg.sets("pokemon")["data"]["sets"]
+guide = tcg.price_guide(604, limit=500)["data"]
+print(len(games), sets[0]["set_id"], guide["set_name"], guide["total_results"])
+for row in guide["rows"][:5]:
+    print(row["name"], row["number"], row["condition"], row["market_price"], row["low_price"])
+
+# --- Autocomplete, trending searches, and sellers.
+print([p["name"] for p in tcg.suggestions("charizard")["data"]["products"]])
+print([t["term"] for t in tcg.trending(game="pokemon")["data"]["terms"]])
+seller = tcg.seller("58f7acae")["data"]
+print(seller["name"], seller["rating_percent"], seller["feedback"]["total"])
+fb = tcg.seller_feedback("58f7acae", rating=1, with_comment=True)["data"]
+stock = tcg.seller_products("58f7acae", game="pokemon")["data"]
+print(fb["total_results"], stock["total_results"])
+```
+
+`sales` returns only the 5 most recent sales (TCGplayer shows no more); use
+`price_history` for sold volume, where `low_sale_price` and `high_sale_price`
+are null in a bucket with no sales. Buckets are daily for `month`, 3-day for
+`quarter` (default) and weekly for `semi_annual` and `annual`. Seller methods
+take the 8-character `seller.key` from a listing; feedback buyers appear only
+as the site's masked nickname. An unknown product id, game, set or seller key
+is a 404. No store locator, product reviews or buylist prices.
+
 ## Error Handling
 
 ```python
@@ -1604,6 +1675,7 @@ Scavio works with popular AI/LLM frameworks:
 | Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` | `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores) |
+| TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1613,6 +1685,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.40.0
+
+- **New `tcgplayer` namespace** (sync and async) for tcgplayer.com (US, USD),
+  13 endpoints at 1 credit each: `search`, `product`, `listings`,
+  `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`,
+  `trending`, `seller`, `seller_feedback`, `seller_products`. `product`
+  returns the market price per SKU (condition x printing x language) with the
+  recent sale range; `price_history` returns up to a year of sold volume per
+  SKU. 120s timeout floor on every method.
 
 ### Changed in 0.39.0
 

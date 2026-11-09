@@ -62,6 +62,7 @@ __all__ = [
     "_AsyncNordstromNamespace",
     "_AsyncNordstromRackNamespace",
     "_AsyncBestBuyNamespace",
+    "_AsyncTcgplayerNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -7745,6 +7746,280 @@ class _AsyncBestBuyNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("best_buy_prices", {"skus": skus}, extra)
+
+class _AsyncTcgplayerNamespace:
+    """TCGplayer card and sealed product search, product (per-SKU market price), live listings, price history, recent sales, games, sets, set price guide, autocomplete, trending, and seller endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        game: Optional[str] = None,
+        set: Optional[str] = None,
+        rarity: Optional[str] = None,
+        product_type: Optional[Literal["cards", "sealed"]] = None,
+        sort: Optional[Literal["relevance", "best_match", "best_selling", "name_asc", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search TCGplayer (US marketplace, USD) for trading cards and sealed products across every game (Pokemon, Magic: The Gathering, Yu-Gi-Oh!, One Piece, Lorcana and 60+ more), up to 50 per page, sorted by relevance, best match, best selling, name or market price, filtered by game, set, rarity and cards vs sealed. query is optional when game or set is given, to browse it. Each product has product id, name, URL, image, game, set name, code and id, card number, rarity, product type, sealed and foil-only flags, release date, market price, median price, lowest price, lowest price with shipping and listing count, plus up to 3 featured live listings (price, shipping, condition, printing, seller). Also returns total_results, has_more and the filter facets with counts; a facet's url_value is what game and set accept.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'charizard'. Optional when game or set is given.
+            game: Game (product line) url_name from games(): pokemon, magic, yugioh, pokemon-japan, one-piece-card-game, lorcana-tcg...
+            set: Only this set, by url_name from sets() (or a set facet's url_value), e.g. 'base-set'.
+            rarity: Only this rarity, as spelled in the rarity facet (e.g. Common, Rare, Holo Rare, Secret Rare).
+            product_type: cards (single cards) or sealed (booster boxes, packs, decks, tins...).
+            sort: relevance (default), best_match, best_selling, name_asc, price_asc or price_desc (by market price). relevance and best_match rankings shift between calls and page 2+ drops products already seen (duplicates_removed), so a price or name sort pages more predictably.
+            page: Results page, 1-based, up to 200. Defaults to 1.
+            limit: Products per page, 1-50. Defaults to 24.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_search", {"query": query, "game": game, "set": set, "rarity": rarity, "product_type": product_type, "sort": sort, "page": page, "limit": limit}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One TCGplayer product (US, USD) by product id or URL: name, URL, images (200, 400 and 1000 px), game, set, card number, rarity, product type, release date, market, median and lowest listing price, listing and seller counts, card text, flavor text, the game's card attributes (Pokemon HP, stage, attacks...; Magic color, mana value, type line...; Yu-Gi-Oh! attribute, level, ATK, DEF...) and every SKU (condition x printing x language, e.g. Near Mint / Normal / English) with its market price, lowest_sale_price and highest_sale_price over recent sales, sale_count and when it was calculated. The sale fields are sale statistics, not live listings. An unknown id is a 404 (not billed).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TCGplayer product id, the number after /product/ in a tcgplayer.com URL (a search result's product_id), e.g. 219058.
+            url: A tcgplayer.com product URL (/product/<id>/...). Used when product_id is not given.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_product", {"product_id": product_id, "url": url}, extra)
+
+    async def listings(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        printing: Optional[Union[str, list[str]]] = None,
+        language: Optional[Union[str, list[str]]] = None,
+        verified_sellers: Optional[bool] = None,
+        direct_only: Optional[bool] = None,
+        sort: Optional[Literal["price_shipping", "price"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Live marketplace listings for one TCGplayer product (US, USD), cheapest first by price plus shipping (default) or by item price, up to 50 per page, filtered by condition, printing, language, verified sellers or TCGplayer Direct. Each listing has listing id, price, shipping, total, quantity, condition, printing, language, listing type (standard or custom) and the seller: key, id, name, URL, rating percent, sales band, gold star, verified and Direct flags, programs and location. Also returns total_results, has_more and condition / printing / language / listing type counts.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TCGplayer product id, the number after /product/ in a tcgplayer.com URL (a search result's product_id), e.g. 219058.
+            url: A tcgplayer.com product URL (/product/<id>/...). Used when product_id is not given.
+            condition: Only these conditions: Near Mint, Lightly Played, Moderately Played, Heavily Played, Damaged, Unopened (or NM, LP, MP, HP, DM, U). A list or a comma-separated string.
+            printing: Only these printings, as a product's skus[].printing spells them (Normal, Foil, Holofoil, Reverse Holofoil, 1st Edition, Unlimited...).
+            language: Only these languages (English, Japanese, French, German, Italian, Spanish, Portuguese, Korean, Chinese (S), Chinese (T), Russian).
+            verified_sellers: Only verified sellers.
+            direct_only: Only TCGplayer Direct sellers.
+            sort: price_shipping (default, cheapest price plus shipping first) or price (item price only).
+            page: Page, 1-based, up to 200. Defaults to 1.
+            limit: Listings per page, 1-50. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_listings", {"product_id": product_id, "url": url, "condition": condition, "printing": printing, "language": language, "verified_sellers": verified_sellers, "direct_only": direct_only, "sort": sort, "page": page, "limit": limit}, extra)
+
+    async def price_history(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        range: Optional[Literal["month", "quarter", "semi_annual", "annual"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sales price history for one TCGplayer product (US, USD) over a month, quarter (default), half year or year, per SKU (condition, printing, language): total quantity sold, transaction count, average daily sales, and buckets newest first (daily for month, 3-day for quarter, weekly for semi_annual and annual) with market price, quantity sold, transaction count and the low and high sale price with and without shipping (null for a bucket with no sales). Totals across SKUs included. A product with no history is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TCGplayer product id, the number after /product/ in a tcgplayer.com URL (a search result's product_id), e.g. 219058.
+            url: A tcgplayer.com product URL (/product/<id>/...). Used when product_id is not given.
+            range: month (daily buckets), quarter (default, 3-day buckets), semi_annual (weekly) or annual (weekly).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_price_history", {"product_id": product_id, "url": url, "range": range}, extra)
+
+    async def sales(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 5 most recent sales of one TCGplayer product (US, USD), optionally only in some conditions: order date, condition, printing, language, quantity, sale price, shipping, total and listing type. TCGplayer shows only the newest 5, so this is not a full sold history; use price_history() for volume and daily or weekly sale ranges.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: TCGplayer product id, the number after /product/ in a tcgplayer.com URL (a search result's product_id), e.g. 219058.
+            url: A tcgplayer.com product URL (/product/<id>/...). Used when product_id is not given.
+            condition: Only sales in these conditions: Near Mint, Lightly Played, Moderately Played, Heavily Played, Damaged, Unopened (or NM, LP, MP, HP, DM, U). A list or a comma-separated string.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_sales", {"product_id": product_id, "url": url, "condition": condition}, extra)
+
+    async def games(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every game (product line) on TCGplayer, 70+ (Magic: The Gathering, Yu-Gi-Oh!, Pokemon, One Piece, Lorcana...): game_id, name, url_name (what search(), sets() and seller_products() accept as game) and whether TCGplayer Direct carries it. No parameters.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_games", {}, extra)
+
+    async def sets(
+        self,
+        game: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every set of one TCGplayer game, newest release first: set_id (for price_guide()), name, url_name (for search()'s set filter), abbreviation, release date and the supplemental flag. An unknown game is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            game: Game url_name or game_id from games() (pokemon, magic, yugioh, or 3, 1, 2...).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_sets", {"game": game}, extra)
+
+    async def price_guide(
+        self,
+        set_id: Union[str, int],
+        *,
+        product_type: Optional[Literal["cards", "sealed"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The TCGplayer price guide for one whole set (US, USD): one row per product per condition and printing with product id, name, URL, card number, rarity, market price and low price, for cards (default) or sealed products, up to 500 rows per page. total_results is given for cards (null for sealed). A set with nothing in the guide is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            set_id: Set id from sets(), e.g. 604 (Pokemon Base Set).
+            product_type: cards (default) or sealed.
+            page: Page, 1-based, up to 100. Defaults to 1.
+            limit: Rows per page, 1-500. Defaults to 100. One row per card per condition and printing.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_price_guide", {"set_id": set_id, "product_type": product_type, "page": page, "limit": limit}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The TCGplayer search-box autocomplete for a partial query (no game filter): suggested products (product id, name, URL, set, game, score), matching sets and the games the matches come from with counts.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'charizard'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_suggestions", {"query": query}, extra)
+
+    async def trending(
+        self,
+        *,
+        game: Optional[Literal["all", "pokemon", "magic", "yugioh"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What shoppers are searching on TCGplayer right now, overall or for Pokemon, Magic or Yu-Gi-Oh!: up to 10 terms with a popularity score.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            game: all (default), pokemon, magic or yugioh.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_trending", {"game": game}, extra)
+
+    async def seller(
+        self,
+        seller_key: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One TCGplayer seller by seller key (a listing's seller.key): store name, URL, location, member since, lifetime sales band, completed sales rank, rating percent, gold star, Direct, Pro, certified hobby shop and WPN flags, US and international shipping, store hours, games sold, social links, and the last 365 days of buyer feedback summarized (total, percent positive, count per star, as described / arrived when expected / good communication). An unknown key is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_key: TCGplayer seller key, a listing's seller.key (8 characters), e.g. '58f7acae'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_seller", {"seller_key": seller_key}, extra)
+
+    async def seller_feedback(
+        self,
+        seller_key: str,
+        *,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        with_comment: Optional[bool] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Individual buyer feedback on one TCGplayer seller from the last 365 days, newest first, up to 50 per page, optionally only one star rating or only feedback with a comment: date, rating, comment, as described / arrived when expected / good communication, and the buyer's masked nickname as the site shows it. Also total_results as TCGplayer reports it (approximate under the rating and with_comment filters) and has_more (true when the page is full).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_key: TCGplayer seller key, a listing's seller.key (8 characters), e.g. '58f7acae'.
+            rating: Only feedback with this many stars, 1-5.
+            with_comment: Only feedback that has a written comment.
+            page: Page, 1-based, up to 500. Defaults to 1.
+            limit: Feedback per page, 1-50. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_seller_feedback", {"seller_key": seller_key, "rating": rating, "with_comment": with_comment, "page": page, "limit": limit}, extra)
+
+    async def seller_products(
+        self,
+        seller_key: str,
+        *,
+        query: Optional[str] = None,
+        game: Optional[str] = None,
+        sort: Optional[Literal["relevance", "best_match", "best_selling", "name_asc", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products one TCGplayer seller has listed (US, USD), optionally matching keywords or one game, up to 50 per page, sorted like search(). Each product has product id, name, URL, image, game, set name, code and id, card number, rarity, product type, sealed and foil-only flags, release date, market price, median price, lowest price, lowest price with shipping and listing count, plus the seller's own listings of it (price, shipping, condition, printing, language, quantity). Also total_results, has_more and facets.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_key: TCGplayer seller key, a listing's seller.key (8 characters), e.g. '58f7acae'.
+            query: Only the seller's products matching these keywords, e.g. 'charizard'.
+            game: Game (product line) url_name from games(): pokemon, magic, yugioh, pokemon-japan, one-piece-card-game, lorcana-tcg...
+            sort: relevance (default), best_match, best_selling, name_asc, price_asc or price_desc (by market price). relevance and best_match rankings shift between calls and page 2+ drops products already seen (duplicates_removed), so a price or name sort pages more predictably.
+            page: Results page, 1-based, up to 200. Defaults to 1.
+            limit: Products per page, 1-50. Defaults to 24.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("tcgplayer_seller_products", {"seller_key": seller_key, "query": query, "game": game, "sort": sort, "page": page, "limit": limit}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

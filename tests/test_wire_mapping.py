@@ -2087,3 +2087,104 @@ def test_best_buy_credits_paths_and_wire(monkeypatch):
         bb.availability(sku="6607832")
     with pytest.raises(ScavioError):
         bb.availability(zip="94103")
+
+
+def test_tcgplayer_credits_paths_and_wire(monkeypatch):
+    """tcgplayer (0.40.0): 13 endpoints on /api/v1/tcgplayer, 1 credit each.
+
+    Multi-word methods map to hyphenated paths (price_history ->
+    price-history); 120 s timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "tcgplayer"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "listings",
+            "price_history",
+            "sales",
+            "games",
+            "sets",
+            "price_guide",
+            "suggestions",
+            "trending",
+            "seller",
+            "seller_feedback",
+            "seller_products",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/tcgplayer/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    tcg = client.tcgplayer
+    tcg.search("charizard", game="pokemon", sort="price_desc", limit=10)
+    tcg.search(game="pokemon", set="base-set", product_type="cards")
+    tcg.product(product_id=219058)
+    tcg.listings(url="https://www.tcgplayer.com/product/219058/x", condition=["Near Mint"])
+    tcg.price_history(product_id="219058", range="month")
+    tcg.sales(product_id=219058, condition="NM,LP")
+    tcg.games()
+    tcg.sets("pokemon")
+    tcg.price_guide(604, product_type="sealed", limit=500)
+    tcg.suggestions("charizard")
+    tcg.trending(game="yugioh")
+    tcg.seller("58f7acae")
+    tcg.seller_feedback("bf43b501", rating=1, with_comment=True, page=2)
+    tcg.seller_products("58f7acae", game="pokemon", sort="price_asc")
+    base = "/api/v1/tcgplayer/"
+    assert seen == [
+        (
+            base + "search",
+            {"query": "charizard", "game": "pokemon", "sort": "price_desc", "limit": 10},
+            120.0,
+        ),
+        (
+            base + "search",
+            {"game": "pokemon", "set": "base-set", "product_type": "cards"},
+            120.0,
+        ),
+        (base + "product", {"product_id": 219058}, 120.0),
+        (
+            base + "listings",
+            {"url": "https://www.tcgplayer.com/product/219058/x", "condition": ["Near Mint"]},
+            120.0,
+        ),
+        (base + "price-history", {"product_id": "219058", "range": "month"}, 120.0),
+        (base + "sales", {"product_id": 219058, "condition": "NM,LP"}, 120.0),
+        (base + "games", {}, 120.0),
+        (base + "sets", {"game": "pokemon"}, 120.0),
+        (base + "price-guide", {"set_id": 604, "product_type": "sealed", "limit": 500}, 120.0),
+        (base + "suggestions", {"query": "charizard"}, 120.0),
+        (base + "trending", {"game": "yugioh"}, 120.0),
+        (base + "seller", {"seller_key": "58f7acae"}, 120.0),
+        (
+            base + "seller-feedback",
+            {"seller_key": "bf43b501", "rating": 1, "with_comment": True, "page": 2},
+            120.0,
+        ),
+        (
+            base + "seller-products",
+            {"seller_key": "58f7acae", "game": "pokemon", "sort": "price_asc"},
+            120.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        tcg.product()
+    with pytest.raises(ScavioError):
+        tcg.listings()
+    with pytest.raises(ScavioError):
+        tcg.price_history()
+    with pytest.raises(ScavioError):
+        tcg.sales()

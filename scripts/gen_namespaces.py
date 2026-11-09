@@ -219,6 +219,12 @@ _NS_META = {
         "Best Buy search, product (open-box offers), reviews, category, Deal of the Day, "
         "store locator, store pickup availability, autocomplete, and batch price endpoints.",
     ),
+    "tcgplayer": (
+        "Tcgplayer",
+        "TCGplayer card and sealed product search, product (per-SKU market price), live listings, "
+        "price history, recent sales, games, sets, set price guide, autocomplete, trending, and "
+        "seller endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",
