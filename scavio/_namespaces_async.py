@@ -63,6 +63,7 @@ __all__ = [
     "_AsyncNordstromRackNamespace",
     "_AsyncBestBuyNamespace",
     "_AsyncTcgplayerNamespace",
+    "_AsyncVintedNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -8020,6 +8021,210 @@ class _AsyncTcgplayerNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("tcgplayer_seller_products", {"seller_key": seller_key, "query": query, "game": game, "sort": sort, "page": page, "limit": limit}, extra)
+
+class _AsyncVintedNamespace:
+    """Vinted second-hand listing search, product, seller profile, seller listings, seller feedback, brands, autocomplete, filters, and category endpoints across 27 country sites."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        category_id: Optional[Union[str, int]] = None,
+        brand_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        status_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        size_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        color_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        material_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        price_from: Optional[float] = None,
+        price_to: Optional[float] = None,
+        sort: Optional[Literal["relevance", "newest_first", "price_low_to_high", "price_high_to_low"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search second-hand listings on any of 27 Vinted country sites (fr default; uk, us, de, pl, es, it, nl, au and more) by keywords, category, brand, condition, size, color, material and price range, sorted by relevance, newest or price. query is optional when category_id or brand_ids is given. 96 items per page, pages 1-10 (Vinted serves no deeper). Each item has id, title, URL, price and currency (the country site's currency), price_with_discount, service_fee, total_price, brand, size, condition, favourite count, promoted flag, photos and the seller's id and business flag; service_fee is the Vinted fee the buyer pays on top of the price (formerly the Buyer Protection fee) and total_price is price plus that fee. Also returns listed_results and total_pages (capped at 960 and 10; total_is_capped is true when the real number of matches is higher) and the filters Vinted actually applied. Live listings only: sold items are not searchable.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'barbour jacket'. Optional when category_id or brand_ids is given.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            category_id: Only this category and its subcategories, by id from categories() (1907 is Women > Clothing > Outerwear > Coats).
+            brand_ids: Only these brands, by id from brands() (Nike 53, Levi's 10, Barbour 46805). A list or a comma-separated string, up to 20.
+            status_ids: Only these conditions: 6 New with tags, 1 New without tags, 2 Very good, 3 Good, 4 Satisfactory. A list or a comma-separated string, up to 20.
+            size_ids: Only these sizes, by option id from filters('size') (4 is women's M / UK 12-14 / US 8-10). A list or a comma-separated string, up to 20.
+            color_ids: Only these colors, by option id from filters('color') (1 is black). A list or a comma-separated string, up to 20.
+            material_ids: Only these materials, by option id from filters('material') (123 is cashmere). A list or a comma-separated string, up to 20.
+            price_from: Minimum item price, in the country site's currency.
+            price_to: Maximum item price, in the country site's currency.
+            sort: relevance (default), newest_first, price_low_to_high or price_high_to_low. Price sorts rank loosely matching items too (very cheap or placeholder-priced listings), so pair them with a category or price range.
+            page: Results page, 1-10 (Vinted serves at most 10 pages of 96). Defaults to 1.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_search", {"query": query, "country": country, "category_id": category_id, "brand_ids": brand_ids, "status_ids": status_ids, "size_ids": size_ids, "color_ids": color_ids, "material_ids": material_ids, "price_from": price_from, "price_to": price_to, "sort": sort, "page": page}, extra)
+
+    async def product(
+        self,
+        *,
+        item_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Vinted listing by item id or URL: title, description, price and currency (the seller's currency, which can differ from the country site's), brand, size, condition, color, material, when it was uploaded as Vinted words it (uploaded_relative, e.g. "8 hours ago"), category id and path, all photos, favourite count, reserved and sold state, whether it can be bought now, and the seller (id, login, profile URL, business flag, feedback count, rating 0-1, badges). Sold listings still return their last price. A URL's own site is used whatever country says. An unknown id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: Vinted item id (a search result's id, the number after /items/ in a Vinted URL), e.g. 10671938315.
+            url: A Vinted item URL on any country site. Its own site is used (and echoed as country), whatever country says.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_product", {"item_id": item_id, "url": url, "country": country}, extra)
+
+    async def seller(
+        self,
+        user_id: Union[str, int],
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Vinted member's public seller profile: login, profile URL, business flag, feedback count, rating (0-1), positive / neutral / negative feedback counts, listed item count, country, city (only when the member shows it), email / Facebook / Google verification, average response time, holiday mode and the date last seen. An unknown id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_seller", {"user_id": user_id, "country": country}, extra)
+
+    async def seller_products(
+        self,
+        user_id: Union[str, int],
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        sort: Optional[Literal["newest_first", "price_low_to_high", "relevance"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The items one Vinted member has listed, newest first, cheapest first or by relevance, up to 96 per page: id, title, URL, price, currency, service_fee, total_price, brand, size, condition, favourite count, reserved, sold and promoted flags and photos; service_fee is the Vinted fee the buyer pays on top of the price (formerly the Buyer Protection fee) and total_price is price plus that fee. Also total_results, total_pages and has_more. A member with no listings (or an unknown id) returns an empty list.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            sort: newest_first (default), price_low_to_high or relevance.
+            page: Page, 1-based, up to 500. Defaults to 1.
+            limit: Items per page, 1-96. Defaults to 20.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_seller_products", {"user_id": user_id, "country": country, "sort": sort, "page": page, "limit": limit}, extra)
+
+    async def seller_feedback(
+        self,
+        user_id: Union[str, int],
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Reviews left for one Vinted member, newest first, up to 50 per page: rating 1-5, review text, date, whether it is Vinted's automatic feedback, and the member's reply. Reviewer identities and the items reviewed are not included. Also total_results, total_pages and has_more.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            user_id: Vinted member id: a search result's seller.id, a product's seller.id, or the number after /member/ in a profile URL, e.g. 65958245.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            page: Page, 1-based, newest first, up to 500. Defaults to 1.
+            limit: Feedback per page, 1-50. Defaults to 20.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_seller_feedback", {"user_id": user_id, "country": country, "page": page, "limit": limit}, extra)
+
+    async def brands(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find Vinted brands by name: brand id (what search()'s brand_ids takes), title, slug, URL, number of listings, luxury flag and whether Vinted authenticity-checks it.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Brand name or part of it, e.g. 'barbour'.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_brands", {"query": query, "country": country}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Vinted search-box autocomplete for a partial query, in the country site's language: up to 10 suggestions, each with its type (popular_search, or the catalog match it comes from such as brand, brand+parent_cat or attr).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'barb'.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_suggestions", {"query": query, "country": country}, extra)
+
+    async def filters(
+        self,
+        filter: Literal["size", "status", "color", "material"],
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The options of one Vinted search filter (size, condition, color or material) with live item counts, optionally for a query and a category: id (what search()'s size_ids, status_ids, color_ids and material_ids take), localized title, item count, the size group and, for conditions, the description.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            filter: size, status (condition), color or material.
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            query: Count options for this search, e.g. 'dress'.
+            category_id: Count options within this category, e.g. 1904 (Women). Sizes are grouped per category, so pass one for size.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_filters", {"filter": filter, "country": country, "query": query, "category_id": category_id}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "es", "nl", "lt", "de", "at", "it", "uk", "pt", "us", "cz", "sk", "pl", "se", "ro", "hu", "dk", "fi", "hr", "gr", "ie", "ee", "lv", "si", "au"]] = None,
+        parent_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Vinted category tree in the country site's language (9 top-level categories, about 3,000 in all): id (what search()'s category_id takes), title, URL and children; or one category's subtree with its path.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Vinted country site: fr (default), be, lu, es, nl, lt, de, at, it, uk (vinted.co.uk), pt, us (vinted.com), cz, sk, pl, se, ro, hu, dk, fi, hr, gr, ie, ee, lv, si, au (vinted.com.au). Category, condition and filter names come back in the site's language. The EU sites share one cross-border listing pool, priced in the site's currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); uk (GBP), us (USD) and au (AUD) are separate catalogs.
+            parent_id: Return only this category's subtree (1904 is Women). Omit for the whole tree.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vinted_categories", {"country": country, "parent_id": parent_id}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

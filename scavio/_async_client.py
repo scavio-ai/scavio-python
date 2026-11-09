@@ -64,6 +64,7 @@ from ._namespaces_async import (
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
     _AsyncUltaNamespace,
+    _AsyncVintedNamespace,
     _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
     _AsyncWholeFoodsNamespace,
@@ -180,6 +181,7 @@ class AsyncScavioClient:
         self.nordstrom_rack = _AsyncNordstromRackNamespace(self)
         self.best_buy = _AsyncBestBuyNamespace(self)
         self.tcgplayer = _AsyncTcgplayerNamespace(self)
+        self.vinted = _AsyncVintedNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

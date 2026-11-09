@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 63 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 64 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -26,6 +26,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
+| Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1543,6 +1544,67 @@ take the 8-character `seller.key` from a listing; feedback buyers appear only
 as the site's masked nickname. An unknown product id, game, set or seller key
 is a 404. No store locator, product reviews or buylist prices.
 
+### 31. Second-hand Fashion -- Vinted
+
+Vinted on 27 country sites, namespace `vinted`, 9 endpoints, 1 credit each:
+`search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`,
+`suggestions`, `filters`, `categories`. Every method takes an optional
+`country`: `fr` (default), `be`, `lu`, `es`, `nl`, `lt`, `de`, `at`, `it`,
+`uk`, `pt`, `us`, `cz`, `sk`, `pl`, `se`, `ro`, `hu`, `dk`, `fi`, `hr`, `gr`,
+`ie`, `ee`, `lv`, `si`, `au`. Category, condition and filter names come back in
+that site's language. `product` takes `item_id` or a Vinted item `url` (the
+URL's own site wins). Every method raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+v = client.vinted
+
+# --- Search one country site; price is in that site's currency.
+found = v.search("barbour jacket", country="uk")["data"]
+print(found["listed_results"], found["total_pages"], found["total_is_capped"])
+for item in found["items"][:5]:
+    # service_fee is the Vinted fee the buyer pays on top of price.
+    print(item["id"], item["title"], item["price"], item["currency"],
+          item["service_fee"], item["total_price"], item["condition"], item["seller"]["id"])
+
+# --- Resolve ids for filters: brands, conditions/sizes/colors, categories.
+brand = v.brands("barbour", country="uk")["data"]["brands"][0]
+print(brand["id"], brand["title"], brand["item_count"], brand["is_luxury"])
+for opt in v.filters("status", country="uk")["data"]["options"]:
+    print(opt["id"], opt["title"], opt["item_count"])
+tree = v.categories(country="uk", parent_id=1904)["data"]
+print(tree["parent"]["title"], [c["title"] for c in tree["categories"]][:5])
+print([s["text"] for s in v.suggestions("barb", country="uk")["data"]["suggestions"]])
+
+# --- One listing, priced in the SELLER's currency.
+item = v.product(url="https://www.vinted.co.uk/items/10671938315-nike-air-max-size-uk-75")["data"]
+print(item["title"], item["price"], item["currency"], item["condition"], item["is_sold"])
+print(item["category"]["path"][-1]["title"], item["seller"]["login"],
+      item["seller"]["feedback_reputation"])
+
+# --- A seller: public profile, listings and reviews.
+seller = v.seller(65958245, country="uk")["data"]
+print(seller["login"], seller["feedback_count"], seller["feedback_reputation"], seller["item_count"])
+wardrobe = v.seller_products(65958245, country="uk", limit=10)["data"]
+reviews = v.seller_feedback(65958245, country="uk")["data"]
+print(wardrobe["total_results"], reviews["total_results"])
+for fb in reviews["feedback"][:3]:
+    print(fb["rating"], fb["created_at"], fb["is_automatic"], fb["text"])
+```
+
+The EU sites share one cross-border listing pool, priced in the site's
+currency (EUR, or CZK, PLN, SEK, RON, HUF, DKK); `uk` (GBP), `us` (USD) and
+`au` (AUD) are separate catalogs. `search` returns 96 items per page and Vinted
+serves at most 10 pages (`total_is_capped` is true past 960 matches); price
+sorts also surface loosely matching cheap listings, so pair them with a
+category or price range. `search`'s `filters` echoes what Vinted actually
+applied. Live listings only: there is no sold-item search, shipping price,
+pickup point or similar-items endpoint. Seller data is limited to public,
+buyer-relevant fields and feedback carries no reviewer identity. An unknown
+item or member id on `product` or `seller` is a 404.
+
 ## Error Handling
 
 ```python
@@ -1676,6 +1738,7 @@ Scavio works with popular AI/LLM frameworks:
 | Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` | `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores) |
 | TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
+| Vinted | `search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`, `suggestions`, `filters`, `categories` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1685,6 +1748,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.41.0
+
+- **New `vinted` namespace** (sync and async) for Vinted on 27 country sites
+  (`country`, `fr` default), 9 endpoints at 1 credit each: `search`,
+  `product`, `seller`, `seller_products`, `seller_feedback`, `brands`,
+  `suggestions`, `filters`, `categories`. `search` and `seller_products`
+  return the price, the Vinted fee (`service_fee`) and `total_price`; the id
+  filters (`brand_ids`, `status_ids`, `size_ids`, `color_ids`,
+  `material_ids`) take a list or a comma-separated string. 120s timeout floor
+  on every method.
 
 ### Changed in 0.40.0
 

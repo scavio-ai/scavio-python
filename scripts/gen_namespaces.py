@@ -225,6 +225,11 @@ _NS_META = {
         "price history, recent sales, games, sets, set price guide, autocomplete, trending, and "
         "seller endpoints.",
     ),
+    "vinted": (
+        "Vinted",
+        "Vinted second-hand listing search, product, seller profile, seller listings, seller "
+        "feedback, brands, autocomplete, filters, and category endpoints across 27 country sites.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

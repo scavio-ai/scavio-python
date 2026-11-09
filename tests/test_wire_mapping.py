@@ -2188,3 +2188,94 @@ def test_tcgplayer_credits_paths_and_wire(monkeypatch):
         tcg.price_history()
     with pytest.raises(ScavioError):
         tcg.sales()
+
+
+def test_vinted_credits_paths_and_wire(monkeypatch):
+    """vinted (0.41.0): 9 endpoints on /api/v1/vinted, 1 credit each.
+
+    Every method takes an optional country (27 sites, fr default on the
+    server); multi-word methods map to hyphenated paths (seller_products ->
+    seller-products); 120 s timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "vinted"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "seller",
+            "seller_products",
+            "seller_feedback",
+            "brands",
+            "suggestions",
+            "filters",
+            "categories",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/vinted/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    v = client.vinted
+    v.search("barbour jacket", country="uk", status_ids=[6, 1], price_to=80.0, sort="newest_first")
+    v.search(country="pl", category_id=1907, brand_ids="46805,53", page=2)
+    v.product(item_id=10671938315)
+    v.product(url="https://www.vinted.co.uk/items/10671938315-x")
+    v.seller(65958245, country="uk")
+    v.seller_products("65958245", country="uk", sort="price_low_to_high", limit=96)
+    v.seller_feedback(65958245, page=2, limit=50)
+    v.brands("barbour", country="de")
+    v.suggestions("barb")
+    v.filters("size", country="fr", query="dress", category_id=1904)
+    v.categories(country="uk", parent_id=1904)
+    base = "/api/v1/vinted/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "barbour jacket",
+                "country": "uk",
+                "status_ids": [6, 1],
+                "price_to": 80.0,
+                "sort": "newest_first",
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {"country": "pl", "category_id": 1907, "brand_ids": "46805,53", "page": 2},
+            120.0,
+        ),
+        (base + "product", {"item_id": 10671938315}, 120.0),
+        (base + "product", {"url": "https://www.vinted.co.uk/items/10671938315-x"}, 120.0),
+        (base + "seller", {"user_id": 65958245, "country": "uk"}, 120.0),
+        (
+            base + "seller-products",
+            {"user_id": "65958245", "country": "uk", "sort": "price_low_to_high", "limit": 96},
+            120.0,
+        ),
+        (base + "seller-feedback", {"user_id": 65958245, "page": 2, "limit": 50}, 120.0),
+        (base + "brands", {"query": "barbour", "country": "de"}, 120.0),
+        (base + "suggestions", {"query": "barb"}, 120.0),
+        (
+            base + "filters",
+            {"filter": "size", "country": "fr", "query": "dress", "category_id": 1904},
+            120.0,
+        ),
+        (base + "categories", {"country": "uk", "parent_id": 1904}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        v.product()
+    with pytest.raises(ScavioError):
+        v.product(country="uk")
