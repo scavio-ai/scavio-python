@@ -2279,3 +2279,113 @@ def test_vinted_credits_paths_and_wire(monkeypatch):
         v.product()
     with pytest.raises(ScavioError):
         v.product(country="uk")
+
+
+def test_macys_credits_paths_and_wire(monkeypatch):
+    """macys (0.42.0): 9 endpoints on /api/v1/macys, 1 credit each.
+
+    US only (no country). store_availability maps to the hyphenated
+    /store-availability path; deals sends `type` as-is; 120 s timeout floor.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "macys"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "reviews",
+            "category",
+            "brand",
+            "deals",
+            "stores",
+            "store_availability",
+            "suggestions",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/macys/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert not any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    m = client.macys
+    m.search(
+        "jeans",
+        brand=["Levi's", "Calvin Klein"],
+        special_offer="clearance",
+        min_price=50.0,
+        max_price=100.0,
+        sort="price_low_to_high",
+        filters={"GENDER": "Women"},
+    )
+    m.product(product_id=25822310)
+    m.product(product_ids=[25822310, 719388])
+    m.reviews(product_id="25822310", sort="lowest_rated", rating=1, limit=100)
+    m.category(category_id=3763, page=2, pickup_store_id=4592)
+    m.brand(url="https://www.macys.com/shop/brands/calvin-klein?id=337747")
+    m.deals(type="last_act", include_sponsored=True)
+    m.stores(zip="10001", radius=25)
+    m.store_availability(product_id=25822310, store_id=4592)
+    m.store_availability(
+        url="https://www.macys.com/shop/product/x?ID=25822310", city="Atlanta", state="GA"
+    )
+    m.suggestions("jea")
+    base = "/api/v1/macys/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "jeans",
+                "special_offer": "clearance",
+                "sort": "price_low_to_high",
+                "brand": ["Levi's", "Calvin Klein"],
+                "min_price": 50.0,
+                "max_price": 100.0,
+                "filters": {"GENDER": "Women"},
+            },
+            120.0,
+        ),
+        (base + "product", {"product_id": 25822310}, 120.0),
+        (base + "product", {"product_ids": [25822310, 719388]}, 120.0),
+        (
+            base + "reviews",
+            {"product_id": "25822310", "sort": "lowest_rated", "limit": 100, "rating": 1},
+            120.0,
+        ),
+        (base + "category", {"category_id": 3763, "page": 2, "pickup_store_id": 4592}, 120.0),
+        (
+            base + "brand",
+            {"url": "https://www.macys.com/shop/brands/calvin-klein?id=337747"},
+            120.0,
+        ),
+        (base + "deals", {"type": "last_act", "include_sponsored": True}, 120.0),
+        (base + "stores", {"zip": "10001", "radius": 25}, 120.0),
+        (base + "store-availability", {"product_id": 25822310, "store_id": 4592}, 120.0),
+        (
+            base + "store-availability",
+            {
+                "url": "https://www.macys.com/shop/product/x?ID=25822310",
+                "city": "Atlanta",
+                "state": "GA",
+            },
+            120.0,
+        ),
+        (base + "suggestions", {"query": "jea"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        m.product()
+    with pytest.raises(ScavioError):
+        m.reviews(rating=5)
+    with pytest.raises(ScavioError):
+        m.stores(radius=10)
+    with pytest.raises(ScavioError):
+        m.store_availability(product_id=25822310)

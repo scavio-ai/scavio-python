@@ -327,6 +327,95 @@ def _vinted_ids(name: str, doc: str) -> Param:
     )
 
 
+# Macy's params shared across endpoints.
+_MACYS_PRODUCT_ID = _str_or_int(
+    "product_id",
+    "Macy's product id: a search result's id, or the ID= number in a macys.com product URL, "
+    "e.g. 25822310.",
+)
+_MACYS_URL = _str("url", "A macys.com product URL (its ID= is used). Alternative to product_id.")
+_MACYS_SPECIAL_OFFERS = (
+    "limited_time_special",
+    "gift_with_purchase",
+    "black_friday_deal",
+    "clearance",
+    "last_act",
+    "our_lowest_price",
+    "sales_and_discounts",
+    "special_offer",
+    "today_only",
+)
+_MACYS_SPECIAL_OFFER_LITERAL = "Literal[" + ", ".join(f'"{c}"' for c in _MACYS_SPECIAL_OFFERS) + "]"
+_MACYS_SPECIAL_OFFER = Param(
+    "special_offer",
+    f"Optional[Union[{_MACYS_SPECIAL_OFFER_LITERAL}, list[{_MACYS_SPECIAL_OFFER_LITERAL}]]]",
+    doc="Only items with this offer: " + ", ".join(_MACYS_SPECIAL_OFFERS) + ". A list matches "
+    "any of them.",
+)
+_MACYS_GRID = (
+    _int("page", "Results page, 1-based (60 organic items per page). Defaults to 1."),
+    _lit(
+        "sort",
+        (
+            "featured",
+            "price_low_to_high",
+            "price_high_to_low",
+            "top_rated",
+            "best_sellers",
+            "newest",
+        ),
+        "featured (default), price_low_to_high, price_high_to_low, top_rated, best_sellers or "
+        "newest. The total can differ between sorts, as it does on the site.",
+    ),
+    _str_or_list(
+        "brand",
+        "Only these brands, spelled as the BRAND facet lists them (e.g. \"Levi's\"). A list "
+        "matches any of them.",
+    ),
+    _str_or_list(
+        "color",
+        "Only these colors, as the COLOR_NORMAL facet lists them (Black, Blue, Red...). A list "
+        "matches any of them.",
+    ),
+    _float("min_price", "Minimum price in USD. Any bound works, not only the site's buckets."),
+    _float("max_price", "Maximum price in USD."),
+    _str_or_int(
+        "pickup_store_id",
+        "Only items available for pickup at this store (a store_id from stores()), e.g. 4592.",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any other facet from a previous response's facets: its name to one value or a "
+        "list, e.g. {'GENDER': 'Women', 'CUSTRATINGS': '4 stars & up'}.",
+    ),
+    _bool(
+        "include_sponsored",
+        "Keep ad-only sponsored tiles (flagged is_sponsored). Defaults to false: they are "
+        "dropped.",
+    ),
+)
+_MACYS_GRID_FIELDS = (
+    "60 organic items per page, each with id, title, brand, URL, image, price (price_max when "
+    "the item sells at a range), regular and sale price, percent off, price label, on-sale "
+    "flag, sale end date, deal label (Black Friday Deal, Clearance, LAST ACT, Today Only...), "
+    "promotions, rating, review count, colors and is_sponsored. Also returns total, page, "
+    "total_pages, the sort applied, the facets (name, label and values with counts; any value "
+    "works in filters) and applied_filters. Ad-only sponsored tiles are dropped "
+    "(sponsored_dropped counts them) unless include_sponsored; organic items that also hold a "
+    "paid slot stay, flagged is_sponsored. Totals can differ between sorts, as on the site. "
+    "Prices in USD."
+)
+_MACYS_LOCATION = (
+    _str("zip", "US ZIP code to search around, e.g. '10001'."),
+    _float("lat", "Latitude (with lng), instead of zip."),
+    _float("lng", "Longitude (with lat)."),
+    _str("city", "US city (with state), instead of zip, e.g. 'Atlanta'."),
+    _str("state", "2-letter US state code (with city), e.g. 'GA'."),
+    _int("radius", "Search radius in miles, 1-100. Defaults to 100."),
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -9411,6 +9500,246 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=120.0,
     ),
+    # =============================== Macy's ==============================
+    # macys.com (US only, USD), 9 endpoints, 1 credit each. product takes
+    # product_id, url or product_ids (up to 10, summary view); reviews and
+    # store_availability take product_id or url; category takes category_id or
+    # url; brand takes brand_id or url; stores takes one location (zip, lat +
+    # lng, or city + state); store_availability takes store_id OR a location,
+    # not both (one_of only enforces "at least one"). filters is a nested
+    # object on the wire, so it is a dict here. 120 s timeout floor.
+    Endpoint(
+        key="macys_search",
+        namespace="macys",
+        method="search",
+        http="POST",
+        path="/api/v1/macys/search",
+        summary=(
+            "Search macys.com (US) by keyword, filtered by brand, color, special offer "
+            "(clearance, Last Act, Today Only, Black Friday deal...), any price range, a pickup "
+            "store and any other facet, sorted by featured, price, top rated, best sellers or "
+            "newest. " + _MACYS_GRID_FIELDS + " A keyword the site maps to a category comes "
+            "back with redirected_to_category (its id works with category())."
+        ),
+        params=(_req("query", "Search keywords, e.g. 'jeans'."), _MACYS_SPECIAL_OFFER, *_MACYS_GRID),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_product",
+        namespace="macys",
+        method="product",
+        http="POST",
+        path="/api/v1/macys/product",
+        summary=(
+            "One macys.com product by id or URL, or up to 10 by product_ids in one call: title, "
+            "brand (with brand_page_id for brand()), type, description, bullets, category path, "
+            "price, regular and sale price, percent off, on-sale flag, sale end, promotions, "
+            "rating, review_count and text_review_count (ratings without text count in "
+            "review_count only), rating_distribution, recommended count, fit slider, AI review "
+            "summary, purchased message, question and answer counts, images, colors with their "
+            "prices, sizes and every variant (UPC, color, size, available, availability message, "
+            "low-stock flag, ship days). A product that belongs to a collection answers with the "
+            "collection product, and requested_id echoes the id asked for. In a batch, unknown "
+            "ids are listed in not_found and Macy's serves its summary view: rating and "
+            "review_count but no rating histogram, and a collection without its members' "
+            "variants. An unknown id is a 404."
+        ),
+        params=(
+            _MACYS_PRODUCT_ID,
+            _MACYS_URL,
+            Param(
+                "product_ids",
+                "Optional[Union[str, list[Union[str, int]]]]",
+                doc="Up to 10 product ids in one call (a list or a comma-separated string), "
+                "instead of product_id / url.",
+            ),
+        ),
+        one_of=(("product_id", "url", "product_ids"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_reviews",
+        namespace="macys",
+        method="reviews",
+        http="POST",
+        path="/api/v1/macys/reviews",
+        summary=(
+            "Customer reviews of one macys.com product by id or URL, newest (default), highest "
+            "rated, lowest rated or with photos first, up to 100 per page, optionally only one "
+            "star rating or only reviews mentioning a word: rating, title, text, date, nickname, "
+            "location as the reviewer gave it, recommended, helpful yes / no votes, incentivized "
+            "and syndicated flags (and the site it came from), badges, fit and other slider "
+            "ratings, photo URLs and the brand's response. Also total, total_pages and has_more. "
+            "total counts written reviews only: ratings without text are not returned (product() "
+            "has the full rating histogram). Reviewer = nickname only."
+        ),
+        params=(
+            _MACYS_PRODUCT_ID,
+            _MACYS_URL,
+            _lit(
+                "sort",
+                ("newest", "highest_rated", "lowest_rated", "with_photos"),
+                "newest (default), highest_rated, lowest_rated or with_photos.",
+            ),
+            _int("page", "Page, 1-based. Defaults to 1."),
+            _int("limit", "Reviews per page, 1-100. Defaults to 20."),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this star rating, 1-5."),
+            _str("query", "Only reviews mentioning this text, e.g. 'soft'."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_category",
+        namespace="macys",
+        method="category",
+        http="POST",
+        path="/api/v1/macys/category",
+        summary=(
+            "Browse one macys.com category by id or URL, with the same filters and sorts as "
+            "search(). " + _MACYS_GRID_FIELDS + " Also returns the category's id, name and URL. "
+            "An unknown id is a 404."
+        ),
+        params=(
+            _str_or_int(
+                "category_id",
+                "Macy's category id: the id= of a macys.com /shop/ URL, a product's "
+                "categories[].id, or a search's redirected_to_category.id, e.g. 3763 (Men's Coats "
+                "& Jackets).",
+            ),
+            _str(
+                "url",
+                "A macys.com category URL with its id=. Filters, page and sort already in the URL "
+                "are kept.",
+            ),
+            _MACYS_SPECIAL_OFFER,
+            *_MACYS_GRID,
+        ),
+        one_of=(("category_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_brand",
+        namespace="macys",
+        method="brand",
+        http="POST",
+        path="/api/v1/macys/brand",
+        summary=(
+            "Browse one brand's macys.com page by its page id or URL (a product's "
+            "brand_page_id), with the same filters and sorts as search(). " + _MACYS_GRID_FIELDS
+            + " Also returns the brand's page id, name and URL. To filter by brand name "
+            "instead, use search() with brand."
+        ),
+        params=(
+            _str_or_int(
+                "brand_id",
+                "The brand page id: a product's brand_page_id, or the id= of a macys.com "
+                "/shop/brands/ URL, e.g. 337747 (Calvin Klein).",
+            ),
+            _str("url", "A macys.com brand page URL with its id=."),
+            _MACYS_SPECIAL_OFFER,
+            *_MACYS_GRID,
+        ),
+        one_of=(("brand_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_deals",
+        namespace="macys",
+        method="deals",
+        http="POST",
+        path="/api/v1/macys/deals",
+        summary=(
+            "Macy's sale listings: all Sales & Offers (default), Clearance, Today Only, Last Act "
+            "(final-sale markdowns), Limited-Time Specials or Black Friday Deals, with the same "
+            "filters and sorts as search() (except special_offer). " + _MACYS_GRID_FIELDS
+            + " sale_ends carries the end date when Macy's states one."
+        ),
+        params=(
+            _lit(
+                "type",
+                (
+                    "sale",
+                    "clearance",
+                    "today_only",
+                    "last_act",
+                    "limited_time_special",
+                    "black_friday",
+                ),
+                "sale (all Sales & Offers, default), clearance, today_only, last_act, "
+                "limited_time_special or black_friday.",
+            ),
+            *_MACYS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_stores",
+        namespace="macys",
+        method="stores",
+        http="POST",
+        path="/api/v1/macys/stores",
+        summary=(
+            "Macy's stores near a US ZIP code, a point (lat + lng) or a city + state, nearest "
+            "first (up to 15, within 100 miles by default): store_id (what "
+            "store_availability() and pickup_store_id take), name, address, phone, lat / lng, "
+            "distance in miles, today's and tomorrow's hours, curbside hours and the order "
+            "cut-off for same-day pickup."
+        ),
+        params=_MACYS_LOCATION,
+        one_of=(("zip", "lat", "city"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_store_availability",
+        namespace="macys",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/macys/store-availability",
+        summary=(
+            "Can a macys.com product be picked up in store? Near a ZIP, a point or a city + "
+            "state: every store with available true / false and available_items_count (how many "
+            "of the product's items it has). At one store (store_id): the store's hours, pickup "
+            "cut-off and pickup options, and for every variant (UPC, color, size) "
+            "pickup_available and in_store_available. Macy's publishes no unit quantities, so "
+            "there are no stock counts. Pass store_id or a location, not both. An unknown "
+            "store_id is a 404."
+        ),
+        params=(
+            _MACYS_PRODUCT_ID,
+            _MACYS_URL,
+            _str_or_int(
+                "store_id",
+                "One store (a store_id from stores()) for per-variant pickup and in-store flags, "
+                "instead of a location, e.g. 4592.",
+            ),
+            *_MACYS_LOCATION,
+        ),
+        one_of=(("product_id", "url"), ("store_id", "zip", "lat", "city")),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="macys_suggestions",
+        namespace="macys",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/macys/suggestions",
+        summary=(
+            "The macys.com search-box autocomplete for a partial query: up to 7 suggested "
+            "searches."
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'jea'."),),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -10524,6 +10853,7 @@ NAMESPACES: tuple[str, ...] = (
     "best_buy",
     "tcgplayer",
     "vinted",
+    "macys",
     "trustpilot",
     "realtor",
     "rightmove",

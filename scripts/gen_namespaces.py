@@ -230,6 +230,11 @@ _NS_META = {
         "Vinted second-hand listing search, product, seller profile, seller listings, seller "
         "feedback, brands, autocomplete, filters, and category endpoints across 27 country sites.",
     ),
+    "macys": (
+        "Macys",
+        "Macy's search, product (batch of 10), reviews, category, brand, deals (clearance, Last "
+        "Act, Black Friday), store locator, store pickup availability, and autocomplete endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

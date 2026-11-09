@@ -64,6 +64,7 @@ __all__ = [
     "_AsyncBestBuyNamespace",
     "_AsyncTcgplayerNamespace",
     "_AsyncVintedNamespace",
+    "_AsyncMacysNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -8225,6 +8226,279 @@ class _AsyncVintedNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vinted_categories", {"country": country, "parent_id": parent_id}, extra)
+
+class _AsyncMacysNamespace:
+    """Macy's search, product (batch of 10), reviews, category, brand, deals (clearance, Last Act, Black Friday), store locator, store pickup availability, and autocomplete endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        special_offer: Optional[Union[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"], list[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"]]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "price_low_to_high", "price_high_to_low", "top_rated", "best_sellers", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search macys.com (US) by keyword, filtered by brand, color, special offer (clearance, Last Act, Today Only, Black Friday deal...), any price range, a pickup store and any other facet, sorted by featured, price, top rated, best sellers or newest. 60 organic items per page, each with id, title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, price label, on-sale flag, sale end date, deal label (Black Friday Deal, Clearance, LAST ACT, Today Only...), promotions, rating, review count, colors and is_sponsored. Also returns total, page, total_pages, the sort applied, the facets (name, label and values with counts; any value works in filters) and applied_filters. Ad-only sponsored tiles are dropped (sponsored_dropped counts them) unless include_sponsored; organic items that also hold a paid slot stay, flagged is_sponsored. Totals can differ between sorts, as on the site. Prices in USD. A keyword the site maps to a category comes back with redirected_to_category (its id works with category()).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'jeans'.
+            special_offer: Only items with this offer: limited_time_special, gift_with_purchase, black_friday_deal, clearance, last_act, our_lowest_price, sales_and_discounts, special_offer, today_only. A list matches any of them.
+            page: Results page, 1-based (60 organic items per page). Defaults to 1.
+            sort: featured (default), price_low_to_high, price_high_to_low, top_rated, best_sellers or newest. The total can differ between sorts, as it does on the site.
+            brand: Only these brands, spelled as the BRAND facet lists them (e.g. "Levi's"). A list matches any of them.
+            color: Only these colors, as the COLOR_NORMAL facet lists them (Black, Blue, Red...). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            pickup_store_id: Only items available for pickup at this store (a store_id from stores()), e.g. 4592.
+            filters: Any other facet from a previous response's facets: its name to one value or a list, e.g. {'GENDER': 'Women', 'CUSTRATINGS': '4 stars & up'}.
+            include_sponsored: Keep ad-only sponsored tiles (flagged is_sponsored). Defaults to false: they are dropped.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_search", {"query": query, "special_offer": special_offer, "page": page, "sort": sort, "brand": brand, "color": color, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        product_ids: Optional[Union[str, list[Union[str, int]]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One macys.com product by id or URL, or up to 10 by product_ids in one call: title, brand (with brand_page_id for brand()), type, description, bullets, category path, price, regular and sale price, percent off, on-sale flag, sale end, promotions, rating, review_count and text_review_count (ratings without text count in review_count only), rating_distribution, recommended count, fit slider, AI review summary, purchased message, question and answer counts, images, colors with their prices, sizes and every variant (UPC, color, size, available, availability message, low-stock flag, ship days). A product that belongs to a collection answers with the collection product, and requested_id echoes the id asked for. In a batch, unknown ids are listed in not_found and Macy's serves its summary view: rating and review_count but no rating histogram, and a collection without its members' variants. An unknown id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Macy's product id: a search result's id, or the ID= number in a macys.com product URL, e.g. 25822310.
+            url: A macys.com product URL (its ID= is used). Alternative to product_id.
+            product_ids: Up to 10 product ids in one call (a list or a comma-separated string), instead of product_id / url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_product", {"product_id": product_id, "url": url, "product_ids": product_ids}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        sort: Optional[Literal["newest", "highest_rated", "lowest_rated", "with_photos"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one macys.com product by id or URL, newest (default), highest rated, lowest rated or with photos first, up to 100 per page, optionally only one star rating or only reviews mentioning a word: rating, title, text, date, nickname, location as the reviewer gave it, recommended, helpful yes / no votes, incentivized and syndicated flags (and the site it came from), badges, fit and other slider ratings, photo URLs and the brand's response. Also total, total_pages and has_more. total counts written reviews only: ratings without text are not returned (product() has the full rating histogram). Reviewer = nickname only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Macy's product id: a search result's id, or the ID= number in a macys.com product URL, e.g. 25822310.
+            url: A macys.com product URL (its ID= is used). Alternative to product_id.
+            sort: newest (default), highest_rated, lowest_rated or with_photos.
+            page: Page, 1-based. Defaults to 1.
+            limit: Reviews per page, 1-100. Defaults to 20.
+            rating: Only reviews with this star rating, 1-5.
+            query: Only reviews mentioning this text, e.g. 'soft'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_reviews", {"product_id": product_id, "url": url, "sort": sort, "page": page, "limit": limit, "rating": rating, "query": query}, extra)
+
+    async def category(
+        self,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        special_offer: Optional[Union[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"], list[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"]]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "price_low_to_high", "price_high_to_low", "top_rated", "best_sellers", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one macys.com category by id or URL, with the same filters and sorts as search(). 60 organic items per page, each with id, title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, price label, on-sale flag, sale end date, deal label (Black Friday Deal, Clearance, LAST ACT, Today Only...), promotions, rating, review count, colors and is_sponsored. Also returns total, page, total_pages, the sort applied, the facets (name, label and values with counts; any value works in filters) and applied_filters. Ad-only sponsored tiles are dropped (sponsored_dropped counts them) unless include_sponsored; organic items that also hold a paid slot stay, flagged is_sponsored. Totals can differ between sorts, as on the site. Prices in USD. Also returns the category's id, name and URL. An unknown id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: Macy's category id: the id= of a macys.com /shop/ URL, a product's categories[].id, or a search's redirected_to_category.id, e.g. 3763 (Men's Coats & Jackets).
+            url: A macys.com category URL with its id=. Filters, page and sort already in the URL are kept.
+            special_offer: Only items with this offer: limited_time_special, gift_with_purchase, black_friday_deal, clearance, last_act, our_lowest_price, sales_and_discounts, special_offer, today_only. A list matches any of them.
+            page: Results page, 1-based (60 organic items per page). Defaults to 1.
+            sort: featured (default), price_low_to_high, price_high_to_low, top_rated, best_sellers or newest. The total can differ between sorts, as it does on the site.
+            brand: Only these brands, spelled as the BRAND facet lists them (e.g. "Levi's"). A list matches any of them.
+            color: Only these colors, as the COLOR_NORMAL facet lists them (Black, Blue, Red...). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            pickup_store_id: Only items available for pickup at this store (a store_id from stores()), e.g. 4592.
+            filters: Any other facet from a previous response's facets: its name to one value or a list, e.g. {'GENDER': 'Women', 'CUSTRATINGS': '4 stars & up'}.
+            include_sponsored: Keep ad-only sponsored tiles (flagged is_sponsored). Defaults to false: they are dropped.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_category", {"category_id": category_id, "url": url, "special_offer": special_offer, "page": page, "sort": sort, "brand": brand, "color": color, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def brand(
+        self,
+        *,
+        brand_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        special_offer: Optional[Union[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"], list[Literal["limited_time_special", "gift_with_purchase", "black_friday_deal", "clearance", "last_act", "our_lowest_price", "sales_and_discounts", "special_offer", "today_only"]]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "price_low_to_high", "price_high_to_low", "top_rated", "best_sellers", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one brand's macys.com page by its page id or URL (a product's brand_page_id), with the same filters and sorts as search(). 60 organic items per page, each with id, title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, price label, on-sale flag, sale end date, deal label (Black Friday Deal, Clearance, LAST ACT, Today Only...), promotions, rating, review count, colors and is_sponsored. Also returns total, page, total_pages, the sort applied, the facets (name, label and values with counts; any value works in filters) and applied_filters. Ad-only sponsored tiles are dropped (sponsored_dropped counts them) unless include_sponsored; organic items that also hold a paid slot stay, flagged is_sponsored. Totals can differ between sorts, as on the site. Prices in USD. Also returns the brand's page id, name and URL. To filter by brand name instead, use search() with brand.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand_id: The brand page id: a product's brand_page_id, or the id= of a macys.com /shop/brands/ URL, e.g. 337747 (Calvin Klein).
+            url: A macys.com brand page URL with its id=.
+            special_offer: Only items with this offer: limited_time_special, gift_with_purchase, black_friday_deal, clearance, last_act, our_lowest_price, sales_and_discounts, special_offer, today_only. A list matches any of them.
+            page: Results page, 1-based (60 organic items per page). Defaults to 1.
+            sort: featured (default), price_low_to_high, price_high_to_low, top_rated, best_sellers or newest. The total can differ between sorts, as it does on the site.
+            brand: Only these brands, spelled as the BRAND facet lists them (e.g. "Levi's"). A list matches any of them.
+            color: Only these colors, as the COLOR_NORMAL facet lists them (Black, Blue, Red...). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            pickup_store_id: Only items available for pickup at this store (a store_id from stores()), e.g. 4592.
+            filters: Any other facet from a previous response's facets: its name to one value or a list, e.g. {'GENDER': 'Women', 'CUSTRATINGS': '4 stars & up'}.
+            include_sponsored: Keep ad-only sponsored tiles (flagged is_sponsored). Defaults to false: they are dropped.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_brand", {"brand_id": brand_id, "url": url, "special_offer": special_offer, "page": page, "sort": sort, "brand": brand, "color": color, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["sale", "clearance", "today_only", "last_act", "limited_time_special", "black_friday"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "price_low_to_high", "price_high_to_low", "top_rated", "best_sellers", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Macy's sale listings: all Sales & Offers (default), Clearance, Today Only, Last Act (final-sale markdowns), Limited-Time Specials or Black Friday Deals, with the same filters and sorts as search() (except special_offer). 60 organic items per page, each with id, title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, price label, on-sale flag, sale end date, deal label (Black Friday Deal, Clearance, LAST ACT, Today Only...), promotions, rating, review count, colors and is_sponsored. Also returns total, page, total_pages, the sort applied, the facets (name, label and values with counts; any value works in filters) and applied_filters. Ad-only sponsored tiles are dropped (sponsored_dropped counts them) unless include_sponsored; organic items that also hold a paid slot stay, flagged is_sponsored. Totals can differ between sorts, as on the site. Prices in USD. sale_ends carries the end date when Macy's states one.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: sale (all Sales & Offers, default), clearance, today_only, last_act, limited_time_special or black_friday.
+            page: Results page, 1-based (60 organic items per page). Defaults to 1.
+            sort: featured (default), price_low_to_high, price_high_to_low, top_rated, best_sellers or newest. The total can differ between sorts, as it does on the site.
+            brand: Only these brands, spelled as the BRAND facet lists them (e.g. "Levi's"). A list matches any of them.
+            color: Only these colors, as the COLOR_NORMAL facet lists them (Black, Blue, Red...). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            pickup_store_id: Only items available for pickup at this store (a store_id from stores()), e.g. 4592.
+            filters: Any other facet from a previous response's facets: its name to one value or a list, e.g. {'GENDER': 'Women', 'CUSTRATINGS': '4 stars & up'}.
+            include_sponsored: Keep ad-only sponsored tiles (flagged is_sponsored). Defaults to false: they are dropped.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_deals", {"type": type, "page": page, "sort": sort, "brand": brand, "color": color, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters, "include_sponsored": include_sponsored}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Macy's stores near a US ZIP code, a point (lat + lng) or a city + state, nearest first (up to 15, within 100 miles by default): store_id (what store_availability() and pickup_store_id take), name, address, phone, lat / lng, distance in miles, today's and tomorrow's hours, curbside hours and the order cut-off for same-day pickup.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '10001'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            city: US city (with state), instead of zip, e.g. 'Atlanta'.
+            state: 2-letter US state code (with city), e.g. 'GA'.
+            radius: Search radius in miles, 1-100. Defaults to 100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_stores", {"zip": zip, "lat": lat, "lng": lng, "city": city, "state": state, "radius": radius}, extra)
+
+    async def store_availability(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        zip: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Can a macys.com product be picked up in store? Near a ZIP, a point or a city + state: every store with available true / false and available_items_count (how many of the product's items it has). At one store (store_id): the store's hours, pickup cut-off and pickup options, and for every variant (UPC, color, size) pickup_available and in_store_available. Macy's publishes no unit quantities, so there are no stock counts. Pass store_id or a location, not both. An unknown store_id is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Macy's product id: a search result's id, or the ID= number in a macys.com product URL, e.g. 25822310.
+            url: A macys.com product URL (its ID= is used). Alternative to product_id.
+            store_id: One store (a store_id from stores()) for per-variant pickup and in-store flags, instead of a location, e.g. 4592.
+            zip: US ZIP code to search around, e.g. '10001'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            city: US city (with state), instead of zip, e.g. 'Atlanta'.
+            state: 2-letter US state code (with city), e.g. 'GA'.
+            radius: Search radius in miles, 1-100. Defaults to 100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_store_availability", {"product_id": product_id, "url": url, "store_id": store_id, "zip": zip, "lat": lat, "lng": lng, "city": city, "state": state, "radius": radius}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The macys.com search-box autocomplete for a partial query: up to 7 suggested searches.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'jea'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("macys_suggestions", {"query": query}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

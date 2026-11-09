@@ -38,6 +38,7 @@ from ._namespaces_sync import (
     _KuaishouNamespace,
     _LinkedInNamespace,
     _LowesNamespace,
+    _MacysNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
     _MetaAdsNamespace,
@@ -187,6 +188,7 @@ class ScavioClient:
         self.best_buy = _BestBuyNamespace(self)
         self.tcgplayer = _TcgplayerNamespace(self)
         self.vinted = _VintedNamespace(self)
+        self.macys = _MacysNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

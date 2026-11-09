@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 64 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 65 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -27,6 +27,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
+| Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1607,6 +1608,74 @@ pickup point or similar-items endpoint. Seller data is limited to public,
 buyer-relevant fields and feedback carries no reviewer identity. An unknown
 item or member id on `product` or `seller` is a 404.
 
+### 32. Department Store -- Macy's
+
+macys.com (US, USD), namespace `macys`, 9 endpoints, 1 credit each: `search`,
+`product`, `reviews`, `category`, `brand`, `deals`, `stores`,
+`store_availability`, `suggestions`. No `country`: the US site only. `product`,
+`reviews` and `store_availability` take `product_id` or a macys.com product
+`url`; `category` takes `category_id` or `url`; `brand` takes `brand_id` (a
+product's `brand_page_id`) or `url`. Every method raises the request timeout to
+at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+m = client.macys
+
+# --- Search: 60 organic items per page, filters from the facets.
+found = m.search("jeans", brand="Levi's", special_offer="clearance", sort="price_low_to_high")["data"]
+print(found["total"], found["total_pages"], found["sponsored_dropped"])
+for item in found["items"][:5]:
+    print(item["id"], item["title"], item["price"], item["regular_price"],
+          item["percent_off"], item["sale_ends"], item["deal_label"], item["is_sponsored"])
+for facet in found["facets"][:3]:
+    print(facet["name"], [(v["value"], v["count"]) for v in facet["values"][:3]])
+
+# --- Deals: sale, clearance, today_only, last_act, limited_time_special, black_friday.
+clearance = m.deals(type="clearance", filters={"GENDER": "Women"})["data"]
+print(clearance["label"], clearance["total"])
+
+# --- One product (or up to 10 with product_ids, summary view).
+p = m.product(product_id=25822310)["data"]
+print(p["title"], p["price"], p["regular_price"], p["on_sale"], p["sale_ends"])
+print(p["review_count"], p["text_review_count"], p["rating_distribution"])
+for v in p["variants"][:3]:
+    print(v["upc"], v["color"], v["size"], v["available"], v["availability_message"])
+
+# --- Written reviews only (ratings without text are counted on product).
+for r in m.reviews(product_id=25822310, sort="lowest_rated", limit=20)["data"]["reviews"]:
+    print(r["rating"], r["date"], r["nickname"], r["title"], r["text"][:80])
+
+# --- Store pickup: stores near a ZIP, then per-variant flags at one store.
+stores = m.stores(zip="10001")["data"]["stores"]
+store_id = stores[0]["store_id"]
+at_store = m.store_availability(product_id=25822310, store_id=store_id)["data"]
+print(at_store["pickup_available_count"], at_store["in_store_available_count"])
+for v in at_store["variants"][:3]:
+    print(v["upc"], v["color"], v["size"], v["pickup_available"], v["in_store_available"])
+print(m.suggestions("jea")["data"]["suggestions"])
+```
+
+`search`, `category`, `brand` and `deals` share one grid: 60 organic items per
+page with `total` and `total_pages`, and totals can differ between sorts, as
+they do on the site. Any facet value from `facets` works in `filters`, and
+`brand`, `color`, `special_offer`, `min_price` / `max_price` and
+`pickup_store_id` are first-class arguments. Ad-only sponsored tiles are
+dropped (`sponsored_dropped` counts them) unless `include_sponsored=True`;
+organic items that also hold a paid slot stay, flagged `is_sponsored`. A
+keyword Macy's maps to a category comes back with `redirected_to_category`.
+A `product_ids` batch (up to 10) gets Macy's summary view: no rating histogram,
+and a collection without its members' variants; a collection member's id
+answers with the collection product (`requested_id` echoes the id asked for).
+`review_count` includes ratings without text, `reviews` returns written reviews
+only. `store_availability` takes a `store_id` (per-variant `pickup_available`
+and `in_store_available`) or a location (`zip`, `lat` + `lng`, or `city` +
+`state`: which stores can hand the product over), not both. Macy's publishes
+no unit quantities, so there are no stock counts. No coupon codes, Q&A text or
+price history: to track prices, poll and store your own.
+
 ## Error Handling
 
 ```python
@@ -1741,6 +1810,7 @@ Scavio works with popular AI/LLM frameworks:
 | Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` | `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores) |
 | TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
 | Vinted | `search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`, `suggestions`, `filters`, `categories` | 1 each |
+| Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1750,6 +1820,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.42.0
+
+- **New `macys` namespace** (sync and async) for macys.com (US, USD), 9
+  endpoints at 1 credit each: `search`, `product`, `reviews`, `category`,
+  `brand`, `deals`, `stores`, `store_availability`, `suggestions`. The grid
+  endpoints take `brand`, `color`, `special_offer`, a price range,
+  `pickup_store_id`, any facet via `filters` (a dict) and
+  `include_sponsored`; `product` takes up to 10 `product_ids` in one call.
+  120s timeout floor on every method.
 
 ### Changed in 0.41.1
 
