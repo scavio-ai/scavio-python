@@ -53,6 +53,7 @@ from ._namespaces_async import (
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncRightmoveNamespace,
+    _AsyncSaksNamespace,
     _AsyncSamsClubNamespace,
     _AsyncSECNamespace,
     _AsyncSephoraNamespace,
@@ -184,6 +185,7 @@ class AsyncScavioClient:
         self.tcgplayer = _AsyncTcgplayerNamespace(self)
         self.vinted = _AsyncVintedNamespace(self)
         self.macys = _AsyncMacysNamespace(self)
+        self.saks = _AsyncSaksNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

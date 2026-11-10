@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 65 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 66 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -28,6 +28,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
+| Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1676,6 +1677,72 @@ and `in_store_available`) or a location (`zip`, `lat` + `lng`, or `city` +
 no unit quantities, so there are no stock counts. No coupon codes, Q&A text or
 price history: to track prices, poll and store your own.
 
+### 33. Department Store -- Saks Fifth Avenue
+
+saksfifthavenue.com (US, USD), namespace `saks`, 9 endpoints, 2 credits each:
+`search`, `product`, `category`, `brand`, `deals`, `stores`,
+`store_availability`, `suggestions`, `designers`. No `country`: the US site
+only. `product` takes `product_id` (master or variant) or a product `url`;
+`category` takes a `/c/` `path` or `url`; `brand` takes a designer slug (from
+`designers`) or `url`; `stores` and `store_availability` take `zip` or `lat` +
+`lng`. Every method raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+s = client.saks
+
+# --- Designer sale: 24 grid positions per page, filters from the facets.
+sale = s.deals(type="womens_sale", brand="Prada", sort="price_low_to_high")["data"]
+print(sale["label"], sale["total"], sale["total_pages"], sale["next_start"])
+for item in sale["items"][:5]:
+    print(item["id"], item["brand"], item["title"], item["price"],
+          item["regular_price"], item["percent_off"], item["badge"])
+for facet in sale["facets"][:3]:
+    print(facet["id"], facet["label"], [(v["value"], v["count"]) for v in facet["values"][:3]])
+
+# --- Walk every item: pass next_start back as start (editorial tiles can take a slot).
+more = s.deals(type="womens_sale", brand="Prada", sort="price_low_to_high",
+               start=sale["next_start"])["data"]
+print(more["start"], more["count"], more["next_start"])
+
+# --- Search: size takes the facet label ("Medium", not "M").
+found = s.search("coat", size="Medium", on_sale=True)["data"]
+print(found["total"], found["redirected_to"])
+
+# --- One product, then one variant's pickup stock near a ZIP.
+p = s.product(product_id="0400019127312")["data"]
+print(p["title"], p["price"], p["on_sale"], p["is_final_sale"], p["rating"], p["review_count"])
+for v in p["variants"][:3]:
+    print(v["sku"], v["warehouse_units"])
+near = s.store_availability(p["variants"][0]["sku"], zip="10022")["data"]
+for st in near["stores"]:
+    print(st["name"], st["availability_message"], st["in_stock"], st["units_at_store"])
+
+# --- Designer index: slugs feed brand().
+for d in s.designers(letter="G")["data"]["designers"][:5]:
+    print(d["name"], d["slug"])
+print(s.brand(brand="gucci", new_arrivals=True)["data"]["total"])
+```
+
+`search`, `category`, `brand` and `deals` share one grid: 24 positions per
+page with `total`, `total_pages`, `start` and `next_start`. An editorial tile
+can take a grid position, so a page may carry 22-23 items: pass the previous
+`next_start` as `start` to miss nothing (`page` also works). Any facet value
+from `facets` works in `filters`; `brand`, `color`, `size`, `min_price` /
+`max_price`, `on_sale` and `new_arrivals` are first-class arguments, and
+`size` takes the facet label ("Medium", not "M"). A keyword the site maps to a
+designer or category page comes back with `redirected_to`. `deals` lists
+`sale`, `womens_sale`, `mens_sale`, `womens_new_arrivals` and
+`mens_new_arrivals`; Saks has no clearance or final-sale list (items carry
+`is_clearance` / `is_final_sale` flags). `store_availability` needs a VARIANT
+sku (a product's `variants[].sku`, or a product resolved with `color` +
+`size`) and returns `units_at_store` only when the site shows a count,
+otherwise null. Rating and review count only: review text is not available.
+No coupon codes, international prices or price history: to track designer
+sale prices, poll and store your own.
+
 ## Error Handling
 
 ```python
@@ -1811,6 +1878,7 @@ Scavio works with popular AI/LLM frameworks:
 | TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
 | Vinted | `search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`, `suggestions`, `filters`, `categories` | 1 each |
 | Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
+| Saks Fifth Avenue (`saks`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `designers` | 2 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -1820,6 +1888,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.43.0
+
+- **New `saks` namespace** (sync and async) for saksfifthavenue.com (US,
+  USD), 9 endpoints at 2 credits each: `search`, `product`, `category`,
+  `brand`, `deals`, `stores`, `store_availability`, `suggestions`,
+  `designers`. The grid endpoints take `brand`, `color`, `size`, a price
+  range, `on_sale`, `new_arrivals`, any facet via `filters` (a dict) and
+  `start` / `page` paging; `store_availability` takes a required variant
+  `sku`. 120s timeout floor on every method.
 
 ### Changed in 0.42.0
 

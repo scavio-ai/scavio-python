@@ -416,6 +416,80 @@ _MACYS_LOCATION = (
 )
 
 
+# Saks Fifth Avenue params shared across endpoints.
+_SAKS_SORTS = (
+    "featured",
+    "best_sellers",
+    "newest",
+    "price_high_to_low",
+    "price_low_to_high",
+    "sale_first",
+    "brand_az",
+)
+_SAKS_BRAND = _str_or_list(
+    "brand",
+    "Only these designers, spelled as the brand facet lists them (e.g. \"Prada\", \"ALICE + "
+    "OLIVIA\"). A list matches any of them.",
+)
+_SAKS_GRID = (
+    _int("page", "Results page, 1-based (24 grid positions per page). Defaults to 1."),
+    _int(
+        "start",
+        "Item offset, instead of page: pass a previous response's next_start to walk every item "
+        "without gaps (an editorial tile can take a grid position, so a page may carry 22-23 "
+        "items).",
+    ),
+    _lit(
+        "sort",
+        _SAKS_SORTS,
+        "featured (default, the site's own order), best_sellers, newest, price_high_to_low, "
+        "price_low_to_high, sale_first or brand_az.",
+    ),
+    _str_or_list(
+        "color",
+        "Only these colors, as the colorRefinement facet lists them (Black, Blue, Red...). A "
+        "list matches any of them.",
+    ),
+    _str_or_list(
+        "size",
+        "Only these sizes, spelled as the sizeRefinement facet LABEL lists them (\"Medium\", "
+        "\"X-Small, 0\"; \"M\" matches nothing). A list matches any of them.",
+    ),
+    _float("min_price", "Minimum price in USD. Any bound works, not only the site's buckets."),
+    _float("max_price", "Maximum price in USD."),
+    _bool("on_sale", "Only items on sale."),
+    _bool("new_arrivals", "Only new arrivals."),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any other facet from a previous response's facets: its id to one value or a list, "
+        "e.g. {'refGender': \"Women's\", 'refMaterial': 'Cashmere'}.",
+    ),
+)
+_SAKS_GRID_FIELDS = (
+    "24 grid positions per page, each item with id (variant_id too when the tile shows one "
+    "variant), title, brand, URL, image, price (price_max when the item sells at a range), "
+    "regular and sale price, percent off, on-sale flag, review count, badge (Best Seller, "
+    "Exclusive, Runway Look...), is_final_sale and is_clearance (null when the tile leaves them "
+    "blank; product() is authoritative), returnable, limited_inventory, promotions, "
+    "product_type and colors. Also returns total, page, total_pages, start and next_start "
+    "(pass next_start as start for the next page: an editorial tile can take a grid position, "
+    "so a page may carry 22-23 items), the sort applied, the facets (id, label and values with "
+    "counts; any value works in filters), price_ranges and applied_filters. Review count only: "
+    "review text is not available. Prices in USD."
+)
+_SAKS_LOCATION = (
+    _str("zip", "US ZIP code to search around, e.g. '10022'."),
+    _float("lat", "Latitude (with lng), instead of zip."),
+    _float("lng", "Longitude (with lat)."),
+    _ilit(
+        "radius",
+        (15, 30, 50, 100, 300),
+        "Search radius in miles: 15, 30, 50, 100 or 300. Defaults to 50.",
+    ),
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -9740,6 +9814,231 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=120.0,
     ),
+    # ========================== Saks Fifth Avenue ========================
+    # saksfifthavenue.com (US only, USD), 9 endpoints, 2 credits each. product
+    # takes product_id or url; category takes path or url; brand takes brand
+    # or url; stores and store_availability take one location (zip, or lat +
+    # lng). filters is a nested object on the wire, so it is a dict here.
+    # 120 s timeout floor.
+    Endpoint(
+        key="saks_search",
+        namespace="saks",
+        method="search",
+        http="POST",
+        path="/api/v1/saks/search",
+        summary=(
+            "Search saksfifthavenue.com (US) by keyword, filtered by designer, color, size (the "
+            "facet label, e.g. Medium), any price range, on sale, new arrivals and any other "
+            "facet, sorted by featured, best sellers, newest, price, sale first or designer A-Z. "
+            + _SAKS_GRID_FIELDS + " A keyword the site sends to a designer or category page is "
+            "answered from that page, named in redirected_to."
+        ),
+        params=(_req("query", "Search keywords, e.g. 'coat'."), _SAKS_BRAND, *_SAKS_GRID),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_product",
+        namespace="saks",
+        method="product",
+        http="POST",
+        path="/api/v1/saks/product",
+        summary=(
+            "One saksfifthavenue.com product by id or URL: title, brand, type (master or "
+            "variant), UPC (for a variant), price, price_max, regular and sale price, percent "
+            "off, on-sale flag, is_new / is_sale / is_clearance / is_final_sale, badge, "
+            "returnable, promotions, description, style code, images, colors and sizes (each "
+            "with availability IN_STOCK / NOT_AVAILABLE, selectable and waitlist), every SKU in "
+            "variants[] with its online warehouse unit count, in-stock and available counts, "
+            "availability (units available to sell, message such as Limited Inventory, "
+            "in_stock_date), available_in_store, marketplace, drop_ship, preorder, merchandising "
+            "attributes (category, gender, material, length...), the average star rating and "
+            "review_count. Review text is not available. Add color + size (or pass a variant "
+            "sku) to resolve one variant: its sku is id, with its UPC and stock. A "
+            "variants[].sku is what store_availability() takes. An unknown id is a 404."
+        ),
+        params=(
+            _str_or_int(
+                "product_id",
+                "Saks product id: a search result's id (the number at the end of a product URL), "
+                "or a variant sku, e.g. '0400019127312'.",
+            ),
+            _str(
+                "url",
+                "A saksfifthavenue.com product URL (its trailing id is used; a color / size it "
+                "selects is kept). Alternative to product_id.",
+            ),
+            _str("color", "Pick one color (a colors[].value), e.g. 'BLUE OPAL'."),
+            _str("size", "Pick one size (a sizes[].value). With color, the answer is that variant."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_category",
+        namespace="saks",
+        method="category",
+        http="POST",
+        path="/api/v1/saks/category",
+        summary=(
+            "Browse one Saks category by its /c/ path or URL (women's dresses, men's sweaters, "
+            "beauty...), with the same filters and sorts as search(). " + _SAKS_GRID_FIELDS
+            + " Also returns the category's name, path, URL and breadcrumbs. An unknown path is "
+            "a 404."
+        ),
+        params=(
+            _str(
+                "path",
+                "A Saks category path (/c/...): from a category URL, a suggestions() "
+                "categories[].path or a breadcrumb, e.g. '/c/women-s-apparel/dresses'.",
+            ),
+            _str(
+                "url",
+                "A saksfifthavenue.com category URL. Filters, sort and page already in the URL "
+                "are kept.",
+            ),
+            _SAKS_BRAND,
+            *_SAKS_GRID,
+        ),
+        one_of=(("path", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_brand",
+        namespace="saks",
+        method="brand",
+        http="POST",
+        path="/api/v1/saks/brand",
+        summary=(
+            "Browse one designer's Saks page by slug (from designers()) or URL, with the same "
+            "filters and sorts as search() (except brand). " + _SAKS_GRID_FIELDS + " Also "
+            "returns the brand's name, slug and URL. An unknown slug is a 404."
+        ),
+        params=(
+            _str(
+                "brand",
+                "A designer slug from designers(), e.g. 'gucci', 'chloé', 'alice-olivia'. A "
+                "plain name is slugified.",
+            ),
+            _str(
+                "url",
+                "A saksfifthavenue.com /brand/ URL. Filters, sort and page already in the URL "
+                "are kept.",
+            ),
+            *_SAKS_GRID,
+        ),
+        one_of=(("brand", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_deals",
+        namespace="saks",
+        method="deals",
+        http="POST",
+        path="/api/v1/saks/deals",
+        summary=(
+            "Saks sale and new-arrival listings: all Sale (default), Women's Clothing Sale, "
+            "Men's Sale, Women's New Arrivals or Men's New Arrivals, with the same filters and "
+            "sorts as search(). " + _SAKS_GRID_FIELDS + " Saks has no clearance or final-sale "
+            "listing (items carry is_clearance / is_final_sale flags)."
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "womens_sale", "mens_sale", "womens_new_arrivals", "mens_new_arrivals"),
+                "sale (all sale, default), womens_sale (women's clothing), mens_sale, "
+                "womens_new_arrivals or mens_new_arrivals.",
+            ),
+            _SAKS_BRAND,
+            *_SAKS_GRID,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_stores",
+        namespace="saks",
+        method="stores",
+        http="POST",
+        path="/api/v1/saks/stores",
+        summary=(
+            "Saks Fifth Avenue stores near a US ZIP code or a point (lat + lng), within 15 / 30 "
+            "/ 50 / 100 / 300 miles (default 50): store_id, name, address, city, state, ZIP, "
+            "lat / lng, distance in miles (pickup stores), today's opening and closing times, "
+            "hours as listed, closed flag, and pickup (true for stores that offer in-store "
+            "pickup; other Saks locations are listed with pickup false)."
+        ),
+        params=_SAKS_LOCATION,
+        one_of=(("zip", "lat"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_store_availability",
+        namespace="saks",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/saks/store-availability",
+        summary=(
+            "Can one Saks variant (sku) be picked up near a US ZIP code or a point? For each "
+            "pickup store: the site's availability message (In Stock, Limited Inventory, Not "
+            "Available), in_stock, limited, units_at_store when the site gives a count (it does "
+            "for stores that have the item; otherwise null), and the store's address, distance "
+            "and today's hours. Needs a variant sku: take it from product() variants[].sku, or "
+            "from product() with color + size."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Union[str, int]",
+                required=True,
+                doc="A variant sku: a product's variants[].sku, or a product's id after picking "
+                "color + size, e.g. '10781654'.",
+            ),
+            *_SAKS_LOCATION,
+        ),
+        one_of=(("zip", "lat"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_suggestions",
+        namespace="saks",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/saks/suggestions",
+        summary=(
+            "The saksfifthavenue.com search-box suggestions for a partial query: the result "
+            "count, matching designers, suggested categories (name, parent, path for "
+            "category()), up to 5 featured products (id, title, brand, URL, image) and the "
+            "site's popular searches."
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'gucci'."),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="saks_designers",
+        namespace="saks",
+        method="designers",
+        http="POST",
+        path="/api/v1/saks/designers",
+        summary=(
+            "The Saks A-Z designer index (about 1,200 designers): name, slug (what brand() "
+            "takes), URL and letter, optionally only one letter."
+        ),
+        params=(
+            _str(
+                "letter",
+                "Only designers under this letter (A-Z, or '#' for names starting with a digit).",
+            ),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -10854,6 +11153,7 @@ NAMESPACES: tuple[str, ...] = (
     "tcgplayer",
     "vinted",
     "macys",
+    "saks",
     "trustpilot",
     "realtor",
     "rightmove",

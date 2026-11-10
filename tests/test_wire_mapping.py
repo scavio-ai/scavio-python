@@ -2389,3 +2389,100 @@ def test_macys_credits_paths_and_wire(monkeypatch):
         m.stores(radius=10)
     with pytest.raises(ScavioError):
         m.store_availability(product_id=25822310)
+
+
+def test_saks_credits_paths_and_wire(monkeypatch):
+    """saks (0.43.0): 9 endpoints on /api/v1/saks, 2 credits each.
+
+    US only (no country). store_availability maps to the hyphenated
+    /store-availability path and takes a required variant sku; radius is an
+    int literal (15, 30, 50, 100, 300); 120 s timeout floor.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "saks"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "category",
+            "brand",
+            "deals",
+            "stores",
+            "store_availability",
+            "suggestions",
+            "designers",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 2, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/saks/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert not any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    s = client.saks
+    s.search(
+        "coat",
+        brand=["Prada", "Moncler"],
+        size="Medium",
+        min_price=500.0,
+        on_sale=True,
+        sort="price_low_to_high",
+        filters={"refGender": "Women's"},
+    )
+    s.product(product_id="0400019127312", color="BLUE OPAL", size="4")
+    s.category(path="/c/women-s-apparel/dresses", start=22)
+    s.brand(brand="gucci", new_arrivals=True, page=2)
+    s.deals(type="womens_sale", color="Black")
+    s.stores(zip="10022", radius=50)
+    s.store_availability("10781654", lat=40.758, lng=-73.9855, radius=15)
+    s.suggestions("gucci")
+    s.designers(letter="G")
+    base = "/api/v1/saks/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "coat",
+                "brand": ["Prada", "Moncler"],
+                "sort": "price_low_to_high",
+                "size": "Medium",
+                "min_price": 500.0,
+                "on_sale": True,
+                "filters": {"refGender": "Women's"},
+            },
+            120.0,
+        ),
+        (
+            base + "product",
+            {"product_id": "0400019127312", "color": "BLUE OPAL", "size": "4"},
+            120.0,
+        ),
+        (base + "category", {"path": "/c/women-s-apparel/dresses", "start": 22}, 120.0),
+        (base + "brand", {"brand": "gucci", "page": 2, "new_arrivals": True}, 120.0),
+        (base + "deals", {"type": "womens_sale", "color": "Black"}, 120.0),
+        (base + "stores", {"zip": "10022", "radius": 50}, 120.0),
+        (
+            base + "store-availability",
+            {"sku": "10781654", "lat": 40.758, "lng": -73.9855, "radius": 15},
+            120.0,
+        ),
+        (base + "suggestions", {"query": "gucci"}, 120.0),
+        (base + "designers", {"letter": "G"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        s.product()
+    with pytest.raises(ScavioError):
+        s.category(sort="newest")
+    with pytest.raises(ScavioError):
+        s.stores(radius=25)
+    with pytest.raises(ScavioError):
+        s.store_availability("10781654")

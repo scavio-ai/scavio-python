@@ -235,6 +235,12 @@ _NS_META = {
         "Macy's search, product (batch of 10), reviews, category, brand, deals (clearance, Last "
         "Act, Black Friday), store locator, store pickup availability, and autocomplete endpoints.",
     ),
+    "saks": (
+        "Saks",
+        "Saks Fifth Avenue search, product, category, designer page, sale and new-arrival "
+        "listings, store locator, store pickup availability, suggestions, and designer index "
+        "endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

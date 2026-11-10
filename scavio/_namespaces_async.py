@@ -65,6 +65,7 @@ __all__ = [
     "_AsyncTcgplayerNamespace",
     "_AsyncVintedNamespace",
     "_AsyncMacysNamespace",
+    "_AsyncSaksNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -8499,6 +8500,265 @@ class _AsyncMacysNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("macys_suggestions", {"query": query}, extra)
+
+class _AsyncSaksNamespace:
+    """Saks Fifth Avenue search, product, category, designer page, sale and new-arrival listings, store locator, store pickup availability, suggestions, and designer index endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        start: Optional[int] = None,
+        sort: Optional[Literal["featured", "best_sellers", "newest", "price_high_to_low", "price_low_to_high", "sale_first", "brand_az"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search saksfifthavenue.com (US) by keyword, filtered by designer, color, size (the facet label, e.g. Medium), any price range, on sale, new arrivals and any other facet, sorted by featured, best sellers, newest, price, sale first or designer A-Z. 24 grid positions per page, each item with id (variant_id too when the tile shows one variant), title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, on-sale flag, review count, badge (Best Seller, Exclusive, Runway Look...), is_final_sale and is_clearance (null when the tile leaves them blank; product() is authoritative), returnable, limited_inventory, promotions, product_type and colors. Also returns total, page, total_pages, start and next_start (pass next_start as start for the next page: an editorial tile can take a grid position, so a page may carry 22-23 items), the sort applied, the facets (id, label and values with counts; any value works in filters), price_ranges and applied_filters. Review count only: review text is not available. Prices in USD. A keyword the site sends to a designer or category page is answered from that page, named in redirected_to.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'coat'.
+            brand: Only these designers, spelled as the brand facet lists them (e.g. "Prada", "ALICE + OLIVIA"). A list matches any of them.
+            page: Results page, 1-based (24 grid positions per page). Defaults to 1.
+            start: Item offset, instead of page: pass a previous response's next_start to walk every item without gaps (an editorial tile can take a grid position, so a page may carry 22-23 items).
+            sort: featured (default, the site's own order), best_sellers, newest, price_high_to_low, price_low_to_high, sale_first or brand_az.
+            color: Only these colors, as the colorRefinement facet lists them (Black, Blue, Red...). A list matches any of them.
+            size: Only these sizes, spelled as the sizeRefinement facet LABEL lists them ("Medium", "X-Small, 0"; "M" matches nothing). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            on_sale: Only items on sale.
+            new_arrivals: Only new arrivals.
+            filters: Any other facet from a previous response's facets: its id to one value or a list, e.g. {'refGender': "Women's", 'refMaterial': 'Cashmere'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_search", {"query": query, "brand": brand, "page": page, "start": start, "sort": sort, "color": color, "size": size, "min_price": min_price, "max_price": max_price, "on_sale": on_sale, "new_arrivals": new_arrivals, "filters": filters}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One saksfifthavenue.com product by id or URL: title, brand, type (master or variant), UPC (for a variant), price, price_max, regular and sale price, percent off, on-sale flag, is_new / is_sale / is_clearance / is_final_sale, badge, returnable, promotions, description, style code, images, colors and sizes (each with availability IN_STOCK / NOT_AVAILABLE, selectable and waitlist), every SKU in variants[] with its online warehouse unit count, in-stock and available counts, availability (units available to sell, message such as Limited Inventory, in_stock_date), available_in_store, marketplace, drop_ship, preorder, merchandising attributes (category, gender, material, length...), the average star rating and review_count. Review text is not available. Add color + size (or pass a variant sku) to resolve one variant: its sku is id, with its UPC and stock. A variants[].sku is what store_availability() takes. An unknown id is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Saks product id: a search result's id (the number at the end of a product URL), or a variant sku, e.g. '0400019127312'.
+            url: A saksfifthavenue.com product URL (its trailing id is used; a color / size it selects is kept). Alternative to product_id.
+            color: Pick one color (a colors[].value), e.g. 'BLUE OPAL'.
+            size: Pick one size (a sizes[].value). With color, the answer is that variant.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_product", {"product_id": product_id, "url": url, "color": color, "size": size}, extra)
+
+    async def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        start: Optional[int] = None,
+        sort: Optional[Literal["featured", "best_sellers", "newest", "price_high_to_low", "price_low_to_high", "sale_first", "brand_az"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one Saks category by its /c/ path or URL (women's dresses, men's sweaters, beauty...), with the same filters and sorts as search(). 24 grid positions per page, each item with id (variant_id too when the tile shows one variant), title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, on-sale flag, review count, badge (Best Seller, Exclusive, Runway Look...), is_final_sale and is_clearance (null when the tile leaves them blank; product() is authoritative), returnable, limited_inventory, promotions, product_type and colors. Also returns total, page, total_pages, start and next_start (pass next_start as start for the next page: an editorial tile can take a grid position, so a page may carry 22-23 items), the sort applied, the facets (id, label and values with counts; any value works in filters), price_ranges and applied_filters. Review count only: review text is not available. Prices in USD. Also returns the category's name, path, URL and breadcrumbs. An unknown path is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A Saks category path (/c/...): from a category URL, a suggestions() categories[].path or a breadcrumb, e.g. '/c/women-s-apparel/dresses'.
+            url: A saksfifthavenue.com category URL. Filters, sort and page already in the URL are kept.
+            brand: Only these designers, spelled as the brand facet lists them (e.g. "Prada", "ALICE + OLIVIA"). A list matches any of them.
+            page: Results page, 1-based (24 grid positions per page). Defaults to 1.
+            start: Item offset, instead of page: pass a previous response's next_start to walk every item without gaps (an editorial tile can take a grid position, so a page may carry 22-23 items).
+            sort: featured (default, the site's own order), best_sellers, newest, price_high_to_low, price_low_to_high, sale_first or brand_az.
+            color: Only these colors, as the colorRefinement facet lists them (Black, Blue, Red...). A list matches any of them.
+            size: Only these sizes, spelled as the sizeRefinement facet LABEL lists them ("Medium", "X-Small, 0"; "M" matches nothing). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            on_sale: Only items on sale.
+            new_arrivals: Only new arrivals.
+            filters: Any other facet from a previous response's facets: its id to one value or a list, e.g. {'refGender': "Women's", 'refMaterial': 'Cashmere'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_category", {"path": path, "url": url, "brand": brand, "page": page, "start": start, "sort": sort, "color": color, "size": size, "min_price": min_price, "max_price": max_price, "on_sale": on_sale, "new_arrivals": new_arrivals, "filters": filters}, extra)
+
+    async def brand(
+        self,
+        *,
+        brand: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        start: Optional[int] = None,
+        sort: Optional[Literal["featured", "best_sellers", "newest", "price_high_to_low", "price_low_to_high", "sale_first", "brand_az"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one designer's Saks page by slug (from designers()) or URL, with the same filters and sorts as search() (except brand). 24 grid positions per page, each item with id (variant_id too when the tile shows one variant), title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, on-sale flag, review count, badge (Best Seller, Exclusive, Runway Look...), is_final_sale and is_clearance (null when the tile leaves them blank; product() is authoritative), returnable, limited_inventory, promotions, product_type and colors. Also returns total, page, total_pages, start and next_start (pass next_start as start for the next page: an editorial tile can take a grid position, so a page may carry 22-23 items), the sort applied, the facets (id, label and values with counts; any value works in filters), price_ranges and applied_filters. Review count only: review text is not available. Prices in USD. Also returns the brand's name, slug and URL. An unknown slug is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A designer slug from designers(), e.g. 'gucci', 'chloé', 'alice-olivia'. A plain name is slugified.
+            url: A saksfifthavenue.com /brand/ URL. Filters, sort and page already in the URL are kept.
+            page: Results page, 1-based (24 grid positions per page). Defaults to 1.
+            start: Item offset, instead of page: pass a previous response's next_start to walk every item without gaps (an editorial tile can take a grid position, so a page may carry 22-23 items).
+            sort: featured (default, the site's own order), best_sellers, newest, price_high_to_low, price_low_to_high, sale_first or brand_az.
+            color: Only these colors, as the colorRefinement facet lists them (Black, Blue, Red...). A list matches any of them.
+            size: Only these sizes, spelled as the sizeRefinement facet LABEL lists them ("Medium", "X-Small, 0"; "M" matches nothing). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            on_sale: Only items on sale.
+            new_arrivals: Only new arrivals.
+            filters: Any other facet from a previous response's facets: its id to one value or a list, e.g. {'refGender': "Women's", 'refMaterial': 'Cashmere'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_brand", {"brand": brand, "url": url, "page": page, "start": start, "sort": sort, "color": color, "size": size, "min_price": min_price, "max_price": max_price, "on_sale": on_sale, "new_arrivals": new_arrivals, "filters": filters}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["sale", "womens_sale", "mens_sale", "womens_new_arrivals", "mens_new_arrivals"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        start: Optional[int] = None,
+        sort: Optional[Literal["featured", "best_sellers", "newest", "price_high_to_low", "price_low_to_high", "sale_first", "brand_az"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Saks sale and new-arrival listings: all Sale (default), Women's Clothing Sale, Men's Sale, Women's New Arrivals or Men's New Arrivals, with the same filters and sorts as search(). 24 grid positions per page, each item with id (variant_id too when the tile shows one variant), title, brand, URL, image, price (price_max when the item sells at a range), regular and sale price, percent off, on-sale flag, review count, badge (Best Seller, Exclusive, Runway Look...), is_final_sale and is_clearance (null when the tile leaves them blank; product() is authoritative), returnable, limited_inventory, promotions, product_type and colors. Also returns total, page, total_pages, start and next_start (pass next_start as start for the next page: an editorial tile can take a grid position, so a page may carry 22-23 items), the sort applied, the facets (id, label and values with counts; any value works in filters), price_ranges and applied_filters. Review count only: review text is not available. Prices in USD. Saks has no clearance or final-sale listing (items carry is_clearance / is_final_sale flags).
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            type: sale (all sale, default), womens_sale (women's clothing), mens_sale, womens_new_arrivals or mens_new_arrivals.
+            brand: Only these designers, spelled as the brand facet lists them (e.g. "Prada", "ALICE + OLIVIA"). A list matches any of them.
+            page: Results page, 1-based (24 grid positions per page). Defaults to 1.
+            start: Item offset, instead of page: pass a previous response's next_start to walk every item without gaps (an editorial tile can take a grid position, so a page may carry 22-23 items).
+            sort: featured (default, the site's own order), best_sellers, newest, price_high_to_low, price_low_to_high, sale_first or brand_az.
+            color: Only these colors, as the colorRefinement facet lists them (Black, Blue, Red...). A list matches any of them.
+            size: Only these sizes, spelled as the sizeRefinement facet LABEL lists them ("Medium", "X-Small, 0"; "M" matches nothing). A list matches any of them.
+            min_price: Minimum price in USD. Any bound works, not only the site's buckets.
+            max_price: Maximum price in USD.
+            on_sale: Only items on sale.
+            new_arrivals: Only new arrivals.
+            filters: Any other facet from a previous response's facets: its id to one value or a list, e.g. {'refGender': "Women's", 'refMaterial': 'Cashmere'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_deals", {"type": type, "brand": brand, "page": page, "start": start, "sort": sort, "color": color, "size": size, "min_price": min_price, "max_price": max_price, "on_sale": on_sale, "new_arrivals": new_arrivals, "filters": filters}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[Literal[15, 30, 50, 100, 300]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Saks Fifth Avenue stores near a US ZIP code or a point (lat + lng), within 15 / 30 / 50 / 100 / 300 miles (default 50): store_id, name, address, city, state, ZIP, lat / lng, distance in miles (pickup stores), today's opening and closing times, hours as listed, closed flag, and pickup (true for stores that offer in-store pickup; other Saks locations are listed with pickup false).
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '10022'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles: 15, 30, 50, 100 or 300. Defaults to 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_stores", {"zip": zip, "lat": lat, "lng": lng, "radius": radius}, extra)
+
+    async def store_availability(
+        self,
+        sku: Union[str, int],
+        *,
+        zip: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[Literal[15, 30, 50, 100, 300]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Can one Saks variant (sku) be picked up near a US ZIP code or a point? For each pickup store: the site's availability message (In Stock, Limited Inventory, Not Available), in_stock, limited, units_at_store when the site gives a count (it does for stores that have the item; otherwise null), and the store's address, distance and today's hours. Needs a variant sku: take it from product() variants[].sku, or from product() with color + size.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A variant sku: a product's variants[].sku, or a product's id after picking color + size, e.g. '10781654'.
+            zip: US ZIP code to search around, e.g. '10022'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles: 15, 30, 50, 100 or 300. Defaults to 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_store_availability", {"sku": sku, "zip": zip, "lat": lat, "lng": lng, "radius": radius}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The saksfifthavenue.com search-box suggestions for a partial query: the result count, matching designers, suggested categories (name, parent, path for category()), up to 5 featured products (id, title, brand, URL, image) and the site's popular searches.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'gucci'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_suggestions", {"query": query}, extra)
+
+    async def designers(
+        self,
+        *,
+        letter: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Saks A-Z designer index (about 1,200 designers): name, slug (what brand() takes), URL and letter, optionally only one letter.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            letter: Only designers under this letter (A-Z, or '#' for names starting with a digit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("saks_designers", {"letter": letter}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""
