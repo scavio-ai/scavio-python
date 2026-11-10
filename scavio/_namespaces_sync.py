@@ -67,6 +67,7 @@ __all__ = [
     "_MacysNamespace",
     "_SaksNamespace",
     "_KohlsNamespace",
+    "_JcpenneyNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -8993,6 +8994,250 @@ class _KohlsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("kohls_coupons", {}, extra)
+
+class _JcpenneyNamespace:
+    """JCPenney search, product (batch of 20), category, brand, clearance / sale / Black Friday / BOGO deal listings, store locator, store unit counts, suggestions, and coupon code endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Union[str, list[str]]] = None,
+        deal: Optional[Union[str, list[str]]] = None,
+        exact: Optional[bool] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "new_arrivals", "best_sellers", "rating", "price_low_to_high", "price_high_to_low"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search jcpenney.com (US) by keyword, filtered by brand, color, size, price range, deal label (SALE, CLEARANCE...) and any facet value (gender, store availability, rating, rise...), sorted by relevance, new arrivals, best sellers, rating or price. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. When the site autocorrects the keyword, corrected_query says so; when it sends a keyword to a deal or category listing (doorbusters), redirected_to says where and the items are that listing's.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'jeans'.
+            brand: Only this brand (or any of several), as the Brand facet lists it ("levi's", "nike", "st. john's bay").
+            deal: Only items with this Deals & Promotions label ('SALE', 'CLEARANCE', 'BIG BUY!'...), as the facet lists it.
+            exact: JCPenney narrows many keywords to a category on its own (jeans -> the Jeans category, visible in applied_filters). True searches the keyword across every category instead.
+            page: Results page, 1-based (48 items per page, at most 25 pages). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (default), new_arrivals, best_sellers, rating (highest rated first), price_low_to_high or price_high_to_low. The price orders are JCPenney's own and loose: sort the items by price yourself when you need a strict order.
+            color: Only this color (or any of several), as the Color facet lists it (black, blue, beige...).
+            size: Only this size (or any of several), as the Size facet lists it (m, 12, 32x30...).
+            price_range: A Price Range facet value ('under $5', '$20 - $24'...).
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values (any of them)}, e.g. {'gender': 'women'}, {'store_availability': 'same day pickup'}, {'average_rating': '4 rating'}. Several facets combine (AND).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_search", {"query": query, "brand": brand, "deal": deal, "exact": exact, "page": page, "sort": sort, "color": color, "size": size, "price_range": price_range, "filters": filters}, extra)
+
+    def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        product_ids: Optional[list[str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One jcpenney.com product by id or URL, or up to 20 by product_ids in one call: title, brand, description, features, category and breadcrumbs, product and item type, images, average rating, review_count, question and answer counts (review text is not available), the price block (regular, sale and clearance min / max ranges, percent off, price type, deal label, the after-coupon price with its coupon code, and when the price window starts and ends), channel (Omnichannel / OnlineOnly), in-store pickup, marketplace flag, and every variant: sku, UPC, color, size, all options, status, max per order and online_stock (high, low or out; single product only, a level, not a count). Prices are product-level ranges: JCPenney does not expose a price per size or color. A variants[].sku is what store_availability() takes. An unknown id is a 404; unknown ids in a batch are listed in not_found.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A JCPenney product id (ppr / ppm / pp + digits): a search result's id, the last part of a product URL, e.g. 'ppr5008604049'.
+            url: A jcpenney.com product URL (its product id is used). Alternative to product_id.
+            product_ids: Up to 20 product ids in one call (still 1 credit). Batch results carry no online stock.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_product", {"product_id": product_id, "url": url, "product_ids": product_ids}, extra)
+
+    def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        deal: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "new_arrivals", "best_sellers", "rating", "price_low_to_high", "price_high_to_low"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one JCPenney category by its path or URL (Dresses, Sheets, Women's Boots...), with the same filters and sorts as search(). The path needs its id=cat... part, the way jcpenney.com /g/ category links and a response's breadcrumbs carry it. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Also returns the category's name, id, path, URL and breadcrumbs. A department page (dept...) lists no products by itself: it needs a deal or another filter.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A JCPenney category path with its id=cat... part, e.g. '/g/women/dresses?id=cat100210008'.
+            url: A jcpenney.com category URL. Filters, a sort or a page in the URL are kept.
+            brand: Only this brand (or any of several), as the Brand facet lists it ("levi's", "nike", "st. john's bay").
+            deal: Only items with this Deals & Promotions label ('SALE', 'CLEARANCE', 'BIG BUY!'...), as the facet lists it.
+            page: Results page, 1-based (48 items per page, at most 25 pages). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (default), new_arrivals, best_sellers, rating (highest rated first), price_low_to_high or price_high_to_low. The price orders are JCPenney's own and loose: sort the items by price yourself when you need a strict order.
+            color: Only this color (or any of several), as the Color facet lists it (black, blue, beige...).
+            size: Only this size (or any of several), as the Size facet lists it (m, 12, 32x30...).
+            price_range: A Price Range facet value ('under $5', '$20 - $24'...).
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values (any of them)}, e.g. {'gender': 'women'}, {'store_availability': 'same day pickup'}, {'average_rating': '4 rating'}. Several facets combine (AND).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_category", {"path": path, "url": url, "brand": brand, "deal": deal, "page": page, "sort": sort, "color": color, "size": size, "price_range": price_range, "filters": filters}, extra)
+
+    def brand(
+        self,
+        *,
+        brand: Optional[str] = None,
+        url: Optional[str] = None,
+        deal: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "new_arrivals", "best_sellers", "rating", "price_low_to_high", "price_high_to_low"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every JCPenney product of one brand by name (Nike, St. John's Bay, Carter's...) or a brand page URL, with the same filters and sorts as search() (except brand). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Also returns the brand's name, facet value and URL. An unknown brand is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand name as JCPenney lists it in the Brand facet, e.g. 'Nike', "St. John's Bay", "Carter's".
+            url: A jcpenney.com brand page URL (JCPenney's curated brand page; its assortment can differ slightly from the brand name listing).
+            deal: Only items with this Deals & Promotions label ('SALE', 'CLEARANCE', 'BIG BUY!'...), as the facet lists it.
+            page: Results page, 1-based (48 items per page, at most 25 pages). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (default), new_arrivals, best_sellers, rating (highest rated first), price_low_to_high or price_high_to_low. The price orders are JCPenney's own and loose: sort the items by price yourself when you need a strict order.
+            color: Only this color (or any of several), as the Color facet lists it (black, blue, beige...).
+            size: Only this size (or any of several), as the Size facet lists it (m, 12, 32x30...).
+            price_range: A Price Range facet value ('under $5', '$20 - $24'...).
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values (any of them)}, e.g. {'gender': 'women'}, {'store_availability': 'same day pickup'}, {'average_rating': '4 rating'}. Several facets combine (AND).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_brand", {"brand": brand, "url": url, "deal": deal, "page": page, "sort": sort, "color": color, "size": size, "price_range": price_range, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["clearance", "sale", "black_friday", "big_buy", "limited_time_special", "best_value", "gotta_have_it", "closeout", "bogo"]] = None,
+        label: Optional[str] = None,
+        department: Optional[str] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "new_arrivals", "best_sellers", "rating", "price_low_to_high", "price_high_to_low"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """JCPenney deal listings across all products or one department: Clearance (default), Sale, Black Friday deals, Big Buy, Limited Time Special, Best Value, Gotta Have It, Closeout, Buy 1 Get 1, or any Deals & Promotions label, with the same filters and sorts as search(). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Seasonal labels (black_friday) list nothing once the event ends. To track clearance prices over time, poll and store your own: there is no price history.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: clearance (default), sale, black_friday, big_buy, limited_time_special, best_value, gotta_have_it, closeout or bogo (every Buy 1 Get 1 offer).
+            label: Any Deals & Promotions label verbatim from a previous response's facets (s1_deals_and_promotions), instead of type, e.g. 'BUY 1 GET 1 50% OFF'.
+            department: Limit the deal to one department or category id (dept... / cat..., from breadcrumbs or a category URL), e.g. 'dept20000011'.
+            brand: Only this brand (or any of several), as the Brand facet lists it ("levi's", "nike", "st. john's bay").
+            page: Results page, 1-based (48 items per page, at most 25 pages). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (default), new_arrivals, best_sellers, rating (highest rated first), price_low_to_high or price_high_to_low. The price orders are JCPenney's own and loose: sort the items by price yourself when you need a strict order.
+            color: Only this color (or any of several), as the Color facet lists it (black, blue, beige...).
+            size: Only this size (or any of several), as the Size facet lists it (m, 12, 32x30...).
+            price_range: A Price Range facet value ('under $5', '$20 - $24'...).
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values (any of them)}, e.g. {'gender': 'women'}, {'store_availability': 'same day pickup'}, {'average_rating': '4 rating'}. Several facets combine (AND).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_deals", {"type": type, "label": label, "department": department, "brand": brand, "page": page, "sort": sort, "color": color, "size": size, "price_range": price_range, "filters": filters}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """JCPenney stores near a US or Puerto Rico ZIP code, a city + state or a point (lat + lng), within 25 miles by default (up to 100), paged: store_id, name, address, city, state, ZIP, phone, lat / lng, distance in miles, weekly opening hours, timezone, services (Curbside Pickup, salon, portrait studio, JCPenney Beauty...), curbside and in-store pickup directions, bookable appointments (Sephora, salon) and the store page URL.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US or Puerto Rico ZIP code to search around, e.g. '75024'.
+            city: City (with state), instead of zip, e.g. 'Austin'.
+            state: 2-letter state code (with city), e.g. 'TX'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles, 1-100. Defaults to 25.
+            page: Results page, 1-based. Defaults to 1.
+            page_size: Stores per page, 1-20. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_stores", {"zip": zip, "city": city, "state": state, "lat": lat, "lng": lng, "radius": radius, "page": page, "page_size": page_size}, extra)
+
+    def store_availability(
+        self,
+        sku: Union[str, int],
+        *,
+        zip: Optional[Union[str, int]] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Real unit counts for one JCPenney SKU at the 5 nearest stores to a US or Puerto Rico ZIP code (or lat + lng): per store quantity, status (in_stock, low, out_of_stock, not_stocked), when the count was refreshed (updated_at), and the store's address, phone, distance and hours. Also returns how many of them have it (stores_with_stock) and total_quantity. in_stock_only drops the stores that have none. Take sku from product() variants[].sku.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A JCPenney SKU id: a product's variants[].sku (or a search result's sku_id / colors[].sku_id), e.g. '84630160042'.
+            zip: US or Puerto Rico ZIP code: the 5 nearest stores are checked, e.g. '90012'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles. Defaults to 25.
+            in_stock_only: Drop the stores (of the 5 nearest) that have none.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_store_availability", {"sku": sku, "zip": zip, "lat": lat, "lng": lng, "radius": radius, "in_stock_only": in_stock_only}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The jcpenney.com search-box suggestions for a partial query: keyword completions with their search URL and, where JCPenney offers them, department refinements (nike shoes women -> sneakers, running shoes...).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'jea'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_suggestions", {"query": query}, extra)
+
+    def coupons(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Today's public JCPenney coupons: code (null for in-store offers that need none), channel (online, in store or both), headline and details of each offer, start and end dates, the full disclaimer with its exclusions, and the URL of the eligible products. Public codes only, no account offers or JCPenney Rewards balances.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("jcpenney_coupons", {}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

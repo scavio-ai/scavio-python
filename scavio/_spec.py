@@ -542,6 +542,82 @@ _KOHLS_GRID_FIELDS = (
 _KOHLS_ZIP_DOC = "US ZIP code to search around, e.g. '60601'."
 
 
+# JCPenney params shared across endpoints.
+_JCPENNEY_SORTS = (
+    "relevance",
+    "new_arrivals",
+    "best_sellers",
+    "rating",
+    "price_low_to_high",
+    "price_high_to_low",
+)
+_JCPENNEY_DEAL_TYPES = (
+    "clearance",
+    "sale",
+    "black_friday",
+    "big_buy",
+    "limited_time_special",
+    "best_value",
+    "gotta_have_it",
+    "closeout",
+    "bogo",
+)
+_JCPENNEY_BRAND = _str_or_list(
+    "brand",
+    "Only this brand (or any of several), as the Brand facet lists it (\"levi's\", \"nike\", "
+    "\"st. john's bay\").",
+)
+_JCPENNEY_DEAL = _str_or_list(
+    "deal",
+    "Only items with this Deals & Promotions label ('SALE', 'CLEARANCE', 'BIG BUY!'...), as "
+    "the facet lists it.",
+)
+_JCPENNEY_GRID = (
+    _int(
+        "page",
+        "Results page, 1-based (48 items per page, at most 25 pages). A page past the last one "
+        "returns an empty items list with the real total. Defaults to 1.",
+    ),
+    _lit(
+        "sort",
+        _JCPENNEY_SORTS,
+        "relevance (default), new_arrivals, best_sellers, rating (highest rated first), "
+        "price_low_to_high or price_high_to_low. The price orders are JCPenney's own and loose: "
+        "sort the items by price yourself when you need a strict order.",
+    ),
+    _str_or_list(
+        "color",
+        "Only this color (or any of several), as the Color facet lists it (black, blue, "
+        "beige...).",
+    ),
+    _str_or_list(
+        "size",
+        "Only this size (or any of several), as the Size facet lists it (m, 12, 32x30...).",
+    ),
+    _str_or_list("price_range", "A Price Range facet value ('under $5', '$20 - $24'...)."),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any facet from a previous response: {facets[].id: facets[].values[].value, or a "
+        "list of values (any of them)}, e.g. {'gender': 'women'}, {'store_availability': 'same "
+        "day pickup'}, {'average_rating': '4 rating'}. Several facets combine (AND).",
+    ),
+)
+_JCPENNEY_GRID_FIELDS = (
+    "48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, "
+    "image, sku_id, price and price_max (current), regular_price and regular_price_max, "
+    "price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), "
+    "coupon_price with coupon_code (the price after today's coupon), rating, review_count, "
+    "badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), "
+    "colors with their SKU ids, and is_marketplace with the seller for third-party items. Also "
+    "returns total, page, total_pages, the sort applied, applied_filters and every facet (id, "
+    "label and values with their value, count and a selected flag; any of them works in "
+    "filters). Prices are product-level ranges: JCPenney does not expose a price per size or "
+    "color. Average rating and review count only: review text is not available. Prices in USD."
+)
+_JCPENNEY_ZIP_DOC = "US or Puerto Rico ZIP code to search around, e.g. '75024'."
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -10329,6 +10405,267 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=120.0,
     ),
+    # ============================== JCPenney =============================
+    # jcpenney.com (US incl. Puerto Rico stores, USD), 9 endpoints, 1 credit
+    # each. product takes product_id, url or product_ids (up to 20); category
+    # takes path or url; brand takes brand or url; stores takes one location
+    # (zip, city + state, or lat + lng); store_availability takes a required
+    # sku plus zip or lat + lng. 120 s timeout floor.
+    Endpoint(
+        key="jcpenney_search",
+        namespace="jcpenney",
+        method="search",
+        http="POST",
+        path="/api/v1/jcpenney/search",
+        summary=(
+            "Search jcpenney.com (US) by keyword, filtered by brand, color, size, price range, "
+            "deal label (SALE, CLEARANCE...) and any facet value (gender, store availability, "
+            "rating, rise...), sorted by relevance, new arrivals, best sellers, rating or price. "
+            + _JCPENNEY_GRID_FIELDS + " When the site autocorrects the keyword, corrected_query "
+            "says so; when it sends a keyword to a deal or category listing (doorbusters), "
+            "redirected_to says where and the items are that listing's."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'jeans'."),
+            _JCPENNEY_BRAND,
+            _JCPENNEY_DEAL,
+            _bool(
+                "exact",
+                "JCPenney narrows many keywords to a category on its own (jeans -> the Jeans "
+                "category, visible in applied_filters). True searches the keyword across every "
+                "category instead.",
+            ),
+            *_JCPENNEY_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_product",
+        namespace="jcpenney",
+        method="product",
+        http="POST",
+        path="/api/v1/jcpenney/product",
+        summary=(
+            "One jcpenney.com product by id or URL, or up to 20 by product_ids in one call: "
+            "title, brand, description, features, category and breadcrumbs, product and item "
+            "type, images, average rating, review_count, question and answer counts (review "
+            "text is not available), the price block (regular, sale and clearance min / max "
+            "ranges, percent off, price type, deal label, the after-coupon price with its coupon "
+            "code, and when the price window starts and ends), channel (Omnichannel / "
+            "OnlineOnly), in-store pickup, marketplace flag, and every variant: sku, UPC, color, "
+            "size, all options, status, max per order and online_stock (high, low or out; single "
+            "product only, a level, not a count). Prices are product-level ranges: JCPenney does "
+            "not expose a price per size or color. A variants[].sku is what "
+            "store_availability() takes. An unknown id is a 404; unknown ids in a batch are "
+            "listed in not_found."
+        ),
+        params=(
+            _str(
+                "product_id",
+                "A JCPenney product id (ppr / ppm / pp + digits): a search result's id, the last "
+                "part of a product URL, e.g. 'ppr5008604049'.",
+            ),
+            _str("url", "A jcpenney.com product URL (its product id is used). Alternative to product_id."),
+            _str_list(
+                "product_ids",
+                "Up to 20 product ids in one call (still 1 credit). Batch results carry no "
+                "online stock.",
+            ),
+        ),
+        one_of=(("product_id", "url", "product_ids"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_category",
+        namespace="jcpenney",
+        method="category",
+        http="POST",
+        path="/api/v1/jcpenney/category",
+        summary=(
+            "Browse one JCPenney category by its path or URL (Dresses, Sheets, Women's Boots...), "
+            "with the same filters and sorts as search(). The path needs its id=cat... part, the "
+            "way jcpenney.com /g/ category links and a response's breadcrumbs carry it. "
+            + _JCPENNEY_GRID_FIELDS + " Also returns the category's name, id, path, URL and "
+            "breadcrumbs. A department page (dept...) lists no products by itself: it needs a "
+            "deal or another filter."
+        ),
+        params=(
+            _str(
+                "path",
+                "A JCPenney category path with its id=cat... part, e.g. "
+                "'/g/women/dresses?id=cat100210008'.",
+            ),
+            _str("url", "A jcpenney.com category URL. Filters, a sort or a page in the URL are kept."),
+            _JCPENNEY_BRAND,
+            _JCPENNEY_DEAL,
+            *_JCPENNEY_GRID,
+        ),
+        one_of=(("path", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_brand",
+        namespace="jcpenney",
+        method="brand",
+        http="POST",
+        path="/api/v1/jcpenney/brand",
+        summary=(
+            "Every JCPenney product of one brand by name (Nike, St. John's Bay, Carter's...) or "
+            "a brand page URL, with the same filters and sorts as search() (except brand). "
+            + _JCPENNEY_GRID_FIELDS + " Also returns the brand's name, facet value and URL. An "
+            "unknown brand is a 404."
+        ),
+        params=(
+            _str(
+                "brand",
+                "A brand name as JCPenney lists it in the Brand facet, e.g. 'Nike', \"St. John's "
+                "Bay\", \"Carter's\".",
+            ),
+            _str(
+                "url",
+                "A jcpenney.com brand page URL (JCPenney's curated brand page; its assortment can "
+                "differ slightly from the brand name listing).",
+            ),
+            _JCPENNEY_DEAL,
+            *_JCPENNEY_GRID,
+        ),
+        one_of=(("brand", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_deals",
+        namespace="jcpenney",
+        method="deals",
+        http="POST",
+        path="/api/v1/jcpenney/deals",
+        summary=(
+            "JCPenney deal listings across all products or one department: Clearance (default), "
+            "Sale, Black Friday deals, Big Buy, Limited Time Special, Best Value, Gotta Have It, "
+            "Closeout, Buy 1 Get 1, or any Deals & Promotions label, with the same filters and "
+            "sorts as search(). " + _JCPENNEY_GRID_FIELDS + " Seasonal labels (black_friday) "
+            "list nothing once the event ends. To track clearance prices over time, poll and "
+            "store your own: there is no price history."
+        ),
+        params=(
+            _lit(
+                "type",
+                _JCPENNEY_DEAL_TYPES,
+                "clearance (default), sale, black_friday, big_buy, limited_time_special, "
+                "best_value, gotta_have_it, closeout or bogo (every Buy 1 Get 1 offer).",
+            ),
+            _str(
+                "label",
+                "Any Deals & Promotions label verbatim from a previous response's facets "
+                "(s1_deals_and_promotions), instead of type, e.g. 'BUY 1 GET 1 50% OFF'.",
+            ),
+            _str(
+                "department",
+                "Limit the deal to one department or category id (dept... / cat..., from "
+                "breadcrumbs or a category URL), e.g. 'dept20000011'.",
+            ),
+            _JCPENNEY_BRAND,
+            *_JCPENNEY_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_stores",
+        namespace="jcpenney",
+        method="stores",
+        http="POST",
+        path="/api/v1/jcpenney/stores",
+        summary=(
+            "JCPenney stores near a US or Puerto Rico ZIP code, a city + state or a point (lat + "
+            "lng), within 25 miles by default (up to 100), paged: store_id, name, address, city, "
+            "state, ZIP, phone, lat / lng, distance in miles, weekly opening hours, timezone, "
+            "services (Curbside Pickup, salon, portrait studio, JCPenney Beauty...), curbside "
+            "and in-store pickup directions, bookable appointments (Sephora, salon) and the "
+            "store page URL."
+        ),
+        params=(
+            _str_or_int("zip", _JCPENNEY_ZIP_DOC),
+            _str("city", "City (with state), instead of zip, e.g. 'Austin'."),
+            _str("state", "2-letter state code (with city), e.g. 'TX'."),
+            _float("lat", "Latitude (with lng), instead of zip."),
+            _float("lng", "Longitude (with lat)."),
+            _int("radius", "Search radius in miles, 1-100. Defaults to 25."),
+            _int("page", "Results page, 1-based. Defaults to 1."),
+            _int("page_size", "Stores per page, 1-20. Defaults to 10."),
+        ),
+        one_of=(("zip", "city", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_store_availability",
+        namespace="jcpenney",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/jcpenney/store-availability",
+        summary=(
+            "Real unit counts for one JCPenney SKU at the 5 nearest stores to a US or Puerto "
+            "Rico ZIP code (or lat + lng): per store quantity, status (in_stock, low, "
+            "out_of_stock, not_stocked), when the count was refreshed (updated_at), and the "
+            "store's address, phone, distance and hours. Also returns how many of them have it "
+            "(stores_with_stock) and total_quantity. in_stock_only drops the stores that have "
+            "none. Take sku from product() variants[].sku."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Union[str, int]",
+                required=True,
+                doc="A JCPenney SKU id: a product's variants[].sku (or a search result's sku_id "
+                "/ colors[].sku_id), e.g. '84630160042'.",
+            ),
+            _str_or_int(
+                "zip",
+                "US or Puerto Rico ZIP code: the 5 nearest stores are checked, e.g. '90012'.",
+            ),
+            _float("lat", "Latitude (with lng), instead of zip."),
+            _float("lng", "Longitude (with lat)."),
+            _int("radius", "Search radius in miles. Defaults to 25."),
+            _bool("in_stock_only", "Drop the stores (of the 5 nearest) that have none."),
+        ),
+        one_of=(("zip", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_suggestions",
+        namespace="jcpenney",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/jcpenney/suggestions",
+        summary=(
+            "The jcpenney.com search-box suggestions for a partial query: keyword completions "
+            "with their search URL and, where JCPenney offers them, department refinements "
+            "(nike shoes women -> sneakers, running shoes...)."
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'jea'."),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="jcpenney_coupons",
+        namespace="jcpenney",
+        method="coupons",
+        http="POST",
+        path="/api/v1/jcpenney/coupons",
+        summary=(
+            "Today's public JCPenney coupons: code (null for in-store offers that need none), "
+            "channel (online, in store or both), headline and details of each offer, start and "
+            "end dates, the full disclaimer with its exclusions, and the URL of the eligible "
+            "products. Public codes only, no account offers or JCPenney Rewards balances."
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -11445,6 +11782,7 @@ NAMESPACES: tuple[str, ...] = (
     "macys",
     "saks",
     "kohls",
+    "jcpenney",
     "trustpilot",
     "realtor",
     "rightmove",

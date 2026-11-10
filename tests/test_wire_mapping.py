@@ -2584,3 +2584,107 @@ def test_kohls_credits_paths_and_wire(monkeypatch):
         k.brand(page=2)
     with pytest.raises(ScavioError):
         k.stores(radius=25)
+
+
+def test_jcpenney_credits_paths_and_wire(monkeypatch):
+    """jcpenney (0.45.0): 9 endpoints on /api/v1/jcpenney, 1 credit each.
+
+    US only (no country). store_availability maps to the hyphenated
+    /store-availability path and takes a required sku plus zip or lat + lng;
+    filters is a dict of facet id to value(s); product takes up to 20
+    product_ids; 120 s timeout floor.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "jcpenney"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "category",
+            "brand",
+            "deals",
+            "stores",
+            "store_availability",
+            "suggestions",
+            "coupons",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/jcpenney/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert not any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    j = client.jcpenney
+    j.search(
+        "jeans",
+        brand=["levi's", "lee"],
+        deal="CLEARANCE",
+        exact=True,
+        sort="price_low_to_high",
+        price_range="$20 - $24",
+        filters={"gender": "women", "rise": ["mid rise", "high rise"]},
+    )
+    j.product(product_ids=["ppr5008604049", "ppr5008212471"])
+    j.category(path="/g/women/dresses?id=cat100210008", page=2, color="black")
+    j.brand(brand="Nike", size="m")
+    j.deals(type="bogo", department="dept20000011")
+    j.stores(city="Austin", state="TX", radius=50, page_size=20)
+    j.store_availability("84630160042", zip="90012", in_stock_only=True)
+    j.suggestions("jea")
+    j.coupons()
+    base = "/api/v1/jcpenney/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "jeans",
+                "brand": ["levi's", "lee"],
+                "deal": "CLEARANCE",
+                "exact": True,
+                "sort": "price_low_to_high",
+                "price_range": "$20 - $24",
+                "filters": {"gender": "women", "rise": ["mid rise", "high rise"]},
+            },
+            120.0,
+        ),
+        (base + "product", {"product_ids": ["ppr5008604049", "ppr5008212471"]}, 120.0),
+        (
+            base + "category",
+            {"path": "/g/women/dresses?id=cat100210008", "page": 2, "color": "black"},
+            120.0,
+        ),
+        (base + "brand", {"brand": "Nike", "size": "m"}, 120.0),
+        (base + "deals", {"type": "bogo", "department": "dept20000011"}, 120.0),
+        (
+            base + "stores",
+            {"city": "Austin", "state": "TX", "radius": 50, "page_size": 20},
+            120.0,
+        ),
+        (
+            base + "store-availability",
+            {"sku": "84630160042", "zip": "90012", "in_stock_only": True},
+            120.0,
+        ),
+        (base + "suggestions", {"query": "jea"}, 120.0),
+        (base + "coupons", {}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        j.product()
+    with pytest.raises(ScavioError):
+        j.category(sort="best_sellers")
+    with pytest.raises(ScavioError):
+        j.brand(page=2)
+    with pytest.raises(ScavioError):
+        j.stores(radius=25)
+    with pytest.raises(ScavioError):
+        j.store_availability("84630160042")

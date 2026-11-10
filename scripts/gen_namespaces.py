@@ -246,6 +246,12 @@ _NS_META = {
         "Kohl's search, product, category, brand page, clearance / sale / Kohl's Cash / Sephora "
         "listings, store locator, store pickup stock, suggestions, and coupon code endpoints.",
     ),
+    "jcpenney": (
+        "Jcpenney",
+        "JCPenney search, product (batch of 20), category, brand, clearance / sale / Black Friday "
+        "/ BOGO deal listings, store locator, store unit counts, suggestions, and coupon code "
+        "endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",
