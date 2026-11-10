@@ -613,9 +613,18 @@ _JCPENNEY_GRID_FIELDS = (
     "returns total, page, total_pages, the sort applied, applied_filters and every facet (id, "
     "label and values with their value, count and a selected flag; any of them works in "
     "filters). Prices are product-level ranges: JCPenney does not expose a price per size or "
-    "color. Average rating and review count only: review text is not available. Prices in USD."
+    "color. Average rating and review count here; review text is reviews(). Prices in USD."
 )
 _JCPENNEY_ZIP_DOC = "US or Puerto Rico ZIP code to search around, e.g. '75024'."
+_JCPENNEY_REVIEW_SORTS = ("most_recent", "most_helpful", "highest_rating", "lowest_rating", "relevance")
+_JCPENNEY_PRODUCT_TARGET = (
+    _str(
+        "product_id",
+        "A JCPenney product id (ppr / ppm / pp + digits): a search result's id, the last part of "
+        "a product URL, e.g. 'ppr5008604049'.",
+    ),
+    _str("url", "A jcpenney.com product URL (its product id is used). Alternative to product_id."),
+)
 
 
 _ENDPOINTS: tuple[Endpoint, ...] = (
@@ -10406,11 +10415,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         min_timeout=120.0,
     ),
     # ============================== JCPenney =============================
-    # jcpenney.com (US incl. Puerto Rico stores, USD), 9 endpoints, 1 credit
+    # jcpenney.com (US incl. Puerto Rico stores, USD), 11 endpoints, 1 credit
     # each. product takes product_id, url or product_ids (up to 20); category
     # takes path or url; brand takes brand or url; stores takes one location
     # (zip, city + state, or lat + lng); store_availability takes a required
-    # sku plus zip or lat + lng. 120 s timeout floor.
+    # sku plus zip or lat + lng; reviews and questions take product_id or url.
+    # 120 s timeout floor (240 s for reviews and questions).
     Endpoint(
         key="jcpenney_search",
         namespace="jcpenney",
@@ -10450,7 +10460,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "One jcpenney.com product by id or URL, or up to 20 by product_ids in one call: "
             "title, brand, description, features, category and breadcrumbs, product and item "
             "type, images, average rating, review_count, question and answer counts (review "
-            "text is not available), the price block (regular, sale and clearance min / max "
+            "text and Q&A: reviews() and questions()), the price block (regular, sale and clearance min / max "
             "ranges, percent off, price type, deal label, the after-coupon price with its coupon "
             "code, and when the price window starts and ends), channel (Omnichannel / "
             "OnlineOnly), in-store pickup, marketplace flag, and every variant: sku, UPC, color, "
@@ -10665,6 +10675,82 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
         min_timeout=120.0,
+    ),
+    # reviews and questions are one slow render each (15-90 s, up to ~3 min
+    # on a retried render), still 1 credit: 240 s timeout floor.
+    Endpoint(
+        key="jcpenney_reviews",
+        namespace="jcpenney",
+        method="reviews",
+        http="POST",
+        path="/api/v1/jcpenney/reviews",
+        summary=(
+            "Real customer review text of one jcpenney.com (US) product by id or URL, up to 98 "
+            "per call (default 38), sorted most recent (default), most helpful, highest or "
+            "lowest rating, or relevance, optionally only one star rating. Returns the product's "
+            "review statistics: total_reviews (every language), displayed_reviews (the English "
+            "reviews JCPenney lists and pages through, often fewer than total_reviews), "
+            "average_rating, rating_distribution (1-5), recommended_percent, "
+            "secondary_ratings_averages (Quality, Value, Apparel...), photo_count, and "
+            "matching_reviews for the sort and filter. Each review has id, rating, title, text, "
+            "author nickname, location, submitted_at and updated_at, recommended, helpful and "
+            "unhelpful votes, verified_purchaser and incentivized badges, syndicated with "
+            "syndication_source (the brand site it came from, e.g. sharkninja.com), customer "
+            "photos and videos, secondary ratings, the brand's public response (name, "
+            "department, text, date) and the original product name. Reviewer age, gender and IP "
+            "are never returned. Slower than the other JCPenney endpoints: usually 15-90s, up "
+            "to about 3 minutes; failed calls are not charged. A product with no reviews "
+            "returns an empty list; an unknown product is a 404."
+        ),
+        params=(
+            *_JCPENNEY_PRODUCT_TARGET,
+            _lit(
+                "sort",
+                _JCPENNEY_REVIEW_SORTS,
+                "most_recent (default), most_helpful, highest_rating, lowest_rating or "
+                "relevance: the review list's own sort menu.",
+            ),
+            _int(
+                "rating",
+                "Only reviews with this star rating (1-5), e.g. 1 for the critical ones. A "
+                "rating nobody gave returns an empty list.",
+            ),
+            _int(
+                "max_reviews",
+                "Reviews to return, 8-98. Defaults to 38. JCPenney loads 8, then 30 more per "
+                "page, so 8, 38, 68 and 98 are the natural sizes; larger values take longer.",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="jcpenney_questions",
+        namespace="jcpenney",
+        method="questions",
+        http="POST",
+        path="/api/v1/jcpenney/questions",
+        summary=(
+            "Customer questions and every answer for one jcpenney.com (US) product by id or "
+            "URL, up to 50 questions per call (default 10), newest answers first (JCPenney's "
+            "order; there is no sort option). Returns total_questions and total_answers. Each "
+            "question has id, question, details, author, submitted_at, answer_count and "
+            "helpful_votes; each answer has id, text, author, author_type (brand for the "
+            "manufacturer's product experts, retailer for JCPenney staff, ai for AI-generated "
+            "answers, customer), ai_label (AI-Generated / AI-Assisted when JCPenney labels it), "
+            "is_best_answer, submitted_at and helpful / unhelpful votes. Answerer IPs are never "
+            "returned. Slower than the other JCPenney endpoints: usually 15-90s, up to about 3 "
+            "minutes; failed calls are not charged. A product with no questions returns an "
+            "empty list; an unknown product is a 404."
+        ),
+        params=(
+            *_JCPENNEY_PRODUCT_TARGET,
+            _int("max_questions", "Questions to return, 10-50 (10 per page). Defaults to 10."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
     ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one

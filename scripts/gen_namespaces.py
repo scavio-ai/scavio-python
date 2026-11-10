@@ -249,8 +249,8 @@ _NS_META = {
     "jcpenney": (
         "Jcpenney",
         "JCPenney search, product (batch of 20), category, brand, clearance / sale / Black Friday "
-        "/ BOGO deal listings, store locator, store unit counts, suggestions, and coupon code "
-        "endpoints.",
+        "/ BOGO deal listings, store locator, store unit counts, suggestions, coupon code, "
+        "review text and Q&A endpoints.",
     ),
     "heb": (
         "Heb",

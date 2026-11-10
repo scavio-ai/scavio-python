@@ -8996,7 +8996,7 @@ class _AsyncKohlsNamespace:
         return await self._client._call("kohls_coupons", {}, extra)
 
 class _AsyncJcpenneyNamespace:
-    """JCPenney search, product (batch of 20), category, brand, clearance / sale / Black Friday / BOGO deal listings, store locator, store unit counts, suggestions, and coupon code endpoints."""
+    """JCPenney search, product (batch of 20), category, brand, clearance / sale / Black Friday / BOGO deal listings, store locator, store unit counts, suggestions, coupon code, review text and Q&A endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -9016,7 +9016,7 @@ class _AsyncJcpenneyNamespace:
         filters: Optional[dict[str, Any]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search jcpenney.com (US) by keyword, filtered by brand, color, size, price range, deal label (SALE, CLEARANCE...) and any facet value (gender, store availability, rating, rise...), sorted by relevance, new arrivals, best sellers, rating or price. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. When the site autocorrects the keyword, corrected_query says so; when it sends a keyword to a deal or category listing (doorbusters), redirected_to says where and the items are that listing's.
+        """Search jcpenney.com (US) by keyword, filtered by brand, color, size, price range, deal label (SALE, CLEARANCE...) and any facet value (gender, store availability, rating, rise...), sorted by relevance, new arrivals, best sellers, rating or price. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count here; review text is reviews(). Prices in USD. When the site autocorrects the keyword, corrected_query says so; when it sends a keyword to a deal or category listing (doorbusters), redirected_to says where and the items are that listing's.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -9043,7 +9043,7 @@ class _AsyncJcpenneyNamespace:
         product_ids: Optional[list[str]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One jcpenney.com product by id or URL, or up to 20 by product_ids in one call: title, brand, description, features, category and breadcrumbs, product and item type, images, average rating, review_count, question and answer counts (review text is not available), the price block (regular, sale and clearance min / max ranges, percent off, price type, deal label, the after-coupon price with its coupon code, and when the price window starts and ends), channel (Omnichannel / OnlineOnly), in-store pickup, marketplace flag, and every variant: sku, UPC, color, size, all options, status, max per order and online_stock (high, low or out; single product only, a level, not a count). Prices are product-level ranges: JCPenney does not expose a price per size or color. A variants[].sku is what store_availability() takes. An unknown id is a 404; unknown ids in a batch are listed in not_found.
+        """One jcpenney.com product by id or URL, or up to 20 by product_ids in one call: title, brand, description, features, category and breadcrumbs, product and item type, images, average rating, review_count, question and answer counts (review text and Q&A: reviews() and questions()), the price block (regular, sale and clearance min / max ranges, percent off, price type, deal label, the after-coupon price with its coupon code, and when the price window starts and ends), channel (Omnichannel / OnlineOnly), in-store pickup, marketplace flag, and every variant: sku, UPC, color, size, all options, status, max per order and online_stock (high, low or out; single product only, a level, not a count). Prices are product-level ranges: JCPenney does not expose a price per size or color. A variants[].sku is what store_availability() takes. An unknown id is a 404; unknown ids in a batch are listed in not_found.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -9070,7 +9070,7 @@ class _AsyncJcpenneyNamespace:
         filters: Optional[dict[str, Any]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Browse one JCPenney category by its path or URL (Dresses, Sheets, Women's Boots...), with the same filters and sorts as search(). The path needs its id=cat... part, the way jcpenney.com /g/ category links and a response's breadcrumbs carry it. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Also returns the category's name, id, path, URL and breadcrumbs. A department page (dept...) lists no products by itself: it needs a deal or another filter.
+        """Browse one JCPenney category by its path or URL (Dresses, Sheets, Women's Boots...), with the same filters and sorts as search(). The path needs its id=cat... part, the way jcpenney.com /g/ category links and a response's breadcrumbs carry it. 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count here; review text is reviews(). Prices in USD. Also returns the category's name, id, path, URL and breadcrumbs. A department page (dept...) lists no products by itself: it needs a deal or another filter.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -9103,7 +9103,7 @@ class _AsyncJcpenneyNamespace:
         filters: Optional[dict[str, Any]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Every JCPenney product of one brand by name (Nike, St. John's Bay, Carter's...) or a brand page URL, with the same filters and sorts as search() (except brand). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Also returns the brand's name, facet value and URL. An unknown brand is a 404.
+        """Every JCPenney product of one brand by name (Nike, St. John's Bay, Carter's...) or a brand page URL, with the same filters and sorts as search() (except brand). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count here; review text is reviews(). Prices in USD. Also returns the brand's name, facet value and URL. An unknown brand is a 404.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -9136,7 +9136,7 @@ class _AsyncJcpenneyNamespace:
         filters: Optional[dict[str, Any]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """JCPenney deal listings across all products or one department: Clearance (default), Sale, Black Friday deals, Big Buy, Limited Time Special, Best Value, Gotta Have It, Closeout, Buy 1 Get 1, or any Deals & Promotions label, with the same filters and sorts as search(). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count only: review text is not available. Prices in USD. Seasonal labels (black_friday) list nothing once the event ends. To track clearance prices over time, poll and store your own: there is no price history.
+        """JCPenney deal listings across all products or one department: Clearance (default), Sale, Black Friday deals, Big Buy, Limited Time Special, Best Value, Gotta Have It, Closeout, Buy 1 Get 1, or any Deals & Promotions label, with the same filters and sorts as search(). 48 products per page (at most 25 pages = 1,200 items), each with id, title, brand, URL, image, sku_id, price and price_max (current), regular_price and regular_price_max, price_type (sale, clearance, original), percent_off, deal_label (BIG BUY!, CLEARANCE...), coupon_price with coupon_code (the price after today's coupon), rating, review_count, badge (Only at JCP, NEW, Few Left), availability_label (Same Day Pickup, Online Only...), colors with their SKU ids, and is_marketplace with the seller for third-party items. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value, count and a selected flag; any of them works in filters). Prices are product-level ranges: JCPenney does not expose a price per size or color. Average rating and review count here; review text is reviews(). Prices in USD. Seasonal labels (black_friday) list nothing once the event ends. To track clearance prices over time, poll and store your own: there is no price history.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -9238,6 +9238,50 @@ class _AsyncJcpenneyNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("jcpenney_coupons", {}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        sort: Optional[Literal["most_recent", "most_helpful", "highest_rating", "lowest_rating", "relevance"]] = None,
+        rating: Optional[int] = None,
+        max_reviews: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Real customer review text of one jcpenney.com (US) product by id or URL, up to 98 per call (default 38), sorted most recent (default), most helpful, highest or lowest rating, or relevance, optionally only one star rating. Returns the product's review statistics: total_reviews (every language), displayed_reviews (the English reviews JCPenney lists and pages through, often fewer than total_reviews), average_rating, rating_distribution (1-5), recommended_percent, secondary_ratings_averages (Quality, Value, Apparel...), photo_count, and matching_reviews for the sort and filter. Each review has id, rating, title, text, author nickname, location, submitted_at and updated_at, recommended, helpful and unhelpful votes, verified_purchaser and incentivized badges, syndicated with syndication_source (the brand site it came from, e.g. sharkninja.com), customer photos and videos, secondary ratings, the brand's public response (name, department, text, date) and the original product name. Reviewer age, gender and IP are never returned. Slower than the other JCPenney endpoints: usually 15-90s, up to about 3 minutes; failed calls are not charged. A product with no reviews returns an empty list; an unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A JCPenney product id (ppr / ppm / pp + digits): a search result's id, the last part of a product URL, e.g. 'ppr5008604049'.
+            url: A jcpenney.com product URL (its product id is used). Alternative to product_id.
+            sort: most_recent (default), most_helpful, highest_rating, lowest_rating or relevance: the review list's own sort menu.
+            rating: Only reviews with this star rating (1-5), e.g. 1 for the critical ones. A rating nobody gave returns an empty list.
+            max_reviews: Reviews to return, 8-98. Defaults to 38. JCPenney loads 8, then 30 more per page, so 8, 38, 68 and 98 are the natural sizes; larger values take longer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("jcpenney_reviews", {"product_id": product_id, "url": url, "sort": sort, "rating": rating, "max_reviews": max_reviews}, extra)
+
+    async def questions(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        max_questions: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions and every answer for one jcpenney.com (US) product by id or URL, up to 50 questions per call (default 10), newest answers first (JCPenney's order; there is no sort option). Returns total_questions and total_answers. Each question has id, question, details, author, submitted_at, answer_count and helpful_votes; each answer has id, text, author, author_type (brand for the manufacturer's product experts, retailer for JCPenney staff, ai for AI-generated answers, customer), ai_label (AI-Generated / AI-Assisted when JCPenney labels it), is_best_answer, submitted_at and helpful / unhelpful votes. Answerer IPs are never returned. Slower than the other JCPenney endpoints: usually 15-90s, up to about 3 minutes; failed calls are not charged. A product with no questions returns an empty list; an unknown product is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A JCPenney product id (ppr / ppm / pp + digits): a search result's id, the last part of a product URL, e.g. 'ppr5008604049'.
+            url: A jcpenney.com product URL (its product id is used). Alternative to product_id.
+            max_questions: Questions to return, 10-50 (10 per page). Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("jcpenney_questions", {"product_id": product_id, "url": url, "max_questions": max_questions}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

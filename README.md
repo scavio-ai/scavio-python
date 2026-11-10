@@ -30,7 +30,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
-| JCPenney Clearance, Sale Prices, Coupon Codes and Store Unit Counts (9 endpoints) | Yes | No | No | No |
+| JCPenney Clearance, Sale Prices, Coupon Codes, Store Unit Counts, Reviews and Q&A (11 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1814,15 +1814,16 @@ clearance prices, poll and store your own.
 
 ### 35. Department Store -- JCPenney
 
-jcpenney.com (US incl. Puerto Rico stores, USD), namespace `jcpenney`, 9
+jcpenney.com (US incl. Puerto Rico stores, USD), namespace `jcpenney`, 11
 endpoints, 1 credit each: `search`, `product`, `category`, `brand`, `deals`,
-`stores`, `store_availability`, `suggestions`, `coupons`. No `country`: the
-US site only. `product` takes `product_id`, a product `url` or up to 20
+`stores`, `store_availability`, `suggestions`, `coupons`, `reviews`,
+`questions`. No `country`: the US site only. `product` takes `product_id`, a product `url` or up to 20
 `product_ids`; `category` takes a `/g/` `path` or `url` that carries its
 `id=cat...`; `brand` takes a brand name or `url`; `stores` takes `zip`,
 `city` + `state`, or `lat` + `lng`; `store_availability` takes a `sku` plus
-`zip` (or `lat` + `lng`). Every method raises the request timeout to at
-least 120s.
+`zip` (or `lat` + `lng`); `reviews` and `questions` take `product_id` or a
+product `url`. Every method raises the request timeout to at least 120s;
+`reviews` and `questions` raise it to 240s.
 
 ```python
 from scavio import ScavioClient
@@ -1862,6 +1863,22 @@ for st in j.stores(zip="75024")["data"]["stores"][:3]:
     print(st["store_id"], st["name"], st["city"], st["services"])
 for c in j.coupons()["data"]["coupons"]:
     print(c["code"], c["channel"], c["headline"], c["ends_at"])
+
+# --- Review text (slow: usually 15-90s, up to about 3 minutes).
+rv = j.reviews(product_id="ppr5008604049", sort="most_helpful")["data"]
+print(rv["total_reviews"], rv["displayed_reviews"], rv["matching_reviews"],
+      rv["average_rating"], rv["rating_distribution"], rv["recommended_percent"])
+for r in rv["reviews"][:3]:
+    print(r["rating"], r["title"], r["author"], r["submitted_at"],
+          r["helpful_votes"], r["verified_purchaser"], r["incentivized"], r["syndicated"])
+
+# --- Questions and every answer, with who answered.
+qa = j.questions(product_id="ppr5008212471")["data"]
+print(qa["total_questions"], qa["total_answers"])
+for q in qa["questions"][:3]:
+    print(q["question"], q["answer_count"])
+    for a in q["answers"]:
+        print("  ", a["author_type"], a["ai_label"], a["text"][:80])
 ```
 
 `search`, `category`, `brand` and `deals` share one grid: 48 products per
@@ -1880,10 +1897,21 @@ sale and clearance min / max, `percent_off`, `price_type`) plus the
 after-coupon price and its code: JCPenney does not expose a price per size
 or color. Variants carry an online stock level (high / low / out), not a
 count. `store_availability` takes a product's `variants[].sku` and returns
-real unit counts at the 5 nearest stores. Rating and review count only:
-review text is not available. No price history, international sites,
-account offers or JCPenney Rewards balances, or checkout: to track clearance
-prices, poll and store your own.
+real unit counts at the 5 nearest stores. `reviews` returns up to 98 review
+texts (default 38), sorted `most_recent` (default), `most_helpful`,
+`highest_rating`, `lowest_rating` or `relevance`, optionally one star
+`rating`; `total_reviews` counts every language, `displayed_reviews` the
+English reviews JCPenney lists, `matching_reviews` those under the sort and
+filter. Each review carries `verified_purchaser`, `incentivized`,
+`syndicated` with `syndication_source`, photos, videos, secondary ratings
+(Quality, Value...) and the brand's response. `questions` returns up to 50
+questions (default 10, no sort option) with every answer's `author_type`
+(`brand`, `retailer` for JCPenney staff, `ai`, `customer`) and `ai_label`
+(AI-Generated / AI-Assisted). Both are slower than the other endpoints
+(usually 15-90s, up to about 3 minutes) and failed calls are not charged.
+Reviewer age, gender and IP addresses are never returned. No price history,
+international sites, account offers or JCPenney Rewards balances, or
+checkout: to track clearance prices, poll and store your own.
 
 ## Error Handling
 
@@ -2022,7 +2050,7 @@ Scavio works with popular AI/LLM frameworks:
 | Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
 | Saks Fifth Avenue (`saks`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `designers` | 2 each |
 | Kohl's (`kohls`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | `stores` 1, the rest 2 each |
-| JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | 1 each |
+| JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons`, `reviews`, `questions` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2032,6 +2060,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.46.0
+
+- **`jcpenney.reviews` and `jcpenney.questions`** (sync and async), 1 credit
+  each, taking `product_id` or `url`. `reviews` returns review text (up to
+  98, `sort`, one-star `rating` filter, `max_reviews`) with `total_reviews`,
+  `displayed_reviews` and `matching_reviews`; `questions` returns questions
+  and every answer with `author_type` and `ai_label` (up to 50,
+  `max_questions`). Both raise the request timeout to at least 240s: they
+  usually take 15-90s, up to about 3 minutes.
 
 ### Changed in 0.45.0
 

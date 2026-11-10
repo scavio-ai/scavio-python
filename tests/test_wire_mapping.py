@@ -2587,12 +2587,13 @@ def test_kohls_credits_paths_and_wire(monkeypatch):
 
 
 def test_jcpenney_credits_paths_and_wire(monkeypatch):
-    """jcpenney (0.45.0): 9 endpoints on /api/v1/jcpenney, 1 credit each.
+    """jcpenney (0.45.0; reviews, questions 0.46.0): 11 endpoints, 1 credit each.
 
     US only (no country). store_availability maps to the hyphenated
     /store-availability path and takes a required sku plus zip or lat + lng;
     filters is a dict of facet id to value(s); product takes up to 20
-    product_ids; 120 s timeout floor.
+    product_ids; reviews and questions take product_id or url; 120 s timeout
+    floor, 240 s for the slow reviews and questions.
     """
     eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "jcpenney"}
     assert sorted(eps) == sorted(
@@ -2606,6 +2607,8 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
             "store_availability",
             "suggestions",
             "coupons",
+            "reviews",
+            "questions",
         ]
     )
     for m, ep in eps.items():
@@ -2613,7 +2616,8 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
         assert ep.credits_note is None, ep.key
         assert ep.http == "POST", ep.key
         assert ep.path == "/api/v1/jcpenney/" + m.replace("_", "-"), ep.key
-        assert ep.min_timeout == 120.0, ep.key
+        slow = m in ("reviews", "questions")
+        assert ep.min_timeout == (240.0 if slow else 120.0), ep.key
         assert not any(p.name == "country" for p in ep.params), ep.key
 
     seen: list[tuple[str, dict, float]] = []
@@ -2642,6 +2646,8 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
     j.store_availability("84630160042", zip="90012", in_stock_only=True)
     j.suggestions("jea")
     j.coupons()
+    j.reviews(product_id="ppr5008604049", sort="most_helpful", rating=1, max_reviews=68)
+    j.questions(url="https://www.jcpenney.com/p/x/ppr5008212471", max_questions=20)
     base = "/api/v1/jcpenney/"
     assert seen == [
         (
@@ -2677,6 +2683,16 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
         ),
         (base + "suggestions", {"query": "jea"}, 120.0),
         (base + "coupons", {}, 120.0),
+        (
+            base + "reviews",
+            {"product_id": "ppr5008604049", "sort": "most_helpful", "rating": 1, "max_reviews": 68},
+            240.0,
+        ),
+        (
+            base + "questions",
+            {"url": "https://www.jcpenney.com/p/x/ppr5008212471", "max_questions": 20},
+            240.0,
+        ),
     ]
     with pytest.raises(ScavioError):
         j.product()
@@ -2688,3 +2704,7 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
         j.stores(radius=25)
     with pytest.raises(ScavioError):
         j.store_availability("84630160042")
+    with pytest.raises(ScavioError):
+        j.reviews(sort="most_recent")
+    with pytest.raises(ScavioError):
+        j.questions(max_questions=10)
