@@ -490,6 +490,58 @@ _SAKS_LOCATION = (
 )
 
 
+# Kohl's params shared across endpoints.
+_KOHLS_SORTS = (
+    "featured",
+    "new_arrivals",
+    "best_sellers",
+    "price_low_to_high",
+    "price_high_to_low",
+    "highest_rated",
+    "percent_off",
+)
+_KOHLS_BRAND = _str(
+    "brand",
+    "Only this brand, as the Brand facet lists it (\"Levi's\", \"Hamilton Beach\", "
+    "\"BLACK+DECKER\").",
+)
+_KOHLS_GRID = (
+    _int("page", "Results page, 1-based (120 products per page). Defaults to 1."),
+    _lit(
+        "sort",
+        _KOHLS_SORTS,
+        "featured (default), new_arrivals, best_sellers, price_low_to_high, price_high_to_low, "
+        "highest_rated or percent_off.",
+    ),
+    _str("color", "Only this color, as the Color facet lists it (Black, Blue, Beig/khaki...)."),
+    _str("size", "Only this size, as the Size facet lists it (M, 32X30, 10...)."),
+    _bool("on_sale", "Only items on sale."),
+    _bool("clearance", "Only clearance items."),
+    _str_or_list(
+        "filters",
+        "Any facet value id from a previous response's facets[].values[].value, e.g. "
+        "'Gender:Womens', 'Price:%2425%20to%20%2450' (price buckets), 'TopRated:4', "
+        "'InStoreOnline:Pick%20Up%20in%20Store'. A list combines facets (AND). Unencoded values "
+        "work too ('Price:$25 to $50').",
+    ),
+)
+_KOHLS_GRID_FIELDS = (
+    "120 products per page, each with id, title, URL, image, price (price_max for a range), "
+    "regular_price, sale_price, price_label (sale, clearance, clearance+regular), on_sale, "
+    "is_clearance, percent_off, price_suppressed with price_note (Kohl's shows some prices only "
+    "in the cart), with_code_price (the price after a public offer code) with "
+    "with_code_offer_codes, promotions (BOGO...), rating, review_count, badges (best_seller, "
+    "top_rated...), colors, is_sephora, coupon_eligible, available_online / available_pickup / "
+    "available_ship_to_store, and is_sponsored. Sponsored placements (up to about 8) stay in "
+    "the list, flagged is_sponsored and counted in sponsored_count. Also returns total, page, "
+    "total_pages, the sort applied, applied_filters and every facet (id, label and values with "
+    "their value id, count and a selected flag; any value id works in filters; price is a "
+    "bucket such as 'Price:$25 to $50', there is no free min / max). Average rating and review "
+    "count only: review text is not available. Prices in USD."
+)
+_KOHLS_ZIP_DOC = "US ZIP code to search around, e.g. '60601'."
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -10039,6 +10091,244 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=120.0,
     ),
+    # =============================== Kohl's ==============================
+    # kohls.com (US only, USD), 9 endpoints: stores 1 credit, the rest 2.
+    # product takes product_id or url; category takes path or url; brand takes
+    # brand or url; stores takes one location (zip, city + state, or lat +
+    # lng); store_availability takes a required sku and zip. 120 s timeout
+    # floor.
+    Endpoint(
+        key="kohls_search",
+        namespace="kohls",
+        method="search",
+        http="POST",
+        path="/api/v1/kohls/search",
+        summary=(
+            "Search kohls.com (US) by keyword, filtered by brand, color, size, on sale, "
+            "clearance and any facet value (price buckets, gender, rating, store pickup...), "
+            "sorted by featured, new arrivals, best sellers, price, highest rated or percent "
+            "off. " + _KOHLS_GRID_FIELDS + " When the site autocorrects the keyword, "
+            "corrected_query says so."
+        ),
+        params=(_req("query", "Search keywords, e.g. 'jeans'."), _KOHLS_BRAND, *_KOHLS_GRID),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_product",
+        namespace="kohls",
+        method="product",
+        http="POST",
+        path="/api/v1/kohls/product",
+        summary=(
+            "One kohls.com product by id or URL: title, brand, status, dept (what "
+            "store_availability() can take), breadcrumbs, Sephora at Kohl's flag, average "
+            "rating, review_count and recommended_percent (review text is not available), "
+            "is_new / best_seller / top_rated, badges, description, details, ingredients "
+            "(beauty), images, videos, return policy, the price block (regular, sale, "
+            "sale_status, percent_off, lowest_applicable_price, price_suppressed with price_note "
+            "for cart-only prices, with_code_price with its savings and offer codes), kohls_cash "
+            "(earn and redeem windows, amount earned) when the product has it, the public offers "
+            "that apply (code, description, terms, start and end dates), pickup / ship-to-store "
+            "eligibility, online_units, and every variant: sku, UPC, color, size, availability, "
+            "online_units, max_per_order, price, sale price, with-code price, Kohl's Cash earned "
+            "and pickup eligibility. Add store_id (from stores()) for that store's availability "
+            "and in-store price on each variant. A variants[].sku is what store_availability() "
+            "takes. An unknown id is a 404 (it can take about 20 seconds)."
+        ),
+        params=(
+            _str_or_int(
+                "product_id",
+                "Kohl's product id: a search result's id, the number after prd- in a product "
+                "URL, e.g. '6251213'.",
+            ),
+            _str("url", "A kohls.com product URL (its prd-<id> is used). Alternative to product_id."),
+            _str_or_int(
+                "store_id",
+                "A Kohl's store number (stores() stores[].store_id), e.g. '725': adds that "
+                "store's availability and in-store price to every variant.",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_category",
+        namespace="kohls",
+        method="category",
+        http="POST",
+        path="/api/v1/kohls/category",
+        summary=(
+            "Browse one Kohl's catalog listing by its path or URL (Small Appliances, Women's "
+            "Clothing, Men's Shoes...), with the same filters and sorts as search(). The path "
+            "must carry its CN=... filter, the way kohls.com category links and a product's "
+            "breadcrumbs[].url do. " + _KOHLS_GRID_FIELDS + " Also returns the category's name, "
+            "breadcrumbs, path and URL."
+        ),
+        params=(
+            _str(
+                "path",
+                "A Kohl's catalog path with its CN=... part, e.g. "
+                "'/catalog/small-appliances-kitchen-dining.jsp?CN=Category:Small%20Appliances"
+                "+Department:Kitchen%20%26%20Dining'.",
+            ),
+            _str(
+                "url",
+                "A kohls.com catalog URL. Its CN facets define the listing; a sort or page in "
+                "the URL is kept.",
+            ),
+            _KOHLS_BRAND,
+            *_KOHLS_GRID,
+        ),
+        one_of=(("path", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_brand",
+        namespace="kohls",
+        method="brand",
+        http="POST",
+        path="/api/v1/kohls/brand",
+        summary=(
+            "Browse one brand at Kohl's by name or URL (Nike, Hamilton Beach, Levi's...), with "
+            "the same filters and sorts as search() (except brand). " + _KOHLS_GRID_FIELDS
+            + " Also returns the brand's name, facet value and URL. An unknown brand is a 404."
+        ),
+        params=(
+            _str(
+                "brand",
+                "A brand name as Kohl's lists it in the Brand facet, e.g. 'Hamilton Beach', "
+                "'Nike', \"Levi's\".",
+            ),
+            _str("url", "A kohls.com brand page URL (its CN carries Brand:...)."),
+            *_KOHLS_GRID,
+        ),
+        one_of=(("brand", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_deals",
+        namespace="kohls",
+        method="deals",
+        http="POST",
+        path="/api/v1/kohls/deals",
+        summary=(
+            "Kohl's deal listings: Clearance (default), Sale, items that earn Kohl's Cash right "
+            "now, or Sephora at Kohl's, with the same filters and sorts as search(). "
+            + _KOHLS_GRID_FIELDS + " To track clearance prices over time, poll and store your "
+            "own: there is no price history."
+        ),
+        params=(
+            _lit(
+                "type",
+                ("clearance", "sale", "kohls_cash", "sephora"),
+                "clearance (default), sale, kohls_cash (items that earn Kohl's Cash now) or "
+                "sephora (Sephora at Kohl's).",
+            ),
+            _KOHLS_BRAND,
+            *_KOHLS_GRID,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_stores",
+        namespace="kohls",
+        method="stores",
+        http="POST",
+        path="/api/v1/kohls/stores",
+        summary=(
+            "Kohl's stores near a US ZIP code, a city + state or a point (lat + lng), within 25 "
+            "miles by default (up to 100): store_id (what product() store_id takes), name, "
+            "address, city, state, ZIP, phone, lat / lng, distance in miles, weekly opening "
+            "hours with the UTC offset, store badges (Sephora, Fine Jewelry, Lands' End...), "
+            "services (In-Store Pickup, Amazon Returns...) and the store page URL."
+        ),
+        params=(
+            _str_or_int("zip", _KOHLS_ZIP_DOC),
+            _str("city", "City (with state), instead of zip, e.g. 'Austin'."),
+            _str("state", "2-letter state code (with city), e.g. 'TX'."),
+            _float("lat", "Latitude (with lng), instead of zip."),
+            _float("lng", "Longitude (with lat)."),
+            _int("radius", "Search radius in miles, 1-100. Defaults to 25."),
+        ),
+        one_of=(("zip", "city", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_store_availability",
+        namespace="kohls",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/kohls/store-availability",
+        summary=(
+            "Pickup stock for one Kohl's SKU at every store within about 50 miles of a US ZIP "
+            "code, with unit counts: per store pickup_units, stock_level (In Stock, Low Stock, "
+            "Out of Stock), in_stock, ship_to_store_units with the ship-to-store pickup window, "
+            "pickup and ship-to-store eligibility, clearance and Sephora flags, and the store's "
+            "address, phone, distance and hours for the week. Also returns how many stores have "
+            "it (in_stock_count) and total_pickup_units. Take sku (variants[].sku) and dept from "
+            "product()."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Union[str, int]",
+                required=True,
+                doc="A Kohl's SKU code: a product's variants[].sku, e.g. '73519108'.",
+            ),
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc="US ZIP code: stores within about 50 miles are listed, e.g. '10001'.",
+            ),
+            _str_or_int("dept", "The product's department code (product() dept, e.g. '063')."),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_suggestions",
+        namespace="kohls",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/kohls/suggestions",
+        summary=(
+            "The kohls.com search-box suggestions for a partial query: keyword completions "
+            "(type terms, default), or matching products with id, title, URL and image (type "
+            "products)."
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'coff'."),
+            _lit(
+                "type",
+                ("terms", "products"),
+                "terms (default): keyword completions; products: matching products.",
+            ),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kohls_coupons",
+        namespace="kohls",
+        method="coupons",
+        http="POST",
+        path="/api/v1/kohls/coupons",
+        summary=(
+            "Today's public Kohl's coupon codes: code, description (the offer, minimum purchase "
+            "and exclusions as stated), end date, whether it needs a Kohl's Card "
+            "(requires_kohls_card), the terms page URL and the URL of the eligible products. "
+            "Public codes only, no account offers or Kohl's Rewards balances."
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -11154,6 +11444,7 @@ NAMESPACES: tuple[str, ...] = (
     "vinted",
     "macys",
     "saks",
+    "kohls",
     "trustpilot",
     "realtor",
     "rightmove",

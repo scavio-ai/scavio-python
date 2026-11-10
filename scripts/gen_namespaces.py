@@ -241,6 +241,11 @@ _NS_META = {
         "listings, store locator, store pickup availability, suggestions, and designer index "
         "endpoints.",
     ),
+    "kohls": (
+        "Kohls",
+        "Kohl's search, product, category, brand page, clearance / sale / Kohl's Cash / Sephora "
+        "listings, store locator, store pickup stock, suggestions, and coupon code endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

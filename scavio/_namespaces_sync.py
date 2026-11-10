@@ -66,6 +66,7 @@ __all__ = [
     "_VintedNamespace",
     "_MacysNamespace",
     "_SaksNamespace",
+    "_KohlsNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -8759,6 +8760,239 @@ class _SaksNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("saks_designers", {"letter": letter}, extra)
+
+class _KohlsNamespace:
+    """Kohl's search, product, category, brand page, clearance / sale / Kohl's Cash / Sephora listings, store locator, store pickup stock, suggestions, and coupon code endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "new_arrivals", "best_sellers", "price_low_to_high", "price_high_to_low", "highest_rated", "percent_off"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search kohls.com (US) by keyword, filtered by brand, color, size, on sale, clearance and any facet value (price buckets, gender, rating, store pickup...), sorted by featured, new arrivals, best sellers, price, highest rated or percent off. 120 products per page, each with id, title, URL, image, price (price_max for a range), regular_price, sale_price, price_label (sale, clearance, clearance+regular), on_sale, is_clearance, percent_off, price_suppressed with price_note (Kohl's shows some prices only in the cart), with_code_price (the price after a public offer code) with with_code_offer_codes, promotions (BOGO...), rating, review_count, badges (best_seller, top_rated...), colors, is_sephora, coupon_eligible, available_online / available_pickup / available_ship_to_store, and is_sponsored. Sponsored placements (up to about 8) stay in the list, flagged is_sponsored and counted in sponsored_count. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value id, count and a selected flag; any value id works in filters; price is a bucket such as 'Price:$25 to $50', there is no free min / max). Average rating and review count only: review text is not available. Prices in USD. When the site autocorrects the keyword, corrected_query says so.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'jeans'.
+            brand: Only this brand, as the Brand facet lists it ("Levi's", "Hamilton Beach", "BLACK+DECKER").
+            page: Results page, 1-based (120 products per page). Defaults to 1.
+            sort: featured (default), new_arrivals, best_sellers, price_low_to_high, price_high_to_low, highest_rated or percent_off.
+            color: Only this color, as the Color facet lists it (Black, Blue, Beig/khaki...).
+            size: Only this size, as the Size facet lists it (M, 32X30, 10...).
+            on_sale: Only items on sale.
+            clearance: Only clearance items.
+            filters: Any facet value id from a previous response's facets[].values[].value, e.g. 'Gender:Womens', 'Price:%2425%20to%20%2450' (price buckets), 'TopRated:4', 'InStoreOnline:Pick%20Up%20in%20Store'. A list combines facets (AND). Unencoded values work too ('Price:$25 to $50').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_search", {"query": query, "brand": brand, "page": page, "sort": sort, "color": color, "size": size, "on_sale": on_sale, "clearance": clearance, "filters": filters}, extra)
+
+    def product(
+        self,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One kohls.com product by id or URL: title, brand, status, dept (what store_availability() can take), breadcrumbs, Sephora at Kohl's flag, average rating, review_count and recommended_percent (review text is not available), is_new / best_seller / top_rated, badges, description, details, ingredients (beauty), images, videos, return policy, the price block (regular, sale, sale_status, percent_off, lowest_applicable_price, price_suppressed with price_note for cart-only prices, with_code_price with its savings and offer codes), kohls_cash (earn and redeem windows, amount earned) when the product has it, the public offers that apply (code, description, terms, start and end dates), pickup / ship-to-store eligibility, online_units, and every variant: sku, UPC, color, size, availability, online_units, max_per_order, price, sale price, with-code price, Kohl's Cash earned and pickup eligibility. Add store_id (from stores()) for that store's availability and in-store price on each variant. A variants[].sku is what store_availability() takes. An unknown id is a 404 (it can take about 20 seconds).
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Kohl's product id: a search result's id, the number after prd- in a product URL, e.g. '6251213'.
+            url: A kohls.com product URL (its prd-<id> is used). Alternative to product_id.
+            store_id: A Kohl's store number (stores() stores[].store_id), e.g. '725': adds that store's availability and in-store price to every variant.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_product", {"product_id": product_id, "url": url, "store_id": store_id}, extra)
+
+    def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "new_arrivals", "best_sellers", "price_low_to_high", "price_high_to_low", "highest_rated", "percent_off"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one Kohl's catalog listing by its path or URL (Small Appliances, Women's Clothing, Men's Shoes...), with the same filters and sorts as search(). The path must carry its CN=... filter, the way kohls.com category links and a product's breadcrumbs[].url do. 120 products per page, each with id, title, URL, image, price (price_max for a range), regular_price, sale_price, price_label (sale, clearance, clearance+regular), on_sale, is_clearance, percent_off, price_suppressed with price_note (Kohl's shows some prices only in the cart), with_code_price (the price after a public offer code) with with_code_offer_codes, promotions (BOGO...), rating, review_count, badges (best_seller, top_rated...), colors, is_sephora, coupon_eligible, available_online / available_pickup / available_ship_to_store, and is_sponsored. Sponsored placements (up to about 8) stay in the list, flagged is_sponsored and counted in sponsored_count. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value id, count and a selected flag; any value id works in filters; price is a bucket such as 'Price:$25 to $50', there is no free min / max). Average rating and review count only: review text is not available. Prices in USD. Also returns the category's name, breadcrumbs, path and URL.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A Kohl's catalog path with its CN=... part, e.g. '/catalog/small-appliances-kitchen-dining.jsp?CN=Category:Small%20Appliances+Department:Kitchen%20%26%20Dining'.
+            url: A kohls.com catalog URL. Its CN facets define the listing; a sort or page in the URL is kept.
+            brand: Only this brand, as the Brand facet lists it ("Levi's", "Hamilton Beach", "BLACK+DECKER").
+            page: Results page, 1-based (120 products per page). Defaults to 1.
+            sort: featured (default), new_arrivals, best_sellers, price_low_to_high, price_high_to_low, highest_rated or percent_off.
+            color: Only this color, as the Color facet lists it (Black, Blue, Beig/khaki...).
+            size: Only this size, as the Size facet lists it (M, 32X30, 10...).
+            on_sale: Only items on sale.
+            clearance: Only clearance items.
+            filters: Any facet value id from a previous response's facets[].values[].value, e.g. 'Gender:Womens', 'Price:%2425%20to%20%2450' (price buckets), 'TopRated:4', 'InStoreOnline:Pick%20Up%20in%20Store'. A list combines facets (AND). Unencoded values work too ('Price:$25 to $50').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_category", {"path": path, "url": url, "brand": brand, "page": page, "sort": sort, "color": color, "size": size, "on_sale": on_sale, "clearance": clearance, "filters": filters}, extra)
+
+    def brand(
+        self,
+        *,
+        brand: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "new_arrivals", "best_sellers", "price_low_to_high", "price_high_to_low", "highest_rated", "percent_off"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one brand at Kohl's by name or URL (Nike, Hamilton Beach, Levi's...), with the same filters and sorts as search() (except brand). 120 products per page, each with id, title, URL, image, price (price_max for a range), regular_price, sale_price, price_label (sale, clearance, clearance+regular), on_sale, is_clearance, percent_off, price_suppressed with price_note (Kohl's shows some prices only in the cart), with_code_price (the price after a public offer code) with with_code_offer_codes, promotions (BOGO...), rating, review_count, badges (best_seller, top_rated...), colors, is_sephora, coupon_eligible, available_online / available_pickup / available_ship_to_store, and is_sponsored. Sponsored placements (up to about 8) stay in the list, flagged is_sponsored and counted in sponsored_count. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value id, count and a selected flag; any value id works in filters; price is a bucket such as 'Price:$25 to $50', there is no free min / max). Average rating and review count only: review text is not available. Prices in USD. Also returns the brand's name, facet value and URL. An unknown brand is a 404.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A brand name as Kohl's lists it in the Brand facet, e.g. 'Hamilton Beach', 'Nike', "Levi's".
+            url: A kohls.com brand page URL (its CN carries Brand:...).
+            page: Results page, 1-based (120 products per page). Defaults to 1.
+            sort: featured (default), new_arrivals, best_sellers, price_low_to_high, price_high_to_low, highest_rated or percent_off.
+            color: Only this color, as the Color facet lists it (Black, Blue, Beig/khaki...).
+            size: Only this size, as the Size facet lists it (M, 32X30, 10...).
+            on_sale: Only items on sale.
+            clearance: Only clearance items.
+            filters: Any facet value id from a previous response's facets[].values[].value, e.g. 'Gender:Womens', 'Price:%2425%20to%20%2450' (price buckets), 'TopRated:4', 'InStoreOnline:Pick%20Up%20in%20Store'. A list combines facets (AND). Unencoded values work too ('Price:$25 to $50').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_brand", {"brand": brand, "url": url, "page": page, "sort": sort, "color": color, "size": size, "on_sale": on_sale, "clearance": clearance, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["clearance", "sale", "kohls_cash", "sephora"]] = None,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["featured", "new_arrivals", "best_sellers", "price_low_to_high", "price_high_to_low", "highest_rated", "percent_off"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Kohl's deal listings: Clearance (default), Sale, items that earn Kohl's Cash right now, or Sephora at Kohl's, with the same filters and sorts as search(). 120 products per page, each with id, title, URL, image, price (price_max for a range), regular_price, sale_price, price_label (sale, clearance, clearance+regular), on_sale, is_clearance, percent_off, price_suppressed with price_note (Kohl's shows some prices only in the cart), with_code_price (the price after a public offer code) with with_code_offer_codes, promotions (BOGO...), rating, review_count, badges (best_seller, top_rated...), colors, is_sephora, coupon_eligible, available_online / available_pickup / available_ship_to_store, and is_sponsored. Sponsored placements (up to about 8) stay in the list, flagged is_sponsored and counted in sponsored_count. Also returns total, page, total_pages, the sort applied, applied_filters and every facet (id, label and values with their value id, count and a selected flag; any value id works in filters; price is a bucket such as 'Price:$25 to $50', there is no free min / max). Average rating and review count only: review text is not available. Prices in USD. To track clearance prices over time, poll and store your own: there is no price history.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            type: clearance (default), sale, kohls_cash (items that earn Kohl's Cash now) or sephora (Sephora at Kohl's).
+            brand: Only this brand, as the Brand facet lists it ("Levi's", "Hamilton Beach", "BLACK+DECKER").
+            page: Results page, 1-based (120 products per page). Defaults to 1.
+            sort: featured (default), new_arrivals, best_sellers, price_low_to_high, price_high_to_low, highest_rated or percent_off.
+            color: Only this color, as the Color facet lists it (Black, Blue, Beig/khaki...).
+            size: Only this size, as the Size facet lists it (M, 32X30, 10...).
+            on_sale: Only items on sale.
+            clearance: Only clearance items.
+            filters: Any facet value id from a previous response's facets[].values[].value, e.g. 'Gender:Womens', 'Price:%2425%20to%20%2450' (price buckets), 'TopRated:4', 'InStoreOnline:Pick%20Up%20in%20Store'. A list combines facets (AND). Unencoded values work too ('Price:$25 to $50').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_deals", {"type": type, "brand": brand, "page": page, "sort": sort, "color": color, "size": size, "on_sale": on_sale, "clearance": clearance, "filters": filters}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Kohl's stores near a US ZIP code, a city + state or a point (lat + lng), within 25 miles by default (up to 100): store_id (what product() store_id takes), name, address, city, state, ZIP, phone, lat / lng, distance in miles, weekly opening hours with the UTC offset, store badges (Sephora, Fine Jewelry, Lands' End...), services (In-Store Pickup, Amazon Returns...) and the store page URL.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '60601'.
+            city: City (with state), instead of zip, e.g. 'Austin'.
+            state: 2-letter state code (with city), e.g. 'TX'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles, 1-100. Defaults to 25.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_stores", {"zip": zip, "city": city, "state": state, "lat": lat, "lng": lng, "radius": radius}, extra)
+
+    def store_availability(
+        self,
+        sku: Union[str, int],
+        zip: Union[str, int],
+        *,
+        dept: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Pickup stock for one Kohl's SKU at every store within about 50 miles of a US ZIP code, with unit counts: per store pickup_units, stock_level (In Stock, Low Stock, Out of Stock), in_stock, ship_to_store_units with the ship-to-store pickup window, pickup and ship-to-store eligibility, clearance and Sephora flags, and the store's address, phone, distance and hours for the week. Also returns how many stores have it (in_stock_count) and total_pickup_units. Take sku (variants[].sku) and dept from product().
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A Kohl's SKU code: a product's variants[].sku, e.g. '73519108'.
+            zip: US ZIP code: stores within about 50 miles are listed, e.g. '10001'.
+            dept: The product's department code (product() dept, e.g. '063').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_store_availability", {"sku": sku, "zip": zip, "dept": dept}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        type: Optional[Literal["terms", "products"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The kohls.com search-box suggestions for a partial query: keyword completions (type terms, default), or matching products with id, title, URL and image (type products).
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'coff'.
+            type: terms (default): keyword completions; products: matching products.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_suggestions", {"query": query, "type": type}, extra)
+
+    def coupons(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Today's public Kohl's coupon codes: code, description (the offer, minimum purchase and exclusions as stated), end date, whether it needs a Kohl's Card (requires_kohls_card), the terms page URL and the URL of the eligible products. Public codes only, no account offers or Kohl's Rewards balances.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("kohls_coupons", {}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

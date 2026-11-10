@@ -36,6 +36,7 @@ from ._namespaces_async import (
     _AsyncIherbNamespace,
     _AsyncIndeedNamespace,
     _AsyncInstagramNamespace,
+    _AsyncKohlsNamespace,
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
@@ -186,6 +187,7 @@ class AsyncScavioClient:
         self.vinted = _AsyncVintedNamespace(self)
         self.macys = _AsyncMacysNamespace(self)
         self.saks = _AsyncSaksNamespace(self)
+        self.kohls = _AsyncKohlsNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

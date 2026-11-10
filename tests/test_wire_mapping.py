@@ -2486,3 +2486,101 @@ def test_saks_credits_paths_and_wire(monkeypatch):
         s.stores(radius=25)
     with pytest.raises(ScavioError):
         s.store_availability("10781654")
+
+
+def test_kohls_credits_paths_and_wire(monkeypatch):
+    """kohls (0.44.0): 9 endpoints on /api/v1/kohls; stores 1 credit, the rest 2.
+
+    US only (no country). store_availability maps to the hyphenated
+    /store-availability path and takes a required sku and zip; filters is a
+    facet value id or a list of them; 120 s timeout floor.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "kohls"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "category",
+            "brand",
+            "deals",
+            "stores",
+            "store_availability",
+            "suggestions",
+            "coupons",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == (1 if m == "stores" else 2), ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/kohls/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert not any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    k = client.kohls
+    k.search(
+        "jeans",
+        brand="Levi's",
+        size="M",
+        clearance=True,
+        sort="percent_off",
+        filters=["Gender:Womens", "Price:$25 to $50"],
+    )
+    k.product(product_id="6251213", store_id=725)
+    k.category(path="/catalog/womens-clothing.jsp?CN=Gender:Womens+Department:Clothing", page=2)
+    k.brand(brand="Hamilton Beach", on_sale=True)
+    k.deals(type="kohls_cash", color="Black")
+    k.stores(city="Austin", state="TX", radius=50)
+    k.store_availability("73519108", "10001", dept="063")
+    k.suggestions("coff", type="products")
+    k.coupons()
+    base = "/api/v1/kohls/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "jeans",
+                "brand": "Levi's",
+                "sort": "percent_off",
+                "size": "M",
+                "clearance": True,
+                "filters": ["Gender:Womens", "Price:$25 to $50"],
+            },
+            120.0,
+        ),
+        (base + "product", {"product_id": "6251213", "store_id": 725}, 120.0),
+        (
+            base + "category",
+            {
+                "path": "/catalog/womens-clothing.jsp?CN=Gender:Womens+Department:Clothing",
+                "page": 2,
+            },
+            120.0,
+        ),
+        (base + "brand", {"brand": "Hamilton Beach", "on_sale": True}, 120.0),
+        (base + "deals", {"type": "kohls_cash", "color": "Black"}, 120.0),
+        (base + "stores", {"city": "Austin", "state": "TX", "radius": 50}, 120.0),
+        (
+            base + "store-availability",
+            {"sku": "73519108", "zip": "10001", "dept": "063"},
+            120.0,
+        ),
+        (base + "suggestions", {"query": "coff", "type": "products"}, 120.0),
+        (base + "coupons", {}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        k.product(store_id=725)
+    with pytest.raises(ScavioError):
+        k.category(sort="best_sellers")
+    with pytest.raises(ScavioError):
+        k.brand(page=2)
+    with pytest.raises(ScavioError):
+        k.stores(radius=25)
