@@ -68,6 +68,7 @@ __all__ = [
     "_AsyncSaksNamespace",
     "_AsyncKohlsNamespace",
     "_AsyncJcpenneyNamespace",
+    "_AsyncDicksNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -9282,6 +9283,230 @@ class _AsyncJcpenneyNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("jcpenney_questions", {"product_id": product_id, "url": url, "max_questions": max_questions}, extra)
+
+class _AsyncDicksNamespace:
+    """Dick's Sporting Goods search, per-SKU product detail, batch product summary, newest reviews, category, brand, clearance / sale / weekly deal listings, store unit counts (DICK'S, Golf Galaxy, Public Lands) and suggestion endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "top_sellers", "savings", "price_low_to_high", "price_high_to_low", "featured", "new_arrivals", "brand_az"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search dickssportinggoods.com (Dick's Sporting Goods, US) by keyword, filtered by brand, an approximate price range and any facet (gender, size, color, rating, sale...), sorted by relevance, top sellers, savings, price, featured, new arrivals or brand A-Z. 48 items per page by default (up to 144), each with id, sku (the variant the tile shows; null on style-level tiles), title, brand, URL, image, price and price_max (current), list_price and list_price_max, percent_off, map_price_applies (the lowest price only shows in the cart), rating, review_count, badge, sku_count, options, is_pinned (a merchandised placement) and scheduled_prices (the offer-price windows Dick's has planned: price, starts_at, ends_at; set by the retailer and can change, not a forecast or price history). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count and selected; any of them works in filters) and categories (id, name, path, count). Pinned items come first on page 1 under the featured sort, so that page can hold a few more than page_size. Prices in USD. did_you_mean carries Dick's spelling suggestion for a misspelled query. Keywords Dick's sends to a landing page (golf balls, clearance) are followed to that page: redirected_to and category say which.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'running shoes'.
+            brand: Only this brand (or any of several), as the Brand facet lists it ("Nike", "HOKA", "YETI").
+            page: Results page, 1-based. A page past the last one returns an empty items list with the real total. Defaults to 1.
+            page_size: Items per page, 1-144. Defaults to 48.
+            sort: relevance, top_sellers, savings (biggest discount first), price_low_to_high, price_high_to_low, featured (the site's merchandised order: pinned items first), new_arrivals or brand_az. Search and brand default to relevance; category and deals to featured, like the site.
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one facet are OR, facets combine (AND). E.g. {'5495': "Men's"} (gender), {'3232': 'Black'} (color), {'rating': '4+'}, {'price': '50-100'}.
+            min_price: Approximate lower price bound in USD (the site's price filter is loose: a few items just outside the range can appear).
+            max_price: Approximate upper price bound in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_search", {"query": query, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dick's Sporting Goods product by id or URL with every SKU: title, brand, description, features, specs, attributes, product type, category, images, rating, review_count, question and answer counts, the price block (min, max, list_min, list_max, percent_off, map_price_applies), clearance flag, the option axes (color, size, width...) and every variant: sku, UPC, options, color, size, price, list_price, percent_off, map_price_applies (the price only shows in the cart), is_clearance, online_units (units available to ship), buyable, ship_class and lead_time. Prices differ per SKU (one color on clearance, the rest at full price), so read the variant you need. A variant's sku is what store_availability() takes; review text is reviews(); products() is the cheap style-level check. An unknown id is a 404. Usually 20-75 s, up to about 2.5 minutes when a call is retried; failed calls and unknown products are not charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: A Dick's product id: a search result's id, the last part of a product URL (any case), e.g. '23FHQMCLFTN9GTXBLMNS'.
+            url: A dickssportinggoods.com product URL (its product id is used). Alternative to product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_product", {"product_id": product_id, "url": url}, extra)
+
+    async def products(
+        self,
+        product_ids: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 5 Dick's Sporting Goods products in one call (1 credit): the fast, style-level check of title, brand, URL, image, price and list-price ranges, percent_off, map_price_applies, clearance, buyable, option axes, attributes, specs, product type, rating, review_count and description. No per-SKU prices or units: those come from product(). Unknown ids are listed in not_found; when none is found it is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_ids: 1 to 5 Dick's product ids, e.g. ['23FHQMCLFTN9GTXBLMNS', '26UNDMFITN1HRI9WUAETC'].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_products", {"product_ids": product_ids}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 15 newest customer reviews of one Dick's Sporting Goods product by id or URL, with its review statistics: total, average, distribution (1-5 stars), recommended and not-recommended counts, photo count, first and last review dates, question and answer counts, and the average of each secondary rating (fit, comfort, quality, value...). Each review has id, rating, title, text, pros, cons, author nickname, submitted_at, recommended, helpful and unhelpful votes, verified_purchaser and incentivized badges, syndicated_from (the brand site a review came from), secondary ratings, customer photos and the brand's public response. The newest 15 only: no paging, no sort, no star filter; questions and answers are counts only. Reviewer age, gender and location are never returned. An unknown id is a 404. Usually 20-75 s, up to about 2.5 minutes when a call is retried; failed calls and unknown products are not charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: A Dick's product id: a search result's id, the last part of a product URL (any case), e.g. '23FHQMCLFTN9GTXBLMNS'.
+            url: A dickssportinggoods.com product URL (its product id is used). Alternative to product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_reviews", {"product_id": product_id, "url": url}, extra)
+
+    async def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "top_sellers", "savings", "price_low_to_high", "price_high_to_low", "featured", "new_arrivals", "brand_az"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one Dick's Sporting Goods category by its page path, URL or id (Men's Running Shoes, Golf Drivers, Kayaks...), in the site's featured order by default, with the same filters and sorts as search(). 48 items per page by default (up to 144), each with id, sku (the variant the tile shows; null on style-level tiles), title, brand, URL, image, price and price_max (current), list_price and list_price_max, percent_off, map_price_applies (the lowest price only shows in the cart), rating, review_count, badge, sku_count, options, is_pinned (a merchandised placement) and scheduled_prices (the offer-price windows Dick's has planned: price, starts_at, ends_at; set by the retailer and can change, not a forecast or price history). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count and selected; any of them works in filters) and categories (id, name, path, count). Pinned items come first on page 1 under the featured sort, so that page can hold a few more than page_size. Prices in USD. Also returns the category's id, name, path and URL. An unknown category is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Dick's category page path (/f/<name> or /c/<name>), as dickssportinggoods.com category links and a response's categories[].path carry it, e.g. '/f/mens-running-shoes'.
+            url: A dickssportinggoods.com category URL (its page is used; filters in the URL are not read, send them in filters).
+            category_id: A category id: a response's categories[].id or category.id, e.g. '202105'.
+            brand: Only this brand (or any of several), as the Brand facet lists it ("Nike", "HOKA", "YETI").
+            page: Results page, 1-based. A page past the last one returns an empty items list with the real total. Defaults to 1.
+            page_size: Items per page, 1-144. Defaults to 48.
+            sort: relevance, top_sellers, savings (biggest discount first), price_low_to_high, price_high_to_low, featured (the site's merchandised order: pinned items first), new_arrivals or brand_az. Search and brand default to relevance; category and deals to featured, like the site.
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one facet are OR, facets combine (AND). E.g. {'5495': "Men's"} (gender), {'3232': 'Black'} (color), {'rating': '4+'}, {'price': '50-100'}.
+            min_price: Approximate lower price bound in USD (the site's price filter is loose: a few items just outside the range can appear).
+            max_price: Approximate upper price bound in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_category", {"path": path, "url": url, "category_id": category_id, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "top_sellers", "savings", "price_low_to_high", "price_high_to_low", "featured", "new_arrivals", "brand_az"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every Dick's Sporting Goods product of one brand by name (Nike, YETI, Callaway, Under Armour...), optionally narrowed by a keyword, with the same filters and sorts as search() (except brand). 48 items per page by default (up to 144), each with id, sku (the variant the tile shows; null on style-level tiles), title, brand, URL, image, price and price_max (current), list_price and list_price_max, percent_off, map_price_applies (the lowest price only shows in the cart), rating, review_count, badge, sku_count, options, is_pinned (a merchandised placement) and scheduled_prices (the offer-price windows Dick's has planned: price, starts_at, ends_at; set by the retailer and can change, not a forecast or price history). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count and selected; any of them works in filters) and categories (id, name, path, count). Pinned items come first on page 1 under the featured sort, so that page can hold a few more than page_size. Prices in USD. brand echoes the brand as Dick's writes it. An unknown brand is a 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand name as Dick's lists it in the Brand facet, e.g. 'Nike', 'YETI', 'Callaway'; case does not matter.
+            query: Narrow the brand to a keyword, e.g. 'tumbler'.
+            page: Results page, 1-based. A page past the last one returns an empty items list with the real total. Defaults to 1.
+            page_size: Items per page, 1-144. Defaults to 48.
+            sort: relevance, top_sellers, savings (biggest discount first), price_low_to_high, price_high_to_low, featured (the site's merchandised order: pinned items first), new_arrivals or brand_az. Search and brand default to relevance; category and deals to featured, like the site.
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one facet are OR, facets combine (AND). E.g. {'5495': "Men's"} (gender), {'3232': 'Black'} (color), {'rating': '4+'}, {'price': '50-100'}.
+            min_price: Approximate lower price bound in USD (the site's price filter is loose: a few items just outside the range can appear).
+            max_price: Approximate upper price bound in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_brand", {"brand": brand, "query": query, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["clearance", "sale", "weekly_deals"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "top_sellers", "savings", "price_low_to_high", "price_high_to_low", "featured", "new_arrivals", "brand_az"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dick's Sporting Goods deal listings: Clearance (default), Sale or This Week's Deals, in the site's featured order by default (sort savings for the biggest discounts first), with the same filters and sorts as search(). 48 items per page by default (up to 144), each with id, sku (the variant the tile shows; null on style-level tiles), title, brand, URL, image, price and price_max (current), list_price and list_price_max, percent_off, map_price_applies (the lowest price only shows in the cart), rating, review_count, badge, sku_count, options, is_pinned (a merchandised placement) and scheduled_prices (the offer-price windows Dick's has planned: price, starts_at, ends_at; set by the retailer and can change, not a forecast or price history). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count and selected; any of them works in filters) and categories (id, name, path, count). Pinned items come first on page 1 under the featured sort, so that page can hold a few more than page_size. Prices in USD. To track clearance prices over time, poll and store your own: there is no price history.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: clearance (default), sale or weekly_deals (This Week's Deals).
+            brand: Only this brand (or any of several), as the Brand facet lists it ("Nike", "HOKA", "YETI").
+            page: Results page, 1-based. A page past the last one returns an empty items list with the real total. Defaults to 1.
+            page_size: Items per page, 1-144. Defaults to 48.
+            sort: relevance, top_sellers, savings (biggest discount first), price_low_to_high, price_high_to_low, featured (the site's merchandised order: pinned items first), new_arrivals or brand_az. Search and brand default to relevance; category and deals to featured, like the site.
+            filters: Any facet from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one facet are OR, facets combine (AND). E.g. {'5495': "Men's"} (gender), {'3232': 'Black'} (color), {'rating': '4+'}, {'price': '50-100'}.
+            min_price: Approximate lower price bound in USD (the site's price filter is loose: a few items just outside the range can appear).
+            max_price: Approximate upper price bound in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_deals", {"type": type, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def store_availability(
+        self,
+        skus: list[str],
+        *,
+        zip: Optional[Union[str, int]] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        chain: Optional[Literal["dicks", "golf_galaxy", "public_lands"]] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store unit counts for 1-20 Dick's Sporting Goods SKUs at up to 100 stores near a US ZIP code or a point (lat + lng), nearest first, within 25 miles by default (up to 250). chain picks DICK'S stores (default, incl. House of Sport and Going, Going, Gone!), Golf Galaxy or Public Lands. Each store has store_id, chain, name, address, shopping_center, city, state, ZIP, phone, lat / lng, distance_miles, status, weekly hours and per SKU: units (the units the store can sell) and in_store_units (the units on hand). Also returns sku_totals and how many stores have stock. There is no standalone store locator: store details come with a SKU lookup. An unknown SKU reads 0 at every store, so take SKUs from product() variants[].sku.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1 to 20 SKU ids from product() variants[].sku, e.g. ['25535758', '26810079'].
+            zip: US ZIP code to search around, e.g. '60601'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles, 1-250. Defaults to 25. Up to 100 stores are returned.
+            chain: dicks (DICK'S Sporting Goods, incl. House of Sport and Going, Going, Gone! stores; default), golf_galaxy or public_lands.
+            in_stock_only: Only the stores that have at least one of the SKUs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_store_availability", {"skus": skus, "zip": zip, "lat": lat, "lng": lng, "radius": radius, "chain": chain, "in_stock_only": in_stock_only}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The dickssportinggoods.com search-box suggestions for a partial query: keyword completions, brands, categories (id, name, path, URL, product_count) and products (id, title, brand, URL, image, color, price and list-price ranges, percent_off).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'yeti tum'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dicks_suggestions", {"query": query}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

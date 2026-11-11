@@ -20,6 +20,7 @@ from ._namespaces_sync import (
     _CostcoNamespace,
     _CvsNamespace,
     _DecathlonNamespace,
+    _DicksNamespace,
     _DollarGeneralNamespace,
     _EbayNamespace,
     _G2Namespace,
@@ -195,6 +196,7 @@ class ScavioClient:
         self.saks = _SaksNamespace(self)
         self.kohls = _KohlsNamespace(self)
         self.jcpenney = _JcpenneyNamespace(self)
+        self.dicks = _DicksNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

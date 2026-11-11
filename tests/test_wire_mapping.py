@@ -2708,3 +2708,115 @@ def test_jcpenney_credits_paths_and_wire(monkeypatch):
         j.reviews(sort="most_recent")
     with pytest.raises(ScavioError):
         j.questions(max_questions=10)
+
+
+def test_dicks_credits_paths_and_wire(monkeypatch):
+    """dicks (0.47.0): 9 endpoints on /api/v1/dicks, 1 credit each except
+    product and reviews (2).
+
+    US only (no country). store_availability maps to the hyphenated
+    /store-availability path and takes a required skus list plus zip or
+    lat + lng; products takes a required product_ids list (up to 5); filters
+    is a dict of facet id to value(s); 120 s timeout floor, 240 s for the slow
+    product and reviews.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "dicks"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "products",
+            "reviews",
+            "category",
+            "brand",
+            "deals",
+            "store_availability",
+            "suggestions",
+        ]
+    )
+    for m, ep in eps.items():
+        slow = m in ("product", "reviews")
+        assert ep.credits == (2 if slow else 1), ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/dicks/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == (240.0 if slow else 120.0), ep.key
+        assert not any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    d = client.dicks
+    d.search(
+        "running shoes",
+        brand=["Nike", "HOKA"],
+        sort="savings",
+        page_size=144,
+        filters={"5495": "Men's", "rating": "4+"},
+        min_price=60,
+        max_price=80,
+    )
+    d.product(product_id="23FHQMCLFTN9GTXBLMNS")
+    d.products(["23FHQMCLFTN9GTXBLMNS", "26UNDMFITN1HRI9WUAETC"])
+    d.reviews(url="https://www.dickssportinggoods.com/p/x/26undmfitn1hri9wuaetc")
+    d.category(path="/f/mens-running-shoes", page=2)
+    d.category(category_id="202105", brand="Nike")
+    d.brand("YETI", query="tumbler")
+    d.deals(type="clearance", sort="savings")
+    d.store_availability(["25535758", "26810079"], zip="60601", chain="golf_galaxy", radius=50)
+    d.suggestions("yeti tum")
+    base = "/api/v1/dicks/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "running shoes",
+                "brand": ["Nike", "HOKA"],
+                "sort": "savings",
+                "page_size": 144,
+                "filters": {"5495": "Men's", "rating": "4+"},
+                "min_price": 60,
+                "max_price": 80,
+            },
+            120.0,
+        ),
+        (base + "product", {"product_id": "23FHQMCLFTN9GTXBLMNS"}, 240.0),
+        (
+            base + "products",
+            {"product_ids": ["23FHQMCLFTN9GTXBLMNS", "26UNDMFITN1HRI9WUAETC"]},
+            120.0,
+        ),
+        (
+            base + "reviews",
+            {"url": "https://www.dickssportinggoods.com/p/x/26undmfitn1hri9wuaetc"},
+            240.0,
+        ),
+        (base + "category", {"path": "/f/mens-running-shoes", "page": 2}, 120.0),
+        (base + "category", {"category_id": "202105", "brand": "Nike"}, 120.0),
+        (base + "brand", {"brand": "YETI", "query": "tumbler"}, 120.0),
+        (base + "deals", {"type": "clearance", "sort": "savings"}, 120.0),
+        (
+            base + "store-availability",
+            {
+                "skus": ["25535758", "26810079"],
+                "zip": "60601",
+                "chain": "golf_galaxy",
+                "radius": 50,
+            },
+            120.0,
+        ),
+        (base + "suggestions", {"query": "yeti tum"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        d.product()
+    with pytest.raises(ScavioError):
+        d.reviews()
+    with pytest.raises(ScavioError):
+        d.category(sort="featured")
+    with pytest.raises(ScavioError):
+        d.store_availability(["25535758"])

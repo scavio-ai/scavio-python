@@ -627,6 +627,81 @@ _JCPENNEY_PRODUCT_TARGET = (
 )
 
 
+# Dick's Sporting Goods params shared across endpoints.
+_DICKS_SORTS = (
+    "relevance",
+    "top_sellers",
+    "savings",
+    "price_low_to_high",
+    "price_high_to_low",
+    "featured",
+    "new_arrivals",
+    "brand_az",
+)
+_DICKS_BRAND = _str_or_list(
+    "brand",
+    "Only this brand (or any of several), as the Brand facet lists it (\"Nike\", \"HOKA\", "
+    "\"YETI\").",
+)
+_DICKS_GRID = (
+    _int(
+        "page",
+        "Results page, 1-based. A page past the last one returns an empty items list with the "
+        "real total. Defaults to 1.",
+    ),
+    _int("page_size", "Items per page, 1-144. Defaults to 48."),
+    _lit(
+        "sort",
+        _DICKS_SORTS,
+        "relevance, top_sellers, savings (biggest discount first), price_low_to_high, "
+        "price_high_to_low, featured (the site's merchandised order: pinned items first), "
+        "new_arrivals or brand_az. Search and brand default to relevance; category and deals to "
+        "featured, like the site.",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any facet from a previous response: {facets[].id: facets[].values[].value, or a "
+        "list of values}. Values of one facet are OR, facets combine (AND). E.g. {'5495': "
+        "\"Men's\"} (gender), {'3232': 'Black'} (color), {'rating': '4+'}, {'price': '50-100'}.",
+    ),
+    _float(
+        "min_price",
+        "Approximate lower price bound in USD (the site's price filter is loose: a few items just "
+        "outside the range can appear).",
+    ),
+    _float("max_price", "Approximate upper price bound in USD."),
+)
+_DICKS_GRID_FIELDS = (
+    "48 items per page by default (up to 144), each with id, sku (the variant the tile shows; "
+    "null on style-level tiles), title, brand, URL, image, price and price_max (current), "
+    "list_price and list_price_max, percent_off, map_price_applies (the lowest price only shows "
+    "in the cart), rating, review_count, badge, sku_count, options, is_pinned (a merchandised "
+    "placement) and scheduled_prices (the offer-price windows Dick's has planned: price, "
+    "starts_at, ends_at; set by the retailer and can change, not a forecast or price history). "
+    "Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every "
+    "facet (id, label, values with value, label, count and selected; any of them works in "
+    "filters) and categories (id, name, path, count). Pinned items come first on page 1 under "
+    "the featured sort, so that page can hold a few more than page_size. Prices in USD."
+)
+_DICKS_PRODUCT_TARGET = (
+    _str(
+        "product_id",
+        "A Dick's product id: a search result's id, the last part of a product URL (any case), "
+        "e.g. '23FHQMCLFTN9GTXBLMNS'.",
+    ),
+    _str(
+        "url",
+        "A dickssportinggoods.com product URL (its product id is used). Alternative to "
+        "product_id.",
+    ),
+)
+_DICKS_SLOW = (
+    " Usually 20-75 s, up to about 2.5 minutes when a call is retried; failed calls and unknown "
+    "products are not charged."
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -10752,6 +10827,248 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ======================== Dick's Sporting Goods =======================
+    # dickssportinggoods.com (US, USD), 9 endpoints, 1 credit each except
+    # product and reviews (2: one product page each). product and reviews take
+    # product_id or url; category takes path, url or category_id;
+    # store_availability takes skus plus zip or lat + lng. 120 s timeout floor,
+    # 240 s for product and reviews (usually 20-75 s, up to ~2.5 min).
+    Endpoint(
+        key="dicks_search",
+        namespace="dicks",
+        method="search",
+        http="POST",
+        path="/api/v1/dicks/search",
+        summary=(
+            "Search dickssportinggoods.com (Dick's Sporting Goods, US) by keyword, filtered by "
+            "brand, an approximate price range and any facet (gender, size, color, rating, "
+            "sale...), sorted by relevance, top sellers, savings, price, featured, new arrivals "
+            "or brand A-Z. " + _DICKS_GRID_FIELDS + " did_you_mean carries Dick's spelling "
+            "suggestion for a misspelled query. Keywords Dick's sends to a landing page (golf "
+            "balls, clearance) are followed to that page: redirected_to and category say which."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'running shoes'."),
+            _DICKS_BRAND,
+            *_DICKS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_product",
+        namespace="dicks",
+        method="product",
+        http="POST",
+        path="/api/v1/dicks/product",
+        summary=(
+            "One Dick's Sporting Goods product by id or URL with every SKU: title, brand, "
+            "description, features, specs, attributes, product type, category, images, rating, "
+            "review_count, question and answer counts, the price block (min, max, list_min, "
+            "list_max, percent_off, map_price_applies), clearance flag, the option axes (color, "
+            "size, width...) and every variant: sku, UPC, options, color, size, price, "
+            "list_price, percent_off, map_price_applies (the price only shows in the cart), "
+            "is_clearance, online_units (units available to ship), buyable, ship_class and "
+            "lead_time. Prices differ per SKU (one color on clearance, the rest at full price), "
+            "so read the variant you need. A variant's sku is what store_availability() takes; "
+            "review text is reviews(); products() is the cheap style-level check. An unknown "
+            "id is a 404." + _DICKS_SLOW
+        ),
+        params=_DICKS_PRODUCT_TARGET,
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dicks_products",
+        namespace="dicks",
+        method="products",
+        http="POST",
+        path="/api/v1/dicks/products",
+        summary=(
+            "Up to 5 Dick's Sporting Goods products in one call (1 credit): the fast, style-level "
+            "check of title, brand, URL, image, price and list-price ranges, percent_off, "
+            "map_price_applies, clearance, buyable, option axes, attributes, specs, product "
+            "type, rating, review_count and description. No per-SKU prices or units: those come "
+            "from product(). Unknown ids are listed in not_found; when none is found it is a "
+            "404."
+        ),
+        params=(
+            _str_list(
+                "product_ids",
+                "1 to 5 Dick's product ids, e.g. ['23FHQMCLFTN9GTXBLMNS', "
+                "'26UNDMFITN1HRI9WUAETC'].",
+                required=True,
+            ),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_reviews",
+        namespace="dicks",
+        method="reviews",
+        http="POST",
+        path="/api/v1/dicks/reviews",
+        summary=(
+            "The 15 newest customer reviews of one Dick's Sporting Goods product by id or URL, "
+            "with its review statistics: total, average, distribution (1-5 stars), recommended "
+            "and not-recommended counts, photo count, first and last review dates, question and "
+            "answer counts, and the average of each secondary rating (fit, comfort, quality, "
+            "value...). Each review has id, rating, title, text, pros, cons, author nickname, "
+            "submitted_at, recommended, helpful and unhelpful votes, verified_purchaser and "
+            "incentivized badges, syndicated_from (the brand site a review came from), "
+            "secondary ratings, customer photos and the brand's public response. The newest 15 "
+            "only: no paging, no sort, no star filter; questions and answers are counts only. "
+            "Reviewer age, gender and location are never returned. An unknown id is a 404."
+            + _DICKS_SLOW
+        ),
+        params=_DICKS_PRODUCT_TARGET,
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dicks_category",
+        namespace="dicks",
+        method="category",
+        http="POST",
+        path="/api/v1/dicks/category",
+        summary=(
+            "Browse one Dick's Sporting Goods category by its page path, URL or id (Men's "
+            "Running Shoes, Golf Drivers, Kayaks...), in the site's featured order by default, "
+            "with the same filters and sorts as search(). " + _DICKS_GRID_FIELDS + " Also "
+            "returns the category's id, name, path and URL. An unknown category is a 404."
+        ),
+        params=(
+            _str(
+                "path",
+                "A Dick's category page path (/f/<name> or /c/<name>), as dickssportinggoods.com "
+                "category links and a response's categories[].path carry it, e.g. "
+                "'/f/mens-running-shoes'.",
+            ),
+            _str(
+                "url",
+                "A dickssportinggoods.com category URL (its page is used; filters in the URL are "
+                "not read, send them in filters).",
+            ),
+            _str_or_int(
+                "category_id",
+                "A category id: a response's categories[].id or category.id, e.g. '202105'.",
+            ),
+            _DICKS_BRAND,
+            *_DICKS_GRID,
+        ),
+        one_of=(("path", "url", "category_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_brand",
+        namespace="dicks",
+        method="brand",
+        http="POST",
+        path="/api/v1/dicks/brand",
+        summary=(
+            "Every Dick's Sporting Goods product of one brand by name (Nike, YETI, Callaway, "
+            "Under Armour...), optionally narrowed by a keyword, with the same filters and sorts "
+            "as search() (except brand). " + _DICKS_GRID_FIELDS + " brand echoes the brand as "
+            "Dick's writes it. An unknown brand is a 404."
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand name as Dick's lists it in the Brand facet, e.g. 'Nike', 'YETI', "
+                "'Callaway'; case does not matter.",
+            ),
+            _str("query", "Narrow the brand to a keyword, e.g. 'tumbler'."),
+            *_DICKS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_deals",
+        namespace="dicks",
+        method="deals",
+        http="POST",
+        path="/api/v1/dicks/deals",
+        summary=(
+            "Dick's Sporting Goods deal listings: Clearance (default), Sale or This Week's "
+            "Deals, in the site's featured order by default (sort savings for the biggest "
+            "discounts first), with the same filters and sorts as search(). "
+            + _DICKS_GRID_FIELDS + " To track clearance prices over time, poll and store your "
+            "own: there is no price history."
+        ),
+        params=(
+            _lit(
+                "type",
+                ("clearance", "sale", "weekly_deals"),
+                "clearance (default), sale or weekly_deals (This Week's Deals).",
+            ),
+            _DICKS_BRAND,
+            *_DICKS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_store_availability",
+        namespace="dicks",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/dicks/store-availability",
+        summary=(
+            "Store unit counts for 1-20 Dick's Sporting Goods SKUs at up to 100 stores near a "
+            "US ZIP code or a point (lat + lng), nearest first, within 25 miles by default (up "
+            "to 250). chain picks DICK'S stores (default, incl. House of Sport and Going, Going, "
+            "Gone!), Golf Galaxy or Public Lands. Each store has store_id, chain, name, address, "
+            "shopping_center, city, state, ZIP, phone, lat / lng, distance_miles, status, weekly "
+            "hours and per SKU: units (the units the store can sell) and in_store_units (the "
+            "units on hand). Also returns sku_totals and how many stores have stock. There is "
+            "no standalone store locator: store details come with a SKU lookup. An unknown SKU "
+            "reads 0 at every store, so take SKUs from product() variants[].sku."
+        ),
+        params=(
+            _str_list(
+                "skus",
+                "1 to 20 SKU ids from product() variants[].sku, e.g. ['25535758', '26810079'].",
+                required=True,
+            ),
+            _str_or_int("zip", "US ZIP code to search around, e.g. '60601'."),
+            _float("lat", "Latitude (with lng), instead of zip."),
+            _float("lng", "Longitude (with lat)."),
+            _int(
+                "radius",
+                "Search radius in miles, 1-250. Defaults to 25. Up to 100 stores are returned.",
+            ),
+            _lit(
+                "chain",
+                ("dicks", "golf_galaxy", "public_lands"),
+                "dicks (DICK'S Sporting Goods, incl. House of Sport and Going, Going, Gone! "
+                "stores; default), golf_galaxy or public_lands.",
+            ),
+            _bool("in_stock_only", "Only the stores that have at least one of the SKUs."),
+        ),
+        one_of=(("zip", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="dicks_suggestions",
+        namespace="dicks",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/dicks/suggestions",
+        summary=(
+            "The dickssportinggoods.com search-box suggestions for a partial query: keyword "
+            "completions, brands, categories (id, name, path, URL, product_count) and products "
+            "(id, title, brand, URL, image, color, price and list-price ranges, percent_off)."
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'yeti tum'."),),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -11869,6 +12186,7 @@ NAMESPACES: tuple[str, ...] = (
     "saks",
     "kohls",
     "jcpenney",
+    "dicks",
     "trustpilot",
     "realtor",
     "rightmove",

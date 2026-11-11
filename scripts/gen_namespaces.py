@@ -252,6 +252,12 @@ _NS_META = {
         "/ BOGO deal listings, store locator, store unit counts, suggestions, coupon code, "
         "review text and Q&A endpoints.",
     ),
+    "dicks": (
+        "Dicks",
+        "Dick's Sporting Goods search, per-SKU product detail, batch product summary, newest "
+        "reviews, category, brand, clearance / sale / weekly deal listings, store unit counts "
+        "(DICK'S, Golf Galaxy, Public Lands) and suggestion endpoints.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

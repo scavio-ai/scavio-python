@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 68 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 69 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -31,6 +31,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
 | JCPenney Clearance, Sale Prices, Coupon Codes, Store Unit Counts, Reviews and Q&A (11 endpoints) | Yes | No | No | No |
+| Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1913,6 +1914,82 @@ Reviewer age, gender and IP addresses are never returned. No price history,
 international sites, account offers or JCPenney Rewards balances, or
 checkout: to track clearance prices, poll and store your own.
 
+### 36. Sporting Goods -- Dick's Sporting Goods
+
+dickssportinggoods.com (US, USD), namespace `dicks`, 9 endpoints, 1 credit
+each except `product` and `reviews` (2 credits): `search`, `product`,
+`products`, `reviews`, `category`, `brand`, `deals`, `store_availability`,
+`suggestions`. No `country`: the US site only. `product` and `reviews` take
+`product_id` or a product `url`; `products` takes up to 5 `product_ids`;
+`category` takes a `/f/` or `/c/` `path`, a `url` or a `category_id`;
+`store_availability` takes a list of `skus` plus `zip` (or `lat` + `lng`).
+Every method raises the request timeout to at least 120s; `product` and
+`reviews` raise it to 240s (usually 20-75s, up to about 2.5 minutes).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+d = client.dicks
+
+# --- Clearance: 48 items per page by default, up to 144.
+clr = d.deals(type="clearance", sort="savings")["data"]
+print(clr["label"], clr["total"], clr["total_pages"])
+for item in clr["items"][:5]:
+    print(item["id"], item["title"], item["price"], item["price_max"],
+          item["list_price"], item["percent_off"], item["is_pinned"],
+          item["scheduled_prices"])
+
+# --- Facet values feed filters as {facet id: value}.
+for facet in clr["facets"][:3]:
+    print(facet["id"], facet["label"], [(v["value"], v["count"]) for v in facet["values"][:3]])
+found = d.search("running shoes", brand="HOKA", filters={"5495": "Men's"})["data"]
+print(found["total"], found["did_you_mean"], found["redirected_to"])
+
+# --- One product: prices differ per SKU (size / color), then store units.
+p = d.product(product_id="23FHQMCLFTN9GTXBLMNS")["data"]
+print(p["title"], p["price"]["min"], p["price"]["max"], p["is_clearance"])
+for v in p["variants"][:5]:
+    print(v["sku"], v["color"], v["size"], v["price"], v["list_price"],
+          v["is_clearance"], v["online_units"])
+skus = [v["sku"] for v in p["variants"][:2]]
+near = d.store_availability(skus, zip="60601")["data"]
+print(near["stores_with_stock"], near["sku_totals"])
+for st in near["stores"][:3]:
+    print(st["name"], st["distance_miles"], [(s["sku"], s["units"]) for s in st["skus"]])
+
+# --- The 15 newest reviews plus rating stats.
+r = d.reviews(product_id="26UNDMFITN1HRI9WUAETC")["data"]
+print(r["stats"]["total"], r["stats"]["average"], r["stats"]["distribution"])
+for rev in r["reviews"][:3]:
+    print(rev["rating"], rev["title"], rev["submitted_at"])
+```
+
+`search`, `category`, `brand` and `deals` share one grid: 48 items per page
+by default, up to 144 (`page_size`), with `total` and `total_pages`, sorted
+by `relevance`, `top_sellers`, `savings`, `price_low_to_high`,
+`price_high_to_low`, `featured`, `new_arrivals` or `brand_az`. Any facet
+from `facets` works in `filters` as `{facets[].id: value}` (one value or a
+list, facets combined with AND); `min_price` / `max_price` are approximate.
+Merchandised items are flagged `is_pinned` and can make page 1 a few items
+longer than `page_size`. Search returns `did_you_mean` for a misspelled
+query and follows keywords Dick's sends to a landing page (`clearance`,
+`golf balls`), reported as `redirected_to`. `scheduled_prices` are the
+retailer's own planned offer-price windows and can change: not a forecast
+or price history. `deals` lists `clearance` (default), `sale` or
+`weekly_deals`. Prices differ per size and color, so `product` lists every
+SKU with its own price, list price, `is_clearance`, `online_units`, UPC and
+`buyable` flag; `products` is the cheap style-level summary for up to 5
+ids. `reviews` returns the 15 newest reviews with full text and the rating
+stats: no paging, sort or star filter, and questions and answers are counts
+only. `store_availability` takes SKUs from `product` and returns unit counts
+at up to 100 DICK'S, Golf Galaxy (`chain="golf_galaxy"`) or Public Lands
+(`chain="public_lands"`) stores, with each store's address, phone, hours and
+distance; there is no standalone store locator, and an unknown SKU reads 0
+everywhere. No price history, ScoreCard prices or points, international
+sites, account data or checkout: to track clearance prices, poll and store
+your own.
+
 ## Error Handling
 
 ```python
@@ -2051,6 +2128,7 @@ Scavio works with popular AI/LLM frameworks:
 | Saks Fifth Avenue (`saks`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `designers` | 2 each |
 | Kohl's (`kohls`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | `stores` 1, the rest 2 each |
 | JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons`, `reviews`, `questions` | 1 each |
+| Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2060,6 +2138,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.47.0
+
+- **New `dicks` namespace** (sync and async) for dickssportinggoods.com
+  (Dick's Sporting Goods, US, USD), 9 endpoints: `search`, `product`,
+  `products`, `reviews`, `category`, `brand`, `deals`,
+  `store_availability`, `suggestions`, 1 credit each except `product` and
+  `reviews` (2). The grid endpoints take `brand`, `page_size` (up to 144),
+  a `sort`, `min_price` / `max_price` and any facet via `filters` (a dict);
+  `product` returns per-SKU prices and online units; `products` takes up to
+  5 `product_ids`; `store_availability` takes a list of `skus` and an
+  optional `chain` (Golf Galaxy, Public Lands). 120s timeout floor, 240s
+  for `product` and `reviews`.
 
 ### Changed in 0.46.0
 
