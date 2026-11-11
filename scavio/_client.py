@@ -23,6 +23,7 @@ from ._namespaces_sync import (
     _DicksNamespace,
     _DollarGeneralNamespace,
     _EbayNamespace,
+    _FanaticsNamespace,
     _FootlockerNamespace,
     _G2Namespace,
     _GeminiNamespace,
@@ -199,6 +200,7 @@ class ScavioClient:
         self.jcpenney = _JcpenneyNamespace(self)
         self.dicks = _DicksNamespace(self)
         self.footlocker = _FootlockerNamespace(self)
+        self.fanatics = _FanaticsNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

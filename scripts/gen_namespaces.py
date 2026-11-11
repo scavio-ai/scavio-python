@@ -264,6 +264,12 @@ _NS_META = {
         "exclusives / promo-eligible deal listings, release calendar, store locator, store "
         "availability, review and Q&A endpoints across 13 storefronts.",
     ),
+    "fanatics": (
+        "Fanatics",
+        "Fanatics merchandise search, product detail with per-size stock levels and "
+        "personalization, team / player / league / brand listings, sale / clearance / under-25 "
+        "deals and review endpoints across 8 storefronts and 4 US league stores.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

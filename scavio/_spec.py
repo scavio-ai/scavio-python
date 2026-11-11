@@ -801,6 +801,78 @@ _FOOTLOCKER_SLOW = (
 )
 
 
+# Fanatics params shared across endpoints (merchandise / product data, not odds).
+_FANATICS_MARKETS = (
+    "us (fanatics.com, USD, default), gb (GBP), de, fr, es, it (EUR), jp (JPY) or ca (CAD; "
+    "language en or fr)"
+)
+_FANATICS_STORES = (
+    "fanatics (default), nflshop (NFL Shop), mlbshop (MLB Shop), nhlshop (NHL Shop) or mlsstore "
+    "(MLS Store)"
+)
+_FANATICS_COUNTRY = _lit(
+    "country",
+    ("us", "gb", "de", "fr", "es", "it", "jp", "ca"),
+    "The storefront: " + _FANATICS_MARKETS + ". Defaults to us. Titles come in the storefront's "
+    "language, prices in its currency.",
+)
+_FANATICS_LANGUAGE = _lit("language", ("en", "fr"), "ca only: en (default) or fr.")
+_FANATICS_SITE = _lit(
+    "site",
+    ("fanatics", "nflshop", "mlbshop", "nhlshop", "mlsstore"),
+    "US only (country us): the store to read, " + _FANATICS_STORES + ". Same product ids on "
+    "every store; each store writes its own titles.",
+)
+_FANATICS_GENDER = _lit("gender", ("men", "women", "kids", "baby"), "men, women, kids or baby.")
+_FANATICS_GRID = (
+    _int(
+        "page",
+        "Results page, 1-based (up to 375). Defaults to 1. Fanatics lists at most 9000 products "
+        "per listing.",
+    ),
+    _ilit("page_size", (24, 48, 72), "Items per page: 24, 48 or 72. Defaults to 72."),
+    _lit(
+        "sort",
+        ("top_sellers", "price_low_to_high", "price_high_to_low", "newest"),
+        "top_sellers (default), price_low_to_high, price_high_to_low or newest. Price sorts "
+        "follow the site's lowest price, which is the with-code price when a promo code applies.",
+    ),
+)
+_FANATICS_FILTERS = Param(
+    "filters",
+    "Optional[dict[str, Union[str, int]]]",
+    doc="Filters from a previous response: {facets[].values[].filter: facets[].values[].value}, "
+    "one value per filter (up to 12). E.g. {'ga': '2'} (Women), {'ks': '126'} (a kids size), "
+    "{'cs': '2'} (Fashion), {'fa': '1'} (Autographed), {'t': '3433'} (a team).",
+)
+_FANATICS_GRID_FIELDS = (
+    "Items with id (for product() and reviews()), title, brand, url, image, price (current), "
+    "regular_price, sale_price, clearance_price, with_code_price and code_percent_off (the price "
+    "with the site's current promo code, when it applies), price_label (none, coupon or "
+    "clearance), percent_off, top_seller, customizable, ready_to_ship, ship_by, est_delivery, "
+    "urgency signals and is_sponsored. Also returns total (the US site counts at most 9000: "
+    "total_capped is true when the real number is 9000 or more), page, page_size, total_pages, "
+    "the sort, every facet (id, label, values with label, filter, value and count: send "
+    "{filter: value} in filters), country, language, currency, site and data_as_of (when "
+    "Fanatics built the page; listings can be a few minutes old)."
+)
+_FANATICS_WHERE = " Storefronts (country): " + _FANATICS_MARKETS + ". US league stores (site): " + _FANATICS_STORES + "."
+_FANATICS_CHARGE = (
+    " Failed upstream calls are not charged (they are retried automatically); a not-found is "
+    "charged."
+)
+_FANATICS_PRODUCT_ID = _str(
+    "product_id",
+    "A Fanatics product id: a search result's id, e.g. '3892922'. The same id works on every "
+    "league store.",
+)
+
+
+def _fanatics_id(name: str, doc: str) -> Param:
+    """A facet id: an integer, or a digit string ('8008-8084' for a sub-department)."""
+    return _str_or_int(name, doc)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -11463,6 +11535,220 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== Fanatics =============================
+    # fanatics.com + 7 country storefronts (local currency) + 4 US league
+    # stores (site), 5 endpoints, 1 credit each. Merchandise / product data,
+    # not odds. search, product, browse and deals take country, language (ca)
+    # and site (country us); reviews is US only. 120 s timeout floor, 300 s
+    # for reviews (usually 20-90 s, up to ~4 min).
+    Endpoint(
+        key="fanatics_search",
+        namespace="fanatics",
+        method="search",
+        http="POST",
+        path="/api/v1/fanatics/search",
+        summary=(
+            "Search Fanatics merchandise (jerseys, hats, fan gear, collectibles) by keyword on 8 "
+            "storefronts and 4 US league stores. Narrow by gender, league_id, department_id or any "
+            "facet value through filters (team, player, size, color style, autographed...). Sort "
+            "by top sellers, price or newest. Misspellings come back corrected "
+            "(corrected_query). " + _FANATICS_GRID_FIELDS + _FANATICS_WHERE + " Price filters are "
+            "on browse() and deals() (on a keyword search the site loosens the match)."
+            + _FANATICS_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search keywords, e.g. 'chiefs jersey'. Misspellings are corrected by the site "
+                "(corrected_query).",
+            ),
+            _FANATICS_COUNTRY,
+            _FANATICS_LANGUAGE,
+            _FANATICS_SITE,
+            _FANATICS_GENDER,
+            _fanatics_id(
+                "league_id",
+                "Narrow to one league (an id from facets: NFL 25, MLB 19, NBA 23, NHL 26, College "
+                "5).",
+            ),
+            _fanatics_id(
+                "department_id",
+                "Narrow to one department (an id from facets: Jerseys 8011, Hats 8008, T-Shirts "
+                "8022).",
+            ),
+            _FANATICS_FILTERS,
+            *_FANATICS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="fanatics_product",
+        namespace="fanatics",
+        method="product",
+        http="POST",
+        path="/api/v1/fanatics/product",
+        summary=(
+            "One Fanatics product by id or URL: title, brand, league, team, player, gender, "
+            "categories, breadcrumb, description, details, images, the price block (price, "
+            "regular_price, sale_price, clearance_price, with_code_price, code_percent_off, "
+            "percent_off, price_label), the site's current promo code (code, percent_off, tiered, "
+            "ends_on, applies_to_product), in_stock, every size (item_id, available, stock_level "
+            "low / out, price, with_code_price, ship_by, estimated delivery window, "
+            "promise_ship_days), every colorway, personalization (name / number fields with their "
+            "rules and the team roster; the price already includes personalization), flags "
+            "(jersey_assurance, non_returnable, exclusive, authentic for autographed / "
+            "authenticated items), the rating (average, count, distribution, fit, value, "
+            "quality), review_count and data_as_of. Stock is a level, never a unit count."
+            + _FANATICS_WHERE
+            + _FANATICS_CHARGE
+        ),
+        params=(
+            _FANATICS_PRODUCT_ID,
+            _str(
+                "url",
+                "A product URL on any covered storefront or league store (its storefront is "
+                "used). Alternative to product_id.",
+            ),
+            _FANATICS_COUNTRY,
+            _FANATICS_LANGUAGE,
+            _FANATICS_SITE,
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="fanatics_browse",
+        namespace="fanatics",
+        method="browse",
+        http="POST",
+        path="/api/v1/fanatics/browse",
+        summary=(
+            "Browse a Fanatics listing by its URL or by ids: a team (Lakers 5,000+ products), a "
+            "player (Mahomes), a league section (NFL hats), a department, a brand ('47, Nike, New "
+            "Era) or a collection, with price_band, on_sale, gender and any facet as filters "
+            "(sizes, color style, autographed). The facets list the listing's teams, players (up "
+            "to 100 on a team page), departments, brands, collections and sizes with their ids. "
+            "browse names the league, team, player, department, brand and collection the page "
+            "shows. Send url or ids, not both; a league alone is a landing page: combine it with "
+            "another id or a filter. " + _FANATICS_GRID_FIELDS + _FANATICS_WHERE + _FANATICS_CHARGE
+        ),
+        params=(
+            _str(
+                "url",
+                "A Fanatics listing URL: a team, player, league section, department, brand or "
+                "collection page, e.g. 'https://www.fanatics.com/nba/los-angeles-lakers/o-23+t-3372'. "
+                "Alternative to the ids.",
+            ),
+            _fanatics_id(
+                "league_id",
+                "League id (NFL 25, MLB 19, NBA 23, NHL 26, College 5). A league alone is a "
+                "landing page: combine it with another id or a filter.",
+            ),
+            _fanatics_id("team_id", "Team id (from facets: Los Angeles Lakers 3372, Kansas City Chiefs 3433)."),
+            _fanatics_id(
+                "player_id", "Player id (from facets.players: Patrick Mahomes 12072, Aaron Judge 31)."
+            ),
+            _fanatics_id(
+                "department_id",
+                "Department id (Hats 8008, Jerseys 8011), or parent-child for a sub-department "
+                "('8008-8084').",
+            ),
+            _fanatics_id("brand_id", "Brand id (from facets.brands: '47 479, Nike 76, New Era 127)."),
+            _fanatics_id("collection_id", "Collection id (from facets.productGroups: City Edition 11552)."),
+            _FANATICS_COUNTRY,
+            _FANATICS_LANGUAGE,
+            _FANATICS_SITE,
+            _bool("on_sale", "Only sale items."),
+            _lit(
+                "price_band",
+                ("under_25", "25_50", "50_100", "100_150", "over_150"),
+                "The site's bands in the storefront's currency, applied to its lowest price (the "
+                "with-code price when a promo code applies, so a few items list a little above "
+                "the band). Not on jp.",
+            ),
+            _FANATICS_GENDER,
+            _FANATICS_FILTERS,
+            *_FANATICS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="fanatics_deals",
+        namespace="fanatics",
+        method="deals",
+        http="POST",
+        path="/api/v1/fanatics/deals",
+        summary=(
+            "Fanatics deal listings: sale (default: the site's Sale listing, coupon-eligible items "
+            "and clearance markdowns), clearance (each sale page's clearance-priced items; total "
+            "counts the whole sale listing) or under_25 (items under 25 in the storefront's "
+            "currency, by the site's lowest price; not on jp), optionally for one league, team, "
+            "department or brand. " + _FANATICS_GRID_FIELDS + " No price history: to track sale "
+            "prices over time, poll and store your own." + _FANATICS_WHERE + _FANATICS_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "clearance", "under_25"),
+                "sale (default), clearance or under_25 (not on jp).",
+            ),
+            _fanatics_id("league_id", "Only one league (NFL 25, MLB 19, NBA 23, NHL 26, College 5)."),
+            _fanatics_id("team_id", "Only one team (Los Angeles Lakers 3372, Kansas City Chiefs 3433)."),
+            _fanatics_id("department_id", "Only one department (Hats 8008, Jerseys 8011)."),
+            _fanatics_id("brand_id", "Only one brand ('47 479, Nike 76, New Era 127)."),
+            _FANATICS_COUNTRY,
+            _FANATICS_LANGUAGE,
+            _FANATICS_SITE,
+            *_FANATICS_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="fanatics_reviews",
+        namespace="fanatics",
+        method="reviews",
+        http="POST",
+        path="/api/v1/fanatics/reviews",
+        summary=(
+            "Customer reviews of one Fanatics (fanatics.com, US) product by id or URL, 1-50 per "
+            "call (default 10), sorted highest rated (default, the site's order), lowest rated, "
+            "most recent or most helpful, optionally only one star rating. Returns stats "
+            "(review_count, rating_count, average, distribution, fit, quality and value "
+            "averages), the site's own AI-written review summary (ai_summary) and the features "
+            "reviewers mention. Each review has id, product_id and product_title, rating, fit, "
+            "quality, value, recommended, title, text, author nickname, submitted_at, updated_at, "
+            "incentivized, helpful and unhelpful votes, features with sentiment and photos. "
+            "Fanatics pools reviews across a style: the list (and matching_reviews) covers "
+            "sibling products of the same cut, so check each review's product_id. Slow: usually "
+            "20-90 s, up to about 4 minutes when a call is retried; when busy it returns 503 with "
+            "Retry-After. Failed calls are not charged; an unknown product is a charged 404. US "
+            "only."
+        ),
+        params=(
+            _FANATICS_PRODUCT_ID,
+            _str("url", "A fanatics.com product URL. Alternative to product_id."),
+            _lit("country", ("us",), "us only."),
+            _lit(
+                "sort",
+                ("highest_rated", "lowest_rated", "most_recent", "most_helpful"),
+                "highest_rated (default, the site's order), lowest_rated, most_recent or "
+                "most_helpful.",
+            ),
+            _int("rating", "Only reviews with this many stars (1-5)."),
+            _int(
+                "limit",
+                "Reviews to return, 1-50. Defaults to 10. More than 10 takes a few seconds longer "
+                "per 8.",
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -12582,6 +12868,7 @@ NAMESPACES: tuple[str, ...] = (
     "jcpenney",
     "dicks",
     "footlocker",
+    "fanatics",
     "trustpilot",
     "realtor",
     "rightmove",

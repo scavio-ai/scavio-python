@@ -2956,3 +2956,101 @@ def test_footlocker_credits_paths_and_wire(monkeypatch):
         f.reviews(sort="most_recent")
     with pytest.raises(ScavioError):
         f.questions(limit=10)
+
+
+def test_fanatics_credits_paths_and_wire(monkeypatch):
+    """fanatics (0.49.0): 5 endpoints on /api/v1/fanatics, 1 credit each.
+
+    search, product, browse and deals take country (8 storefronts), language
+    (ca) and site (US league stores); reviews is US only. filters is a dict of
+    filter code to one value; ids take an int or a digit string; 120 s timeout
+    floor, 300 s for the slow reviews.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "fanatics"}
+    assert sorted(eps) == sorted(["search", "product", "browse", "deals", "reviews"])
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/fanatics/" + m, ep.key
+        assert ep.min_timeout == (300.0 if m == "reviews" else 120.0), ep.key
+        assert any(p.name == "country" for p in ep.params), ep.key
+        assert any(p.name == "site" for p in ep.params) == (m != "reviews"), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    f = client.fanatics
+    f.search(
+        "chiefs jersey",
+        site="nflshop",
+        gender="women",
+        league_id=25,
+        department_id="8011",
+        filters={"ks": "126"},
+        page=2,
+        page_size=24,
+        sort="price_low_to_high",
+    )
+    f.search("trikot", country="de")
+    f.product(product_id="3892922")
+    f.product(url="https://www.fanatics.ca/fr/x/p-3892922", country="ca", language="fr")
+    f.browse(team_id=3372, department_id="8008-8084", price_band="25_50", on_sale=True)
+    f.browse(url="https://www.fanatics.com/nba/los-angeles-lakers/o-23+t-3372", site="fanatics")
+    f.deals()
+    f.deals(type="clearance", league_id=25, country="jp")
+    f.reviews(product_id="3892922", sort="most_recent", rating=5, limit=50)
+    base = "/api/v1/fanatics/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "chiefs jersey",
+                "site": "nflshop",
+                "gender": "women",
+                "league_id": 25,
+                "department_id": "8011",
+                "filters": {"ks": "126"},
+                "page": 2,
+                "page_size": 24,
+                "sort": "price_low_to_high",
+            },
+            120.0,
+        ),
+        (base + "search", {"query": "trikot", "country": "de"}, 120.0),
+        (base + "product", {"product_id": "3892922"}, 120.0),
+        (
+            base + "product",
+            {"url": "https://www.fanatics.ca/fr/x/p-3892922", "country": "ca", "language": "fr"},
+            120.0,
+        ),
+        (
+            base + "browse",
+            {"team_id": 3372, "department_id": "8008-8084", "price_band": "25_50", "on_sale": True},
+            120.0,
+        ),
+        (
+            base + "browse",
+            {
+                "url": "https://www.fanatics.com/nba/los-angeles-lakers/o-23+t-3372",
+                "site": "fanatics",
+            },
+            120.0,
+        ),
+        (base + "deals", {}, 120.0),
+        (base + "deals", {"type": "clearance", "league_id": 25, "country": "jp"}, 120.0),
+        (
+            base + "reviews",
+            {"product_id": "3892922", "sort": "most_recent", "rating": 5, "limit": 50},
+            300.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        f.product(country="de")
+    with pytest.raises(ScavioError):
+        f.reviews(sort="most_recent")

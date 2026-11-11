@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 70 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 71 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -33,6 +33,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | JCPenney Clearance, Sale Prices, Coupon Codes, Store Unit Counts, Reviews and Q&A (11 endpoints) | Yes | No | No | No |
 | Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
+| Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -2073,6 +2074,88 @@ Unknown SKUs, categories and brands are a charged 404. No search
 suggestions, member (FLX) prices or account data, price history or
 checkout: to track prices, poll and store your own.
 
+### 38. Fan Merchandise -- Fanatics
+
+Fanatics merchandise and product data (jerseys, hats, fan gear,
+collectibles; not sportsbook odds), namespace `fanatics`, 5 endpoints, 1
+credit each: `search`, `product`, `browse`, `deals`, `reviews`. `country`
+picks the storefront: `us` (fanatics.com, USD, default), `gb` (GBP), `de`,
+`fr`, `es`, `it` (EUR), `jp` (JPY) or `ca` (CAD, `language` en or fr);
+titles come in the storefront's language. `site` reads a US league store
+(with country us): `fanatics` (default), `nflshop`, `mlbshop`, `nhlshop` or
+`mlsstore`; the same product ids work on every store. `search`, `product`,
+`browse` and `deals` take both; `reviews` is US only (fanatics.com). Every
+method raises the request timeout to at least 120s; `reviews` raises it to
+300s (usually 20-90s, up to about 4 minutes).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+fan = client.fanatics
+
+# --- Search: up to 72 items per page, data_as_of on every listing.
+res = fan.search("chiefs jersey", sort="price_low_to_high")["data"]
+print(res["total"], res["total_capped"], res["corrected_query"], res["data_as_of"])
+for item in res["items"][:5]:
+    print(item["id"], item["title"], item["price"], item["regular_price"],
+          item["with_code_price"], item["price_label"], item["ship_by"])
+
+# --- Facet values feed filters as {filter: value}; ids feed browse().
+for facet in res["facets"][:3]:
+    print(facet["id"], facet["label"], [(v["label"], v["filter"], v["value"]) for v in facet["values"][:3]])
+
+# --- A team's hats, or a league store (NFL Shop) on the same ids.
+hats = fan.browse(team_id=3372, department_id=8008, price_band="25_50")["data"]
+print(hats["browse"]["team"], hats["browse"]["department"], hats["total"])
+nfl = fan.search("mahomes jersey", site="nflshop")["data"]
+print(nfl["site"], nfl["total"])
+
+# --- One product: regular / sale / clearance / with-code price, stock level per size.
+p = fan.product(product_id="3892922")["data"]
+print(p["title"], p["price"], p["sale_price"], p["clearance_price"], p["with_code_price"])
+print(p["coupon"], p["flags"], p["customizable"], p["personalization"])
+for size in p["sizes"]:
+    print(size["size"], size["available"], size["stock_level"], size["ship_by"],
+          size["est_delivery_from"], size["est_delivery_to"])
+
+# --- Sale and clearance listings, other storefronts in local currency.
+sale = fan.deals(type="clearance", league_id=25)["data"]
+print(sale["count"], sale["total"])
+de = fan.deals(country="de")["data"]
+print(de["currency"], de["total"], de["data_as_of"])
+
+# --- Reviews (slow): style rollup, so each review names its product.
+rv = fan.reviews(product_id="3892922", sort="most_recent", limit=30)["data"]
+print(rv["stats"]["average"], rv["stats"]["fit"], rv["ai_summary"])
+for review in rv["reviews"][:3]:
+    print(review["product_id"], review["rating"], review["fit"], review["text"])
+```
+
+`search`, `browse` and `deals` share one grid: 24, 48 or 72 items per page
+(default 72) with `total`, `total_capped` (the US site counts at most 9000)
+and `total_pages`, sorted by `top_sellers`, `price_low_to_high`,
+`price_high_to_low` or `newest`. Each item carries `price`,
+`regular_price`, `sale_price`, `clearance_price`, `with_code_price` (the
+price with the site-wide promo code shown on the page) and `price_label`.
+Filter by `gender`, ids (`league_id`, `team_id`, `player_id`,
+`department_id`, `brand_id`, `collection_id`; `browse` and `deals`) or any
+facet value via `filters` as `{filter: value}`, one value per filter;
+`price_band` and `on_sale` are on `browse` (price bands are not on jp). A
+league alone is a landing page: combine it with another id or a filter.
+`data_as_of` says when Fanatics built each listing; misspellings come back
+as `corrected_query`. `product` lists every size with `stock_level` (low /
+out: a level, never a unit count), ship-by and delivery estimates, the
+current promo code, personalization fields with the team roster (prices
+already include personalization), and jersey assurance / authentic flags.
+`reviews` returns real text with 4 sorts and a star filter (1-50, default
+10), fit / quality / value, and the site's own AI-written summary
+(`ai_summary`); Fanatics pools reviews across a style, so check each
+review's `product_id`. Unknown products are a charged 404. No search
+suggestions, store locator or store stock, Q&A, FanCash, member pricing,
+unit counts, price history or checkout: to track jersey sale prices, poll
+and store your own.
+
 ## Error Handling
 
 ```python
@@ -2213,6 +2296,7 @@ Scavio works with popular AI/LLM frameworks:
 | JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons`, `reviews`, `questions` | 1 each |
 | Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
+| Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2222,6 +2306,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.49.0
+
+- **New `fanatics` namespace** (sync and async) for Fanatics merchandise,
+  5 endpoints at 1 credit each: `search`, `product`, `browse`, `deals`,
+  `reviews`. `country` picks one of 8 storefronts (us default, gb, de, fr,
+  es, it, jp, ca), `language` the ca language and `site` a US league store
+  (nflshop, mlbshop, nhlshop, mlsstore); `reviews` is US only. 120s timeout
+  floor, 300s for `reviews`.
 
 ### Changed in 0.48.0
 
