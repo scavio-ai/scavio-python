@@ -2083,7 +2083,9 @@ picks the storefront: `us` (fanatics.com, USD, default), `gb` (GBP), `de`,
 `fr`, `es`, `it` (EUR), `jp` (JPY) or `ca` (CAD, `language` en or fr);
 titles come in the storefront's language. `site` reads a US league store
 (with country us): `fanatics` (default), `nflshop`, `mlbshop`, `nhlshop` or
-`mlsstore`; the same product ids work on every store. `search`, `product`,
+`mlsstore`; the same product ids work on every store, but department and
+filter ids are per store (Jerseys is 8011 on fanatics.com, 14012 on NFL
+Shop): take them from the facets of the store you query. `search`, `product`,
 `browse` and `deals` take both; `reviews` is US only (fanatics.com). Every
 method raises the request timeout to at least 120s; `reviews` raises it to
 300s (usually 20-90s, up to about 4 minutes).
@@ -2105,7 +2107,7 @@ for item in res["items"][:5]:
 for facet in res["facets"][:3]:
     print(facet["id"], facet["label"], [(v["label"], v["filter"], v["value"]) for v in facet["values"][:3]])
 
-# --- A team's hats, or a league store (NFL Shop) on the same ids.
+# --- A team's hats, or a league store (NFL Shop): same product ids, its own department ids.
 hats = fan.browse(team_id=3372, department_id=8008, price_band="25_50")["data"]
 print(hats["browse"]["team"], hats["browse"]["department"], hats["total"])
 nfl = fan.search("mahomes jersey", site="nflshop")["data"]
@@ -2135,9 +2137,13 @@ for review in rv["reviews"][:3]:
 `search`, `browse` and `deals` share one grid: 24, 48 or 72 items per page
 (default 72) with `total`, `total_capped` (the US site counts at most 9000)
 and `total_pages`, sorted by `top_sellers`, `price_low_to_high`,
-`price_high_to_low` or `newest`. Each item carries `price`,
+`price_high_to_low` or `newest` (price sorts use the current `price`, before
+any promo code, not `with_code_price`). Each item carries `price`,
 `regular_price`, `sale_price`, `clearance_price`, `with_code_price` (the
-price with the site-wide promo code shown on the page) and `price_label`.
+price with the site-wide promo code shown on the page) and `price_label`
+(`coupon` means coupon-eligible; a null `with_code_price` means the code does
+not lower that item). Player ids come from the players facet when the page
+lists one (e.g. Lakers) or from a product's `player`.
 Filter by `gender`, ids (`league_id`, `team_id`, `player_id`,
 `department_id`, `brand_id`, `collection_id`; `browse` and `deals`) or any
 facet value via `filters` as `{filter: value}`, one value per filter;
@@ -2306,6 +2312,13 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.49.1
+
+- `fanatics` docstrings: price sorts order by the current `price`, not the
+  with-code price; department and filter ids are per store; the players
+  facet appears only on some pages; `price_label` `coupon` means
+  coupon-eligible; product `on_sale` covers clearance markdowns.
 
 ### Changed in 0.49.0
 

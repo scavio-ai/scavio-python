@@ -821,7 +821,9 @@ _FANATICS_SITE = _lit(
     "site",
     ("fanatics", "nflshop", "mlbshop", "nhlshop", "mlsstore"),
     "US only (country us): the store to read, " + _FANATICS_STORES + ". Same product ids on "
-    "every store; each store writes its own titles.",
+    "every store; each store writes its own titles. Department and filter ids are per store "
+    "(Jerseys is 8011 on fanatics, 14012 on nflshop): take them from the facets of the store you "
+    "query, since an id from another store is silently ignored.",
 )
 _FANATICS_GENDER = _lit("gender", ("men", "women", "kids", "baby"), "men, women, kids or baby.")
 _FANATICS_GRID = (
@@ -835,7 +837,7 @@ _FANATICS_GRID = (
         "sort",
         ("top_sellers", "price_low_to_high", "price_high_to_low", "newest"),
         "top_sellers (default), price_low_to_high, price_high_to_low or newest. Price sorts "
-        "follow the site's lowest price, which is the with-code price when a promo code applies.",
+        "order by the current price (price, before any promo code), not the with-code price.",
     ),
 )
 _FANATICS_FILTERS = Param(
@@ -849,7 +851,8 @@ _FANATICS_GRID_FIELDS = (
     "Items with id (for product() and reviews()), title, brand, url, image, price (current), "
     "regular_price, sale_price, clearance_price, with_code_price and code_percent_off (the price "
     "with the site's current promo code, when it applies), price_label (none, coupon or "
-    "clearance), percent_off, top_seller, customizable, ready_to_ship, ship_by, est_delivery, "
+    "clearance; coupon means coupon-eligible, a null with_code_price means the code does not "
+    "apply), percent_off, top_seller, customizable, ready_to_ship, ship_by, est_delivery, "
     "urgency signals and is_sponsored. Also returns total (the US site counts at most 9000: "
     "total_capped is true when the real number is 9000 or more), page, page_size, total_pages, "
     "the sort, every facet (id, label, values with label, filter, value and count: send "
@@ -11573,8 +11576,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _fanatics_id(
                 "department_id",
-                "Narrow to one department (an id from facets: Jerseys 8011, Hats 8008, T-Shirts "
-                "8022).",
+                "Narrow to one department (an id from the facets of the same storefront / store: on "
+                "fanatics.com Jerseys 8011, Hats 8008, T-Shirts 8022; nflshop Jerseys 14012).",
             ),
             _FANATICS_FILTERS,
             *_FANATICS_GRID,
@@ -11592,7 +11595,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "One Fanatics product by id or URL: title, brand, league, team, player, gender, "
             "categories, breadcrumb, description, details, images, the price block (price, "
             "regular_price, sale_price, clearance_price, with_code_price, code_percent_off, "
-            "percent_off, price_label), the site's current promo code (code, percent_off, tiered, "
+            "percent_off, price_label), on_sale (true for sale and clearance markdowns), the site's "
+            "current promo code (code, percent_off, tiered, "
             "ends_on, applies_to_product), in_stock, every size (item_id, available, stock_level "
             "low / out, price, with_code_price, ship_by, estimated delivery window, "
             "promise_ship_days), every colorway, personalization (name / number fields with their "
@@ -11628,8 +11632,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "Browse a Fanatics listing by its URL or by ids: a team (Lakers 5,000+ products), a "
             "player (Mahomes), a league section (NFL hats), a department, a brand ('47, Nike, New "
             "Era) or a collection, with price_band, on_sale, gender and any facet as filters "
-            "(sizes, color style, autographed). The facets list the listing's teams, players (up "
-            "to 100 on a team page), departments, brands, collections and sizes with their ids. "
+            "(sizes, color style, autographed). The facets list the listing's teams, departments, "
+            "brands, collections and sizes with their ids, plus players when the page lists them "
+            "(e.g. Lakers). "
             "browse names the league, team, player, department, brand and collection the page "
             "shows. Send url or ids, not both; a league alone is a landing page: combine it with "
             "another id or a filter. " + _FANATICS_GRID_FIELDS + _FANATICS_WHERE + _FANATICS_CHARGE
@@ -11648,12 +11653,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _fanatics_id("team_id", "Team id (from facets: Los Angeles Lakers 3372, Kansas City Chiefs 3433)."),
             _fanatics_id(
-                "player_id", "Player id (from facets.players: Patrick Mahomes 12072, Aaron Judge 31)."
+                "player_id",
+                "Player id, from the players facet when the page lists one (e.g. Lakers) or a "
+                "product's player field: Patrick Mahomes 12072, Aaron Judge 31.",
             ),
             _fanatics_id(
                 "department_id",
-                "Department id (Hats 8008, Jerseys 8011), or parent-child for a sub-department "
-                "('8008-8084').",
+                "Department id from the same store's facets (fanatics.com: Hats 8008, Jerseys 8011; "
+                "nflshop Jerseys 14012), or parent-child for a sub-department ('8008-8084').",
             ),
             _fanatics_id("brand_id", "Brand id (from facets.brands: '47 479, Nike 76, New Era 127)."),
             _fanatics_id("collection_id", "Collection id (from facets.productGroups: City Edition 11552)."),
@@ -11697,7 +11704,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _fanatics_id("league_id", "Only one league (NFL 25, MLB 19, NBA 23, NHL 26, College 5)."),
             _fanatics_id("team_id", "Only one team (Los Angeles Lakers 3372, Kansas City Chiefs 3433)."),
-            _fanatics_id("department_id", "Only one department (Hats 8008, Jerseys 8011)."),
+            _fanatics_id(
+                "department_id",
+                "Only one department, from the same store's facets (fanatics.com: Hats 8008, "
+                "Jerseys 8011; nflshop Jerseys 14012).",
+            ),
             _fanatics_id("brand_id", "Only one brand ('47 479, Nike 76, New Era 127)."),
             _FANATICS_COUNTRY,
             _FANATICS_LANGUAGE,
