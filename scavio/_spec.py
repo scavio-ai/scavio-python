@@ -702,6 +702,105 @@ _DICKS_SLOW = (
 )
 
 
+# Foot Locker params shared across endpoints.
+_FOOTLOCKER_MARKETS = (
+    "us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, "
+    "nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD)"
+)
+_FOOTLOCKER_COUNTRY = _lit(
+    "country",
+    ("us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"),
+    "The storefront: " + _FOOTLOCKER_MARKETS + ". Titles come in the storefront's language, "
+    "prices in its currency.",
+)
+_FOOTLOCKER_LANGUAGE = _lit(
+    "language", ("en", "fr", "nl"), "Only for ca (en default, fr) and be (nl default, fr)."
+)
+_FOOTLOCKER_US_ONLY = _lit("country", ("us",), "us only (the only storefront this endpoint covers).")
+_FOOTLOCKER_SORTS = (
+    "relevance",
+    "price_low_to_high",
+    "price_high_to_low",
+    "new_arrivals",
+    "top_rated",
+    "name_az",
+    "brand_az",
+)
+_FOOTLOCKER_BRAND = _str_or_list(
+    "brand",
+    "Only this brand (or any of several), e.g. \"Nike\", \"Jordan\", \"adidas\", \"New "
+    "Balance\", \"HOKA\"; case does not matter.",
+)
+_FOOTLOCKER_GRID = (
+    _int(
+        "page",
+        "Results page, 1-based (48 items per page, up to 200). A page past the last one returns "
+        "an empty items list with the real total. Defaults to 1.",
+    ),
+    _lit(
+        "sort",
+        _FOOTLOCKER_SORTS,
+        "relevance (the site's Featured order, default), price_low_to_high, price_high_to_low, "
+        "new_arrivals, top_rated, name_az or brand_az.",
+    ),
+    _str_or_list(
+        "gender",
+        "Gender filter value(s) as facets.gender lists them (\"Men's\", \"Women's\"; in the "
+        "storefront's language).",
+    ),
+    _str_or_list("color", "Color filter value(s) as facets.primaryColor lists them, e.g. 'Black'."),
+    _str_or_list(
+        "price_range",
+        "Price bucket value(s) as facets.price lists them (25-50, 50-75, 75-100, 100-150, "
+        "150-inf).",
+    ),
+    _bool("on_sale", "Only items on sale."),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any filter from a previous response: {facets[].id: facets[].values[].value, or a "
+        "list of values}. Values of one filter are OR, filters combine (AND). E.g. "
+        "{'mensShoesSize': '10.0'}, {'womensShoesSize': '8.0'}, {'style': 'Casual Sneakers'}, "
+        "{'sport': 'Running'}, {'eligibleForDiscount': 'True'}.",
+    ),
+)
+_FOOTLOCKER_GRID_FIELDS = (
+    "48 items per page, each with id (the SKU, for product()), base_product, title, brand, URL, "
+    "image, price, list_price, percent_off, lowest_price_30d (European storefronts: the lowest "
+    "price of the last 30 days), on_sale, is_new, is_launch, member_only_sale, rating, "
+    "review_count, color_count and colors (sku, color, price, list_price per colorway). Also "
+    "returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet "
+    "(id, label, values with value, label, count; any of them works in filters), country, "
+    "language, currency and data_as_of: listings can be a few hours old, data_as_of says when "
+    "this one was built."
+)
+_FOOTLOCKER_PRODUCT_TARGET = (
+    _str(
+        "product_id",
+        "A Foot Locker SKU: a search result's id, the last part of a product URL (Q5495005 in "
+        "the US, 12 digits such as 316707025504 in Europe).",
+    ),
+    _str(
+        "url",
+        "A Foot Locker product URL on any covered storefront (its storefront and SKU are used). "
+        "Alternative to product_id.",
+    ),
+)
+_FOOTLOCKER_WHERE = (
+    _str_or_int("zip", "US ZIP code to search around, e.g. '10001'."),
+    _float("lat", "Latitude (with lng), instead of zip."),
+    _float("lng", "Longitude (with lat)."),
+    _int("radius", "Search radius in miles, 1-120. Defaults to 25."),
+    _int("limit", "Stores to return, nearest first, 1-50. Defaults to 10."),
+    _FOOTLOCKER_US_ONLY,
+)
+_FOOTLOCKER_NOT_FOUND = " Failed upstream calls are not charged; a not-found is charged."
+_FOOTLOCKER_SLOW = (
+    " Slow: usually 25-90 s, up to about 3-4 minutes when a call is retried; failed calls are "
+    "not charged. A product without an online page is a charged 404. US only."
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -11069,6 +11168,301 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=120.0,
     ),
+    # ============================= Foot Locker ===========================
+    # footlocker.com + 12 country storefronts (local currency), 10 endpoints,
+    # 1 credit each. search, product, category, brand and deals take country
+    # (13 storefronts) and language (ca: en / fr, be: nl / fr); releases is
+    # us, ca, gb; stores, store_availability, reviews and questions are US
+    # only. 120 s timeout floor, 240 s for reviews and questions (usually
+    # 25-90 s, up to ~3-4 min).
+    Endpoint(
+        key="footlocker_search",
+        namespace="footlocker",
+        method="search",
+        http="POST",
+        path="/api/v1/footlocker/search",
+        summary=(
+            "Search Foot Locker by keyword on any of 13 storefronts, filtered by brand, gender, "
+            "color, price bucket, on_sale and any facet (shoe size per gender, style, sport, "
+            "rating...), sorted by relevance, price, new arrivals, top rated, name or brand. "
+            + _FOOTLOCKER_GRID_FIELDS
+            + " A bare brand keyword (nike, hoka) is answered by the site with a landing page: "
+            "the brand's listing is returned instead and redirected_to says which. A keyword the "
+            "site sends to a landing page without a product listing (samba, clearance) is an "
+            "unbilled 400: use brand(), category() or deals() instead."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'nike dunk'."),
+            _FOOTLOCKER_COUNTRY,
+            _FOOTLOCKER_LANGUAGE,
+            _FOOTLOCKER_BRAND,
+            *_FOOTLOCKER_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_product",
+        namespace="footlocker",
+        method="product",
+        http="POST",
+        path="/api/v1/footlocker/product",
+        summary=(
+            "One Foot Locker product by SKU or URL on any of the 13 storefronts: title, brand, "
+            "description, genders, sports, category, color, style code, images, rating, "
+            "review_count, the price block (price, list_price, percent_off, lowest_price_30d on "
+            "European storefronts), availability online / to ship / for pickup, launch info "
+            "(is_launch, launch_type, launch_date, web_only), flags, the size chart, every "
+            "colorway (sku, color, price, availability) and every size: available, ship, pickup, "
+            "stores_available (how many stores show that size as available: a store count, not "
+            "units), UPC and store SKU. Availability is yes / no per size: Foot Locker publishes "
+            "no unit counts. A SKU without an online page (unknown, store-only or not launched "
+            "yet) is a 404." + _FOOTLOCKER_NOT_FOUND
+        ),
+        params=(*_FOOTLOCKER_PRODUCT_TARGET, _FOOTLOCKER_COUNTRY, _FOOTLOCKER_LANGUAGE),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_category",
+        namespace="footlocker",
+        method="category",
+        http="POST",
+        path="/api/v1/footlocker/category",
+        summary=(
+            "Browse one Foot Locker category by its page path, URL or collection id (Men's "
+            "Shoes, Women's Clothing, Kids...), in the site's order by default, with the same "
+            "filters and sorts as search(). " + _FOOTLOCKER_GRID_FIELDS + " Also returns the "
+            "category's id (collection id), name, path and URL. An unknown category is a 404."
+            + _FOOTLOCKER_NOT_FOUND
+        ),
+        params=(
+            _str(
+                "path",
+                "A Foot Locker category page path (/category/<path>.html), as the site's "
+                "category links carry it, e.g. '/category/mens/shoes.html'.",
+            ),
+            _str("url", "A Foot Locker category URL (its storefront and page are used)."),
+            _str(
+                "collection_id",
+                "A collection id: a previous response's category.id, e.g. 'men-s-shoes' (saves "
+                "time on page 2+).",
+            ),
+            _FOOTLOCKER_COUNTRY,
+            _FOOTLOCKER_LANGUAGE,
+            _FOOTLOCKER_BRAND,
+            *_FOOTLOCKER_GRID,
+        ),
+        one_of=(("path", "url", "collection_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_brand",
+        namespace="footlocker",
+        method="brand",
+        http="POST",
+        path="/api/v1/footlocker/brand",
+        summary=(
+            "Every Foot Locker product of one brand by name or brand page URL (Nike, Jordan, "
+            "adidas, New Balance, HOKA...), optionally narrowed by a keyword, with the same "
+            "filters and sorts as search() (except brand). " + _FOOTLOCKER_GRID_FIELDS + " brand "
+            "echoes the brand as the site writes it, brand_id its id. An unknown brand is a 404."
+            + _FOOTLOCKER_NOT_FOUND
+        ),
+        params=(
+            _str(
+                "brand",
+                "A brand name, e.g. 'Nike', 'Jordan', 'adidas', 'New Balance', 'HOKA', 'PUMA'; "
+                "case does not matter.",
+            ),
+            _str(
+                "url",
+                "A Foot Locker brand page URL (/category/brands/<brand>.html). Alternative to "
+                "brand.",
+            ),
+            _str("query", "Narrow the brand to a keyword, e.g. 'running shoes'."),
+            _FOOTLOCKER_COUNTRY,
+            _FOOTLOCKER_LANGUAGE,
+            *_FOOTLOCKER_GRID,
+        ),
+        one_of=(("brand", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_deals",
+        namespace="footlocker",
+        method="deals",
+        http="POST",
+        path="/api/v1/footlocker/deals",
+        summary=(
+            "Foot Locker deal listings: sale (default; every storefront), Foot Locker Exclusives "
+            "(us and ca only) or discount_eligible (the items a promo code applies to), with the "
+            "same filters and sorts as search(). " + _FOOTLOCKER_GRID_FIELDS + " No price "
+            "history: to track prices over time, poll and store your own."
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "exclusives", "discount_eligible"),
+                "sale (default; every storefront), exclusives (Foot Locker Exclusives; us and ca "
+                "only) or discount_eligible (items a promo code applies to).",
+            ),
+            _FOOTLOCKER_COUNTRY,
+            _FOOTLOCKER_LANGUAGE,
+            _FOOTLOCKER_BRAND,
+            *_FOOTLOCKER_GRID,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_releases",
+        namespace="footlocker",
+        method="releases",
+        http="POST",
+        path="/api/v1/footlocker/releases",
+        summary=(
+            "The Foot Locker sneaker release calendar as monitoring data (us, ca, gb): sku, "
+            "title, brand, colorway (style), style_code, gender, launch_at, online_at, "
+            "heat_level, in_stock, image, url, retail_price and currency (us and ca; gb has no "
+            "prices), the reservation status and windows where the storefront runs them (status "
+            "open / closed / store_only, starts_at, ends_at, assignment_at, awarding_at, "
+            "online_reveal_at, store procedures; not on gb) and sizes (us, eu, uk, participating "
+            "channels). Also returns total, count and data_as_of. Filter by status (upcoming / "
+            "launched), a date window and brand. Read-only: nothing here enters, reserves or "
+            "buys a release."
+        ),
+        params=(
+            _lit("country", ("us", "ca", "gb"), "us (default), ca or gb."),
+            _lit("language", ("en", "fr"), "ca only: en (default) or fr."),
+            _lit(
+                "status",
+                ("all", "upcoming", "launched"),
+                "all (default), upcoming (launch date ahead) or launched.",
+            ),
+            _str(
+                "date_from",
+                "Only releases launching on or after this ISO date, e.g. '2026-11-01'.",
+                wire="from",
+            ),
+            _str(
+                "date_to",
+                "Only releases launching on or before this ISO date, e.g. '2026-12-31'.",
+                wire="to",
+            ),
+            _str("brand", "Only this brand, e.g. 'Nike' (case does not matter)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_stores",
+        namespace="footlocker",
+        method="stores",
+        http="POST",
+        path="/api/v1/footlocker/stores",
+        summary=(
+            "Foot Locker stores near a US ZIP code, a city + state or a point (lat + lng), "
+            "nearest first (up to 50, default 10, within 25 miles by default, up to 120): "
+            "store_id, name, name_secondary, address, city, state, ZIP, phone, lat / lng, "
+            "distance_miles, weekly hours, opened_at, alert and closure notices, and the store "
+            "page URL. Foot Locker banner stores only (no Kids Foot Locker or Champs). US only."
+        ),
+        params=(
+            *_FOOTLOCKER_WHERE,
+            _str("city", "US city (with state), instead of zip, e.g. 'Atlanta'."),
+            _str("state", "2-letter US state code (with city), e.g. 'GA'."),
+        ),
+        one_of=(("zip", "city", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_store_availability",
+        namespace="footlocker",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/footlocker/store-availability",
+        summary=(
+            "Which Foot Locker stores near a US ZIP code or a point (lat + lng) show a product "
+            "(or one size) as available: each store (as in stores()) with available and "
+            "sizes_available, plus per size whether it ships online, can be picked up and in how "
+            "many of the listed stores it shows (stores_in_results), and "
+            "stores_with_availability. Yes / no only: Foot Locker publishes no unit counts. Foot "
+            "Locker banner stores only. US only, prices in USD." + _FOOTLOCKER_NOT_FOUND
+        ),
+        params=(
+            *_FOOTLOCKER_PRODUCT_TARGET,
+            _str_or_int(
+                "size",
+                "One size as product() sizes[].size lists it (10.0, 10, XL). Without it, every "
+                "size.",
+            ),
+            *_FOOTLOCKER_WHERE,
+        ),
+        one_of=(("product_id", "url"), ("zip", "lat")),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="footlocker_reviews",
+        namespace="footlocker",
+        method="reviews",
+        http="POST",
+        path="/api/v1/footlocker/reviews",
+        summary=(
+            "Customer reviews of one Foot Locker (US) product by SKU or URL, 1-98 per call "
+            "(default 38), sorted most recent (default), most helpful, highest or lowest rating, "
+            "or relevance, optionally only one star rating. Returns the review statistics: "
+            "total_reviews (every language), displayed_reviews (the English reviews the site "
+            "pages through), average_rating, rating_distribution, recommended_percent, secondary "
+            "rating averages (fit, comfort, quality...) and photo_count, plus matching_reviews. "
+            "Each review has id, rating, title, text, author nickname, submitted_at, recommended, "
+            "helpful and unhelpful votes, verified_purchaser, incentivized, syndicated and its "
+            "source, secondary ratings, photos, videos and the brand's response. Reviewer age, "
+            "gender, location and IP are never returned. More reviews take longer (about 4 s per "
+            "30)." + _FOOTLOCKER_SLOW
+        ),
+        params=(
+            *_FOOTLOCKER_PRODUCT_TARGET,
+            _FOOTLOCKER_US_ONLY,
+            _lit(
+                "sort",
+                ("most_recent", "most_helpful", "highest_rating", "lowest_rating", "relevance"),
+                "most_recent (default), most_helpful, highest_rating, lowest_rating or relevance.",
+            ),
+            _int("rating", "Only reviews with this many stars (1-5)."),
+            _int("limit", "Reviews to return, 1-98. Defaults to 38."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="footlocker_questions",
+        namespace="footlocker",
+        method="questions",
+        http="POST",
+        path="/api/v1/footlocker/questions",
+        summary=(
+            "Shopper questions about one Foot Locker (US) product by SKU or URL, 1-50 per call "
+            "(default 10), newest answered first, with every answer: question, details, author, "
+            "submitted_at, answer_count, helpful votes, and per answer its text, author, "
+            "author_type (brand, retailer or customer), best-answer flag, date and votes. Also "
+            "returns total_questions." + _FOOTLOCKER_SLOW
+        ),
+        params=(
+            *_FOOTLOCKER_PRODUCT_TARGET,
+            _FOOTLOCKER_US_ONLY,
+            _int("limit", "Questions to return, 1-50. Defaults to 10."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -12187,6 +12581,7 @@ NAMESPACES: tuple[str, ...] = (
     "kohls",
     "jcpenney",
     "dicks",
+    "footlocker",
     "trustpilot",
     "realtor",
     "rightmove",

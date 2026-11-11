@@ -258,6 +258,12 @@ _NS_META = {
         "reviews, category, brand, clearance / sale / weekly deal listings, store unit counts "
         "(DICK'S, Golf Galaxy, Public Lands) and suggestion endpoints.",
     ),
+    "footlocker": (
+        "Footlocker",
+        "Foot Locker search, product detail with per-size availability, category, brand, sale / "
+        "exclusives / promo-eligible deal listings, release calendar, store locator, store "
+        "availability, review and Q&A endpoints across 13 storefronts.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

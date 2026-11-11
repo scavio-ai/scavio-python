@@ -25,6 +25,7 @@ from ._namespaces_async import (
     _AsyncDicksNamespace,
     _AsyncDollarGeneralNamespace,
     _AsyncEbayNamespace,
+    _AsyncFootlockerNamespace,
     _AsyncG2Namespace,
     _AsyncGeminiNamespace,
     _AsyncGlassdoorNamespace,
@@ -192,6 +193,7 @@ class AsyncScavioClient:
         self.kohls = _AsyncKohlsNamespace(self)
         self.jcpenney = _AsyncJcpenneyNamespace(self)
         self.dicks = _AsyncDicksNamespace(self)
+        self.footlocker = _AsyncFootlockerNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

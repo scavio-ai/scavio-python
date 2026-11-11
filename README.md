@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 69 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 70 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -32,6 +32,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
 | JCPenney Clearance, Sale Prices, Coupon Codes, Store Unit Counts, Reviews and Q&A (11 endpoints) | Yes | No | No | No |
 | Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
+| Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -1990,6 +1991,88 @@ everywhere. No price history, ScoreCard prices or points, international
 sites, account data or checkout: to track clearance prices, poll and store
 your own.
 
+### 37. Sneakers -- Foot Locker
+
+Foot Locker, namespace `footlocker`, 10 endpoints, 1 credit each: `search`,
+`product`, `category`, `brand`, `deals`, `releases`, `stores`,
+`store_availability`, `reviews`, `questions`. `country` picks the
+storefront: `us` (footlocker.com, USD, default), `ca` (CAD, `language` en
+or fr), `gb` (GBP), `de`, `fr`, `it`, `es`, `nl`, `be` (`language` nl or
+fr), `at`, `ie` (EUR), `au` (AUD) or `nz` (NZD); titles come in the
+storefront's language. Search, product, category, brand and deals (`sale`,
+`discount_eligible`) work on all 13; `exclusives` on us and ca; `releases`
+on us, ca and gb (gb has no prices or reservation windows); `stores`,
+`store_availability`, `reviews` and `questions` are US only. Every method
+raises the request timeout to at least 120s; `reviews` and `questions`
+raise it to 240s (usually 25-90s, up to about 3-4 minutes).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+fl = client.footlocker
+
+# --- Search: 48 items per page, any storefront, data_as_of on every listing.
+res = fl.search("nike dunk", country="de", sort="price_low_to_high")["data"]
+print(res["currency"], res["total"], res["total_pages"], res["data_as_of"], res["redirected_to"])
+for item in res["items"][:5]:
+    print(item["id"], item["title"], item["price"], item["list_price"],
+          item["percent_off"], item["lowest_price_30d"])
+
+# --- Facet values feed filters as {facet id: value}.
+for facet in res["facets"][:3]:
+    print(facet["id"], facet["label"], [(v["value"], v["count"]) for v in facet["values"][:3]])
+mens10 = fl.brand(brand="New Balance", filters={"mensShoesSize": "10.0"})["data"]
+print(mens10["brand"], mens10["total"])
+
+# --- One product: availability is yes / no per size, never unit counts.
+p = fl.product(product_id="Q5495005")["data"]
+print(p["title"], p["price"], p["launch"])
+for size in p["sizes"][:5]:
+    print(size["size"], size["available"], size["ship"], size["pickup"],
+          size["stores_available"])
+
+# --- Which nearby stores show size 10.0 as available (US).
+near = fl.store_availability(product_id="W2288111", size="10.0", zip="10001")["data"]
+print(near["stores_with_availability"])
+for st in near["stores"][:3]:
+    print(st["name_secondary"], st["distance_miles"], st["available"], st["sizes_available"])
+
+# --- The release calendar: monitoring data only.
+cal = fl.releases(status="upcoming", brand="Jordan")["data"]
+for r in cal["releases"][:5]:
+    print(r["launch_at"], r["title"], r["style"], r["retail_price"], r["heat_level"],
+          r["reservation"]["status"])
+
+# --- Reviews (slow): 1-98 with full text, sort and star filter.
+rv = fl.reviews(product_id="Q5495005", sort="most_helpful", limit=30)["data"]
+print(rv["stats"]["average_rating"], rv["stats"]["rating_distribution"])
+for review in rv["reviews"][:3]:
+    print(review["rating"], review["title"], review["submitted_at"])
+```
+
+`search`, `category`, `brand` and `deals` share one grid: 48 items per page
+with `total` and `total_pages`, sorted by `relevance`, `price_low_to_high`,
+`price_high_to_low`, `new_arrivals`, `top_rated`, `name_az` or `brand_az`.
+Filter by `brand` (any case), `gender`, `color`, `price_range`, `on_sale`,
+or any facet from `facets` via `filters` as `{facets[].id: value}` (one
+value or a list, filters combined with AND). Listings can be a few hours
+old: `data_as_of` says when each one was built. A bare brand keyword
+(`nike`, `hoka`) is answered with that brand's listing and reported as
+`redirected_to`; a keyword the site sends to a landing page without a
+product listing is an unbilled 400 pointing to `brand`, `category` or
+`deals`. `product` lists every colorway with its price and every size with
+`available`, `ship`, `pickup` and `stores_available` (how many stores show
+the size as available: a store count, not units); European storefronts add
+`lowest_price_30d`. `releases` is the release calendar as monitoring data:
+launch date and time, retail price, colorway, style code, heat level, size
+run and reservation windows where the storefront runs them; nothing here
+enters, reserves or buys a release. `store_availability` covers Foot Locker
+banner stores only (no Kids Foot Locker or Champs) and answers yes / no.
+Unknown SKUs, categories and brands are a charged 404. No search
+suggestions, member (FLX) prices or account data, price history or
+checkout: to track prices, poll and store your own.
+
 ## Error Handling
 
 ```python
@@ -2129,6 +2212,7 @@ Scavio works with popular AI/LLM frameworks:
 | Kohl's (`kohls`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | `stores` 1, the rest 2 each |
 | JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons`, `reviews`, `questions` | 1 each |
 | Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
+| Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2138,6 +2222,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.48.0
+
+- **New `footlocker` namespace** (sync and async) for Foot Locker, 10
+  endpoints at 1 credit each: `search`, `product`, `category`, `brand`,
+  `deals`, `releases`, `stores`, `store_availability`, `reviews`,
+  `questions`. `country` picks one of 13 storefronts (us default, ca, gb,
+  de, fr, it, es, nl, be, at, ie, au, nz) and `language` the ca / be
+  language; `releases` covers us, ca and gb and takes `date_from` /
+  `date_to`; `stores`, `store_availability`, `reviews` and `questions` are
+  US only. 120s timeout floor, 240s for `reviews` and `questions`.
 
 ### Changed in 0.47.0
 

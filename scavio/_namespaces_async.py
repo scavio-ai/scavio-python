@@ -69,6 +69,7 @@ __all__ = [
     "_AsyncKohlsNamespace",
     "_AsyncJcpenneyNamespace",
     "_AsyncDicksNamespace",
+    "_AsyncFootlockerNamespace",
     "_AsyncTrustpilotNamespace",
     "_AsyncRealtorNamespace",
     "_AsyncRightmoveNamespace",
@@ -9507,6 +9508,320 @@ class _AsyncDicksNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("dicks_suggestions", {"query": query}, extra)
+
+class _AsyncFootlockerNamespace:
+    """Foot Locker search, product detail with per-size availability, category, brand, sale / exclusives / promo-eligible deal listings, release calendar, store locator, store availability, review and Q&A endpoints across 13 storefronts."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"]] = None,
+        language: Optional[Literal["en", "fr", "nl"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "new_arrivals", "top_rated", "name_az", "brand_az"]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        on_sale: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Foot Locker by keyword on any of 13 storefronts, filtered by brand, gender, color, price bucket, on_sale and any facet (shoe size per gender, style, sport, rating...), sorted by relevance, price, new arrivals, top rated, name or brand. 48 items per page, each with id (the SKU, for product()), base_product, title, brand, URL, image, price, list_price, percent_off, lowest_price_30d (European storefronts: the lowest price of the last 30 days), on_sale, is_new, is_launch, member_only_sale, rating, review_count, color_count and colors (sku, color, price, list_price per colorway). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count; any of them works in filters), country, language, currency and data_as_of: listings can be a few hours old, data_as_of says when this one was built. A bare brand keyword (nike, hoka) is answered by the site with a landing page: the brand's listing is returned instead and redirected_to says which. A keyword the site sends to a landing page without a product listing (samba, clearance) is an unbilled 400: use brand(), category() or deals() instead.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'nike dunk'.
+            country: The storefront: us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD). Titles come in the storefront's language, prices in its currency.
+            language: Only for ca (en default, fr) and be (nl default, fr).
+            brand: Only this brand (or any of several), e.g. "Nike", "Jordan", "adidas", "New Balance", "HOKA"; case does not matter.
+            page: Results page, 1-based (48 items per page, up to 200). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (the site's Featured order, default), price_low_to_high, price_high_to_low, new_arrivals, top_rated, name_az or brand_az.
+            gender: Gender filter value(s) as facets.gender lists them ("Men's", "Women's"; in the storefront's language).
+            color: Color filter value(s) as facets.primaryColor lists them, e.g. 'Black'.
+            price_range: Price bucket value(s) as facets.price lists them (25-50, 50-75, 75-100, 100-150, 150-inf).
+            on_sale: Only items on sale.
+            filters: Any filter from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one filter are OR, filters combine (AND). E.g. {'mensShoesSize': '10.0'}, {'womensShoesSize': '8.0'}, {'style': 'Casual Sneakers'}, {'sport': 'Running'}, {'eligibleForDiscount': 'True'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_search", {"query": query, "country": country, "language": language, "brand": brand, "page": page, "sort": sort, "gender": gender, "color": color, "price_range": price_range, "on_sale": on_sale, "filters": filters}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"]] = None,
+        language: Optional[Literal["en", "fr", "nl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Foot Locker product by SKU or URL on any of the 13 storefronts: title, brand, description, genders, sports, category, color, style code, images, rating, review_count, the price block (price, list_price, percent_off, lowest_price_30d on European storefronts), availability online / to ship / for pickup, launch info (is_launch, launch_type, launch_date, web_only), flags, the size chart, every colorway (sku, color, price, availability) and every size: available, ship, pickup, stores_available (how many stores show that size as available: a store count, not units), UPC and store SKU. Availability is yes / no per size: Foot Locker publishes no unit counts. A SKU without an online page (unknown, store-only or not launched yet) is a 404. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Foot Locker SKU: a search result's id, the last part of a product URL (Q5495005 in the US, 12 digits such as 316707025504 in Europe).
+            url: A Foot Locker product URL on any covered storefront (its storefront and SKU are used). Alternative to product_id.
+            country: The storefront: us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD). Titles come in the storefront's language, prices in its currency.
+            language: Only for ca (en default, fr) and be (nl default, fr).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_product", {"product_id": product_id, "url": url, "country": country, "language": language}, extra)
+
+    async def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        collection_id: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"]] = None,
+        language: Optional[Literal["en", "fr", "nl"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "new_arrivals", "top_rated", "name_az", "brand_az"]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        on_sale: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one Foot Locker category by its page path, URL or collection id (Men's Shoes, Women's Clothing, Kids...), in the site's order by default, with the same filters and sorts as search(). 48 items per page, each with id (the SKU, for product()), base_product, title, brand, URL, image, price, list_price, percent_off, lowest_price_30d (European storefronts: the lowest price of the last 30 days), on_sale, is_new, is_launch, member_only_sale, rating, review_count, color_count and colors (sku, color, price, list_price per colorway). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count; any of them works in filters), country, language, currency and data_as_of: listings can be a few hours old, data_as_of says when this one was built. Also returns the category's id (collection id), name, path and URL. An unknown category is a 404. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Foot Locker category page path (/category/<path>.html), as the site's category links carry it, e.g. '/category/mens/shoes.html'.
+            url: A Foot Locker category URL (its storefront and page are used).
+            collection_id: A collection id: a previous response's category.id, e.g. 'men-s-shoes' (saves time on page 2+).
+            country: The storefront: us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD). Titles come in the storefront's language, prices in its currency.
+            language: Only for ca (en default, fr) and be (nl default, fr).
+            brand: Only this brand (or any of several), e.g. "Nike", "Jordan", "adidas", "New Balance", "HOKA"; case does not matter.
+            page: Results page, 1-based (48 items per page, up to 200). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (the site's Featured order, default), price_low_to_high, price_high_to_low, new_arrivals, top_rated, name_az or brand_az.
+            gender: Gender filter value(s) as facets.gender lists them ("Men's", "Women's"; in the storefront's language).
+            color: Color filter value(s) as facets.primaryColor lists them, e.g. 'Black'.
+            price_range: Price bucket value(s) as facets.price lists them (25-50, 50-75, 75-100, 100-150, 150-inf).
+            on_sale: Only items on sale.
+            filters: Any filter from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one filter are OR, filters combine (AND). E.g. {'mensShoesSize': '10.0'}, {'womensShoesSize': '8.0'}, {'style': 'Casual Sneakers'}, {'sport': 'Running'}, {'eligibleForDiscount': 'True'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_category", {"path": path, "url": url, "collection_id": collection_id, "country": country, "language": language, "brand": brand, "page": page, "sort": sort, "gender": gender, "color": color, "price_range": price_range, "on_sale": on_sale, "filters": filters}, extra)
+
+    async def brand(
+        self,
+        *,
+        brand: Optional[str] = None,
+        url: Optional[str] = None,
+        query: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"]] = None,
+        language: Optional[Literal["en", "fr", "nl"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "new_arrivals", "top_rated", "name_az", "brand_az"]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        on_sale: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every Foot Locker product of one brand by name or brand page URL (Nike, Jordan, adidas, New Balance, HOKA...), optionally narrowed by a keyword, with the same filters and sorts as search() (except brand). 48 items per page, each with id (the SKU, for product()), base_product, title, brand, URL, image, price, list_price, percent_off, lowest_price_30d (European storefronts: the lowest price of the last 30 days), on_sale, is_new, is_launch, member_only_sale, rating, review_count, color_count and colors (sku, color, price, list_price per colorway). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count; any of them works in filters), country, language, currency and data_as_of: listings can be a few hours old, data_as_of says when this one was built. brand echoes the brand as the site writes it, brand_id its id. An unknown brand is a 404. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand name, e.g. 'Nike', 'Jordan', 'adidas', 'New Balance', 'HOKA', 'PUMA'; case does not matter.
+            url: A Foot Locker brand page URL (/category/brands/<brand>.html). Alternative to brand.
+            query: Narrow the brand to a keyword, e.g. 'running shoes'.
+            country: The storefront: us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD). Titles come in the storefront's language, prices in its currency.
+            language: Only for ca (en default, fr) and be (nl default, fr).
+            page: Results page, 1-based (48 items per page, up to 200). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (the site's Featured order, default), price_low_to_high, price_high_to_low, new_arrivals, top_rated, name_az or brand_az.
+            gender: Gender filter value(s) as facets.gender lists them ("Men's", "Women's"; in the storefront's language).
+            color: Color filter value(s) as facets.primaryColor lists them, e.g. 'Black'.
+            price_range: Price bucket value(s) as facets.price lists them (25-50, 50-75, 75-100, 100-150, 150-inf).
+            on_sale: Only items on sale.
+            filters: Any filter from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one filter are OR, filters combine (AND). E.g. {'mensShoesSize': '10.0'}, {'womensShoesSize': '8.0'}, {'style': 'Casual Sneakers'}, {'sport': 'Running'}, {'eligibleForDiscount': 'True'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_brand", {"brand": brand, "url": url, "query": query, "country": country, "language": language, "page": page, "sort": sort, "gender": gender, "color": color, "price_range": price_range, "on_sale": on_sale, "filters": filters}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["sale", "exclusives", "discount_eligible"]] = None,
+        country: Optional[Literal["us", "ca", "gb", "de", "fr", "it", "es", "nl", "be", "at", "ie", "au", "nz"]] = None,
+        language: Optional[Literal["en", "fr", "nl"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "new_arrivals", "top_rated", "name_az", "brand_az"]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_range: Optional[Union[str, list[str]]] = None,
+        on_sale: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Foot Locker deal listings: sale (default; every storefront), Foot Locker Exclusives (us and ca only) or discount_eligible (the items a promo code applies to), with the same filters and sorts as search(). 48 items per page, each with id (the SKU, for product()), base_product, title, brand, URL, image, price, list_price, percent_off, lowest_price_30d (European storefronts: the lowest price of the last 30 days), on_sale, is_new, is_launch, member_only_sale, rating, review_count, color_count and colors (sku, color, price, list_price per colorway). Also returns total, page, page_size, total_pages, the sort applied, applied_filters, every facet (id, label, values with value, label, count; any of them works in filters), country, language, currency and data_as_of: listings can be a few hours old, data_as_of says when this one was built. No price history: to track prices over time, poll and store your own.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: sale (default; every storefront), exclusives (Foot Locker Exclusives; us and ca only) or discount_eligible (items a promo code applies to).
+            country: The storefront: us (footlocker.com, USD, default), ca (CAD, language en or fr), gb (GBP), de, fr, it, es, nl, be (language nl or fr), at, ie (EUR), au (AUD) or nz (NZD). Titles come in the storefront's language, prices in its currency.
+            language: Only for ca (en default, fr) and be (nl default, fr).
+            brand: Only this brand (or any of several), e.g. "Nike", "Jordan", "adidas", "New Balance", "HOKA"; case does not matter.
+            page: Results page, 1-based (48 items per page, up to 200). A page past the last one returns an empty items list with the real total. Defaults to 1.
+            sort: relevance (the site's Featured order, default), price_low_to_high, price_high_to_low, new_arrivals, top_rated, name_az or brand_az.
+            gender: Gender filter value(s) as facets.gender lists them ("Men's", "Women's"; in the storefront's language).
+            color: Color filter value(s) as facets.primaryColor lists them, e.g. 'Black'.
+            price_range: Price bucket value(s) as facets.price lists them (25-50, 50-75, 75-100, 100-150, 150-inf).
+            on_sale: Only items on sale.
+            filters: Any filter from a previous response: {facets[].id: facets[].values[].value, or a list of values}. Values of one filter are OR, filters combine (AND). E.g. {'mensShoesSize': '10.0'}, {'womensShoesSize': '8.0'}, {'style': 'Casual Sneakers'}, {'sport': 'Running'}, {'eligibleForDiscount': 'True'}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_deals", {"type": type, "country": country, "language": language, "brand": brand, "page": page, "sort": sort, "gender": gender, "color": color, "price_range": price_range, "on_sale": on_sale, "filters": filters}, extra)
+
+    async def releases(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "gb"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        status: Optional[Literal["all", "upcoming", "launched"]] = None,
+        date_from: Optional[str] = None,
+        date_to: Optional[str] = None,
+        brand: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Foot Locker sneaker release calendar as monitoring data (us, ca, gb): sku, title, brand, colorway (style), style_code, gender, launch_at, online_at, heat_level, in_stock, image, url, retail_price and currency (us and ca; gb has no prices), the reservation status and windows where the storefront runs them (status open / closed / store_only, starts_at, ends_at, assignment_at, awarding_at, online_reveal_at, store procedures; not on gb) and sizes (us, eu, uk, participating channels). Also returns total, count and data_as_of. Filter by status (upcoming / launched), a date window and brand. Read-only: nothing here enters, reserves or buys a release.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: us (default), ca or gb.
+            language: ca only: en (default) or fr.
+            status: all (default), upcoming (launch date ahead) or launched.
+            date_from: Only releases launching on or after this ISO date, e.g. '2026-11-01'.
+            date_to: Only releases launching on or before this ISO date, e.g. '2026-12-31'.
+            brand: Only this brand, e.g. 'Nike' (case does not matter).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_releases", {"country": country, "language": language, "status": status, "date_from": date_from, "date_to": date_to, "brand": brand}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        limit: Optional[int] = None,
+        country: Optional[Literal["us"]] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Foot Locker stores near a US ZIP code, a city + state or a point (lat + lng), nearest first (up to 50, default 10, within 25 miles by default, up to 120): store_id, name, name_secondary, address, city, state, ZIP, phone, lat / lng, distance_miles, weekly hours, opened_at, alert and closure notices, and the store page URL. Foot Locker banner stores only (no Kids Foot Locker or Champs). US only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around, e.g. '10001'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles, 1-120. Defaults to 25.
+            limit: Stores to return, nearest first, 1-50. Defaults to 10.
+            country: us only (the only storefront this endpoint covers).
+            city: US city (with state), instead of zip, e.g. 'Atlanta'.
+            state: 2-letter US state code (with city), e.g. 'GA'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_stores", {"zip": zip, "lat": lat, "lng": lng, "radius": radius, "limit": limit, "country": country, "city": city, "state": state}, extra)
+
+    async def store_availability(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        size: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius: Optional[int] = None,
+        limit: Optional[int] = None,
+        country: Optional[Literal["us"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Which Foot Locker stores near a US ZIP code or a point (lat + lng) show a product (or one size) as available: each store (as in stores()) with available and sizes_available, plus per size whether it ships online, can be picked up and in how many of the listed stores it shows (stores_in_results), and stores_with_availability. Yes / no only: Foot Locker publishes no unit counts. Foot Locker banner stores only. US only, prices in USD. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Foot Locker SKU: a search result's id, the last part of a product URL (Q5495005 in the US, 12 digits such as 316707025504 in Europe).
+            url: A Foot Locker product URL on any covered storefront (its storefront and SKU are used). Alternative to product_id.
+            size: One size as product() sizes[].size lists it (10.0, 10, XL). Without it, every size.
+            zip: US ZIP code to search around, e.g. '10001'.
+            lat: Latitude (with lng), instead of zip.
+            lng: Longitude (with lat).
+            radius: Search radius in miles, 1-120. Defaults to 25.
+            limit: Stores to return, nearest first, 1-50. Defaults to 10.
+            country: us only (the only storefront this endpoint covers).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_store_availability", {"product_id": product_id, "url": url, "size": size, "zip": zip, "lat": lat, "lng": lng, "radius": radius, "limit": limit, "country": country}, extra)
+
+    async def reviews(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us"]] = None,
+        sort: Optional[Literal["most_recent", "most_helpful", "highest_rating", "lowest_rating", "relevance"]] = None,
+        rating: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Foot Locker (US) product by SKU or URL, 1-98 per call (default 38), sorted most recent (default), most helpful, highest or lowest rating, or relevance, optionally only one star rating. Returns the review statistics: total_reviews (every language), displayed_reviews (the English reviews the site pages through), average_rating, rating_distribution, recommended_percent, secondary rating averages (fit, comfort, quality...) and photo_count, plus matching_reviews. Each review has id, rating, title, text, author nickname, submitted_at, recommended, helpful and unhelpful votes, verified_purchaser, incentivized, syndicated and its source, secondary ratings, photos, videos and the brand's response. Reviewer age, gender, location and IP are never returned. More reviews take longer (about 4 s per 30). Slow: usually 25-90 s, up to about 3-4 minutes when a call is retried; failed calls are not charged. A product without an online page is a charged 404. US only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Foot Locker SKU: a search result's id, the last part of a product URL (Q5495005 in the US, 12 digits such as 316707025504 in Europe).
+            url: A Foot Locker product URL on any covered storefront (its storefront and SKU are used). Alternative to product_id.
+            country: us only (the only storefront this endpoint covers).
+            sort: most_recent (default), most_helpful, highest_rating, lowest_rating or relevance.
+            rating: Only reviews with this many stars (1-5).
+            limit: Reviews to return, 1-98. Defaults to 38.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_reviews", {"product_id": product_id, "url": url, "country": country, "sort": sort, "rating": rating, "limit": limit}, extra)
+
+    async def questions(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Shopper questions about one Foot Locker (US) product by SKU or URL, 1-50 per call (default 10), newest answered first, with every answer: question, details, author, submitted_at, answer_count, helpful votes, and per answer its text, author, author_type (brand, retailer or customer), best-answer flag, date and votes. Also returns total_questions. Slow: usually 25-90 s, up to about 3-4 minutes when a call is retried; failed calls are not charged. A product without an online page is a charged 404. US only.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Foot Locker SKU: a search result's id, the last part of a product URL (Q5495005 in the US, 12 digits such as 316707025504 in Europe).
+            url: A Foot Locker product URL on any covered storefront (its storefront and SKU are used). Alternative to product_id.
+            country: us only (the only storefront this endpoint covers).
+            limit: Questions to return, 1-50. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("footlocker_questions", {"product_id": product_id, "url": url, "country": country, "limit": limit}, extra)
 
 class _AsyncTrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

@@ -2820,3 +2820,139 @@ def test_dicks_credits_paths_and_wire(monkeypatch):
         d.category(sort="featured")
     with pytest.raises(ScavioError):
         d.store_availability(["25535758"])
+
+
+def test_footlocker_credits_paths_and_wire(monkeypatch):
+    """footlocker (0.48.0): 10 endpoints on /api/v1/footlocker, 1 credit each.
+
+    search, product, category, brand and deals take country (13 storefronts)
+    and language; releases takes us / ca / gb and maps date_from / date_to to
+    the wire's from / to; stores, store_availability, reviews and questions
+    are US only. store_availability maps to the hyphenated /store-availability
+    path; filters is a dict of facet id to value(s); 120 s timeout floor, 240 s
+    for the slow reviews and questions.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "footlocker"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "category",
+            "brand",
+            "deals",
+            "releases",
+            "stores",
+            "store_availability",
+            "reviews",
+            "questions",
+        ]
+    )
+    for m, ep in eps.items():
+        slow = m in ("reviews", "questions")
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/footlocker/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == (240.0 if slow else 120.0), ep.key
+        assert any(p.name == "country" for p in ep.params), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    f = client.footlocker
+    f.search(
+        "nike dunk",
+        country="be",
+        language="fr",
+        brand=["Nike", "Jordan"],
+        sort="price_low_to_high",
+        gender="Men's",
+        on_sale=True,
+        filters={"mensShoesSize": "10.0"},
+    )
+    f.product(product_id="Q5495005")
+    f.product(url="https://www.footlocker.de/de/product/~/316707025504.html", country="de")
+    f.category(path="/category/mens/shoes.html", page=2)
+    f.category(collection_id="men-s-shoes", country="gb")
+    f.brand(brand="New Balance", query="running shoes")
+    f.deals(type="exclusives", country="ca", language="fr")
+    f.releases(
+        country="gb", status="upcoming", date_from="2026-11-01", date_to="2026-12-31", brand="Nike"
+    )
+    f.stores(city="Atlanta", state="GA", limit=5)
+    f.store_availability(product_id="W2288111", size="10.0", zip="10001", radius=25)
+    f.reviews(product_id="Q5495005", sort="lowest_rating", rating=1, limit=98)
+    f.questions(url="https://www.footlocker.com/product/~/Q5495005.html", limit=50)
+    base = "/api/v1/footlocker/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "nike dunk",
+                "country": "be",
+                "language": "fr",
+                "brand": ["Nike", "Jordan"],
+                "sort": "price_low_to_high",
+                "gender": "Men's",
+                "on_sale": True,
+                "filters": {"mensShoesSize": "10.0"},
+            },
+            120.0,
+        ),
+        (base + "product", {"product_id": "Q5495005"}, 120.0),
+        (
+            base + "product",
+            {"url": "https://www.footlocker.de/de/product/~/316707025504.html", "country": "de"},
+            120.0,
+        ),
+        (base + "category", {"path": "/category/mens/shoes.html", "page": 2}, 120.0),
+        (base + "category", {"collection_id": "men-s-shoes", "country": "gb"}, 120.0),
+        (base + "brand", {"brand": "New Balance", "query": "running shoes"}, 120.0),
+        (base + "deals", {"type": "exclusives", "country": "ca", "language": "fr"}, 120.0),
+        (
+            base + "releases",
+            {
+                "country": "gb",
+                "status": "upcoming",
+                "from": "2026-11-01",
+                "to": "2026-12-31",
+                "brand": "Nike",
+            },
+            120.0,
+        ),
+        (base + "stores", {"city": "Atlanta", "state": "GA", "limit": 5}, 120.0),
+        (
+            base + "store-availability",
+            {"product_id": "W2288111", "size": "10.0", "zip": "10001", "radius": 25},
+            120.0,
+        ),
+        (
+            base + "reviews",
+            {"product_id": "Q5495005", "sort": "lowest_rating", "rating": 1, "limit": 98},
+            240.0,
+        ),
+        (
+            base + "questions",
+            {"url": "https://www.footlocker.com/product/~/Q5495005.html", "limit": 50},
+            240.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        f.product(country="de")
+    with pytest.raises(ScavioError):
+        f.category(sort="top_rated")
+    with pytest.raises(ScavioError):
+        f.brand(query="running")
+    with pytest.raises(ScavioError):
+        f.stores(radius=10)
+    with pytest.raises(ScavioError):
+        f.store_availability(product_id="W2288111")
+    with pytest.raises(ScavioError):
+        f.reviews(sort="most_recent")
+    with pytest.raises(ScavioError):
+        f.questions(limit=10)
