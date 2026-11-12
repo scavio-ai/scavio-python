@@ -71,6 +71,7 @@ __all__ = [
     "_DicksNamespace",
     "_FootlockerNamespace",
     "_FanaticsNamespace",
+    "_CarrefourNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -9999,6 +10000,268 @@ class _FanaticsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("fanatics_reviews", {"product_id": product_id, "url": url, "country": country, "sort": sort, "rating": rating, "limit": limit}, extra)
+
+class _CarrefourNamespace:
+    """Carrefour grocery search with national or store-level prices, product detail with Nutri-Score, ingredients and nutrition, reviews, category and promotion listings, suggestions, store locator, store availability and store detail with fuel prices (carrefour.fr; search and product also on Argentina, Romania and Belgium)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["fr", "ar", "ro", "be"]] = None,
+        language: Optional[Literal["fr", "nl"]] = None,
+        store: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "unit_price_low_to_high", "unit_price_high_to_low", "top_rated"]] = None,
+        brand: Optional[str] = None,
+        nutriscore: Optional[Literal["A", "B", "C", "D", "E"]] = None,
+        organic: Optional[bool] = None,
+        carrefour_brands: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        promotion: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Carrefour grocery and household products by keyword: carrefour.fr with every filter (brand, promotion, Nutri-Score, organic, Carrefour brands, price range), sorts by price, unit price or rating, and store-scoped prices; also the Argentina (ARS), Romania (RON) and Belgium (EUR, French or Dutch) sites, which return the fields their site carries (no facets or store scope). Misspellings come back corrected (corrected_query); when nothing matches results_type is 'fallback'. Items with ean (for product(), reviews() and store_availability()), title, brand, url, image, type (product or marketplace), sponsored, price (regular price), unit_price with unit and unit_price_label (price per kg / L), packaging, format, nutriscore (A-E), ecoscore, rating, review_count, available, low_stock, promotion (type, label, loyalty_only: the price needs the Carrefour loyalty card, seen_in_catalogue, discounted_price, initial_price, discount_amount, quantity, starts_at, ends_at; on multi-buy deals such as 'Le 2ème à -50%' initial_price and discounted_price cover quantity items, and discounted_price is null when the site does not price the deal), seller (marketplace items) and category. Also total, total_pages, page, page_size, every facet (id, label, values with label, count and selected), store, price_scope, country, language and currency. Prices: without store, carrefour.fr's national online price; with store, that store's shelf price and assortment (they differ by store: Nutella 400 g was 3.99 national, 3.69 at two stores and 4.61 at another). The response says which (store, price_scope). Titles and labels come in French on fr, as the site writes them. Markets: fr (carrefour.fr, EUR, every endpoint, default), ar (Argentina, ARS, Spanish), ro (Romania, RON, Romanian) or be (Belgium, EUR, language fr or nl; 2 credits). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit, or 2 when country is 'be'. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'nutella' or 'lait'. Misspellings are corrected by the site on fr (corrected_query).
+            country: The national site: fr (carrefour.fr, EUR, every endpoint, default), ar (Argentina, ARS, Spanish), ro (Romania, RON, Romanian) or be (Belgium, EUR, language fr or nl; 2 credits). Defaults to fr. Titles come in the market's language, prices in its currency.
+            language: be only: fr (default) or nl.
+            store: fr only: price and assortment at one store. A store_ref or pickup_refs[].ref from stores(), or stores[].store.ref from store_availability(), e.g. '840093'. Without it prices are the national online price.
+            page: Results page, 1-based (up to 500). Defaults to 1. 30 items per page on fr (ar and ro 24, be 36).
+            sort: relevance (default), price_low_to_high, price_high_to_low, unit_price_low_to_high, unit_price_high_to_low or top_rated. ar and ro: relevance and the two price sorts; be: relevance.
+            brand: fr: one brand as the Marque facet lists it (facets[id=facet_marque].values[].label, e.g. NUTELLA, CARREFOUR BIO). Another casing is matched to the facet's own.
+            nutriscore: fr: only this Nutri-Score.
+            organic: fr: only organic products.
+            carrefour_brands: fr: only Carrefour's own brands.
+            min_price: fr: lowest price in EUR.
+            max_price: fr: highest price in EUR.
+            promotion: fr: one value of the Promotions facet (facets[id=facet_promotions]): Toutes les promotions, Remises immédiates, Vu en catalogue, Avantage Fidélité...
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_search", {"query": query, "country": country, "language": language, "store": store, "page": page, "sort": sort, "brand": brand, "nutriscore": nutriscore, "organic": organic, "carrefour_brands": carrefour_brands, "min_price": min_price, "max_price": max_price, "promotion": promotion}, extra)
+
+    def product(
+        self,
+        *,
+        ean: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr", "ar", "ro", "be"]] = None,
+        language: Optional[Literal["fr", "nl"]] = None,
+        store: Optional[Union[str, int]] = None,
+        seller: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Carrefour product by EAN or URL. On fr: title, brand, description, key features, breadcrumb, categories, images, packaging, format, origin, Nutri-Score, Eco-Score, regulated name, ingredients, allergens (as written in capitals in the ingredients), nutrition per 100 g / ml and per portion (with daily value %), storage and advice, characteristics (non-food), weights, the price block (price, unit price, tax note, promotion with loyalty_only), availability, the marketplace seller and every offer, and the rating (average, count, distribution). Prices: without store, carrefour.fr's national online price; with store, that store's shelf price and assortment (they differ by store: Nutella 400 g was 3.99 national, 3.69 at two stores and 4.61 at another). The response says which (store, price_scope). Titles and labels come in French on fr, as the site writes them. ar (by EAN or URL), ro and be (by URL only) return title, brand, price, list price, promotion, unit price, availability, description, images and categories as their site gives them. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit, or 2 when country is 'be'. Returns the API response as a dict.
+
+        Args:
+            ean: The product barcode (EAN / GTIN): items[].ean of a search, e.g. '3017620422003'. fr and ar.
+            url: A product URL (items[].url of a search). Alternative to ean on fr and ar; required on ro and be.
+            country: The national site: fr (carrefour.fr, EUR, every endpoint, default), ar (Argentina, ARS, Spanish), ro (Romania, RON, Romanian) or be (Belgium, EUR, language fr or nl; 2 credits). Defaults to fr. Titles come in the market's language, prices in its currency.
+            language: be only: fr (default) or nl.
+            store: fr only: price and assortment at one store. A store_ref or pickup_refs[].ref from stores(), or stores[].store.ref from store_availability(), e.g. '840093'. Without it prices are the national online price.
+            seller: fr: a marketplace seller id (items[].seller.id) to read that seller's offer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_product", {"ean": ean, "url": url, "country": country, "language": language, "store": store, "seller": seller}, extra)
+
+    def reviews(
+        self,
+        ean: str,
+        *,
+        country: Optional[Literal["fr"]] = None,
+        sort: Optional[Literal["most_recent", "oldest", "highest_rated", "lowest_rated"]] = None,
+        rating: Optional[int] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Verified-purchase customer reviews of one carrefour.fr product by EAN, 1-50 per call (default 10), sorted most recent (default), oldest, highest or lowest rated, optionally only one star rating, with offset paging: total, has_more and per review author (public first name and last initial, as published), rating, title, text, reviewed_at, purchased_at and source (the verified-review provider). Review text is in French. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            ean: The product barcode (EAN / GTIN): items[].ean of a search, e.g. '3017620422003'.
+            country: fr only (carrefour.fr).
+            sort: most_recent (default), oldest, highest_rated or lowest_rated.
+            rating: Only reviews with this many stars (1-5).
+            limit: Reviews to return, 1-50. Defaults to 10.
+            offset: Reviews to skip (paging). Defaults to 0.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_reviews", {"ean": ean, "country": country, "sort": sort, "rating": rating, "limit": limit, "offset": offset}, extra)
+
+    def category(
+        self,
+        *,
+        url: Optional[str] = None,
+        path: Optional[str] = None,
+        country: Optional[Literal["fr"]] = None,
+        store: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "unit_price_low_to_high", "unit_price_high_to_low", "top_rated"]] = None,
+        brand: Optional[str] = None,
+        nutriscore: Optional[Literal["A", "B", "C", "D", "E"]] = None,
+        organic: Optional[bool] = None,
+        carrefour_brands: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        promotion: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A carrefour.fr category (aisle) grid by URL or path (/r/cremerie, /r/epicerie-sucree/petit-dejeuner), with the same filters and sorts as search() and the category's label, path, url and breadcrumb. A product's breadcrumb[].url is a valid path. Items with ean (for product(), reviews() and store_availability()), title, brand, url, image, type (product or marketplace), sponsored, price (regular price), unit_price with unit and unit_price_label (price per kg / L), packaging, format, nutriscore (A-E), ecoscore, rating, review_count, available, low_stock, promotion (type, label, loyalty_only: the price needs the Carrefour loyalty card, seen_in_catalogue, discounted_price, initial_price, discount_amount, quantity, starts_at, ends_at; on multi-buy deals such as 'Le 2ème à -50%' initial_price and discounted_price cover quantity items, and discounted_price is null when the site does not price the deal), seller (marketplace items) and category. Also total, total_pages, page, page_size, every facet (id, label, values with label, count and selected), store, price_scope, country, language and currency. Prices: without store, carrefour.fr's national online price; with store, that store's shelf price and assortment (they differ by store: Nutella 400 g was 3.99 national, 3.69 at two stores and 4.61 at another). The response says which (store, price_scope). Titles and labels come in French on fr, as the site writes them. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A carrefour.fr category page URL (/r/...), e.g. 'https://www.carrefour.fr/r/cremerie'. Alternative to path.
+            path: The category path ('/r/cremerie', '/r/epicerie-sucree/petit-dejeuner') or its slug ('cremerie'): a breadcrumb[].url of a product. Alternative to url.
+            country: fr only (carrefour.fr).
+            store: fr only: price and assortment at one store. A store_ref or pickup_refs[].ref from stores(), or stores[].store.ref from store_availability(), e.g. '840093'. Without it prices are the national online price.
+            page: Results page, 1-based (up to 500). Defaults to 1. 30 items per page on fr (ar and ro 24, be 36).
+            sort: relevance (default), price_low_to_high, price_high_to_low, unit_price_low_to_high, unit_price_high_to_low or top_rated. ar and ro: relevance and the two price sorts; be: relevance.
+            brand: fr: one brand as the Marque facet lists it (facets[id=facet_marque].values[].label, e.g. NUTELLA, CARREFOUR BIO). Another casing is matched to the facet's own.
+            nutriscore: fr: only this Nutri-Score.
+            organic: fr: only organic products.
+            carrefour_brands: fr: only Carrefour's own brands.
+            min_price: fr: lowest price in EUR.
+            max_price: fr: highest price in EUR.
+            promotion: fr: one value of the Promotions facet (facets[id=facet_promotions]): Toutes les promotions, Remises immédiates, Vu en catalogue, Avantage Fidélité...
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_category", {"url": url, "path": path, "country": country, "store": store, "page": page, "sort": sort, "brand": brand, "nutriscore": nutriscore, "organic": organic, "carrefour_brands": carrefour_brands, "min_price": min_price, "max_price": max_price, "promotion": promotion}, extra)
+
+    def promotions(
+        self,
+        *,
+        type: Optional[Literal["all", "catalogue", "immediate", "loyalty", "festive"]] = None,
+        category: Optional[str] = None,
+        country: Optional[Literal["fr"]] = None,
+        store: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "unit_price_low_to_high", "unit_price_high_to_low", "top_rated"]] = None,
+        brand: Optional[str] = None,
+        nutriscore: Optional[Literal["A", "B", "C", "D", "E"]] = None,
+        organic: Optional[bool] = None,
+        carrefour_brands: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """carrefour.fr items on promotion: all (default), catalogue (seen in the printed catalogue), immediate (immediate discounts), loyalty (loyalty-card offers, i.e. member prices) or festive (the site's seasonal festive selection), optionally for one aisle, with the search filters and sorts. Each promotion carries type, label, loyalty_only, discounted_price and initial_price (discounted_price is null when the site does not price the deal, as on some multi-buy offers), and its start and end dates. Not the printed leaflet itself and no price history: to track promotions over time, poll and store your own. Items with ean (for product(), reviews() and store_availability()), title, brand, url, image, type (product or marketplace), sponsored, price (regular price), unit_price with unit and unit_price_label (price per kg / L), packaging, format, nutriscore (A-E), ecoscore, rating, review_count, available, low_stock, promotion (type, label, loyalty_only: the price needs the Carrefour loyalty card, seen_in_catalogue, discounted_price, initial_price, discount_amount, quantity, starts_at, ends_at; on multi-buy deals such as 'Le 2ème à -50%' initial_price and discounted_price cover quantity items, and discounted_price is null when the site does not price the deal), seller (marketplace items) and category. Also total, total_pages, page, page_size, every facet (id, label, values with label, count and selected), store, price_scope, country, language and currency. Prices: without store, carrefour.fr's national online price; with store, that store's shelf price and assortment (they differ by store: Nutella 400 g was 3.99 national, 3.69 at two stores and 4.61 at another). The response says which (store, price_scope). Titles and labels come in French on fr, as the site writes them. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: all (default), catalogue (Vu en catalogue), immediate (Remises immédiates), loyalty (Avantage Fidélité) or festive (Sélection festive).
+            category: Only one aisle: a value of the Rayons facet (facets[id=product.categories.name].values[].label), e.g. 'Boissons'.
+            country: fr only (carrefour.fr).
+            store: fr only: price and assortment at one store. A store_ref or pickup_refs[].ref from stores(), or stores[].store.ref from store_availability(), e.g. '840093'. Without it prices are the national online price.
+            page: Results page, 1-based (up to 500). Defaults to 1. 30 items per page on fr (ar and ro 24, be 36).
+            sort: relevance (default), price_low_to_high, price_high_to_low, unit_price_low_to_high, unit_price_high_to_low or top_rated. ar and ro: relevance and the two price sorts; be: relevance.
+            brand: fr: one brand as the Marque facet lists it (facets[id=facet_marque].values[].label, e.g. NUTELLA, CARREFOUR BIO). Another casing is matched to the facet's own.
+            nutriscore: fr: only this Nutri-Score.
+            organic: fr: only organic products.
+            carrefour_brands: fr: only Carrefour's own brands.
+            min_price: fr: lowest price in EUR.
+            max_price: fr: highest price in EUR.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_promotions", {"type": type, "category": category, "country": country, "store": store, "page": page, "sort": sort, "brand": brand, "nutriscore": nutriscore, "organic": organic, "carrefour_brands": carrefour_brands, "min_price": min_price, "max_price": max_price}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """carrefour.fr search box suggestions for a partial query: suggestions (text, url) and category suggestions (category, text, url), in French. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a shopper has typed so far, e.g. 'nutel'.
+            country: fr only (carrefour.fr).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_suggestions", {"query": query, "country": country}, extra)
+
+    def stores(
+        self,
+        *,
+        postal_code: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        service: Optional[Literal["drive", "lad", "Retrait2h-drive", "station_service", "banque_assurance", "spectacles", "voyages", "location_vehicule", "traiteur", "Parapharmacie", "pro"]] = None,
+        country: Optional[Literal["fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Carrefour stores in France near a postal code or a point (lat + lng), nearest first (up to 20 per page), optionally only those with one service (drive, home delivery, fuel station...). Each store has id, store_ref and pickup_refs (pass either as store on search(), product(), category() or promotions() for that store's prices), name, banner, format, distance_km, address, lat, lng, open_today and today's opening hours, slug (for store()) and store_url. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            postal_code: A French postal code, e.g. '69003'. Alternative to lat + lng.
+            lat: Latitude (metropolitan France), with lng.
+            lng: Longitude, with lat.
+            page: Page of stores, 1-based (up to 50).
+            limit: Stores per page, 1-20. Defaults to 10.
+            service: Only stores with this service: drive, lad (home delivery), Retrait2h-drive, station_service (fuel station), banque_assurance, spectacles, voyages, location_vehicule, traiteur, Parapharmacie or pro.
+            country: fr only (carrefour.fr).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_stores", {"postal_code": postal_code, "lat": lat, "lng": lng, "page": page, "limit": limit, "service": service, "country": country}, extra)
+
+    def store_availability(
+        self,
+        ean: str,
+        postal_code: str,
+        *,
+        country: Optional[Literal["fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Whether the Carrefour stores around a French postal code carry one product (EAN): count, available_count and per store available yes / no, distance_km and the store (id, ref, pickup_refs, name, banner, format, address, lat, lng, phone, weekly opening hours and drive hours, slug, store_url). Availability only, no price and no unit count: for a store's price call search() or product() with store set to stores[].store.ref. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            ean: The product barcode (EAN / GTIN): items[].ean of a search, e.g. '3017620422003'.
+            postal_code: A French postal code, e.g. '69003': stores around it are checked.
+            country: fr only (carrefour.fr).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_store_availability", {"ean": ean, "postal_code": postal_code, "country": country}, extra)
+
+    def store(
+        self,
+        *,
+        slug: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Carrefour store in France by slug or URL: name, banner, format, type, status, address, lat, lng, phone, services, weekly opening hours and drive hours, the next pickup slots as shown, delivery and express delivery flags, nearby stores and, at stores with a fuel station, fuel prices per litre (Gazole, SP95, SP95-E10, SP98, E85, GPLc) with their update times (fuel is None elsewhere). No delivery-slot booking. fr only (carrefour.fr). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A store page slug: stores[].slug from stores(), e.g. 'venissieux' or 'lyon-part-dieu'. Alternative to url.
+            url: A carrefour.fr/magasin/... store page URL, e.g. 'https://www.carrefour.fr/magasin/venissieux'. Alternative to slug.
+            country: fr only (carrefour.fr).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefour_store", {"slug": slug, "url": url, "country": country}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

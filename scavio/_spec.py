@@ -876,6 +876,91 @@ def _fanatics_id(name: str, doc: str) -> Param:
     return _str_or_int(name, doc)
 
 
+# Carrefour params shared across endpoints (carrefour.fr + ar / ro / be for search and product).
+_CARREFOUR_MARKETS = (
+    "fr (carrefour.fr, EUR, every endpoint, default), ar (Argentina, ARS, Spanish), ro (Romania, "
+    "RON, Romanian) or be (Belgium, EUR, language fr or nl; 2 credits)"
+)
+_CARREFOUR_COUNTRY = _lit(
+    "country",
+    ("fr", "ar", "ro", "be"),
+    "The national site: " + _CARREFOUR_MARKETS + ". Defaults to fr. Titles come in the market's "
+    "language, prices in its currency.",
+)
+_CARREFOUR_FR = _lit("country", ("fr",), "fr only (carrefour.fr).")
+_CARREFOUR_LANGUAGE = _lit("language", ("fr", "nl"), "be only: fr (default) or nl.")
+_CARREFOUR_STORE = _str_or_int(
+    "store",
+    "fr only: price and assortment at one store. A store_ref or pickup_refs[].ref from stores(), "
+    "or stores[].store.ref from store_availability(), e.g. '840093'. Without it prices are the "
+    "national online price.",
+)
+_CARREFOUR_PAGE = _int(
+    "page", "Results page, 1-based (up to 500). Defaults to 1. 30 items per page on fr (ar and ro 24, be 36)."
+)
+_CARREFOUR_SORT = _lit(
+    "sort",
+    (
+        "relevance",
+        "price_low_to_high",
+        "price_high_to_low",
+        "unit_price_low_to_high",
+        "unit_price_high_to_low",
+        "top_rated",
+    ),
+    "relevance (default), price_low_to_high, price_high_to_low, unit_price_low_to_high, "
+    "unit_price_high_to_low or top_rated. ar and ro: relevance and the two price sorts; be: "
+    "relevance.",
+)
+_CARREFOUR_FILTERS = (
+    _str(
+        "brand",
+        "fr: one brand as the Marque facet lists it (facets[id=facet_marque].values[].label, e.g. "
+        "NUTELLA, CARREFOUR BIO). Another casing is matched to the facet's own.",
+    ),
+    _lit("nutriscore", ("A", "B", "C", "D", "E"), "fr: only this Nutri-Score."),
+    _bool("organic", "fr: only organic products."),
+    _bool("carrefour_brands", "fr: only Carrefour's own brands."),
+    _float("min_price", "fr: lowest price in EUR."),
+    _float("max_price", "fr: highest price in EUR."),
+)
+_CARREFOUR_PROMOTION_FILTER = _str(
+    "promotion",
+    "fr: one value of the Promotions facet (facets[id=facet_promotions]): Toutes les promotions, "
+    "Remises immédiates, Vu en catalogue, Avantage Fidélité...",
+)
+_CARREFOUR_GRID_FIELDS = (
+    " Items with ean (for product(), reviews() and store_availability()), title, brand, url, "
+    "image, type (product or marketplace), sponsored, price (regular price), unit_price with unit "
+    "and unit_price_label (price per kg / L), packaging, format, nutriscore (A-E), ecoscore, "
+    "rating, review_count, available, low_stock, promotion (type, label, loyalty_only: the price "
+    "needs the Carrefour loyalty card, seen_in_catalogue, discounted_price, initial_price, "
+    "discount_amount, quantity, starts_at, ends_at; on multi-buy deals such as 'Le 2ème à -50%' "
+    "initial_price and discounted_price cover quantity items, and discounted_price is null when "
+    "the site does not price the deal), seller (marketplace items) and category. Also total, "
+    "total_pages, page, page_size, every facet (id, label, values with label, count and "
+    "selected), store, price_scope, country, language and currency."
+)
+_CARREFOUR_SCOPE = (
+    " Prices: without store, carrefour.fr's national online price; with store, that store's "
+    "shelf price and assortment (they differ by store: Nutella 400 g was 3.99 national, 3.69 at "
+    "two stores and 4.61 at another). The response says which (store, price_scope). Titles and "
+    "labels come in French on fr, as the site writes them."
+)
+_CARREFOUR_CHARGE = (
+    " Failed upstream calls are not charged (they are retried automatically); a not-found is "
+    "charged."
+)
+_CARREFOUR_FR_NOTE = " fr only (carrefour.fr)."
+
+
+def _carrefour_ean(doc: str = "") -> Param:
+    return _req(
+        "ean",
+        "The product barcode (EAN / GTIN): items[].ean of a search, e.g. '3017620422003'." + doc,
+    )
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -11760,6 +11845,313 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=300.0,
     ),
+    # ============================== Carrefour ============================
+    # carrefour.fr (every endpoint) + Argentina, Romania and Belgium (search
+    # and product), 9 endpoints, 1 credit each; be search / product cost 2.
+    # store (fr) scopes prices and assortment to one store. 120 s timeout
+    # floor (store-scoped and retried calls can take longer than 30 s).
+    Endpoint(
+        key="carrefour_search",
+        namespace="carrefour",
+        method="search",
+        http="POST",
+        path="/api/v1/carrefour/search",
+        summary=(
+            "Search Carrefour grocery and household products by keyword: carrefour.fr with every "
+            "filter (brand, promotion, Nutri-Score, organic, Carrefour brands, price range), sorts "
+            "by price, unit price or rating, and store-scoped prices; also the Argentina (ARS), "
+            "Romania (RON) and Belgium (EUR, French or Dutch) sites, which return the fields "
+            "their site carries (no facets or store scope). Misspellings come back corrected "
+            "(corrected_query); when nothing matches results_type is 'fallback'."
+            + _CARREFOUR_GRID_FIELDS
+            + _CARREFOUR_SCOPE
+            + " Markets: "
+            + _CARREFOUR_MARKETS
+            + "."
+            + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search keywords, e.g. 'nutella' or 'lait'. Misspellings are corrected by the site "
+                "on fr (corrected_query).",
+            ),
+            _CARREFOUR_COUNTRY,
+            _CARREFOUR_LANGUAGE,
+            _CARREFOUR_STORE,
+            _CARREFOUR_PAGE,
+            _CARREFOUR_SORT,
+            *_CARREFOUR_FILTERS,
+            _CARREFOUR_PROMOTION_FILTER,
+        ),
+        credits=1,
+        credits_note="Costs 1 credit, or 2 when country is 'be'.",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_product",
+        namespace="carrefour",
+        method="product",
+        http="POST",
+        path="/api/v1/carrefour/product",
+        summary=(
+            "One Carrefour product by EAN or URL. On fr: title, brand, description, key "
+            "features, breadcrumb, categories, images, packaging, format, origin, Nutri-Score, "
+            "Eco-Score, regulated name, ingredients, allergens (as written in capitals in the "
+            "ingredients), nutrition per 100 g / ml and per portion (with daily value %), storage "
+            "and advice, characteristics (non-food), weights, the price block (price, unit price, "
+            "tax note, promotion with loyalty_only), availability, the marketplace seller and "
+            "every offer, and the rating (average, count, distribution)."
+            + _CARREFOUR_SCOPE
+            + " ar (by EAN or URL), ro and be (by URL only) return title, brand, price, list "
+            "price, promotion, unit price, availability, description, images and categories as "
+            "their site gives them."
+            + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _str(
+                "ean",
+                "The product barcode (EAN / GTIN): items[].ean of a search, e.g. '3017620422003'. "
+                "fr and ar.",
+            ),
+            _str(
+                "url",
+                "A product URL (items[].url of a search). Alternative to ean on fr and ar; "
+                "required on ro and be.",
+            ),
+            _CARREFOUR_COUNTRY,
+            _CARREFOUR_LANGUAGE,
+            _CARREFOUR_STORE,
+            _str_or_int(
+                "seller",
+                "fr: a marketplace seller id (items[].seller.id) to read that seller's offer.",
+            ),
+        ),
+        one_of=(("ean", "url"),),
+        credits=1,
+        credits_note="Costs 1 credit, or 2 when country is 'be'.",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_reviews",
+        namespace="carrefour",
+        method="reviews",
+        http="POST",
+        path="/api/v1/carrefour/reviews",
+        summary=(
+            "Verified-purchase customer reviews of one carrefour.fr product by EAN, 1-50 per call "
+            "(default 10), sorted most recent (default), oldest, highest or lowest rated, "
+            "optionally only one star rating, with offset paging: total, has_more and per review "
+            "author (public first name and last initial, as published), rating, title, text, "
+            "reviewed_at, purchased_at and source (the verified-review provider). Review text is "
+            "in French." + _CARREFOUR_FR_NOTE + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _carrefour_ean(),
+            _CARREFOUR_FR,
+            _lit(
+                "sort",
+                ("most_recent", "oldest", "highest_rated", "lowest_rated"),
+                "most_recent (default), oldest, highest_rated or lowest_rated.",
+            ),
+            _int("rating", "Only reviews with this many stars (1-5)."),
+            _int("limit", "Reviews to return, 1-50. Defaults to 10."),
+            _int("offset", "Reviews to skip (paging). Defaults to 0."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_category",
+        namespace="carrefour",
+        method="category",
+        http="POST",
+        path="/api/v1/carrefour/category",
+        summary=(
+            "A carrefour.fr category (aisle) grid by URL or path (/r/cremerie, "
+            "/r/epicerie-sucree/petit-dejeuner), with the same filters and sorts as search() and "
+            "the category's label, path, url and breadcrumb. A product's breadcrumb[].url is a "
+            "valid path." + _CARREFOUR_GRID_FIELDS + _CARREFOUR_SCOPE + _CARREFOUR_FR_NOTE
+            + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _str(
+                "url",
+                "A carrefour.fr category page URL (/r/...), e.g. "
+                "'https://www.carrefour.fr/r/cremerie'. Alternative to path.",
+            ),
+            _str(
+                "path",
+                "The category path ('/r/cremerie', '/r/epicerie-sucree/petit-dejeuner') or its "
+                "slug ('cremerie'): a breadcrumb[].url of a product. Alternative to url.",
+            ),
+            _CARREFOUR_FR,
+            _CARREFOUR_STORE,
+            _CARREFOUR_PAGE,
+            _CARREFOUR_SORT,
+            *_CARREFOUR_FILTERS,
+            _CARREFOUR_PROMOTION_FILTER,
+        ),
+        one_of=(("url", "path"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_promotions",
+        namespace="carrefour",
+        method="promotions",
+        http="POST",
+        path="/api/v1/carrefour/promotions",
+        summary=(
+            "carrefour.fr items on promotion: all (default), catalogue (seen in the printed "
+            "catalogue), immediate (immediate discounts), loyalty (loyalty-card offers, i.e. "
+            "member prices) or festive (the site's seasonal festive selection), optionally for "
+            "one aisle, with the search filters and sorts. Each promotion carries type, label, "
+            "loyalty_only, discounted_price and initial_price (discounted_price is null when the site "
+            "does not price the deal, as on some multi-buy offers), and its start and end dates. Not the printed leaflet itself and "
+            "no price history: to track promotions over time, poll and store your own."
+            + _CARREFOUR_GRID_FIELDS
+            + _CARREFOUR_SCOPE
+            + _CARREFOUR_FR_NOTE
+            + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("all", "catalogue", "immediate", "loyalty", "festive"),
+                "all (default), catalogue (Vu en catalogue), immediate (Remises immédiates), "
+                "loyalty (Avantage Fidélité) or festive (Sélection festive).",
+            ),
+            _str(
+                "category",
+                "Only one aisle: a value of the Rayons facet "
+                "(facets[id=product.categories.name].values[].label), e.g. 'Boissons'.",
+            ),
+            _CARREFOUR_FR,
+            _CARREFOUR_STORE,
+            _CARREFOUR_PAGE,
+            _CARREFOUR_SORT,
+            *_CARREFOUR_FILTERS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_suggestions",
+        namespace="carrefour",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/carrefour/suggestions",
+        summary=(
+            "carrefour.fr search box suggestions for a partial query: suggestions (text, url) and "
+            "category suggestions (category, text, url), in French." + _CARREFOUR_FR_NOTE
+            + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _req("query", "What a shopper has typed so far, e.g. 'nutel'."),
+            _CARREFOUR_FR,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_stores",
+        namespace="carrefour",
+        method="stores",
+        http="POST",
+        path="/api/v1/carrefour/stores",
+        summary=(
+            "Carrefour stores in France near a postal code or a point (lat + lng), nearest first "
+            "(up to 20 per page), optionally only those with one service (drive, home delivery, "
+            "fuel station...). Each store has id, store_ref and pickup_refs (pass either as store "
+            "on search(), product(), category() or promotions() for that store's prices), name, "
+            "banner, format, distance_km, address, lat, lng, open_today and today's opening "
+            "hours, slug (for store()) and store_url." + _CARREFOUR_FR_NOTE + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _str("postal_code", "A French postal code, e.g. '69003'. Alternative to lat + lng."),
+            _float("lat", "Latitude (metropolitan France), with lng."),
+            _float("lng", "Longitude, with lat."),
+            _int("page", "Page of stores, 1-based (up to 50)."),
+            _int("limit", "Stores per page, 1-20. Defaults to 10."),
+            _lit(
+                "service",
+                (
+                    "drive",
+                    "lad",
+                    "Retrait2h-drive",
+                    "station_service",
+                    "banque_assurance",
+                    "spectacles",
+                    "voyages",
+                    "location_vehicule",
+                    "traiteur",
+                    "Parapharmacie",
+                    "pro",
+                ),
+                "Only stores with this service: drive, lad (home delivery), Retrait2h-drive, "
+                "station_service (fuel station), banque_assurance, spectacles, voyages, "
+                "location_vehicule, traiteur, Parapharmacie or pro.",
+            ),
+            _CARREFOUR_FR,
+        ),
+        one_of=(("postal_code", "lat"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_store_availability",
+        namespace="carrefour",
+        method="store_availability",
+        http="POST",
+        path="/api/v1/carrefour/store-availability",
+        summary=(
+            "Whether the Carrefour stores around a French postal code carry one product (EAN): "
+            "count, available_count and per store available yes / no, distance_km and the store "
+            "(id, ref, pickup_refs, name, banner, format, address, lat, lng, phone, weekly "
+            "opening hours and drive hours, slug, store_url). Availability only, no price and no "
+            "unit count: for a store's price call search() or product() with store set to "
+            "stores[].store.ref." + _CARREFOUR_FR_NOTE + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _carrefour_ean(),
+            _req("postal_code", "A French postal code, e.g. '69003': stores around it are checked."),
+            _CARREFOUR_FR,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="carrefour_store",
+        namespace="carrefour",
+        method="store",
+        http="POST",
+        path="/api/v1/carrefour/store",
+        summary=(
+            "One Carrefour store in France by slug or URL: name, banner, format, type, status, "
+            "address, lat, lng, phone, services, weekly opening hours and drive hours, the next "
+            "pickup slots as shown, delivery and express delivery flags, nearby stores and, at "
+            "stores with a fuel station, fuel prices per litre (Gazole, SP95, SP95-E10, SP98, "
+            "E85, GPLc) with their update times (fuel is None elsewhere). No delivery-slot "
+            "booking." + _CARREFOUR_FR_NOTE + _CARREFOUR_CHARGE
+        ),
+        params=(
+            _str(
+                "slug",
+                "A store page slug: stores[].slug from stores(), e.g. 'venissieux' or "
+                "'lyon-part-dieu'. Alternative to url.",
+            ),
+            _str(
+                "url",
+                "A carrefour.fr/magasin/... store page URL, e.g. "
+                "'https://www.carrefour.fr/magasin/venissieux'. Alternative to slug.",
+            ),
+            _CARREFOUR_FR,
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -12880,6 +13272,7 @@ NAMESPACES: tuple[str, ...] = (
     "dicks",
     "footlocker",
     "fanatics",
+    "carrefour",
     "trustpilot",
     "realtor",
     "rightmove",

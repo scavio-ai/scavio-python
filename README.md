@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 71 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 72 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -34,6 +34,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
+| Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -2162,6 +2163,94 @@ suggestions, store locator or store stock, Q&A, FanCash, member pricing,
 unit counts, price history or checkout: to track jersey sale prices, poll
 and store your own.
 
+### 39. Grocery -- Carrefour
+
+Carrefour grocery prices by store, promotions, Nutri-Score and stores,
+namespace `carrefour`, 9 endpoints, 1 credit each: `search`, `product`,
+`reviews`, `category`, `promotions`, `suggestions`, `stores`,
+`store_availability`, `store`. carrefour.fr (France) serves every endpoint;
+`search` and `product` also take `country` `ar` (Argentina, ARS), `ro`
+(Romania, RON) or `be` (Belgium, EUR, `language` fr or nl; 2 credits). Data
+comes back in the market's language: French titles, labels and ingredients
+on fr. Without `store` a price is carrefour.fr's national online price; pass
+a store ref from `stores()` (`store_ref` or `pickup_refs[].ref`) or
+`store_availability()` (`stores[].store.ref`) for that store's shelf price
+and assortment. Every method raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cf = client.carrefour
+
+# --- Search: national online price, unit price, promotion, Nutri-Score.
+res = cf.search("nutella")["data"]
+print(res["total"], res["store"], res["price_scope"], res["currency"])
+for item in res["items"][:5]:
+    print(item["ean"], item["title"], item["price"], item["unit_price_label"],
+          item["nutriscore"], item["promotion"])
+
+# --- Stores near a postal code; a store ref scopes prices to that store.
+stores = cf.stores(postal_code="69003")["data"]["stores"]
+for s in stores[:3]:
+    print(s["store_ref"], s["name"], s["banner"], s["distance_km"], s["slug"])
+local = cf.search("nutella", store="840093")["data"]
+print(local["store"], local["price_scope"], local["total"])
+
+# --- One product: ingredients, allergens, nutrition per 100 g, rating.
+p = cf.product(ean="3017620422003")["data"]
+print(p["title"], p["price"], p["unit_price"], p["unit"], p["ecoscore"])
+print(p["ingredients"], p["allergens"])
+for row in p["nutrition"]["per_100"]["values"]:
+    print(row["nutrient"], row["quantity"])
+
+# --- Promotions: catalogue, immediate, loyalty-card (member) or festive.
+promo = cf.promotions(type="loyalty", category="Boissons")["data"]
+for item in promo["items"][:3]:
+    d = item["promotion"]
+    print(item["title"], d["label"], d["loyalty_only"], d["discounted_price"],
+          d["initial_price"], d["ends_at"])
+
+# --- Which nearby stores carry a product (yes / no, no price), store detail with fuel.
+av = cf.store_availability("3017620422003", "69003")["data"]
+print(av["available_count"], [(s["store"]["ref"], s["available"]) for s in av["stores"][:3]])
+st = cf.store(slug="venissieux")["data"]
+print(st["store"]["name"], st["store"]["next_slots"])
+if st["fuel"]:
+    for f in st["fuel"]["prices"]:
+        print(f["fuel"], f["price_per_litre"], f["updated_at"])
+
+# --- Verified-purchase reviews, and other markets (search / product only).
+rv = cf.reviews("8006530256179", sort="lowest_rated", limit=20)["data"]
+print(rv["total"], [(r["author"], r["rating"], r["text"]) for r in rv["reviews"][:2]])
+be = cf.search("chocolat", country="be", language="nl")["data"]
+print(be["country"], be["language"], be["currency"], be["total"])
+```
+
+`search`, `category` and `promotions` share one grid (30 items per page on
+fr; ar and ro 24, be 36) with `total`, `total_pages` and every facet; filter
+by `brand`, `promotion`, `nutriscore`, `organic`, `carrefour_brands` or
+`min_price` / `max_price`, and sort by `relevance`, `price_low_to_high`,
+`price_high_to_low`, `unit_price_low_to_high`, `unit_price_high_to_low` or
+`top_rated` (ar and ro: relevance and the price sorts; be: relevance). Each
+item carries `price`, `unit_price` with `unit_price_label` (per kg / L),
+`nutriscore`, `ecoscore` and `promotion` (`type`, `label`, `loyalty_only` for
+loyalty-card prices, `discounted_price`, `initial_price`, `quantity`,
+`starts_at`, `ends_at`). On multi-buy deals ("Le 2ème à -50%") the prices
+cover `quantity` items and `discounted_price` is None when the site does not
+price the deal. Store prices differ from national ones (Nutella 400 g: 3.99
+national, 3.69 at two stores, 4.61 at another). `reviews` returns 1-50
+verified-purchase reviews (default 10) with 4 sorts, a star filter and
+`offset` paging; authors appear as published (first name and last initial).
+`stores` finds stores by postal code or `lat` / `lng`, optionally with one
+`service` (`drive`, `station_service`...). `store` returns services, weekly
+hours, drive hours, the next pickup slots as shown and, at stores with a fuel
+station, fuel prices per litre with update times. Failed calls are not
+charged; a not-found is a charged 404. No Q&A, printed leaflet,
+delivery-slot booking, cart, loyalty account data or price history: to track
+prices, poll and store your own. Spain, Italy, Poland, Brazil and the Middle
+East sites are not covered.
+
 ## Error Handling
 
 ```python
@@ -2303,6 +2392,7 @@ Scavio works with popular AI/LLM frameworks:
 | Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
+| Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2312,6 +2402,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.50.0
+
+- **New `carrefour` namespace** (sync and async) for Carrefour, 9 endpoints
+  at 1 credit each: `search`, `product`, `reviews`, `category`,
+  `promotions`, `suggestions`, `stores`, `store_availability`, `store`.
+  carrefour.fr serves every endpoint; `search` and `product` also take
+  `country` ar, ro or be (`language` fr or nl; 2 credits on be). `store`
+  scopes prices and assortment to one store. 120s timeout floor.
 
 ### Changed in 0.49.1
 

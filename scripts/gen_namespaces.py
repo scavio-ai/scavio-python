@@ -270,6 +270,13 @@ _NS_META = {
         "personalization, team / player / league / brand listings, sale / clearance / under-25 "
         "deals and review endpoints across 8 storefronts and 4 US league stores.",
     ),
+    "carrefour": (
+        "Carrefour",
+        "Carrefour grocery search with national or store-level prices, product detail with "
+        "Nutri-Score, ingredients and nutrition, reviews, category and promotion listings, "
+        "suggestions, store locator, store availability and store detail with fuel prices "
+        "(carrefour.fr; search and product also on Argentina, Romania and Belgium).",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

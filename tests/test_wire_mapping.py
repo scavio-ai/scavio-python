@@ -619,6 +619,8 @@ BODY_PRICED_KEYS = {
     "costco_gas",
     "menards_product",
     "best_buy_category",
+    "carrefour_search",
+    "carrefour_product",
 }
 
 
@@ -3054,3 +3056,121 @@ def test_fanatics_credits_paths_and_wire(monkeypatch):
         f.product(country="de")
     with pytest.raises(ScavioError):
         f.reviews(sort="most_recent")
+
+
+def test_carrefour_credits_paths_and_wire(monkeypatch):
+    """carrefour (0.50.0): 9 endpoints on /api/v1/carrefour, 1 credit each.
+
+    search and product take country (fr, ar, ro, be; be costs 2), language
+    (be) and store (fr); the other seven are carrefour.fr only. store takes a
+    digit string or an int; 120 s timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "carrefour"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "reviews",
+            "category",
+            "promotions",
+            "suggestions",
+            "stores",
+            "store_availability",
+            "store",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/carrefour/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert any(p.name == "country" for p in ep.params), ep.key
+        assert (ep.credits_note is not None) == (m in ("search", "product")), ep.key
+        assert any(p.name == "store" for p in ep.params) == (
+            m in ("search", "product", "category", "promotions")
+        ), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    c = client.carrefour
+    c.search(
+        "lait",
+        brand="LACTEL",
+        sort="price_low_to_high",
+        store="840093",
+        nutriscore="A",
+        organic=True,
+        min_price=1.5,
+        page=2,
+    )
+    c.search("chocolat", country="be", language="nl")
+    c.product(ean="3017620422003", store=281)
+    c.product(url="https://carrefour.ro/x/p", country="ro")
+    c.reviews("8006530256179", sort="lowest_rated", rating=1, limit=50, offset=10)
+    c.category(path="/r/cremerie", sort="unit_price_low_to_high", carrefour_brands=True)
+    c.promotions(type="loyalty", category="Boissons")
+    c.suggestions("nutel")
+    c.stores(postal_code="69003", service="station_service", limit=20)
+    c.stores(lat=45.75, lng=4.85)
+    c.store_availability("3017620422003", "69003")
+    c.store(slug="venissieux")
+    base = "/api/v1/carrefour/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "lait",
+                "store": "840093",
+                "page": 2,
+                "sort": "price_low_to_high",
+                "brand": "LACTEL",
+                "nutriscore": "A",
+                "organic": True,
+                "min_price": 1.5,
+            },
+            120.0,
+        ),
+        (base + "search", {"query": "chocolat", "country": "be", "language": "nl"}, 120.0),
+        (base + "product", {"ean": "3017620422003", "store": 281}, 120.0),
+        (base + "product", {"url": "https://carrefour.ro/x/p", "country": "ro"}, 120.0),
+        (
+            base + "reviews",
+            {
+                "ean": "8006530256179",
+                "sort": "lowest_rated",
+                "rating": 1,
+                "limit": 50,
+                "offset": 10,
+            },
+            120.0,
+        ),
+        (
+            base + "category",
+            {"path": "/r/cremerie", "sort": "unit_price_low_to_high", "carrefour_brands": True},
+            120.0,
+        ),
+        (base + "promotions", {"type": "loyalty", "category": "Boissons"}, 120.0),
+        (base + "suggestions", {"query": "nutel"}, 120.0),
+        (
+            base + "stores",
+            {"postal_code": "69003", "limit": 20, "service": "station_service"},
+            120.0,
+        ),
+        (base + "stores", {"lat": 45.75, "lng": 4.85}, 120.0),
+        (base + "store-availability", {"ean": "3017620422003", "postal_code": "69003"}, 120.0),
+        (base + "store", {"slug": "venissieux"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        c.product(country="fr")
+    with pytest.raises(ScavioError):
+        c.category(sort="top_rated")
+    with pytest.raises(ScavioError):
+        c.stores(service="drive")
+    with pytest.raises(ScavioError):
+        c.store()
