@@ -6085,7 +6085,7 @@ class _SephoraNamespace:
     ) -> dict[str, Any]:
         """One sephora.com (US) product: name, brand, rating, review count, loves count, price range, description, usage, category and breadcrumbs, a summary of what reviews say with pro and con sentiment counts (no review text), and every shade or size as a sku with price, list and sale price, in_stock, only_few_left, ingredients, images and pickup and same-day eligibility. An unknown product is a 404.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             url: sephora.com product URL (the `url` of a search result). Preferred: it answers faster.

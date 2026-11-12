@@ -2367,7 +2367,7 @@ Scavio works with popular AI/LLM frameworks:
 | Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | 1 each |
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
-| Sephora | `search`, `category`, `product` | 1 each |
+| Sephora | `search`, `category`, `product` | 1 each, `product` 2 |
 | Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
 | ALDI | `stores` (start here), `search`, `product` | 1 each |
 | Micro Center | `stores` (start here), `search`, `product` | `stores` 1, the rest 2 each |

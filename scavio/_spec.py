@@ -7300,7 +7300,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================== Sephora ==============================
-    # 3 endpoints, 1 credit each. sephora.com (US). Prices are national.
+    # 3 endpoints: search and category 1 credit, product 2 (since 2026-11-12).
+    # sephora.com (US). Prices are national.
     # product() carries a summary of what reviews say plus pro/con sentiment
     # counts, but no review text.
     Endpoint(
@@ -7366,7 +7367,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("product_id", "Sephora product id, e.g. 'P510799'. Used when url is not given."),
         ),
         one_of=(("url", "product_id"),),
-        credits=1,
+        credits=2,
     ),
     # ============================ Ulta Beauty ============================
     # 4 endpoints, 1 credit each. stores() reports in stock / out of stock for

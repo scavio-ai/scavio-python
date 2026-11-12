@@ -1601,7 +1601,7 @@ def test_ai_chat_async(monkeypatch):
 def test_us_retail_batch_1_credits_and_paths():
     """sephora/ulta/aldi/micro_center/walgreens/cvs (0.32.0): 20 endpoints, priced per method."""
     expected = {
-        "sephora": {"search": 1, "category": 1, "product": 1},
+        "sephora": {"search": 1, "category": 1, "product": 2},  # product 2 since 0.50.1
         "ulta": {"search": 1, "category": 1, "product": 1, "stores": 1},
         "aldi": {"search": 1, "product": 1, "stores": 1},
         "micro_center": {"search": 2, "product": 2, "stores": 1},
