@@ -12460,6 +12460,60 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=120.0,
     ),
+    # ============================== Company ==============================
+    # 1 endpoint, body-priced: 10 credits from a url, 20 from a place_id (1
+    # when the listing has no readable website), unreachable site free. One of
+    # url / place_id is required; both are accepted (url is the site read).
+    # Median ~23 s, p90 ~44 s; slow sites measured 101-125 s (2026-11-12): 180 s floor.
+    Endpoint(
+        key="company_enrich",
+        namespace="company",
+        method="enrich",
+        http="POST",
+        path="/api/v1/company/enrich",
+        summary=(
+            "Find a company's contact details and its owner from its website or a Google Maps "
+            "place_id: published emails, phone numbers, social profiles and contact page, plus "
+            "the owner's name and title with the page that names them. Use after a Google Maps "
+            "search: pass each result's place_id. Provide url or place_id (one is required). "
+            "Returns data.company (name, website, domain, emails, phones as digits only, socials "
+            "keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, "
+            "contact_page, address, place_id), data.owner (name, title, source_url, email, "
+            "email_status 'published' or 'not_found'; None when no page names an owner) and "
+            "data.pages_read (home, up to 3 contact / about / team pages, privacy and terms). "
+            "Usually takes 10-45s and can take over a minute."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The company's own website (3-2048 characters); a bare domain works. Social "
+                    "profile links (Facebook, Instagram, LinkedIn...) are rejected with 400. "
+                    "Alternative to place_id; when both are sent, url is the site read."
+                ),
+            ),
+            Param(
+                "place_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Google Maps place_id (10-300 characters), e.g. local_results[].place_id of "
+                    "google.maps_search(). The listing (name, address, phone, website) is looked "
+                    "up first, then its website is read. Alternative to url."
+                ),
+            ),
+        ),
+        one_of=(("url", "place_id"),),
+        credits=10,
+        credits_note=(
+            "Costs 10 credits from a url and 20 from a place_id (1 when the listing has no "
+            "readable website); a website that cannot be reached and a 400 are not charged. "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=180.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -13582,6 +13636,7 @@ NAMESPACES: tuple[str, ...] = (
     "fanatics",
     "carrefour",
     "allegro",
+    "company",
     "trustpilot",
     "realtor",
     "rightmove",

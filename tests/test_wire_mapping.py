@@ -621,6 +621,7 @@ BODY_PRICED_KEYS = {
     "best_buy_category",
     "carrefour_search",
     "carrefour_product",
+    "company_enrich",
 }
 
 
@@ -3299,3 +3300,74 @@ def test_allegro_credits_paths_and_wire(monkeypatch):
         a.product_offers(sort="price_low_to_high")
     with pytest.raises(ScavioError):
         a.category(query="dell")
+
+
+def test_company_enrich_credits_paths_and_wire(monkeypatch):
+    """company (0.52.0): enrich on /api/v1/company/enrich, body-priced.
+
+    10 credits from a url, 20 from a place_id. url and place_id are both
+    optional positionals; at least one is required (client-side one_of),
+    both together are allowed (url is the site read). 180 s timeout floor:
+    median ~23 s, place_id calls measured 78 s.
+    """
+    eps = [ep for ep in ENDPOINTS.values() if ep.namespace == "company"]
+    assert [ep.method for ep in eps] == ["enrich"]
+    ep = eps[0]
+    assert ep.key == "company_enrich"
+    assert ep.http == "POST"
+    assert ep.path == "/api/v1/company/enrich"
+    assert ep.credits == 10
+    assert "20 from a place_id" in ep.credits_note
+    assert ep.min_timeout == 180.0
+    assert [p.name for p in ep.params] == ["url", "place_id"]
+    assert all(not p.required and p.positional for p in ep.params)
+
+    enrich = ScavioClient(api_key="sk_test").company.enrich
+    params = list(inspect.signature(enrich).parameters.values())
+    assert [p.name for p in params] == ["url", "place_id", "extra"]
+    assert params[0].kind is inspect.Parameter.POSITIONAL_OR_KEYWORD
+    assert params[0].default is None and params[1].default is None
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    c = ScavioClient(api_key="sk_test").company
+    c.enrich("https://reliantplumbing.com")
+    c.enrich(place_id="ChIJf--pagyMOIgRBVuxHteSRBo")
+    c.enrich(url="reliantplumbing.com", place_id="ChIJf--pagyMOIgRBVuxHteSRBo")
+    ScavioClient(api_key="sk_test", timeout=300).company.enrich("reliantplumbing.com")
+    assert seen == [
+        ("/api/v1/company/enrich", {"url": "https://reliantplumbing.com"}, 180.0),
+        ("/api/v1/company/enrich", {"place_id": "ChIJf--pagyMOIgRBVuxHteSRBo"}, 180.0),
+        (
+            "/api/v1/company/enrich",
+            {"url": "reliantplumbing.com", "place_id": "ChIJf--pagyMOIgRBVuxHteSRBo"},
+            180.0,
+        ),
+        ("/api/v1/company/enrich", {"url": "reliantplumbing.com"}, 300),
+    ]
+    with pytest.raises(ScavioError):
+        c.enrich()
+
+
+def test_company_enrich_async(monkeypatch):
+    import asyncio
+
+    seen: dict = {}
+
+    async def fake_request(method, path, *, timeout, json=None, **_):
+        seen.update(path=path, json=json, timeout=timeout)
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._async_client.async_request", fake_request)
+    client = AsyncScavioClient(api_key="sk_test")
+    asyncio.run(client.company.enrich(place_id="ChIJf--pagyMOIgRBVuxHteSRBo"))
+    assert seen == {
+        "path": "/api/v1/company/enrich",
+        "json": {"place_id": "ChIJf--pagyMOIgRBVuxHteSRBo"},
+        "timeout": 180.0,
+    }

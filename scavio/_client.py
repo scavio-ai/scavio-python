@@ -19,6 +19,7 @@ from ._namespaces_sync import (
     _ChatGPTNamespace,
     _ChewyNamespace,
     _CompaniesHouseNamespace,
+    _CompanyNamespace,
     _CostcoNamespace,
     _CvsNamespace,
     _DecathlonNamespace,
@@ -205,6 +206,7 @@ class ScavioClient:
         self.fanatics = _FanaticsNamespace(self)
         self.carrefour = _CarrefourNamespace(self)
         self.allegro = _AllegroNamespace(self)
+        self.company = _CompanyNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)

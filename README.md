@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 73 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 73 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -53,6 +53,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
 | Read Any URL (`extract`) | Yes | Yes | No | Yes |
+| Company Enrichment: Emails, Phones, Socials and Owner from a Website or Google Maps place_id (`company.enrich`) | Yes | No | No | No |
 | Data Sources | 60 | 1 | 1 per plan | 1 |
 | Structured JSON | Yes | Yes | Yes | Raw HTML |
 | Knowledge Graphs | Yes | No | Yes | No |
@@ -2341,6 +2342,53 @@ source, Smart! account data, seller revenue, seller addresses or tax ids,
 price history or reviews past the first 20: to track prices, poll and store
 your own.
 
+### 41. Lead Enrichment -- `company.enrich()`
+
+Turn a business website or a Google Maps place_id into contact data,
+namespace `company`, 1 endpoint: `enrich(url=None, place_id=None)`. Provide
+`url` or `place_id`; one of the two is required (the SDK raises
+`ScavioError` before sending when both are missing). Returns the company's
+published emails, phone numbers (digits only), social profiles and contact
+page, plus the owner or founder's name and title with the page that names
+them. 10 credits from a `url`, 20 from a `place_id` (1 when the listing has no
+readable website); a website that cannot be reached is not charged, and
+`credits_used` in the response is the exact charge. A call reads several pages
+and usually takes 10-45s, but a slow site can take about 2 minutes, so
+`enrich()` raises the request timeout to at least 180s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+
+# --- From a website (10 credits). A bare domain works.
+res = client.company.enrich("https://reliantplumbing.com")
+co = res["data"]["company"]
+print(co["name"], co["domain"], co["emails"], co["phones"])
+print(co["socials"].get("facebook"), co["contact_page"])
+owner = res["data"]["owner"]  # None when no page names an owner
+if owner:
+    print(owner["name"], owner["title"], owner["source_url"],
+          owner["email"], owner["email_status"])
+print(res["data"]["pages_read"], res["credits_used"])
+
+# --- After a Google Maps search: enrich each result by place_id (20 credits).
+places = client.google.maps_search("plumbers in Austin")["local_results"]
+for place in places[:3]:
+    lead = client.company.enrich(place_id=place["place_id"])["data"]
+    print(lead["company"]["name"], lead["company"]["website"],
+          lead["company"]["emails"], lead["company"]["phones"])
+```
+
+`socials` keys are `facebook`, `instagram`, `linkedin`, `x`, `tiktok`,
+`youtube` and `pinterest`, present only when found. `owner.email_status` is
+`published` when an address on the site matches the owner's name, otherwise
+`not_found` with `owner.email` None. `pages_read` lists the home page, up to 3
+contact, about or team pages, and the privacy and terms pages. Social profile
+links (Facebook, Instagram, LinkedIn...) are rejected as `url` with a 400: pass
+the business's own site. When both `url` and `place_id` are sent, `url` is the
+site that gets read.
+
 ## Error Handling
 
 ```python
@@ -2488,11 +2536,20 @@ Scavio works with popular AI/LLM frameworks:
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
+| Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
 | Extract (core, callable) | `client.extract(url)`, `extract.map`, `extract.crawl`, `extract.crawl_status`, `extract.cancel_crawl`, `extract.batch`, `extract.batch_status`, `extract.cancel_batch` | `extract`: 1 for `mode="normal"` or `"advanced"`, 2 for `"ultra"`, only on success. `map`: 1 on normal. `crawl` / `batch`: that same price per successful page. Status and cancel: free |
 
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.52.0
+
+- **New `company` namespace** (sync and async) with `enrich(url=None,
+  place_id=None)`: a business's published emails, phones, socials, contact
+  page and owner from its website or a Google Maps place_id. One of `url` or
+  `place_id` is required. 10 credits from a url, 20 from a place_id. 180s
+  timeout floor.
 
 ### Changed in 0.51.0
 

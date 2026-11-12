@@ -73,6 +73,7 @@ __all__ = [
     "_FanaticsNamespace",
     "_CarrefourNamespace",
     "_AllegroNamespace",
+    "_CompanyNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
     "_RightmoveNamespace",
@@ -10473,6 +10474,31 @@ class _AllegroNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("allegro_category", {"category_id": category_id, "url": url, "country": country, "query": query, "page": page, "sort": sort, "min_price": min_price, "max_price": max_price, "condition": condition, "smart": smart, "buying_format": buying_format, "deals": deals}, extra)
+
+class _CompanyNamespace:
+    """Company enrichment: a company's published emails, phone numbers, social profiles, contact page and owner from its website or a Google Maps place_id."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def enrich(
+        self,
+        url: Optional[str] = None,
+        place_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find a company's contact details and its owner from its website or a Google Maps place_id: published emails, phone numbers, social profiles and contact page, plus the owner's name and title with the page that names them. Use after a Google Maps search: pass each result's place_id. Provide url or place_id (one is required). Returns data.company (name, website, domain, emails, phones as digits only, socials keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, contact_page, address, place_id), data.owner (name, title, source_url, email, email_status 'published' or 'not_found'; None when no page names an owner) and data.pages_read (home, up to 3 contact / about / team pages, privacy and terms). Usually takes 10-45s and can take over a minute.
+
+        Costs 10 credits from a url and 20 from a place_id (1 when the listing has no readable
+        website); a website that cannot be reached and a 400 are not charged. credits_used in
+        the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            url: The company's own website (3-2048 characters); a bare domain works. Social profile links (Facebook, Instagram, LinkedIn...) are rejected with 400. Alternative to place_id; when both are sent, url is the site read.
+            place_id: A Google Maps place_id (10-300 characters), e.g. local_results[].place_id of google.maps_search(). The listing (name, address, phone, website) is looked up first, then its website is read. Alternative to url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("company_enrich", {"url": url, "place_id": place_id}, extra)
 
 class _TrustpilotNamespace:
     """Trustpilot business search, profile, review, and category endpoints."""

@@ -284,6 +284,11 @@ _NS_META = {
         "product, seller offers and seller feedback, and category listings (allegro.pl, plus "
         "allegro.cz, allegro.sk and allegro.hu).",
     ),
+    "company": (
+        "Company",
+        "Company enrichment: a company's published emails, phone numbers, social profiles, "
+        "contact page and owner from its website or a Google Maps place_id.",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",
