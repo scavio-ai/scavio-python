@@ -73,6 +73,7 @@ __all__ = [
     "_FanaticsNamespace",
     "_CarrefourNamespace",
     "_AllegroNamespace",
+    "_OlxNamespace",
     "_CompanyNamespace",
     "_TrustpilotNamespace",
     "_RealtorNamespace",
@@ -10474,6 +10475,254 @@ class _AllegroNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("allegro_category", {"category_id": category_id, "url": url, "country": country, "query": query, "page": page, "sort": sort, "min_price": min_price, "max_price": max_price, "condition": condition, "smart": smart, "buying_format": buying_format, "deals": deals}, extra)
+
+class _OlxNamespace:
+    """OLX Europe classifieds search, ad detail, seller and seller ads, category filters, category tree, location and search suggestions, and similar ads (olx.pl, plus olx.ro, olx.pt, olx.bg, olx.ua, olx.kz and olx.uz)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        language: Optional[Literal["ru", "kk", "uz"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low_to_high", "price_high_to_low"]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        condition: Optional[Literal["new", "used", "refurbished", "damaged"]] = None,
+        seller_type: Optional[Literal["private", "business"]] = None,
+        olx_delivery: Optional[bool] = None,
+        with_photos: Optional[bool] = None,
+        region_id: Optional[Union[str, int]] = None,
+        city_id: Optional[Union[str, int]] = None,
+        district_id: Optional[Union[str, int]] = None,
+        distance_km: Optional[Literal[0, 2, 5, 10, 15, 30, 50, 75, 100]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_promoted: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search OLX classifieds (used goods, cars, real estate, jobs, services) by keyword and / or category: sort by newest or price; filter by price range, condition, private or business seller, OLX delivery, photos, region / city / district with a radius, and the category's own filters (rooms, area, year, mileage ... from filters()). Up to 1000 results per query (OLX's own cap). Promoted ads are interleaved and flagged. A query with no exact match returns the closest ads, never an empty list. OLX Europe only (olx.pl, olx.ro, olx.pt, olx.bg, olx.ua, olx.kz, olx.uz); OLX Brasil, olx.in and other OLX-branded sites are not covered. Items with id, url, title, description_snippet, price (value, currency, negotiable, type price / free / exchange / budget, label as shown, previous_value when the seller lowered it; when the site converts a price, e.g. olx.uz y.e. to UZS, value is the converted figure and original_value with original_currency keep what the seller entered), salary (jobs: from, to, period, currency, gross), condition, params (key, name, value, normalized_value), category_id, location (city, district, region with their ids), created_at, refreshed_at, valid_to, status, is_promoted with promoted_position (the slot on the page), is_highlighted, is_business, olx_delivery, photos and seller (id; business_name for business sellers only). Also total (the site's count; None on kz and uz once a search reaches 1000 ads), total_capped (True when there are more ads than the 1000 OLX lets anyone page through), total_pages, page, page_size, has_next_page, count, promoted_count, sort, applied_filters, country, language and currency. Titles, parameters and labels come back in the site's language as the site writes them (Polish on pl; Russian by default on kz and uz). A seller name is returned only for business sellers (business_name); private sellers come as an id only. No phone numbers, emails, last-seen times, profile photos or map positions are returned, and phone numbers and emails in ad text are replaced with [phone removed] / [email removed]. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in any language, e.g. 'iphone'. query, category_id or both.
+            category_id: Search inside one category: categories[].id of categories() or an item's category_id, e.g. 84 = cars on olx.pl.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            language: kz and uz only: kk (Kazakh) on kz or uz (Uzbek) on uz; both sites default to ru (Russian). Refused on the other sites, which answer in their own language.
+            page: Results page, 1-based. OLX serves the first 1000 results of a search only, so page x page_size may not exceed 1000.
+            page_size: Ads per page, up to 50 (default 40). Promoted ads come on top of these (40 asks return about 52 items).
+            sort: relevance (default), newest (most recently posted or refreshed first: sellers can refresh an ad to the top), price_low_to_high or price_high_to_low. Promoted ads are not sorted.
+            min_price: Lowest price, in the site's currency.
+            max_price: Highest price, in the site's currency.
+            condition: new, used, refurbished or damaged (in categories that have a condition).
+            seller_type: private (individuals) or business.
+            olx_delivery: Only ads that can be bought with OLX delivery. Not on kz or uz.
+            with_photos: Only ads with photos.
+            region_id: Only ads in this region: region_id of locations() or of an item's location.
+            city_id: Only ads in this city: city_id of locations() or of an item's location, e.g. '17871'.
+            district_id: Only ads in this district of a city: district_id of locations().
+            distance_km: With city_id: include ads within this many km of the city.
+            filters: The category's own filters, as listed by filters() (send_as keys): a range filter as filter_float_<name>:from / :to with a number, e.g. {'filter_float_year:from': 2018, 'filter_float_milage:to': 100000}; a choice filter as filter_enum_<name> with one value or a list, e.g. {'filter_enum_rooms': ['two', 'three']}. Up to 20 keys; other keys are refused.
+            include_promoted: Keep the promoted ads the site places on each page (default True; each is flagged is_promoted with its slot).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_search", {"query": query, "category_id": category_id, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "min_price": min_price, "max_price": max_price, "condition": condition, "seller_type": seller_type, "olx_delivery": olx_delivery, "with_photos": with_photos, "region_id": region_id, "city_id": city_id, "district_id": district_id, "distance_km": distance_km, "filters": filters, "include_promoted": include_promoted}, extra)
+
+    def offer(
+        self,
+        *,
+        offer_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        language: Optional[Literal["ru", "kk", "uz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One OLX ad by id or link: title, the full description as plain text, price (value, currency, negotiable, type price / free / exchange / budget, label as shown, previous_value when the seller lowered it; when the site converts a price, e.g. olx.uz y.e. to UZS, value is the converted figure and original_value with original_currency keep what the seller entered), salary for jobs, condition, every parameter (a car's VIN is never returned), category with breadcrumb, all photos, location (city, district, region with ids), created_at, refreshed_at, valid_to, status, is_active, is_promoted, olx_delivery, is_job and the seller (id, is_business, business_name for business sellers, member_since). An ad that does not exist and an ad that has ended answer the same 404 ('not found or no longer active'). No view counts, phone numbers or messaging. OLX Europe only (olx.pl, olx.ro, olx.pt, olx.bg, olx.ua, olx.kz, olx.uz); OLX Brasil, olx.in and other OLX-branded sites are not covered. Titles, parameters and labels come back in the site's language as the site writes them (Polish on pl; Russian by default on kz and uz). A seller name is returned only for business sellers (business_name); private sellers come as an id only. No phone numbers, emails, last-seen times, profile photos or map positions are returned, and phone numbers and emails in ad text are replaced with [phone removed] / [email removed]. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            offer_id: An OLX ad id: items[].id of a search, e.g. '1107557408'. Alternative to url.
+            url: An OLX ad link on any of the seven sites. Alternative to offer_id.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            language: kz and uz only: kk (Kazakh) on kz or uz (Uzbek) on uz; both sites default to ru (Russian). Refused on the other sites, which answer in their own language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_offer", {"offer_id": offer_id, "url": url, "country": country, "language": language}, extra)
+
+    def seller(
+        self,
+        user_id: Union[str, int],
+        *,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One OLX seller by id: is_business (from the seller's own ads), business_name (business sellers only; None otherwise), member_since, active_ads (the number of live ads; None on kz and uz from 1000 ads up) and ads_url (the seller's page on OLX). OLX shows no seller ratings or reviews, so none are returned. A seller name is returned only for business sellers (business_name); private sellers come as an id only. No phone numbers, emails, last-seen times, profile photos or map positions are returned, and phone numbers and emails in ad text are replaced with [phone removed] / [email removed]. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            user_id: An OLX seller id: items[].seller.id of a search or seller.id of an offer, e.g. '2547532895'.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_seller", {"user_id": user_id, "country": country}, extra)
+
+    def seller_ads(
+        self,
+        user_id: Union[str, int],
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        language: Optional[Literal["ru", "kk", "uz"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low_to_high", "price_high_to_low"]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        condition: Optional[Literal["new", "used", "refurbished", "damaged"]] = None,
+        seller_type: Optional[Literal["private", "business"]] = None,
+        olx_delivery: Optional[bool] = None,
+        with_photos: Optional[bool] = None,
+        region_id: Optional[Union[str, int]] = None,
+        city_id: Optional[Union[str, int]] = None,
+        district_id: Optional[Union[str, int]] = None,
+        distance_km: Optional[Literal[0, 2, 5, 10, 15, 30, 50, 75, 100]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_promoted: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One OLX seller's live ads, with the search() sorts and filters and an optional query. Items with id, url, title, description_snippet, price (value, currency, negotiable, type price / free / exchange / budget, label as shown, previous_value when the seller lowered it; when the site converts a price, e.g. olx.uz y.e. to UZS, value is the converted figure and original_value with original_currency keep what the seller entered), salary (jobs: from, to, period, currency, gross), condition, params (key, name, value, normalized_value), category_id, location (city, district, region with their ids), created_at, refreshed_at, valid_to, status, is_promoted with promoted_position (the slot on the page), is_highlighted, is_business, olx_delivery, photos and seller (id; business_name for business sellers only). Also total (the site's count; None on kz and uz once a search reaches 1000 ads), total_capped (True when there are more ads than the 1000 OLX lets anyone page through), total_pages, page, page_size, has_next_page, count, promoted_count, sort, applied_filters, country, language and currency. Titles, parameters and labels come back in the site's language as the site writes them (Polish on pl; Russian by default on kz and uz). A seller name is returned only for business sellers (business_name); private sellers come as an id only. No phone numbers, emails, last-seen times, profile photos or map positions are returned, and phone numbers and emails in ad text are replaced with [phone removed] / [email removed]. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            user_id: An OLX seller id: items[].seller.id of a search or seller.id of an offer, e.g. '2547532895'.
+            query: Search within the seller's ads.
+            category_id: Only the seller's ads in this category.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            language: kz and uz only: kk (Kazakh) on kz or uz (Uzbek) on uz; both sites default to ru (Russian). Refused on the other sites, which answer in their own language.
+            page: Results page, 1-based. OLX serves the first 1000 results of a search only, so page x page_size may not exceed 1000.
+            page_size: Ads per page, up to 50 (default 40). Promoted ads come on top of these (40 asks return about 52 items).
+            sort: relevance (default), newest (most recently posted or refreshed first: sellers can refresh an ad to the top), price_low_to_high or price_high_to_low. Promoted ads are not sorted.
+            min_price: Lowest price, in the site's currency.
+            max_price: Highest price, in the site's currency.
+            condition: new, used, refurbished or damaged (in categories that have a condition).
+            seller_type: private (individuals) or business.
+            olx_delivery: Only ads that can be bought with OLX delivery. Not on kz or uz.
+            with_photos: Only ads with photos.
+            region_id: Only ads in this region: region_id of locations() or of an item's location.
+            city_id: Only ads in this city: city_id of locations() or of an item's location, e.g. '17871'.
+            district_id: Only ads in this district of a city: district_id of locations().
+            distance_km: With city_id: include ads within this many km of the city.
+            filters: The category's own filters, as listed by filters() (send_as keys): a range filter as filter_float_<name>:from / :to with a number, e.g. {'filter_float_year:from': 2018, 'filter_float_milage:to': 100000}; a choice filter as filter_enum_<name> with one value or a list, e.g. {'filter_enum_rooms': ['two', 'three']}. Up to 20 keys; other keys are refused.
+            include_promoted: Keep the promoted ads the site places on each page (default True; each is flagged is_promoted with its slot).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_seller_ads", {"user_id": user_id, "query": query, "category_id": category_id, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "min_price": min_price, "max_price": max_price, "condition": condition, "seller_type": seller_type, "olx_delivery": olx_delivery, "with_photos": with_photos, "region_id": region_id, "city_id": city_id, "district_id": district_id, "distance_km": distance_km, "filters": filters, "include_promoted": include_promoted}, extra)
+
+    def filters(
+        self,
+        category_id: Union[str, int],
+        *,
+        query: Optional[str] = None,
+        region_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The filters one OLX category offers, ready to send as search() filters: each with key, label, type, kind (range or choice), unit, send_as (the filters keys to use), suggested range steps, and for choice filters every value with its label and the number of matching ads. Also the category's ad counts per region (or per city inside region_id) and per category. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian) or ua (olx.ua, UAH, Ukrainian); not kz or uz. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: The category (categories[].id of categories()), e.g. 14 = flats for sale on olx.pl, 84 = cars.
+            query: Count values for this keyword inside the category.
+            region_id: Count values in this region only (locations then lists its cities).
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian) or ua (olx.ua, UAH, Ukrainian); not kz or uz. Defaults to pl.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_filters", {"category_id": category_id, "query": query, "region_id": region_id, "country": country}, extra)
+
+    def categories(
+        self,
+        *,
+        parent_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The OLX category tree of one site: id, name, parent_id, level, path, url, type and count (active ads), with children. Without parent_id: the top-level categories and their direct children (children_count tells which go deeper); with parent_id: that category's whole subtree. Names come in the site's language. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            parent_id: Return this category's whole subtree, e.g. 5. Without it: the top-level categories with their direct children.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_categories", {"parent_id": parent_id, "country": country}, extra)
+
+    def locations(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Place autocomplete for OLX location filters: cities and districts matching a name, with city_id, district_id and region_id to send to search(), plus the municipality, county and region names. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: At least 2 letters of a city or district name, e.g. 'Warszawa'.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_locations", {"query": query, "country": country}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The suggestions the OLX search box shows for what a user typed: popular searches, each with the category it is most searched in (category_id, name and its parent categories). Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the user has typed so far, e.g. 'rower'.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek). Defaults to pl. Titles and labels come in the site's language, prices in its currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_suggestions", {"query": query, "country": country}, extra)
+
+    def similar(
+        self,
+        *,
+        offer_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["pl", "ro", "pt", "bg", "ua"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ads OLX recommends next to one ad (about 30), in the search() item shape: id, url, title, description_snippet, price (value, currency, negotiable, type price / free / exchange / budget, label as shown, previous_value when the seller lowered it; when the site converts a price, e.g. olx.uz y.e. to UZS, value is the converted figure and original_value with original_currency keep what the seller entered), salary (jobs: from, to, period, currency, gross), condition, params (key, name, value, normalized_value), category_id, location (city, district, region with their ids), created_at, refreshed_at, valid_to, status, is_promoted with promoted_position (the slot on the page), is_highlighted, is_business, olx_delivery, photos and seller (id; business_name for business sellers only). Also offer_id, count, country, language and currency. A seller name is returned only for business sellers (business_name); private sellers come as an id only. No phone numbers, emails, last-seen times, profile photos or map positions are returned, and phone numbers and emails in ad text are replaced with [phone removed] / [email removed]. Markets: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian) or ua (olx.ua, UAH, Ukrainian); not kz or uz. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            offer_id: An OLX ad id: items[].id of a search, e.g. '1107557408'. Alternative to url.
+            url: An OLX ad link on any of the seven sites. Alternative to offer_id.
+            country: The OLX site: pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, Portuguese), bg (olx.bg, EUR, Bulgarian) or ua (olx.ua, UAH, Ukrainian); not kz or uz. Defaults to pl.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("olx_similar", {"offer_id": offer_id, "url": url, "country": country}, extra)
 
 class _CompanyNamespace:
     """Company enrichment: a company's published emails, phone numbers, social profiles, contact page and owner from its website or a Google Maps place_id."""

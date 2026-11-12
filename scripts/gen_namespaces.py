@@ -284,6 +284,12 @@ _NS_META = {
         "product, seller offers and seller feedback, and category listings (allegro.pl, plus "
         "allegro.cz, allegro.sk and allegro.hu).",
     ),
+    "olx": (
+        "Olx",
+        "OLX Europe classifieds search, ad detail, seller and seller ads, category filters, "
+        "category tree, location and search suggestions, and similar ads (olx.pl, plus olx.ro, "
+        "olx.pt, olx.bg, olx.ua, olx.kz and olx.uz).",
+    ),
     "company": (
         "Company",
         "Company enrichment: a company's published emails, phone numbers, social profiles, "

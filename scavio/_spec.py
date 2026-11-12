@@ -1052,6 +1052,144 @@ _ALLEGRO_NOTE = (
 )
 
 
+# OLX params shared across endpoints (OLX Europe: olx.pl + olx.ro, olx.pt, olx.bg, olx.ua,
+# olx.kz, olx.uz; filters and similar are pl, ro, pt, bg and ua only).
+_OLX_MARKETS = (
+    "pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, "
+    "Portuguese), bg (olx.bg, EUR, Bulgarian), ua (olx.ua, UAH, Ukrainian), kz (olx.kz, KZT, "
+    "Russian or Kazakh) or uz (olx.uz, UZS, Russian or Uzbek)"
+)
+_OLX_MARKETS_NO_KZ_UZ = (
+    "pl (olx.pl, PLN, Polish, default), ro (olx.ro, RON, Romanian), pt (olx.pt, EUR, "
+    "Portuguese), bg (olx.bg, EUR, Bulgarian) or ua (olx.ua, UAH, Ukrainian); not kz or uz"
+)
+_OLX_COUNTRY = _lit(
+    "country",
+    ("pl", "ro", "pt", "bg", "ua", "kz", "uz"),
+    "The OLX site: " + _OLX_MARKETS + ". Defaults to pl. Titles and labels come in the site's "
+    "language, prices in its currency.",
+)
+_OLX_COUNTRY_NO_KZ_UZ = _lit(
+    "country",
+    ("pl", "ro", "pt", "bg", "ua"),
+    "The OLX site: " + _OLX_MARKETS_NO_KZ_UZ + ". Defaults to pl.",
+)
+_OLX_LANGUAGE = _lit(
+    "language",
+    ("ru", "kk", "uz"),
+    "kz and uz only: kk (Kazakh) on kz or uz (Uzbek) on uz; both sites default to ru "
+    "(Russian). Refused on the other sites, which answer in their own language.",
+)
+_OLX_USER_ID = Param(
+    "user_id",
+    "Union[str, int]",
+    required=True,
+    doc="An OLX seller id: items[].seller.id of a search or seller.id of an offer, e.g. "
+    "'2547532895'.",
+)
+_OLX_OFFER_TARGET = (
+    _str_or_int(
+        "offer_id",
+        "An OLX ad id: items[].id of a search, e.g. '1107557408'. Alternative to url.",
+    ),
+    _str("url", "An OLX ad link on any of the seven sites. Alternative to offer_id."),
+)
+_OLX_GRID_PARAMS = (
+    _int(
+        "page",
+        "Results page, 1-based. OLX serves the first 1000 results of a search only, so page x "
+        "page_size may not exceed 1000.",
+    ),
+    _int(
+        "page_size",
+        "Ads per page, up to 50 (default 40). Promoted ads come on top of these (40 asks return "
+        "about 52 items).",
+    ),
+    _lit(
+        "sort",
+        ("relevance", "newest", "price_low_to_high", "price_high_to_low"),
+        "relevance (default), newest (most recently posted or refreshed first: sellers can "
+        "refresh an ad to the top), price_low_to_high or price_high_to_low. Promoted ads are "
+        "not sorted.",
+    ),
+    _float("min_price", "Lowest price, in the site's currency."),
+    _float("max_price", "Highest price, in the site's currency."),
+    _lit(
+        "condition",
+        ("new", "used", "refurbished", "damaged"),
+        "new, used, refurbished or damaged (in categories that have a condition).",
+    ),
+    _lit("seller_type", ("private", "business"), "private (individuals) or business."),
+    _bool("olx_delivery", "Only ads that can be bought with OLX delivery. Not on kz or uz."),
+    _bool("with_photos", "Only ads with photos."),
+    _str_or_int(
+        "region_id",
+        "Only ads in this region: region_id of locations() or of an item's location.",
+    ),
+    _str_or_int(
+        "city_id",
+        "Only ads in this city: city_id of locations() or of an item's location, e.g. '17871'.",
+    ),
+    _str_or_int("district_id", "Only ads in this district of a city: district_id of locations()."),
+    _ilit(
+        "distance_km",
+        (0, 2, 5, 10, 15, 30, 50, 75, 100),
+        "With city_id: include ads within this many km of the city.",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="The category's own filters, as listed by filters() (send_as keys): a range filter "
+        "as filter_float_<name>:from / :to with a number, e.g. {'filter_float_year:from': 2018, "
+        "'filter_float_milage:to': 100000}; a choice filter as filter_enum_<name> with one "
+        "value or a list, e.g. {'filter_enum_rooms': ['two', 'three']}. Up to 20 keys; other "
+        "keys are refused.",
+    ),
+    _bool(
+        "include_promoted",
+        "Keep the promoted ads the site places on each page (default True; each is flagged "
+        "is_promoted with its slot).",
+    ),
+)
+_OLX_SCOPE = (
+    " OLX Europe only (olx.pl, olx.ro, olx.pt, olx.bg, olx.ua, olx.kz, olx.uz); OLX Brasil, "
+    "olx.in and other OLX-branded sites are not covered."
+)
+_OLX_PRICE = (
+    "price (value, currency, negotiable, type price / free / exchange / budget, label as "
+    "shown, previous_value when the seller lowered it; when the site converts a price, e.g. "
+    "olx.uz y.e. to UZS, value is the converted figure and original_value with "
+    "original_currency keep what the seller entered)"
+)
+_OLX_ITEM = (
+    "id, url, title, description_snippet, " + _OLX_PRICE + ", salary (jobs: from, to, period, "
+    "currency, gross), condition, params (key, name, value, normalized_value), category_id, "
+    "location (city, district, region with their ids), created_at, refreshed_at, valid_to, "
+    "status, is_promoted with promoted_position (the slot on the page), is_highlighted, "
+    "is_business, olx_delivery, photos and seller (id; business_name for business sellers only)"
+)
+_OLX_GRID_FIELDS = (
+    " Items with " + _OLX_ITEM + ". Also total (the site's count; None on kz and uz once a "
+    "search reaches 1000 ads), total_capped (True when there are more ads than the 1000 OLX "
+    "lets anyone page through), total_pages, page, page_size, has_next_page, count, "
+    "promoted_count, sort, applied_filters, country, language and currency."
+)
+_OLX_PRIVACY = (
+    " A seller name is returned only for business sellers (business_name); private sellers come "
+    "as an id only. No phone numbers, emails, last-seen times, profile photos or map positions "
+    "are returned, and phone numbers and emails in ad text are replaced with [phone removed] / "
+    "[email removed]."
+)
+_OLX_LANG_NOTE = (
+    " Titles, parameters and labels come back in the site's language as the site writes them "
+    "(Polish on pl; Russian by default on kz and uz)."
+)
+_OLX_CHARGE = (
+    " Failed upstream calls are not charged (they are retried automatically); a not-found is "
+    "charged."
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -12460,6 +12598,215 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=120.0,
     ),
+    # ================================ OLX ================================
+    # OLX Europe: olx.pl + olx.ro, olx.pt, olx.bg, olx.ua, olx.kz, olx.uz, 9 endpoints,
+    # 1 credit each. filters() and similar() are pl, ro, pt, bg and ua only; language is
+    # kz / uz only (search, seller_ads, offer); olx_delivery is refused on kz and uz.
+    # 120 s timeout floor (a call can take up to about a minute with retries).
+    Endpoint(
+        key="olx_search",
+        namespace="olx",
+        method="search",
+        http="POST",
+        path="/api/v1/olx/search",
+        summary=(
+            "Search OLX classifieds (used goods, cars, real estate, jobs, services) by keyword "
+            "and / or category: sort by newest or price; filter by price range, condition, "
+            "private or business seller, OLX delivery, photos, region / city / district with a "
+            "radius, and the category's own filters (rooms, area, year, mileage ... from "
+            "filters()). Up to 1000 results per query (OLX's own cap). Promoted ads are "
+            "interleaved and flagged. A query with no exact match returns the closest ads, "
+            "never an empty list." + _OLX_SCOPE + _OLX_GRID_FIELDS + _OLX_LANG_NOTE
+            + _OLX_PRIVACY + " Markets: " + _OLX_MARKETS + "." + _OLX_CHARGE
+        ),
+        params=(
+            _str(
+                "query",
+                "Search keywords, in any language, e.g. 'iphone'. query, category_id or both.",
+            ),
+            _str_or_int(
+                "category_id",
+                "Search inside one category: categories[].id of categories() or an item's "
+                "category_id, e.g. 84 = cars on olx.pl.",
+            ),
+            _OLX_COUNTRY,
+            _OLX_LANGUAGE,
+            *_OLX_GRID_PARAMS,
+        ),
+        one_of=(("query", "category_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_offer",
+        namespace="olx",
+        method="offer",
+        http="POST",
+        path="/api/v1/olx/offer",
+        summary=(
+            "One OLX ad by id or link: title, the full description as plain text, " + _OLX_PRICE
+            + ", salary for jobs, condition, every parameter (a car's VIN is never returned), "
+            "category with breadcrumb, all photos, location (city, district, region with ids), "
+            "created_at, refreshed_at, valid_to, status, is_active, is_promoted, olx_delivery, "
+            "is_job and the seller (id, is_business, business_name for business sellers, "
+            "member_since). An ad that does not exist and an ad that has ended answer the same "
+            "404 ('not found or no longer active'). No view counts, phone numbers or messaging."
+            + _OLX_SCOPE + _OLX_LANG_NOTE + _OLX_PRIVACY + " Markets: " + _OLX_MARKETS + "."
+            + _OLX_CHARGE
+        ),
+        params=(*_OLX_OFFER_TARGET, _OLX_COUNTRY, _OLX_LANGUAGE),
+        one_of=(("offer_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_seller",
+        namespace="olx",
+        method="seller",
+        http="POST",
+        path="/api/v1/olx/seller",
+        summary=(
+            "One OLX seller by id: is_business (from the seller's own ads), business_name "
+            "(business sellers only; None otherwise), member_since, active_ads (the number of "
+            "live ads; None on kz and uz from 1000 ads up) and ads_url (the seller's page on "
+            "OLX). OLX shows no seller ratings or reviews, so none are returned." + _OLX_PRIVACY
+            + " Markets: " + _OLX_MARKETS + "." + _OLX_CHARGE
+        ),
+        params=(_OLX_USER_ID, _OLX_COUNTRY),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_seller_ads",
+        namespace="olx",
+        method="seller_ads",
+        http="POST",
+        path="/api/v1/olx/seller-ads",
+        summary=(
+            "One OLX seller's live ads, with the search() sorts and filters and an optional "
+            "query." + _OLX_GRID_FIELDS + _OLX_LANG_NOTE + _OLX_PRIVACY + " Markets: "
+            + _OLX_MARKETS + "." + _OLX_CHARGE
+        ),
+        params=(
+            _OLX_USER_ID,
+            _str("query", "Search within the seller's ads."),
+            _str_or_int("category_id", "Only the seller's ads in this category."),
+            _OLX_COUNTRY,
+            _OLX_LANGUAGE,
+            *_OLX_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_filters",
+        namespace="olx",
+        method="filters",
+        http="POST",
+        path="/api/v1/olx/filters",
+        summary=(
+            "The filters one OLX category offers, ready to send as search() filters: each with "
+            "key, label, type, kind (range or choice), unit, send_as (the filters keys to use), "
+            "suggested range steps, and for choice filters every value with its label and the "
+            "number of matching ads. Also the category's ad counts per region (or per city "
+            "inside region_id) and per category. Markets: " + _OLX_MARKETS_NO_KZ_UZ + "."
+            + _OLX_CHARGE
+        ),
+        params=(
+            Param(
+                "category_id",
+                "Union[str, int]",
+                required=True,
+                doc="The category (categories[].id of categories()), e.g. 14 = flats for sale "
+                "on olx.pl, 84 = cars.",
+            ),
+            _str("query", "Count values for this keyword inside the category."),
+            _str_or_int(
+                "region_id",
+                "Count values in this region only (locations then lists its cities).",
+            ),
+            _OLX_COUNTRY_NO_KZ_UZ,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_categories",
+        namespace="olx",
+        method="categories",
+        http="POST",
+        path="/api/v1/olx/categories",
+        summary=(
+            "The OLX category tree of one site: id, name, parent_id, level, path, url, type and "
+            "count (active ads), with children. Without parent_id: the top-level categories and "
+            "their direct children (children_count tells which go deeper); with parent_id: that "
+            "category's whole subtree. Names come in the site's language. Markets: "
+            + _OLX_MARKETS + "." + _OLX_CHARGE
+        ),
+        params=(
+            _str_or_int(
+                "parent_id",
+                "Return this category's whole subtree, e.g. 5. Without it: the top-level "
+                "categories with their direct children.",
+            ),
+            _OLX_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_locations",
+        namespace="olx",
+        method="locations",
+        http="POST",
+        path="/api/v1/olx/locations",
+        summary=(
+            "Place autocomplete for OLX location filters: cities and districts matching a name, "
+            "with city_id, district_id and region_id to send to search(), plus the "
+            "municipality, county and region names. Markets: " + _OLX_MARKETS + "."
+            + _OLX_CHARGE
+        ),
+        params=(
+            _req("query", "At least 2 letters of a city or district name, e.g. 'Warszawa'."),
+            _OLX_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_suggestions",
+        namespace="olx",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/olx/suggestions",
+        summary=(
+            "The suggestions the OLX search box shows for what a user typed: popular searches, "
+            "each with the category it is most searched in (category_id, name and its parent "
+            "categories). Markets: " + _OLX_MARKETS + "." + _OLX_CHARGE
+        ),
+        params=(
+            _req("query", "What the user has typed so far, e.g. 'rower'."),
+            _OLX_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="olx_similar",
+        namespace="olx",
+        method="similar",
+        http="POST",
+        path="/api/v1/olx/similar",
+        summary=(
+            "The ads OLX recommends next to one ad (about 30), in the search() item shape: "
+            + _OLX_ITEM + ". Also offer_id, count, country, language and currency."
+            + _OLX_PRIVACY + " Markets: " + _OLX_MARKETS_NO_KZ_UZ + "." + _OLX_CHARGE
+        ),
+        params=(*_OLX_OFFER_TARGET, _OLX_COUNTRY_NO_KZ_UZ),
+        one_of=(("offer_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================== Company ==============================
     # 1 endpoint, body-priced: 10 credits from a url, 20 from a place_id (1
     # when the listing has no readable website), unreachable site free. One of
@@ -13636,6 +13983,7 @@ NAMESPACES: tuple[str, ...] = (
     "fanatics",
     "carrefour",
     "allegro",
+    "olx",
     "company",
     "trustpilot",
     "realtor",

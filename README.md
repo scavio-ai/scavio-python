@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 73 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 74 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -36,6 +36,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
+| OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -2389,6 +2390,88 @@ links (Facebook, Instagram, LinkedIn...) are rejected as `url` with a 400: pass
 the business's own site. When both `url` and `place_id` are sent, `url` is the
 site that gets read.
 
+### 42. Classifieds -- OLX
+
+OLX Europe classifieds (used goods, cars, real estate, jobs), namespace
+`olx`, 9 endpoints, 1 credit each: `search`, `offer`, `seller`,
+`seller_ads`, `filters`, `categories`, `locations`, `suggestions`,
+`similar`. OLX Europe only: `country` is `pl` (olx.pl, PLN, default), `ro`
+(olx.ro, RON), `pt` (olx.pt, EUR), `bg` (olx.bg, EUR), `ua` (olx.ua, UAH),
+`kz` (olx.kz, KZT) or `uz` (olx.uz, UZS); `filters` and `similar` are pl, ro,
+pt, bg and ua only. OLX Brasil, olx.in and other OLX-branded sites are not
+covered. Titles, params and labels come back in the site's language (Polish
+on pl; Russian by default on kz and uz, `language="kk"` / `"uz"` for Kazakh
+or Uzbek on `search`, `seller_ads` and `offer`). Every method raises the
+request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+olx = client.olx
+
+# --- Search: promoted ads are interleaved and flagged; 1,000-result cap.
+res = olx.search(query="iphone", sort="newest", seller_type="private")["data"]
+print(res["total"], res["total_capped"], res["promoted_count"], res["currency"])
+for item in res["items"][:5]:
+    print(item["id"], item["title"], item["price"]["value"], item["condition"],
+          item["location"]["city"], item["refreshed_at"], item["is_promoted"])
+
+# --- Discover a category's filters, then search with them.
+f = olx.filters(84)["data"]
+for flt in f["filters"][:5]:
+    print(flt["key"], flt["label"], flt["kind"], flt["send_as"])
+cars = olx.search(category_id=84, filters={"filter_float_year:from": 2018,
+                                           "filter_float_milage:to": 100000})["data"]
+
+# --- Places and categories for the location and category filters.
+loc = olx.locations("Warszawa")["data"]["locations"][0]
+print(loc["city"], loc["city_id"], loc["region_id"])
+near = olx.search(query="rower", city_id=loc["city_id"], distance_km=30)["data"]
+top = olx.categories()["data"]["categories"]
+print([(c["id"], c["name"], c["count"]) for c in top[:5]])
+
+# --- One ad, its seller, the seller's ads and similar ads.
+ad = olx.offer(offer_id="1107557408")["data"]
+print(ad["title"], ad["price"], ad["category"]["breadcrumb"], ad["seller"])
+s = olx.seller(2547532895)["data"]
+print(s["is_business"], s["business_name"], s["member_since"], s["active_ads"])
+ads = olx.seller_ads(2547532895, sort="price_low_to_high")["data"]
+sim = olx.similar(offer_id="1107557408")["data"]
+print(ads["total"], sim["count"])
+
+# --- olx.uz: Russian titles by default; y.e. prices come converted to UZS.
+uz = olx.search(query="iphone", country="uz")["data"]
+for item in uz["items"]:
+    p = item["price"]
+    if p["original_currency"]:  # e.g. 529 UYE -> 6334404.7 UZS
+        print(p["value"], p["currency"], p["original_value"], p["original_currency"])
+```
+
+`search` and `seller_ads` share one grid: up to 50 ads per page (default 40;
+promoted ads come on top, each flagged `is_promoted` with
+`promoted_position`, `include_promoted=False` drops them), and OLX lets
+anyone page through the first 1,000 results only (`total_capped`; kz and uz
+hide large totals, so `total` is None there). Sort by `relevance`, `newest`
+(last refresh, not first posting: sellers can refresh an ad),
+`price_low_to_high` or `price_high_to_low`; filter by `min_price` /
+`max_price`, `condition`, `seller_type` (`private` / `business`),
+`olx_delivery` (not on kz or uz), `with_photos`, `region_id` / `city_id` /
+`district_id` with `distance_km`, and the category's own `filter_*` keys
+from `filters()`. A query with no exact match returns the closest ads. When
+the site converts a price (olx.uz y.e. to UZS, EUR to RON on ro, USD / EUR
+to UAH on ua), `price["value"]` is the converted figure and
+`original_value` / `original_currency` keep what the seller entered. Jobs
+carry `salary`. Private sellers' names, phone numbers, emails, exact map
+positions, last-seen times and car VINs are never returned, and phone
+numbers and emails in ad text are replaced; `business_name` is set for
+business sellers only. OLX shows no seller ratings or reviews. Failed calls
+are not charged; a not-found is a charged 404, and an ended ad answers the
+same 404 as a missing one ("not found or no longer active"). No view
+counts, phone numbers, messaging, delivery prices, checkout, average prices,
+notifications or price history: to watch for new listings or track prices,
+poll `sort="newest"` and store your own.
+
 ## Error Handling
 
 ```python
@@ -2532,6 +2615,7 @@ Scavio works with popular AI/LLM frameworks:
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
+| OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2542,6 +2626,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.53.0
+
+- **New `olx` namespace** (sync and async) for OLX Europe, 9 endpoints at
+  1 credit each: `search`, `offer`, `seller`, `seller_ads`, `filters`,
+  `categories`, `locations`, `suggestions`, `similar`. `country` pl
+  (default), ro, pt, bg, ua, kz or uz (`filters` and `similar`: pl, ro, pt,
+  bg, ua); `language` (kk on kz, uz on uz, ru on both) on `search`,
+  `seller_ads` and `offer`. 120s timeout floor.
 
 ### Changed in 0.52.0
 

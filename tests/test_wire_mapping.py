@@ -3371,3 +3371,125 @@ def test_company_enrich_async(monkeypatch):
         "json": {"place_id": "ChIJf--pagyMOIgRBVuxHteSRBo"},
         "timeout": 180.0,
     }
+
+
+def test_olx_credits_paths_and_wire(monkeypatch):
+    """olx (0.53.0): 9 endpoints on /api/v1/olx, 1 credit each.
+
+    Every endpoint takes country (pl, ro, pt, bg, ua, kz, uz) except filters and
+    similar (pl, ro, pt, bg, ua). language (ru, kk, uz) is on search, seller_ads
+    and offer only. search takes query, category_id or both; offer and similar
+    take offer_id or url. 120 s timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "olx"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "offer",
+            "seller",
+            "seller_ads",
+            "filters",
+            "categories",
+            "locations",
+            "suggestions",
+            "similar",
+        ]
+    )
+    all7 = 'Optional[Literal["pl", "ro", "pt", "bg", "ua", "kz", "uz"]]'
+    eu5 = 'Optional[Literal["pl", "ro", "pt", "bg", "ua"]]'
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/olx/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        country = next(p for p in ep.params if p.name == "country")
+        assert country.annotation == (eu5 if m in ("filters", "similar") else all7), ep.key
+        names = {p.name for p in ep.params}
+        assert ("language" in names) == (m in ("search", "seller_ads", "offer")), ep.key
+        assert ("filters" in names) == (m in ("search", "seller_ads")), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    o = client.olx
+    o.search(
+        query="iphone",
+        sort="newest",
+        min_price=500,
+        condition="used",
+        seller_type="private",
+        olx_delivery=True,
+        city_id=17871,
+        distance_km=30,
+        page=2,
+        page_size=50,
+    )
+    o.search(
+        category_id="84",
+        filters={"filter_float_year:from": 2018, "filter_enum_rooms": ["two", "three"]},
+        include_promoted=False,
+    )
+    o.search(query="velosiped", country="uz", language="uz")
+    o.offer(offer_id="1107557408")
+    o.offer(offer_id=402863292, country="kz", language="kk")
+    o.seller("2547532895")
+    o.seller_ads(2547532895, sort="price_low_to_high", country="ro")
+    o.filters(14, region_id=2, query="mieszkanie")
+    o.categories(parent_id=5)
+    o.locations("Warszawa")
+    o.suggestions("rower", country="bg")
+    o.similar(url="https://www.olx.pl/d/oferta/x-ID1cXcha.html")
+    base = "/api/v1/olx/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "iphone",
+                "page": 2,
+                "page_size": 50,
+                "sort": "newest",
+                "min_price": 500,
+                "condition": "used",
+                "seller_type": "private",
+                "olx_delivery": True,
+                "city_id": 17871,
+                "distance_km": 30,
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {
+                "category_id": "84",
+                "filters": {"filter_float_year:from": 2018, "filter_enum_rooms": ["two", "three"]},
+                "include_promoted": False,
+            },
+            120.0,
+        ),
+        (base + "search", {"query": "velosiped", "country": "uz", "language": "uz"}, 120.0),
+        (base + "offer", {"offer_id": "1107557408"}, 120.0),
+        (base + "offer", {"offer_id": 402863292, "country": "kz", "language": "kk"}, 120.0),
+        (base + "seller", {"user_id": "2547532895"}, 120.0),
+        (
+            base + "seller-ads",
+            {"user_id": 2547532895, "country": "ro", "sort": "price_low_to_high"},
+            120.0,
+        ),
+        (base + "filters", {"category_id": 14, "query": "mieszkanie", "region_id": 2}, 120.0),
+        (base + "categories", {"parent_id": 5}, 120.0),
+        (base + "locations", {"query": "Warszawa"}, 120.0),
+        (base + "suggestions", {"query": "rower", "country": "bg"}, 120.0),
+        (base + "similar", {"url": "https://www.olx.pl/d/oferta/x-ID1cXcha.html"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        o.search(sort="newest")
+    with pytest.raises(ScavioError):
+        o.offer(country="pl")
+    with pytest.raises(ScavioError):
+        o.similar()

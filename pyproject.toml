@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.52.0"
-description = "Python SDK for the Scavio Search API - real-time data from 73 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks, Kohl's, JCPenney, Dick's, Foot Locker, Fanatics, Lowe's, Nordstrom, Sephora, Ulta, ALDI, Walgreens, CVS, Whole Foods, PetSmart, Chewy, HEB, Kroger, Carrefour, Allegro, Mercado Libre, eBay, Zillow, Booking, Airbnb, Yelp, Trustpilot, Indeed, Glassdoor, SEC EDGAR, Meta Ad Library and more) plus URL extraction and website map, crawl and batch extract"
+version = "0.53.0"
+description = "Python SDK for the Scavio Search API - real-time data from 74 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks, Kohl's, JCPenney, Dick's, Foot Locker, Fanatics, Lowe's, Nordstrom, Sephora, Ulta, ALDI, Walgreens, CVS, Whole Foods, PetSmart, Chewy, HEB, Kroger, Carrefour, Allegro, OLX, Mercado Libre, eBay, Zillow, Booking, Airbnb, Yelp, Trustpilot, Indeed, Glassdoor, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -84,6 +84,10 @@ keywords = [
     "allegro-api",
     "allegro-price-monitoring",
     "polish-marketplace",
+    "olx",
+    "olx-api",
+    "olx-listings",
+    "classifieds",
     "company-enrichment",
     "lead-enrichment",
     "email-finder",
