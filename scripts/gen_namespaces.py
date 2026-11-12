@@ -277,6 +277,13 @@ _NS_META = {
         "suggestions, store locator, store availability and store detail with fuel prices "
         "(carrefour.fr; search and product also on Argentina, Romania and Belgium).",
     ),
+    "allegro": (
+        "Allegro",
+        "Allegro marketplace search, offer detail with the 30-day lowest price and auction "
+        "state, catalogue product with the first 20 reviews, every seller's offer for one "
+        "product, seller offers and seller feedback, and category listings (allegro.pl, plus "
+        "allegro.cz, allegro.sk and allegro.hu).",
+    ),
     "heb": (
         "Heb",
         "HEB grocery search, product detail, and store locator endpoints, store-targetable.",

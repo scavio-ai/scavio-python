@@ -10,6 +10,7 @@ from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
     _AsyncAirbnbNamespace,
     _AsyncAldiNamespace,
+    _AsyncAllegroNamespace,
     _AsyncAmazonNamespace,
     _AsyncAppStoreNamespace,
     _AsyncBestBuyNamespace,
@@ -198,6 +199,7 @@ class AsyncScavioClient:
         self.footlocker = _AsyncFootlockerNamespace(self)
         self.fanatics = _AsyncFanaticsNamespace(self)
         self.carrefour = _AsyncCarrefourNamespace(self)
+        self.allegro = _AsyncAllegroNamespace(self)
         self.trustpilot = _AsyncTrustpilotNamespace(self)
         self.realtor = _AsyncRealtorNamespace(self)
         self.rightmove = _AsyncRightmoveNamespace(self)

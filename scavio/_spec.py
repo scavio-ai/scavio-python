@@ -961,6 +961,97 @@ def _carrefour_ean(doc: str = "") -> Param:
     )
 
 
+# Allegro params shared across endpoints (allegro.pl + allegro.cz / .sk / .hu on every endpoint).
+_ALLEGRO_MARKETS = (
+    "pl (allegro.pl, PLN, Polish, default), cz (allegro.cz, CZK, Czech), sk (allegro.sk, EUR, "
+    "Slovak) or hu (allegro.hu, HUF, Hungarian)"
+)
+_ALLEGRO_COUNTRY = _lit(
+    "country",
+    ("pl", "cz", "sk", "hu"),
+    "The Allegro site: " + _ALLEGRO_MARKETS + ". Defaults to pl. Titles and labels come in the "
+    "site's language, prices in its currency.",
+)
+_ALLEGRO_PAGE = _int(
+    "page",
+    "Results page, 1-based (up to 100). 60 organic offers per page; sponsored slots come on top.",
+)
+_ALLEGRO_SORT = _lit(
+    "sort",
+    (
+        "relevance",
+        "price_low_to_high",
+        "price_high_to_low",
+        "price_with_delivery_low_to_high",
+        "price_with_delivery_high_to_low",
+        "popularity",
+        "ending_soonest",
+        "newest",
+    ),
+    "relevance (default), price_low_to_high, price_high_to_low, price_with_delivery_low_to_high, "
+    "price_with_delivery_high_to_low, popularity, ending_soonest (auctions first to end) or "
+    "newest. Sponsored slots are not sorted; where the site shows promoted offers as their own "
+    "block, each block is in sort order.",
+)
+_ALLEGRO_PRICE_CONDITION = (
+    _float("min_price", "Lowest price, in the site's currency."),
+    _float("max_price", "Highest price, in the site's currency."),
+    _lit("condition", ("new", "used"), "new or used."),
+    _bool("smart", "Only offers with Allegro Smart! (free delivery and returns for members)."),
+)
+_ALLEGRO_FILTERS = (
+    *_ALLEGRO_PRICE_CONDITION,
+    _lit("buying_format", ("buy_now", "auction"), "pl only: buy_now (fixed price) or auction."),
+    _bool(
+        "deals",
+        "pl only: only offers in Allegro's deals and promotions zone (seasonal campaign deals "
+        "such as Black Weeks included while they run).",
+    ),
+)
+_ALLEGRO_PRODUCT_TARGET = (
+    _str(
+        "product_id",
+        "A catalogue product id (a uuid): items[].product_id of a search or product_id of an "
+        "offer, e.g. '90d08230-e02a-4210-913d-d417453321b8'. Alternative to url.",
+    ),
+    _str(
+        "url",
+        "A product link (allegro.pl/produkt/..., any of the four sites). Alternative to "
+        "product_id.",
+    ),
+    _ALLEGRO_COUNTRY,
+)
+_ALLEGRO_LOGIN = _req(
+    "login",
+    "A seller login: items[].seller.login of a search or seller.login of an offer, e.g. "
+    "'Yupilo_pl'.",
+)
+_ALLEGRO_GRID_FIELDS = (
+    " Items with offer_id (for offer()), product_id (for product() and product_offers()), title, "
+    "url, image, price and currency, buy_now_price (auctions), price_with_delivery (when the page "
+    "shows it), free_delivery, delivery_text, condition, is_auction with auction_ends_in, "
+    "discount_percent and lowest_price_30d, seller (id, login, super_seller, "
+    "positive_feedback_percent, is_business), rating and rating_count, sold_count ('x people "
+    "bought recently' as a number; None on auctions) with sold_label, smart (Allegro Smart!), "
+    "offers_count, stock, placement (regular, promoted, sponsored or featured) with "
+    "is_sponsored, and source (allegro, or allegro_lokalnie for Allegro Lokalnie offers inside "
+    "pl results). Also total (exact), total_pages (at most 100), page, page_size (60), sort, "
+    "applied_filters, facets (every filter with its values and offer counts), country, language "
+    "and currency."
+)
+_ALLEGRO_OMNIBUS = (
+    " lowest_price_30d is the EU price disclosure Allegro shows next to a discount: the lowest "
+    "price in the 30 days before the discount. It is None without a discount and is not a price "
+    "history."
+)
+_ALLEGRO_NOTE = (
+    " Titles, parameters and labels come back in the site's language (Polish on pl). Markets: "
+    + _ALLEGRO_MARKETS
+    + ". sk and hu calls can take up to about a minute. Failed upstream calls are not charged "
+    "(they are retried automatically); a not-found is charged."
+)
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -12153,6 +12244,222 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=120.0,
     ),
+    # ============================== Allegro ==============================
+    # allegro.pl + allegro.cz, allegro.sk and allegro.hu on every endpoint,
+    # 7 endpoints, 2 credits each. buying_format and deals are pl only (400
+    # elsewhere). 120 s timeout floor (sk / hu take up to ~60 s per attempt).
+    Endpoint(
+        key="allegro_search",
+        namespace="allegro",
+        method="search",
+        http="POST",
+        path="/api/v1/allegro/search",
+        summary=(
+            "Search Allegro, the largest marketplace in Poland and Central Europe, by keyword: "
+            "sort by price, price with delivery, popularity, ending soonest or newest; filter by "
+            "price range, new or used, buy now or auction (pl), Allegro Smart! and deals (pl); "
+            "optionally inside one category. Sponsored and promoted offers are flagged. "
+            "Misspellings are not corrected." + _ALLEGRO_GRID_FIELDS + _ALLEGRO_OMNIBUS
+            + _ALLEGRO_NOTE
+        ),
+        params=(
+            _req("query", "Search keywords, in any language, e.g. 'laptop' or 'buty nike'."),
+            _ALLEGRO_COUNTRY,
+            _ALLEGRO_PAGE,
+            _ALLEGRO_SORT,
+            _str_or_int(
+                "category_id",
+                "Search inside one category: a category id (category.id or breadcrumb[].id of an "
+                "offer, e.g. 491 = laptops) or its slug (laptopy-491).",
+            ),
+            *_ALLEGRO_FILTERS,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_offer",
+        namespace="allegro",
+        method="offer",
+        http="POST",
+        path="/api/v1/allegro/offer",
+        summary=(
+            "One Allegro offer (one seller's listing, /oferta) by number or link: title, "
+            "condition, status, price, original_price and lowest_price_30d with discount_percent "
+            "on a discount, price_with_delivery, stock (units available as shown), sold_count "
+            "(None on auctions and on cz, sk and hu offers), auction state (current price, "
+            "minimum next bid, bid step, end time, whether anyone has bid) or buy now price, "
+            "every parameter (EAN / GTIN, brand, model...), gtin, brand, the seller's description "
+            "as plain text, images, breadcrumb, delivery methods with price and estimated "
+            "delivery, handling time, returns (days), warranty, the product's rating and offer "
+            "count (product_id for product_offers()), and the seller (login, super seller, "
+            "positive feedback percent and counts for the last 12 months, is_business, "
+            "company_name for business sellers). No bid history." + _ALLEGRO_OMNIBUS
+            + _ALLEGRO_NOTE
+        ),
+        params=(
+            _str_or_int(
+                "offer_id",
+                "An offer number: items[].offer_id of a search, category or seller answer, e.g. "
+                "'17858046919'. Alternative to url.",
+            ),
+            _str(
+                "url",
+                "An offer link (allegro.pl/oferta/..., or a product link with ?offerId=; any of "
+                "the four sites). Alternative to offer_id.",
+            ),
+            _ALLEGRO_COUNTRY,
+        ),
+        one_of=(("offer_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_product",
+        namespace="allegro",
+        method="product",
+        http="POST",
+        path="/api/v1/allegro/product",
+        summary=(
+            "One Allegro catalogue product (/produkt: one item that groups many sellers' offers) "
+            "by id or link: title, brand, GTIN, parameters, images, breadcrumb, description, "
+            "lowest_price and offer_count (every seller's offer is on product_offers()), the "
+            "cheapest and fastest offers as the page highlights them, the featured (buy box) "
+            "offer with its price, 30-day lowest price, stock, sold count and seller, how many "
+            "people bought it recently, the rating (average, count, 1-5 star distribution), "
+            "review aspects (topic, sentiment, mention counts) and the first 20 reviews as shown "
+            "on the product page (rating, text, pros, cons, author as published e.g. 'b...y', "
+            "date, helpful votes, images, is_best). Not the full review history." + _ALLEGRO_NOTE
+        ),
+        params=_ALLEGRO_PRODUCT_TARGET,
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_product_offers",
+        namespace="allegro",
+        method="product_offers",
+        http="POST",
+        path="/api/v1/allegro/product-offers",
+        summary=(
+            "Every seller's offer for one Allegro catalogue product: the price comparison page, "
+            "for price monitoring across sellers. 60 offers per page, sortable by price or price "
+            "with delivery and filterable by condition, price and Allegro Smart!. Each offer has "
+            "price, price_with_delivery, delivery_text, condition, seller (login, super seller, "
+            "positive feedback percent and count, is_business), smart, stock where shown, "
+            "is_featured (the buy box offer) and the listing fields of search(). Also total, "
+            "total_pages, page and facets. Promoted offers can come first as their own block."
+            + _ALLEGRO_NOTE
+        ),
+        params=(
+            *_ALLEGRO_PRODUCT_TARGET,
+            _ALLEGRO_PAGE,
+            _lit(
+                "sort",
+                (
+                    "relevance",
+                    "price_low_to_high",
+                    "price_high_to_low",
+                    "price_with_delivery_low_to_high",
+                    "price_with_delivery_high_to_low",
+                    "popularity",
+                ),
+                "relevance (default), price_low_to_high, price_high_to_low, "
+                "price_with_delivery_low_to_high, price_with_delivery_high_to_low or popularity.",
+            ),
+            *_ALLEGRO_PRICE_CONDITION,
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_seller",
+        namespace="allegro",
+        method="seller",
+        http="POST",
+        path="/api/v1/allegro/seller",
+        summary=(
+            "One Allegro seller's offers by login, with the seller (id, login, is_business, url; "
+            "the super seller status, feedback score and member since are on "
+            "seller_feedback()), whether the seller is active, and the categories the seller "
+            "sells in (with offer counts and a slug for category); search within the seller's "
+            "offers and use the search sorts and filters. No seller address or tax id."
+            + _ALLEGRO_GRID_FIELDS
+            + _ALLEGRO_NOTE
+        ),
+        params=(
+            _ALLEGRO_LOGIN,
+            _ALLEGRO_COUNTRY,
+            _str("query", "Search within the seller's offers."),
+            _str(
+                "category",
+                "Only one of the seller's categories: categories[].slug of a previous seller() "
+                "answer (e.g. komputery).",
+            ),
+            _ALLEGRO_PAGE,
+            _ALLEGRO_SORT,
+            *_ALLEGRO_FILTERS,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_seller_feedback",
+        namespace="allegro",
+        method="seller_feedback",
+        http="POST",
+        path="/api/v1/allegro/seller-feedback",
+        summary=(
+            "One Allegro seller's buyer ratings: summary (recommended and not recommended "
+            "counts, unique counts, positive_percent, received, excluded and removed ratings, "
+            "member_since, super_seller) and 20 ratings per page, newest first, each with "
+            "recommended yes / no, comment, the reasons given (e.g. on-time delivery), date, the "
+            "offers rated, and whether it was excluded from the score and why. No buyer identity "
+            "is returned." + _ALLEGRO_NOTE
+        ),
+        params=(
+            _ALLEGRO_LOGIN,
+            _ALLEGRO_COUNTRY,
+            _int("page", "Ratings page, 1-based (up to 500). 20 ratings per page, newest first."),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="allegro_category",
+        namespace="allegro",
+        method="category",
+        http="POST",
+        path="/api/v1/allegro/category",
+        summary=(
+            "One Allegro category's offers by id or link, with the same sorts and filters as "
+            "search() and an optional query, plus the category (id, name, url, breadcrumb, "
+            "subcategories or sibling categories with offer counts)." + _ALLEGRO_GRID_FIELDS
+            + _ALLEGRO_NOTE
+        ),
+        params=(
+            _str_or_int(
+                "category_id",
+                "A category id (e.g. 491 = laptops) or its slug (laptopy-491): breadcrumb[].id "
+                "of an offer or subcategories[].id of a category answer. Alternative to url.",
+            ),
+            _str(
+                "url",
+                "A category link (allegro.pl/kategoria/..., any of the four sites), e.g. "
+                "'https://allegro.pl/kategoria/laptopy-491'. Alternative to category_id.",
+            ),
+            _ALLEGRO_COUNTRY,
+            _str("query", "Search within the category."),
+            _ALLEGRO_PAGE,
+            _ALLEGRO_SORT,
+            *_ALLEGRO_FILTERS,
+        ),
+        one_of=(("category_id", "url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
     # ============================= Trustpilot ============================
     # 6 endpoints, 2 credits each. business() and reviews() take exactly one
     # of domain or url (the server rejects both); one_of only enforces "at
@@ -13274,6 +13581,7 @@ NAMESPACES: tuple[str, ...] = (
     "footlocker",
     "fanatics",
     "carrefour",
+    "allegro",
     "trustpilot",
     "realtor",
     "rightmove",

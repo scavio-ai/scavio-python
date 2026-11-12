@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 72 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 73 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -35,6 +35,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
+| Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -2251,6 +2252,95 @@ delivery-slot booking, cart, loyalty account data or price history: to track
 prices, poll and store your own. Spain, Italy, Poland, Brazil and the Middle
 East sites are not covered.
 
+### 40. Marketplace -- Allegro
+
+Allegro offers, every seller's price for one product, sellers and seller
+feedback, namespace `allegro`, 7 endpoints, 2 credits each: `search`,
+`offer`, `product`, `product_offers`, `seller`, `seller_feedback`,
+`category`. Every endpoint takes `country`: `pl` (allegro.pl, PLN, default),
+`cz` (allegro.cz, CZK), `sk` (allegro.sk, EUR) or `hu` (allegro.hu, HUF).
+Titles, parameters and labels come back in the site's language (Polish on
+pl). An offer is one seller's listing (`offer_id`); a catalogue product
+(`product_id`) groups many sellers' offers, and `product_offers()` lists every
+seller's price for it. sk and hu calls can take up to about a minute; every
+method raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+al = client.allegro
+
+# --- Search: price, price with delivery, sold count, seller, sponsored flag.
+res = al.search("laptop", sort="price_low_to_high", condition="new")["data"]
+print(res["total"], res["total_pages"], res["currency"], res["language"])
+for item in res["items"][:5]:
+    print(item["offer_id"], item["title"], item["price"], item["price_with_delivery"],
+          item["sold_count"], item["seller"]["login"], item["placement"])
+
+# --- One offer: 30-day lowest price on a discount, stock, delivery, seller.
+o = al.offer(offer_id="18801787032")["data"]
+print(o["price"], o["original_price"], o["lowest_price_30d"], o["discount_percent"])
+print(o["stock"], o["sold_count"], o["seller"]["login"], o["seller"]["company_name"])
+for d in o["delivery"][:3]:
+    print(d["method"], d["price"], d["eta_text"])
+
+# --- A catalogue product, then every seller's offer for it (price monitoring).
+p = al.product(product_id="90d08230-e02a-4210-913d-d417453321b8")["data"]
+print(p["title"], p["lowest_price"], p["offer_count"], p["rating"]["average"])
+print(p["featured_offer"]["price"], p["featured_offer"]["seller"]["login"])
+for r in p["reviews"][:3]:
+    print(r["rating"], r["author"], r["text"])
+offers = al.product_offers(product_id=p["product_id"],
+                           sort="price_with_delivery_low_to_high")["data"]
+for of in offers["offers"][:5]:
+    print(of["seller"]["login"], of["price"], of["price_with_delivery"],
+          of["smart"], of["is_featured"])
+
+# --- A seller's offers, then the seller's feedback score.
+s = al.seller("Yupilo_pl", query="lenovo", category="komputery")["data"]
+print(s["seller"]["is_business"], [(c["name"], c["slug"]) for c in s["categories"]])
+fb = al.seller_feedback("Yupilo_pl")["data"]
+print(fb["summary"]["positive_percent"], fb["summary"]["super_seller"],
+      fb["summary"]["member_since"])
+
+# --- A category, and another market (Hungarian titles, HUF prices).
+cat = al.category(category_id=491, sort="popularity")["data"]
+print(cat["category"]["name"], cat["category"]["breadcrumb"], cat["total"])
+hu = al.search("laptop", country="hu")["data"]
+print(hu["currency"], hu["items"][0]["title"], hu["items"][0]["price"])
+```
+
+`search`, `category` and `seller` share one grid: 60 organic offers per page
+(sponsored slots on top), up to 100 pages, exact `total` and every facet.
+Sort by `relevance`, `price_low_to_high`, `price_high_to_low`,
+`price_with_delivery_low_to_high`, `price_with_delivery_high_to_low`,
+`popularity`, `ending_soonest` or `newest`; filter by `min_price` /
+`max_price`, `condition` (`new` / `used`), `smart`, and on pl only
+`buying_format` (`buy_now` / `auction`) and `deals` (Allegro's deals zone,
+Black Weeks included while it runs); both pl-only filters are a 400
+elsewhere. Each item carries `price`, `price_with_delivery`, `condition`,
+`is_auction`, `discount_percent` and `lowest_price_30d`, the seller
+(`super_seller`, `positive_feedback_percent`, `is_business`), `sold_count`,
+`smart`, `placement` (regular, promoted, sponsored or featured) and `source`
+(`allegro_lokalnie` for Allegro Lokalnie offers inside pl results).
+`lowest_price_30d` is the EU disclosure Allegro shows next to a discount (the
+lowest price in the 30 days before it): None without a discount, and not a
+price history. `sold_count` is None on auctions and on cz, sk and hu offer
+pages. `offer` returns the auction state (current price, minimum next bid,
+ends at, has bids; no bid history), every parameter with GTIN and brand,
+delivery methods, returns, warranty and `company_name` for business sellers.
+`product` returns `lowest_price`, `offer_count`, the featured (buy box) offer,
+the star distribution, review aspects and the first 20 reviews as shown on
+the page. `seller` returns id, login, `is_business` and the seller's
+categories (`slug` feeds `category`); super seller status, positive percent
+and member since come from `seller_feedback` (20 ratings per page, no buyer
+identity). Failed calls are not charged; a not-found is a charged 404. No
+search suggestions, bidding, buying or checkout, Allegro Lokalnie as its own
+source, Smart! account data, seller revenue, seller addresses or tax ids,
+price history or reviews past the first 20: to track prices, poll and store
+your own.
+
 ## Error Handling
 
 ```python
@@ -2393,6 +2483,7 @@ Scavio works with popular AI/LLM frameworks:
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
+| Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2402,6 +2493,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.51.0
+
+- **New `allegro` namespace** (sync and async) for Allegro, 7 endpoints at
+  2 credits each: `search`, `offer`, `product`, `product_offers`, `seller`,
+  `seller_feedback`, `category`. Every endpoint takes `country` pl
+  (default), cz, sk or hu; `buying_format` and `deals` are pl only. 120s
+  timeout floor.
 
 ### Changed in 0.50.0
 

@@ -3174,3 +3174,128 @@ def test_carrefour_credits_paths_and_wire(monkeypatch):
         c.stores(service="drive")
     with pytest.raises(ScavioError):
         c.store()
+
+
+def test_allegro_credits_paths_and_wire(monkeypatch):
+    """allegro (0.51.0): 7 endpoints on /api/v1/allegro, 2 credits each.
+
+    Every endpoint takes country (pl, cz, sk, hu). buying_format and deals are
+    pl-only filters on the grid endpoints (search, seller, category), absent on
+    product_offers. offer_id and category_id take a digit string or an int;
+    120 s timeout floor everywhere (sk / hu take up to ~60 s per attempt).
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "allegro"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "offer",
+            "product",
+            "product_offers",
+            "seller",
+            "seller_feedback",
+            "category",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 2, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/allegro/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        country = next(p for p in ep.params if p.name == "country")
+        assert country.annotation == 'Optional[Literal["pl", "cz", "sk", "hu"]]', ep.key
+        names = {p.name for p in ep.params}
+        assert ({"buying_format", "deals"} <= names) == (
+            m in ("search", "seller", "category")
+        ), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    a = client.allegro
+    a.search(
+        "laptop",
+        sort="price_low_to_high",
+        condition="new",
+        buying_format="buy_now",
+        deals=True,
+        smart=True,
+        min_price=500,
+        category_id=491,
+        page=2,
+    )
+    a.search("notebook", country="hu")
+    a.offer(offer_id="18801787032")
+    a.offer(url="https://allegro.cz/nabidka/18740738924")
+    a.product(product_id="90d08230-e02a-4210-913d-d417453321b8", country="sk")
+    a.product_offers(
+        product_id="90d08230-e02a-4210-913d-d417453321b8",
+        sort="price_with_delivery_low_to_high",
+        condition="used",
+        max_price=100.5,
+    )
+    a.seller("Yupilo_pl", query="lenovo", category="komputery", sort="newest")
+    a.seller_feedback("Yupilo_pl", page=3)
+    a.category(category_id="laptopy-491", query="dell", sort="popularity")
+    a.category(url="https://allegro.pl/kategoria/laptopy-491")
+    base = "/api/v1/allegro/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "laptop",
+                "page": 2,
+                "sort": "price_low_to_high",
+                "category_id": 491,
+                "min_price": 500,
+                "condition": "new",
+                "smart": True,
+                "buying_format": "buy_now",
+                "deals": True,
+            },
+            120.0,
+        ),
+        (base + "search", {"query": "notebook", "country": "hu"}, 120.0),
+        (base + "offer", {"offer_id": "18801787032"}, 120.0),
+        (base + "offer", {"url": "https://allegro.cz/nabidka/18740738924"}, 120.0),
+        (
+            base + "product",
+            {"product_id": "90d08230-e02a-4210-913d-d417453321b8", "country": "sk"},
+            120.0,
+        ),
+        (
+            base + "product-offers",
+            {
+                "product_id": "90d08230-e02a-4210-913d-d417453321b8",
+                "sort": "price_with_delivery_low_to_high",
+                "max_price": 100.5,
+                "condition": "used",
+            },
+            120.0,
+        ),
+        (
+            base + "seller",
+            {"login": "Yupilo_pl", "query": "lenovo", "category": "komputery", "sort": "newest"},
+            120.0,
+        ),
+        (base + "seller-feedback", {"login": "Yupilo_pl", "page": 3}, 120.0),
+        (
+            base + "category",
+            {"category_id": "laptopy-491", "query": "dell", "sort": "popularity"},
+            120.0,
+        ),
+        (base + "category", {"url": "https://allegro.pl/kategoria/laptopy-491"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        a.offer(country="pl")
+    with pytest.raises(ScavioError):
+        a.product()
+    with pytest.raises(ScavioError):
+        a.product_offers(sort="price_low_to_high")
+    with pytest.raises(ScavioError):
+        a.category(query="dell")

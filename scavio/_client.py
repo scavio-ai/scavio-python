@@ -8,6 +8,7 @@ from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
     _AirbnbNamespace,
     _AldiNamespace,
+    _AllegroNamespace,
     _AmazonNamespace,
     _AppStoreNamespace,
     _BestBuyNamespace,
@@ -203,6 +204,7 @@ class ScavioClient:
         self.footlocker = _FootlockerNamespace(self)
         self.fanatics = _FanaticsNamespace(self)
         self.carrefour = _CarrefourNamespace(self)
+        self.allegro = _AllegroNamespace(self)
         self.trustpilot = _TrustpilotNamespace(self)
         self.realtor = _RealtorNamespace(self)
         self.rightmove = _RightmoveNamespace(self)
