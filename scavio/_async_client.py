@@ -40,6 +40,7 @@ from ._namespaces_async import (
     _AsyncHebNamespace,
     _AsyncHomeDepotNamespace,
     _AsyncIherbNamespace,
+    _AsyncIkeaNamespace,
     _AsyncIndeedNamespace,
     _AsyncInstagramNamespace,
     _AsyncJcpenneyNamespace,
@@ -214,6 +215,7 @@ class AsyncScavioClient:
         self.heb = _AsyncHebNamespace(self)
         self.kroger = _AsyncKrogerNamespace(self)
         self.publix = _AsyncPublixNamespace(self)
+        self.ikea = _AsyncIkeaNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -38,6 +38,7 @@ from ._namespaces_sync import (
     _HebNamespace,
     _HomeDepotNamespace,
     _IherbNamespace,
+    _IkeaNamespace,
     _IndeedNamespace,
     _InstagramNamespace,
     _JcpenneyNamespace,
@@ -219,6 +220,7 @@ class ScavioClient:
         self.heb = _HebNamespace(self)
         self.kroger = _KrogerNamespace(self)
         self.publix = _PublixNamespace(self)
+        self.ikea = _IkeaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

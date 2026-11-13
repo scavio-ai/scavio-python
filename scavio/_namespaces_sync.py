@@ -84,6 +84,7 @@ __all__ = [
     "_HebNamespace",
     "_KrogerNamespace",
     "_PublixNamespace",
+    "_IkeaNamespace",
 ]
 
 class _GoogleNamespace:
@@ -11901,3 +11902,345 @@ class _PublixNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("publix_suggestions", {"query": query, "store_id": store_id}, extra)
+
+class _IkeaNamespace:
+    """IKEA search, product, reviews, category, category tree, deal lists, search suggestion, store locator, stock by store, bulk item lookup, prices by country and As-is offer endpoints, across 55 markets."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        island: Optional[Literal["tenerife", "grancanaria", "lanzarote", "fuerteventura", "lapalma", "lagomera", "elhierro", "mallorca", "menorca", "ibiza"]] = None,
+        category_id: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "rating", "name_asc", "most_popular"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_bucket: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        last_chance: Optional[bool] = None,
+        family_price: Optional[bool] = None,
+        top_seller: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        availability: Optional[Literal["in_store", "click_collect", "online"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search IKEA products by keyword on any of 55 markets. The 50 ikea.com markets and cn get the full grid: sort by price, newest, rating, name or popularity; filter by color, price range, category, new, last chance, IKEA Family price, best seller, store availability or any facet. Items with item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, image, images, price, previous_price, discount_amount, discount_percent, price_tag (family_price: price is the IKEA Family member price and previous_price the regular one; new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA markets), badge, colors, variant_count, variants, last_chance, online_sellable, category_path and availability (with store_id). Also total, page, page_size, total_pages, count, sort, applied_filters and facets (name, parameter, type, values with id, label and count; the parameter is the key filters takes). Keyword searches also return did_you_mean, related_searches and content (inspiration pages, separate from items). The franchise sites (pr, do, es_islands, is) take query and page only: Puerto Rico, Dominican Republic and the islands return the first 40 results only; Iceland pages by 40. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in any language the market serves, e.g. 'kallax'.
+            country: IKEA market code, lowercase (default 'us'). Served: 55 markets: the 50 ikea.com markets (us ca gb ie de at ch fr be nl dk se no fi ee lv lt pl cz sk hu hr si rs ro pt es it il ae sa kw qa bh om jo eg ma in my sg ph th jp kr au nz mx cl co), cn (ikea.cn), pr (Puerto Rico), do (Dominican Republic), es_islands (Canary and Balearic islands, with island) and is (Iceland).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            island: Required with country 'es_islands' (the Canary and Balearic islands storefronts): which island.
+            category_id: Narrow to category id(s) from facets (parameter f-subcategories), e.g. 'st002'.
+            page: Results page, 1-based.
+            page_size: Products per page (default 24, up to 100).
+            sort: relevance (default), price_asc, price_desc, newest, rating, name_asc or most_popular.
+            color: Color id(s) from facets (parameter f-colors), e.g. '10156' = white.
+            price_bucket: A price range id from facets (parameter f-price-buckets), e.g. 'PRICE_0_5000' = 0 to 49.99.
+            new_only: Only new products.
+            last_chance: Only last-chance (being discontinued) products.
+            family_price: Only products with an IKEA Family member price.
+            top_seller: Only best sellers.
+            store_id: A store id (stores()): adds each product's availability at that store (stock level, home delivery) and enables availability.
+            availability: With store_id: in_store (in stock at the store), click_collect or online.
+            filters: Any other facet, keyed by facets[].parameter, e.g. {'f-materials': ['47350']}; boolean facets take True.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_search", {"query": query, "country": country, "language": language, "island": island, "category_id": category_id, "page": page, "page_size": page_size, "sort": sort, "color": color, "price_bucket": price_bucket, "new_only": new_only, "last_chance": last_chance, "family_price": family_price, "top_seller": top_seller, "store_id": store_id, "availability": availability, "filters": filters}, extra)
+
+    def product(
+        self,
+        *,
+        item_no: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        island: Optional[Literal["tenerife", "grancanaria", "lanzarote", "fuerteventura", "lapalma", "lagomera", "elhierro", "mallorca", "menorca", "ibiza"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One IKEA product by article number or product URL: item_no, article_number, name, full_name, type_name, summary, description, url, price, previous_price, price_valid_from / to, family_price (member price with its dates), currency, images, rating, rating_count, measurements, materials, care, good_to_know, safety, packaging (number_of_packages, packages with item_no, dimensions, weight, quantity), assembly_pdfs, manuals, designer, variants, secondary_ratings, reviews_preview (3 newest), availability_online and detail_level (basic, rare: core fields only). cn answers in Chinese; the franchise sites (pr, do, es_islands, is) answer name, description, price, currency, availability_online, images and dimensions (detail_level basic). A product call can take up to about 100 seconds. An unknown article number is a charged 404. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_no: An IKEA article number: 8 digits, dots allowed, e.g. '80275887' or '802.758.87'. Pass a str to keep leading zeros ('00263850'). Alternative to url.
+            url: An IKEA product page of a served market, e.g. 'https://www.ikea.com/de/de/p/kallax-regal-weiss-80275887/' (alternative to item_no; the market and language are read from it).
+            country: IKEA market code, lowercase (default 'us'). Served: 55 markets: the 50 ikea.com markets (us ca gb ie de at ch fr be nl dk se no fi ee lv lt pl cz sk hu hr si rs ro pt es it il ae sa kw qa bh om jo eg ma in my sg ph th jp kr au nz mx cl co), cn (ikea.cn), pr (Puerto Rico), do (Dominican Republic), es_islands (Canary and Balearic islands, with island) and is (Iceland).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            island: Required with country 'es_islands' (the Canary and Balearic islands storefronts): which island.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_product", {"item_no": item_no, "url": url, "country": country, "language": language, "island": island}, extra)
+
+    def reviews(
+        self,
+        *,
+        item_no: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """An IKEA product's rating, rating_count, secondary_ratings (appearance, ease of assembly, quality, value for money ...) and the 20 most recent reviews the product page shows (title, text, rating, date, author first name as shown, country), plus highlighted reviews with their country. No paging, sort or star filter: always the 20 newest. Ratings and reviews are pooled across IKEA markets (the same count on every market). A call can take up to about 100 seconds. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_no: An IKEA article number: 8 digits, dots allowed, e.g. '80275887' or '802.758.87'. Pass a str to keep leading zeros ('00263850'). Alternative to url.
+            url: An ikea.com product page (alternative to item_no).
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets (not cn, pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_reviews", {"item_no": item_no, "url": url, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        *,
+        category_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "rating", "name_asc", "most_popular"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_bucket: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        last_chance: Optional[bool] = None,
+        family_price: Optional[bool] = None,
+        top_seller: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        availability: Optional[Literal["in_store", "click_collect", "online"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One IKEA category's products by category id or category URL, with the search sorts and filters: category (id, name, url, parents). Items with item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, image, images, price, previous_price, discount_amount, discount_percent, price_tag (family_price: price is the IKEA Family member price and previous_price the regular one; new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA markets), badge, colors, variant_count, variants, last_chance, online_sellable, category_path and availability (with store_id). Also total, page, page_size, total_pages, count, sort, applied_filters and facets (name, parameter, type, values with id, label and count; the parameter is the key filters takes). An unknown category id is a charged 404. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id (categories[].id of categories(), or category_path / facets ids of a search), e.g. '10382' = bookcases, 'fu003' = sofas. Alternative to url.
+            url: An IKEA category page, e.g. 'https://www.ikea.com/us/en/cat/bookcases-10382/'. Alternative to category_id.
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets and cn (not pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            page: Results page, 1-based.
+            page_size: Products per page (default 24, up to 100).
+            sort: relevance (default), price_asc, price_desc, newest, rating, name_asc or most_popular.
+            color: Color id(s) from facets (parameter f-colors), e.g. '10156' = white.
+            price_bucket: A price range id from facets (parameter f-price-buckets), e.g. 'PRICE_0_5000' = 0 to 49.99.
+            new_only: Only new products.
+            last_chance: Only last-chance (being discontinued) products.
+            family_price: Only products with an IKEA Family member price.
+            top_seller: Only best sellers.
+            store_id: A store id (stores()): adds each product's availability at that store (stock level, home delivery) and enables availability.
+            availability: With store_id: in_store (in stock at the store), click_collect or online.
+            filters: Any other facet, keyed by facets[].parameter, e.g. {'f-materials': ['47350']}; boolean facets take True.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_category", {"category_id": category_id, "url": url, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "color": color, "price_bucket": price_bucket, "new_only": new_only, "last_chance": last_chance, "family_price": family_price, "top_seller": top_seller, "store_id": store_id, "availability": availability, "filters": filters}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The market's IKEA category tree as its site menu shows it (about 1,500 categories): id (for category()), name, url and children; plus parent_id and count. parent_id returns one category's subtree. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets (not cn, pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            parent_id: Return only this category's subtree (categories[].id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_categories", {"country": country, "language": language, "parent_id": parent_id}, extra)
+
+    def deals(
+        self,
+        type: Literal["new_products", "family_price", "new_lower_price", "last_chance", "lowest_price", "top_seller", "limited_edition", "time_restricted", "in_store_price_only", "reduced_price_offer"],
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "rating", "name_asc", "most_popular"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_bucket: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        last_chance: Optional[bool] = None,
+        family_price: Optional[bool] = None,
+        top_seller: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        availability: Optional[Literal["in_store", "click_collect", "online"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One of the market's IKEA deal lists, with the search sorts and filters: new_products, family_price (IKEA Family member prices), new_lower_price, last_chance, lowest_price (the lowest-price range), top_seller, limited_edition, time_restricted, in_store_price_only or reduced_price_offer. Returns type. Items with item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, image, images, price, previous_price, discount_amount, discount_percent, price_tag (family_price: price is the IKEA Family member price and previous_price the regular one; new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA markets), badge, colors, variant_count, variants, last_chance, online_sellable, category_path and availability (with store_id). Also total, page, page_size, total_pages, count, sort, applied_filters and facets (name, parameter, type, values with id, label and count; the parameter is the key filters takes). Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: The deal list, e.g. 'new_lower_price'.
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets and cn (not pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            page: Results page, 1-based.
+            page_size: Products per page (default 24, up to 100).
+            sort: relevance (default), price_asc, price_desc, newest, rating, name_asc or most_popular.
+            color: Color id(s) from facets (parameter f-colors), e.g. '10156' = white.
+            price_bucket: A price range id from facets (parameter f-price-buckets), e.g. 'PRICE_0_5000' = 0 to 49.99.
+            new_only: Only new products.
+            last_chance: Only last-chance (being discontinued) products.
+            family_price: Only products with an IKEA Family member price.
+            top_seller: Only best sellers.
+            store_id: A store id (stores()): adds each product's availability at that store (stock level, home delivery) and enables availability.
+            availability: With store_id: in_store (in stock at the store), click_collect or online.
+            filters: Any other facet, keyed by facets[].parameter, e.g. {'f-materials': ['47350']}; boolean facets take True.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_deals", {"type": type, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "color": color, "price_bucket": price_bucket, "new_only": new_only, "last_chance": last_chance, "family_price": family_price, "top_seller": top_seller, "store_id": store_id, "availability": availability, "filters": filters}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What the IKEA search box suggests for what a user typed: suggestions with text, type (completion, category, product, planner, content), label, url, category_id, item_no and image when given. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the user has typed so far, e.g. 'sof'.
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets and cn (not pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    def stores(
+        self,
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        query: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The market's IKEA stores and pick-up / plan-and-order points: store_id (for stock(), as_is() and the store_id filter), name, display_name, type (store, small_store, plan_and_order_point, shop ...), address (street, city, zip, state, timezone), latitude, longitude, hours (normal week, exceptions, closed days), restaurant, bistro, cafe, click & collect, Swedish Food Market and Smaland hours, store_url and opening_date; plus total and count. Filter by text (query) and sort by distance from lat / lng (distance_km). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets (not cn, pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            query: Only stores whose name, city, ZIP / postal code or address contains this text, e.g. 'Burbank'.
+            lat: With lng: stores sorted by distance from this point (distance_km).
+            lng: With lat.
+            limit: Stores to return (default 50, up to 200).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_stores", {"country": country, "language": language, "query": query, "lat": lat, "lng": lng, "limit": limit}, extra)
+
+    def stock(
+        self,
+        item_nos: Union[str, list[str]],
+        store_id: Union[str, int],
+        *,
+        zip: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Stock at one IKEA store for up to 100 article numbers in one call: store (id, name), zip and items (item_no, name, type_name, design, url, price, store_availability with status in_stock_high, in_stock_low or out_of_stock and the site's text, home_delivery with zip, click_collect). A level, not a quantity: IKEA does not publish unit counts. Numbers the market does not sell are listed in not_found; an unknown store id is a charged 404. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_nos: 1 to 100 IKEA article numbers: a list or a comma-separated string, e.g. ['80275887', '00263850'].
+            store_id: An IKEA store id: stores[].store_id of stores(), e.g. '399' (Burbank, CA).
+            zip: A postal code: adds home-delivery availability to that address.
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets (not cn, pr, do, es_islands or is); the store's market.
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_stock", {"item_nos": item_nos, "store_id": store_id, "zip": zip, "country": country, "language": language}, extra)
+
+    def items(
+        self,
+        item_nos: Union[str, list[str]],
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 100 IKEA article numbers on one market in one call, each with the search item fields (item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, image, images, price, previous_price, discount_amount, discount_percent, price_tag (family_price: price is the IKEA Family member price and previous_price the regular one; new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA markets), badge, colors, variant_count, variants, last_chance, online_sellable, category_path and availability (with store_id)); numbers the market does not sell are listed in not_found. Data comes in the market's language and prices are numbers in the market's own currency (never converted); every answer echoes country, language and currency. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_nos: 1 to 100 IKEA article numbers: a list or a comma-separated string, e.g. ['80275887', '00263850'].
+            country: IKEA market code, lowercase (default 'us'). Served: the 50 ikea.com markets and cn (not pr, do, es_islands or is).
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_items", {"item_nos": item_nos, "country": country, "language": language}, extra)
+
+    def compare(
+        self,
+        item_no: Union[str, int],
+        countries: list[str],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """IKEA prices by country: one article number across 2 to 10 IKEA markets in one call. Returns item_no, count, found_count, markets (country, language, currency, found, name, type_name, design, price, previous_price, price_tag, url), errors and note. Prices are in each market's own currency and never converted (measured 2026-11-13: KALLAX 80275887 was EUR 49.99 in de and nl, EUR 59.99 in fr, SEK 599 in se). Some markets (us, ca, jp, au, kr, in, my, sg, ph ...) sell the same product under a different article number, so found is False there. A market that fails is listed in errors and not charged. Markets: the 50 ikea.com markets (not cn, pr, do, es_islands or is).
+
+        Costs 1 credit per market that answered (the balance must cover every market asked).
+        Returns the API response as a dict.
+
+        Args:
+            item_no: An IKEA article number: 8 digits, dots allowed, e.g. '80275887' or '802.758.87'. Pass a str to keep leading zeros ('00263850').
+            countries: 2 to 10 ikea.com market codes, e.g. ['de', 'fr', 'se', 'nl', 'es', 'it'].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_compare", {"item_no": item_no, "countries": countries}, extra)
+
+    def as_is(
+        self,
+        store_id: Union[str, int],
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One IKEA store's As-is offers (ex-display, returned and second-hand items at reduced prices): store_id, total, page, page_size, total_pages and offers, per product title, description, article_numbers, currency, original_price, min_price, max_price, image and offers (offer_id, offer_number, description, price, lowest_previous_price, condition_code, condition, condition_description, in_box, reason_discount). Read-only: nothing is reserved. A store of another market is a charged 404. Markets: us, gb, de, fr, se, jp, nl, es, it, pl, au, ch and at. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: An IKEA store id: stores[].store_id of stores(), e.g. '399' (Burbank, CA).
+            country: IKEA market code, lowercase (default 'us'). Served: us, gb, de, fr, se, jp, nl, es, it, pl, au, ch and at; the store's market.
+            language: The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does not serve answers 400.
+            page: Results page, 1-based.
+            page_size: Products per page (default 24, up to 48).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("ikea_as_is", {"store_id": store_id, "country": country, "language": language, "page": page, "page_size": page_size}, extra)

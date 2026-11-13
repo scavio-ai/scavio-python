@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 75 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 76 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -2597,6 +2597,74 @@ publish UPCs, ingredients, allergens or reviews online. `category()` takes
 `city` with `state`, or `store_id`. No cart or ordering. Failed calls are not
 charged; an unknown item code or store id is a charged 404.
 
+### 45. Retail -- IKEA prices by country, stock by store and product data
+
+IKEA product data across 55 markets, namespace `ikea`, 12 endpoints at 1
+credit each: `search`, `product`, `reviews`, `category`, `categories`,
+`deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`.
+`compare` costs 1 credit per market that answered. `country` is the market
+code (default `us`); `language` one of that market's languages (ca en/fr, be
+nl/fr/en, ch de/fr/it/en, us en/es ...). `product` and `reviews` raise the
+request timeout to at least 180s, the rest to 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ikea = client.ikea
+
+# --- IKEA prices by country: one article number on up to 10 markets, each in its own currency.
+cmp = ikea.compare("80275887", ["de", "fr", "se", "nl", "es", "it"])["data"]
+for m in cmp["markets"]:
+    print(m["country"], m["found"], m["currency"], m["price"], m["previous_price"], m["price_tag"])
+
+# --- Search one market, in one of its languages, sorted and filtered.
+res = ikea.search("kallax", country="de", sort="price_asc", page_size=48)["data"]
+print(res["total"], res["currency"])
+for p in res["items"][:5]:
+    print(p["item_no"], p["name"], p["type_name"], p["price"], p["price_tag"], p["rating_count"])
+
+# --- Full product: measurements, materials, packaging, assembly PDFs, variants.
+prod = ikea.product(item_no="20522046")["data"]
+print(prod["name"], prod["type_name"], prod["price"], prod["currency"])
+print(prod["packaging"]["number_of_packages"], [v["type"] for v in prod["variants"]])
+
+# --- Stores, then stock level (not a quantity) at one store for up to 100 items.
+stores = ikea.stores(country="us", query="Burbank")["data"]["stores"]
+stock = ikea.stock(["20522046", "20631663"], stores[0]["store_id"])["data"]
+print([(i["item_no"], i["store_availability"]["status"]) for i in stock["items"]])
+
+# --- Deal lists, the 20 newest reviews, and one store's As-is (second-hand) offers.
+deals = ikea.deals("new_lower_price", country="gb")["data"]
+print(deals["total"], [(d["name"], d["price"], d["previous_price"]) for d in deals["items"][:3]])
+reviews = ikea.reviews(item_no="80275887", country="de")["data"]
+print(reviews["rating"], reviews["rating_count"], len(reviews["reviews"]))
+asis = ikea.as_is("257")["data"]
+print(asis["total"], [(o["title"], o["min_price"], o["original_price"]) for o in asis["offers"][:3]])
+```
+
+Markets: `search` and `product` cover 55, the 50 ikea.com markets (us ca gb
+ie de at ch fr be nl dk se no fi ee lv lt pl cz sk hu hr si rs ro pt es it il
+ae sa kw qa bh om jo eg ma in my sg ph th jp kr au nz mx cl co) plus cn
+(ikea.cn), pr (Puerto Rico), do (Dominican Republic), es_islands (Canary and
+Balearic islands, with `island`) and is (Iceland). `category`, `deals`,
+`suggestions` and `items` serve the 50 ikea.com markets plus cn; `reviews`,
+`categories`, `stores`, `stock` and `compare` the 50 ikea.com markets; `as_is`
+us, gb, de, fr, se, jp, nl, es, it, pl, au, ch and at. Ukraine, Greece,
+Cyprus, Bulgaria, Hong Kong, Taiwan, Indonesia and Turkey are not available.
+Data comes in the market's language and prices in its own currency, never
+converted: on 2026-11-13 KALLAX 80275887 was EUR 49.99 in de and nl, EUR
+59.99 in fr and SEK 599 in se. Some markets (us, ca, jp, au, kr, in, my, sg,
+ph ...) sell the same product under a different article number, so `found`
+is False there. `reviews` returns the 20 most recent reviews the product page
+shows (no paging, sort or star filter); ratings are pooled across markets.
+`stock` is a level per store (in_stock_high, in_stock_low, out_of_stock), not
+a quantity. A product call can take up to about 100 seconds. Puerto Rico,
+Dominican Republic and the islands return the first 40 search results only,
+and franchise products (pr, do, es_islands, is) return basic detail. Pass
+article numbers as str to keep leading zeros. Failed calls are not charged;
+an unknown article number, category or store id is a charged 404.
+
 ## Error Handling
 
 ```python
@@ -2743,6 +2811,7 @@ Scavio works with popular AI/LLM frameworks:
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
+| IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2753,6 +2822,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.56.0
+
+- **New `ikea` namespace** (sync and async) for IKEA across 55 markets, 12
+  endpoints at 1 credit each: `search`, `product`, `reviews`, `category`,
+  `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`,
+  `compare` (1 credit per market that answered), `as_is`. `country` picks the
+  market, `language` one of its languages. 180s timeout floor on `product`
+  and `reviews`, 120s elsewhere.
 
 ### Changed in 0.55.0
 

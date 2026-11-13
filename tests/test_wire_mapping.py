@@ -622,6 +622,7 @@ BODY_PRICED_KEYS = {
     "carrefour_search",
     "carrefour_product",
     "company_enrich",
+    "ikea_compare",
 }
 
 
@@ -3707,3 +3708,121 @@ def test_publix_credits_paths_and_wire(monkeypatch):
         px.category("1825", sort="name_asc")
     with pytest.raises(ScavioError):
         px.stores(limit=5)
+
+
+def test_ikea_credits_paths_and_wire(monkeypatch):
+    """ikea (0.56.0): 12 endpoints on /api/v1/ikea, 1 credit each; compare is priced per
+    market that answered (credits_note).
+
+    product and reviews take item_no or url (180 s timeout floor: a product page can take
+    up to about 100 s); category takes category_id or url. country / language are plain
+    strings (55 markets); island is a literal for country es_islands.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "ikea"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "reviews",
+            "category",
+            "categories",
+            "deals",
+            "suggestions",
+            "stores",
+            "stock",
+            "items",
+            "compare",
+            "as_is",
+        ]
+    )
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/ikea/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == (180.0 if m in ("product", "reviews") else 120.0), ep.key
+        assert (ep.credits_note is not None) == (m == "compare"), ep.key
+    assert "per market" in eps["compare"].credits_note
+    sort = next(p for p in eps["search"].params if p.name == "sort")
+    assert sort.annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "rating", '
+        '"name_asc", "most_popular"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ik = client.ikea
+    ik.search("kallax", country="de", language="en", sort="price_asc", page=2, color="10156")
+    ik.search("billy", country="es_islands", island="tenerife")
+    ik.search("sofa", store_id="399", availability="in_store", filters={"f-materials": ["47350"]})
+    ik.product(item_no="80275887", country="fr")
+    ik.product(url="https://www.ikea.com/de/de/p/kallax-regal-weiss-80275887/")
+    ik.reviews(item_no=80275887, country="de")
+    ik.category(category_id="10382", new_only=True)
+    ik.categories(country="ca", language="fr", parent_id="fu003")
+    ik.deals("new_lower_price", country="gb", page_size=48)
+    ik.suggestions("sof")
+    ik.stores(country="se", lat=59.33, lng=18.06, limit=5)
+    ik.stock(["20522046", "20631663"], "399", zip="91502")
+    ik.items("80275887,00263850", country="de")
+    ik.compare("80275887", ["de", "fr", "se"])
+    ik.as_is(257, page=2, page_size=48)
+    base = "/api/v1/ikea/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "kallax",
+                "country": "de",
+                "language": "en",
+                "page": 2,
+                "sort": "price_asc",
+                "color": "10156",
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {"query": "billy", "country": "es_islands", "island": "tenerife"},
+            120.0,
+        ),
+        (
+            base + "search",
+            {
+                "query": "sofa",
+                "store_id": "399",
+                "availability": "in_store",
+                "filters": {"f-materials": ["47350"]},
+            },
+            120.0,
+        ),
+        (base + "product", {"item_no": "80275887", "country": "fr"}, 180.0),
+        (
+            base + "product",
+            {"url": "https://www.ikea.com/de/de/p/kallax-regal-weiss-80275887/"},
+            180.0,
+        ),
+        (base + "reviews", {"item_no": 80275887, "country": "de"}, 180.0),
+        (base + "category", {"category_id": "10382", "new_only": True}, 120.0),
+        (base + "categories", {"country": "ca", "language": "fr", "parent_id": "fu003"}, 120.0),
+        (base + "deals", {"type": "new_lower_price", "country": "gb", "page_size": 48}, 120.0),
+        (base + "suggestions", {"query": "sof"}, 120.0),
+        (base + "stores", {"country": "se", "lat": 59.33, "lng": 18.06, "limit": 5}, 120.0),
+        (
+            base + "stock",
+            {"item_nos": ["20522046", "20631663"], "store_id": "399", "zip": "91502"},
+            120.0,
+        ),
+        (base + "items", {"item_nos": "80275887,00263850", "country": "de"}, 120.0),
+        (base + "compare", {"item_no": "80275887", "countries": ["de", "fr", "se"]}, 120.0),
+        (base + "as-is", {"store_id": 257, "page": 2, "page_size": 48}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        ik.product(country="de")
+    with pytest.raises(ScavioError):
+        ik.category(sort="newest")

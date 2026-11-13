@@ -1030,6 +1030,121 @@ _PUBLIX_CHARGE = (
 )
 
 
+# IKEA params shared across endpoints (50 ikea.com markets, ikea.cn, the IKEA Islas sites
+# pr / do / es_islands and IKEA Iceland). Each endpoint serves its own market list.
+_IKEA_MAIN_MARKETS = (
+    "us ca gb ie de at ch fr be nl dk se no fi ee lv lt pl cz sk hu hr si rs ro pt es it il ae "
+    "sa kw qa bh om jo eg ma in my sg ph th jp kr au nz mx cl co"
+)
+_IKEA_ALL_SCOPE = (
+    "55 markets: the 50 ikea.com markets (" + _IKEA_MAIN_MARKETS + "), cn (ikea.cn), pr "
+    "(Puerto Rico), do (Dominican Republic), es_islands (Canary and Balearic islands, with "
+    "island) and is (Iceland)"
+)
+_IKEA_MAIN_SCOPE = "the 50 ikea.com markets (not cn, pr, do, es_islands or is)"
+_IKEA_MAIN_CN_SCOPE = "the 50 ikea.com markets and cn (not pr, do, es_islands or is)"
+_IKEA_ASIS_SCOPE = "us, gb, de, fr, se, jp, nl, es, it, pl, au, ch and at"
+
+
+def _ikea_country(scope: str) -> Param:
+    return _str("country", "IKEA market code, lowercase (default 'us'). Served: " + scope + ".")
+
+
+_IKEA_LANGUAGE = _str(
+    "language",
+    "The answer's language (default: the market's first), e.g. ca en/fr, be nl/fr/en, ch "
+    "de/fr/it/en, us en/es, es es/en/ca/eu/gl, jp ja/en, cn zh/en. A language the market does "
+    "not serve answers 400.",
+)
+_IKEA_ISLAND = _lit(
+    "island",
+    (
+        "tenerife",
+        "grancanaria",
+        "lanzarote",
+        "fuerteventura",
+        "lapalma",
+        "lagomera",
+        "elhierro",
+        "mallorca",
+        "menorca",
+        "ibiza",
+    ),
+    "Required with country 'es_islands' (the Canary and Balearic islands storefronts): which "
+    "island.",
+)
+_IKEA_ITEM_NO_DOC = (
+    "An IKEA article number: 8 digits, dots allowed, e.g. '80275887' or '802.758.87'. Pass a "
+    "str to keep leading zeros ('00263850')."
+)
+_IKEA_STORE_DOC = "An IKEA store id: stores[].store_id of stores(), e.g. '399' (Burbank, CA)."
+_IKEA_STORE = Param("store_id", "Union[str, int]", required=True, doc=_IKEA_STORE_DOC)
+_IKEA_ITEM_NOS = Param(
+    "item_nos",
+    "Union[str, list[str]]",
+    required=True,
+    doc="1 to 100 IKEA article numbers: a list or a comma-separated string, e.g. "
+    "['80275887', '00263850'].",
+)
+_IKEA_GRID_PARAMS = (
+    _int("page", "Results page, 1-based."),
+    _int("page_size", "Products per page (default 24, up to 100)."),
+    _lit(
+        "sort",
+        ("relevance", "price_asc", "price_desc", "newest", "rating", "name_asc", "most_popular"),
+        "relevance (default), price_asc, price_desc, newest, rating, name_asc or most_popular.",
+    ),
+    _str_or_list("color", "Color id(s) from facets (parameter f-colors), e.g. '10156' = white."),
+    _str(
+        "price_bucket",
+        "A price range id from facets (parameter f-price-buckets), e.g. 'PRICE_0_5000' = 0 to "
+        "49.99.",
+    ),
+    _bool("new_only", "Only new products."),
+    _bool("last_chance", "Only last-chance (being discontinued) products."),
+    _bool("family_price", "Only products with an IKEA Family member price."),
+    _bool("top_seller", "Only best sellers."),
+    _str_or_int(
+        "store_id",
+        "A store id (stores()): adds each product's availability at that store (stock level, "
+        "home delivery) and enables availability.",
+    ),
+    _lit(
+        "availability",
+        ("in_store", "click_collect", "online"),
+        "With store_id: in_store (in stock at the store), click_collect or online.",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any other facet, keyed by facets[].parameter, e.g. {'f-materials': ['47350']}; "
+        "boolean facets take True.",
+    ),
+)
+_IKEA_LANG_NOTE = (
+    " Data comes in the market's language and prices are numbers in the market's own currency "
+    "(never converted); every answer echoes country, language and currency."
+)
+_IKEA_ITEM = (
+    "item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, "
+    "image, images, price, previous_price, discount_amount, discount_percent, price_tag "
+    "(family_price: price is the IKEA Family member price and previous_price the regular one; "
+    "new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, "
+    "lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA "
+    "markets), badge, colors, variant_count, variants, last_chance, online_sellable, "
+    "category_path and availability (with store_id)"
+)
+_IKEA_GRID_FIELDS = (
+    " Items with " + _IKEA_ITEM + ". Also total, page, page_size, total_pages, count, sort, "
+    "applied_filters and facets (name, parameter, type, values with id, label and count; the "
+    "parameter is the key filters takes)."
+)
+_IKEA_CHARGE = (
+    " Failed upstream calls are not charged (they are retried automatically); a not-found is "
+    "charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -7502,6 +7617,328 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "Optional: with a store the answer also carries up to 4 products. "
                 + _PUBLIX_STORE_DOC,
             ),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    # ================================= IKEA ================================
+    # 12 endpoints on /api/v1/ikea, 1 credit each; compare costs 1 credit per market that
+    # answered (credits_note). search and product serve 55 markets (50 ikea.com + cn, pr, do,
+    # es_islands with island, is); category, deals, suggestions and items the 50 ikea.com
+    # markets + cn; reviews, categories, stores, stock and compare the 50 ikea.com markets;
+    # as-is 13 markets. A product or reviews call can take up to about 100 s: 180 s timeout
+    # floor there, 120 s elsewhere.
+    Endpoint(
+        key="ikea_search",
+        namespace="ikea",
+        method="search",
+        http="POST",
+        path="/api/v1/ikea/search",
+        summary=(
+            "Search IKEA products by keyword on any of 55 markets. The 50 ikea.com markets and "
+            "cn get the full grid: sort by price, newest, rating, name or popularity; filter by "
+            "color, price range, category, new, last chance, IKEA Family price, best seller, "
+            "store availability or any facet." + _IKEA_GRID_FIELDS + " Keyword searches also "
+            "return did_you_mean, related_searches and content (inspiration pages, separate "
+            "from items). The franchise sites (pr, do, es_islands, is) take query and page "
+            "only: Puerto Rico, Dominican Republic and the islands return the first 40 results "
+            "only; Iceland pages by 40." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _req("query", "Search keywords, in any language the market serves, e.g. 'kallax'."),
+            _ikea_country(_IKEA_ALL_SCOPE),
+            _IKEA_LANGUAGE,
+            _IKEA_ISLAND,
+            _str_or_list(
+                "category_id",
+                "Narrow to category id(s) from facets (parameter f-subcategories), e.g. 'st002'.",
+            ),
+            *_IKEA_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_product",
+        namespace="ikea",
+        method="product",
+        http="POST",
+        path="/api/v1/ikea/product",
+        summary=(
+            "One IKEA product by article number or product URL: item_no, article_number, name, "
+            "full_name, type_name, summary, description, url, price, previous_price, "
+            "price_valid_from / to, family_price (member price with its dates), currency, "
+            "images, rating, rating_count, measurements, materials, care, good_to_know, safety, "
+            "packaging (number_of_packages, packages with item_no, dimensions, weight, "
+            "quantity), assembly_pdfs, manuals, designer, variants, secondary_ratings, "
+            "reviews_preview (3 newest), availability_online and detail_level (basic, rare: core "
+            "fields only). cn answers in Chinese; the franchise sites (pr, do, es_islands, is) "
+            "answer name, description, price, currency, availability_online, images and "
+            "dimensions (detail_level basic). A product call can take up to about 100 seconds. "
+            "An unknown article number is a charged 404." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _str_or_int("item_no", _IKEA_ITEM_NO_DOC + " Alternative to url."),
+            _str(
+                "url",
+                "An IKEA product page of a served market, e.g. "
+                "'https://www.ikea.com/de/de/p/kallax-regal-weiss-80275887/' (alternative to "
+                "item_no; the market and language are read from it).",
+            ),
+            _ikea_country(_IKEA_ALL_SCOPE),
+            _IKEA_LANGUAGE,
+            _IKEA_ISLAND,
+        ),
+        one_of=(("item_no", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="ikea_reviews",
+        namespace="ikea",
+        method="reviews",
+        http="POST",
+        path="/api/v1/ikea/reviews",
+        summary=(
+            "An IKEA product's rating, rating_count, secondary_ratings (appearance, ease of "
+            "assembly, quality, value for money ...) and the 20 most recent reviews the product "
+            "page shows (title, text, rating, date, author first name as shown, country), plus "
+            "highlighted reviews with their country. No paging, sort or star filter: always the "
+            "20 newest. Ratings and reviews are pooled across IKEA markets (the same count on "
+            "every market). A call can take up to about 100 seconds." + _IKEA_CHARGE
+        ),
+        params=(
+            _str_or_int("item_no", _IKEA_ITEM_NO_DOC + " Alternative to url."),
+            _str("url", "An ikea.com product page (alternative to item_no)."),
+            _ikea_country(_IKEA_MAIN_SCOPE),
+            _IKEA_LANGUAGE,
+        ),
+        one_of=(("item_no", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="ikea_category",
+        namespace="ikea",
+        method="category",
+        http="POST",
+        path="/api/v1/ikea/category",
+        summary=(
+            "One IKEA category's products by category id or category URL, with the search "
+            "sorts and filters: category (id, name, url, parents)." + _IKEA_GRID_FIELDS
+            + " An unknown category id is a charged 404." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _str(
+                "category_id",
+                "A category id (categories[].id of categories(), or category_path / facets ids "
+                "of a search), e.g. '10382' = bookcases, 'fu003' = sofas. Alternative to url.",
+            ),
+            _str(
+                "url",
+                "An IKEA category page, e.g. 'https://www.ikea.com/us/en/cat/bookcases-10382/'. "
+                "Alternative to category_id.",
+            ),
+            _ikea_country(_IKEA_MAIN_CN_SCOPE),
+            _IKEA_LANGUAGE,
+            *_IKEA_GRID_PARAMS,
+        ),
+        one_of=(("category_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_categories",
+        namespace="ikea",
+        method="categories",
+        http="POST",
+        path="/api/v1/ikea/categories",
+        summary=(
+            "The market's IKEA category tree as its site menu shows it (about 1,500 "
+            "categories): id (for category()), name, url and children; plus parent_id and "
+            "count. parent_id returns one category's subtree." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _ikea_country(_IKEA_MAIN_SCOPE),
+            _IKEA_LANGUAGE,
+            _str("parent_id", "Return only this category's subtree (categories[].id)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_deals",
+        namespace="ikea",
+        method="deals",
+        http="POST",
+        path="/api/v1/ikea/deals",
+        summary=(
+            "One of the market's IKEA deal lists, with the search sorts and filters: "
+            "new_products, family_price (IKEA Family member prices), new_lower_price, "
+            "last_chance, lowest_price (the lowest-price range), top_seller, limited_edition, "
+            "time_restricted, in_store_price_only or reduced_price_offer. Returns type."
+            + _IKEA_GRID_FIELDS + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            Param(
+                "type",
+                'Literal["new_products", "family_price", "new_lower_price", "last_chance", '
+                '"lowest_price", "top_seller", "limited_edition", "time_restricted", '
+                '"in_store_price_only", "reduced_price_offer"]',
+                required=True,
+                doc="The deal list, e.g. 'new_lower_price'.",
+            ),
+            _ikea_country(_IKEA_MAIN_CN_SCOPE),
+            _IKEA_LANGUAGE,
+            *_IKEA_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_suggestions",
+        namespace="ikea",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/ikea/suggestions",
+        summary=(
+            "What the IKEA search box suggests for what a user typed: suggestions with text, "
+            "type (completion, category, product, planner, content), label, url, category_id, "
+            "item_no and image when given." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _req("query", "What the user has typed so far, e.g. 'sof'."),
+            _ikea_country(_IKEA_MAIN_CN_SCOPE),
+            _IKEA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_stores",
+        namespace="ikea",
+        method="stores",
+        http="POST",
+        path="/api/v1/ikea/stores",
+        summary=(
+            "The market's IKEA stores and pick-up / plan-and-order points: store_id (for "
+            "stock(), as_is() and the store_id filter), name, display_name, type (store, "
+            "small_store, plan_and_order_point, shop ...), address (street, city, zip, state, "
+            "timezone), latitude, longitude, hours (normal week, exceptions, closed days), "
+            "restaurant, bistro, cafe, click & collect, Swedish Food Market and Smaland hours, "
+            "store_url and opening_date; plus total and count. Filter by text (query) and sort "
+            "by distance from lat / lng (distance_km)." + _IKEA_CHARGE
+        ),
+        params=(
+            _ikea_country(_IKEA_MAIN_SCOPE),
+            _IKEA_LANGUAGE,
+            _str(
+                "query",
+                "Only stores whose name, city, ZIP / postal code or address contains this "
+                "text, e.g. 'Burbank'.",
+            ),
+            _float("lat", "With lng: stores sorted by distance from this point (distance_km)."),
+            _float("lng", "With lat."),
+            _int("limit", "Stores to return (default 50, up to 200)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_stock",
+        namespace="ikea",
+        method="stock",
+        http="POST",
+        path="/api/v1/ikea/stock",
+        summary=(
+            "Stock at one IKEA store for up to 100 article numbers in one call: store (id, "
+            "name), zip and items (item_no, name, type_name, design, url, price, "
+            "store_availability with status in_stock_high, in_stock_low or out_of_stock and the "
+            "site's text, home_delivery with zip, click_collect). A level, not a quantity: IKEA "
+            "does not publish unit counts. Numbers the market does not sell are listed in "
+            "not_found; an unknown store id is a charged 404." + _IKEA_CHARGE
+        ),
+        params=(
+            _IKEA_ITEM_NOS,
+            _IKEA_STORE,
+            _str("zip", "A postal code: adds home-delivery availability to that address."),
+            _ikea_country(_IKEA_MAIN_SCOPE + "; the store's market"),
+            _IKEA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_items",
+        namespace="ikea",
+        method="items",
+        http="POST",
+        path="/api/v1/ikea/items",
+        summary=(
+            "Up to 100 IKEA article numbers on one market in one call, each with the search "
+            "item fields (" + _IKEA_ITEM + "); numbers the market does not sell are listed in "
+            "not_found." + _IKEA_LANG_NOTE + _IKEA_CHARGE
+        ),
+        params=(
+            _IKEA_ITEM_NOS,
+            _ikea_country(_IKEA_MAIN_CN_SCOPE),
+            _IKEA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_compare",
+        namespace="ikea",
+        method="compare",
+        http="POST",
+        path="/api/v1/ikea/compare",
+        summary=(
+            "IKEA prices by country: one article number across 2 to 10 IKEA markets in one "
+            "call. Returns item_no, count, found_count, markets (country, language, currency, "
+            "found, name, type_name, design, price, previous_price, price_tag, url), errors and "
+            "note. Prices are in each market's own currency and never converted (measured "
+            "2026-11-13: KALLAX 80275887 was EUR 49.99 in de and nl, EUR 59.99 in fr, SEK 599 in "
+            "se). Some markets (us, ca, jp, au, kr, in, my, sg, ph ...) sell the same product "
+            "under a different article number, so found is False there. A market that fails is "
+            "listed in errors and not charged. Markets: " + _IKEA_MAIN_SCOPE + "."
+        ),
+        params=(
+            Param("item_no", "Union[str, int]", required=True, doc=_IKEA_ITEM_NO_DOC),
+            _str_list(
+                "countries",
+                "2 to 10 ikea.com market codes, e.g. ['de', 'fr', 'se', 'nl', 'es', 'it'].",
+                required=True,
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit per market that answered (the balance must cover every market "
+            "asked)."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ikea_as_is",
+        namespace="ikea",
+        method="as_is",
+        http="POST",
+        path="/api/v1/ikea/as-is",
+        summary=(
+            "One IKEA store's As-is offers (ex-display, returned and second-hand items at "
+            "reduced prices): store_id, total, page, page_size, total_pages and offers, per "
+            "product title, description, article_numbers, currency, original_price, min_price, "
+            "max_price, image and offers (offer_id, offer_number, description, price, "
+            "lowest_previous_price, condition_code, condition, condition_description, in_box, "
+            "reason_discount). Read-only: nothing is reserved. A store of another market is a "
+            "charged 404. Markets: " + _IKEA_ASIS_SCOPE + "." + _IKEA_CHARGE
+        ),
+        params=(
+            _IKEA_STORE,
+            _ikea_country(_IKEA_ASIS_SCOPE + "; the store's market"),
+            _IKEA_LANGUAGE,
+            _int("page", "Results page, 1-based."),
+            _int("page_size", "Products per page (default 24, up to 48)."),
         ),
         credits=1,
         min_timeout=120.0,
@@ -14523,6 +14960,7 @@ NAMESPACES: tuple[str, ...] = (
     "heb",
     "kroger",
     "publix",
+    "ikea",
 )
 
 
