@@ -83,6 +83,7 @@ __all__ = [
     "_AsyncGeminiNamespace",
     "_AsyncHebNamespace",
     "_AsyncKrogerNamespace",
+    "_AsyncPublixNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -11668,3 +11669,235 @@ class _AsyncKrogerNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("kroger_suggestions", {"query": query, "banner": banner, "store_id": store_id}, extra)
+
+class _AsyncPublixNamespace:
+    """Publix grocery search, product and nutrition, category, category tree, weekly ad, Extra Savings, digital coupons, savings search, deli and bakery order-ahead menu, store locator and search suggestion endpoints, store-scoped."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        store_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "featured", "name_asc", "name_desc", "popularity", "savings_amount", "most_viewed"]] = None,
+        on_sale: Optional[bool] = None,
+        bogo: Optional[bool] = None,
+        brand: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Publix products at one store by keyword: sort by name, popularity, savings or views; filter to items on sale, BOGO (Buy One Get One Free) or a brand. Keywords the site sends to a category answer that category's products; keywords it sends to an order-ahead page set redirected_to (items may be empty). Items with item_code (for product()), base_product_id, title, brand, size, description, image, url, category_path, aisle (where it sits in that store), on_sale, price, price_unit, bundle, starting_price, regular_price, price_text, regular_price_text, promo (type single, bogo or multi; message, conditions, savings, valid_from, valid_through), has_coupon and is_order_ahead. Also store (id, name), total, page, page_size (48), total_pages, count, sort, applied_filters and facets (deals, BOGO, weekly ad, brand, type, diet, nutrition ranges). Publix shows prices online only for items on sale and for order-ahead (deli and bakery) items, so price is a number only when the site shows one and None otherwise; it is never estimated (no regular shelf prices). price_text is the price as shown, price_unit lb when per pound, bundle {quantity, price} for multi-buys ('2 for $5.00'), starting_price for 'Starts at' items, regular_price the crossed-out price. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (1-100 characters), e.g. 'chicken'.
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            page: Results page, 1-based (48 products per page). A page past the last answers an empty list.
+            sort: relevance (default), featured, name_asc, name_desc, popularity, savings_amount (biggest promo savings first) or most_viewed.
+            on_sale: Only items on sale at the store (weekly ad, BOGO, multi-buy or extra savings).
+            bogo: Only Buy One Get One Free items at the store.
+            brand: Only this brand, as the site lists it (facets: Brand values), e.g. 'Tyson'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_search", {"query": query, "store_id": store_id, "page": page, "sort": sort, "on_sale": on_sale, "bogo": bogo, "brand": brand}, extra)
+
+    async def product(
+        self,
+        item_code: Union[str, int],
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Publix product by item code at one store: the product card (item_code (for product()), base_product_id, title, brand, size, description, image, url, category_path, aisle (where it sits in that store), on_sale, price, price_unit, bundle, starting_price, regular_price, price_text, regular_price_text, promo (type single, bogo or multi; message, conditions, savings, valid_from, valid_through), has_coupon and is_order_ahead; order-ahead items also short_description, lead_time, serves, calories) and its nutrition facts (labels with serving size, servings per container and every nutrient with amount, unit and percent daily value; a deli sub has one label per component and size; None when Publix has none), plus store. Ingredients, allergens, UPC and reviews are not published by Publix online. An unknown item code is a charged 404. Publix shows prices online only for items on sale and for order-ahead (deli and bakery) items, so price is a number only when the site shows one and None otherwise; it is never estimated (no regular shelf prices). price_text is the price as shown, price_unit lb when per pound, bundle {quantity, price} for multi-buys ('2 for $5.00'), starting_price for 'Starts at' items, regular_price the crossed-out price. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_code: A Publix item code (not a UPC): items[].item_code of search(), category() or order_ahead(), e.g. '90355'.
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_product", {"item_code": item_code, "store_id": store_id}, extra)
+
+    async def category(
+        self,
+        store_id: Union[str, int],
+        *,
+        category_url: Optional[str] = None,
+        category_id: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "featured", "name_asc", "name_desc", "popularity", "savings_amount", "most_viewed"]] = None,
+        on_sale: Optional[bool] = None,
+        bogo: Optional[bool] = None,
+        brand: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Publix category's products at one store, by category_url or category_id, with the search sorts and filters. Also category (id, name, path). Items with item_code (for product()), base_product_id, title, brand, size, description, image, url, category_path, aisle (where it sits in that store), on_sale, price, price_unit, bundle, starting_price, regular_price, price_text, regular_price_text, promo (type single, bogo or multi; message, conditions, savings, valid_from, valid_through), has_coupon and is_order_ahead. Also store (id, name), total, page, page_size (48), total_pages, count, sort, applied_filters and facets (deals, BOGO, weekly ad, brand, type, diet, nutrition ranges). Publix shows prices online only for items on sale and for order-ahead (deli and bakery) items, so price is a number only when the site shows one and None otherwise; it is never estimated (no regular shelf prices). price_text is the price as shown, price_unit lb when per pound, bundle {quantity, price} for multi-buys ('2 for $5.00'), starting_price for 'Starts at' items, regular_price the crossed-out price. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            category_url: A publix.com category link (/c/<name>/<id>), e.g. 'https://www.publix.com/c/chicken/6772da29-55bf-4051-83d5-104d73ae9a96'.
+            category_id: A category id (categories[].id of categories()), e.g. '6772da29-55bf-4051-83d5-104d73ae9a96'. Alternative to category_url.
+            page: Results page, 1-based (48 products per page). A page past the last answers an empty list.
+            sort: relevance (default), featured, name_asc, name_desc, popularity, savings_amount (biggest promo savings first) or most_viewed.
+            on_sale: Only items on sale at the store (weekly ad, BOGO, multi-buy or extra savings).
+            bogo: Only Buy One Get One Free items at the store.
+            brand: Only this brand, as the site lists it (facets: Brand values), e.g. 'Tyson'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_category", {"store_id": store_id, "category_url": category_url, "category_id": category_id, "page": page, "sort": sort, "on_sale": on_sale, "bogo": bogo, "brand": brand}, extra)
+
+    async def categories(
+        self,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        parent_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Publix product category tree: departments (Bakery, Dairy, Meat, Produce ...) with their categories and sub-categories, each with id (for category()), name, url, parent_id, level and children; plus count. parent_id returns one department's or category's subtree. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: Optional. A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            parent_id: Return only this department's or category's subtree (categories[].id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_categories", {"store_id": store_id, "parent_id": parent_id}, extra)
+
+    async def weekly_ad(
+        self,
+        store_id: Union[str, int],
+        *,
+        department: Optional[str] = None,
+        bogo_only: Optional[bool] = None,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store's current Publix weekly ad (English), about 700 items: BOGO deals (about 230 a week), sale prices, multi-buys and percent-off deals, with ad (start_date, end_date), total, count, applied_filters and departments. Weekly ads start on different days by state (Thursday to Wednesday in Florida, Wednesday to Tuesday in Georgia and North Carolina; weekly_ad_break_day of stores() gives each store's start day), and prices of some items (beer, wine) differ by store. Each item: id, item_code, base_product_id, title, description, brand, department, categories, savings_text (as shown, e.g. 'Buy 1 Get 1 FREE', '$6.89 lb', '2 for $5.00'), deal_type (bogo, b2g1, multi, price, percent_off or other), price (only when savings_text is a plain price), price_unit, bundle, save_up_to, additional_savings, min_quantity, fine_print, stacked_with_coupon, promotion, valid_from, valid_to and image. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            department: Only items of this department (departments of the answer, e.g. 'Meat', 'Produce', 'Deli', 'Wine').
+            bogo_only: Only Buy 1 Get 1 Free and Buy 2 Get 1 Free items.
+            query: Only items whose title, description or brand contains this text.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_weekly_ad", {"store_id": store_id, "department": department, "bogo_only": bogo_only, "query": query}, extra)
+
+    async def extra_savings(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store's Publix Extra Savings (temporary price reductions), several hundred items: id, base_product_id, title, size, brand, categories, savings_text (the amount saved as shown), savings, additional_savings, final_price (the reduced price, as the site lists it), min_quantity, image and url; plus store, count and period (start_date, end_date of the current Extra Savings period). Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_extra_savings", {"store_id": store_id}, extra)
+
+    async def coupons(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store's Publix digital coupons as every visitor sees them (about 100-130): id, title, description, brand, savings_text, value (the dollar amount when the coupon states one), min_quantity, limit_per_transaction, categories, valid_from, valid_to, terms and image; plus store and count. Read-only: coupons are listed, never clipped, and no account is used. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_coupons", {"store_id": store_id}, extra)
+
+    async def savings_search(
+        self,
+        query: str,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find a keyword across the store's Publix weekly ad, Extra Savings and digital coupons in one call: query, store, count and items, each with saving_type (weekly_ad, extra_savings or coupon) and that feed's fields. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A keyword to find in the store's savings, e.g. 'coffee'.
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_savings_search", {"query": query, "store_id": store_id}, extra)
+
+    async def order_ahead(
+        self,
+        store_id: Union[str, int],
+        *,
+        section: Optional[Literal["subs", "all"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store's Publix deli and bakery order-ahead (in-store pickup) menu with this store's prices: Pub Subs (section subs, default) or the whole catalog of subs, platters, cakes, wings and meals (section all, about 1,150 items, 60 per page). Each item: item_code (for product()), base_product_id, title, brand, size, description, image, url, category_path, aisle (where it sits in that store), on_sale, price, price_unit, bundle, starting_price, regular_price, price_text, regular_price_text, promo (type single, bogo or multi; message, conditions, savings, valid_from, valid_through), has_coupon and is_order_ahead, short_description, lead_time, serves, calories and pay_online. Pub Sub prices differ by store (e.g. $12.09 in Miami, $11.99 in Atlanta). Also section, store, total, page, page_size, total_pages and count. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            section: subs (default: the Pub Sub menu) or all (the whole deli and bakery order-ahead catalog: subs, platters, cakes, meals ...).
+            page: Results page, 1-based (60 items per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_order_ahead", {"store_id": store_id, "section": section, "page": page}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        limit: Optional[int] = None,
+        radius_miles: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Publix stores near a ZIP code or in a city (city with state), or one store by store_id. Each store: store_id (for every other endpoint), name, short_name, type (supermarket, liquor, pharmacy), address, phone, hours for the next 7 days, time_zone, departments, services, pharmacy (phone, hours), liquor_store, latitude, longitude, distance_miles, weekly_ad_break_day (the day the store's weekly ad starts), opening_date, closing_date and image. Publix operates in FL, GA, AL, SC, NC, TN, VA and KY. An unknown store_id is a charged 404. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A 5-digit US ZIP code: the stores nearest to it, e.g. '33101'.
+            city: A city name, with state, e.g. 'Nashville'.
+            state: A 2-letter state code, with city, e.g. 'TN'.
+            store_id: One store by its Publix store number, e.g. '1825'.
+            limit: Stores to return, up to 30 (default 10).
+            radius_miles: Search radius in miles, 1-100 (default 50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_stores", {"zip": zip, "city": city, "state": state, "store_id": store_id, "limit": limit, "radius_miles": radius_miles}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The suggestions the Publix search box shows for what a user typed: up to 10 popular searches (suggestions: text, type) and, with store_id, up to 4 products (item_code, base_product_id, title, description, saving_text, image, url); plus query, store_id and count. Failed upstream calls are not charged (they are retried automatically); a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the user has typed so far, e.g. 'chick'.
+            store_id: Optional: with a store the answer also carries up to 4 products. A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' (Atlanta). Prices, promotions and aisles are this store's.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("publix_suggestions", {"query": query, "store_id": store_id}, extra)

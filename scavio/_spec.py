@@ -972,6 +972,64 @@ _KROGER_STORE_BANNER = _lit(
 )
 
 
+# Publix params shared across endpoints (publix.com, US; every price endpoint is store-scoped).
+_PUBLIX_STORE_DOC = (
+    "A Publix store number: stores[].store_id of stores(), e.g. '1614' (Miami) or '1825' "
+    "(Atlanta). Prices, promotions and aisles are this store's."
+)
+_PUBLIX_STORE = Param("store_id", "Union[str, int]", required=True, doc=_PUBLIX_STORE_DOC)
+_PUBLIX_STORE_OPT = _str_or_int("store_id", "Optional. " + _PUBLIX_STORE_DOC)
+_PUBLIX_GRID_PARAMS = (
+    _int(
+        "page",
+        "Results page, 1-based (48 products per page). A page past the last answers an empty list.",
+    ),
+    _lit(
+        "sort",
+        (
+            "relevance",
+            "featured",
+            "name_asc",
+            "name_desc",
+            "popularity",
+            "savings_amount",
+            "most_viewed",
+        ),
+        "relevance (default), featured, name_asc, name_desc, popularity, savings_amount "
+        "(biggest promo savings first) or most_viewed.",
+    ),
+    _bool(
+        "on_sale",
+        "Only items on sale at the store (weekly ad, BOGO, multi-buy or extra savings).",
+    ),
+    _bool("bogo", "Only Buy One Get One Free items at the store."),
+    _str("brand", "Only this brand, as the site lists it (facets: Brand values), e.g. 'Tyson'."),
+)
+_PUBLIX_PRICES = (
+    " Publix shows prices online only for items on sale and for order-ahead (deli and bakery) "
+    "items, so price is a number only when the site shows one and None otherwise; it is never "
+    "estimated (no regular shelf prices). price_text is the price as shown, price_unit lb when "
+    "per pound, bundle {quantity, price} for multi-buys ('2 for $5.00'), starting_price for "
+    "'Starts at' items, regular_price the crossed-out price."
+)
+_PUBLIX_ITEM = (
+    "item_code (for product()), base_product_id, title, brand, size, description, image, url, "
+    "category_path, aisle (where it sits in that store), on_sale, price, price_unit, bundle, "
+    "starting_price, regular_price, price_text, regular_price_text, promo (type single, bogo or "
+    "multi; message, conditions, savings, valid_from, valid_through), has_coupon and "
+    "is_order_ahead"
+)
+_PUBLIX_GRID_FIELDS = (
+    " Items with " + _PUBLIX_ITEM + ". Also store (id, name), total, page, page_size (48), "
+    "total_pages, count, sort, applied_filters and facets (deals, BOGO, weekly ad, brand, type, "
+    "diet, nutrition ranges)."
+)
+_PUBLIX_CHARGE = (
+    " Failed upstream calls are not charged (they are retried automatically); a not-found is "
+    "charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -7173,6 +7231,277 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _req("query", "What a shopper has typed so far (2-100 characters), e.g. 'almond mi'."),
             _KROGER_STORE_BANNER,
             _str("store_id", "A store's 8-digit location_id from stores(). Optional."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    # ================================ Publix ===============================
+    # 11 endpoints on /api/v1/publix (publix.com, US), 1 credit each. Every price
+    # endpoint takes the store_id you choose (a Publix store number from
+    # stores()); categories and suggestions take it optionally. Publix shows
+    # prices online only for promoted and order-ahead items: price is None
+    # otherwise. Cross-field rules the server enforces beyond one_of: stores
+    # needs zip, city with state, or store_id. 120 s timeout floor.
+    Endpoint(
+        key="publix_search",
+        namespace="publix",
+        method="search",
+        http="POST",
+        path="/api/v1/publix/search",
+        summary=(
+            "Search Publix products at one store by keyword: sort by name, popularity, savings "
+            "or views; filter to items on sale, BOGO (Buy One Get One Free) or a brand. Keywords "
+            "the site sends to a category answer that category's products; keywords it sends to "
+            "an order-ahead page set redirected_to (items may be empty)."
+            + _PUBLIX_GRID_FIELDS + _PUBLIX_PRICES + _PUBLIX_CHARGE
+        ),
+        params=(
+            _req("query", "Search keywords (1-100 characters), e.g. 'chicken'."),
+            _PUBLIX_STORE,
+            *_PUBLIX_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_product",
+        namespace="publix",
+        method="product",
+        http="POST",
+        path="/api/v1/publix/product",
+        summary=(
+            "One Publix product by item code at one store: the product card (" + _PUBLIX_ITEM
+            + "; order-ahead items also short_description, lead_time, serves, calories) and its "
+            "nutrition facts (labels with serving size, servings per container and every "
+            "nutrient with amount, unit and percent daily value; a deli sub has one label per "
+            "component and size; None when Publix has none), plus store. Ingredients, "
+            "allergens, UPC and reviews are not published by Publix online. An unknown item "
+            "code is a charged 404." + _PUBLIX_PRICES + _PUBLIX_CHARGE
+        ),
+        params=(
+            Param(
+                "item_code",
+                "Union[str, int]",
+                required=True,
+                doc="A Publix item code (not a UPC): items[].item_code of search(), category() "
+                "or order_ahead(), e.g. '90355'.",
+            ),
+            _PUBLIX_STORE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_category",
+        namespace="publix",
+        method="category",
+        http="POST",
+        path="/api/v1/publix/category",
+        summary=(
+            "One Publix category's products at one store, by category_url or category_id, with "
+            "the search sorts and filters. Also category (id, name, path)."
+            + _PUBLIX_GRID_FIELDS + _PUBLIX_PRICES + _PUBLIX_CHARGE
+        ),
+        params=(
+            _PUBLIX_STORE,
+            _str(
+                "category_url",
+                "A publix.com category link (/c/<name>/<id>), e.g. "
+                "'https://www.publix.com/c/chicken/6772da29-55bf-4051-83d5-104d73ae9a96'.",
+            ),
+            _str(
+                "category_id",
+                "A category id (categories[].id of categories()), e.g. "
+                "'6772da29-55bf-4051-83d5-104d73ae9a96'. Alternative to category_url.",
+            ),
+            *_PUBLIX_GRID_PARAMS,
+        ),
+        one_of=(("category_url", "category_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_categories",
+        namespace="publix",
+        method="categories",
+        http="POST",
+        path="/api/v1/publix/categories",
+        summary=(
+            "The Publix product category tree: departments (Bakery, Dairy, Meat, Produce ...) "
+            "with their categories and sub-categories, each with id (for category()), name, "
+            "url, parent_id, level and children; plus count. parent_id returns one "
+            "department's or category's subtree." + _PUBLIX_CHARGE
+        ),
+        params=(
+            _PUBLIX_STORE_OPT,
+            _str(
+                "parent_id",
+                "Return only this department's or category's subtree (categories[].id).",
+            ),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_weekly_ad",
+        namespace="publix",
+        method="weekly_ad",
+        http="POST",
+        path="/api/v1/publix/weekly-ad",
+        summary=(
+            "The store's current Publix weekly ad (English), about 700 items: BOGO deals (about "
+            "230 a week), sale prices, multi-buys and percent-off deals, with ad (start_date, "
+            "end_date), total, count, applied_filters and departments. Weekly ads start on "
+            "different days by state (Thursday to Wednesday in Florida, Wednesday to Tuesday in "
+            "Georgia and North Carolina; weekly_ad_break_day of stores() gives each store's "
+            "start day), and prices of some items (beer, wine) differ by store. Each item: id, "
+            "item_code, base_product_id, title, description, brand, department, categories, "
+            "savings_text (as shown, e.g. 'Buy 1 Get 1 FREE', '$6.89 lb', '2 for $5.00'), "
+            "deal_type (bogo, b2g1, multi, price, percent_off or other), price (only when "
+            "savings_text is a plain price), price_unit, bundle, save_up_to, additional_savings, "
+            "min_quantity, fine_print, stacked_with_coupon, promotion, valid_from, valid_to and "
+            "image." + _PUBLIX_CHARGE
+        ),
+        params=(
+            _PUBLIX_STORE,
+            _str(
+                "department",
+                "Only items of this department (departments of the answer, e.g. 'Meat', "
+                "'Produce', 'Deli', 'Wine').",
+            ),
+            _bool("bogo_only", "Only Buy 1 Get 1 Free and Buy 2 Get 1 Free items."),
+            _str("query", "Only items whose title, description or brand contains this text."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_extra_savings",
+        namespace="publix",
+        method="extra_savings",
+        http="POST",
+        path="/api/v1/publix/extra-savings",
+        summary=(
+            "The store's Publix Extra Savings (temporary price reductions), several hundred "
+            "items: id, base_product_id, title, size, brand, categories, savings_text (the "
+            "amount saved as shown), savings, additional_savings, final_price (the reduced "
+            "price, as the site lists it), min_quantity, image and url; plus store, count and "
+            "period (start_date, end_date of the current Extra Savings period)." + _PUBLIX_CHARGE
+        ),
+        params=(_PUBLIX_STORE,),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_coupons",
+        namespace="publix",
+        method="coupons",
+        http="POST",
+        path="/api/v1/publix/coupons",
+        summary=(
+            "The store's Publix digital coupons as every visitor sees them (about 100-130): id, "
+            "title, description, brand, savings_text, value (the dollar amount when the coupon "
+            "states one), min_quantity, limit_per_transaction, categories, valid_from, "
+            "valid_to, terms and image; plus store and count. Read-only: coupons are listed, "
+            "never clipped, and no account is used." + _PUBLIX_CHARGE
+        ),
+        params=(_PUBLIX_STORE,),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_savings_search",
+        namespace="publix",
+        method="savings_search",
+        http="POST",
+        path="/api/v1/publix/savings-search",
+        summary=(
+            "Find a keyword across the store's Publix weekly ad, Extra Savings and digital "
+            "coupons in one call: query, store, count and items, each with saving_type "
+            "(weekly_ad, extra_savings or coupon) and that feed's fields." + _PUBLIX_CHARGE
+        ),
+        params=(
+            _req("query", "A keyword to find in the store's savings, e.g. 'coffee'."),
+            _PUBLIX_STORE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_order_ahead",
+        namespace="publix",
+        method="order_ahead",
+        http="POST",
+        path="/api/v1/publix/order-ahead",
+        summary=(
+            "The store's Publix deli and bakery order-ahead (in-store pickup) menu with this "
+            "store's prices: Pub Subs (section subs, default) or the whole catalog of subs, "
+            "platters, cakes, wings and meals (section all, about 1,150 items, 60 per page). "
+            "Each item: " + _PUBLIX_ITEM + ", short_description, lead_time, serves, calories and "
+            "pay_online. Pub Sub prices differ by store (e.g. $12.09 in Miami, $11.99 in "
+            "Atlanta). Also section, store, total, page, page_size, total_pages and count."
+            + _PUBLIX_CHARGE
+        ),
+        params=(
+            _PUBLIX_STORE,
+            _lit(
+                "section",
+                ("subs", "all"),
+                "subs (default: the Pub Sub menu) or all (the whole deli and bakery order-ahead "
+                "catalog: subs, platters, cakes, meals ...).",
+            ),
+            _int("page", "Results page, 1-based (60 items per page)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_stores",
+        namespace="publix",
+        method="stores",
+        http="POST",
+        path="/api/v1/publix/stores",
+        summary=(
+            "Publix stores near a ZIP code or in a city (city with state), or one store by "
+            "store_id. Each store: store_id (for every other endpoint), name, short_name, type "
+            "(supermarket, liquor, pharmacy), address, phone, hours for the next 7 days, "
+            "time_zone, departments, services, pharmacy (phone, hours), liquor_store, "
+            "latitude, longitude, distance_miles, weekly_ad_break_day (the day the store's "
+            "weekly ad starts), opening_date, closing_date and image. Publix operates in FL, "
+            "GA, AL, SC, NC, TN, VA and KY. An unknown store_id is a charged 404."
+            + _PUBLIX_CHARGE
+        ),
+        params=(
+            _str("zip", "A 5-digit US ZIP code: the stores nearest to it, e.g. '33101'."),
+            _str("city", "A city name, with state, e.g. 'Nashville'."),
+            _str("state", "A 2-letter state code, with city, e.g. 'TN'."),
+            _str_or_int("store_id", "One store by its Publix store number, e.g. '1825'."),
+            _int("limit", "Stores to return, up to 30 (default 10)."),
+            _int("radius_miles", "Search radius in miles, 1-100 (default 50)."),
+        ),
+        one_of=(("zip", "city", "store_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="publix_suggestions",
+        namespace="publix",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/publix/suggestions",
+        summary=(
+            "The suggestions the Publix search box shows for what a user typed: up to 10 "
+            "popular searches (suggestions: text, type) and, with store_id, up to 4 products "
+            "(item_code, base_product_id, title, description, saving_text, image, url); plus "
+            "query, store_id and count." + _PUBLIX_CHARGE
+        ),
+        params=(
+            _req("query", "What the user has typed so far, e.g. 'chick'."),
+            _str_or_int(
+                "store_id",
+                "Optional: with a store the answer also carries up to 4 products. "
+                + _PUBLIX_STORE_DOC,
+            ),
         ),
         credits=1,
         min_timeout=120.0,
@@ -14193,6 +14522,7 @@ NAMESPACES: tuple[str, ...] = (
     "gemini",
     "heb",
     "kroger",
+    "publix",
 )
 
 

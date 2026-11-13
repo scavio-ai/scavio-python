@@ -56,6 +56,7 @@ from ._namespaces_sync import (
     _OlxNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
+    _PublixNamespace,
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
@@ -217,6 +218,7 @@ class ScavioClient:
         self.gemini = _GeminiNamespace(self)
         self.heb = _HebNamespace(self)
         self.kroger = _KrogerNamespace(self)
+        self.publix = _PublixNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

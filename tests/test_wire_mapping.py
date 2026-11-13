@@ -3590,3 +3590,120 @@ def test_kroger_banners_credits_paths_and_wire(monkeypatch):
         k.category(slug="Import-Beer")
     with pytest.raises(ScavioError):
         k.coupons(banner="fred_meyer")
+
+
+def test_publix_credits_paths_and_wire(monkeypatch):
+    """publix (0.55.0): 11 endpoints on /api/v1/publix, 1 credit each.
+
+    store_id (a Publix store number, str or int) is required on every price
+    endpoint and optional on categories, suggestions and stores. category takes
+    category_url or category_id; stores takes zip, city (+ state) or store_id.
+    120 s timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "publix"}
+    assert sorted(eps) == sorted(
+        [
+            "search",
+            "product",
+            "category",
+            "categories",
+            "weekly_ad",
+            "extra_savings",
+            "coupons",
+            "savings_search",
+            "order_ahead",
+            "stores",
+            "suggestions",
+        ]
+    )
+    optional_store = {"categories", "suggestions", "stores"}
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/publix/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        store = next(p for p in ep.params if p.name == "store_id")
+        assert store.required == (m not in optional_store), ep.key
+        assert "Union[str, int]" in store.annotation, ep.key
+    sort = next(p for p in eps["search"].params if p.name == "sort")
+    assert sort.annotation == (
+        'Optional[Literal["relevance", "featured", "name_asc", "name_desc", "popularity", '
+        '"savings_amount", "most_viewed"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    px = client.publix
+    cat_id = "6772da29-55bf-4051-83d5-104d73ae9a96"
+    px.search("chicken", "1614", sort="savings_amount", on_sale=True, page=2)
+    px.search("chicken", 1453, bogo=True, brand="Tyson")
+    px.product("90355", 1825)
+    px.category("1825", category_id=cat_id, sort="name_asc")
+    px.category(1614, category_url="https://www.publix.com/c/chicken/" + cat_id)
+    px.categories()
+    px.categories(store_id="1453", parent_id=cat_id)
+    px.weekly_ad("1614", department="Produce", bogo_only=True, query="apple")
+    px.extra_savings(1614)
+    px.coupons("1453")
+    px.savings_search("coffee", "1614")
+    px.order_ahead("1825", section="all", page=2)
+    px.stores(zip="33101", limit=5, radius_miles=100)
+    px.stores(city="Nashville", state="TN")
+    px.stores(store_id=1825)
+    px.suggestions("chick", store_id="1614")
+    base = "/api/v1/publix/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "chicken",
+                "store_id": "1614",
+                "page": 2,
+                "sort": "savings_amount",
+                "on_sale": True,
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {"query": "chicken", "store_id": 1453, "bogo": True, "brand": "Tyson"},
+            120.0,
+        ),
+        (base + "product", {"item_code": "90355", "store_id": 1825}, 120.0),
+        (
+            base + "category",
+            {"store_id": "1825", "category_id": cat_id, "sort": "name_asc"},
+            120.0,
+        ),
+        (
+            base + "category",
+            {"store_id": 1614, "category_url": "https://www.publix.com/c/chicken/" + cat_id},
+            120.0,
+        ),
+        (base + "categories", {}, 120.0),
+        (base + "categories", {"store_id": "1453", "parent_id": cat_id}, 120.0),
+        (
+            base + "weekly-ad",
+            {"store_id": "1614", "department": "Produce", "bogo_only": True, "query": "apple"},
+            120.0,
+        ),
+        (base + "extra-savings", {"store_id": 1614}, 120.0),
+        (base + "coupons", {"store_id": "1453"}, 120.0),
+        (base + "savings-search", {"query": "coffee", "store_id": "1614"}, 120.0),
+        (base + "order-ahead", {"store_id": "1825", "section": "all", "page": 2}, 120.0),
+        (base + "stores", {"zip": "33101", "limit": 5, "radius_miles": 100}, 120.0),
+        (base + "stores", {"city": "Nashville", "state": "TN"}, 120.0),
+        (base + "stores", {"store_id": 1825}, 120.0),
+        (base + "suggestions", {"query": "chick", "store_id": "1614"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        px.category("1825", sort="name_asc")
+    with pytest.raises(ScavioError):
+        px.stores(limit=5)

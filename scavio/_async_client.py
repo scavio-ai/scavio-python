@@ -58,6 +58,7 @@ from ._namespaces_async import (
     _AsyncOlxNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
+    _AsyncPublixNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
@@ -212,6 +213,7 @@ class AsyncScavioClient:
         self.gemini = _AsyncGeminiNamespace(self)
         self.heb = _AsyncHebNamespace(self)
         self.kroger = _AsyncKrogerNamespace(self)
+        self.publix = _AsyncPublixNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

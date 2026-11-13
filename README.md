@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 74 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 75 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -2535,6 +2535,68 @@ available. 2 credits for `search` and `product`, 3 for `prices`, 1 for the
 rest. Failed calls are not charged; an unknown UPC or store id is a charged
 404.
 
+### 44. Grocery -- Publix weekly ad, BOGO deals and store prices
+
+Publix grocery data, namespace `publix`, 11 endpoints at 1 credit each:
+`search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`,
+`coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`. Every
+price endpoint is store-scoped: pass `store_id`, a Publix store number from
+`stores()` (str or int). Prices and promotions differ by store. Every method
+raises the request timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+publix = client.publix
+
+# --- Find a store: store_id feeds every other method.
+stores = publix.stores(zip="33101", limit=5)["data"]["stores"]
+store_id = stores[0]["store_id"]
+print(store_id, stores[0]["name"], stores[0]["weekly_ad_break_day"])
+
+# --- This week's ad at that store: BOGO, sale prices, multi-buys.
+ad = publix.weekly_ad(store_id, bogo_only=True)["data"]
+print(ad["ad"]["start_date"], ad["ad"]["end_date"], ad["count"])
+for item in ad["items"][:5]:
+    print(item["title"], item["savings_text"], item["deal_type"], item["price"])
+
+# --- Search: price is a number only when Publix shows one (promo or order-ahead).
+res = publix.search("chicken", store_id, on_sale=True, sort="savings_amount")["data"]
+for p in res["items"][:5]:
+    print(p["item_code"], p["title"], p["aisle"], p["price"], p["price_text"], p["promo"])
+
+# --- Pub Subs and the deli / bakery order-ahead menu, with this store's prices.
+subs = publix.order_ahead(store_id)["data"]
+print([(s["title"], s["price"]) for s in subs["items"][:3]])
+
+# --- Product card plus nutrition facts by Publix item code (not UPC).
+sub = publix.product("90355", store_id)["data"]
+print(sub["title"], sub["price"], sub["nutrition"][0]["serving_size"])
+
+# --- Extra Savings, digital coupons (listed, never clipped), or one keyword across all.
+extra = publix.extra_savings(store_id)["data"]
+print(extra["period"], extra["count"])
+coupons = publix.coupons(store_id)["data"]
+print([(c["title"], c["value"], c["valid_to"]) for c in coupons["items"][:3]])
+hits = publix.savings_search("coffee", store_id)["data"]
+print([(h["saving_type"], h["title"]) for h in hits["items"][:5]])
+```
+
+Publix does not show regular shelf prices online: `price` is a number only
+for items on promotion (weekly ad, BOGO, multi-buy, Extra Savings) and for
+order-ahead items, and None otherwise; it is never estimated. Multi-buys
+("2 for $5.00") carry `bundle` {quantity, price}. A Publix Chicken Tender Sub
+was measured at $12.09 in Miami (store 1614) and $11.99 in Atlanta (store
+1825). Weekly ads run Thursday to Wednesday in Florida and Wednesday to
+Tuesday in Georgia and North Carolina (`weekly_ad_break_day` per store);
+English ad only. `search` and `category` serve 48 items per page,
+`order_ahead` 60. Products are keyed by Publix item code: Publix does not
+publish UPCs, ingredients, allergens or reviews online. `category()` takes
+`category_url` or `category_id` (from `categories()`); `stores()` takes `zip`,
+`city` with `state`, or `store_id`. No cart or ordering. Failed calls are not
+charged; an unknown item code or store id is a charged 404.
+
 ## Error Handling
 
 ```python
@@ -2680,6 +2742,7 @@ Scavio works with popular AI/LLM frameworks:
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
+| Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2690,6 +2753,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.55.0
+
+- **New `publix` namespace** (sync and async) for Publix (publix.com, US),
+  11 endpoints at 1 credit each: `search`, `product`, `category`,
+  `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`,
+  `order_ahead`, `stores`, `suggestions`. Store-scoped: `store_id` (a Publix
+  store number from `stores()`) on every price endpoint. 120s timeout floor.
 
 ### Changed in 0.54.0
 
