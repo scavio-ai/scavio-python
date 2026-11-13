@@ -301,7 +301,8 @@ _NS_META = {
     ),
     "kroger": (
         "Kroger",
-        "Kroger grocery search and product detail endpoints.",
+        "Kroger, QFC and Fred Meyer grocery search, product detail, store-level prices, store "
+        "locator, category, weekly digital deals, digital coupons and search suggestion endpoints.",
     ),
 }
 

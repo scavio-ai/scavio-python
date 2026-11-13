@@ -954,6 +954,24 @@ _CARREFOUR_CHARGE = (
 _CARREFOUR_FR_NOTE = " fr only (carrefour.fr)."
 
 
+_KROGER_BANNERS = ("kroger", "qfc", "fred_meyer")
+_KROGER_BANNER_TEXT = (
+    "kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer "
+    "(Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska)"
+)
+_KROGER_BANNER = _lit(
+    "banner",
+    _KROGER_BANNERS,
+    f"The store banner: {_KROGER_BANNER_TEXT}. Defaults to kroger. Prices differ by banner and by store.",
+)
+_KROGER_STORE_BANNER = _lit(
+    "banner",
+    _KROGER_BANNERS,
+    f"The store banner: {_KROGER_BANNER_TEXT}. Optional with store_id: QFC ids start with 705, "
+    "Fred Meyer ids with 701, anything else is kroger.",
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -6933,8 +6951,16 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
     ),
     # ================================ Kroger ===============================
-    # 2 endpoints, 2 credits each. Operates Kroger, Ralphs, Fred Meyer,
-    # Harris Teeter, King Soopers, Fry's and other banners.
+    # 8 endpoints on /api/v1/kroger: kroger.com plus the QFC (qfc.com) and Fred
+    # Meyer (fredmeyer.com) banners via `banner` on every endpoint. search and
+    # product 2 credits, prices 3, the rest 1. Prices are integer cents.
+    # search / product / category / deals price at a store the site chooses
+    # (returned in `store`); prices() takes the store you pick. search,
+    # category and deals serve page 1 only (page > 1 is an unbilled 400), no
+    # sort. Cross-field rules the server enforces beyond one_of ("at least
+    # one"): stores takes exactly one of zip, query or store_id; category and
+    # coupons reject both alternatives together. 120 s timeout floor: search
+    # and prices can take up to about a minute.
     Endpoint(
         key="kroger_search",
         namespace="kroger",
@@ -6942,16 +6968,24 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/search",
         summary=(
-            "Search Kroger grocery products by keyword: price (cents), promo/n-for deals, "
-            "unit price, UPC, stock, SNAP eligibility, dietary info, rating and category. "
-            "Kroger operates Kroger, Ralphs, Fred Meyer, Harris Teeter, King Soopers, Fry's "
-            "and other banners."
+            "Search Kroger, QFC or Fred Meyer products by keyword (banner): price, list and "
+            "promo price with end date, n-for deals, unit price, size, UPC, stock (in_stock "
+            "null without a stock record), SNAP eligibility, dietary info, category and rating "
+            "(average, count, star distribution; no review text), plus total and the store "
+            "that priced the results (a store the site chooses; use prices() for a specific "
+            "store). Prices are integer cents. Only the first page (up to 24 products), no sort."
         ),
         params=(
             _req("query", "Search keywords (1-200 characters)."),
-            _int("page", "Results page, 1-based (1-100)."),
+            _KROGER_BANNER,
+            _int(
+                "page",
+                "Results page. Only page 1 is available (up to 24 products); page above 1 is "
+                "refused with a 400 before any charge.",
+            ),
         ),
         credits=2,
+        min_timeout=120.0,
     ),
     Endpoint(
         key="kroger_product",
@@ -6960,22 +6994,188 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/product",
         summary=(
-            "Full Kroger product detail: nutrition facts with allergens and ingredients, "
-            "rating distribution, store aisle location, dietary flags (organic, non-GMO, "
-            "gluten-free), SNAP eligibility, dimensions and country of origin. Pass "
-            "product_url (from search()) or upc."
+            "One Kroger, QFC or Fred Meyer product by URL or UPC: the search fields plus "
+            "description, nutrition facts, ingredients, allergens, images, country of origin, "
+            "dimensions, weight, dietary flags, the aisle at the store (store_location), "
+            "breadcrumbs, banner and store (a store the site chooses). Prices are integer "
+            "cents. An unknown UPC is a charged 404."
         ),
         params=(
             _str(
                 "product_url",
-                "Full or relative product URL from kroger.com (e.g. "
-                "'/p/kroger-2-reduced-fat-milk-gallon/0001111041700'). Preferred.",
+                "Full or relative product URL on kroger.com, qfc.com or fredmeyer.com "
+                "(products[].url of search()). An absolute URL sets the banner; a banner that "
+                "contradicts its host is a 400.",
             ),
-            _str("upc", "Kroger product UPC (from search() or product URLs: /p/{slug}/{upc})."),
-            _str("slug", "Product slug for readable URL. Optional with upc."),
+            _str(
+                "upc",
+                "The product's UPC (products[].upc of search(), or the digits at the end of a "
+                "product URL: /p/{slug}/{upc}), e.g. '0001111050438'.",
+            ),
+            _str("slug", "Product slug (the readable part of the product URL). Optional with upc."),
+            _KROGER_BANNER,
         ),
         one_of=(("product_url", "upc"),),
         credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_prices",
+        namespace="kroger",
+        method="prices",
+        http="POST",
+        path="/api/v1/kroger/prices",
+        summary=(
+            "Price, promotion, stock and aisle for 1 to 25 UPCs at one Kroger, QFC or Fred "
+            "Meyer store you choose (store_id from stores()). Per UPC: price, promo_price, "
+            "promo_ends_at, on_sale, price_display, unit_price_display, in_stock, stock_level, "
+            "quantity (the site's available estimate, not a shelf count), aisle (description, "
+            "number, side, bay, shelf), fulfillment and priced_at. Unknown UPCs are listed in "
+            "not_found. Prices are integer cents. An unknown store_id is a charged 404."
+        ),
+        params=(
+            _req("store_id", "A store's 8-digit location_id: stores[].location_id of stores(), e.g. '70500847'."),
+            _str_list(
+                "upcs",
+                "1 to 25 13-digit UPCs as the site writes them (products[].upc of search() or "
+                "category()), e.g. ['0001111050438'].",
+                required=True,
+            ),
+            _KROGER_STORE_BANNER,
+        ),
+        credits=3,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_stores",
+        namespace="kroger",
+        method="stores",
+        http="POST",
+        path="/api/v1/kroger/stores",
+        summary=(
+            "Kroger, QFC or Fred Meyer stores near a ZIP or a city / address (nearest first), "
+            "or one store by store_id; pass exactly one. Each store: location_id (the store_id "
+            "for prices(), coupons() and suggestions()), banner, type (store or fuel_center), "
+            "name, store_number, address, coordinates, phone, timezone, hours, open_24_hours, "
+            "departments, has_pharmacy, has_fuel_center, pickup, delivery and distance_miles. "
+            "No fuel prices. An unknown store_id is a charged 404."
+        ),
+        params=(
+            _str("zip", "A 5-digit US ZIP code, e.g. '98101'."),
+            _str("query", "A city or address, as typed in the site's store finder, e.g. 'Portland, OR'."),
+            _str("store_id", "One store's 8-digit location_id, e.g. '70100011'."),
+            _KROGER_STORE_BANNER,
+            _int("limit", "Stores to return, 1-50. Defaults to 10."),
+            _bool(
+                "include_other_banners",
+                "Also return nearby stores of other Kroger banners (for example Fred Meyer stores "
+                "near a QFC search). Defaults to False.",
+            ),
+        ),
+        one_of=(("zip", "query", "store_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_category",
+        namespace="kroger",
+        method="category",
+        http="POST",
+        path="/api/v1/kroger/category",
+        summary=(
+            "A Kroger, QFC or Fred Meyer category listing by /pl/ URL or taxonomy_id (not both): "
+            "category (id, name, url) and the search fields (total, count, products, the store "
+            "the site chose). Prices are integer cents. Only the first page (up to 24 "
+            "products), no sort."
+        ),
+        params=(
+            _str(
+                "url",
+                "A category listing URL (/pl/<name>/<id>) on kroger.com, qfc.com or "
+                "fredmeyer.com. The URL's host sets the banner.",
+            ),
+            _str(
+                "taxonomy_id",
+                "The digits at the end of a /pl/ URL, e.g. '08190'. Category ids are shared "
+                "across banners.",
+            ),
+            _str(
+                "slug",
+                "The name part of a /pl/ URL, e.g. 'Import-Beer'. Optional with taxonomy_id; "
+                "without it category.name is None.",
+            ),
+            _KROGER_BANNER,
+            _int("page", "Results page. Only page 1 is available; page above 1 is an unbilled 400."),
+        ),
+        one_of=(("url", "taxonomy_id"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_deals",
+        namespace="kroger",
+        method="deals",
+        http="POST",
+        path="/api/v1/kroger/deals",
+        summary=(
+            "This week's weekly digital deals of Kroger, QFC or Fred Meyer: deals_week (id, "
+            "ends_at) and the search fields. Store promotions carry promo_price and "
+            "promo_ends_at; digital-coupon deals show the shelf price (the coupon is in "
+            "coupons(), tag Weekly Digital Deals). Prices are integer cents. Only the first "
+            "page (up to 24 products). The printed weekly ad circular is not available."
+        ),
+        params=(
+            _KROGER_BANNER,
+            _int("page", "Results page. Only page 1 is available; page above 1 is an unbilled 400."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_coupons",
+        namespace="kroger",
+        method="coupons",
+        http="POST",
+        path="/api/v1/kroger/coupons",
+        summary=(
+            "The digital coupons at one Kroger, QFC or Fred Meyer store (store_id, or the "
+            "banner's store nearest a zip; not both), 24 per page, optionally one department "
+            "(category) or a text match (query). Each coupon: id, brand, title, description, "
+            "details, savings (type, amount in cents, percent), tags, valid_for, starts_at, "
+            "clip_by, expires_at and image; plus total_at_store, has_more and categories. "
+            "Listing only: coupons are not clipped."
+        ),
+        params=(
+            _str("store_id", "A store's 8-digit location_id from stores(), e.g. '70500847'."),
+            _str("zip", "A 5-digit ZIP: the banner's nearest store is used."),
+            _KROGER_STORE_BANNER,
+            _int("page", "Page of coupons, 24 per page, 1-50. Defaults to 1. Follow has_more."),
+            _str("category", "Only coupons in one department: a name from the response's categories, e.g. 'Dairy'."),
+            _str("query", "Only coupons whose brand or text matches, e.g. 'coffee'."),
+        ),
+        one_of=(("store_id", "zip"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="kroger_suggestions",
+        namespace="kroger",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/kroger/suggestions",
+        summary=(
+            "Kroger, QFC or Fred Meyer search box suggestions for a partial query: suggestions "
+            "(text, type), count and the store they were asked for. Without store_id the "
+            "banner's store nearest a representative ZIP is used (Kroger 45202, QFC 98101, "
+            "Fred Meyer 97201)."
+        ),
+        params=(
+            _req("query", "What a shopper has typed so far (2-100 characters), e.g. 'almond mi'."),
+            _KROGER_STORE_BANNER,
+            _str("store_id", "A store's 8-digit location_id from stores(). Optional."),
+        ),
+        credits=1,
+        min_timeout=120.0,
     ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:

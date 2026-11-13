@@ -2472,6 +2472,69 @@ counts, phone numbers, messaging, delivery prices, checkout, average prices,
 notifications or price history: to watch for new listings or track prices,
 poll `sort="newest"` and store your own.
 
+### 43. Grocery -- Kroger, QFC and Fred Meyer
+
+Kroger grocery data, namespace `kroger`, 8 endpoints: `search`, `product`,
+`prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`. Every
+method takes `banner`: `kroger` (kroger.com, default), `qfc` (QFC, qfc.com:
+Washington and Oregon) or `fred_meyer` (Fred Meyer, fredmeyer.com: the
+Pacific Northwest and Alaska, grocery plus general merchandise, apparel and
+home). Other Kroger banners (Ralphs, King Soopers, Fry's, Harris Teeter,
+Smith's...) are not supported yet. Prices are integer cents (`price` 399 =
+$3.99) and differ by banner and by store. Every method raises the request
+timeout to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+kroger = client.kroger
+
+# --- Search: prices are those of a store the site chooses (returned in store).
+res = kroger.search("coffee", banner="qfc")["data"]
+print(res["total"], res["count"], res["store"]["location_id"], res["store"]["name"])
+for p in res["products"][:5]:
+    print(p["upc"], p["name"], p["price"], p["promo_price"], p["price_display"])
+
+# --- A specific store: find it, then price up to 25 UPCs there.
+stores = kroger.stores(zip="97201", banner="fred_meyer")["data"]["stores"]
+store_id = stores[0]["location_id"]
+prices = kroger.prices(store_id, ["0001111050438"])["data"]
+for item in prices["items"]:
+    print(item["upc"], item["price"], item["promo_price"], item["in_stock"],
+          item["stock_level"], item["quantity"], item["aisle"])
+print(prices["not_found"])
+
+# --- Product detail, a category listing and this week's digital deals.
+milk = kroger.product(upc="0001111050438", banner="fred_meyer")["data"]
+print(milk["name"], milk["price"], milk["rating"], milk["store_location"])
+beer = kroger.category(taxonomy_id="08190", slug="Import-Beer", banner="qfc")["data"]
+deals = kroger.deals(banner="qfc")["data"]
+print(beer["category"], beer["total"], deals["deals_week"], deals["total"])
+
+# --- Digital coupons at one store (listed, never clipped) and suggestions.
+c = kroger.coupons(store_id="70100011", category="Dairy")["data"]
+print(c["total_at_store"], c["has_more"], [x["title"] for x in c["coupons"][:3]])
+print(kroger.suggestions("almond mi", banner="qfc")["data"]["suggestions"])
+```
+
+`search`, `product`, `category` and `deals` return the prices, promotions,
+stock and aisle of a store the site chooses for the request (`store`: it can
+change between calls and cannot be picked). For one store's price, stock and
+aisle, take a `location_id` from `stores()` and pass it as `store_id` to
+`prices()`; QFC store ids start with 705, Fred Meyer ids with 701. `search`,
+`category` and `deals` serve the first page only (up to 24 products) and
+cannot be sorted: `page` above 1 is a 400 and is not charged. `in_stock` is
+None when the store has no stock record for the item. Ratings are average,
+count and star distribution; review text is not available. `stores()` takes
+exactly one of `zip`, `query` or `store_id` and returns fuel center
+locations, not fuel prices. `coupons()` pages 24 at a time (`has_more`) and
+only lists coupons: no account is used and nothing is clipped. `deals()` is
+the weekly digital deals list; the printed weekly ad circular is not
+available. 2 credits for `search` and `product`, 3 for `prices`, 1 for the
+rest. Failed calls are not charged; an unknown UPC or store id is a charged
+404.
+
 ## Error Handling
 
 ```python
@@ -2616,6 +2679,7 @@ Scavio works with popular AI/LLM frameworks:
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
+| Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2626,6 +2690,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.54.0
+
+- **`kroger` namespace: QFC and Fred Meyer, 6 new endpoints.** Every method
+  takes `banner` (`kroger` default, `qfc`, `fred_meyer`). New: `prices`
+  (up to 25 UPCs at one store you choose, 3 credits), `stores`, `category`,
+  `deals` (weekly digital deals), `coupons` (listed, not clipped) and
+  `suggestions`, 1 credit each. `search` and `product` now also return
+  `banner` and the `store` that priced them; `search` serves page 1 only
+  (`page` above 1 is an unbilled 400). 120s timeout floor.
 
 ### Changed in 0.53.0
 

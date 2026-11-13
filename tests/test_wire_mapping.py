@@ -3493,3 +3493,100 @@ def test_olx_credits_paths_and_wire(monkeypatch):
         o.offer(country="pl")
     with pytest.raises(ScavioError):
         o.similar()
+
+
+def test_kroger_banners_credits_paths_and_wire(monkeypatch):
+    """kroger (0.54.0): 8 endpoints on /api/v1/kroger, banner on every one.
+
+    banner is kroger (default), qfc or fred_meyer. search and product 2 credits,
+    prices 3, the rest 1. prices needs store_id + upcs; stores takes zip, query
+    or store_id; category url or taxonomy_id; coupons store_id or zip. 120 s
+    timeout floor everywhere.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "kroger"}
+    assert sorted(eps) == sorted(
+        ["search", "product", "prices", "stores", "category", "deals", "coupons", "suggestions"]
+    )
+    credits = {"search": 2, "product": 2, "prices": 3}
+    banners = 'Optional[Literal["kroger", "qfc", "fred_meyer"]]'
+    for m, ep in eps.items():
+        assert ep.credits == credits.get(m, 1), ep.key
+        assert ep.credits_note is None, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/kroger/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        banner = next(p for p in ep.params if p.name == "banner")
+        assert banner.annotation == banners, ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    k = client.kroger
+    k.search("coffee", banner="qfc")
+    k.search("organic milk", page=1)
+    k.product(upc="0001111050438", banner="fred_meyer")
+    milk_url = "/p/simple-truth-organic-lactose-free-2-reduced-fat-milk-half-gallon/0001111050438"
+    hp_url = "https://www.fredmeyer.com/pl/headphones-earbuds-headsets/2900300001"
+    k.product(product_url=milk_url)
+    k.prices("70500847", ["0001111050438", "0081006334306"], banner="qfc")
+    k.stores(zip="97201", banner="fred_meyer", limit=5, include_other_banners=True)
+    k.stores(store_id="70100011")
+    k.category(taxonomy_id="08190", slug="Import-Beer", banner="qfc")
+    k.category(url=hp_url)
+    k.deals(banner="qfc")
+    k.coupons(store_id="70100011", page=2, category="Dairy", query="milk")
+    k.coupons(zip="98101", banner="qfc")
+    k.suggestions("almond mi", banner="qfc", store_id="70500847")
+    base = "/api/v1/kroger/"
+    assert seen == [
+        (base + "search", {"query": "coffee", "banner": "qfc"}, 120.0),
+        (base + "search", {"query": "organic milk", "page": 1}, 120.0),
+        (base + "product", {"upc": "0001111050438", "banner": "fred_meyer"}, 120.0),
+        (
+            base + "product",
+            {"product_url": milk_url},
+            120.0,
+        ),
+        (
+            base + "prices",
+            {"store_id": "70500847", "upcs": ["0001111050438", "0081006334306"], "banner": "qfc"},
+            120.0,
+        ),
+        (
+            base + "stores",
+            {"zip": "97201", "banner": "fred_meyer", "limit": 5, "include_other_banners": True},
+            120.0,
+        ),
+        (base + "stores", {"store_id": "70100011"}, 120.0),
+        (
+            base + "category",
+            {"taxonomy_id": "08190", "slug": "Import-Beer", "banner": "qfc"},
+            120.0,
+        ),
+        (base + "category", {"url": hp_url}, 120.0),
+        (base + "deals", {"banner": "qfc"}, 120.0),
+        (
+            base + "coupons",
+            {"store_id": "70100011", "page": 2, "category": "Dairy", "query": "milk"},
+            120.0,
+        ),
+        (base + "coupons", {"zip": "98101", "banner": "qfc"}, 120.0),
+        (
+            base + "suggestions",
+            {"query": "almond mi", "banner": "qfc", "store_id": "70500847"},
+            120.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        k.product(banner="qfc")
+    with pytest.raises(ScavioError):
+        k.stores(banner="qfc")
+    with pytest.raises(ScavioError):
+        k.category(slug="Import-Beer")
+    with pytest.raises(ScavioError):
+        k.coupons(banner="fred_meyer")
