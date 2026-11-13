@@ -1129,9 +1129,11 @@ _IKEA_ITEM = (
     "item_no, item_no_global, is_combination, name, type_name, design, measure_text, url, "
     "image, images, price, previous_price, discount_amount, discount_percent, price_tag "
     "(family_price: price is the IKEA Family member price and previous_price the regular one; "
-    "new_lower_price, lower_price_in_store, new_product, discontinued or none), price_tag_text, "
-    "lowest_price, price_valid_from, price_valid_to, rating, rating_count (pooled across IKEA "
-    "markets), badge, colors, variant_count, variants, last_chance, online_sellable, "
+    "new_lower_price, time_restricted_offer (a limited-time reduced price, with previous_price "
+    "and valid dates), lower_price_in_store, new_product, discontinued or none), price_tag_text, "
+    "lowest_price, price_valid_from, price_valid_to, rating, rating_count (per market as shown; "
+    "many markets share one pool, some show none), badge, colors, variant_count, variants, "
+    "last_chance, online_sellable, "
     "category_path and availability (with store_id)"
 )
 _IKEA_GRID_FIELDS = (
@@ -7704,8 +7706,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "assembly, quality, value for money ...) and the 20 most recent reviews the product "
             "page shows (title, text, rating, date, author first name as shown, country), plus "
             "highlighted reviews with their country. No paging, sort or star filter: always the "
-            "20 newest. Ratings and reviews are pooled across IKEA markets (the same count on "
-            "every market). A call can take up to about 100 seconds." + _IKEA_CHARGE
+            "20 newest. rating and rating_count are what that market's site shows: many markets "
+            "share one pool (KALLAX: 8,241 in Germany, Spain, Sweden), others have their own "
+            "(France 2,760, Italy 1,887), and some show none (Estonia, Latvia, Lithuania, Israel, "
+            "Iceland). A call can take up to about 100 seconds." + _IKEA_CHARGE
         ),
         params=(
             _str_or_int("item_no", _IKEA_ITEM_NO_DOC + " Alternative to url."),
