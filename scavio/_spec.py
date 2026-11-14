@@ -1377,9 +1377,10 @@ _MDM_GRID_PARAMS = (
     ),
 )
 _MDM_PRICES = (
-    " Prices are numbers in the market's currency, never converted (Switzerland is priced "
-    "separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 "
-    "on 4 products). price is what the site charges now; was_price is the crossed-out price "
+    " Prices are numbers in the market's currency, never converted. Prices can differ by "
+    "market: measured on 2026-11-14 on about 170 discounted sofas, lu, nl, de, es, it and pt "
+    "matched fr on every item, be differed on 19, and ch is priced separately in CHF; read each "
+    "market you report. price is what the site charges now; was_price is the crossed-out price "
     "shown next to a discount; discount_percent is the page's own percent off; "
     "eco_participation is the French furniture recycling fee included in the price (fr only). "
     "Maisons du Monde shows no 30-day lowest price and no price history: poll for changes."

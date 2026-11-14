@@ -2835,10 +2835,12 @@ print(seller["seller"]["name"], seller["seller"]["rating"], seller["total"])
 own = mdm.search("chaise", sold_by="mdm", on_sale=True)["data"]
 ```
 
-Prices are numbers in the market's currency, never converted. Measured on
-2026-11-14 on 4 products, the euro storefronts shared one price per product
-and Switzerland was priced separately in CHF (round mirror 204172: 74.99, now
-37.45 EUR on every euro market; 91.90, now 45.95 CHF). `was_price` is the
+Prices are numbers in the market's currency, never converted, and can differ
+by market: measured on 2026-11-14 on about 170 discounted sofas, Luxembourg,
+the Netherlands, Germany, Spain, Italy and Portugal matched France on every
+item, Belgium differed on 19, and Switzerland is priced separately in CHF
+(round mirror 204172: 74.99, now 37.45 EUR on every euro market; 91.90, now
+45.95 CHF). Read each market you report. `was_price` is the
 crossed-out price shown next to a discount and `discount_percent` the page's
 own percent off; `eco_participation` (fr) is the French furniture recycling
 fee included in the price. Maisons du Monde shows no 30-day lowest price and no
