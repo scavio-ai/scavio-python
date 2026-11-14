@@ -11,6 +11,7 @@ from ._namespaces_sync import (
     _AllegroNamespace,
     _AmazonNamespace,
     _AppStoreNamespace,
+    _AshleyNamespace,
     _BestBuyNamespace,
     _BookingNamespace,
     _CanadianTireNamespace,
@@ -223,6 +224,7 @@ class ScavioClient:
         self.publix = _PublixNamespace(self)
         self.ikea = _IkeaNamespace(self)
         self.wayfair = _WayfairNamespace(self)
+        self.ashley = _AshleyNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

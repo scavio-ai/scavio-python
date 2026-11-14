@@ -13,6 +13,7 @@ from ._namespaces_async import (
     _AsyncAllegroNamespace,
     _AsyncAmazonNamespace,
     _AsyncAppStoreNamespace,
+    _AsyncAshleyNamespace,
     _AsyncBestBuyNamespace,
     _AsyncBookingNamespace,
     _AsyncCanadianTireNamespace,
@@ -218,6 +219,7 @@ class AsyncScavioClient:
         self.publix = _AsyncPublixNamespace(self)
         self.ikea = _AsyncIkeaNamespace(self)
         self.wayfair = _AsyncWayfairNamespace(self)
+        self.ashley = _AsyncAshleyNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

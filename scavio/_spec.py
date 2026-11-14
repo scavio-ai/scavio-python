@@ -1230,6 +1230,78 @@ _WAYFAIR_NOTE = (
 )
 
 
+# Ashley Furniture params shared across endpoints (ashleyfurniture.com; Ashley's licensed
+# storefronts ca, mx, ph, sa, tr for search + product only). category, deals, stores and
+# store are us only, so they take no country.
+_ASHLEY_COUNTRY = _lit(
+    "country",
+    ("us", "ca", "mx", "ph", "sa", "tr"),
+    "Ashley market (default 'us'): us (ashleyfurniture.com, USD), ca (ashleyhomestore.ca, "
+    "CAD), mx (store.ashleyfurniture.com.mx, MXN, Spanish), ph (store.ashleyfurniture.ph, PHP), "
+    "sa (store.ashley.sa, SAR, English), tr (ashleyturkiye.com, TRY, Turkish).",
+)
+_ASHLEY_SORTS = ("best_sellers", "price_asc", "price_desc", "newest", "rating", "name")
+_ASHLEY_GRID_PARAMS = (
+    _int(
+        "page",
+        "Grid page, 1-based (30 products per page). A page past the last returns no items and "
+        "a note.",
+    ),
+    _lit(
+        "sort",
+        _ASHLEY_SORTS,
+        "best_sellers (default), price_asc, price_desc, newest, rating (customer rating) or "
+        "name (A to Z).",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Facet refinements keyed by facets[].id with options[].value values (a str or a "
+        "list of str), e.g. {'facetUpholsteryDesign': 'Chaise'}. At most 6 facets.",
+    ),
+    _float(
+        "price_min",
+        "Lowest price (USD), applied to Ashley's own price list, so an item priced for another "
+        "region can sit just outside the range.",
+    ),
+    _float("price_max", "Highest price (USD)."),
+)
+_ASHLEY_PRICES = (
+    " Prices are numbers in the market's currency, never converted. price is what Ashley "
+    "charges now; regular_price is Ashley's own 'Regular Price' (the struck-through price; "
+    "Ashley's terms define it as its highest advertised price in store and online, offered to "
+    "customers using special long-term financing), set only when it is at or above price; "
+    "discount_percent is computed from the two."
+)
+_ASHLEY_REGION = (
+    " Ashley prices vary by region (price zone) and there is no ZIP input: every us answer "
+    "returns priced_for (zipcode, price_zone), the ZIP and price zone Ashley priced that "
+    "answer for. Two calls can land in different price zones, so prices can differ between "
+    "calls and consecutive pages can overlap slightly."
+)
+_ASHLEY_BADGES = (
+    "badges (sale, clearance, doorbuster, outlet, hot_buy, online_only, ashley_exclusive, "
+    "luxe, daily_deal)"
+)
+_ASHLEY_GRID_FIELDS = (
+    " 30 products per page: items with position, sku, name, brand, upc, category, url, image, "
+    "price, regular_price, discount_percent, color, flag, " + _ASHLEY_BADGES + ", promotion, "
+    "rating, review_count, swatch_count, stock_text and delivery_method (home_delivery or "
+    "direct_ship). Also priced_for, count, total, page, page_size, total_pages, sort, "
+    "requested_filters and facets (id, name, options with value, label and count)."
+)
+_ASHLEY_MARKETS_NOTE = (
+    " Markets: us, plus Ashley's licensed storefronts ca, mx, ph, sa and tr (search and "
+    "product only); every answer carries country, language, currency and source_domain. "
+    "Failed upstream calls are not charged; a not-found is charged."
+)
+_ASHLEY_US_NOTE = (
+    " us only (ashleyfurniture.com). Failed upstream calls are not charged; a not-found is "
+    "charged."
+)
+_ASHLEY_CREDITS_NOTE = "Costs 2 credits on us (the default) and mx, 1 credit on ca, ph, sa and tr."
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -8157,6 +8229,192 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _WAYFAIR_LANGUAGE,
         ),
         credits=1,
+        min_timeout=120.0,
+    ),
+    # =========================== Ashley Furniture ==========================
+    # 6 endpoints on /api/v1/ashley. search + product serve us and the licensee storefronts
+    # (ca, mx, ph, sa, tr): 2 credits on us and mx, 1 on the rest (credits_note; credits is
+    # the floor). category, deals, stores and store are us only, 2 credits. Each call can
+    # retry once upstream: 120 s timeout floor.
+    Endpoint(
+        key="ashley_search",
+        namespace="ashley",
+        method="search",
+        http="POST",
+        path="/api/v1/ashley/search",
+        summary=(
+            "Search Ashley Furniture by keyword. us: 48 results per page with the exact total, "
+            "sorted by best sellers, price, newest, customer rating or name; items carry "
+            "position, sku, master_id, name, brand, url, image, swatch_image, price, "
+            "regular_price, discount_percent, color, size, flag, " + _ASHLEY_BADGES + ", "
+            "new_since, rating, review_count, variant_count, variants (sku, color, size, url, "
+            "price, regular_price, rating, review_count) and promotions; also priced_for, "
+            "total, total_pages, page_size, sorts_offered and facets (informational: search "
+            "takes no facet filters, use category() for filters). ca, mx, ph, sa, tr: the "
+            "storefront's best matches (up to 10; tr its first results page) with handle (for "
+            "product()), product_id, name, brand, product_type, url, image, price, "
+            "regular_price, discount_percent and available; no sort, paging or total."
+            + _ASHLEY_PRICES + _ASHLEY_REGION + _ASHLEY_MARKETS_NOTE
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'sofa' (tr: Turkish keywords such as 'koltuk')."),
+            _ASHLEY_COUNTRY,
+            _int("page", "us only: results page, 1-based (48 per page)."),
+            _lit(
+                "sort",
+                _ASHLEY_SORTS,
+                "us only: best_sellers (default), price_asc, price_desc, newest, rating or name.",
+            ),
+        ),
+        credits=1,
+        credits_note=_ASHLEY_CREDITS_NOTE,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ashley_product",
+        namespace="ashley",
+        method="product",
+        http="POST",
+        path="/api/v1/ashley/product",
+        summary=(
+            "One Ashley product. us (by item number or URL): priced_for, sku, master_id, name, "
+            "brand, url, price, regular_price, discount_percent, " + _ASHLEY_BADGES + ", "
+            "new_since, item_status, color, size, description, features, options, variants "
+            "(sku, dimension values, url, selected; call again with a variant sku for its "
+            "price), is_set and components (each piece of a set with sku, name, price, "
+            "regular_price, dimensions, stock_status, stock_quantity), dimensions, materials, "
+            "assembly, images, category, breadcrumbs, stock (status, quantity, delivery_method, "
+            "delivery_message, delivery_date, white_glove), nearest_store, rating, "
+            "review_count, rating_histogram (5 to 1), reviews (the first 10 the page shows; no "
+            "review paging, sort or star filter), customer_photos, questions_total and "
+            "questions (customer Q&A). ca, mx, ph, sa, tr (by handle or URL, not sku): sku, "
+            "handle, product_id, name, brand, product_type, url, price, regular_price, "
+            "discount_percent, available, description, options, variants (sku, options, price, "
+            "regular_price, available, barcode) and images. An unknown item number is a "
+            "charged 404." + _ASHLEY_PRICES + _ASHLEY_REGION + _ASHLEY_MARKETS_NOTE
+        ),
+        params=(
+            _str(
+                "sku",
+                "us: an Ashley item number (items[].sku), e.g. '5950418' or 'APK-29004-R3'.",
+            ),
+            _str(
+                "handle",
+                "ca, mx, ph, sa, tr: the product handle from search (items[].handle), e.g. "
+                "'aviemore-sofa'. Send it with country.",
+            ),
+            _str(
+                "url",
+                "A product page on a served storefront (alternative to sku / handle; the market "
+                "is read from it).",
+            ),
+            _ASHLEY_COUNTRY,
+        ),
+        one_of=(("sku", "handle", "url"),),
+        credits=1,
+        credits_note=_ASHLEY_CREDITS_NOTE,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ashley_category",
+        namespace="ashley",
+        method="category",
+        http="POST",
+        path="/api/v1/ashley/category",
+        summary=(
+            "One ashleyfurniture.com category's products by path or category URL, sorted and "
+            "filtered." + _ASHLEY_GRID_FIELDS + " Also category (path, name, url, "
+            "breadcrumbs). An unknown category is a charged 404." + _ASHLEY_PRICES
+            + _ASHLEY_REGION + _ASHLEY_US_NOTE
+        ),
+        params=(
+            _str(
+                "path",
+                "A category path: the part after /c/ in an ashleyfurniture.com category URL, "
+                "e.g. 'furniture/living-room/sofas', 'bedroom/beds', 'mattresses'. Alternative "
+                "to category_url.",
+            ),
+            _str(
+                "category_url",
+                "An ashleyfurniture.com category page (/c/... URL); refinements in it are kept. "
+                "Alternative to path.",
+            ),
+            *_ASHLEY_GRID_PARAMS,
+        ),
+        one_of=(("path", "category_url"),),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ashley_deals",
+        namespace="ashley",
+        method="deals",
+        http="POST",
+        path="/api/v1/ashley/deals",
+        summary=(
+            "The products of one Ashley deal event: black_friday (Black Friday furniture "
+            "deals, the default), clearance (clearance furniture) or hot_buys (Ashley's Hot "
+            "Buys), with the category sorts and filters." + _ASHLEY_GRID_FIELDS + " Also "
+            "event, event_name and event_url." + _ASHLEY_PRICES + _ASHLEY_REGION
+            + _ASHLEY_US_NOTE
+        ),
+        params=(
+            _lit(
+                "event",
+                ("black_friday", "clearance", "hot_buys"),
+                "black_friday (default), clearance or hot_buys.",
+            ),
+            *_ASHLEY_GRID_PARAMS,
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ashley_stores",
+        namespace="ashley",
+        method="stores",
+        http="POST",
+        path="/api/v1/ashley/stores",
+        summary=(
+            "Ashley stores near a point (lat and lng are required; there is no address or ZIP "
+            "lookup): latitude, longitude, radius_miles, count and stores with store_id, name "
+            "and url, in the order Ashley lists them (alphabetical, not by distance). Call "
+            "store() with a store_id for the address, phone and hours." + _ASHLEY_US_NOTE
+        ),
+        params=(
+            Param("lat", "float", required=True, doc="Latitude in decimal degrees, e.g. 40.7506."),
+            Param("lng", "float", required=True, doc="Longitude in decimal degrees, e.g. -73.9972."),
+            _ilit("radius", (10, 25, 50, 100), "Search radius in miles (default 50)."),
+        ),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="ashley_store",
+        namespace="ashley",
+        method="store",
+        http="POST",
+        path="/api/v1/ashley/store",
+        summary=(
+            "One Ashley store by store_id or store page URL: store_id, name, url, phone, "
+            "address (street, city, state, zip, country), latitude, longitude, hours (day, "
+            "opens, closes), payment_accepted, services, rating, image and map_url. An unknown "
+            "store is a charged 404." + _ASHLEY_US_NOTE
+        ),
+        params=(
+            _str(
+                "store_id",
+                "A store id from stores() (stores[].store_id), e.g. "
+                "'us/wisconsin/greenfield/4771-s-27th-st/luxe'. Alternative to url.",
+            ),
+            _str(
+                "url",
+                "A store page on stores.ashleyfurniture.com (stores[].url). Alternative to "
+                "store_id.",
+            ),
+        ),
+        one_of=(("store_id", "url"),),
+        credits=2,
         min_timeout=120.0,
     ),
     # ============================= Decathlon =============================
@@ -15179,6 +15437,7 @@ NAMESPACES: tuple[str, ...] = (
     "publix",
     "ikea",
     "wayfair",
+    "ashley",
 )
 
 

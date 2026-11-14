@@ -86,6 +86,7 @@ __all__ = [
     "_AsyncPublixNamespace",
     "_AsyncIkeaNamespace",
     "_AsyncWayfairNamespace",
+    "_AsyncAshleyNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -12391,3 +12392,147 @@ class _AsyncWayfairNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("wayfair_deals", {"country": country, "language": language}, extra)
+
+class _AsyncAshleyNamespace:
+    """Ashley Furniture search, product, category, deal event, store locator and store endpoints for ashleyfurniture.com, plus search and product on Ashley's licensed storefronts in Canada, Mexico, the Philippines, Saudi Arabia and Turkey."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "ph", "sa", "tr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_sellers", "price_asc", "price_desc", "newest", "rating", "name"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Ashley Furniture by keyword. us: 48 results per page with the exact total, sorted by best sellers, price, newest, customer rating or name; items carry position, sku, master_id, name, brand, url, image, swatch_image, price, regular_price, discount_percent, color, size, flag, badges (sale, clearance, doorbuster, outlet, hot_buy, online_only, ashley_exclusive, luxe, daily_deal), new_since, rating, review_count, variant_count, variants (sku, color, size, url, price, regular_price, rating, review_count) and promotions; also priced_for, total, total_pages, page_size, sorts_offered and facets (informational: search takes no facet filters, use category() for filters). ca, mx, ph, sa, tr: the storefront's best matches (up to 10; tr its first results page) with handle (for product()), product_id, name, brand, product_type, url, image, price, regular_price, discount_percent and available; no sort, paging or total. Prices are numbers in the market's currency, never converted. price is what Ashley charges now; regular_price is Ashley's own 'Regular Price' (the struck-through price; Ashley's terms define it as its highest advertised price in store and online, offered to customers using special long-term financing), set only when it is at or above price; discount_percent is computed from the two. Ashley prices vary by region (price zone) and there is no ZIP input: every us answer returns priced_for (zipcode, price_zone), the ZIP and price zone Ashley priced that answer for. Two calls can land in different price zones, so prices can differ between calls and consecutive pages can overlap slightly. Markets: us, plus Ashley's licensed storefronts ca, mx, ph, sa and tr (search and product only); every answer carries country, language, currency and source_domain. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits on us (the default) and mx, 1 credit on ca, ph, sa and tr. Returns the
+        API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'sofa' (tr: Turkish keywords such as 'koltuk').
+            country: Ashley market (default 'us'): us (ashleyfurniture.com, USD), ca (ashleyhomestore.ca, CAD), mx (store.ashleyfurniture.com.mx, MXN, Spanish), ph (store.ashleyfurniture.ph, PHP), sa (store.ashley.sa, SAR, English), tr (ashleyturkiye.com, TRY, Turkish).
+            page: us only: results page, 1-based (48 per page).
+            sort: us only: best_sellers (default), price_asc, price_desc, newest, rating or name.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_search", {"query": query, "country": country, "page": page, "sort": sort}, extra)
+
+    async def product(
+        self,
+        *,
+        sku: Optional[str] = None,
+        handle: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "ph", "sa", "tr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Ashley product. us (by item number or URL): priced_for, sku, master_id, name, brand, url, price, regular_price, discount_percent, badges (sale, clearance, doorbuster, outlet, hot_buy, online_only, ashley_exclusive, luxe, daily_deal), new_since, item_status, color, size, description, features, options, variants (sku, dimension values, url, selected; call again with a variant sku for its price), is_set and components (each piece of a set with sku, name, price, regular_price, dimensions, stock_status, stock_quantity), dimensions, materials, assembly, images, category, breadcrumbs, stock (status, quantity, delivery_method, delivery_message, delivery_date, white_glove), nearest_store, rating, review_count, rating_histogram (5 to 1), reviews (the first 10 the page shows; no review paging, sort or star filter), customer_photos, questions_total and questions (customer Q&A). ca, mx, ph, sa, tr (by handle or URL, not sku): sku, handle, product_id, name, brand, product_type, url, price, regular_price, discount_percent, available, description, options, variants (sku, options, price, regular_price, available, barcode) and images. An unknown item number is a charged 404. Prices are numbers in the market's currency, never converted. price is what Ashley charges now; regular_price is Ashley's own 'Regular Price' (the struck-through price; Ashley's terms define it as its highest advertised price in store and online, offered to customers using special long-term financing), set only when it is at or above price; discount_percent is computed from the two. Ashley prices vary by region (price zone) and there is no ZIP input: every us answer returns priced_for (zipcode, price_zone), the ZIP and price zone Ashley priced that answer for. Two calls can land in different price zones, so prices can differ between calls and consecutive pages can overlap slightly. Markets: us, plus Ashley's licensed storefronts ca, mx, ph, sa and tr (search and product only); every answer carries country, language, currency and source_domain. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits on us (the default) and mx, 1 credit on ca, ph, sa and tr. Returns the
+        API response as a dict.
+
+        Args:
+            sku: us: an Ashley item number (items[].sku), e.g. '5950418' or 'APK-29004-R3'.
+            handle: ca, mx, ph, sa, tr: the product handle from search (items[].handle), e.g. 'aviemore-sofa'. Send it with country.
+            url: A product page on a served storefront (alternative to sku / handle; the market is read from it).
+            country: Ashley market (default 'us'): us (ashleyfurniture.com, USD), ca (ashleyhomestore.ca, CAD), mx (store.ashleyfurniture.com.mx, MXN, Spanish), ph (store.ashleyfurniture.ph, PHP), sa (store.ashley.sa, SAR, English), tr (ashleyturkiye.com, TRY, Turkish).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_product", {"sku": sku, "handle": handle, "url": url, "country": country}, extra)
+
+    async def category(
+        self,
+        *,
+        path: Optional[str] = None,
+        category_url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_sellers", "price_asc", "price_desc", "newest", "rating", "name"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One ashleyfurniture.com category's products by path or category URL, sorted and filtered. 30 products per page: items with position, sku, name, brand, upc, category, url, image, price, regular_price, discount_percent, color, flag, badges (sale, clearance, doorbuster, outlet, hot_buy, online_only, ashley_exclusive, luxe, daily_deal), promotion, rating, review_count, swatch_count, stock_text and delivery_method (home_delivery or direct_ship). Also priced_for, count, total, page, page_size, total_pages, sort, requested_filters and facets (id, name, options with value, label and count). Also category (path, name, url, breadcrumbs). An unknown category is a charged 404. Prices are numbers in the market's currency, never converted. price is what Ashley charges now; regular_price is Ashley's own 'Regular Price' (the struck-through price; Ashley's terms define it as its highest advertised price in store and online, offered to customers using special long-term financing), set only when it is at or above price; discount_percent is computed from the two. Ashley prices vary by region (price zone) and there is no ZIP input: every us answer returns priced_for (zipcode, price_zone), the ZIP and price zone Ashley priced that answer for. Two calls can land in different price zones, so prices can differ between calls and consecutive pages can overlap slightly. us only (ashleyfurniture.com). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A category path: the part after /c/ in an ashleyfurniture.com category URL, e.g. 'furniture/living-room/sofas', 'bedroom/beds', 'mattresses'. Alternative to category_url.
+            category_url: An ashleyfurniture.com category page (/c/... URL); refinements in it are kept. Alternative to path.
+            page: Grid page, 1-based (30 products per page). A page past the last returns no items and a note.
+            sort: best_sellers (default), price_asc, price_desc, newest, rating (customer rating) or name (A to Z).
+            filters: Facet refinements keyed by facets[].id with options[].value values (a str or a list of str), e.g. {'facetUpholsteryDesign': 'Chaise'}. At most 6 facets.
+            price_min: Lowest price (USD), applied to Ashley's own price list, so an item priced for another region can sit just outside the range.
+            price_max: Highest price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_category", {"path": path, "category_url": category_url, "page": page, "sort": sort, "filters": filters, "price_min": price_min, "price_max": price_max}, extra)
+
+    async def deals(
+        self,
+        *,
+        event: Optional[Literal["black_friday", "clearance", "hot_buys"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_sellers", "price_asc", "price_desc", "newest", "rating", "name"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one Ashley deal event: black_friday (Black Friday furniture deals, the default), clearance (clearance furniture) or hot_buys (Ashley's Hot Buys), with the category sorts and filters. 30 products per page: items with position, sku, name, brand, upc, category, url, image, price, regular_price, discount_percent, color, flag, badges (sale, clearance, doorbuster, outlet, hot_buy, online_only, ashley_exclusive, luxe, daily_deal), promotion, rating, review_count, swatch_count, stock_text and delivery_method (home_delivery or direct_ship). Also priced_for, count, total, page, page_size, total_pages, sort, requested_filters and facets (id, name, options with value, label and count). Also event, event_name and event_url. Prices are numbers in the market's currency, never converted. price is what Ashley charges now; regular_price is Ashley's own 'Regular Price' (the struck-through price; Ashley's terms define it as its highest advertised price in store and online, offered to customers using special long-term financing), set only when it is at or above price; discount_percent is computed from the two. Ashley prices vary by region (price zone) and there is no ZIP input: every us answer returns priced_for (zipcode, price_zone), the ZIP and price zone Ashley priced that answer for. Two calls can land in different price zones, so prices can differ between calls and consecutive pages can overlap slightly. us only (ashleyfurniture.com). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            event: black_friday (default), clearance or hot_buys.
+            page: Grid page, 1-based (30 products per page). A page past the last returns no items and a note.
+            sort: best_sellers (default), price_asc, price_desc, newest, rating (customer rating) or name (A to Z).
+            filters: Facet refinements keyed by facets[].id with options[].value values (a str or a list of str), e.g. {'facetUpholsteryDesign': 'Chaise'}. At most 6 facets.
+            price_min: Lowest price (USD), applied to Ashley's own price list, so an item priced for another region can sit just outside the range.
+            price_max: Highest price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_deals", {"event": event, "page": page, "sort": sort, "filters": filters, "price_min": price_min, "price_max": price_max}, extra)
+
+    async def stores(
+        self,
+        lat: float,
+        lng: float,
+        *,
+        radius: Optional[Literal[10, 25, 50, 100]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Ashley stores near a point (lat and lng are required; there is no address or ZIP lookup): latitude, longitude, radius_miles, count and stores with store_id, name and url, in the order Ashley lists them (alphabetical, not by distance). Call store() with a store_id for the address, phone and hours. us only (ashleyfurniture.com). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            lat: Latitude in decimal degrees, e.g. 40.7506.
+            lng: Longitude in decimal degrees, e.g. -73.9972.
+            radius: Search radius in miles (default 50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_stores", {"lat": lat, "lng": lng, "radius": radius}, extra)
+
+    async def store(
+        self,
+        *,
+        store_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Ashley store by store_id or store page URL: store_id, name, url, phone, address (street, city, state, zip, country), latitude, longitude, hours (day, opens, closes), payment_accepted, services, rating, image and map_url. An unknown store is a charged 404. us only (ashleyfurniture.com). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: A store id from stores() (stores[].store_id), e.g. 'us/wisconsin/greenfield/4771-s-27th-st/luxe'. Alternative to url.
+            url: A store page on stores.ashleyfurniture.com (stores[].url). Alternative to store_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ashley_store", {"store_id": store_id, "url": url}, extra)

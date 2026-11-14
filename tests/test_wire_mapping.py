@@ -623,6 +623,8 @@ BODY_PRICED_KEYS = {
     "carrefour_product",
     "company_enrich",
     "ikea_compare",
+    "ashley_search",
+    "ashley_product",
 }
 
 
@@ -3917,3 +3919,106 @@ def test_wayfair_credits_paths_and_wire(monkeypatch):
         wf.product(zip="10001")
     with pytest.raises(ScavioError):
         wf.category(sort="price_asc")
+
+
+def test_ashley_credits_paths_and_wire(monkeypatch):
+    """ashley (0.58.0): 6 endpoints on /api/v1/ashley, 120 s timeout floor.
+
+    search and product serve us and the licensee storefronts (ca, mx, ph, sa, tr) and are
+    market-priced (credits_note; floor 1); category, deals, stores and store are us only at
+    2 credits and take no country. product takes sku, handle or url; category takes path or
+    category_url; store takes store_id or url; stores takes lat and lng.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "ashley"}
+    assert sorted(eps) == ["category", "deals", "product", "search", "store", "stores"]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/ashley/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+    for m in ("search", "product"):
+        assert eps[m].credits == 1, m
+        assert eps[m].credits_note == (
+            "Costs 2 credits on us (the default) and mx, 1 credit on ca, ph, sa and tr."
+        )
+        params = {p.name: p for p in eps[m].params}
+        assert params["country"].annotation == (
+            'Optional[Literal["us", "ca", "mx", "ph", "sa", "tr"]]'
+        )
+    for m in ("category", "deals", "stores", "store"):
+        assert eps[m].credits == 2, m
+        assert eps[m].credits_note is None, m
+        assert "country" not in {p.name for p in eps[m].params}, m
+    grid = {p.name: p for p in eps["category"].params}
+    assert grid["sort"].annotation == (
+        'Optional[Literal["best_sellers", "price_asc", "price_desc", "newest", "rating", "name"]]'
+    )
+    assert {p.name: p for p in eps["stores"].params}["radius"].annotation == (
+        "Optional[Literal[10, 25, 50, 100]]"
+    )
+    assert {p.name: p for p in eps["deals"].params}["event"].annotation == (
+        'Optional[Literal["black_friday", "clearance", "hot_buys"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ash = client.ashley
+    ash.search("sofa", sort="price_asc", page=2)
+    ash.search("koltuk", country="tr")
+    ash.product(sku="5950418")
+    ash.product(handle="aviemore-sofa", country="ca")
+    ash.product(url="https://store.ashleyfurniture.com.mx/products/cashton-sofa")
+    ash.category(path="furniture/living-room/sofas", filters={"facetUpholsteryDesign": "Chaise"})
+    ash.category(
+        category_url="https://www.ashleyfurniture.com/c/furniture/living-room/sofas/",
+        price_min=200,
+        price_max=899.99,
+    )
+    ash.deals(event="clearance", sort="price_desc")
+    ash.deals()
+    ash.stores(40.7506, -73.9972, radius=25)
+    ash.store(store_id="us/wisconsin/greenfield/4771-s-27th-st/luxe")
+    base = "/api/v1/ashley/"
+    assert seen == [
+        (base + "search", {"query": "sofa", "sort": "price_asc", "page": 2}, 120.0),
+        (base + "search", {"query": "koltuk", "country": "tr"}, 120.0),
+        (base + "product", {"sku": "5950418"}, 120.0),
+        (base + "product", {"handle": "aviemore-sofa", "country": "ca"}, 120.0),
+        (
+            base + "product",
+            {"url": "https://store.ashleyfurniture.com.mx/products/cashton-sofa"},
+            120.0,
+        ),
+        (
+            base + "category",
+            {
+                "path": "furniture/living-room/sofas",
+                "filters": {"facetUpholsteryDesign": "Chaise"},
+            },
+            120.0,
+        ),
+        (
+            base + "category",
+            {
+                "category_url": "https://www.ashleyfurniture.com/c/furniture/living-room/sofas/",
+                "price_min": 200,
+                "price_max": 899.99,
+            },
+            120.0,
+        ),
+        (base + "deals", {"event": "clearance", "sort": "price_desc"}, 120.0),
+        (base + "deals", {}, 120.0),
+        (base + "stores", {"lat": 40.7506, "lng": -73.9972, "radius": 25}, 120.0),
+        (base + "store", {"store_id": "us/wisconsin/greenfield/4771-s-27th-st/luxe"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        ash.product(country="mx")
+    with pytest.raises(ScavioError):
+        ash.category(sort="newest")
+    with pytest.raises(ScavioError):
+        ash.store()

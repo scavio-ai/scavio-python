@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 77 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 78 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -2725,6 +2725,67 @@ them: use `on_sale`, `closeout` or `open_box` on `search` or `category` for
 products. Wayfair no longer sells in Germany or Austria. Failed calls are not
 charged; an unknown SKU or category is a charged 404.
 
+### 47. Retail -- Ashley Furniture prices, Regular Price, reviews, deals and stores
+
+Ashley Furniture product data for ashleyfurniture.com, plus search and product
+on Ashley's licensed storefronts in Canada, Mexico, the Philippines, Saudi
+Arabia and Turkey. Namespace `ashley`, 6 endpoints: `search`, `product`,
+`category`, `deals`, `stores`, `store`. `search` and `product` cost 2 credits
+on `us` (the default) and `mx` and 1 credit on `ca`, `ph`, `sa` and `tr`;
+`category`, `deals`, `stores` and `store` are us only at 2 credits. The
+request timeout is raised to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ashley = client.ashley
+
+# --- Search (us): 48 per page, exact total, sort by price, newest, rating or name.
+res = ashley.search("sofa", sort="price_asc")["data"]
+print(res["total"], res["priced_for"])  # {'zipcode': ..., 'price_zone': ...}
+for p in res["items"][:5]:
+    print(p["sku"], p["name"], p["price"], p["regular_price"], p["discount_percent"])
+
+# --- One product: price vs Regular Price, badges, stock, the first 10 reviews and Q&A.
+prod = ashley.product(sku="5950418")["data"]
+print(prod["price"], prod["regular_price"], prod["priced_for"], prod["stock"]["status"])
+print(prod["rating"], prod["review_count"], prod["rating_histogram"], len(prod["reviews"]))
+
+# --- A category grid (30 per page) with facet filters, and a deal event.
+cat = ashley.category(path="furniture/living-room/sofas", filters={"facetUpholsteryDesign": "Chaise"})["data"]
+print(cat["category"]["name"], cat["total"], [f["id"] for f in cat["facets"]])
+deals = ashley.deals(event="black_friday", sort="price_desc")["data"]
+print(deals["event_name"], deals["total"])
+
+# --- Stores near a point (coordinates only), then one store's address and hours.
+near = ashley.stores(40.7506, -73.9972, radius=25)["data"]
+store = ashley.store(store_id=near["stores"][0]["store_id"])["data"]
+print(store["name"], store["phone"], store["address"], store["hours"][0])
+
+# --- A licensed storefront: search, then product by handle (not sku).
+mx = ashley.search("sofa", country="mx")["data"]
+item = ashley.product(handle=mx["items"][0]["handle"], country="mx")["data"]
+print(mx["currency"], item["name"], item["price"], item["regular_price"])
+```
+
+Prices are numbers in the market's currency (USD, CAD, MXN, PHP, SAR, TRY),
+never converted. `regular_price` is Ashley's own Regular Price, which Ashley's
+terms define as its highest advertised price in store and online, offered to
+customers using special long-term financing. Ashley prices vary by region and
+there is no ZIP input: every us answer returns `priced_for` (`zipcode`,
+`price_zone`), the ZIP and price zone Ashley priced that answer for, so two
+calls can come back priced for different zones and consecutive pages can
+overlap slightly. `product` returns the first 10 reviews the page shows plus
+the rating histogram, customer photos and Q&A (no review paging). Search facets
+are informational: filter with `category`. On the licensed storefronts
+`search` returns up to 10 matches (`tr` its first results page) with no paging
+or sort, and `product` takes `handle` or `url`, not `sku`. `deals` events are
+`black_friday`, `clearance` and `hot_buys`. `stores` takes coordinates only (no
+ZIP or city lookup) and lists stores alphabetically; call `store` for the
+address, phone and hours. Failed calls are not charged; an unknown item number,
+category or store is a charged 404.
+
 ## Error Handling
 
 ```python
@@ -2873,6 +2934,7 @@ Scavio works with popular AI/LLM frameworks:
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
 | Wayfair (`wayfair`) | `search`, `product`, `category`, `deals`; markets us, ca (en / fr), gb, ie via `country`; `site` allmodern, birchlane, jossandmain or perigold | 1 each |
+| Ashley Furniture (`ashley`) | `search`, `product`, `category`, `deals`, `stores`, `store`; `search` and `product` also on ca, mx, ph, sa, tr via `country` (`product` by `handle` there) | `search` and `product` 2 on us and mx, 1 on ca, ph, sa, tr; the rest (us only) 2 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2883,6 +2945,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.58.0
+
+- **New `ashley` namespace** (sync and async) for Ashley Furniture, 6
+  endpoints: `search`, `product`, `category`, `deals`, `stores`, `store`.
+  `search` and `product` also serve Ashley's licensed storefronts (ca, mx, ph,
+  sa, tr; `product` by `handle` there) and cost 2 credits on us and mx, 1 on
+  the rest; the other four are us only at 2 credits. Every us answer carries
+  `priced_for` (the ZIP and price zone it was priced for). 120s timeout floor.
 
 ### Changed in 0.57.0
 
