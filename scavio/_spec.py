@@ -8343,7 +8343,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================= Sam's Club ============================
-    # 6 endpoints, 1 credit each. search, savings and category answer for a
+    # 6 endpoints: clubs 1 credit, the other five 2 (since 2026-11-14).
+    # search, savings and category answer for a
     # club picked by location (echoed in data.club); product(club_id=...)
     # prices and stocks one specific club. available_quantity is capped at 8
     # by the site (8 means 8 or more). Clearance is category 1150109.
@@ -8368,7 +8369,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
             ),
         ),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="sams_club_product",
@@ -8383,10 +8384,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "is capped at 8 by the site; 8 means 8 or more."
         ),
         params=(
-            _req("item_id", "Sam's Club item id: the number at the end of a sams_club.com/ip/ URL, or item_id from search()."),
+            _req("item_id", "Sam's Club item id: the number at the end of a samsclub.com/ip/ URL, or item_id from search()."),
             _str("club_id", "Club number from sams_club.clubs(), e.g. '6372'. Prices and stocks that club."),
         ),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="sams_club_clubs",
@@ -8424,7 +8425,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
             ),
         ),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="sams_club_category",
@@ -8446,7 +8447,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "relevance, price_low, price_high or top_selling. Defaults to the site's own order.",
             ),
         ),
-        credits=1,
+        credits=2,
     ),
     Endpoint(
         key="sams_club_reviews",
@@ -8460,7 +8461,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "1-5 star breakdown."
         ),
         params=(
-            _req("item_id", "Sam's Club item id from search() or a sams_club.com/ip/ URL."),
+            _req("item_id", "Sam's Club item id from search() or a samsclub.com/ip/ URL."),
             _int("page", "Reviews page, 1-based (1-100). 10 reviews per page."),
             _lit(
                 "sort",
@@ -8468,7 +8469,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "newest, oldest, highest, lowest or most_helpful.",
             ),
         ),
-        credits=1,
+        credits=2,
     ),
     # ============================ Canadian Tire ==========================
     # 6 endpoints, 1 credit each. Prices (CAD) and stock are one store's, so

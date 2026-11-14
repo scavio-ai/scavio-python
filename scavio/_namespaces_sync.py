@@ -5691,7 +5691,7 @@ class _SamsClubNamespace:
     ) -> dict[str, Any]:
         """Search Sam's Club: item_id, price, was_price, savings_amount, unit price, Instant Savings (amount, end date, purchase limit), rating, review count, stock, pickup/delivery/shipping availability and aisle. The club is picked by location and returned in data.club; use product(club_id=...) for a specific club.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             query: Search keywords (1-200 characters).
@@ -5710,10 +5710,10 @@ class _SamsClubNamespace:
     ) -> dict[str, Any]:
         """One Sam's Club item: online price and the club shelf price (club_price) with was price, savings and unit price, Instant Savings, rating histogram, UPC, model, specifications, and per-method fulfillment with stock and aisle. available_quantity is capped at 8 by the site; 8 means 8 or more.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
-            item_id: Sam's Club item id: the number at the end of a sams_club.com/ip/ URL, or item_id from search().
+            item_id: Sam's Club item id: the number at the end of a samsclub.com/ip/ URL, or item_id from search().
             club_id: Club number from sams_club.clubs(), e.g. '6372'. Prices and stocks that club.
             extra: Additional wire parameters passed through verbatim.
         """
@@ -5746,7 +5746,7 @@ class _SamsClubNamespace:
     ) -> dict[str, Any]:
         """Every item on Sam's Club Instant Savings, paged: price, was price and savings amount, plus each offer's amount, end date, purchase limit and channels. The club is picked by location and returned in data.club.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             page: Results page, 1-based (1-100). Up to 45 items per page.
@@ -5765,7 +5765,7 @@ class _SamsClubNamespace:
     ) -> dict[str, Any]:
         """Products in a Sam's Club category, paged, with the same fields as search(). Clearance is category '1150109'. An empty shelf returns an empty list. The club is picked by location and returned in data.club.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
             category_id: Category id, the number at the end of a sams_club.com /browse/ or /cp/ URL. Clearance is '1150109'.
@@ -5785,10 +5785,10 @@ class _SamsClubNamespace:
     ) -> dict[str, Any]:
         """Customer reviews for a Sam's Club item, 10 per page: rating, title, text, author, date, verified purchase and helpful votes, plus the average rating, total count and 1-5 star breakdown.
 
-        Costs 1 credit. Returns the API response as a dict.
+        Costs 2 credits. Returns the API response as a dict.
 
         Args:
-            item_id: Sam's Club item id from search() or a sams_club.com/ip/ URL.
+            item_id: Sam's Club item id from search() or a samsclub.com/ip/ URL.
             page: Reviews page, 1-based (1-100). 10 reviews per page.
             sort: newest, oldest, highest, lowest or most_helpful.
             extra: Additional wire parameters passed through verbatim.

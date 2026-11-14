@@ -996,7 +996,7 @@ Four retailers whose prices and stock are per store. Each answers for ONE
 store you choose: find its number with the locator (`lowes.stores`,
 `sams_club.clubs`, `canadian_tire.stores`, `dollar_general.stores`) and pass it
 on every call. Lowe's `search`, `product` and `stores` cost 2 credits and
-`reviews` 1; every Sam's Club, Canadian Tire and Dollar General method costs 1.
+`reviews` 1; Sam's Club `clubs` costs 1 and its other methods 2; every Canadian Tire and Dollar General method costs 1.
 
 ```python
 from scavio import ScavioClient
@@ -2838,7 +2838,7 @@ Scavio works with popular AI/LLM frameworks:
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
 | Lowe's | `stores` (start here), `search`, `product`, `reviews` | `reviews` 1, the rest 2 each |
-| Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | 1 each |
+| Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | `clubs` 1, the rest 2 each |
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
 | Sephora | `search`, `category`, `product` | 1 each, `product` 2 |
