@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 76 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 77 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -2667,6 +2667,64 @@ and franchise products (pr, do, es_islands, is) return basic detail. Pass
 article numbers as str to keep leading zeros. Failed calls are not charged;
 an unknown article number, category or store id is a charged 404.
 
+### 46. Retail -- Wayfair prices, sale and was price, reviews and delivery
+
+Wayfair product data for wayfair.com, wayfair.ca (English or French),
+wayfair.co.uk and wayfair.ie, plus Wayfair's US sites AllModern, Birch Lane,
+Joss & Main and Perigold. Namespace `wayfair`, 4 endpoints at 1 credit each:
+`search`, `product`, `category`, `deals`. `country` is the market (`us`
+default, `ca`, `gb`, `ie`), `language` is `en` or `fr` on `ca`, and `site`
+picks a US banner site (`search`, `product`, `category`). The request timeout
+is raised to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+wayfair = client.wayfair
+
+# --- Search: sort by price or rating, filter by sale, closeout, open box, brand id, rating.
+res = wayfair.search("office chair", sort="price_asc", on_sale=True)["data"]
+print(res["total"], res["total_is_approximate"], res["currency"], res["redirected_to"])
+for p in res["items"][:5]:
+    print(p["sku"], p["name"], p["price"], p["was_price"], p["price_label"], p["badge"])
+
+# --- One product: price, sale price, was price, badge, stock, options, 5 reviews,
+# and the delivery estimate for a ZIP (us and ca only).
+prod = wayfair.product(sku="W005006988", zip="10001")["data"]
+print(prod["price"], prod["sale_price"], prod["was_price"], prod["percent_off"], prod["badge"])
+print(prod["rating"], prod["review_count"], prod["rating_histogram"], len(prod["reviews"]))
+print([(d["name"], d["date_min"], d["text"]) for d in prod["delivery"]])
+
+# --- Option choices carry no price: one call per option_id for its price and stock.
+for choice in prod["options"][0]["choices"][:3]:
+    opt = wayfair.product(sku="W005006988", option_id=choice["option_id"])["data"]
+    print(choice["name"], opt["price"], opt["was_price"], opt["stock_status"])
+
+# --- A category's grid (48 per page), another market, and the current sale events.
+cat = wayfair.category(category_id="413892", sort="rating")["data"]
+print(cat["category"]["name"], cat["total"], len(cat["items"]))
+uk = wayfair.search("sofa", country="gb")["data"]
+print(uk["currency"], [(i["name"], i["price"]) for i in uk["items"][:3]])
+events = wayfair.deals()["data"]
+print(events["count"], [e["title"] for e in events["events"][:5]])
+```
+
+Prices are numbers in the market's currency (USD, CAD, GBP, EUR), never
+converted. `was_price` is Wayfair's strikethrough price: Wayfair's terms state
+it is the manufacturer's suggested price or the highest price Wayfair offered
+or sold the item at in the past, and its Sale label means a discount against a
+price in the previous 90 days. Wayfair shows no price history, so poll
+`price`, `sale_price`, `was_price` and `badge` on a schedule to build one.
+`product` returns the 5 reviews the page shows plus the rating histogram and
+review summary (no review paging). Keyword pages return 30 results (category
+pages 48) and `total` is approximate. `brand` takes brand ids
+(`items[].brand.id`), not names. `zip` delivery estimates are us and ca only.
+`deals` lists sale events (event id, title, URL, image) without expanding
+them: use `on_sale`, `closeout` or `open_box` on `search` or `category` for
+products. Wayfair no longer sells in Germany or Austria. Failed calls are not
+charged; an unknown SKU or category is a charged 404.
+
 ## Error Handling
 
 ```python
@@ -2814,6 +2872,7 @@ Scavio works with popular AI/LLM frameworks:
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
+| Wayfair (`wayfair`) | `search`, `product`, `category`, `deals`; markets us, ca (en / fr), gb, ie via `country`; `site` allmodern, birchlane, jossandmain or perigold | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2824,6 +2883,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.57.0
+
+- **New `wayfair` namespace** (sync and async) for Wayfair (us, ca en / fr,
+  gb, ie; AllModern, Birch Lane, Joss & Main and Perigold via `site`), 4
+  endpoints at 1 credit each: `search`, `product`, `category`, `deals`.
+  `product` takes `option_id` for one option's price and stock and `zip` for
+  a delivery estimate (us, ca). 120s timeout floor.
 
 ### Changed in 0.56.0
 

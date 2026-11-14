@@ -85,6 +85,7 @@ __all__ = [
     "_AsyncKrogerNamespace",
     "_AsyncPublixNamespace",
     "_AsyncIkeaNamespace",
+    "_AsyncWayfairNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -12244,3 +12245,149 @@ class _AsyncIkeaNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("ikea_as_is", {"store_id": store_id, "country": country, "language": language, "page": page, "page_size": page_size}, extra)
+
+class _AsyncWayfairNamespace:
+    """Wayfair search, product, category and sale event endpoints for wayfair.com, wayfair.ca, wayfair.co.uk and wayfair.ie, plus the AllModern, Birch Lane, Joss & Main and Perigold sites."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "gb", "ie"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        site: Optional[Literal["wayfair", "allmodern", "birchlane", "jossandmain", "perigold"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "rating"]] = None,
+        on_sale: Optional[bool] = None,
+        closeout: Optional[bool] = None,
+        open_box: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        brand: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        min_rating: Optional[Literal[1, 3, 4, 5]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Wayfair products by keyword, sorted by price or customer rating and filtered by sale, closeout, open box, new arrivals, in stock, brand id, minimum rating, price range or any facet. Keyword pages return 30 results per page; a keyword that matches a category answers that category's grid (48 per page) and says so in redirected_to (type, category_id, name, url), and a SKU answers redirected_to a product. Returns query. Items with position, sku, variant_id, name, brand (id, name), url, image, price, sale_price, was_price, price_label, discount_percent, per_item_price (sets), loyalty_savings, prices (every price line), badge (e.g. Early Black Friday, Sale), rating, review_count, stock_status, stock_text, open_box_price, option_counts, selected_options, category and sponsored. Also count, total (approximate: Wayfair's own count, total_is_approximate), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters, unapplied_filters and facets (id, name, type, options with id and label; the ids are what filters takes; no per-option counts). Prices are numbers in the market's currency (never converted). price is what Wayfair charges now (sale_price when on sale, with price_label such as Sale, Closeout or Solde); was_price is Wayfair's strikethrough price, which Wayfair's terms define as the manufacturer's suggested price or the highest price Wayfair offered or sold the item at in the past; Wayfair's Sale label means a discount against a price in the previous 90 days. No price history: Wayfair shows none, so poll price, sale_price, was_price and badge to build one. Markets: us, ca (language en or fr), gb, ie; every answer echoes country, language, site and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'office chair' (a SKU opens that product: redirected_to).
+            country: Wayfair market (default 'us'): us (wayfair.com, USD), ca (wayfair.ca, CAD), gb (wayfair.co.uk, GBP), ie (wayfair.ie, EUR). Wayfair no longer sells in Germany or Austria.
+            language: ca only: 'en' (default) or 'fr' (wayfair.ca in French: French names, labels and dates). Every other market is English.
+            site: Wayfair's US banner sites (USD, country 'us' only): allmodern, birchlane, jossandmain or perigold. Default 'wayfair'.
+            page: Results page, 1-based. A page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc or rating (customer rating). Price sorts follow Wayfair's price per item: a set is ordered by its per_item_price.
+            on_sale: Only products on sale.
+            closeout: Only closeout products.
+            open_box: Only products with an open-box offer (open_box_price).
+            new_arrivals: Only new arrivals.
+            in_stock: Only products in stock.
+            brand: 1 to 5 brand ids, not names: items[].brand.id or a Brand facet option id, e.g. 44308 (Ebern Designs).
+            min_rating: Customer rating: 5 = five stars only, 4 / 3 = that many stars and up, 1 = every reviewed product.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            filters: Any facet of the answer, keyed by facets[].id with facets[].options[].id values, e.g. {'2471': ['274623']}; ranges as 'min~max'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("wayfair_search", {"query": query, "country": country, "language": language, "site": site, "page": page, "sort": sort, "on_sale": on_sale, "closeout": closeout, "open_box": open_box, "new_arrivals": new_arrivals, "in_stock": in_stock, "brand": brand, "min_rating": min_rating, "price_min": price_min, "price_max": price_max, "filters": filters}, extra)
+
+    async def product(
+        self,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        option_id: Optional[Union[str, int]] = None,
+        zip: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "ie"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        site: Optional[Literal["wayfair", "allmodern", "birchlane", "jossandmain", "perigold"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Wayfair product by SKU or product URL: sku, variant_id, name, brand (id, name, url), url, price, sale_price, was_price, price_label, percent_off, per_item_price, loyalty_savings, prices, badge, limited_time_deal, stock_status, max_quantity, part_number, options (category, total, selected and choices with name, option_id, stock_status, url; choices carry no price: call again with option_id for that option's price and stock, one call per option), dimensions, specifications, features, description, image, images, breadcrumbs, documents, collection, returns, rating, review_count, rating_histogram, review_summary, review_aspects and reviews (the 5 reviews the page shows; no review paging). delivery (name, date_min, date_max, text, badge) and delivery_zip come back for the ZIP / postal code sent in zip (us and ca only). Prices are numbers in the market's currency (never converted). price is what Wayfair charges now (sale_price when on sale, with price_label such as Sale, Closeout or Solde); was_price is Wayfair's strikethrough price, which Wayfair's terms define as the manufacturer's suggested price or the highest price Wayfair offered or sold the item at in the past; Wayfair's Sale label means a discount against a price in the previous 90 days. No price history: Wayfair shows none, so poll price, sale_price, was_price and badge to build one. Markets: us, ca (language en or fr), gb, ie; every answer echoes country, language, site and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A Wayfair SKU (items[].sku, or 'SKU:' on the product page), e.g. 'W005006988'. Alternative to url.
+            url: A Wayfair product page of a served site (alternative to sku; the market, language and site are read from it).
+            option_id: A size / color / configuration: options[].choices[].option_id (several comma-separated for multi-choice products), e.g. '1820607042'. Returns that option's price and stock.
+            zip: Delivery estimate to this ZIP / postal code, e.g. '10001' (us and ca only).
+            country: Wayfair market (default 'us'): us (wayfair.com, USD), ca (wayfair.ca, CAD), gb (wayfair.co.uk, GBP), ie (wayfair.ie, EUR). Wayfair no longer sells in Germany or Austria.
+            language: ca only: 'en' (default) or 'fr' (wayfair.ca in French: French names, labels and dates). Every other market is English.
+            site: Wayfair's US banner sites (USD, country 'us' only): allmodern, birchlane, jossandmain or perigold. Default 'wayfair'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("wayfair_product", {"sku": sku, "url": url, "option_id": option_id, "zip": zip, "country": country, "language": language, "site": site}, extra)
+
+    async def category(
+        self,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        category_url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "ie"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        site: Optional[Literal["wayfair", "allmodern", "birchlane", "jossandmain", "perigold"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "rating"]] = None,
+        on_sale: Optional[bool] = None,
+        closeout: Optional[bool] = None,
+        open_box: Optional[bool] = None,
+        new_arrivals: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        brand: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        min_rating: Optional[Literal[1, 3, 4, 5]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Wayfair category's products (48 per page) by category id or category URL, with the search sorts and filters: category (id, name, url, breadcrumbs). Items with position, sku, variant_id, name, brand (id, name), url, image, price, sale_price, was_price, price_label, discount_percent, per_item_price (sets), loyalty_savings, prices (every price line), badge (e.g. Early Black Friday, Sale), rating, review_count, stock_status, stock_text, open_box_price, option_counts, selected_options, category and sponsored. Also count, total (approximate: Wayfair's own count, total_is_approximate), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters, unapplied_filters and facets (id, name, type, options with id and label; the ids are what filters takes; no per-option counts). An unknown category is a charged 404; a department page (/cat/) is not a product list. Prices are numbers in the market's currency (never converted). price is what Wayfair charges now (sale_price when on sale, with price_label such as Sale, Closeout or Solde); was_price is Wayfair's strikethrough price, which Wayfair's terms define as the manufacturer's suggested price or the highest price Wayfair offered or sold the item at in the past; Wayfair's Sale label means a discount against a price in the previous 90 days. No price history: Wayfair shows none, so poll price, sale_price, was_price and badge to build one. Markets: us, ca (language en or fr), gb, ie; every answer echoes country, language, site and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A Wayfair category id, e.g. '413892' (Sofas) or 'c413892', from a category URL (...-c413892.html) or a search's redirected_to.category_id. Alternative to category_url.
+            category_url: A category page of a served site (/sb0/, /sb1/ or /sb2/ URL; filters in it are kept). Alternative to category_id.
+            country: Wayfair market (default 'us'): us (wayfair.com, USD), ca (wayfair.ca, CAD), gb (wayfair.co.uk, GBP), ie (wayfair.ie, EUR). Wayfair no longer sells in Germany or Austria.
+            language: ca only: 'en' (default) or 'fr' (wayfair.ca in French: French names, labels and dates). Every other market is English.
+            site: Wayfair's US banner sites (USD, country 'us' only): allmodern, birchlane, jossandmain or perigold. Default 'wayfair'.
+            page: Results page, 1-based. A page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc or rating (customer rating). Price sorts follow Wayfair's price per item: a set is ordered by its per_item_price.
+            on_sale: Only products on sale.
+            closeout: Only closeout products.
+            open_box: Only products with an open-box offer (open_box_price).
+            new_arrivals: Only new arrivals.
+            in_stock: Only products in stock.
+            brand: 1 to 5 brand ids, not names: items[].brand.id or a Brand facet option id, e.g. 44308 (Ebern Designs).
+            min_rating: Customer rating: 5 = five stars only, 4 / 3 = that many stars and up, 1 = every reviewed product.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            filters: Any facet of the answer, keyed by facets[].id with facets[].options[].id values, e.g. {'2471': ['274623']}; ranges as 'min~max'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("wayfair_category", {"category_id": category_id, "category_url": category_url, "country": country, "language": language, "site": site, "page": page, "sort": sort, "on_sale": on_sale, "closeout": closeout, "open_box": open_box, "new_arrivals": new_arrivals, "in_stock": in_stock, "brand": brand, "min_rating": min_rating, "price_min": price_min, "price_max": price_max, "filters": filters}, extra)
+
+    async def deals(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "gb", "ie"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The market's current Wayfair sale events (the Daily Sales list): events (event_id, slug, title, url, image) and count; about 38 on us, 34 on ca, 6 on gb and ie. Events are listed, not expanded: for sale, closeout or open-box products use search() or category() with on_sale, closeout or open_box. Markets: us, ca (language en or fr), gb, ie; every answer echoes country, language, site and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Wayfair market (default 'us'): us (wayfair.com, USD), ca (wayfair.ca, CAD), gb (wayfair.co.uk, GBP), ie (wayfair.ie, EUR). Wayfair no longer sells in Germany or Austria.
+            language: ca only: 'en' (default) or 'fr' (wayfair.ca in French: French names, labels and dates). Every other market is English.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("wayfair_deals", {"country": country, "language": language}, extra)

@@ -80,6 +80,7 @@ from ._namespaces_async import (
     _AsyncVintedNamespace,
     _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
+    _AsyncWayfairNamespace,
     _AsyncWholeFoodsNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
@@ -216,6 +217,7 @@ class AsyncScavioClient:
         self.kroger = _AsyncKrogerNamespace(self)
         self.publix = _AsyncPublixNamespace(self)
         self.ikea = _AsyncIkeaNamespace(self)
+        self.wayfair = _AsyncWayfairNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

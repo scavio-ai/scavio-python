@@ -78,6 +78,7 @@ from ._namespaces_sync import (
     _VintedNamespace,
     _WalgreensNamespace,
     _WalmartNamespace,
+    _WayfairNamespace,
     _WholeFoodsNamespace,
     _XNamespace,
     _YelpNamespace,
@@ -221,6 +222,7 @@ class ScavioClient:
         self.kroger = _KrogerNamespace(self)
         self.publix = _PublixNamespace(self)
         self.ikea = _IkeaNamespace(self)
+        self.wayfair = _WayfairNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

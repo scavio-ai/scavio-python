@@ -1147,6 +1147,89 @@ _IKEA_CHARGE = (
 )
 
 
+# Wayfair params shared across endpoints (wayfair.com, wayfair.ca en/fr, wayfair.co.uk,
+# wayfair.ie; the US banner sites AllModern, Birch Lane, Joss & Main and Perigold via site).
+_WAYFAIR_COUNTRY = _lit(
+    "country",
+    ("us", "ca", "gb", "ie"),
+    "Wayfair market (default 'us'): us (wayfair.com, USD), ca (wayfair.ca, CAD), gb "
+    "(wayfair.co.uk, GBP), ie (wayfair.ie, EUR). Wayfair no longer sells in Germany or "
+    "Austria.",
+)
+_WAYFAIR_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "ca only: 'en' (default) or 'fr' (wayfair.ca in French: French names, labels and dates). "
+    "Every other market is English.",
+)
+_WAYFAIR_SITE = _lit(
+    "site",
+    ("wayfair", "allmodern", "birchlane", "jossandmain", "perigold"),
+    "Wayfair's US banner sites (USD, country 'us' only): allmodern, birchlane, jossandmain or "
+    "perigold. Default 'wayfair'.",
+)
+_WAYFAIR_GRID_PARAMS = (
+    _int("page", "Results page, 1-based. A page past the last returns no items and a note."),
+    _lit(
+        "sort",
+        ("recommended", "price_asc", "price_desc", "rating"),
+        "recommended (default), price_asc, price_desc or rating (customer rating). Price sorts "
+        "follow Wayfair's price per item: a set is ordered by its per_item_price.",
+    ),
+    _bool("on_sale", "Only products on sale."),
+    _bool("closeout", "Only closeout products."),
+    _bool("open_box", "Only products with an open-box offer (open_box_price)."),
+    _bool("new_arrivals", "Only new arrivals."),
+    _bool("in_stock", "Only products in stock."),
+    Param(
+        "brand",
+        "Optional[Union[int, str, list[Union[int, str]]]]",
+        doc="1 to 5 brand ids, not names: items[].brand.id or a Brand facet option id, e.g. "
+        "44308 (Ebern Designs).",
+    ),
+    _ilit(
+        "min_rating",
+        (1, 3, 4, 5),
+        "Customer rating: 5 = five stars only, 4 / 3 = that many stars and up, 1 = every "
+        "reviewed product.",
+    ),
+    _float("price_min", "Lowest price, in the market's currency."),
+    _float("price_max", "Highest price, in the market's currency."),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any facet of the answer, keyed by facets[].id with facets[].options[].id values, "
+        "e.g. {'2471': ['274623']}; ranges as 'min~max'.",
+    ),
+)
+_WAYFAIR_PRICES = (
+    " Prices are numbers in the market's currency (never converted). price is what Wayfair "
+    "charges now (sale_price when on sale, with price_label such as Sale, Closeout or Solde); "
+    "was_price is Wayfair's strikethrough price, which Wayfair's terms define as the "
+    "manufacturer's suggested price or the highest price Wayfair offered or sold the item at in "
+    "the past; Wayfair's Sale label means a discount against a price in the previous 90 days. "
+    "No price history: Wayfair shows none, so poll price, sale_price, was_price and badge to "
+    "build one."
+)
+_WAYFAIR_ITEM = (
+    "position, sku, variant_id, name, brand (id, name), url, image, price, sale_price, "
+    "was_price, price_label, discount_percent, per_item_price (sets), loyalty_savings, prices "
+    "(every price line), badge (e.g. Early Black Friday, Sale), rating, review_count, "
+    "stock_status, stock_text, open_box_price, option_counts, selected_options, category and "
+    "sponsored"
+)
+_WAYFAIR_GRID_FIELDS = (
+    " Items with " + _WAYFAIR_ITEM + ". Also count, total (approximate: Wayfair's own count, "
+    "total_is_approximate), page, page_size, total_pages, sort, sorts_offered, "
+    "requested_filters, applied_filters, unapplied_filters and facets (id, name, type, options "
+    "with id and label; the ids are what filters takes; no per-option counts)."
+)
+_WAYFAIR_NOTE = (
+    " Markets: us, ca (language en or fr), gb, ie; every answer echoes country, language, site "
+    "and currency. Failed upstream calls are not charged; a not-found is charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -7943,6 +8026,135 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _IKEA_LANGUAGE,
             _int("page", "Results page, 1-based."),
             _int("page_size", "Products per page (default 24, up to 48)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    # ================================ Wayfair ===============================
+    # 4 endpoints on /api/v1/wayfair, 1 credit each. Markets us, ca (en / fr), gb, ie;
+    # site = the US banners (search, product, category). zip on product is us and ca only.
+    # A grid call can take about 40 s and a slow product page longer: 120 s timeout floor.
+    Endpoint(
+        key="wayfair_search",
+        namespace="wayfair",
+        method="search",
+        http="POST",
+        path="/api/v1/wayfair/search",
+        summary=(
+            "Search Wayfair products by keyword, sorted by price or customer rating and "
+            "filtered by sale, closeout, open box, new arrivals, in stock, brand id, minimum "
+            "rating, price range or any facet. Keyword pages return 30 results per page; a "
+            "keyword that matches a category answers that category's grid (48 per page) and "
+            "says so in redirected_to (type, category_id, name, url), and a SKU answers "
+            "redirected_to a product. Returns query." + _WAYFAIR_GRID_FIELDS
+            + _WAYFAIR_PRICES + _WAYFAIR_NOTE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search keywords, e.g. 'office chair' (a SKU opens that product: redirected_to).",
+            ),
+            _WAYFAIR_COUNTRY,
+            _WAYFAIR_LANGUAGE,
+            _WAYFAIR_SITE,
+            *_WAYFAIR_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="wayfair_product",
+        namespace="wayfair",
+        method="product",
+        http="POST",
+        path="/api/v1/wayfair/product",
+        summary=(
+            "One Wayfair product by SKU or product URL: sku, variant_id, name, brand (id, name, "
+            "url), url, price, sale_price, was_price, price_label, percent_off, per_item_price, "
+            "loyalty_savings, prices, badge, limited_time_deal, stock_status, max_quantity, "
+            "part_number, options (category, total, selected and choices with name, option_id, "
+            "stock_status, url; choices carry no price: call again with option_id for that "
+            "option's price and stock, one call per option), dimensions, specifications, "
+            "features, description, image, images, breadcrumbs, documents, collection, returns, "
+            "rating, review_count, rating_histogram, review_summary, review_aspects and reviews "
+            "(the 5 reviews the page shows; no review paging). delivery (name, date_min, "
+            "date_max, text, badge) and delivery_zip come back for the ZIP / postal code sent in "
+            "zip (us and ca only)." + _WAYFAIR_PRICES + _WAYFAIR_NOTE
+        ),
+        params=(
+            _str(
+                "sku",
+                "A Wayfair SKU (items[].sku, or 'SKU:' on the product page), e.g. 'W005006988'. "
+                "Alternative to url.",
+            ),
+            _str(
+                "url",
+                "A Wayfair product page of a served site (alternative to sku; the market, "
+                "language and site are read from it).",
+            ),
+            _str_or_int(
+                "option_id",
+                "A size / color / configuration: options[].choices[].option_id (several "
+                "comma-separated for multi-choice products), e.g. '1820607042'. Returns that "
+                "option's price and stock.",
+            ),
+            _str("zip", "Delivery estimate to this ZIP / postal code, e.g. '10001' (us and ca only)."),
+            _WAYFAIR_COUNTRY,
+            _WAYFAIR_LANGUAGE,
+            _WAYFAIR_SITE,
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="wayfair_category",
+        namespace="wayfair",
+        method="category",
+        http="POST",
+        path="/api/v1/wayfair/category",
+        summary=(
+            "One Wayfair category's products (48 per page) by category id or category URL, with "
+            "the search sorts and filters: category (id, name, url, breadcrumbs)."
+            + _WAYFAIR_GRID_FIELDS + " An unknown category is a charged 404; a department page "
+            "(/cat/) is not a product list." + _WAYFAIR_PRICES + _WAYFAIR_NOTE
+        ),
+        params=(
+            _str_or_int(
+                "category_id",
+                "A Wayfair category id, e.g. '413892' (Sofas) or 'c413892', from a category URL "
+                "(...-c413892.html) or a search's redirected_to.category_id. Alternative to "
+                "category_url.",
+            ),
+            _str(
+                "category_url",
+                "A category page of a served site (/sb0/, /sb1/ or /sb2/ URL; filters in it are "
+                "kept). Alternative to category_id.",
+            ),
+            _WAYFAIR_COUNTRY,
+            _WAYFAIR_LANGUAGE,
+            _WAYFAIR_SITE,
+            *_WAYFAIR_GRID_PARAMS,
+        ),
+        one_of=(("category_id", "category_url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="wayfair_deals",
+        namespace="wayfair",
+        method="deals",
+        http="POST",
+        path="/api/v1/wayfair/deals",
+        summary=(
+            "The market's current Wayfair sale events (the Daily Sales list): events (event_id, "
+            "slug, title, url, image) and count; about 38 on us, 34 on ca, 6 on gb and ie. "
+            "Events are listed, not expanded: for sale, closeout or open-box products use "
+            "search() or category() with on_sale, closeout or open_box." + _WAYFAIR_NOTE
+        ),
+        params=(
+            _WAYFAIR_COUNTRY,
+            _WAYFAIR_LANGUAGE,
         ),
         credits=1,
         min_timeout=120.0,
@@ -14965,6 +15177,7 @@ NAMESPACES: tuple[str, ...] = (
     "kroger",
     "publix",
     "ikea",
+    "wayfair",
 )
 
 

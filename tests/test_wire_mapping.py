@@ -3826,3 +3826,94 @@ def test_ikea_credits_paths_and_wire(monkeypatch):
         ik.product(country="de")
     with pytest.raises(ScavioError):
         ik.category(sort="newest")
+
+
+def test_wayfair_credits_paths_and_wire(monkeypatch):
+    """wayfair (0.57.0): 4 endpoints on /api/v1/wayfair, 1 credit each, 120 s timeout floor.
+
+    product takes sku or url; category takes category_id or category_url. country is a
+    literal (us, ca, gb, ie), language en / fr (ca), site the US banners; min_rating is an
+    int literal (1, 3, 4, 5).
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "wayfair"}
+    assert sorted(eps) == ["category", "deals", "product", "search"]
+    for m, ep in eps.items():
+        assert ep.credits == 1, ep.key
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/wayfair/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits_note is None, ep.key
+    params = {p.name: p for p in eps["search"].params}
+    assert params["country"].annotation == 'Optional[Literal["us", "ca", "gb", "ie"]]'
+    assert params["min_rating"].annotation == "Optional[Literal[1, 3, 4, 5]]"
+    assert params["sort"].annotation == (
+        'Optional[Literal["recommended", "price_asc", "price_desc", "rating"]]'
+    )
+    assert "site" not in {p.name for p in eps["deals"].params}
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    wf = client.wayfair
+    wf.search("office chair", sort="price_asc", on_sale=True, brand=[44308], min_rating=4)
+    wf.search("sofa", country="ca", language="fr", page=2, filters={"2471": ["274623"]})
+    wf.search("velvet sofa", site="perigold", price_min=100, price_max=400.5)
+    wf.product(sku="W005006988", zip="10001")
+    wf.product(sku="W005006988", option_id="1820607042")
+    wf.product(url="https://www.wayfair.ca/fr/mobilier/pdp/x-c115423787.html")
+    wf.category(category_id=413892, sort="rating", in_stock=True)
+    wf.category(category_url="https://www.wayfair.co.uk/furniture/sb0/sofas-c1772837.html")
+    wf.deals(country="gb")
+    base = "/api/v1/wayfair/"
+    assert seen == [
+        (
+            base + "search",
+            {
+                "query": "office chair",
+                "sort": "price_asc",
+                "on_sale": True,
+                "brand": [44308],
+                "min_rating": 4,
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {
+                "query": "sofa",
+                "country": "ca",
+                "language": "fr",
+                "page": 2,
+                "filters": {"2471": ["274623"]},
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {"query": "velvet sofa", "site": "perigold", "price_min": 100, "price_max": 400.5},
+            120.0,
+        ),
+        (base + "product", {"sku": "W005006988", "zip": "10001"}, 120.0),
+        (base + "product", {"sku": "W005006988", "option_id": "1820607042"}, 120.0),
+        (
+            base + "product",
+            {"url": "https://www.wayfair.ca/fr/mobilier/pdp/x-c115423787.html"},
+            120.0,
+        ),
+        (base + "category", {"category_id": 413892, "sort": "rating", "in_stock": True}, 120.0),
+        (
+            base + "category",
+            {"category_url": "https://www.wayfair.co.uk/furniture/sb0/sofas-c1772837.html"},
+            120.0,
+        ),
+        (base + "deals", {"country": "gb"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        wf.product(zip="10001")
+    with pytest.raises(ScavioError):
+        wf.category(sort="price_asc")
