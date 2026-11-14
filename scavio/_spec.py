@@ -1302,6 +1302,105 @@ _ASHLEY_US_NOTE = (
 _ASHLEY_CREDITS_NOTE = "Costs 2 credits on us (the default) and mx, 1 credit on ca, ph, sa and tr."
 
 
+# Maisons du Monde params shared across endpoints (maisonsdumonde.com: fr, be fr / nl, lu,
+# nl, de, es, it, pt, ch fr / de / it). stores, store and availability serve fr, be, de, es,
+# it, pt and ch (no store finder on nl or lu); seller and the seller / sold_by filters serve
+# the marketplace markets fr, de, es and it.
+_MDM_COUNTRIES = ("fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch")
+_MDM_STORE_COUNTRIES = ("fr", "be", "de", "es", "it", "pt", "ch")
+_MDM_MARKETPLACE_COUNTRIES = ("fr", "de", "es", "it")
+
+
+def _mdm_country(choices: Sequence[str], scope: str) -> Param:
+    return _lit("country", choices, "Maisons du Monde market (default 'fr'). " + scope)
+
+
+_MDM_ALL_SCOPE = (
+    "All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, "
+    "de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it)."
+)
+_MDM_STORE_SCOPE = "fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu)."
+_MDM_MARKETPLACE_SCOPE = "fr, de, es or it (marketplace sellers exist there only)."
+_MDM_LANGUAGE = _lit(
+    "language",
+    ("fr", "nl", "de", "es", "it", "pt"),
+    "Language of the market's site (default its first): be fr or nl, ch fr, de or it; every "
+    "other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A "
+    "language the market does not serve answers 400.",
+)
+_MDM_SORTS = ("relevance", "price_asc", "price_desc", "rating")
+_MDM_PAGE = _int(
+    "page",
+    "Results page, 1-based, 40 items per page (at most 250 pages; a page past the last returns "
+    "no items and a note).",
+)
+_MDM_SORT = _lit(
+    "sort",
+    _MDM_SORTS,
+    "relevance (default), price_asc, price_desc or rating (customer rating). The site has no "
+    "newest, best-seller or discount sort.",
+)
+_MDM_GRID_PARAMS = (
+    _MDM_PAGE,
+    _MDM_SORT,
+    _float("price_min", "Lowest price, in the market's currency."),
+    _float("price_max", "Highest price, in the market's currency."),
+    _bool("on_sale", "Only discounted items."),
+    _ilit("min_discount", (20, 30, 40, 50), "Only items at least this many percent off."),
+    _bool("in_stock", "Only items in stock online."),
+    _ilit(
+        "min_rating",
+        (3, 4, 5),
+        "Customer rating: 5 = five stars only, 4 / 3 = that many stars and up.",
+    ),
+    _str_or_list("color", "1 to 5 color option ids (facet c of the answer's facets)."),
+    _str_or_list("material", "1 to 5 material option ids (facet f)."),
+    _str_or_list("style", "1 to 5 style option ids (facet st)."),
+    _str_or_list("brand", "1 to 5 brand option ids (facet bra), e.g. 'BRAND_MAISONS_DU_MONDE'."),
+    _str(
+        "seller",
+        "One marketplace seller's items: seller.code from seller() or a Seller facet (se) option "
+        "id, e.g. 'BESTMOBILIER'. fr, de, es and it only.",
+    ),
+    _lit(
+        "sold_by",
+        ("mdm",),
+        "mdm: only items sold by Maisons du Monde itself (not marketplace sellers). fr, de, es "
+        "and it only (elsewhere every item is).",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Any]]",
+        doc="Any other facet, keyed by facets[].id with facets[].options[].id values (a str or a "
+        "list of str), e.g. {'nbs': ['CAPACITY_2_places']}; dimension ranges (dd, dh, dw) as "
+        "'min-max' in cm.",
+    ),
+)
+_MDM_PRICES = (
+    " Prices are numbers in the market's currency, never converted (Switzerland is priced "
+    "separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 "
+    "on 4 products). price is what the site charges now; was_price is the crossed-out price "
+    "shown next to a discount; discount_percent is the page's own percent off; "
+    "eco_participation is the French furniture recycling fee included in the price (fr only). "
+    "Maisons du Monde shows no 30-day lowest price and no price history: poll for changes."
+)
+_MDM_GRID_FIELDS = (
+    " 40 items per page with position, id (digits for Maisons du Monde items, M + digits for "
+    "marketplace items), name, collection, brand, url, image, price, was_price, "
+    "discount_percent, currency, eco_participation (fr), badges, rating, review_count, "
+    "color_count, sold_by (mdm or marketplace), offer_id, sponsored (sponsored marketplace "
+    "tiles, not counted in count), condition, store_only and purchase_status. Also count, "
+    "sponsored_count, total (exact), page, page_size, total_pages, sort, sorts_offered, "
+    "requested_filters, applied_filters and facets (id, name, type, options with id, label and "
+    "count, or a min / max range; the ids are what color, material, style, brand, seller and "
+    "filters take)."
+)
+_MDM_NOTE = (
+    " Every answer carries country, language and currency. Failed upstream calls are not "
+    "charged; a not-found is charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -8417,6 +8516,283 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=120.0,
     ),
+    # ========================== Maisons du Monde ==========================
+    # 9 endpoints on /api/v1/maisonsdumonde, 1 credit each. search, product, category, deals
+    # and reviews serve all 9 markets; stores, store and availability fr, be, de, es, it, pt,
+    # ch; seller fr, de, es, it. Some calls make two upstream requests: 120 s timeout floor.
+    Endpoint(
+        key="maisonsdumonde_search",
+        namespace="maisonsdumonde",
+        method="search",
+        http="POST",
+        path="/api/v1/maisonsdumonde/search",
+        summary=(
+            "Search Maisons du Monde (furniture and home decor) by keyword, sorted by price or "
+            "customer rating and filtered by price range, discount, stock, rating, color, "
+            "material, style, brand, marketplace seller or any facet. A keyword that names a "
+            "category answers that category's grid and says so in redirected_to (type, "
+            "category_id, name, url)." + _MDM_GRID_FIELDS + " The German site does not sort "
+            "keyword results: on de a sorted search comes back in relevance order with a note "
+            "(sort works on category() and deals())." + _MDM_PRICES + _MDM_NOTE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search keywords, in the market's language, e.g. 'table' (fr), 'couchtisch' (de).",
+            ),
+            _mdm_country(_MDM_COUNTRIES, _MDM_ALL_SCOPE),
+            _MDM_LANGUAGE,
+            *_MDM_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_product",
+        namespace="maisonsdumonde",
+        method="product",
+        http="POST",
+        path="/api/v1/maisonsdumonde/product",
+        summary=(
+            "One Maisons du Monde product by reference or product URL: id, gtin13, name, "
+            "collection, brand, url, price, was_price, discount_percent, currency, "
+            "eco_participation (fr), badges, stock (status and the exact online quantity), "
+            "store_only, sold_by, seller (marketplace items: id, name, url, rating, orders, "
+            "member_since), offer_id, condition, variants (dimension, value, name, id, url, "
+            "price_difference), dimensions, weight, materials, made_in, characteristics, "
+            "composition, attributes, wood_and_finishes, assembly, care, documents, images, "
+            "breadcrumbs, categories, short_description, description, rating, review_count, "
+            "review_summary, questions and markets (the same product on every other market: "
+            "country, language, url). An unknown product, or one not sold in that market, is a "
+            "charged 404. Delivery and store stock: availability(); reviews: reviews()."
+            + _MDM_PRICES + _MDM_NOTE
+        ),
+        params=(
+            _str(
+                "id",
+                "A product reference (items[].id): digits for Maisons du Monde items, e.g. "
+                "'186339', or M + digits for marketplace items, e.g. 'M24132196'. Alternative "
+                "to url.",
+            ),
+            _str(
+                "url",
+                "A product page of any market (its market and language are used unless country "
+                "/ language are sent). Alternative to id.",
+            ),
+            _mdm_country(_MDM_COUNTRIES, _MDM_ALL_SCOPE),
+            _MDM_LANGUAGE,
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_category",
+        namespace="maisonsdumonde",
+        method="category",
+        http="POST",
+        path="/api/v1/maisonsdumonde/category",
+        summary=(
+            "One Maisons du Monde category's products by category hash or category URL, with "
+            "the search sorts and filters. The hash is the same on every market, so a URL from "
+            "any market works on any other." + _MDM_GRID_FIELDS + " Also category (id, name, "
+            "url, breadcrumbs). An unknown category is a charged 404." + _MDM_PRICES + _MDM_NOTE
+        ),
+        params=(
+            _str(
+                "category",
+                "A category hash (the end of a /c/ URL, the same on every market), optionally "
+                "with its name, e.g. 'canapes-n4dc562d7bb509362a3a2102db4cbf90b6454f1f', or "
+                "redirected_to.category_id of a search. Alternative to category_url.",
+            ),
+            _str(
+                "category_url",
+                "A category page of any market (filters in it are kept). Alternative to "
+                "category.",
+            ),
+            _mdm_country(_MDM_COUNTRIES, _MDM_ALL_SCOPE),
+            _MDM_LANGUAGE,
+            *_MDM_GRID_PARAMS,
+        ),
+        one_of=(("category", "category_url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_deals",
+        namespace="maisonsdumonde",
+        method="deals",
+        http="POST",
+        path="/api/v1/maisonsdumonde/deals",
+        summary=(
+            "A Maisons du Monde sale event's products: black_friday (default, on every market "
+            "while it runs) or second_chance (fr only: used and returned items, condition per "
+            "item); or a category's discounted items (category / category_url, on_sale unless "
+            "min_discount is sent). Same sorts and filters as search()." + _MDM_GRID_FIELDS
+            + " Also event (type, name, url, category_id). An event that is not running is a "
+            "charged 404." + _MDM_PRICES + _MDM_NOTE
+        ),
+        params=(
+            _lit(
+                "event",
+                ("black_friday", "second_chance"),
+                "black_friday (default; every market while it runs) or second_chance (fr only).",
+            ),
+            _str("category", "A category hash: answers its discounted items instead of an event."),
+            _str(
+                "category_url",
+                "A category page of any market: answers its discounted items instead of an "
+                "event.",
+            ),
+            _mdm_country(_MDM_COUNTRIES, _MDM_ALL_SCOPE),
+            _MDM_LANGUAGE,
+            *_MDM_GRID_PARAMS,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_reviews",
+        namespace="maisonsdumonde",
+        method="reviews",
+        http="POST",
+        path="/api/v1/maisonsdumonde/reviews",
+        summary=(
+            "A Maisons du Monde product's customer reviews: product_id, sort, rating, "
+            "review_count, rating_histogram (5 to 1), criteria and reviews (rating, text, date, "
+            "author as the display name shown, country, source_market, syndicated, criteria "
+            "scores, brand_reply, images), plus next_cursor for the next page. Reviews are "
+            "pooled across every Maisons du Monde market and shown translated into the request "
+            "language (source_market is where a review was written). Sorted newest, "
+            "rating_desc or rating_asc; the site has no star filter. Reviews carry no id, title "
+            "or verified flag. A product with no reviews (or a marketplace item) is a charged "
+            "404." + _MDM_NOTE
+        ),
+        params=(
+            _req("id", "A Maisons du Monde product reference (product id), e.g. '186339'."),
+            _mdm_country(_MDM_COUNTRIES, _MDM_ALL_SCOPE),
+            _MDM_LANGUAGE,
+            _lit(
+                "sort",
+                ("newest", "rating_desc", "rating_asc"),
+                "newest (default), rating_desc or rating_asc.",
+            ),
+            _str(
+                "cursor",
+                "next_cursor of the previous answer, for the next page (keep the same sort).",
+            ),
+            _int("limit", "Reviews per page, 1 to 30 (default 10)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_stores",
+        namespace="maisonsdumonde",
+        method="stores",
+        http="POST",
+        path="/api/v1/maisonsdumonde/stores",
+        summary=(
+            "Up to 10 Maisons du Monde stores nearest a postcode: postcode, count and stores "
+            "with id, name, address, postcode, city, country, lat, lng, distance_km, url, "
+            "open_now, hours (per day, opening slots) and click_collect. Call store() for the "
+            "phone and services and availability() with a store id for an item's stock there."
+            " Markets: " + _MDM_STORE_SCOPE + _MDM_NOTE
+        ),
+        params=(
+            _req(
+                "postcode",
+                "A postcode of the market: 5 digits on fr / de / es / it (e.g. '75011'), 4 on "
+                "be / ch, 1000-001 on pt.",
+            ),
+            _mdm_country(_MDM_STORE_COUNTRIES, _MDM_STORE_SCOPE),
+            _MDM_LANGUAGE,
+            _int("limit", "Stores to return, nearest first (1 to 10, default 10)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_store",
+        namespace="maisonsdumonde",
+        method="store",
+        http="POST",
+        path="/api/v1/maisonsdumonde/store",
+        summary=(
+            "One Maisons du Monde store by store id or store page URL: id, name, address, "
+            "postcode, city, country, phone, lat, lng, url, hours (every day of the week, "
+            "opening slots), services (as the store page lists them), click_collect and "
+            "hours_today (by id). Markets: " + _MDM_STORE_SCOPE + _MDM_NOTE
+        ),
+        params=(
+            _str(
+                "store_id",
+                "A store id (stores[].id of stores()) of the market in country, e.g. '41'. "
+                "Alternative to url.",
+            ),
+            _str("url", "A store page (stores[].url). Alternative to store_id."),
+            _mdm_country(_MDM_STORE_COUNTRIES, _MDM_STORE_SCOPE),
+            _MDM_LANGUAGE,
+        ),
+        one_of=(("store_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_availability",
+        namespace="maisonsdumonde",
+        method="availability",
+        http="POST",
+        path="/api/v1/maisonsdumonde/availability",
+        summary=(
+            "One Maisons du Monde item's stock at one store plus the market's delivery "
+            "options: product_id, store (id, name, postcode, city), in_stock, quantity (the "
+            "store's stock count), stock_text, display_model (only the display piece is in "
+            "store), click_collect and on_shelf (available, the site's texts) and delivery "
+            "(type home, store_pickup or in_store: title, available, availability_text, "
+            "from_price, currency, price_text). Home delivery is a from-price per product and "
+            "market; the exact cost for a postcode is only shown in the cart and is not "
+            "returned. Marketplace items are not stocked in stores. Markets: "
+            + _MDM_STORE_SCOPE + _MDM_NOTE
+        ),
+        params=(
+            _req(
+                "id",
+                "A Maisons du Monde item reference (digits; marketplace items are not stocked "
+                "in stores), e.g. '204172'.",
+            ),
+            _req("store_id", "A store id from stores() (stores[].id), e.g. '125'."),
+            _mdm_country(_MDM_STORE_COUNTRIES, _MDM_STORE_SCOPE),
+            _MDM_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="maisonsdumonde_seller",
+        namespace="maisonsdumonde",
+        method="seller",
+        http="POST",
+        path="/api/v1/maisonsdumonde/seller",
+        summary=(
+            "A Maisons du Monde marketplace seller by seller id or seller URL: seller (id, "
+            "name, code for search()'s seller filter, url, rating, review_count, orders, "
+            "member_since, order_approval, shipping, returns, company_city, description) plus "
+            "the seller's catalog as a grid (sort as search())." + _MDM_GRID_FIELDS
+            + " Markets: " + _MDM_MARKETPLACE_SCOPE + _MDM_PRICES + _MDM_NOTE
+        ),
+        params=(
+            _str("seller_id", "A marketplace seller id (a product's seller.id), e.g. '2066'."),
+            _str("url", "A seller page (seller.url). Alternative to seller_id."),
+            _mdm_country(_MDM_MARKETPLACE_COUNTRIES, _MDM_MARKETPLACE_SCOPE),
+            _MDM_LANGUAGE,
+            _MDM_PAGE,
+            _MDM_SORT,
+        ),
+        one_of=(("seller_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -15438,6 +15814,7 @@ NAMESPACES: tuple[str, ...] = (
     "ikea",
     "wayfair",
     "ashley",
+    "maisonsdumonde",
 )
 
 

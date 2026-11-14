@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 78 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 79 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -2786,6 +2786,76 @@ ZIP or city lookup) and lists stores alphabetically; call `store` for the
 address, phone and hours. Failed calls are not charged; an unknown item number,
 category or store is a charged 404.
 
+### 48. Retail -- Maisons du Monde promo prices, reviews, store stock and marketplace sellers
+
+Maisons du Monde (furniture and home decor) for France, Belgium (French or
+Dutch), Luxembourg, the Netherlands, Germany, Spain, Italy, Portugal and
+Switzerland (French, German or Italian). Namespace `maisonsdumonde`, 9
+endpoints, 1 credit each: `search`, `product`, `category`, `deals`, `reviews`,
+`stores`, `store`, `availability`, `seller`. Pick the market with `country`
+(default `fr`) and, on Belgium and Switzerland, the language with `language`.
+The request timeout is raised to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mdm = client.maisonsdumonde
+
+# --- Search: 40 per page with the exact total; price next to the crossed-out price.
+res = mdm.search("table")["data"]
+print(res["total"], res["currency"])
+for p in res["items"][:5]:
+    print(p["id"], p["name"], p["price"], p["was_price"], p["discount_percent"], p["sold_by"])
+
+# --- The same product on another storefront: Switzerland is priced in CHF.
+fr = mdm.product(id="204172")["data"]
+ch = mdm.product(id="204172", country="ch", language="de")["data"]
+print(fr["price"], fr["was_price"], fr["currency"], ch["price"], ch["was_price"], ch["currency"])
+print([m["country"] + "/" + m["language"] for m in fr["markets"]])
+
+# --- Black Friday, or one category's discounted items at 30% off or more.
+bf = mdm.deals(country="de")["data"]
+cat = mdm.deals(category="canapes-n4dc562d7bb509362a3a2102db4cbf90b6454f1f", min_discount=30)["data"]
+print(bf["event"]["name"], bf["total"], cat["total"])
+
+# --- Reviews: pooled across markets, translated into the request language.
+rev = mdm.reviews("186339", sort="rating_asc")["data"]
+print(rev["rating"], rev["rating_histogram"], rev["reviews"][0]["source_market"])
+more = mdm.reviews("186339", sort="rating_asc", cursor=rev["next_cursor"])["data"]
+
+# --- Stores near a postcode, then one item's stock at a store and the delivery from-price.
+near = mdm.stores("75011")["data"]
+stock = mdm.availability("204172", near["stores"][0]["id"])["data"]
+print(stock["in_stock"], stock["quantity"], [(d["type"], d["from_price"]) for d in stock["delivery"]])
+
+# --- A marketplace seller (fr, de, es, it) and only items sold by Maisons du Monde.
+seller = mdm.seller(seller_id="2066")["data"]
+print(seller["seller"]["name"], seller["seller"]["rating"], seller["total"])
+own = mdm.search("chaise", sold_by="mdm", on_sale=True)["data"]
+```
+
+Prices are numbers in the market's currency, never converted. Measured on
+2026-11-14 on 4 products, the euro storefronts shared one price per product
+and Switzerland was priced separately in CHF (round mirror 204172: 74.99, now
+37.45 EUR on every euro market; 91.90, now 45.95 CHF). `was_price` is the
+crossed-out price shown next to a discount and `discount_percent` the page's
+own percent off; `eco_participation` (fr) is the French furniture recycling
+fee included in the price. Maisons du Monde shows no 30-day lowest price and no
+price history, so poll to track changes. `search`, `product`, `category`,
+`deals` and `reviews` serve all nine markets; `stores`, `store` and
+`availability` serve fr, be, de, es, it, pt and ch (not nl or lu); `seller`
+and the `seller` / `sold_by` filters serve the marketplace markets fr, de, es
+and it. Search tiles carry `sold_by` but not the seller name (`product` has
+it). The German site does not sort keyword results, so a sorted search on
+`de` comes back in relevance order with a note. Reviews have no star filter
+and no id, title or verified flag; a product with no reviews is a charged 404.
+Home delivery is a from-price per product and market (no postcode-exact
+cost). `availability` covers Maisons du Monde items only (marketplace items
+are not stocked in stores). `deals` events are `black_friday` (every market
+while it runs) and `second_chance` (fr: used and returned items). No search
+suggestions. Failed calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -2935,6 +3005,7 @@ Scavio works with popular AI/LLM frameworks:
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
 | Wayfair (`wayfair`) | `search`, `product`, `category`, `deals`; markets us, ca (en / fr), gb, ie via `country`; `site` allmodern, birchlane, jossandmain or perigold | 1 each |
 | Ashley Furniture (`ashley`) | `search`, `product`, `category`, `deals`, `stores`, `store`; `search` and `product` also on ca, mx, ph, sa, tr via `country` (`product` by `handle` there) | `search` and `product` 2 on us and mx, 1 on ca, ph, sa, tr; the rest (us only) 2 each |
+| Maisons du Monde (`maisonsdumonde`) | `search`, `product`, `category`, `deals`, `reviews`, `stores`, `store`, `availability`, `seller`; markets fr, be (fr / nl), lu, nl, de, es, it, pt, ch (fr / de / it) via `country` and `language` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -2945,6 +3016,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.59.0
+
+- **New `maisonsdumonde` namespace** (sync and async) for Maisons du Monde, 9
+  endpoints at 1 credit each: `search`, `product`, `category`, `deals`,
+  `reviews`, `stores`, `store`, `availability`, `seller`. Markets fr, be (fr /
+  nl), lu, nl, de, es, it, pt (EUR) and ch (fr / de / it, CHF) via `country`
+  and `language`; stores and store stock on fr, be, de, es, it, pt and ch;
+  marketplace sellers on fr, de, es and it. 120s timeout floor.
 
 ### Changed in 0.58.0
 

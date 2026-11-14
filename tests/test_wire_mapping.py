@@ -4022,3 +4022,128 @@ def test_ashley_credits_paths_and_wire(monkeypatch):
         ash.category(sort="newest")
     with pytest.raises(ScavioError):
         ash.store()
+
+
+def test_maisonsdumonde_credits_paths_and_wire(monkeypatch):
+    """maisonsdumonde (0.59.0): 9 endpoints on /api/v1/maisonsdumonde, 1 credit each, 120 s floor.
+
+    search, product, category, deals and reviews serve all 9 markets; stores, store and
+    availability serve fr, be, de, es, it, pt, ch (no store finder on nl / lu); seller serves
+    the marketplace markets fr, de, es, it. product takes id or url; category takes category
+    or category_url; store takes store_id or url; seller takes seller_id or url.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "maisonsdumonde"}
+    assert sorted(eps) == [
+        "availability", "category", "deals", "product", "reviews", "search", "seller", "store",
+        "stores",
+    ]
+    all_markets = 'Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]]'
+    store_markets = 'Optional[Literal["fr", "be", "de", "es", "it", "pt", "ch"]]'
+    marketplace = 'Optional[Literal["fr", "de", "es", "it"]]'
+    expected_country = {
+        "search": all_markets, "product": all_markets, "category": all_markets,
+        "deals": all_markets, "reviews": all_markets, "stores": store_markets,
+        "store": store_markets, "availability": store_markets, "seller": marketplace,
+    }
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/maisonsdumonde/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        assert params["country"].annotation == expected_country[m], m
+        assert params["language"].annotation == (
+            'Optional[Literal["fr", "nl", "de", "es", "it", "pt"]]'
+        ), m
+    grid = {p.name: p for p in eps["search"].params}
+    assert grid["sort"].annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "rating"]]'
+    )
+    assert grid["min_discount"].annotation == "Optional[Literal[20, 30, 40, 50]]"
+    assert grid["min_rating"].annotation == "Optional[Literal[3, 4, 5]]"
+    assert grid["sold_by"].annotation == 'Optional[Literal["mdm"]]'
+    assert {p.name: p for p in eps["deals"].params}["event"].annotation == (
+        'Optional[Literal["black_friday", "second_chance"]]'
+    )
+    assert {p.name: p for p in eps["reviews"].params}["sort"].annotation == (
+        'Optional[Literal["newest", "rating_desc", "rating_asc"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    mdm = client.maisonsdumonde
+    mdm.search("table")
+    mdm.search(
+        "couchtisch",
+        country="de",
+        sort="price_asc",
+        page=2,
+        min_discount=30,
+        color=["n9660c0e9e5310638a19012509703a483cebdb2b"],
+        filters={"nbs": ["CAPACITY_2_places"]},
+    )
+    mdm.search("chaise", sold_by="mdm", on_sale=True, seller="BESTMOBILIER")
+    mdm.product(id="204172", country="ch", language="de")
+    mdm.product(url="https://www.maisonsdumonde.com/BE/nl/p/x-186339.htm")
+    mdm.category(category="canapes-n4dc562d7bb509362a3a2102db4cbf90b6454f1f", min_rating=4)
+    mdm.deals()
+    mdm.deals(event="second_chance", sort="price_desc")
+    mdm.reviews("186339", sort="rating_asc", cursor="eyJzb3J0IjpbMV19", limit=30)
+    mdm.stores("75011", limit=3)
+    mdm.store(store_id="41")
+    mdm.availability("204172", "125", country="fr")
+    mdm.seller(seller_id="2066", page=2)
+    base = "/api/v1/maisonsdumonde/"
+    assert seen == [
+        (base + "search", {"query": "table"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "couchtisch",
+                "country": "de",
+                "page": 2,
+                "sort": "price_asc",
+                "min_discount": 30,
+                "color": ["n9660c0e9e5310638a19012509703a483cebdb2b"],
+                "filters": {"nbs": ["CAPACITY_2_places"]},
+            },
+            120.0,
+        ),
+        (
+            base + "search",
+            {"query": "chaise", "on_sale": True, "seller": "BESTMOBILIER", "sold_by": "mdm"},
+            120.0,
+        ),
+        (base + "product", {"id": "204172", "country": "ch", "language": "de"}, 120.0),
+        (base + "product", {"url": "https://www.maisonsdumonde.com/BE/nl/p/x-186339.htm"}, 120.0),
+        (
+            base + "category",
+            {"category": "canapes-n4dc562d7bb509362a3a2102db4cbf90b6454f1f", "min_rating": 4},
+            120.0,
+        ),
+        (base + "deals", {}, 120.0),
+        (base + "deals", {"event": "second_chance", "sort": "price_desc"}, 120.0),
+        (
+            base + "reviews",
+            {"id": "186339", "sort": "rating_asc", "cursor": "eyJzb3J0IjpbMV19", "limit": 30},
+            120.0,
+        ),
+        (base + "stores", {"postcode": "75011", "limit": 3}, 120.0),
+        (base + "store", {"store_id": "41"}, 120.0),
+        (base + "availability", {"id": "204172", "store_id": "125", "country": "fr"}, 120.0),
+        (base + "seller", {"seller_id": "2066", "page": 2}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        mdm.product(country="fr")
+    with pytest.raises(ScavioError):
+        mdm.category(sort="rating")
+    with pytest.raises(ScavioError):
+        mdm.store()
+    with pytest.raises(ScavioError):
+        mdm.seller(country="de")

@@ -87,6 +87,7 @@ __all__ = [
     "_IkeaNamespace",
     "_WayfairNamespace",
     "_AshleyNamespace",
+    "_MaisonsDuMondeNamespace",
 ]
 
 class _GoogleNamespace:
@@ -12536,3 +12537,305 @@ class _AshleyNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("ashley_store", {"store_id": store_id, "url": url}, extra)
+
+class _MaisonsDuMondeNamespace:
+    """Maisons du Monde search, product, category, deals, reviews, store finder, store, store stock and marketplace seller endpoints for France, Belgium (French or Dutch), Luxembourg, the Netherlands, Germany, Spain, Italy, Portugal and Switzerland (French, German or Italian)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        min_discount: Optional[Literal[20, 30, 40, 50]] = None,
+        in_stock: Optional[bool] = None,
+        min_rating: Optional[Literal[3, 4, 5]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        style: Optional[Union[str, list[str]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[str] = None,
+        sold_by: Optional[Literal["mdm"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Maisons du Monde (furniture and home decor) by keyword, sorted by price or customer rating and filtered by price range, discount, stock, rating, color, material, style, brand, marketplace seller or any facet. A keyword that names a category answers that category's grid and says so in redirected_to (type, category_id, name, url). 40 items per page with position, id (digits for Maisons du Monde items, M + digits for marketplace items), name, collection, brand, url, image, price, was_price, discount_percent, currency, eco_participation (fr), badges, rating, review_count, color_count, sold_by (mdm or marketplace), offer_id, sponsored (sponsored marketplace tiles, not counted in count), condition, store_only and purchase_status. Also count, sponsored_count, total (exact), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters and facets (id, name, type, options with id, label and count, or a min / max range; the ids are what color, material, style, brand, seller and filters take). The German site does not sort keyword results: on de a sorted search comes back in relevance order with a note (sort works on category() and deals()). Prices are numbers in the market's currency, never converted (Switzerland is priced separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 on 4 products). price is what the site charges now; was_price is the crossed-out price shown next to a discount; discount_percent is the page's own percent off; eco_participation is the French furniture recycling fee included in the price (fr only). Maisons du Monde shows no 30-day lowest price and no price history: poll for changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in the market's language, e.g. 'table' (fr), 'couchtisch' (de).
+            country: Maisons du Monde market (default 'fr'). All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            page: Results page, 1-based, 40 items per page (at most 250 pages; a page past the last returns no items and a note).
+            sort: relevance (default), price_asc, price_desc or rating (customer rating). The site has no newest, best-seller or discount sort.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            on_sale: Only discounted items.
+            min_discount: Only items at least this many percent off.
+            in_stock: Only items in stock online.
+            min_rating: Customer rating: 5 = five stars only, 4 / 3 = that many stars and up.
+            color: 1 to 5 color option ids (facet c of the answer's facets).
+            material: 1 to 5 material option ids (facet f).
+            style: 1 to 5 style option ids (facet st).
+            brand: 1 to 5 brand option ids (facet bra), e.g. 'BRAND_MAISONS_DU_MONDE'.
+            seller: One marketplace seller's items: seller.code from seller() or a Seller facet (se) option id, e.g. 'BESTMOBILIER'. fr, de, es and it only.
+            sold_by: mdm: only items sold by Maisons du Monde itself (not marketplace sellers). fr, de, es and it only (elsewhere every item is).
+            filters: Any other facet, keyed by facets[].id with facets[].options[].id values (a str or a list of str), e.g. {'nbs': ['CAPACITY_2_places']}; dimension ranges (dd, dh, dw) as 'min-max' in cm.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_search", {"query": query, "country": country, "language": language, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "on_sale": on_sale, "min_discount": min_discount, "in_stock": in_stock, "min_rating": min_rating, "color": color, "material": material, "style": style, "brand": brand, "seller": seller, "sold_by": sold_by, "filters": filters}, extra)
+
+    def product(
+        self,
+        *,
+        id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Maisons du Monde product by reference or product URL: id, gtin13, name, collection, brand, url, price, was_price, discount_percent, currency, eco_participation (fr), badges, stock (status and the exact online quantity), store_only, sold_by, seller (marketplace items: id, name, url, rating, orders, member_since), offer_id, condition, variants (dimension, value, name, id, url, price_difference), dimensions, weight, materials, made_in, characteristics, composition, attributes, wood_and_finishes, assembly, care, documents, images, breadcrumbs, categories, short_description, description, rating, review_count, review_summary, questions and markets (the same product on every other market: country, language, url). An unknown product, or one not sold in that market, is a charged 404. Delivery and store stock: availability(); reviews: reviews(). Prices are numbers in the market's currency, never converted (Switzerland is priced separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 on 4 products). price is what the site charges now; was_price is the crossed-out price shown next to a discount; discount_percent is the page's own percent off; eco_participation is the French furniture recycling fee included in the price (fr only). Maisons du Monde shows no 30-day lowest price and no price history: poll for changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: A product reference (items[].id): digits for Maisons du Monde items, e.g. '186339', or M + digits for marketplace items, e.g. 'M24132196'. Alternative to url.
+            url: A product page of any market (its market and language are used unless country / language are sent). Alternative to id.
+            country: Maisons du Monde market (default 'fr'). All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_product", {"id": id, "url": url, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        *,
+        category: Optional[str] = None,
+        category_url: Optional[str] = None,
+        country: Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        min_discount: Optional[Literal[20, 30, 40, 50]] = None,
+        in_stock: Optional[bool] = None,
+        min_rating: Optional[Literal[3, 4, 5]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        style: Optional[Union[str, list[str]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[str] = None,
+        sold_by: Optional[Literal["mdm"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Maisons du Monde category's products by category hash or category URL, with the search sorts and filters. The hash is the same on every market, so a URL from any market works on any other. 40 items per page with position, id (digits for Maisons du Monde items, M + digits for marketplace items), name, collection, brand, url, image, price, was_price, discount_percent, currency, eco_participation (fr), badges, rating, review_count, color_count, sold_by (mdm or marketplace), offer_id, sponsored (sponsored marketplace tiles, not counted in count), condition, store_only and purchase_status. Also count, sponsored_count, total (exact), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters and facets (id, name, type, options with id, label and count, or a min / max range; the ids are what color, material, style, brand, seller and filters take). Also category (id, name, url, breadcrumbs). An unknown category is a charged 404. Prices are numbers in the market's currency, never converted (Switzerland is priced separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 on 4 products). price is what the site charges now; was_price is the crossed-out price shown next to a discount; discount_percent is the page's own percent off; eco_participation is the French furniture recycling fee included in the price (fr only). Maisons du Monde shows no 30-day lowest price and no price history: poll for changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category hash (the end of a /c/ URL, the same on every market), optionally with its name, e.g. 'canapes-n4dc562d7bb509362a3a2102db4cbf90b6454f1f', or redirected_to.category_id of a search. Alternative to category_url.
+            category_url: A category page of any market (filters in it are kept). Alternative to category.
+            country: Maisons du Monde market (default 'fr'). All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            page: Results page, 1-based, 40 items per page (at most 250 pages; a page past the last returns no items and a note).
+            sort: relevance (default), price_asc, price_desc or rating (customer rating). The site has no newest, best-seller or discount sort.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            on_sale: Only discounted items.
+            min_discount: Only items at least this many percent off.
+            in_stock: Only items in stock online.
+            min_rating: Customer rating: 5 = five stars only, 4 / 3 = that many stars and up.
+            color: 1 to 5 color option ids (facet c of the answer's facets).
+            material: 1 to 5 material option ids (facet f).
+            style: 1 to 5 style option ids (facet st).
+            brand: 1 to 5 brand option ids (facet bra), e.g. 'BRAND_MAISONS_DU_MONDE'.
+            seller: One marketplace seller's items: seller.code from seller() or a Seller facet (se) option id, e.g. 'BESTMOBILIER'. fr, de, es and it only.
+            sold_by: mdm: only items sold by Maisons du Monde itself (not marketplace sellers). fr, de, es and it only (elsewhere every item is).
+            filters: Any other facet, keyed by facets[].id with facets[].options[].id values (a str or a list of str), e.g. {'nbs': ['CAPACITY_2_places']}; dimension ranges (dd, dh, dw) as 'min-max' in cm.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_category", {"category": category, "category_url": category_url, "country": country, "language": language, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "on_sale": on_sale, "min_discount": min_discount, "in_stock": in_stock, "min_rating": min_rating, "color": color, "material": material, "style": style, "brand": brand, "seller": seller, "sold_by": sold_by, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        event: Optional[Literal["black_friday", "second_chance"]] = None,
+        category: Optional[str] = None,
+        category_url: Optional[str] = None,
+        country: Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        on_sale: Optional[bool] = None,
+        min_discount: Optional[Literal[20, 30, 40, 50]] = None,
+        in_stock: Optional[bool] = None,
+        min_rating: Optional[Literal[3, 4, 5]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        style: Optional[Union[str, list[str]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[str] = None,
+        sold_by: Optional[Literal["mdm"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Maisons du Monde sale event's products: black_friday (default, on every market while it runs) or second_chance (fr only: used and returned items, condition per item); or a category's discounted items (category / category_url, on_sale unless min_discount is sent). Same sorts and filters as search(). 40 items per page with position, id (digits for Maisons du Monde items, M + digits for marketplace items), name, collection, brand, url, image, price, was_price, discount_percent, currency, eco_participation (fr), badges, rating, review_count, color_count, sold_by (mdm or marketplace), offer_id, sponsored (sponsored marketplace tiles, not counted in count), condition, store_only and purchase_status. Also count, sponsored_count, total (exact), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters and facets (id, name, type, options with id, label and count, or a min / max range; the ids are what color, material, style, brand, seller and filters take). Also event (type, name, url, category_id). An event that is not running is a charged 404. Prices are numbers in the market's currency, never converted (Switzerland is priced separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 on 4 products). price is what the site charges now; was_price is the crossed-out price shown next to a discount; discount_percent is the page's own percent off; eco_participation is the French furniture recycling fee included in the price (fr only). Maisons du Monde shows no 30-day lowest price and no price history: poll for changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            event: black_friday (default; every market while it runs) or second_chance (fr only).
+            category: A category hash: answers its discounted items instead of an event.
+            category_url: A category page of any market: answers its discounted items instead of an event.
+            country: Maisons du Monde market (default 'fr'). All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            page: Results page, 1-based, 40 items per page (at most 250 pages; a page past the last returns no items and a note).
+            sort: relevance (default), price_asc, price_desc or rating (customer rating). The site has no newest, best-seller or discount sort.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            on_sale: Only discounted items.
+            min_discount: Only items at least this many percent off.
+            in_stock: Only items in stock online.
+            min_rating: Customer rating: 5 = five stars only, 4 / 3 = that many stars and up.
+            color: 1 to 5 color option ids (facet c of the answer's facets).
+            material: 1 to 5 material option ids (facet f).
+            style: 1 to 5 style option ids (facet st).
+            brand: 1 to 5 brand option ids (facet bra), e.g. 'BRAND_MAISONS_DU_MONDE'.
+            seller: One marketplace seller's items: seller.code from seller() or a Seller facet (se) option id, e.g. 'BESTMOBILIER'. fr, de, es and it only.
+            sold_by: mdm: only items sold by Maisons du Monde itself (not marketplace sellers). fr, de, es and it only (elsewhere every item is).
+            filters: Any other facet, keyed by facets[].id with facets[].options[].id values (a str or a list of str), e.g. {'nbs': ['CAPACITY_2_places']}; dimension ranges (dd, dh, dw) as 'min-max' in cm.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_deals", {"event": event, "category": category, "category_url": category_url, "country": country, "language": language, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "on_sale": on_sale, "min_discount": min_discount, "in_stock": in_stock, "min_rating": min_rating, "color": color, "material": material, "style": style, "brand": brand, "seller": seller, "sold_by": sold_by, "filters": filters}, extra)
+
+    def reviews(
+        self,
+        id: str,
+        *,
+        country: Optional[Literal["fr", "be", "lu", "nl", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        sort: Optional[Literal["newest", "rating_desc", "rating_asc"]] = None,
+        cursor: Optional[str] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Maisons du Monde product's customer reviews: product_id, sort, rating, review_count, rating_histogram (5 to 1), criteria and reviews (rating, text, date, author as the display name shown, country, source_market, syndicated, criteria scores, brand_reply, images), plus next_cursor for the next page. Reviews are pooled across every Maisons du Monde market and shown translated into the request language (source_market is where a review was written). Sorted newest, rating_desc or rating_asc; the site has no star filter. Reviews carry no id, title or verified flag. A product with no reviews (or a marketplace item) is a charged 404. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: A Maisons du Monde product reference (product id), e.g. '186339'.
+            country: Maisons du Monde market (default 'fr'). All 9 markets: fr (EUR, French), be (EUR, fr or nl), lu (EUR, fr), nl (EUR, nl), de (EUR, de), es (EUR, es), it (EUR, it), pt (EUR, pt), ch (CHF, fr, de or it).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            sort: newest (default), rating_desc or rating_asc.
+            cursor: next_cursor of the previous answer, for the next page (keep the same sort).
+            limit: Reviews per page, 1 to 30 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_reviews", {"id": id, "country": country, "language": language, "sort": sort, "cursor": cursor, "limit": limit}, extra)
+
+    def stores(
+        self,
+        postcode: str,
+        *,
+        country: Optional[Literal["fr", "be", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 10 Maisons du Monde stores nearest a postcode: postcode, count and stores with id, name, address, postcode, city, country, lat, lng, distance_km, url, open_now, hours (per day, opening slots) and click_collect. Call store() for the phone and services and availability() with a store id for an item's stock there. Markets: fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            postcode: A postcode of the market: 5 digits on fr / de / es / it (e.g. '75011'), 4 on be / ch, 1000-001 on pt.
+            country: Maisons du Monde market (default 'fr'). fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            limit: Stores to return, nearest first (1 to 10, default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_stores", {"postcode": postcode, "country": country, "language": language, "limit": limit}, extra)
+
+    def store(
+        self,
+        *,
+        store_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr", "be", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Maisons du Monde store by store id or store page URL: id, name, address, postcode, city, country, phone, lat, lng, url, hours (every day of the week, opening slots), services (as the store page lists them), click_collect and hours_today (by id). Markets: fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store id (stores[].id of stores()) of the market in country, e.g. '41'. Alternative to url.
+            url: A store page (stores[].url). Alternative to store_id.
+            country: Maisons du Monde market (default 'fr'). fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_store", {"store_id": store_id, "url": url, "country": country, "language": language}, extra)
+
+    def availability(
+        self,
+        id: str,
+        store_id: str,
+        *,
+        country: Optional[Literal["fr", "be", "de", "es", "it", "pt", "ch"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Maisons du Monde item's stock at one store plus the market's delivery options: product_id, store (id, name, postcode, city), in_stock, quantity (the store's stock count), stock_text, display_model (only the display piece is in store), click_collect and on_shelf (available, the site's texts) and delivery (type home, store_pickup or in_store: title, available, availability_text, from_price, currency, price_text). Home delivery is a from-price per product and market; the exact cost for a postcode is only shown in the cart and is not returned. Marketplace items are not stocked in stores. Markets: fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: A Maisons du Monde item reference (digits; marketplace items are not stocked in stores), e.g. '204172'.
+            store_id: A store id from stores() (stores[].id), e.g. '125'.
+            country: Maisons du Monde market (default 'fr'). fr, be, de, es, it, pt or ch (the store finder answers no stores on nl and lu).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_availability", {"id": id, "store_id": store_id, "country": country, "language": language}, extra)
+
+    def seller(
+        self,
+        *,
+        seller_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["fr", "de", "es", "it"]] = None,
+        language: Optional[Literal["fr", "nl", "de", "es", "it", "pt"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Maisons du Monde marketplace seller by seller id or seller URL: seller (id, name, code for search()'s seller filter, url, rating, review_count, orders, member_since, order_approval, shipping, returns, company_city, description) plus the seller's catalog as a grid (sort as search()). 40 items per page with position, id (digits for Maisons du Monde items, M + digits for marketplace items), name, collection, brand, url, image, price, was_price, discount_percent, currency, eco_participation (fr), badges, rating, review_count, color_count, sold_by (mdm or marketplace), offer_id, sponsored (sponsored marketplace tiles, not counted in count), condition, store_only and purchase_status. Also count, sponsored_count, total (exact), page, page_size, total_pages, sort, sorts_offered, requested_filters, applied_filters and facets (id, name, type, options with id, label and count, or a min / max range; the ids are what color, material, style, brand, seller and filters take). Markets: fr, de, es or it (marketplace sellers exist there only). Prices are numbers in the market's currency, never converted (Switzerland is priced separately in CHF; the euro markets shared one price per product, measured on 2026-11-14 on 4 products). price is what the site charges now; was_price is the crossed-out price shown next to a discount; discount_percent is the page's own percent off; eco_participation is the French furniture recycling fee included in the price (fr only). Maisons du Monde shows no 30-day lowest price and no price history: poll for changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A marketplace seller id (a product's seller.id), e.g. '2066'.
+            url: A seller page (seller.url). Alternative to seller_id.
+            country: Maisons du Monde market (default 'fr'). fr, de, es or it (marketplace sellers exist there only).
+            language: Language of the market's site (default its first): be fr or nl, ch fr, de or it; every other market has one language (fr and lu fr, nl nl, de de, es es, it it, pt pt). A language the market does not serve answers 400.
+            page: Results page, 1-based, 40 items per page (at most 250 pages; a page past the last returns no items and a note).
+            sort: relevance (default), price_asc, price_desc or rating (customer rating). The site has no newest, best-seller or discount sort.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("maisonsdumonde_seller", {"seller_id": seller_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
