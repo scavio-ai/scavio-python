@@ -2372,7 +2372,7 @@ owner = res["data"]["owner"]  # None when no page names an owner
 if owner:
     print(owner["name"], owner["title"], owner["source_url"],
           owner["email"], owner["email_status"])
-print(res["data"]["pages_read"], res["credits_used"])
+print(res["credits_used"])
 
 # --- After a Google Maps search: enrich each result by place_id (20 credits).
 places = client.google.maps_search("plumbers in Austin")["local_results"]
@@ -2385,7 +2385,7 @@ for place in places[:3]:
 `socials` keys are `facebook`, `instagram`, `linkedin`, `x`, `tiktok`,
 `youtube` and `pinterest`, present only when found. `owner.email_status` is
 `published` when an address on the site matches the owner's name, otherwise
-`not_found` with `owner.email` None. `pages_read` lists the home page, up to 3
+`not_found` with `owner.email` None. Each call reads the home page, up to 3
 contact, about or team pages, and the privacy and terms pages. Social profile
 links (Facebook, Instagram, LinkedIn...) are rejected as `url` with a 400: pass
 the business's own site. When both `url` and `place_id` are sent, `url` is the

@@ -15191,8 +15191,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "Returns data.company (name, website, domain, emails, phones as digits only, socials "
             "keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, "
             "contact_page, address, place_id), data.owner (name, title, source_url, email, "
-            "email_status 'published' or 'not_found'; None when no page names an owner) and "
-            "data.pages_read (home, up to 3 contact / about / team pages, privacy and terms). "
+            "email_status 'published' or 'not_found'; None when no page names an owner). "
             "Usually takes 10-45s and can take over a minute."
         ),
         params=(
