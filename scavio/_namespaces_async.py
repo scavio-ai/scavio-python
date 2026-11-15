@@ -10743,7 +10743,7 @@ class _AsyncCompanyNamespace:
         place_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Find a company's contact details and its owner from its website or a Google Maps place_id: published emails, phone numbers, social profiles and contact page, plus the owner's name and title with the page that names them. Use after a Google Maps search: pass each result's place_id. Provide url or place_id (one is required). Returns data.company (name, website, domain, emails, phones as digits only, socials keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, contact_page, address, place_id), data.owner (name, title, source_url, email, email_status 'published' or 'not_found'; None when no page names an owner). Usually takes 10-45s and can take over a minute.
+        """Find a company's contact details and its owner from its website or a Google Maps place_id: published emails, phone numbers, social profiles and contact page, plus the owner's name and title with the page that names them. Use after a Google Maps search: pass each result's place_id. Provide url or place_id (one is required). Returns data.company (name, website, domain, emails, phones in E.164 when they validate, socials keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, contact_page, address, place_id), data.owner (name, title, source_url, email, email_status 'published' or 'not_found'; None when no page names an owner). Usually takes 10-45s and can take over a minute.
 
         Costs 10 credits from a url and 20 from a place_id (1 when the listing has no readable
         website); a website that cannot be reached and a 400 are not charged. credits_used in

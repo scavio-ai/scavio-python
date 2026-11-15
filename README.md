@@ -2351,7 +2351,7 @@ Turn a business website or a Google Maps place_id into contact data,
 namespace `company`, 1 endpoint: `enrich(url=None, place_id=None)`. Provide
 `url` or `place_id`; one of the two is required (the SDK raises
 `ScavioError` before sending when both are missing). Returns the company's
-published emails, phone numbers (digits only), social profiles and contact
+published emails, phone numbers (E.164), social profiles and contact
 page, plus the owner or founder's name and title with the page that names
 them. 10 credits from a `url`, 20 from a `place_id` (1 when the listing has no
 readable website); a website that cannot be reached is not charged, and

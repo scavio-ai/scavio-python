@@ -15493,7 +15493,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "place_id: published emails, phone numbers, social profiles and contact page, plus "
             "the owner's name and title with the page that names them. Use after a Google Maps "
             "search: pass each result's place_id. Provide url or place_id (one is required). "
-            "Returns data.company (name, website, domain, emails, phones as digits only, socials "
+            "Returns data.company (name, website, domain, emails, phones in E.164 when they validate, socials "
             "keyed facebook / instagram / linkedin / x / tiktok / youtube / pinterest when found, "
             "contact_page, address, place_id), data.owner (name, title, source_url, email, "
             "email_status 'published' or 'not_found'; None when no page names an owner). "
