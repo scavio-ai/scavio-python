@@ -4310,3 +4310,144 @@ def test_trendyol_credits_paths_and_wire(monkeypatch):
         ty.coupons(seller_id="1188867")
     with pytest.raises(ScavioError):
         ty.delivery(city_id=133)
+
+
+def test_nintendo_credits_paths_and_wire(monkeypatch):
+    """nintendo (0.61.0): 6 endpoints on /api/v1/nintendo, 1 credit each, 120 s floor.
+
+    46 countries via country + language: search, product, deals, releases and dlc on the 42
+    catalog markets; prices also on kr, hk, tw and il. product and dlc take nsuid, url or slug;
+    prices takes 1 to 50 ids.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nintendo"}
+    assert sorted(eps) == ["deals", "dlc", "prices", "product", "releases", "search"]
+    catalog = (
+        '"us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", '
+        '"be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", '
+        '"fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"'
+    )
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/nintendo/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        expected = (
+            "Optional[Literal[" + catalog + ', "kr", "hk", "tw", "il"]]'
+            if m == "prices"
+            else "Optional[Literal[" + catalog + "]]"
+        )
+        assert params["country"].annotation == expected, m
+        assert params["language"].annotation == (
+            'Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]]'
+        ), m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "newest", "price_asc", "price_desc", "title", "discount"]]'
+    )
+    assert search["type"].annotation == 'Optional[Literal["game", "dlc", "bundle", "all"]]'
+    assert search["price_min"].annotation == "Optional[float]"
+    assert {p.name: p for p in eps["deals"].params}["sort"].annotation == (
+        'Optional[Literal["featured", "discount", "price_asc", "newest", "ending_soon"]]'
+    )
+    assert {p.name: p for p in eps["releases"].params}["type"].annotation == (
+        'Optional[Literal["new", "upcoming"]]'
+    )
+    assert {p.name: p for p in eps["prices"].params}["ids"].required
+    assert eps["product"].one_of == (("nsuid", "url", "slug"),)
+    assert eps["dlc"].one_of == (("nsuid", "url", "slug"),)
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    nd = client.nintendo
+    nd.search("mario")
+    nd.search(
+        "zelda",
+        country="de",
+        language="de",
+        page=2,
+        page_size=50,
+        sort="price_asc",
+        platform="switch_2",
+        on_sale=True,
+        price_max=30,
+        genre="RPG",
+        players=2,
+        has_demo=True,
+        type="all",
+    )
+    nd.product(nsuid="70010000095431")
+    nd.product(slug="mario-kart-world-switch-2", country="ca", language="fr")
+    nd.prices("70010000095431,70010000063714,70010000094234")
+    nd.prices(["70010000063716", 70010000084605], country="kr")
+    nd.deals()
+    nd.deals(country="us", sort="ending_soon", sale="square-enix")
+    nd.releases(country="gb")
+    nd.releases(country="jp", type="upcoming", platform="switch_2", page=2, page_size=10)
+    nd.dlc(slug="super-smash-bros-ultimate-switch")
+    nd.dlc(nsuid=70010000012332, country="mx")
+    base = "/api/v1/nintendo/"
+    assert seen == [
+        (base + "search", {"query": "mario"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "zelda",
+                "country": "de",
+                "language": "de",
+                "page": 2,
+                "page_size": 50,
+                "sort": "price_asc",
+                "platform": "switch_2",
+                "on_sale": True,
+                "price_max": 30,
+                "genre": "RPG",
+                "players": 2,
+                "has_demo": True,
+                "type": "all",
+            },
+            120.0,
+        ),
+        (base + "product", {"nsuid": "70010000095431"}, 120.0),
+        (
+            base + "product",
+            {"slug": "mario-kart-world-switch-2", "country": "ca", "language": "fr"},
+            120.0,
+        ),
+        (base + "prices", {"ids": "70010000095431,70010000063714,70010000094234"}, 120.0),
+        (
+            base + "prices",
+            {"ids": ["70010000063716", 70010000084605], "country": "kr"},
+            120.0,
+        ),
+        (base + "deals", {}, 120.0),
+        (
+            base + "deals",
+            {"country": "us", "sort": "ending_soon", "sale": "square-enix"},
+            120.0,
+        ),
+        (base + "releases", {"country": "gb"}, 120.0),
+        (
+            base + "releases",
+            {
+                "country": "jp",
+                "type": "upcoming",
+                "platform": "switch_2",
+                "page": 2,
+                "page_size": 10,
+            },
+            120.0,
+        ),
+        (base + "dlc", {"slug": "super-smash-bros-ultimate-switch"}, 120.0),
+        (base + "dlc", {"nsuid": 70010000012332, "country": "mx"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        nd.product(country="us")
+    with pytest.raises(ScavioError):
+        nd.dlc()

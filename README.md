@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 80 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 81 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -26,6 +26,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
+| Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
@@ -2931,6 +2932,75 @@ site's rounded text. Reviews carry the site's masked author only and no
 seller e-mail, tax number or address is returned. Failed calls are not
 charged; a not-found is charged.
 
+### 50. Games -- Nintendo eShop regional prices, sales, deals, releases and DLC
+
+The Nintendo eShop and My Nintendo Store in 46 countries. Namespace
+`nintendo`, 6 endpoints, 1 credit each: `search`, `product`, `prices`,
+`deals`, `releases`, `dlc`. Pick the market with `country` (default `us`) and
+the language with `language` (default the market's first). The request
+timeout is raised to at least 120s (Americas searches take about 8 to 13s).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+nd = client.nintendo
+
+# --- One game's price, sale price and sale end in each eShop country of its region.
+# Item ids (nsuid) are per eShop region: look the game up in the region first.
+p = nd.product(nsuid="70010000095431")["data"]["product"]  # an Americas id
+for cc in ("us", "ca", "mx", "br", "ar", "cl", "co", "pe"):
+    row = nd.prices([p["nsuid"]], country=cc)["data"]["prices"][0]
+    print(cc, row["currency"], row["price"], row["regular_price"], row["sale_price"], row["sale_end"])
+
+# --- A European id priced in Poland and Sweden (the English catalog, local prices).
+for cc in ("pl", "se"):
+    d = nd.prices(["70010000096802", "70010000063715"], country=cc)["data"]
+    print(cc, d["currency"], [(r["nsuid"], r["price"]) for r in d["prices"]], d["not_found"])
+
+# --- Search: Europe and Japan have an nsuid per item; Americas tiles carry a slug only.
+gb = nd.search("mario", country="gb", sort="price_asc", platform="switch_2")["data"]
+print(gb["total"], gb["total_pages"], [(i["nsuid"], i["title"], i["price"]) for i in gb["items"][:3]])
+us = nd.search("mario")["data"]
+first = nd.product(slug=us["items"][0]["slug"])["data"]["product"]
+
+# --- Deals: Americas = Nintendo's featured sale pages; Europe / Japan = every game on sale.
+deals = nd.deals(sort="ending_soon")["data"]
+print([s["sale"] for s in deals["sales"]], [(i["title"], i["discount_percent"], i["sale_end"]) for i in deals["items"][:3]])
+
+# --- New and upcoming releases, and a game's DLC with prices.
+new = nd.releases(country="gb")["data"]
+dlc = nd.dlc(slug="super-smash-bros-ultimate-switch")["data"]
+print(dlc["game"]["title"], dlc["count"], [(x["title"], x["type"], x["price"]) for x in dlc["dlc"][:3]])
+```
+
+Markets and languages: Americas us (USD), ca (CAD; en or fr), mx (MXN; es),
+br (BRL; pt), ar (ARS), cl (CLP), co (COP) and pe (PEN) (es); Europe in the
+market's language: gb (GBP) and ie (EUR) (en), de and at (EUR; de), ch (CHF;
+de, fr or it), fr, be (fr or nl), nl, lu (fr), it, es and pt (EUR), au (AUD),
+nz (NZD) and za (ZAR) (en); pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK),
+fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt and cy (EUR) have no Nintendo
+site of their own and read the English European catalog with that country's
+own prices; jp (JPY; ja). `prices` also serves kr (KRW), hk (HKD), tw (TWD)
+and il (EUR, European item ids). ph (no Philippines item ids published yet),
+ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+
+Item ids (`nsuid`) are per eShop region: Americas, Europe (EU / EFTA, GB, AU,
+NZ, ZA, IL), Japan, Korea, and Hong Kong + Taiwan (Taiwan uses Hong Kong ids).
+An id from one region is `not_found` in another and there is no cross-region
+title mapping: look the game up with `search` or `product` in that region,
+then call `prices` for any country of the region (up to 50 ids per call).
+Prices are always the requested country's eShop price in its currency;
+`sale_start` and `sale_end` are the eShop's own sale window. Nintendo shows
+no price history or historical low: poll `prices` to build one. Americas
+`deals` are Nintendo's featured sale pages, not every discounted game (check
+any id with `prices`); Europe and Japan `deals` are every game on sale.
+Americas `search` sorts by relevance or newest only and takes no filters, and
+the Americas `releases` lists are one page; an unsupported sort or filter
+answers 400, never silently dropped. No user reviews (Nintendo's stores have
+none; age ratings only), no best-seller charts and no autocomplete. Failed
+calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3076,6 +3146,7 @@ Scavio works with popular AI/LLM frameworks:
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
 | Trendyol (`trendyol`) | `search`, `product`, `category`, `brand`, `reviews`, `questions`, `seller`, `deals`, `coupons`, `rankings`, `suggestions`, `delivery`; 35 markets via `country` and `language` (`deals` and `coupons` tr only; `rankings` not on the English-language EU storefronts) | 1 each |
+| Nintendo (`nintendo`) | `search`, `product`, `prices`, `deals`, `releases`, `dlc`; 46 countries via `country` and `language` (`prices` also kr, hk, tw and il) | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3092,6 +3163,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.61.0
+
+- **New `nintendo` namespace** (sync and async) for the Nintendo eShop, 6
+  endpoints at 1 credit each: `search`, `product`, `prices`, `deals`,
+  `releases`, `dlc`. 46 countries via `country` and `language` (`prices` also
+  kr, hk, tw and il). Item ids are per eShop region; `prices` takes 1 to 50
+  ids. 120s timeout floor.
 
 ### Changed in 0.60.1
 

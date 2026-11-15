@@ -89,6 +89,7 @@ __all__ = [
     "_AsyncAshleyNamespace",
     "_AsyncMaisonsDuMondeNamespace",
     "_AsyncTrendyolNamespace",
+    "_AsyncNintendoNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -13302,3 +13303,175 @@ class _AsyncTrendyolNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("trendyol_delivery", {"content_id": content_id, "url": url, "item_number": item_number, "listing_id": listing_id, "city_id": city_id, "district_id": district_id, "country": country, "language": language}, extra)
+
+class _AsyncNintendoNamespace:
+    """Nintendo eShop search, product, prices (one game's price, sale price and sale end in each eShop country), deals, releases and DLC endpoints for 46 countries across the Americas, Europe, Oceania, South Africa, Japan, Korea, Hong Kong and Taiwan."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc", "title", "discount"]] = None,
+        platform: Optional[Literal["switch", "switch_2"]] = None,
+        on_sale: Optional[bool] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        genre: Optional[str] = None,
+        players: Optional[int] = None,
+        publisher: Optional[str] = None,
+        has_demo: Optional[bool] = None,
+        type: Optional[Literal["game", "dlc", "bundle", "all"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search one country's Nintendo eShop catalog by keyword. Europe and jp: items with nsuid, slug (Americas), page_id (Europe), url, title (in the request language), platform (switch / switch_2), release_date (ISO), release_date_text, publisher, price, regular_price, sale_price, discount_percent, sale_start, sale_end, currency, is_free, sales_status, image, type (game, dlc, bundle; Americas also hardware and merchandise) and age_rating (system such as ESRB, PEGI, USK or CERO, and rating), with total, page, page_size (up to 50, default 24) and total_pages; sorted by relevance, newest, price_asc, price_desc, title or discount (Europe: all six; jp: relevance, newest, price_asc, price_desc) and filtered by platform, on_sale, publisher and type (Europe also price range, genre, players and has_demo). Americas: Nintendo's store search, 40 tiles per page (games, hardware and merchandise together), sorted by relevance or newest only, no filters, with slug, title, platform, release_date, price fields, badges, category and has_more (total null, nsuid null: read product() with the slug). An unsupported sort or filter answers 400, never silently dropped. Also sort, sorts_offered, requested_filters and notes. Prices are numbers in the market's currency, always the requested country's eShop price: price (what it costs now), regular_price, sale_price, discount_percent, sale_start and sale_end (the eShop's own sale window), is_free (free-to-play is 0 with is_free true), sales_status (onsale, preorder, unreleased; not_found when that eShop does not sell the item, kept with price null). Nintendo shows no price history or historical low: poll prices() to build one. Item ids (nsuid) are per eShop region: americas (US CA MX BR AR CL CO PE), europe (EU / EFTA, GB, AU, NZ, ZA, IL), japan, kr, and hk-tw (Taiwan uses Hong Kong ids); an id from one region is not_found in another, so there is no cross-region title mapping: look the game up with search() or product() in each region, then call prices() for any country of that region. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'mario' (Japanese titles on jp).
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). kr, hk, tw and il answer prices() only (400 here). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            page: Results page, 1-based (Americas: up to 50).
+            page_size: Items per page, 1 to 50 (default 24; Europe and jp). Americas pages are fixed at 40.
+            sort: relevance (default), newest, price_asc, price_desc, title or discount. Americas: relevance and newest; jp: relevance, newest, price_asc, price_desc; Europe: all six.
+            platform: switch or switch_2 (Europe and jp; default both).
+            on_sale: Only discounted games (Europe and jp).
+            price_min: Lowest price (Europe, on markets whose catalog is priced in the market's currency: gb, and the EUR markets with a catalog of their own).
+            price_max: Highest price (as price_min).
+            genre: A genre as the catalog names it, in the request language (Europe: e.g. RPG, Action).
+            players: At least this many players (Europe).
+            publisher: Exact publisher name (Europe; jp in Japanese).
+            has_demo: Only games with a free demo (Europe).
+            type: game (default), dlc, bundle or all (Europe: game, dlc or all; jp: all four).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_search", {"query": query, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "platform": platform, "on_sale": on_sale, "price_min": price_min, "price_max": price_max, "genre": genre, "players": players, "publisher": publisher, "has_demo": has_demo, "type": type}, extra)
+
+    async def product(
+        self,
+        *,
+        nsuid: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        slug: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Nintendo eShop or My Nintendo Store product by nsuid, link or (Americas) slug, as product: nsuid, application_id, title, url, platform, type, release_date, publisher, developer, genres, players (system / local / online), languages, file size, age_rating (system such as ESRB, PEGI, USK, CERO or CLASSIND, rating and descriptors), description, price fields with sale_start / sale_end and sales_status, has_demo, nintendo_switch_online (required, features), images; on the Americas store also sku, slug, editions, is_upgrade, play_modes, availability, the game's dlc with prices, and for hardware, amiibo and merchandise the stock signal (in_stock, sold_out_permanently, max_per_order); in Europe also nsuids, page_id, physical_version, digital_version, game_series and base_game; on jp also title_reading, format and dlc_nsuids. An id unknown to that region's eShop is a charged 404. Nintendo's stores carry no user reviews (age ratings only). Prices are numbers in the market's currency, always the requested country's eShop price: price (what it costs now), regular_price, sale_price, discount_percent, sale_start and sale_end (the eShop's own sale window), is_free (free-to-play is 0 with is_free true), sales_status (onsale, preorder, unreleased; not_found when that eShop does not sell the item, kept with price null). Nintendo shows no price history or historical low: poll prices() to build one. Item ids (nsuid) are per eShop region: americas (US CA MX BR AR CL CO PE), europe (EU / EFTA, GB, AU, NZ, ZA, IL), japan, kr, and hk-tw (Taiwan uses Hong Kong ids); an id from one region is not_found in another, so there is no cross-region title mapping: look the game up with search() or product() in each region, then call prices() for any country of that region. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            nsuid: An eShop item id (14 digits starting 70; items[].nsuid, prices[].nsuid), e.g. '70010000095431'. Ids are per eShop region: an Americas id is not found in Europe. One of nsuid, url or slug.
+            url: A nintendo.com product link: an Americas store page (/us/store/products/<slug>/), a European game page (ending -<id>.html) or a nintendo.com/au game page.
+            slug: Americas markets only: the store slug (items[].slug of an Americas search, which carries no nsuid), e.g. 'mario-kart-world-switch-2'.
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). kr, hk, tw and il answer prices() only (400 here). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_product", {"nsuid": nsuid, "url": url, "slug": slug, "country": country, "language": language}, extra)
+
+    async def prices(
+        self,
+        ids: Union[str, list[Union[str, int]]],
+        *,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp", "kr", "hk", "tw", "il"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The eShop price of 1 to 50 item ids in one country: prices (nsuid, sales_status, price, regular_price, sale_price, discount_percent, sale_start, sale_end, currency, is_free), not_found (ids that eShop does not sell), count and notes. Serves every market including the prices-only kr, hk, tw and il. Use it to compare one game's regular price, sale price and sale end date across the countries of its eShop region, in each country's currency, and to watch prices and sales over time (Nintendo publishes no price history). Item ids (nsuid) are per eShop region: americas (US CA MX BR AR CL CO PE), europe (EU / EFTA, GB, AU, NZ, ZA, IL), japan, kr, and hk-tw (Taiwan uses Hong Kong ids); an id from one region is not_found in another, so there is no cross-region title mapping: look the game up with search() or product() in each region, then call prices() for any country of that region. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            ids: 1 to 50 eShop item ids of one region, as a list or comma-separated, e.g. '70010000095431,70010000063714'. More than 50 answers 400.
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). Prices only: kr (KRW; ko), hk (HKD; zh), tw (TWD; zh), il (EUR; en, European item ids). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_prices", {"ids": ids, "country": country, "language": language}, extra)
+
+    async def deals(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["featured", "discount", "price_asc", "newest", "ending_soon"]] = None,
+        platform: Optional[Literal["switch", "switch_2"]] = None,
+        sale: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Games on sale now in one country. Europe and jp: every discounted game in the catalog with the country's sale price, discount and sale_end (items with nsuid, slug (Americas), page_id (Europe), url, title (in the request language), platform (switch / switch_2), release_date (ISO), release_date_text, publisher, price, regular_price, sale_price, discount_percent, sale_start, sale_end, currency, is_free, sales_status, image, type (game, dlc, bundle; Americas also hardware and merchandise) and age_rating (system such as ESRB, PEGI, USK or CERO, and rating) and on_sale), paged (up to 50, default 24), sorted by discount (default), price_asc or newest (Europe) or newest (default) / price_asc (jp). Americas: Nintendo's featured sale pages (the nintendo.com sales and deals pages, not every discounted game: check any id with prices()), with sale on each item (the sale page it is featured in: sale, name, headline), amount_off, sales (every sale page: pass its sale slug as sale), heading, and sorts featured (default, Nintendo's order), discount, price_asc, newest and ending_soon. Also count, total, page, page_size, total_pages, sort, sorts_offered, requested_filters and notes. Prices are numbers in the market's currency, always the requested country's eShop price: price (what it costs now), regular_price, sale_price, discount_percent, sale_start and sale_end (the eShop's own sale window), is_free (free-to-play is 0 with is_free true), sales_status (onsale, preorder, unreleased; not_found when that eShop does not sell the item, kept with price null). Nintendo shows no price history or historical low: poll prices() to build one. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). kr, hk, tw and il answer prices() only (400 here). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            page: Results page, 1-based.
+            page_size: Items per page, 1 to 50 (default 24).
+            sort: Americas: featured (default), discount, price_asc, newest or ending_soon; Europe: discount (default), price_asc or newest; jp: newest (default) or price_asc.
+            platform: switch or switch_2 (default both).
+            sale: Americas only: one sale page, by its slug from sales[].sale, e.g. 'square-enix'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_deals", {"country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "platform": platform, "sale": sale}, extra)
+
+    async def releases(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        type: Optional[Literal["new", "upcoming"]] = None,
+        platform: Optional[Literal["switch", "switch_2"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """New releases (released games, newest first) or upcoming games (future release dates, soonest first) in one country, with the search item fields (nsuid, slug (Americas), page_id (Europe), url, title (in the request language), platform (switch / switch_2), release_date (ISO), release_date_text, publisher, price, regular_price, sale_price, discount_percent, sale_start, sale_end, currency, is_free, sales_status, image, type (game, dlc, bundle; Americas also hardware and merchandise) and age_rating (system such as ESRB, PEGI, USK or CERO, and rating)). Europe and jp: paged (up to 50, default 24), filtered by platform. Americas: Nintendo's new releases / coming soon lists in one page (page > 1 answers 400); titles announced for a year or month only carry release_date null and release_date_text. Also count, total, page, page_size, total_pages, requested_filters and notes. Prices are numbers in the market's currency, always the requested country's eShop price: price (what it costs now), regular_price, sale_price, discount_percent, sale_start and sale_end (the eShop's own sale window), is_free (free-to-play is 0 with is_free true), sales_status (onsale, preorder, unreleased; not_found when that eShop does not sell the item, kept with price null). Nintendo shows no price history or historical low: poll prices() to build one. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). kr, hk, tw and il answer prices() only (400 here). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            type: new (default: released games, newest first) or upcoming (future release dates, soonest first).
+            platform: switch or switch_2 (default both).
+            page: Results page, 1-based (Europe and jp; the Americas lists are one page).
+            page_size: Items per page, 1 to 50 (default 24; Europe and jp).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_releases", {"country": country, "language": language, "type": type, "platform": platform, "page": page, "page_size": page_size}, extra)
+
+    async def dlc(
+        self,
+        *,
+        nsuid: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        slug: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "br", "ar", "cl", "co", "pe", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "lu", "it", "es", "pt", "au", "nz", "za", "pl", "cz", "se", "no", "dk", "fi", "sk", "hu", "ro", "bg", "gr", "hr", "si", "ee", "lv", "lt", "mt", "cy", "jp"]] = None,
+        language: Optional[Literal["en", "fr", "es", "pt", "de", "it", "nl", "ja", "ko", "zh"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A game's DLC, bundles and upgrade packs by the game's nsuid, link or (Americas) slug: game (nsuid, title, url) and dlc (nsuid, title, url, slug (Americas), type dlc / bundle / upgrade, release_date, price, regular_price, sale_price, discount_percent, sale_start, sale_end, currency, is_free, sales_status, image), count and total. Prices are numbers in the market's currency, always the requested country's eShop price: price (what it costs now), regular_price, sale_price, discount_percent, sale_start and sale_end (the eShop's own sale window), is_free (free-to-play is 0 with is_free true), sales_status (onsale, preorder, unreleased; not_found when that eShop does not sell the item, kept with price null). Nintendo shows no price history or historical low: poll prices() to build one. Item ids (nsuid) are per eShop region: americas (US CA MX BR AR CL CO PE), europe (EU / EFTA, GB, AU, NZ, ZA, IL), japan, kr, and hk-tw (Taiwan uses Hong Kong ids); an id from one region is not_found in another, so there is no cross-region title mapping: look the game up with search() or product() in each region, then call prices() for any country of that region. Every answer carries country, language, currency and region (americas, europe, japan or asia). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            nsuid: An eShop item id (14 digits starting 70; items[].nsuid, prices[].nsuid), e.g. '70010000095431'. Ids are per eShop region: an Americas id is not found in Europe. One of nsuid, url or slug.
+            url: A nintendo.com product link: an Americas store page (/us/store/products/<slug>/), a European game page (ending -<id>.html) or a nintendo.com/au game page.
+            slug: Americas markets only: the store slug (items[].slug of an Americas search, which carries no nsuid), e.g. 'mario-kart-world-switch-2'.
+            country: eShop country (default 'us'): Americas: us (USD; en), ca (CAD; en or fr), mx (MXN; es), br (BRL; pt), ar (ARS), cl (CLP), co (COP), pe (PEN) (es). Europe, in the market's language: gb (GBP; en), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (fr), be (fr or nl), nl (nl), lu (fr), it (it), es (es), pt (pt) (EUR); au (AUD), nz (NZD), za (ZAR) (en). Europe without a Nintendo site of its own (the English European catalog with that country's own prices): pl (PLN), cz (CZK), se (SEK), no (NOK), dk (DKK), fi, sk, hu, ro, bg, gr, hr, si, ee, lv, lt, mt, cy (EUR) (en). Japan: jp (JPY; ja). kr, hk, tw and il answer prices() only (400 here). ph (no Philippines item ids published yet), ru (no eShop), uk (use gb) and countries with no eShop data answer 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles and descriptions come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nintendo_dlc", {"nsuid": nsuid, "url": url, "slug": slug, "country": country, "language": language}, extra)
