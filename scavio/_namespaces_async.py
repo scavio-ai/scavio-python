@@ -88,6 +88,7 @@ __all__ = [
     "_AsyncWayfairNamespace",
     "_AsyncAshleyNamespace",
     "_AsyncMaisonsDuMondeNamespace",
+    "_AsyncTrendyolNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -12839,3 +12840,465 @@ class _AsyncMaisonsDuMondeNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("maisonsdumonde_seller", {"seller_id": seller_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
+
+class _AsyncTrendyolNamespace:
+    """Trendyol search, product (buy box and every other seller), category, brand, reviews, questions, seller, deals, coupons, rankings, suggestions and delivery endpoints for the Turkish storefront and Trendyol's international storefronts (35 markets)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", "most_favourited", "most_rated"]] = None,
+        brand_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        seller_id: Optional[Union[str, int]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        free_shipping: Optional[bool] = None,
+        fast_delivery: Optional[bool] = None,
+        min_discount: Optional[int] = None,
+        lowest_price_days: Optional[int] = None,
+        seller_type: Optional[Literal["official", "authorized", "successful"]] = None,
+        flash_sale: Optional[bool] = None,
+        has_coupon: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Trendyol by keyword, sorted by recommended, price, newest, best seller, most favourited or most rated, and filtered by price, brand, category, seller, rating, free shipping, rush delivery, discount, lowest-price badge, seller type, flash sale, coupon or any facet. 36 items per page with position, content_id, group_id, listing_id, item_number, name, brand (id, name), category (name), url, image, images, price, original_price, discount_percent, rrp, plus_price, currency, lowest_price_badge (days, text), badges, best_seller_rank, labels, promotions, rating, review_count, favourites and orders (the site's rounded counts, e.g. 21K, 200+), seller (id), color, variant and sponsored. Sponsored items (sponsored true: ads placed among the results, repeating on every page) are flagged and kept; count is the organic items, sponsored_count the ads. Also total (exact below 100000; the site stops counting at 100000: total_capped), page, page_size, total_pages (at most 138), sort, requested_filters, notes and, with include_facets, facets (param, key, name, type, options with value, label and count: what filters takes). Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in the market's language, e.g. 'telefon' (tr).
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Results page, 1-based, 36 per page. The site lists at most 138 pages (page 139 and up: 400); a page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc, newest, best_seller, most_favourited or most_rated.
+            brand_id: 1 to 10 brand ids (items[].brand.id, e.g. 794 Samsung).
+            category_id: 1 to 10 category ids (product category.id / category.tree[].id, or the wc facet).
+            seller_id: Only one seller's items (items[].seller.id), e.g. 4473.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            min_rating: Product rating and up: 1, 2, 3, 4 or 4.5.
+            free_shipping: Only items with free shipping.
+            fast_delivery: Only items with rush delivery.
+            min_discount: Only items at least this many percent off (1 to 90).
+            lowest_price_days: Only items carrying the site's lowest-price badge for the last N days: 7, 10, 14, 30 or 90 (tr shows 10 / 14 / 30 / 90, international storefronts 7 / 14 / 30).
+            seller_type: official (the brand's official seller), authorized or successful sellers only.
+            flash_sale: Only flash-sale items.
+            has_coupon: Only items with a collectable coupon.
+            filters: Any other facet, keyed by facets[].param with facets[].options[].value values (a str or a list of str; send include_facets once to read them): {'attr': ['348|1']} is a color, {'wg': '1'} a gender.
+            include_facets: Also return facets (filter groups with option values and counts). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_search", {"query": query, "country": country, "language": language, "page": page, "sort": sort, "brand_id": brand_id, "category_id": category_id, "seller_id": seller_id, "price_min": price_min, "price_max": price_max, "min_rating": min_rating, "free_shipping": free_shipping, "fast_delivery": fast_delivery, "min_discount": min_discount, "lowest_price_days": lowest_price_days, "seller_type": seller_type, "flash_sale": flash_sale, "has_coupon": has_coupon, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def product(
+        self,
+        *,
+        content_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        include_description: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Trendyol product by content id or link, with the buy-box seller and every other seller's offer: content_id, product_group_id, product_code, name, brand, category (id, name, path, tree), url, price, original_price, discount_percent, rrp, currency, lowest_price_badge, in_stock, running_out, max_per_order, color, options, variants (attribute, value, item_number, in_stock, price, barcode, selected), attributes, images, rating, rating_count, review_count, favourite_count, category_rankings, buy_box (seller id, name, score out of 10, badges, city, country, cash_on_delivery, corporate_invoice; listing_id, item_number, prices, free_shipping, rush_delivery_hours, flash_sale, has_coupon), other_sellers (seller id, name, score, badges; listing_id, item_number, prices, currency, free_shipping, rush_delivery, lowest_price_badge, promotions), other_seller_count, promotions, returnable, max_installments, vat_percent, has_description and, with include_description, description (text and HTML). Trendyol's developer FAQ says the buy box is chosen by algorithm metrics, not price alone: compare other_sellers. The seller's legal disclosure (e-mail, tax number, address) is not returned. A product unknown, or not sold on that storefront, is a charged 404. Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            content_id: A product's content id (items[].content_id, the number after -p- in a product link), e.g. 975557855. Alternative to url.
+            url: A product link of any Trendyol storefront (a language-only path like /en/... needs country). Alternative to content_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            include_description: Also return the seller's description (text and HTML). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_product", {"content_id": content_id, "url": url, "country": country, "language": language, "include_description": include_description}, extra)
+
+    async def category(
+        self,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", "most_favourited", "most_rated"]] = None,
+        brand_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        seller_id: Optional[Union[str, int]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        free_shipping: Optional[bool] = None,
+        fast_delivery: Optional[bool] = None,
+        min_discount: Optional[int] = None,
+        lowest_price_days: Optional[int] = None,
+        seller_type: Optional[Literal["official", "authorized", "successful"]] = None,
+        flash_sale: Optional[bool] = None,
+        has_coupon: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Trendyol category's products by category id or link, with the search sorts and filters. Category ids are the same on every market. 36 items per page with position, content_id, group_id, listing_id, item_number, name, brand (id, name), category (name), url, image, images, price, original_price, discount_percent, rrp, plus_price, currency, lowest_price_badge (days, text), badges, best_seller_rank, labels, promotions, rating, review_count, favourites and orders (the site's rounded counts, e.g. 21K, 200+), seller (id), color, variant and sponsored. Sponsored items (sponsored true: ads placed among the results, repeating on every page) are flagged and kept; count is the organic items, sponsored_count the ads. Also total (exact below 100000; the site stops counting at 100000: total_capped), page, page_size, total_pages (at most 138), sort, requested_filters, notes and, with include_facets, facets (param, key, name, type, options with value, label and count: what filters takes). Also category (id, name in the request language, url). An unknown category is a charged 404. Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id (103498 phones, 56 dresses; the same id on every market). Alternative to url.
+            url: A category link (<name>-x-c<id>). Alternative to category_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Results page, 1-based, 36 per page. The site lists at most 138 pages (page 139 and up: 400); a page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc, newest, best_seller, most_favourited or most_rated.
+            brand_id: 1 to 10 brand ids (items[].brand.id, e.g. 794 Samsung).
+            seller_id: Only one seller's items (items[].seller.id), e.g. 4473.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            min_rating: Product rating and up: 1, 2, 3, 4 or 4.5.
+            free_shipping: Only items with free shipping.
+            fast_delivery: Only items with rush delivery.
+            min_discount: Only items at least this many percent off (1 to 90).
+            lowest_price_days: Only items carrying the site's lowest-price badge for the last N days: 7, 10, 14, 30 or 90 (tr shows 10 / 14 / 30 / 90, international storefronts 7 / 14 / 30).
+            seller_type: official (the brand's official seller), authorized or successful sellers only.
+            flash_sale: Only flash-sale items.
+            has_coupon: Only items with a collectable coupon.
+            filters: Any other facet, keyed by facets[].param with facets[].options[].value values (a str or a list of str; send include_facets once to read them): {'attr': ['348|1']} is a color, {'wg': '1'} a gender.
+            include_facets: Also return facets (filter groups with option values and counts). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_category", {"category_id": category_id, "url": url, "country": country, "language": language, "page": page, "sort": sort, "brand_id": brand_id, "seller_id": seller_id, "price_min": price_min, "price_max": price_max, "min_rating": min_rating, "free_shipping": free_shipping, "fast_delivery": fast_delivery, "min_discount": min_discount, "lowest_price_days": lowest_price_days, "seller_type": seller_type, "flash_sale": flash_sale, "has_coupon": has_coupon, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def brand(
+        self,
+        *,
+        brand_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", "most_favourited", "most_rated"]] = None,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        seller_id: Optional[Union[str, int]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        free_shipping: Optional[bool] = None,
+        fast_delivery: Optional[bool] = None,
+        min_discount: Optional[int] = None,
+        lowest_price_days: Optional[int] = None,
+        seller_type: Optional[Literal["official", "authorized", "successful"]] = None,
+        flash_sale: Optional[bool] = None,
+        has_coupon: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Trendyol by brand id or link, with the search sorts and filters. 36 items per page with position, content_id, group_id, listing_id, item_number, name, brand (id, name), category (name), url, image, images, price, original_price, discount_percent, rrp, plus_price, currency, lowest_price_badge (days, text), badges, best_seller_rank, labels, promotions, rating, review_count, favourites and orders (the site's rounded counts, e.g. 21K, 200+), seller (id), color, variant and sponsored. Sponsored items (sponsored true: ads placed among the results, repeating on every page) are flagged and kept; count is the organic items, sponsored_count the ads. Also total (exact below 100000; the site stops counting at 100000: total_capped), page, page_size, total_pages (at most 138), sort, requested_filters, notes and, with include_facets, facets (param, key, name, type, options with value, label and count: what filters takes). Also brand (id, name, url). An unknown brand is a charged 404. Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand_id: A brand id (items[].brand.id, e.g. 794 Samsung). Alternative to url.
+            url: A brand link (<brand>-x-b<id>). Alternative to brand_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Results page, 1-based, 36 per page. The site lists at most 138 pages (page 139 and up: 400); a page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc, newest, best_seller, most_favourited or most_rated.
+            category_id: 1 to 10 category ids (product category.id / category.tree[].id, or the wc facet).
+            seller_id: Only one seller's items (items[].seller.id), e.g. 4473.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            min_rating: Product rating and up: 1, 2, 3, 4 or 4.5.
+            free_shipping: Only items with free shipping.
+            fast_delivery: Only items with rush delivery.
+            min_discount: Only items at least this many percent off (1 to 90).
+            lowest_price_days: Only items carrying the site's lowest-price badge for the last N days: 7, 10, 14, 30 or 90 (tr shows 10 / 14 / 30 / 90, international storefronts 7 / 14 / 30).
+            seller_type: official (the brand's official seller), authorized or successful sellers only.
+            flash_sale: Only flash-sale items.
+            has_coupon: Only items with a collectable coupon.
+            filters: Any other facet, keyed by facets[].param with facets[].options[].value values (a str or a list of str; send include_facets once to read them): {'attr': ['348|1']} is a color, {'wg': '1'} a gender.
+            include_facets: Also return facets (filter groups with option values and counts). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_brand", {"brand_id": brand_id, "url": url, "country": country, "language": language, "page": page, "sort": sort, "category_id": category_id, "seller_id": seller_id, "price_min": price_min, "price_max": price_max, "min_rating": min_rating, "free_shipping": free_shipping, "fast_delivery": fast_delivery, "min_discount": min_discount, "lowest_price_days": lowest_price_days, "seller_type": seller_type, "flash_sale": flash_sale, "has_coupon": has_coupon, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def reviews(
+        self,
+        *,
+        content_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["recommended", "newest", "oldest", "rating_desc", "rating_asc"]] = None,
+        rating: Optional[int] = None,
+        with_media: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Trendyol product's reviews: rating, rating_count, review_count, photo_review_count, rating_histogram (5 to 1), topics (with positive / negative counts), sizes, review_summary (Trendyol's own summary, labelled with its source) and reviews (id, rating, text, date, updated_at, likes, author as the site shows it, already masked, verified_buyer, elite, influencer, seller, size, fit, variant, language, photos), count, page, page_size (up to 50), total_pages. Sorted recommended, newest, oldest, rating_desc or rating_asc; filtered by star rating or photos. Reviewer height and weight are never returned. International storefronts list the reviews written in their language. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            content_id: A product's content id (items[].content_id, the number after -p- in a product link), e.g. 975557855. Alternative to url.
+            url: A product link of any Trendyol storefront (a language-only path like /en/... needs country). Alternative to content_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Page, 1-based (up to 500).
+            page_size: Reviews per page, 1 to 50 (default 20).
+            sort: recommended (default, the site's order), newest, oldest, rating_desc or rating_asc.
+            rating: Only reviews with this many stars (1 to 5).
+            with_media: Only reviews with photos.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_reviews", {"content_id": content_id, "url": url, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "rating": rating, "with_media": with_media}, extra)
+
+    async def questions(
+        self,
+        *,
+        content_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Trendyol product's answered seller questions: questions (id, text, date, verified_buyer, answer with text, answered_in and seller id and name; original_text when Trendyol translated it), topics, total, total_asked, count, page, page_size (up to 20), total_pages. Askers are not named. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            content_id: A product's content id (items[].content_id, the number after -p- in a product link), e.g. 975557855. Alternative to url.
+            url: A product link of any Trendyol storefront (a language-only path like /en/... needs country). Alternative to content_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Page, 1-based (up to 500).
+            page_size: Questions per page, 1 to 20 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_questions", {"content_id": content_id, "url": url, "country": country, "language": language, "page": page, "page_size": page_size}, extra)
+
+    async def seller(
+        self,
+        *,
+        seller_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        include_products: Optional[bool] = None,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", "most_favourited", "most_rated"]] = None,
+        brand_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        free_shipping: Optional[bool] = None,
+        fast_delivery: Optional[bool] = None,
+        min_discount: Optional[int] = None,
+        lowest_price_days: Optional[int] = None,
+        seller_type: Optional[Literal["official", "authorized", "successful"]] = None,
+        flash_sale: Optional[bool] = None,
+        has_coupon: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Trendyol seller's store profile by seller id or store link: seller (id, name, score with score_scale 10, product_count, follower_count, followers_text, follower_coupon, badges, ranking, city, on_trendyol_for, average_shipping_time, question_response_time, average_product_rating, average_seller_rating, corporate_invoice, metrics, logo, store_url) and, with include_products, the seller's products as a grid (position, content_id, group_id, listing_id, item_number, name, brand (id, name), category (name), url, image, images, price, original_price, discount_percent, rrp, plus_price, currency, lowest_price_badge (days, text), badges, best_seller_rank, labels, promotions, rating, review_count, favourites and orders (the site's rounded counts, e.g. 21K, 200+), seller (id), color, variant and sponsored; search sorts and filters, query). No e-mail, tax number, address or legal name. An unknown seller is a charged 404. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A seller id (items[].seller.id, buy_box.seller.id, other_sellers[].seller.id), e.g. 4473. Alternative to url.
+            url: A seller store link (/magaza/<name>-m-<id>, or /store/<name>-m-<id> on international storefronts). Alternative to seller_id.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            include_products: Also return the seller's products as a grid (page, sort, query and the search filters apply). Still 1 credit.
+            query: Search within the seller's products (with include_products).
+            page: Results page, 1-based, 36 per page. The site lists at most 138 pages (page 139 and up: 400); a page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc, newest, best_seller, most_favourited or most_rated.
+            brand_id: 1 to 10 brand ids (items[].brand.id, e.g. 794 Samsung).
+            category_id: 1 to 10 category ids (product category.id / category.tree[].id, or the wc facet).
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            min_rating: Product rating and up: 1, 2, 3, 4 or 4.5.
+            free_shipping: Only items with free shipping.
+            fast_delivery: Only items with rush delivery.
+            min_discount: Only items at least this many percent off (1 to 90).
+            lowest_price_days: Only items carrying the site's lowest-price badge for the last N days: 7, 10, 14, 30 or 90 (tr shows 10 / 14 / 30 / 90, international storefronts 7 / 14 / 30).
+            seller_type: official (the brand's official seller), authorized or successful sellers only.
+            flash_sale: Only flash-sale items.
+            has_coupon: Only items with a collectable coupon.
+            filters: Any other facet, keyed by facets[].param with facets[].options[].value values (a str or a list of str; send include_facets once to read them): {'attr': ['348|1']} is a color, {'wg': '1'} a gender.
+            include_facets: Also return facets (filter groups with option values and counts). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_seller", {"seller_id": seller_id, "url": url, "country": country, "language": language, "include_products": include_products, "query": query, "page": page, "sort": sort, "brand_id": brand_id, "category_id": category_id, "price_min": price_min, "price_max": price_max, "min_rating": min_rating, "free_shipping": free_shipping, "fast_delivery": fast_delivery, "min_discount": min_discount, "lowest_price_days": lowest_price_days, "seller_type": seller_type, "flash_sale": flash_sale, "has_coupon": has_coupon, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["flash", "super_discounts"]] = None,
+        slot: Optional[str] = None,
+        country: Optional[Literal["tr"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", "most_favourited", "most_rated"]] = None,
+        brand_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        seller_id: Optional[Union[str, int]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        free_shipping: Optional[bool] = None,
+        fast_delivery: Optional[bool] = None,
+        min_discount: Optional[int] = None,
+        lowest_price_days: Optional[int] = None,
+        seller_type: Optional[Literal["official", "authorized", "successful"]] = None,
+        flash_sale: Optional[bool] = None,
+        has_coupon: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Trendyol's flash deals or super discounts as a grid. type flash: slots (tag, status active or upcoming, date, start, end; tags are dated) and the active slot's items, or a chosen slot's (an upcoming slot lists no items until it opens); type super_discounts: Super Firsatlar, campaign items at a 10 / 14 / 30-day low and at least 30% off. Search sorts and filters apply. 36 items per page with position, content_id, group_id, listing_id, item_number, name, brand (id, name), category (name), url, image, images, price, original_price, discount_percent, rrp, plus_price, currency, lowest_price_badge (days, text), badges, best_seller_rank, labels, promotions, rating, review_count, favourites and orders (the site's rounded counts, e.g. 21K, 200+), seller (id), color, variant and sponsored. Sponsored items (sponsored true: ads placed among the results, repeating on every page) are flagged and kept; count is the organic items, sponsored_count the ads. Also total (exact below 100000; the site stops counting at 100000: total_capped), page, page_size, total_pages (at most 138), sort, requested_filters, notes and, with include_facets, facets (param, key, name, type, options with value, label and count: what filters takes). Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Turkish storefront only (international storefronts run no flash or super-discount pages: 400). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: flash (default: the live slot unless slot is sent) or super_discounts (Super Firsatlar).
+            slot: A flash slot tag from slots[].tag of a previous answer (tags are dated), e.g. 'fs_15_11_2026_21_24'.
+            country: tr only (the Turkish storefront; every other market answers 400).
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            page: Results page, 1-based, 36 per page. The site lists at most 138 pages (page 139 and up: 400); a page past the last returns no items and a note.
+            sort: recommended (default), price_asc, price_desc, newest, best_seller, most_favourited or most_rated.
+            brand_id: 1 to 10 brand ids (items[].brand.id, e.g. 794 Samsung).
+            category_id: 1 to 10 category ids (product category.id / category.tree[].id, or the wc facet).
+            seller_id: Only one seller's items (items[].seller.id), e.g. 4473.
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            min_rating: Product rating and up: 1, 2, 3, 4 or 4.5.
+            free_shipping: Only items with free shipping.
+            fast_delivery: Only items with rush delivery.
+            min_discount: Only items at least this many percent off (1 to 90).
+            lowest_price_days: Only items carrying the site's lowest-price badge for the last N days: 7, 10, 14, 30 or 90 (tr shows 10 / 14 / 30 / 90, international storefronts 7 / 14 / 30).
+            seller_type: official (the brand's official seller), authorized or successful sellers only.
+            flash_sale: Only flash-sale items.
+            has_coupon: Only items with a collectable coupon.
+            filters: Any other facet, keyed by facets[].param with facets[].options[].value values (a str or a list of str; send include_facets once to read them): {'attr': ['348|1']} is a color, {'wg': '1'} a gender.
+            include_facets: Also return facets (filter groups with option values and counts). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_deals", {"type": type, "slot": slot, "country": country, "language": language, "page": page, "sort": sort, "brand_id": brand_id, "category_id": category_id, "seller_id": seller_id, "price_min": price_min, "price_max": price_max, "min_rating": min_rating, "free_shipping": free_shipping, "fast_delivery": fast_delivery, "min_discount": min_discount, "lowest_price_days": lowest_price_days, "seller_type": seller_type, "flash_sale": flash_sale, "has_coupon": has_coupon, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def coupons(
+        self,
+        *,
+        content_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        seller_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["tr"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The collectable coupons for one Trendyol product's listing (the buy box, or seller_id's): coupons (id, discount, discount_type amount or percent, discount_amount, discount_percent, max_discount, min_basket, currency, valid_until (Turkey time), issued_by, seller_id, link, mega_coupon, plus_members_only, messages, collectable), count and product (name, seller, price, currency). Coupons belong to each seller's listing: the buy box often has none while another seller has some, so pass other_sellers[].seller.id of product() as seller_id. Turkish storefront only (400 elsewhere). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            content_id: A product's content id (items[].content_id, the number after -p- in a product link), e.g. 975557855. Alternative to url.
+            url: A product link of any Trendyol storefront (a language-only path like /en/... needs country). Alternative to content_id.
+            seller_id: Which seller's listing to read coupons for (default the buy box; another seller from other_sellers[].seller.id), e.g. 1188867.
+            country: tr only (the Turkish storefront; every other market answers 400).
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_coupons", {"content_id": content_id, "url": url, "seller_id": seller_id, "country": country, "language": language}, extra)
+
+    async def rankings(
+        self,
+        category_id: Union[str, int],
+        *,
+        ranking: Optional[Literal["best_seller", "most_favourited", "most_rated", "top_viewed"]] = None,
+        page: Optional[int] = None,
+        country: Optional[Literal["tr", "de", "at", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Trendyol category's top-100 list: best_seller, most_favourited, most_rated or top_viewed, 20 per page (5 pages): ranking, category (id, name), items (rank, content_id, listing_id, name, brand, url, image, images, price, original_price, discount_percent, currency, lowest_price_badge, badges, promotions, rating, review_count, in_stock, running_out, seller), count, total, page, page_size, total_pages. Not on the English-language EU storefronts (fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu), which have no ranking lists. Prices are numbers in the market's currency. Each international storefront has its own price list (mostly sold by Trendyol itself and shipped cross-border), not a currency conversion of the Turkish price. price is what one unit costs at checkout; original_price is the higher (crossed-out) price it is shown against and discount_percent is computed from the two; rrp is the recommended retail price where shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's 'lowest price of the last N days' badge (days, text): a day count only. Trendyol publishes no numeric 30-day lowest price and no price history: poll to track changes. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id: 56 dresses, 103498 phones, 1156 lipsticks.
+            ranking: best_seller (default), most_favourited, most_rated or top_viewed.
+            page: Page of 20, 1 to 5 (the top 100).
+            country: Trendyol market (default 'tr'): any market except the 15 English-language EU storefronts (fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu), which have no ranking lists (400 there).
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_rankings", {"category_id": category_id, "ranking": ranking, "page": page, "country": country, "language": language}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Trendyol's search-box suggestions for a partial query: query, suggestions (text, type keyword / category / brand / store / other, site_type, url, category_ids, seller_id, brand_id, image), count. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'iph'.
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    async def delivery(
+        self,
+        *,
+        content_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        item_number: Optional[Union[str, int]] = None,
+        listing_id: Optional[str] = None,
+        city_id: Optional[Union[str, int]] = None,
+        district_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", "lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]] = None,
+        language: Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", "sr", "uk"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Delivery estimate for one Trendyol product variant from every seller listing it: content_id, item_number, city_id, district_id, time_zone (dates are local), listings (listing_id, seller, buy_box, delivery start and end, ships_by, ships_in_days, fast_options, tomorrow_shipping_cutoff, same_day_shipping_cutoff, rush_delivery_hours, agreed_delivery_days, local_delivery, carriers), count. On the Turkish storefront city_id and district_id narrow the estimate to an address (Istanbul 133, Sisli 54; there is no city list). Without item_number and listing_id the product is read first for the buy box (still 1 credit). No pickup points. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            content_id: A product's content id (items[].content_id, the number after -p- in a product link), e.g. 975557855. Alternative to url.
+            url: A product link of any Trendyol storefront (a language-only path like /en/... needs country). Alternative to content_id.
+            item_number: The variant (variants[].item_number or buy_box.item_number); default the buy box's.
+            listing_id: The listing the site treats as the default (buy_box.listing_id, 32 characters); default the buy box's. With item_number the product is not read first.
+            city_id: A Turkish city id (tr only; Istanbul is 133).
+            district_id: A district id of that city (tr only, needs city_id; Istanbul's Sisli is 54).
+            country: Trendyol market (default 'tr'): tr (TRY; tr, en or ar), de and at (EUR; de), fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu (EUR; en), bg (EUR; bg or en), gr (EUR; el or en), cz (CZK; cs or en), hu (HUF; hu or en), pl (PLN; pl or en), ro (RON; ro or en), sk (EUR; sk or en), rs (RSD; sr or en), ua (UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en), qa, kw, om, bh (QAR, KWD, OMR, BHD; ar or en), az (AZN; tr). ge, kz, kg and iq are served as the Turkish storefront and ie, mt, gb, ru, us, ca, jo, lb are not sold to: 400.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, categories and reviews come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trendyol_delivery", {"content_id": content_id, "url": url, "item_number": item_number, "listing_id": listing_id, "city_id": city_id, "district_id": district_id, "country": country, "language": language}, extra)

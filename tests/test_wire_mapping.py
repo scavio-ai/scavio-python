@@ -4147,3 +4147,166 @@ def test_maisonsdumonde_credits_paths_and_wire(monkeypatch):
         mdm.store()
     with pytest.raises(ScavioError):
         mdm.seller(country="de")
+
+
+def test_trendyol_credits_paths_and_wire(monkeypatch):
+    """trendyol (0.60.0): 12 endpoints on /api/v1/trendyol, 1 credit each, 120 s floor.
+
+    35 markets via country + language; deals and coupons serve tr only; rankings is not on the
+    15 English-language EU storefronts. product, reviews, questions, coupons and delivery take
+    content_id or url; category takes category_id or url; brand brand_id or url; seller
+    seller_id or url.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "trendyol"}
+    assert sorted(eps) == [
+        "brand", "category", "coupons", "deals", "delivery", "product", "questions", "rankings",
+        "reviews", "search", "seller", "suggestions",
+    ]
+    all_markets = (
+        'Optional[Literal["tr", "de", "at", "fr", "be", "hr", "dk", "ee", "fi", "it", "lv", '
+        '"lt", "nl", "pt", "si", "es", "se", "lu", "bg", "gr", "cz", "hu", "pl", "ro", "sk", '
+        '"rs", "ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]]'
+    )
+    ranking_markets = (
+        'Optional[Literal["tr", "de", "at", "bg", "gr", "cz", "hu", "pl", "ro", "sk", "rs", '
+        '"ua", "md", "ae", "sa", "qa", "kw", "om", "bh", "az"]]'
+    )
+    tr_only = 'Optional[Literal["tr"]]'
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/trendyol/" + m, ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        expected = {"deals": tr_only, "coupons": tr_only, "rankings": ranking_markets}
+        assert params["country"].annotation == expected.get(m, all_markets), m
+        assert params["language"].annotation == (
+            'Optional[Literal["tr", "en", "ar", "de", "bg", "el", "cs", "hu", "pl", "ro", "sk", '
+            '"sr", "uk"]]'
+        ), m
+    grid = {p.name: p for p in eps["search"].params}
+    assert grid["sort"].annotation == (
+        'Optional[Literal["recommended", "price_asc", "price_desc", "newest", "best_seller", '
+        '"most_favourited", "most_rated"]]'
+    )
+    assert grid["seller_type"].annotation == (
+        'Optional[Literal["official", "authorized", "successful"]]'
+    )
+    assert grid["brand_id"].annotation == "Optional[Union[str, int, list[Union[str, int]]]]"
+    assert not any(p.doc.startswith("1 to 10 category") for p in eps["category"].params)
+    assert {p.name: p for p in eps["rankings"].params}["category_id"].required
+    assert {p.name: p for p in eps["deals"].params}["type"].annotation == (
+        'Optional[Literal["flash", "super_discounts"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ty = client.trendyol
+    ty.search("telefon")
+    ty.search(
+        "kulaklik",
+        country="tr",
+        language="en",
+        page=2,
+        sort="price_asc",
+        brand_id=[794],
+        price_max=5000,
+        min_rating=4.5,
+        lowest_price_days=30,
+        seller_type="official",
+        filters={"attr": ["348|1"]},
+        include_facets=True,
+    )
+    ty.product(content_id=975557855, include_description=True)
+    ty.product(url="https://www.trendyol.com/x/y-p-975557855", country="de")
+    ty.category(category_id="103498", sort="price_desc")
+    ty.brand(brand_id=794, country="ro")
+    ty.reviews(
+        content_id="975557855", page=2, page_size=50, sort="newest", rating=5, with_media=True
+    )
+    ty.questions(content_id="975557855", country="ae", language="ar")
+    ty.seller(seller_id=4473, include_products=True, query="kilif")
+    ty.deals(type="super_discounts", sort="price_asc")
+    ty.coupons(content_id="780343279", seller_id="1188867")
+    ty.rankings(56, ranking="most_favourited", page=2)
+    ty.suggestions("iph", country="sa")
+    ty.delivery(content_id="975557855", city_id=133, district_id=54)
+    base = "/api/v1/trendyol/"
+    assert seen == [
+        (base + "search", {"query": "telefon"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "kulaklik",
+                "country": "tr",
+                "language": "en",
+                "page": 2,
+                "sort": "price_asc",
+                "brand_id": [794],
+                "price_max": 5000,
+                "min_rating": 4.5,
+                "lowest_price_days": 30,
+                "seller_type": "official",
+                "filters": {"attr": ["348|1"]},
+                "include_facets": True,
+            },
+            120.0,
+        ),
+        (base + "product", {"content_id": 975557855, "include_description": True}, 120.0),
+        (
+            base + "product",
+            {"url": "https://www.trendyol.com/x/y-p-975557855", "country": "de"},
+            120.0,
+        ),
+        (base + "category", {"category_id": "103498", "sort": "price_desc"}, 120.0),
+        (base + "brand", {"brand_id": 794, "country": "ro"}, 120.0),
+        (
+            base + "reviews",
+            {
+                "content_id": "975557855",
+                "page": 2,
+                "page_size": 50,
+                "sort": "newest",
+                "rating": 5,
+                "with_media": True,
+            },
+            120.0,
+        ),
+        (
+            base + "questions",
+            {"content_id": "975557855", "country": "ae", "language": "ar"},
+            120.0,
+        ),
+        (
+            base + "seller",
+            {"seller_id": 4473, "include_products": True, "query": "kilif"},
+            120.0,
+        ),
+        (base + "deals", {"type": "super_discounts", "sort": "price_asc"}, 120.0),
+        (base + "coupons", {"content_id": "780343279", "seller_id": "1188867"}, 120.0),
+        (base + "rankings", {"category_id": 56, "ranking": "most_favourited", "page": 2}, 120.0),
+        (base + "suggestions", {"query": "iph", "country": "sa"}, 120.0),
+        (
+            base + "delivery",
+            {"content_id": "975557855", "city_id": 133, "district_id": 54},
+            120.0,
+        ),
+    ]
+    with pytest.raises(ScavioError):
+        ty.product(country="tr")
+    with pytest.raises(ScavioError):
+        ty.category(sort="newest")
+    with pytest.raises(ScavioError):
+        ty.brand()
+    with pytest.raises(ScavioError):
+        ty.seller(include_products=True)
+    with pytest.raises(ScavioError):
+        ty.coupons(seller_id="1188867")
+    with pytest.raises(ScavioError):
+        ty.delivery(city_id=133)

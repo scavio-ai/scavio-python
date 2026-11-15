@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 79 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 80 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -37,6 +37,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
+| Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -2858,6 +2859,77 @@ are not stocked in stores). `deals` events are `black_friday` (every market
 while it runs) and `second_chance` (fr: used and returned items). No search
 suggestions. Failed calls are not charged; a not-found is charged.
 
+### 49. Marketplace -- Trendyol seller prices, buy box, reviews, coupons and rankings
+
+Trendyol (Turkey's largest online marketplace) and its international
+storefronts across Europe, the Gulf and Azerbaijan: 35 markets. Namespace
+`trendyol`, 12 endpoints, 1 credit each: `search`, `product`, `category`,
+`brand`, `reviews`, `questions`, `seller`, `deals`, `coupons`, `rankings`,
+`suggestions`, `delivery`. Pick the market with `country` (default `tr`) and
+the language with `language` (default the market's first). The request
+timeout is raised to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ty = client.trendyol
+
+# --- One product: the buy-box seller and every other seller's price and score.
+p = ty.product(content_id=975557855)["data"]
+bb = p["buy_box"]
+print(p["name"], p["currency"], bb["seller"]["name"], bb["seller"]["score"], bb["price"])
+for o in p["other_sellers"]:
+    print(o["seller"]["name"], o["seller"]["score"], o["price"], o["original_price"], o["lowest_price_badge"])
+
+# --- Search: 36 per page; sponsored cards are flagged and repeat across pages.
+res = ty.search("telefon", sort="price_asc", lowest_price_days=30)["data"]
+print(res["total"], res["total_capped"], res["count"], res["sponsored_count"])
+organic = [i for i in res["items"] if not i["sponsored"]]
+
+# --- An international storefront: its own price list and language.
+ro = ty.search("rochie", country="ro", language="ro")["data"]
+print(ro["currency"], ro["items"][0]["name"], ro["items"][0]["price"])
+
+# --- Reviews (masked authors only) and answered seller questions.
+rev = ty.reviews(content_id=975557855, sort="newest")["data"]
+print(rev["rating"], rev["rating_histogram"], rev["reviews"][0]["author"])
+qa = ty.questions(content_id=975557855)["data"]
+
+# --- Coupons belong to each seller's listing (tr only); pass another seller's id.
+cp = ty.coupons(content_id=1164743007)["data"]
+print([(c["discount"], c["discount_type"], c["min_basket"], c["valid_until"]) for c in cp["coupons"]])
+
+# --- Top-100 rankings, flash deals (tr only) and a delivery estimate for Istanbul / Sisli.
+top = ty.rankings(56, ranking="best_seller")["data"]
+flash = ty.deals(type="flash")["data"]
+dl = ty.delivery(content_id=975557855, city_id=133, district_id=54)["data"]
+print([(l["seller"], l["delivery"]) for l in dl["listings"][:3]])
+```
+
+Markets and languages: tr (TRY; tr, en or ar), de and at (EUR; de), fr, be,
+hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se and lu (EUR; en), bg (EUR; bg
+or en), gr (EUR; el or en), sk (EUR; sk or en), cz (CZK; cs or en), hu (HUF;
+hu or en), pl (PLN; pl or en), ro (RON; ro or en), rs (RSD; sr or en), ua
+(UAH; uk or en), md (MDL; ro or en), ae (AED; en or ar), sa (SAR; ar or en),
+qa, kw, om and bh (QAR, KWD, OMR, BHD; ar or en) and az (AZN; tr). `deals`
+and `coupons` are tr only; `rankings` is not on the 15 English-language EU
+storefronts (fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu),
+which have no ranking lists; `delivery`'s `city_id` / `district_id` are tr
+only (Istanbul 133, Sisli 54; there is no city list). Every other endpoint
+serves all 35. The international storefronts are mostly sold cross-border by
+Trendyol itself and have their own price lists, not a currency conversion of
+the Turkish price (measured on 2 products on 2026-11-15). Trendyol's developer
+FAQ says the buy box is chosen by algorithm metrics, not price alone, so
+compare `buy_box` with `other_sellers`. `lowest_price_badge` is the site's
+"lowest price of the last N days" tag (7, 10, 14, 30 or 90 days): a day
+count, not a numeric 30-day lowest price, and there is no price history, so
+poll to track changes. Search lists at most 138 pages and `total` stops at
+100,000 (`total_capped`); search cards give favourites and orders as the
+site's rounded text. Reviews carry the site's masked author only and no
+seller e-mail, tax number or address is returned. Failed calls are not
+charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3002,6 +3074,7 @@ Scavio works with popular AI/LLM frameworks:
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
+| Trendyol (`trendyol`) | `search`, `product`, `category`, `brand`, `reviews`, `questions`, `seller`, `deals`, `coupons`, `rankings`, `suggestions`, `delivery`; 35 markets via `country` and `language` (`deals` and `coupons` tr only; `rankings` not on the English-language EU storefronts) | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3018,6 +3091,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.60.0
+
+- **New `trendyol` namespace** (sync and async) for Trendyol, 12 endpoints at
+  1 credit each: `search`, `product`, `category`, `brand`, `reviews`,
+  `questions`, `seller`, `deals`, `coupons`, `rankings`, `suggestions`,
+  `delivery`. 35 markets via `country` and `language`; `deals` and `coupons`
+  tr only; `rankings` not on the 15 English-language EU storefronts.
+  `product` returns the buy box and every other seller's offer. 120s timeout
+  floor.
 
 ### Changed in 0.59.0
 

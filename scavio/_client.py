@@ -74,6 +74,7 @@ from ._namespaces_sync import (
     _ThreadsNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
+    _TrendyolNamespace,
     _TripadvisorNamespace,
     _TrustpilotNamespace,
     _UltaNamespace,
@@ -227,6 +228,7 @@ class ScavioClient:
         self.wayfair = _WayfairNamespace(self)
         self.ashley = _AshleyNamespace(self)
         self.maisonsdumonde = _MaisonsDuMondeNamespace(self)
+        self.trendyol = _TrendyolNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -76,6 +76,7 @@ from ._namespaces_async import (
     _AsyncThreadsNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
+    _AsyncTrendyolNamespace,
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
     _AsyncUltaNamespace,
@@ -222,6 +223,7 @@ class AsyncScavioClient:
         self.wayfair = _AsyncWayfairNamespace(self)
         self.ashley = _AsyncAshleyNamespace(self)
         self.maisonsdumonde = _AsyncMaisonsDuMondeNamespace(self)
+        self.trendyol = _AsyncTrendyolNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
