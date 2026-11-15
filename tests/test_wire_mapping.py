@@ -4451,3 +4451,130 @@ def test_nintendo_credits_paths_and_wire(monkeypatch):
         nd.product(country="us")
     with pytest.raises(ScavioError):
         nd.dlc()
+
+
+def test_hm_credits_paths_and_wire(monkeypatch):
+    """hm (0.62.0): 9 endpoints on /api/v1/hm, product 2 credits, the rest 1, 120 s floor.
+
+    47 countries via country + language: product not on mo, tw or the shared EU store
+    countries; stores not on mo. product and production take article_code or url; stock takes
+    article_code or product_code.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "hm"}
+    assert sorted(eps) == [
+        "category", "deals", "new_arrivals", "product", "production", "search", "stock",
+        "stores", "suggestions",
+    ]
+    every = (
+        '"us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", '
+        '"se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", '
+        '"il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", '
+        '"ee", "lv", "lt", "lu", "si"'
+    )
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/hm/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == (2 if m == "product" else 1) and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        country = params["country"].annotation
+        if m == "product":
+            for cc in ("mo", "tw", "hr", "cy", "ee", "lv", "lt", "lu", "si"):
+                assert f'"{cc}"' not in country, cc
+            assert country.count('"') // 2 == 38
+        elif m == "stores":
+            assert '"mo"' not in country
+            assert country.count('"') // 2 == 46
+        else:
+            assert country == "Optional[Literal[" + every + "]]", m
+        if m not in ("stores", "production"):
+            assert params["language"].annotation.count('"') // 2 == 26, m
+    grid = {p.name: p for p in eps["category"].params}
+    assert grid["category"].required
+    assert grid["sort"].annotation == (
+        'Optional[Literal["relevance", "newest", "price_asc", "price_desc"]]'
+    )
+    assert grid["color"].annotation == "Optional[Union[str, list[str]]]"
+    assert {p.name: p for p in eps["deals"].params}["department"].annotation == (
+        'Optional[Literal["women", "men", "kids", "baby", "home"]]'
+    )
+    assert "on_sale" not in {p.name for p in eps["deals"].params}
+    assert eps["product"].one_of == (("article_code", "url"),)
+    assert eps["production"].one_of == (("article_code", "url"),)
+    assert eps["stock"].one_of == (("article_code", "product_code"),)
+    assert {p.name: p for p in eps["stores"].params}["lat"].annotation == "Optional[float]"
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    hm = client.hm
+    hm.search("jeans")
+    hm.search(
+        "jeans",
+        country="de",
+        language="de",
+        department="women",
+        page=2,
+        page_size=72,
+        sort="price_asc",
+        color=["schwarz_000000", "blau_0000ff"],
+        on_sale=True,
+    )
+    hm.product(article_code="1310382004")
+    hm.product(article_code="1347936009", country="ca", language="fr")
+    hm.stock(product_code="1310382", country="mo")
+    hm.stores(city="New York")
+    hm.stores(country="gb", lat=51.5, lng=-0.12, radius_km=5, page_size=50)
+    hm.category("ladies_dresses", country="gb")
+    hm.deals(country="gb", department="men")
+    hm.new_arrivals(country="se", language="sv")
+    hm.suggestions("hoodie")
+    hm.production(article_code="1310382004")
+    base = "/api/v1/hm/"
+    assert seen == [
+        (base + "search", {"query": "jeans"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "jeans",
+                "country": "de",
+                "language": "de",
+                "department": "women",
+                "page": 2,
+                "page_size": 72,
+                "sort": "price_asc",
+                "color": ["schwarz_000000", "blau_0000ff"],
+                "on_sale": True,
+            },
+            120.0,
+        ),
+        (base + "product", {"article_code": "1310382004"}, 120.0),
+        (
+            base + "product",
+            {"article_code": "1347936009", "country": "ca", "language": "fr"},
+            120.0,
+        ),
+        (base + "stock", {"product_code": "1310382", "country": "mo"}, 120.0),
+        (base + "stores", {"city": "New York"}, 120.0),
+        (
+            base + "stores",
+            {"country": "gb", "lat": 51.5, "lng": -0.12, "radius_km": 5, "page_size": 50},
+            120.0,
+        ),
+        (base + "category", {"category": "ladies_dresses", "country": "gb"}, 120.0),
+        (base + "deals", {"country": "gb", "department": "men"}, 120.0),
+        (base + "new-arrivals", {"country": "se", "language": "sv"}, 120.0),
+        (base + "suggestions", {"query": "hoodie"}, 120.0),
+        (base + "production", {"article_code": "1310382004"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        hm.product(country="gb")
+    with pytest.raises(ScavioError):
+        hm.stock()
+    with pytest.raises(ScavioError):
+        hm.production()

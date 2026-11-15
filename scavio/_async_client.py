@@ -39,6 +39,7 @@ from ._namespaces_async import (
     _AsyncGooglePlayNamespace,
     _AsyncHarborFreightNamespace,
     _AsyncHebNamespace,
+    _AsyncHmNamespace,
     _AsyncHomeDepotNamespace,
     _AsyncIherbNamespace,
     _AsyncIkeaNamespace,
@@ -226,6 +227,7 @@ class AsyncScavioClient:
         self.maisonsdumonde = _AsyncMaisonsDuMondeNamespace(self)
         self.trendyol = _AsyncTrendyolNamespace(self)
         self.nintendo = _AsyncNintendoNamespace(self)
+        self.hm = _AsyncHmNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

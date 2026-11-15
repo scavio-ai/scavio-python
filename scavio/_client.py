@@ -37,6 +37,7 @@ from ._namespaces_sync import (
     _GooglePlayNamespace,
     _HarborFreightNamespace,
     _HebNamespace,
+    _HmNamespace,
     _HomeDepotNamespace,
     _IherbNamespace,
     _IkeaNamespace,
@@ -231,6 +232,7 @@ class ScavioClient:
         self.maisonsdumonde = _MaisonsDuMondeNamespace(self)
         self.trendyol = _TrendyolNamespace(self)
         self.nintendo = _NintendoNamespace(self)
+        self.hm = _HmNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

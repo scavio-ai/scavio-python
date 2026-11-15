@@ -90,6 +90,7 @@ __all__ = [
     "_AsyncMaisonsDuMondeNamespace",
     "_AsyncTrendyolNamespace",
     "_AsyncNintendoNamespace",
+    "_AsyncHmNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -13475,3 +13476,277 @@ class _AsyncNintendoNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("nintendo_dlc", {"nsuid": nsuid, "url": url, "slug": slug, "country": country, "language": language}, extra)
+
+class _AsyncHmNamespace:
+    """H&M search, product (prices, member price, colours, online stock by size, rating and the latest reviews), stock, stores, category, deals, new arrivals, suggestions and production endpoints for 47 countries across Europe, the Americas, the Middle East, Asia and Australia."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        department: Optional[Literal["women", "men", "kids", "baby", "home"]] = None,
+        store: Optional[str] = None,
+        on_sale: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        fit: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search one H&M market's catalog by keyword (an article or product code finds that item): items (article_code, product_code, title (in the request language), brand, url, the prices, currency, promo_text, multipack (quantity, unit_price), color, colors (article_code, name, hex), sizes (size_code, label, in_stock: online stock), in_stock, coming_soon, new_arrival, markers, category (H&M's category id) and image), count, total, page, page_size (up to 72, default 36), total_pages, sort, sorts_offered, filters, facets (filter, name, values with value, label, count; color values carry hex), on_sale_count and price_range. Optional department and store (a store code from stores(): only that store's assortment). Also departments (with counts) and did_you_mean. Prices are numbers in the market's currency: price (what a non-member pays now), regular_price, sale_price (a markdown), member_price (H&M's member price as shown to signed-in members), discount_percent, prior_price (the earlier price H&M shows next to a markdown in the EU). No price history: poll to track changes. Article codes are global: the same 10-digit code in every market, so one code compares a price across markets with one call per country. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords in any language, e.g. 'jeans', or an article code.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            department: women, men, kids, baby or home.
+            store: A store code from stores() (stores[].store_code, e.g. 'US0760'): only items in that store's assortment.
+            on_sale: Only marked-down items.
+            page: Results page, 1-based (up to 200).
+            page_size: Items per page, 1 to 72 (default 36).
+            sort: relevance (default), newest, price_asc or price_desc.
+            color: Colour: one or more values of the color facet of an earlier answer in the same market (e.g. 'black_000000' on us, 'schwarz_000000' on de); several values are ORed.
+            size: Size: values of the size facet (e.g. 'womenswear;NO_FORMAT[Numeric];8').
+            material: Material: values of the material facet (in the market's language, e.g. 'Cotton').
+            fit: Fit: values of the fit facet (e.g. 'Slim fit').
+            product_type: Product type: values of the product_type facet (e.g. 'Jeans').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_search", {"query": query, "country": country, "language": language, "department": department, "store": store, "on_sale": on_sale, "page": page, "page_size": page_size, "sort": sort, "color": color, "size": size, "material": material, "fit": fit, "product_type": product_type}, extra)
+
+    async def product(
+        self,
+        *,
+        article_code: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "jp", "kr", "in", "my", "ph", "sg", "vn", "au"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One H&M article by article code or link: article_code, product_code, title, brand, category, category_code, breadcrumbs, url, color, description, composition (part, materials with percent), materials, care, attributes (fit, length, rise, sleeve_length, style, neckline, weight, measurements ...), the prices with price_disclosure (e.g. 'Sale price in effect for 90+ days' where H&M shows it), currency, colors (every colourway with its own prices), sizes (size_code, label, in_stock, few_left: online stock), new_arrival, coming_soon, sold_in_stores, images, rating (average, count) and the latest reviews H&M shows (up to 10: rating, text, date, fit feedback such as true to size or length; no reviewer names). Not available: the full review list, per-size store stock, price history, member-only checkout prices. Can take up to about a minute. An article unknown to that market is a charged 404. Prices are numbers in the market's currency: price (what a non-member pays now), regular_price, sale_price (a markdown), member_price (H&M's member price as shown to signed-in members), discount_percent, prior_price (the earlier price H&M shows next to a markdown in the EU). No price history: poll to track changes. Article codes are global: the same 10-digit code in every market, so one code compares a price across markets with one call per country. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            article_code: An H&M article code: 10 digits (7-digit product code + 3-digit colour), e.g. '1310382004'. The same code in every market.
+            url: An hm.com product link (https://www2.hm.com/<locale>/productpage.<article code>.html); its market is used unless country is sent.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Not mo, tw or the shared EU store countries (use search() or stock() there). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_product", {"article_code": article_code, "url": url, "country": country, "language": language}, extra)
+
+    async def stock(
+        self,
+        *,
+        article_code: Optional[str] = None,
+        product_code: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online stock per size for every colour of an H&M product, by article or product code: product_code, article_code, title, colors (article_code, name, sizes with size_code, label, in_stock, few_left), sizes_total and sizes_in_stock. Online stock, not store stock: H&M publishes no per-size store stock (search() with store lists a store's assortment). few_left is null on mo, tw and the shared EU store. An unknown product is a charged 404. Article codes are global: the same 10-digit code in every market, so one code compares a price across markets with one call per country. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            article_code: An H&M article code: 10 digits (7-digit product code + 3-digit colour), e.g. '1310382004'. The same code in every market.
+            product_code: An H&M product code: 7 digits (the first 7 of an article code), e.g. '1310382'.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_stock", {"article_code": article_code, "product_code": product_code, "country": country, "language": language}, extra)
+
+    async def stores(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        city: Optional[str] = None,
+        postal_code: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius_km: Optional[float] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """H&M stores of a country: stores (store_code, name, status such as open or future, store_class, address, city, state, postal_code, country, lat, lng, phone, opening_hours with day, open, close, opening_hour_exceptions with date, closed, open, close, departments with concepts, campaigns), count, total, country_total, page, page_size, total_pages; filtered by city, postal_code or a lat / lng radius (nearest first, with distance_km). Pass a store_code to search() as store. Every market except mo (H&M lists no stores there). Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Not mo (H&M lists no stores there). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            city: Only stores whose city or address contains this (case and accents ignored), e.g. 'New York'.
+            postal_code: Only stores whose postal code starts with this.
+            lat: Latitude: stores within radius_km, nearest first (with lng).
+            lng: Longitude (with lat).
+            radius_km: Radius around lat / lng in km (default 25).
+            page: Results page, 1-based.
+            page_size: Stores per page, 1 to 100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_stores", {"country": country, "city": city, "postal_code": postal_code, "lat": lat, "lng": lng, "radius_km": radius_km, "page": page, "page_size": page_size}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        on_sale: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        fit: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One H&M category grid by H&M's category id: items (article_code, product_code, title (in the request language), brand, url, the prices, currency, promo_text, multipack (quantity, unit_price), color, colors (article_code, name, hex), sizes (size_code, label, in_stock: online stock), in_stock, coming_soon, new_arrival, markers, category (H&M's category id) and image), count, total, page, page_size (up to 72, default 36), total_pages, sort, sorts_offered, filters, facets (filter, name, values with value, label, count; color values carry hex), on_sale_count and price_range. Category ids are the same in every market (items[].category of any answer gives more); a category returns everything H&M files under that id, which can be more than the site's curated page. An unknown or empty category is a charged 404. Prices are numbers in the market's currency: price (what a non-member pays now), regular_price, sale_price (a markdown), member_price (H&M's member price as shown to signed-in members), discount_percent, prior_price (the earlier price H&M shows next to a markdown in the EU). No price history: poll to track changes. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: An H&M category id, the same in every market, e.g. 'ladies_dresses', 'ladies_tops', 'ladies_jeans', 'men_jeans', 'men_hoodiessweatshirts', 'kids_all', 'ladies_all', 'men_all'.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            on_sale: Only marked-down items.
+            page: Results page, 1-based (up to 200).
+            page_size: Items per page, 1 to 72 (default 36).
+            sort: relevance (default), newest, price_asc or price_desc.
+            color: Colour: one or more values of the color facet of an earlier answer in the same market (e.g. 'black_000000' on us, 'schwarz_000000' on de); several values are ORed.
+            size: Size: values of the size facet (e.g. 'womenswear;NO_FORMAT[Numeric];8').
+            material: Material: values of the material facet (in the market's language, e.g. 'Cotton').
+            fit: Fit: values of the fit facet (e.g. 'Slim fit').
+            product_type: Product type: values of the product_type facet (e.g. 'Jeans').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_category", {"category": category, "country": country, "language": language, "on_sale": on_sale, "page": page, "page_size": page_size, "sort": sort, "color": color, "size": size, "material": material, "fit": fit, "product_type": product_type}, extra)
+
+    async def deals(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        department: Optional[Literal["women", "men", "kids", "baby", "home"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        fit: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The sale grid of an H&M department (default women): every marked-down item with sale_price, regular_price and discount_percent, plus department. items (article_code, product_code, title (in the request language), brand, url, the prices, currency, promo_text, multipack (quantity, unit_price), color, colors (article_code, name, hex), sizes (size_code, label, in_stock: online stock), in_stock, coming_soon, new_arrival, markers, category (H&M's category id) and image), count, total, page, page_size (up to 72, default 36), total_pages, sort, sorts_offered, filters, facets (filter, name, values with value, label, count; color values carry hex), on_sale_count and price_range. H&M runs sales in seasons: a market with no sale running answers an empty grid (charged as a normal call), so it may be empty between sales. Prices are numbers in the market's currency: price (what a non-member pays now), regular_price, sale_price (a markdown), member_price (H&M's member price as shown to signed-in members), discount_percent, prior_price (the earlier price H&M shows next to a markdown in the EU). No price history: poll to track changes. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            department: women (default), men, kids, baby or home.
+            page: Results page, 1-based (up to 200).
+            page_size: Items per page, 1 to 72 (default 36).
+            sort: relevance (default), newest, price_asc or price_desc.
+            color: Colour: one or more values of the color facet of an earlier answer in the same market (e.g. 'black_000000' on us, 'schwarz_000000' on de); several values are ORed.
+            size: Size: values of the size facet (e.g. 'womenswear;NO_FORMAT[Numeric];8').
+            material: Material: values of the material facet (in the market's language, e.g. 'Cotton').
+            fit: Fit: values of the fit facet (e.g. 'Slim fit').
+            product_type: Product type: values of the product_type facet (e.g. 'Jeans').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_deals", {"country": country, "language": language, "department": department, "page": page, "page_size": page_size, "sort": sort, "color": color, "size": size, "material": material, "fit": fit, "product_type": product_type}, extra)
+
+    async def new_arrivals(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        department: Optional[Literal["women", "men", "kids", "baby", "home"]] = None,
+        on_sale: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        fit: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The new-arrivals grid of an H&M department (default women), plus department: items (article_code, product_code, title (in the request language), brand, url, the prices, currency, promo_text, multipack (quantity, unit_price), color, colors (article_code, name, hex), sizes (size_code, label, in_stock: online stock), in_stock, coming_soon, new_arrival, markers, category (H&M's category id) and image), count, total, page, page_size (up to 72, default 36), total_pages, sort, sorts_offered, filters, facets (filter, name, values with value, label, count; color values carry hex), on_sale_count and price_range. Prices are numbers in the market's currency: price (what a non-member pays now), regular_price, sale_price (a markdown), member_price (H&M's member price as shown to signed-in members), discount_percent, prior_price (the earlier price H&M shows next to a markdown in the EU). No price history: poll to track changes. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            department: women (default), men, kids, baby or home.
+            on_sale: Only marked-down items.
+            page: Results page, 1-based (up to 200).
+            page_size: Items per page, 1 to 72 (default 36).
+            sort: relevance (default), newest, price_asc or price_desc.
+            color: Colour: one or more values of the color facet of an earlier answer in the same market (e.g. 'black_000000' on us, 'schwarz_000000' on de); several values are ORed.
+            size: Size: values of the size facet (e.g. 'womenswear;NO_FORMAT[Numeric];8').
+            material: Material: values of the material facet (in the market's language, e.g. 'Cotton').
+            fit: Fit: values of the fit facet (e.g. 'Slim fit').
+            product_type: Product type: values of the product_type facet (e.g. 'Jeans').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_new_arrivals", {"country": country, "language": language, "department": department, "on_sale": on_sale, "page": page, "page_size": page_size, "sort": sort, "color": color, "size": size, "material": material, "fit": fit, "product_type": product_type}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        language: Optional[Literal["en", "fr", "es", "de", "it", "nl", "pt", "sv", "fi", "da", "no", "pl", "cs", "sk", "hu", "ro", "bg", "el", "sr", "tr", "uk", "he", "zh", "ja", "ko", "vi"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """H&M search suggestions for what a shopper has typed, in the market's language: query, suggestions (text, type query or content, url for content pages) and count. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'hoodie'.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            language: Language of the market (default its first; the languages each market serves are listed under country). Titles, descriptions, colours and facet values come back in it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    async def production(
+        self,
+        *,
+        article_code: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "mx", "gb", "ie", "de", "at", "ch", "fr", "be", "nl", "it", "es", "pt", "se", "fi", "dk", "no", "pl", "cz", "sk", "hu", "ro", "bg", "gr", "rs", "tr", "ua", "il", "hk", "mo", "tw", "jp", "kr", "in", "my", "ph", "sg", "vn", "au", "hr", "cy", "ee", "lv", "lt", "lu", "si"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Where an H&M article is made, as H&M publishes it: article_code, product_code, production_countries and countries (country, suppliers with supplier_id, name and factories with factory_id, name, city and workers range). Company names and city only: no street addresses or contacts. The same in every market. An article without a disclosure is a charged 404. Every answer carries country, language, currency, locale and store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            article_code: An H&M article code: 10 digits (7-digit product code + 3-digit colour), e.g. '1310382004'. The same code in every market.
+            url: An hm.com product link (https://www2.hm.com/<locale>/productpage.<article code>.html); its market is used unless country is sent.
+            country: H&M market (default 'us'): us (USD), ca (CAD; en or fr), mx (MXN; es), gb (GBP), ie (EUR; en), de and at (EUR; de), ch (CHF; de, fr or it), fr (EUR), be (EUR; nl or fr), nl, it, es, pt (EUR), se (SEK; sv), fi (EUR; fi or sv), dk (DKK; da), no (NOK), pl (PLN), cz (CZK; cs), sk (EUR), hu (HUF), ro (RON), bg (EUR), gr (EUR; el), rs (RSD; sr), tr (TRY), ua (UAH; uk), il (ILS; he), hk and mo (HKD; zh or en), tw (TWD; zh or en), jp (JPY; ja), kr (KRW; ko), in (INR), my (MYR), ph (PHP), sg (SGD) (en), vn (VND; vi), au (AUD); and hr, cy, ee, lv, lt, lu, si on H&M's shared English EUR store (the answer says store 'eu'). Countries where H&M runs a separate site (ae, eg, id, th, br, cn) or has no online store, ru, and uk (use gb) answer 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("hm_production", {"article_code": article_code, "url": url, "country": country}, extra)
