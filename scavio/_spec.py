@@ -1510,8 +1510,9 @@ _TY_FILTER_PARAMS = (
 )
 _TY_PRICES = (
     " Prices are numbers in the market's currency. Each international storefront has its own "
-    "price list (mostly sold by Trendyol itself and shipped cross-border), not a currency "
-    "conversion of the Turkish price. price is what one unit costs at checkout; "
+    "price list, not a currency conversion of the Turkish price; items there are sold by "
+    "Trendyol itself or by other sellers (see seller on grid items, buy_box and "
+    "other_sellers on product). price is what one unit costs at checkout; "
     "original_price is the higher (crossed-out) price it is shown against and "
     "discount_percent is computed from the two; rrp is the recommended retail price where "
     "shown; plus_price is the Trendyol Plus member price. lowest_price_badge is the site's "

@@ -2917,9 +2917,10 @@ and `coupons` are tr only; `rankings` is not on the 15 English-language EU
 storefronts (fr, be, hr, dk, ee, fi, it, lv, lt, nl, pt, si, es, se, lu),
 which have no ranking lists; `delivery`'s `city_id` / `district_id` are tr
 only (Istanbul 133, Sisli 54; there is no city list). Every other endpoint
-serves all 35. The international storefronts are mostly sold cross-border by
-Trendyol itself and have their own price lists, not a currency conversion of
-the Turkish price (measured on 2 products on 2026-11-15). Trendyol's developer
+serves all 35. The international storefronts have their own price lists, not
+a currency conversion of the Turkish price (measured on 2 products on
+2026-11-15), and their items are sold by Trendyol itself or by other sellers
+(check `buy_box` and `other_sellers`). Trendyol's developer
 FAQ says the buy box is chosen by algorithm metrics, not price alone, so
 compare `buy_box` with `other_sellers`. `lowest_price_badge` is the site's
 "lowest price of the last N days" tag (7, 10, 14, 30 or 90 days): a day
@@ -3091,6 +3092,12 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.60.1
+
+- `trendyol` docstrings: international storefronts are sold by Trendyol itself
+  or by other sellers (check `buy_box` and `other_sellers`); the earlier
+  "mostly sold by Trendyol" wording is removed. No code change.
 
 ### Changed in 0.60.0
 
