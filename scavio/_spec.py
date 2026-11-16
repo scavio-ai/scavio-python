@@ -1995,14 +1995,19 @@ _ASOS_FILTER_PARAMS = (
 )
 _ASOS_ON_SALE = _bool("on_sale", "Only sale items (ASOS's Sale facet).")
 _ASOS_PRICES = (
-    " Prices are numbers in the request's currency, never converted, set per store + currency "
-    "(not per country inside a store): price, previous_price (a markdown, above price), rrp, "
+    " Prices are numbers in the request's currency, never converted, as ASOS sets them for that "
+    "country: countries served by the same ASOS store in the same currency share one price "
+    "list, except Ireland, which has its own euro prices on ASOS's European store (measured "
+    "2026-11-16 on all 245 country-currency combinations). Which products are offered still "
+    "differs by country. price is the lowest size price when ASOS prices sizes differently "
+    "(variants carry each size's price): price, previous_price (a markdown, above price), rrp, "
     "lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and "
     "discount_basis (previous_price or rrp). No price history: poll stock() or product()."
 )
 _ASOS_IDS = (
     " Product and category ids are global: the same id on every store; titles come back in the "
-    "store's language; availability and prices are per store and currency."
+    "store's language; prices follow the country's ASOS price list and availability differs "
+    "by country."
 )
 _ASOS_ITEM = (
     "product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, "
@@ -10727,9 +10732,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "labelled), reviews (id, rating, title, text, date, experience_date, ratings_only, "
             "recommended, fit and quality with ASOS's label such as True to Size, color, "
             "verified_purchaser, language, syndicated, source, photos), total, page, has_more. "
-            "Reviews are per store (the same product has different reviews on gb and de; the "
-            "European and international stores share one pool). Reviewer names are never "
-            "returned." + _ASOS_NOTE
+            "Which reviews come back depends on the store: gb, us, au and ASOS's European and "
+            "international stores share one English review pool; es, it, nl, se, dk and pl add "
+            "reviews written in their own language to that pool; fr and de show only reviews "
+            "written in French or German (each review carries its language; totals differ by "
+            "store). Reviewer names are never returned." + _ASOS_NOTE
         ),
         params=(
             _req("product_id", _ASOS_PRODUCT_ID),

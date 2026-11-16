@@ -29,7 +29,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
 | Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
-| ASOS Prices by Country and Currency, Online Stock by Size, Reviews per Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
+| ASOS Prices by Country and Currency, Online Stock by Size, Reviews by Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
@@ -3185,7 +3185,8 @@ client = ScavioClient()
 asos = client.asos
 
 # --- One product's price and online stock by size in several stores and currencies.
-# Product ids are the same on every store; prices are set per store + currency.
+# Product ids are the same on every store. Countries on the same store + currency share one
+# price list, except Ireland (its own euro prices on ASOS's European store).
 for country, currency in [("gb", None), ("us", None), ("fr", None), ("au", None), ("ae", "AED")]:
     p = asos.product(product_id="210309625", country=country, currency=currency)["data"]
     print(p["store"], p["currency"], p["price"], p["previous_price"], p["rrp"], p["is_marked_down"])
@@ -3201,7 +3202,9 @@ print("not sold here:", st["not_found"])
 res = asos.search("jeans", sort="price_asc", gender="women", range="petite")["data"]
 print(res["total"], res["max_reachable"], [(i["product_id"], i["title"], i["price"]) for i in res["items"][:3]])
 
-# --- Reviews are per store, with ASOS's labelled AI summary; no reviewer names.
+# --- Reviews: gb, us, au, europe and international share one English pool; es, it, nl, se,
+# dk and pl add own-language reviews; fr and de show only French or German. ASOS's labelled
+# AI summary; no reviewer names.
 rv = asos.reviews("210309625", sort="newest", page_size=50)["data"]
 print(rv["summary"]["average"], rv["summary"]["count"], rv["ai_summary"])
 
@@ -3234,16 +3237,22 @@ answers no suggestions). Russia and Belarus (ASOS is not selling there), uk
 charged.
 
 Product and category ids are the same on every store (titles come back in the
-store's language). Prices are set per store and currency, not per country
-inside a store (the European store prices Ireland and Portugal alike in EUR);
-which products are offered can still differ by country. Prices are numbers in
+store's language). Countries served by the same ASOS store in the same
+currency share one price list, except Ireland, which has its own euro prices on
+ASOS's European store (measured 2026-11-16 on all 245 country-currency
+combinations); which products are offered still differs by country. `price` is
+the lowest size price when ASOS prices sizes differently (variants carry each
+size's price). Prices are numbers in
 the requested currency, never converted: `price`, `previous_price` (ASOS's
 "was"), `rrp`, `lowest_price_30d` where ASOS shows it, `is_marked_down`,
 `is_outlet`, `discount_percent` and `discount_basis` (`previous_price` or
 `rrp`). `stock` is online stock per variant (ASOS has no physical stores) and
-carries variant ids, not size names: `product` carries the sizes. Reviews are
-per store (the European and international stores share one pool), up to 50
-per page, sorted by relevance, newest, oldest or rating, filtered by star
+carries variant ids, not size names: `product` carries the sizes. Which reviews
+come back depends on the store: gb, us, au and ASOS's European and
+international stores share one English review pool; es, it, nl, se, dk and pl
+add reviews written in their own language to that pool; fr and de show only
+reviews written in French or German (each review carries its language). Up to
+50 per page, sorted by relevance, newest, oldest or rating, filtered by star
 rating; syndicated reviews are labelled. Keyword search serves at most 2,088
 results whatever `total` says (`max_reachable`); category, `deals` and
 `new_arrivals` lists page through everything. The `search` brand filter takes
