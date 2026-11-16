@@ -92,6 +92,7 @@ __all__ = [
     "_AsyncNintendoNamespace",
     "_AsyncHmNamespace",
     "_AsyncZaraNamespace",
+    "_AsyncAsosNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -14058,3 +14059,335 @@ class _AsyncZaraNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("zara_suggestions", {"query": query, "country": country, "language": language, "section": section}, extra)
+
+class _AsyncAsosNamespace:
+    """ASOS search, product, online stock by size, reviews, suggestions, category, categories, brands, deals, new arrivals and markets endpoints for 235 countries (13 ASOS stores, 245 country-currency combinations)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        gender: Optional[Literal["women", "men", "unisex"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        facets: Optional[dict[str, Union[str, list[str]]]] = None,
+        on_sale: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search one ASOS store by keyword: items (product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, the prices, currency, selling_fast, restocking_soon, is_new, sponsored, color_product_ids (the other colours' product ids), image, images and video), total, max_reachable, page, page_size (up to 200, default 72), has_more, sort, sorts_offered, filters, facets (id, name, values with id, name and count) and price_range. Filters: gender, brand (brand facet ids), color, size, range, product_type, price_min / price_max, on_sale and facets. ASOS serves keyword results only up to position 2,088 whatever total says (max_reachable; a page past it answers 400 before anything is charged): narrow with filters or use category(). Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Product and category ids are global: the same id on every store; titles come back in the store's language; availability and prices are per store and currency. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (in the store's language or English), e.g. 'jeans'.
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            page: Results page, 1-based (up to 1000).
+            page_size: Items per page, 1 to 200 (default 72).
+            sort: relevance (default, ASOS's own order), newest, price_asc or price_desc.
+            gender: women, men or unisex (ASOS's Gender facet).
+            brand: Brand: value ids of the brand facet of an earlier search or category answer (e.g. '53' ASOS DESIGN, '401' Levi's); several are ORed. Not brands()[].brand_id (a category id: pass that to category()).
+            color: Colour: red, green, blue, black, white, yellow, orange, purple, pink, brown, gold, silver, copper, grey, multi, navy, neutral, or value ids of the base_colour facet; several are ORed.
+            size: Size: value ids of the size facet of an earlier answer (e.g. '279' XS); several are ORed.
+            range: Body-fit range: plus, petite, tall, maternity, hourglass, wide_fit, fuller_bust (or value ids of the Body Fit facet, attribute_10155).
+            product_type: Product type: value ids of the Product Type facet (attribute_1047) of an earlier answer (e.g. '8393' Jeans).
+            price_min: Lowest price, in the request's currency.
+            price_max: Highest price, in the request's currency.
+            facets: Any other facet of an earlier answer: {facet id: value id or [value ids]}, e.g. {'attribute_1046': '8310', 'discount_band': ['5', '6']} (facets[].id and facets[].values[].id).
+            on_sale: Only sale items (ASOS's Sale facet).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_search", {"query": query, "country": country, "currency": currency, "page": page, "page_size": page_size, "sort": sort, "gender": gender, "brand": brand, "color": color, "size": size, "range": range, "product_type": product_type, "price_min": price_min, "price_max": price_max, "facets": facets, "on_sale": on_sale}, extra)
+
+    async def product(
+        self,
+        *,
+        product_id: Optional[str] = None,
+        group_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One ASOS product by product_id, group_id or link: product_id, product_code, title, brand, brand_id, gender, product_kind, url, category and breadcrumbs, category_ids, description, product_details, brand_description, composition, care, size_and_fit (model height and size worn as ASOS shows it), fit, country_of_manufacture, color, color_products (each other colour is its own product id), the prices, price_since, in_stock, selling_fast, is_discontinued, variants (variant_id, size, brand_size, size_id, color, sku, ean, price, previous_price, in_stock, low_stock, restocking_soon, seller: online stock per size), rating (average, count, distribution, recommended_percent, fit and quality), ai_summary (ASOS's own AI summary of reviews), images and video. A co-ord set (group_id, a /grp/ link, or the id of one of its pieces) answers the group: items[] with each piece's variants, stock and price. An unknown id, or a product the store does not sell, is a charged 404. Not available: an outlet, promo codes (shown only to signed-in shoppers), store locator (ASOS has no physical stores), price history, checkout and delivery prices. Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Product and category ids are global: the same id on every store; titles come back in the store's language; availability and prices are per store and currency. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: An ASOS product id (items[].product_id of any answer, the number after /prd/ in a link), e.g. '210309625'. The same id on every store.
+            group_id: An ASOS co-ord group id (items[].group_id of a group or group_piece item, the number after /grp/ in a link).
+            url: An ASOS product link (https://www.asos.com/<store>/<brand>/<slug>/prd/<id>, or /grp/<id>) from any store: its store's country is used unless country is sent.
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_product", {"product_id": product_id, "group_id": group_id, "url": url, "country": country, "currency": currency}, extra)
+
+    async def stock(
+        self,
+        product_ids: Union[str, list[str]],
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Price and online stock of up to 100 ASOS products in one call: per product product_id, the prices, price_since, in_stock, restocking_soon and variants (variant_id, in_stock, low_stock, restocking_soon, price, previous_price, seller); not_found lists the ids the store does not sell. Online stock: ASOS has no physical stores. Variants carry ids, not size names: map variant_id to its size with product(). Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Product and category ids are global: the same id on every store; titles come back in the store's language; availability and prices are per store and currency. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_ids: 1 to 100 ASOS product ids (a list or comma-separated), e.g. ['205338218', '206956133', '209793673'].
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_stock", {"product_ids": product_ids, "country": country, "currency": currency}, extra)
+
+    async def reviews(
+        self,
+        product_id: str,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "oldest", "rating_desc", "rating_asc"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one ASOS product on one store, paged (up to 50 per page): summary (average, count, ratings_only_count, distribution, recommended counts and percent, fit and quality averages), ai_summary (ASOS's own AI-generated summary, labelled), reviews (id, rating, title, text, date, experience_date, ratings_only, recommended, fit and quality with ASOS's label such as True to Size, color, verified_purchaser, language, syndicated, source, photos), total, page, has_more. Reviews are per store (the same product has different reviews on gb and de; the European and international stores share one pool). Reviewer names are never returned. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: An ASOS product id (items[].product_id of any answer, the number after /prd/ in a link), e.g. '210309625'. The same id on every store.
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            page: Results page, 1-based (up to 500).
+            page_size: Reviews per page, 1 to 50 (default 10).
+            sort: relevance (default, ASOS's own order), newest, oldest, rating_desc or rating_asc.
+            rating: Only reviews with this star rating (1 to 5).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_reviews", {"product_id": product_id, "country": country, "currency": currency, "page": page, "page_size": page_size, "sort": sort, "rating": rating}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """ASOS search suggestions for what a shopper has typed, in the store's language: suggestions (text, count = ASOS's number of results). Not on pl (ASOS's Polish store answers no search suggestions; use search() there). Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'dre'.
+            country: Country (default 'gb'): every country ASOS sells in except pl (ASOS's Polish store answers no search suggestions; use search() there). Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_suggestions", {"query": query, "country": country, "currency": currency}, extra)
+
+    async def category(
+        self,
+        category_id: str,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        gender: Optional[Literal["women", "men", "unisex"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        facets: Optional[dict[str, Union[str, list[str]]]] = None,
+        on_sale: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every product of one ASOS category (a category_id from categories(), or a brand's brand_id from brands(): a brand page is a category), paged and sorted (no 2,088 cap: category lists page through everything): category_id, category_name (in the store's language), items (product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, the prices, currency, selling_fast, restocking_soon, is_new, sponsored, color_product_ids (the other colours' product ids), image, images and video), total, page, page_size (up to 200), has_more, sort, facets and price_range. The filters of search(). An unknown category id is a charged 404. Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Product and category ids are global: the same id on every store; titles come back in the store's language; availability and prices are per store and currency. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: An ASOS category id (categories[].category_id of categories(), or brand_id of brands()), the same on every store: e.g. '8799' women's dresses, '7046' women's sale.
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            page: Results page, 1-based (up to 1000).
+            page_size: Items per page, 1 to 200 (default 72).
+            sort: relevance (default, ASOS's own order), newest, price_asc or price_desc.
+            gender: women, men or unisex (ASOS's Gender facet).
+            brand: Brand: value ids of the brand facet of an earlier search or category answer (e.g. '53' ASOS DESIGN, '401' Levi's); several are ORed. Not brands()[].brand_id (a category id: pass that to category()).
+            color: Colour: red, green, blue, black, white, yellow, orange, purple, pink, brown, gold, silver, copper, grey, multi, navy, neutral, or value ids of the base_colour facet; several are ORed.
+            size: Size: value ids of the size facet of an earlier answer (e.g. '279' XS); several are ORed.
+            range: Body-fit range: plus, petite, tall, maternity, hourglass, wide_fit, fuller_bust (or value ids of the Body Fit facet, attribute_10155).
+            product_type: Product type: value ids of the Product Type facet (attribute_1047) of an earlier answer (e.g. '8393' Jeans).
+            price_min: Lowest price, in the request's currency.
+            price_max: Highest price, in the request's currency.
+            facets: Any other facet of an earlier answer: {facet id: value id or [value ids]}, e.g. {'attribute_1046': '8310', 'discount_band': ['5', '6']} (facets[].id and facets[].values[].id).
+            on_sale: Only sale items (ASOS's Sale facet).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_category", {"category_id": category_id, "country": country, "currency": currency, "page": page, "page_size": page_size, "sort": sort, "gender": gender, "brand": brand, "color": color, "size": size, "range": range, "product_type": product_type, "price_min": price_min, "price_max": price_max, "facets": facets, "on_sale": on_sale}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        gender: Optional[Literal["women", "men"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ASOS store's navigation (as its desktop menu shows it) for women and men, in the store's language: sections (gender, name, url, categories, count), each category node with name, category_id (null on headings), url, path and children. Category ids are the same on every store. Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            gender: women or men (default: both).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_categories", {"country": country, "currency": currency, "gender": gender}, extra)
+
+    async def brands(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        gender: Optional[Literal["women", "men"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ASOS store's A-Z brand list for women or men (default women): brands (brand_id, name, url, letter), count, title. brand_id is the brand's ASOS category id: pass it to category() as category_id for the brand's products (the search() brand filter takes the brand facet ids of a search answer instead). Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            gender: women or men (default women).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_brands", {"country": country, "currency": currency, "gender": gender}, extra)
+
+    async def deals(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        gender: Optional[Literal["women", "men"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        facets: Optional[dict[str, Union[str, list[str]]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ASOS store's SALE category for women (7046) or men (8409), default women (the same ids on every store): items (product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, the prices, currency, selling_fast, restocking_soon, is_new, sponsored, color_product_ids (the other colours' product ids), image, images and video) with previous_price and discount_percent, marked_down, total, paging, sort, facets and the filters of category(). No outlet (ASOS's outlet categories are empty) and no promo codes (shown only to signed-in shoppers). Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            gender: women or men (default women).
+            page: Results page, 1-based (up to 1000).
+            page_size: Items per page, 1 to 200 (default 72).
+            sort: relevance (default, ASOS's own order), newest, price_asc or price_desc.
+            brand: Brand: value ids of the brand facet of an earlier search or category answer (e.g. '53' ASOS DESIGN, '401' Levi's); several are ORed. Not brands()[].brand_id (a category id: pass that to category()).
+            color: Colour: red, green, blue, black, white, yellow, orange, purple, pink, brown, gold, silver, copper, grey, multi, navy, neutral, or value ids of the base_colour facet; several are ORed.
+            size: Size: value ids of the size facet of an earlier answer (e.g. '279' XS); several are ORed.
+            range: Body-fit range: plus, petite, tall, maternity, hourglass, wide_fit, fuller_bust (or value ids of the Body Fit facet, attribute_10155).
+            product_type: Product type: value ids of the Product Type facet (attribute_1047) of an earlier answer (e.g. '8393' Jeans).
+            price_min: Lowest price, in the request's currency.
+            price_max: Highest price, in the request's currency.
+            facets: Any other facet of an earlier answer: {facet id: value id or [value ids]}, e.g. {'attribute_1046': '8310', 'discount_band': ['5', '6']} (facets[].id and facets[].values[].id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_deals", {"country": country, "currency": currency, "gender": gender, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "color": color, "size": size, "range": range, "product_type": product_type, "price_min": price_min, "price_max": price_max, "facets": facets}, extra)
+
+    async def new_arrivals(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        gender: Optional[Literal["women", "men"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        facets: Optional[dict[str, Union[str, list[str]]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The ASOS store's NEW IN category for women (27108) or men (27110), default women: items (product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, the prices, currency, selling_fast, restocking_soon, is_new, sponsored, color_product_ids (the other colours' product ids), image, images and video), total, paging, sort (newest for the latest first), facets and the filters of category(). Prices are numbers in the request's currency, never converted, set per store + currency (not per country inside a store): price, previous_price (a markdown, above price), rrp, lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and discount_basis (previous_price or rrp). No price history: poll stock() or product(). Every answer carries country, currency, store and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            gender: women or men (default women).
+            page: Results page, 1-based (up to 1000).
+            page_size: Items per page, 1 to 200 (default 72).
+            sort: relevance (default, ASOS's own order), newest, price_asc or price_desc.
+            brand: Brand: value ids of the brand facet of an earlier search or category answer (e.g. '53' ASOS DESIGN, '401' Levi's); several are ORed. Not brands()[].brand_id (a category id: pass that to category()).
+            color: Colour: red, green, blue, black, white, yellow, orange, purple, pink, brown, gold, silver, copper, grey, multi, navy, neutral, or value ids of the base_colour facet; several are ORed.
+            size: Size: value ids of the size facet of an earlier answer (e.g. '279' XS); several are ORed.
+            range: Body-fit range: plus, petite, tall, maternity, hourglass, wide_fit, fuller_bust (or value ids of the Body Fit facet, attribute_10155).
+            product_type: Product type: value ids of the Product Type facet (attribute_1047) of an earlier answer (e.g. '8393' Jeans).
+            price_min: Lowest price, in the request's currency.
+            price_max: Highest price, in the request's currency.
+            facets: Any other facet of an earlier answer: {facet id: value id or [value ids]}, e.g. {'attribute_1046': '8310', 'discount_band': ['5', '6']} (facets[].id and facets[].values[].id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_new_arrivals", {"country": country, "currency": currency, "gender": gender, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "color": color, "size": size, "range": range, "product_type": product_type, "price_min": price_min, "price_max": price_max, "facets": facets}, extra)
+
+    async def markets(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq", "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo", "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs", "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr", "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg", "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw"]] = None,
+        currency: Optional[Literal["AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN", "SAR", "SEK", "SGD", "TWD", "USD"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every country in ASOS's live country selector: country, name, store (gb, us, fr, de, es, it, au, dk, nl, pl, se, europe, international), language, currencies (the first is ASOS's default for the country), default_currency, size_schema and served (false for Russia and Belarus, with the reason); selected carries the requested country's live currencies (default gb). Failed upstream calls are not charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Country (default 'gb'), ISO-2 lower case: the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); 'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, tw, cn and 150 more). markets() lists every country with its store, language and currencies. Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not list answer 400 before anything is charged.
+            currency: ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others answer 400 listing the allowed ones.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("asos_markets", {"country": country, "currency": currency}, extra)

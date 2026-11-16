@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 83 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 84 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -29,6 +29,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
 | Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
+| ASOS Prices by Country and Currency, Online Stock by Size, Reviews per Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
@@ -3169,6 +3170,89 @@ shows none), no price history (poll `prices`), and Inditex's other brands
 (Pull&Bear, Massimo Dutti, Bershka, Stradivarius, Oysho, Zara Home, Lefties)
 are not covered. Failed calls are not charged; a not-found is charged.
 
+### 53. Fashion -- ASOS prices by country and currency, stock by size, reviews
+
+ASOS in 235 countries. Namespace `asos`, 11 endpoints: `search`, `product`,
+`stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`,
+`deals`, `new_arrivals`, `markets`. Pick the country with `country` (default
+`gb`) and the currency with `currency` (default ASOS's own default for the
+country). 1 credit per call. The request timeout is raised to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+asos = client.asos
+
+# --- One product's price and online stock by size in several stores and currencies.
+# Product ids are the same on every store; prices are set per store + currency.
+for country, currency in [("gb", None), ("us", None), ("fr", None), ("au", None), ("ae", "AED")]:
+    p = asos.product(product_id="210309625", country=country, currency=currency)["data"]
+    print(p["store"], p["currency"], p["price"], p["previous_price"], p["rrp"], p["is_marked_down"])
+    print([(v["size"], v["in_stock"], v["low_stock"]) for v in p["variants"]])
+
+# --- Price and online stock of up to 100 ids in one call (variant ids; product() has the sizes).
+st = asos.stock(["205338218", "206956133", "209793673"], country="de")["data"]
+for prod in st["products"]:
+    print(prod["product_id"], prod["price"], [(v["variant_id"], v["in_stock"]) for v in prod["variants"]])
+print("not sold here:", st["not_found"])
+
+# --- Search (at most 2,088 results reachable: max_reachable), then filter with facet ids.
+res = asos.search("jeans", sort="price_asc", gender="women", range="petite")["data"]
+print(res["total"], res["max_reachable"], [(i["product_id"], i["title"], i["price"]) for i in res["items"][:3]])
+
+# --- Reviews are per store, with ASOS's labelled AI summary; no reviewer names.
+rv = asos.reviews("210309625", sort="newest", page_size=50)["data"]
+print(rv["summary"]["average"], rv["summary"]["count"], rv["ai_summary"])
+
+# --- Brands: brand_id is a category id, so pass it to category().
+brands = asos.brands(gender="women")["data"]["brands"]
+brand_page = asos.category(str(brands[0]["brand_id"]), sort="newest")["data"]
+
+# --- Navigation, the SALE and NEW IN lists, suggestions and the markets table.
+tree = asos.categories(country="it")["data"]
+sale = asos.deals(country="us", gender="men")["data"]
+new = asos.new_arrivals(country="au")["data"]
+print(asos.suggestions("dre", country="de")["data"]["suggestions"])
+mk = asos.markets(country="il")["data"]
+print(mk["selected"]["currencies"], mk["count"])
+```
+
+Markets: the 235 countries in ASOS's own country selector, served by 13 ASOS
+stores. Eleven have a site of their own in their own language: gb (GBP), us
+and pr (USD), fr and mc (EUR, French; the French overseas territories in USD),
+de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR,
+Italian), au (AUD), dk (DKK), nl (EUR), pl (PLN) and se (SEK). ASOS's European
+store (33 countries, English: ie, pt, be, fi, gr, cz, hu, ro, no ...) and its
+international store (170 countries, English: ca, mx, in, za, ch, nz, ae, sa,
+hk, il, jp, kr, sg, tw, cn ...) serve the rest. `currency` takes any currency
+ASOS offers the country (245 country-currency combinations, e.g. ae AED or
+GBP, il ILS, GBP or USD, jp USD or GBP); `markets` lists them. Every endpoint
+serves every combination except `suggestions` on pl (ASOS's Polish store
+answers no suggestions). Russia and Belarus (ASOS is not selling there), uk
+(use gb) and countries ASOS does not list answer 400 before anything is
+charged.
+
+Product and category ids are the same on every store (titles come back in the
+store's language). Prices are set per store and currency, not per country
+inside a store (the European store prices Ireland and Portugal alike in EUR);
+which products are offered can still differ by country. Prices are numbers in
+the requested currency, never converted: `price`, `previous_price` (ASOS's
+"was"), `rrp`, `lowest_price_30d` where ASOS shows it, `is_marked_down`,
+`is_outlet`, `discount_percent` and `discount_basis` (`previous_price` or
+`rrp`). `stock` is online stock per variant (ASOS has no physical stores) and
+carries variant ids, not size names: `product` carries the sizes. Reviews are
+per store (the European and international stores share one pool), up to 50
+per page, sorted by relevance, newest, oldest or rating, filtered by star
+rating; syndicated reviews are labelled. Keyword search serves at most 2,088
+results whatever `total` says (`max_reachable`); category, `deals` and
+`new_arrivals` lists page through everything. The `search` brand filter takes
+brand facet ids from a search answer; `brands` returns category ids to pass to
+`category`. `deals` is ASOS's sale category per gender, `new_arrivals` its new-in
+category. No outlet (ASOS's outlet categories are empty), no promo codes
+(shown only to signed-in shoppers) and no price history (poll `stock`). Failed
+calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3317,6 +3401,7 @@ Scavio works with popular AI/LLM frameworks:
 | Nintendo (`nintendo`) | `search`, `product`, `prices`, `deals`, `releases`, `dlc`; 46 countries via `country` and `language` (`prices` also kr, hk, tw and il) | 1 each |
 | H&M (`hm`) | `search`, `product`, `stock`, `stores`, `category`, `deals`, `new_arrivals`, `suggestions`, `production`; 47 countries via `country` and `language` (`product` not on mo, tw or the shared EU store; `stores` not on mo) | `product` 2, the rest 1 each |
 | Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
+| ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3333,6 +3418,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.64.0
+
+- **New `asos` namespace** (sync and async) for ASOS, 11 endpoints:
+  `search`, `product`, `stock`, `reviews`, `suggestions`, `category`,
+  `categories`, `brands`, `deals`, `new_arrivals`, `markets`. 235
+  countries via `country` and `currency` (245 combinations); `stock` takes
+  up to 100 product ids per call. 1 credit each. 120s timeout floor.
 
 ### Changed in 0.63.0
 

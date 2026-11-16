@@ -12,6 +12,7 @@ from ._namespaces_sync import (
     _AmazonNamespace,
     _AppStoreNamespace,
     _AshleyNamespace,
+    _AsosNamespace,
     _BestBuyNamespace,
     _BookingNamespace,
     _CanadianTireNamespace,
@@ -235,6 +236,7 @@ class ScavioClient:
         self.nintendo = _NintendoNamespace(self)
         self.hm = _HmNamespace(self)
         self.zara = _ZaraNamespace(self)
+        self.asos = _AsosNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

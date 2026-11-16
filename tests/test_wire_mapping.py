@@ -4724,3 +4724,143 @@ def test_zara_credits_paths_and_wire(monkeypatch):
         zara.product(country="gb")
     with pytest.raises(ScavioError):
         zara.store_stock("553306790")
+
+
+def test_asos_credits_paths_and_wire(monkeypatch):
+    """asos (0.64.0): 11 endpoints on /api/v1/asos, 1 credit each, 120 s floor.
+
+    235 countries via country (default gb) + currency (245 combinations); suggestions not on
+    pl; ru, by and uk are not in any country literal. product takes product_id, group_id or
+    url; stock takes up to 100 product ids as a list or a comma-separated string.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "asos"}
+    assert sorted(eps) == [
+        "brands", "categories", "category", "deals", "markets", "new_arrivals", "product",
+        "reviews", "search", "stock", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/asos/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        country = params["country"].annotation
+        assert country.count('"') // 2 == (234 if m == "suggestions" else 235), m
+        for cc in ("ru", "by", "uk"):
+            assert f'"{cc}"' not in country, (m, cc)
+        assert ('"pl"' in country) == (m != "suggestions"), m
+        assert params["currency"].annotation.count('"') // 2 == 18, m
+    assert eps["product"].one_of == (("product_id", "group_id", "url"),)
+    assert {p.name: p for p in eps["stock"].params}["product_ids"].annotation == (
+        "Union[str, list[str]]"
+    )
+    assert {p.name: p for p in eps["search"].params}["sort"].annotation == (
+        'Optional[Literal["relevance", "newest", "price_asc", "price_desc"]]'
+    )
+    assert {p.name: p for p in eps["reviews"].params}["sort"].annotation == (
+        'Optional[Literal["relevance", "newest", "oldest", "rating_desc", "rating_asc"]]'
+    )
+    for m in ("brands", "deals", "new_arrivals"):
+        assert {p.name: p for p in eps[m].params}["gender"].annotation == (
+            'Optional[Literal["women", "men"]]'
+        ), m
+    for m in ("search", "category"):
+        assert {p.name: p for p in eps[m].params}["gender"].annotation == (
+            'Optional[Literal["women", "men", "unisex"]]'
+        ), m
+        assert "on_sale" in {p.name for p in eps[m].params}, m
+    for m in ("deals", "new_arrivals"):
+        assert "on_sale" not in {p.name for p in eps[m].params}, m
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    asos = client.asos
+    asos.search("jeans")
+    asos.search(
+        "kleid",
+        country="de",
+        page=2,
+        page_size=200,
+        sort="price_asc",
+        gender="women",
+        brand=["53", "401"],
+        color="black",
+        range="petite",
+        price_min=10,
+        price_max=49.5,
+        facets={"discount_band": ["5", "6"]},
+        on_sale=True,
+    )
+    asos.product(product_id="210309625")
+    asos.product(group_id="210070576", country="nl")
+    asos.product(product_id="211390171", country="jp", currency="USD")
+    asos.stock(["205338218", "206956133", "209793673"], country="il", currency="USD")
+    asos.stock("205338218,206956133")
+    asos.reviews("210309625", sort="newest", page_size=50, rating=5)
+    asos.suggestions("dre", country="us")
+    asos.category("8799", country="fr", sort="price_asc")
+    asos.categories(gender="men")
+    asos.brands(country="es")
+    asos.deals(country="us", gender="men")
+    asos.new_arrivals(country="au")
+    asos.markets(country="ae", currency="GBP")
+    base = "/api/v1/asos/"
+    assert seen == [
+        (base + "search", {"query": "jeans"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "kleid",
+                "country": "de",
+                "page": 2,
+                "page_size": 200,
+                "sort": "price_asc",
+                "gender": "women",
+                "brand": ["53", "401"],
+                "color": "black",
+                "range": "petite",
+                "price_min": 10,
+                "price_max": 49.5,
+                "facets": {"discount_band": ["5", "6"]},
+                "on_sale": True,
+            },
+            120.0,
+        ),
+        (base + "product", {"product_id": "210309625"}, 120.0),
+        (base + "product", {"group_id": "210070576", "country": "nl"}, 120.0),
+        (
+            base + "product",
+            {"product_id": "211390171", "country": "jp", "currency": "USD"},
+            120.0,
+        ),
+        (
+            base + "stock",
+            {
+                "product_ids": ["205338218", "206956133", "209793673"],
+                "country": "il",
+                "currency": "USD",
+            },
+            120.0,
+        ),
+        (base + "stock", {"product_ids": "205338218,206956133"}, 120.0),
+        (
+            base + "reviews",
+            {"product_id": "210309625", "sort": "newest", "page_size": 50, "rating": 5},
+            120.0,
+        ),
+        (base + "suggestions", {"query": "dre", "country": "us"}, 120.0),
+        (base + "category", {"category_id": "8799", "country": "fr", "sort": "price_asc"}, 120.0),
+        (base + "categories", {"gender": "men"}, 120.0),
+        (base + "brands", {"country": "es"}, 120.0),
+        (base + "deals", {"country": "us", "gender": "men"}, 120.0),
+        (base + "new-arrivals", {"country": "au"}, 120.0),
+        (base + "markets", {"country": "ae", "currency": "GBP"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        asos.product(country="gb")

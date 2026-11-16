@@ -1877,6 +1877,144 @@ _ZARA_NOTE = (
 _ZARA_CN = " China (cn) costs 1 credit per call instead of 2."
 
 
+# ASOS params shared across endpoints (asos.com: 235 countries in ASOS's own country selector,
+# served by 13 ASOS stores: gb, us, fr, de, es, it, au, dk, nl, pl and se with a site of their
+# own, plus ASOS's European and international stores; 245 country-currency combinations). Every
+# endpoint serves every combination except suggestions on pl. 1 credit per call everywhere.
+_ASOS_COUNTRIES = (
+    "ad", "ae", "af", "ag", "ai", "al", "am", "ao", "aq", "ar", "as", "at", "au", "aw", "ax",
+    "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bl", "bm", "bn", "bo", "bq",
+    "br", "bs", "bt", "bw", "bz", "ca", "cc", "cd", "cf", "cg", "ch", "ci", "ck", "cl", "cm",
+    "cn", "co", "cr", "cv", "cw", "cx", "cy", "cz", "de", "dj", "dk", "dm", "do", "dz", "ec",
+    "ee", "eg", "eh", "er", "es", "et", "fi", "fj", "fk", "fm", "fo", "fr", "ga", "gb", "gd",
+    "ge", "gf", "gh", "gi", "gl", "gm", "gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy",
+    "hk", "hn", "hr", "ht", "hu", "id", "ie", "il", "in", "io", "iq", "is", "it", "jm", "jo",
+    "jp", "ke", "kg", "kh", "ki", "km", "kn", "kr", "kw", "ky", "kz", "la", "lb", "lc", "li",
+    "lk", "lr", "ls", "lt", "lu", "lv", "ma", "mc", "md", "me", "mf", "mg", "mh", "mk", "ml",
+    "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw", "mx", "my", "mz", "na",
+    "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu", "nz", "om", "pa", "pe", "pf",
+    "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt", "pw", "py", "qa", "re", "ro", "rs",
+    "rw", "sa", "sb", "sc", "sd", "se", "sg", "sh", "si", "sj", "sk", "sl", "sm", "sn", "sr",
+    "ss", "st", "sv", "sx", "sz", "tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn",
+    "to", "tr", "tt", "tv", "tw", "tz", "ua", "ug", "um", "us", "uy", "uz", "va", "vc", "vg",
+    "vi", "vn", "vu", "wf", "ws", "xk", "yt", "za", "zm", "zw",
+)
+_ASOS_SUGGESTIONS_COUNTRIES = tuple(c for c in _ASOS_COUNTRIES if c != "pl")
+_ASOS_CURRENCIES = (
+    "AED", "AUD", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "ILS", "NOK", "NZD", "PLN",
+    "SAR", "SEK", "SGD", "TWD", "USD",
+)
+_ASOS_MARKET_TEXT = (
+    "the 235 countries in ASOS's own country selector, served by 13 ASOS stores: gb (GBP, "
+    "English), us and pr (USD, en-US), fr and mc (EUR; French; the French overseas territories "
+    "in USD), de and at (EUR, German), es and ad (EUR, Spanish), it, sm and va (EUR, Italian), "
+    "au (AUD), dk (DKK, Danish), nl (EUR, Dutch), pl (PLN, Polish), se (SEK, Swedish); "
+    "'europe' (ASOS's European store, English: ie, pt, be, lu, fi, gr, cz, hu, ro, bg, hr, si, "
+    "sk, ee, lv, lt, cy, mt (EUR), no (NOK), fo and gl (DKK), am, ge, kz, kg and ba (GBP) ...) "
+    "and 'international' (English: ca (CAD), mx, in, za (USD), ch (CHF), nz (NZD), ae (AED or "
+    "GBP), sa (SAR or GBP), hk (HKD or GBP), il (ILS, GBP or USD), jp and kr (USD or GBP), sg, "
+    "tw, cn and 150 more). markets() lists every country with its store, language and "
+    "currencies."
+)
+_ASOS_HELD = (
+    " Russia and Belarus (ASOS is not selling there), uk (use gb) and countries ASOS does not "
+    "list answer 400 before anything is charged."
+)
+_ASOS_COUNTRY = _lit(
+    "country",
+    _ASOS_COUNTRIES,
+    "Country (default 'gb'), ISO-2 lower case: " + _ASOS_MARKET_TEXT + _ASOS_HELD,
+)
+_ASOS_SUGGESTIONS_COUNTRY = _lit(
+    "country",
+    _ASOS_SUGGESTIONS_COUNTRIES,
+    "Country (default 'gb'): every country ASOS sells in except pl (ASOS's Polish store answers "
+    "no search suggestions; use search() there)." + _ASOS_HELD,
+)
+_ASOS_CURRENCY = _lit(
+    "currency",
+    _ASOS_CURRENCIES,
+    "ISO-4217 currency (default: ASOS's own default for the country). Any currency ASOS offers "
+    "the country is accepted (e.g. ae: AED or GBP; il: ILS, GBP or USD; jp: USD or GBP); others "
+    "answer 400 listing the allowed ones.",
+)
+_ASOS_PRODUCT_ID = (
+    "An ASOS product id (items[].product_id of any answer, the number after /prd/ in a link), "
+    "e.g. '210309625'. The same id on every store."
+)
+_ASOS_SORT = _lit(
+    "sort",
+    ("relevance", "newest", "price_asc", "price_desc"),
+    "relevance (default, ASOS's own order), newest, price_asc or price_desc.",
+)
+_ASOS_PAGE = _int("page", "Results page, 1-based (up to 1000).")
+_ASOS_PAGE_SIZE = _int("page_size", "Items per page, 1 to 200 (default 72).")
+_ASOS_GENDER = _lit(
+    "gender", ("women", "men", "unisex"), "women, men or unisex (ASOS's Gender facet)."
+)
+_ASOS_SECTION = _lit("gender", ("women", "men"), "women or men (default women).")
+_ASOS_COLORS = (
+    "red, green, blue, black, white, yellow, orange, purple, pink, brown, gold, silver, copper, "
+    "grey, multi, navy, neutral"
+)
+_ASOS_RANGES = "plus, petite, tall, maternity, hourglass, wide_fit, fuller_bust"
+_ASOS_FILTER_PARAMS = (
+    _str_or_list(
+        "brand",
+        "Brand: value ids of the brand facet of an earlier search or category answer (e.g. '53' "
+        "ASOS DESIGN, '401' Levi's); several are ORed. Not brands()[].brand_id (a category id: "
+        "pass that to category()).",
+    ),
+    _str_or_list(
+        "color",
+        "Colour: " + _ASOS_COLORS + ", or value ids of the base_colour facet; several are ORed.",
+    ),
+    _str_or_list(
+        "size", "Size: value ids of the size facet of an earlier answer (e.g. '279' XS); several "
+        "are ORed."
+    ),
+    _str_or_list(
+        "range",
+        "Body-fit range: " + _ASOS_RANGES + " (or value ids of the Body Fit facet, "
+        "attribute_10155).",
+    ),
+    _str_or_list(
+        "product_type",
+        "Product type: value ids of the Product Type facet (attribute_1047) of an earlier answer "
+        "(e.g. '8393' Jeans).",
+    ),
+    _float("price_min", "Lowest price, in the request's currency."),
+    _float("price_max", "Highest price, in the request's currency."),
+    Param(
+        "facets",
+        "Optional[dict[str, Union[str, list[str]]]]",
+        doc="Any other facet of an earlier answer: {facet id: value id or [value ids]}, e.g. "
+        "{'attribute_1046': '8310', 'discount_band': ['5', '6']} (facets[].id and "
+        "facets[].values[].id).",
+    ),
+)
+_ASOS_ON_SALE = _bool("on_sale", "Only sale items (ASOS's Sale facet).")
+_ASOS_PRICES = (
+    " Prices are numbers in the request's currency, never converted, set per store + currency "
+    "(not per country inside a store): price, previous_price (a markdown, above price), rrp, "
+    "lowest_price_30d (when ASOS shows it), is_marked_down, is_outlet, discount_percent and "
+    "discount_basis (previous_price or rrp). No price history: poll stock() or product()."
+)
+_ASOS_IDS = (
+    " Product and category ids are global: the same id on every store; titles come back in the "
+    "store's language; availability and prices are per store and currency."
+)
+_ASOS_ITEM = (
+    "product_id, product_type (product, group, group_piece), group_id, title, brand, color, url, "
+    "the prices, currency, selling_fast, restocking_soon, is_new, sponsored, color_product_ids "
+    "(the other colours' product ids), image, images and video"
+)
+_ASOS_NOTE = (
+    " Every answer carries country, currency, store and language. Failed upstream calls are not "
+    "charged; a not-found is charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -10472,6 +10610,297 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         min_timeout=120.0,
     ),
+    # ============================= ASOS =============================
+    # 11 endpoints on /api/v1/asos, 1 credit each. 235 countries (country + currency, 245
+    # combinations); suggestions not on pl. Product pages take up to ~10 s and a retried call
+    # longer: 120 s timeout floor on every endpoint.
+    Endpoint(
+        key="asos_search",
+        namespace="asos",
+        method="search",
+        http="POST",
+        path="/api/v1/asos/search",
+        summary=(
+            "Search one ASOS store by keyword: items (" + _ASOS_ITEM + "), total, "
+            "max_reachable, page, page_size (up to 200, default 72), has_more, sort, "
+            "sorts_offered, filters, facets (id, name, values with id, name and count) and "
+            "price_range. Filters: gender, brand (brand facet ids), color, size, range, "
+            "product_type, price_min / price_max, on_sale and facets. ASOS serves keyword "
+            "results only up to position 2,088 whatever total says (max_reachable; a page past "
+            "it answers 400 before anything is charged): narrow with filters or use category()."
+            + _ASOS_PRICES + _ASOS_IDS + _ASOS_NOTE
+        ),
+        params=(
+            _req("query", "Search keywords (in the store's language or English), e.g. 'jeans'."),
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _ASOS_PAGE,
+            _ASOS_PAGE_SIZE,
+            _ASOS_SORT,
+            _ASOS_GENDER,
+        )
+        + _ASOS_FILTER_PARAMS
+        + (_ASOS_ON_SALE,),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_product",
+        namespace="asos",
+        method="product",
+        http="POST",
+        path="/api/v1/asos/product",
+        summary=(
+            "One ASOS product by product_id, group_id or link: product_id, product_code, title, "
+            "brand, brand_id, gender, product_kind, url, category and breadcrumbs, category_ids, "
+            "description, product_details, brand_description, composition, care, size_and_fit "
+            "(model height and size worn as ASOS shows it), fit, country_of_manufacture, color, "
+            "color_products (each other colour is its own product id), the prices, price_since, "
+            "in_stock, selling_fast, is_discontinued, variants (variant_id, size, brand_size, "
+            "size_id, color, sku, ean, price, previous_price, in_stock, low_stock, "
+            "restocking_soon, seller: online stock per size), rating (average, count, "
+            "distribution, recommended_percent, fit and quality), ai_summary (ASOS's own AI "
+            "summary of reviews), images and video. A co-ord set (group_id, a /grp/ link, or the "
+            "id of one of its pieces) answers the group: items[] with each piece's variants, "
+            "stock and price. An unknown id, or a product the store does not sell, is a charged "
+            "404. Not available: an outlet, promo codes (shown only to signed-in shoppers), "
+            "store locator (ASOS has no physical stores), price history, checkout and delivery "
+            "prices." + _ASOS_PRICES + _ASOS_IDS + _ASOS_NOTE
+        ),
+        params=(
+            _str("product_id", _ASOS_PRODUCT_ID),
+            _str(
+                "group_id",
+                "An ASOS co-ord group id (items[].group_id of a group or group_piece item, the "
+                "number after /grp/ in a link).",
+            ),
+            _str(
+                "url",
+                "An ASOS product link (https://www.asos.com/<store>/<brand>/<slug>/prd/<id>, or "
+                "/grp/<id>) from any store: its store's country is used unless country is sent.",
+            ),
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+        ),
+        one_of=(("product_id", "group_id", "url"),),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_stock",
+        namespace="asos",
+        method="stock",
+        http="POST",
+        path="/api/v1/asos/stock",
+        summary=(
+            "Price and online stock of up to 100 ASOS products in one call: per product "
+            "product_id, the prices, price_since, in_stock, restocking_soon and variants "
+            "(variant_id, in_stock, low_stock, restocking_soon, price, previous_price, seller); "
+            "not_found lists the ids the store does not sell. Online stock: ASOS has no physical "
+            "stores. Variants carry ids, not size names: map variant_id to its size with "
+            "product()." + _ASOS_PRICES + _ASOS_IDS + _ASOS_NOTE
+        ),
+        params=(
+            Param(
+                "product_ids",
+                "Union[str, list[str]]",
+                required=True,
+                doc="1 to 100 ASOS product ids (a list or comma-separated), e.g. ['205338218', "
+                "'206956133', '209793673'].",
+            ),
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_reviews",
+        namespace="asos",
+        method="reviews",
+        http="POST",
+        path="/api/v1/asos/reviews",
+        summary=(
+            "Customer reviews of one ASOS product on one store, paged (up to 50 per page): "
+            "summary (average, count, ratings_only_count, distribution, recommended counts and "
+            "percent, fit and quality averages), ai_summary (ASOS's own AI-generated summary, "
+            "labelled), reviews (id, rating, title, text, date, experience_date, ratings_only, "
+            "recommended, fit and quality with ASOS's label such as True to Size, color, "
+            "verified_purchaser, language, syndicated, source, photos), total, page, has_more. "
+            "Reviews are per store (the same product has different reviews on gb and de; the "
+            "European and international stores share one pool). Reviewer names are never "
+            "returned." + _ASOS_NOTE
+        ),
+        params=(
+            _req("product_id", _ASOS_PRODUCT_ID),
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _int("page", "Results page, 1-based (up to 500)."),
+            _int("page_size", "Reviews per page, 1 to 50 (default 10)."),
+            _lit(
+                "sort",
+                ("relevance", "newest", "oldest", "rating_desc", "rating_asc"),
+                "relevance (default, ASOS's own order), newest, oldest, rating_desc or "
+                "rating_asc.",
+            ),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this star rating (1 to 5)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_suggestions",
+        namespace="asos",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/asos/suggestions",
+        summary=(
+            "ASOS search suggestions for what a shopper has typed, in the store's language: "
+            "suggestions (text, count = ASOS's number of results). Not on pl (ASOS's Polish "
+            "store answers no search suggestions; use search() there)." + _ASOS_NOTE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'dre'."),
+            _ASOS_SUGGESTIONS_COUNTRY,
+            _ASOS_CURRENCY,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_category",
+        namespace="asos",
+        method="category",
+        http="POST",
+        path="/api/v1/asos/category",
+        summary=(
+            "Every product of one ASOS category (a category_id from categories(), or a brand's "
+            "brand_id from brands(): a brand page is a category), paged and sorted (no 2,088 "
+            "cap: category lists page through everything): category_id, category_name (in the "
+            "store's language), items (" + _ASOS_ITEM + "), total, page, page_size (up to 200), "
+            "has_more, sort, facets and price_range. The filters of search(). An unknown "
+            "category id is a charged 404." + _ASOS_PRICES + _ASOS_IDS + _ASOS_NOTE
+        ),
+        params=(
+            _req(
+                "category_id",
+                "An ASOS category id (categories[].category_id of categories(), or brand_id of "
+                "brands()), the same on every store: e.g. '8799' women's dresses, '7046' women's "
+                "sale.",
+            ),
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _ASOS_PAGE,
+            _ASOS_PAGE_SIZE,
+            _ASOS_SORT,
+            _ASOS_GENDER,
+        )
+        + _ASOS_FILTER_PARAMS
+        + (_ASOS_ON_SALE,),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_categories",
+        namespace="asos",
+        method="categories",
+        http="POST",
+        path="/api/v1/asos/categories",
+        summary=(
+            "The ASOS store's navigation (as its desktop menu shows it) for women and men, in "
+            "the store's language: sections (gender, name, url, categories, count), each "
+            "category node with name, category_id (null on headings), url, path and children. "
+            "Category ids are the same on every store." + _ASOS_NOTE
+        ),
+        params=(
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _lit("gender", ("women", "men"), "women or men (default: both)."),
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_brands",
+        namespace="asos",
+        method="brands",
+        http="POST",
+        path="/api/v1/asos/brands",
+        summary=(
+            "The ASOS store's A-Z brand list for women or men (default women): brands (brand_id, "
+            "name, url, letter), count, title. brand_id is the brand's ASOS category id: pass it "
+            "to category() as category_id for the brand's products (the search() brand filter "
+            "takes the brand facet ids of a search answer instead)." + _ASOS_NOTE
+        ),
+        params=(_ASOS_COUNTRY, _ASOS_CURRENCY, _ASOS_SECTION),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_deals",
+        namespace="asos",
+        method="deals",
+        http="POST",
+        path="/api/v1/asos/deals",
+        summary=(
+            "The ASOS store's SALE category for women (7046) or men (8409), default women (the "
+            "same ids on every store): items (" + _ASOS_ITEM + ") with previous_price and "
+            "discount_percent, marked_down, total, paging, sort, facets and the filters of "
+            "category(). No outlet (ASOS's outlet categories are empty) and no promo codes "
+            "(shown only to signed-in shoppers)." + _ASOS_PRICES + _ASOS_NOTE
+        ),
+        params=(
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _ASOS_SECTION,
+            _ASOS_PAGE,
+            _ASOS_PAGE_SIZE,
+            _ASOS_SORT,
+        )
+        + _ASOS_FILTER_PARAMS,
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_new_arrivals",
+        namespace="asos",
+        method="new_arrivals",
+        http="POST",
+        path="/api/v1/asos/new-arrivals",
+        summary=(
+            "The ASOS store's NEW IN category for women (27108) or men (27110), default women: "
+            "items (" + _ASOS_ITEM + "), total, paging, sort (newest for the latest first), "
+            "facets and the filters of category()." + _ASOS_PRICES + _ASOS_NOTE
+        ),
+        params=(
+            _ASOS_COUNTRY,
+            _ASOS_CURRENCY,
+            _ASOS_SECTION,
+            _ASOS_PAGE,
+            _ASOS_PAGE_SIZE,
+            _ASOS_SORT,
+        )
+        + _ASOS_FILTER_PARAMS,
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="asos_markets",
+        namespace="asos",
+        method="markets",
+        http="POST",
+        path="/api/v1/asos/markets",
+        summary=(
+            "Every country in ASOS's live country selector: country, name, store (gb, us, fr, "
+            "de, es, it, au, dk, nl, pl, se, europe, international), language, currencies (the "
+            "first is ASOS's default for the country), default_currency, size_schema and served "
+            "(false for Russia and Belarus, with the reason); selected carries the requested "
+            "country's live currencies (default gb). Failed upstream calls are not charged."
+        ),
+        params=(_ASOS_COUNTRY, _ASOS_CURRENCY),
+        credits=1,
+        min_timeout=120.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -17497,6 +17926,7 @@ NAMESPACES: tuple[str, ...] = (
     "nintendo",
     "hm",
     "zara",
+    "asos",
 )
 
 
