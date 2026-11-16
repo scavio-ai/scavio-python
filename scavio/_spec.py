@@ -2043,7 +2043,11 @@ _MERCARI_COUNTRY_JP = _lit(
     "Market: 'jp' only (Mercari Japan, JPY, Japanese; the default for this endpoint). Any other "
     "value answers 400 before anything is charged.",
 )
-_MERCARI_DEPTH = "us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91."
+_MERCARI_DEPTH = (
+    "us 50 per page up to page 20 (later pages can repeat earlier items: dedupe by item_id), jp "
+    "120 per page up to page 91. total stops at 10,000 on us and 15,000 on jp (the cap means "
+    "that many or more)."
+)
 _MERCARI_STATUS = _lit(
     "status",
     ("on_sale", "sold", "all"),
@@ -2054,7 +2058,8 @@ _MERCARI_SORT = _lit(
     "sort",
     ("relevance", "newest", "price_asc", "price_desc", "likes", "recently_sold"),
     "relevance (default), newest, price_asc, price_desc; likes (jp only); recently_sold (us "
-    "only). jp newest follows Mercari Japan's own order (relisted items move up).",
+    "only). A us sold search comes most recently sold first under relevance too. jp newest "
+    "follows Mercari Japan's own order (relisted items move up).",
 )
 _MERCARI_PRICE_MIN = _float("price_min", "Lowest price: US dollars on us, whole yen on jp.")
 _MERCARI_PRICE_MAX = _float("price_max", "Highest price: US dollars on us, whole yen on jp.")
@@ -2064,7 +2069,10 @@ _MERCARI_CONDITION = _str_or_list(
     "['new', 'like_new'].",
 )
 _MERCARI_SHIPPING = _lit(
-    "shipping", ("free", "buyer_pays"), "free (the seller pays shipping) or buyer_pays."
+    "shipping",
+    ("free", "buyer_pays"),
+    "free (the seller pays shipping) or buyer_pays. On us, result rows carry free_shipping only "
+    "when this filter is sent.",
 )
 _MERCARI_SIZE_ID = _str_or_int("size_id", "us only: a Mercari US size id.")
 _MERCARI_GRID_PARAMS = (
@@ -2086,9 +2094,10 @@ _MERCARI_GRID_PARAMS = (
 _MERCARI_ITEM = (
     "item_id, title, url, price, original_price, discount_percent, currency, status (on_sale, "
     "trading = sold and in transit, sold), condition (new, like_new, good, fair, poor, bad) and "
-    "condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping, created_at; "
-    "jp adds is_shop, shop_id, is_auction and updated_at. Grid results carry no likes and no "
-    "sold time (item() has both)"
+    "condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping (us: set "
+    "only when you filter by shipping; jp: None on Mercari Shops rows), created_at; jp adds "
+    "is_shop, shop_id, is_auction and updated_at. Grid results carry no likes, no sold time and "
+    "on us no shipping payer (item() has all three)"
 )
 _MERCARI_FILTERS = (
     " Filters: status (on_sale default, sold, all), sort (relevance, newest, price_asc, "
@@ -2097,11 +2106,12 @@ _MERCARI_FILTERS = (
 )
 _MERCARI_PRICES = (
     " Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's "
-    "earlier price when above price, with discount_percent computed against it."
+    "earlier price when above price, with discount_percent computed against it (never set on "
+    "jp results)."
 )
 _MERCARI_JP = (
     " jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers "
-    "take longer (search 30-60 s, other endpoints 10-30 s)."
+    "are slower than us (typically 10-20 s, up to about a minute)."
 )
 _MERCARI_IDS = (
     " Item, category, brand and seller ids are per market: an id from us is not valid on jp (a "
@@ -11023,10 +11033,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Search Mercari listings by keyword (Mercari US or Mercari Japan): items ("
             + _MERCARI_ITEM
-            + "), total (Mercari's own capped count), page, page_size, max_page, has_more, "
+            + "), total (Mercari's own count, capped), page, page_size, max_page, has_more, "
             "status, sort and filters. status sold returns sold listings (sold and in transit) "
             "with their prices, so asking prices (on_sale) and sold prices for the same query "
-            "come from one endpoint; sort recently_sold on us. Depth: " + _MERCARI_DEPTH
+            "come from one endpoint. On us, Mercari orders sold results most recently sold first "
+            "whatever relevance asks (price sorts apply) and matches the keyword more loosely "
+            "than on-sale results (set names, descriptions): check titles before comparing "
+            "prices. Depth: " + _MERCARI_DEPTH
             + _MERCARI_FILTERS + _MERCARI_PRICES + _MERCARI_JP + _MERCARI_IDS + _MERCARI_NOTE
         ),
         params=(
@@ -11056,10 +11069,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/mercari/item",
         summary=(
             "One Mercari listing by item_id or link: item_id, title, description, url, price, "
-            "original_price, discount_percent (us also price_with_buyer_fee), currency, status, "
-            "sold_at (when it sold), condition and condition_name, brand, category with its "
-            "path, size, color, shipping (payer, method, service, fee, days_to_ship, ships_from: "
-            "US state or Japanese prefecture), likes, photos, created_at, updated_at, seller "
+            "original_price, discount_percent (us also price_with_buyer_fee: price plus buyer "
+            "fees, plus shipping when the buyer pays it), currency, status, sold_at (when it "
+            "sold, if Mercari shows it), condition and condition_name, brand, category with its "
+            "path, size, color, shipping (payer, method, service, fee: the shipping label cost "
+            "paid by payer, days_to_ship, ships_from: US state or Japanese prefecture), likes, photos, created_at, updated_at, seller "
             "(seller_id, public display name, rating, review_count, listings_count, badges; us "
             "sold_count, jp good / normal / bad ratings). A sold listing keeps its full data. jp "
             "adds the item's full public comment list (text, date, is_seller; who wrote each is "

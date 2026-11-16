@@ -3270,7 +3270,7 @@ Japanese). Namespace `mercari`, 11 endpoints: `search`, `item`, `category`,
 `categories`, `brands`, `brand`, `deals`, `trending`, `seller`,
 `seller_reviews`, `shop`. Pick the market with `country` (`us`, the default,
 or `jp`). 1 credit per call. The request timeout is raised to at least 240s
-(Mercari Japan calls typically take 30-60s for search).
+(Mercari Japan calls are slower than US: typically 10-20s, up to about a minute).
 
 ```python
 from scavio import ScavioClient
@@ -3279,14 +3279,16 @@ client = ScavioClient()
 mercari = client.mercari
 
 # --- Asking prices vs sold prices for the same query, from one endpoint.
-# status="sold" returns sold listings (sold and in transit) with their prices.
+# status="sold" returns sold listings (sold and in transit) with their prices. On us,
+# sold results come most recently sold first and match the keyword loosely: check titles.
 on_sale = mercari.search("nintendo switch")["data"]
 sold = mercari.search("nintendo switch", status="sold", sort="recently_sold")["data"]
 print(on_sale["total"], [(i["title"], i["price"]) for i in on_sale["items"][:3]])
 print(sold["total"], [(i["title"], i["price"], i["status"]) for i in sold["items"][:3]])
 
 # --- One listing: price, the seller's earlier price, sold_at, shipping, likes, seller summary.
-# Grids carry no likes and no sold time; item() has both. Sold items keep full data.
+# Grids carry no likes and no sold time; item() has both. Sold items keep full data;
+# sold_at is set when Mercari shows it (some sold items carry none).
 it = mercari.item("m38943035688")["data"]
 print(it["price"], it["original_price"], it["discount_percent"], it["status"], it["sold_at"])
 print(it["shipping"], it["likes"], it["seller"])
@@ -3322,13 +3324,18 @@ anything is charged. Item, category, brand and seller ids are per market: an
 id from us is not valid on jp.
 
 `status` is `on_sale` (default), `sold` (sold and in transit) or `all`, so
-asking and sold prices for the same query come from one call each. Search
-depth: us 50 per page up to page 20 (1,000 results), jp 120 per page up to
-page 91. Sorts: relevance, newest, price_asc, price_desc, plus `likes` on jp
+asking and sold prices for the same query come from one call each. On us,
+Mercari orders sold results most recently sold first whatever relevance asks
+(price sorts apply) and matches the keyword more loosely than on-sale results,
+so check titles before comparing prices. Search depth: us 50 per page up to
+page 20 (later pages can repeat earlier items: dedupe by `item_id`), jp 120
+per page up to page 91; `total` stops at 10,000 on us and 15,000 on jp (that
+many or more). On us, `free_shipping` is set only when you filter by
+`shipping`; `item()` has `shipping.payer`. Sorts: relevance, newest, price_asc, price_desc, plus `likes` on jp
 and `recently_sold` on us; jp `newest` follows Mercari Japan's own order,
 where relisted items move up. Prices are numbers, US dollars on us and whole
 yen on jp; `original_price` is the seller's earlier price when above `price`,
-with `discount_percent` against it. `brands` covers about 28,800 US and 52,600
+with `discount_percent` against it (never set on jp results). `brands` covers about 28,800 US and 52,600
 Japanese brands in pages of 1,000; `categories` answers one level at a time on
 us and the full tree (or one parent's children) on jp. `seller_reviews`
 returns the most recent 100 reviews with no reviewer names; `shop` is the
