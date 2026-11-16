@@ -3151,9 +3151,10 @@ dz) and `suggestions` (not ad, al, am, az, ba, dz, mk, mo, uz or xk).
 Belarus, uk (use gb) and the countries Zara serves only from its worldwide
 store answer 400 before anything is charged.
 
-Product ids (one per colour) and references are global on Zara's
-international site, so `prices` compares one reference across markets in a
-single call; China (`cn`) runs its own ids, so use the reference there.
+References are global on Zara's international site, so `prices` compares
+one reference across markets in a single call. A colour's product id is
+usually the same across markets but can differ, and China (`cn`) runs its
+own ids, so match across markets with the reference.
 Prices are numbers in the market's own currency, never converted;
 `old_price` is set only on a markdown. Zara runs seasonal sales and lists
 special prices between them: `deals` resolves each market's special-prices
