@@ -93,6 +93,7 @@ __all__ = [
     "_AsyncHmNamespace",
     "_AsyncZaraNamespace",
     "_AsyncAsosNamespace",
+    "_AsyncMercariNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -14391,3 +14392,307 @@ class _AsyncAsosNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("asos_markets", {"country": country, "currency": currency}, extra)
+
+class _AsyncMercariNamespace:
+    """Mercari search (on sale and sold), item, category, categories, brands, brand, deals and trending endpoints for Mercari US and Mercari Japan, plus Mercari Japan seller, seller reviews and Mercari Shops shop endpoints."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        country: Optional[Literal["us", "jp"]] = None,
+        category_id: Optional[Union[str, int]] = None,
+        brand_id: Optional[Union[str, int]] = None,
+        status: Optional[Literal["on_sale", "sold", "all"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc", "likes", "recently_sold"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        shipping: Optional[Literal["free", "buyer_pays"]] = None,
+        size_id: Optional[Union[str, int]] = None,
+        deals_only: Optional[bool] = None,
+        shops_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Mercari listings by keyword (Mercari US or Mercari Japan): items (item_id, title, url, price, original_price, discount_percent, currency, status (on_sale, trading = sold and in transit, sold), condition (new, like_new, good, fair, poor, bad) and condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping, created_at; jp adds is_shop, shop_id, is_auction and updated_at. Grid results carry no likes and no sold time (item() has both)), total (Mercari's own capped count), page, page_size, max_page, has_more, status, sort and filters. status sold returns sold listings (sold and in transit) with their prices, so asking prices (on_sale) and sold prices for the same query come from one endpoint; sort recently_sold on us. Depth: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91. Filters: status (on_sale default, sold, all), sort (relevance, newest, price_asc, price_desc; likes on jp, recently_sold on us), price_min / price_max, condition, shipping (free, buyer_pays), size_id and deals_only (us), shops_only (jp). Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's earlier price when above price, with discount_percent computed against it. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'nintendo switch' (required unless category_id or brand_id is sent). On jp, Japanese keywords match best.
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            category_id: A category id of the same market (categories()) to search within.
+            brand_id: A brand id of the same market (brands()).
+            status: on_sale (default), sold (sold listings, including items sold but still in transit: sold prices), or all.
+            page: Results page, 1-based: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91.
+            sort: relevance (default), newest, price_asc, price_desc; likes (jp only); recently_sold (us only). jp newest follows Mercari Japan's own order (relisted items move up).
+            price_min: Lowest price: US dollars on us, whole yen on jp.
+            price_max: Highest price: US dollars on us, whole yen on jp.
+            condition: One or more of: new, like_new, good, fair, poor; bad (jp only). Several are ORed, e.g. ['new', 'like_new'].
+            shipping: free (the seller pays shipping) or buyer_pays.
+            size_id: us only: a Mercari US size id.
+            deals_only: us only: only listings on Mercari's deals filter (price dropped below the seller's earlier price).
+            shops_only: jp only: only Mercari Shops products (business sellers).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_search", {"query": query, "country": country, "category_id": category_id, "brand_id": brand_id, "status": status, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "condition": condition, "shipping": shipping, "size_id": size_id, "deals_only": deals_only, "shops_only": shops_only}, extra)
+
+    async def item(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Mercari listing by item_id or link: item_id, title, description, url, price, original_price, discount_percent (us also price_with_buyer_fee), currency, status, sold_at (when it sold), condition and condition_name, brand, category with its path, size, color, shipping (payer, method, service, fee, days_to_ship, ships_from: US state or Japanese prefecture), likes, photos, created_at, updated_at, seller (seller_id, public display name, rating, review_count, listings_count, badges; us sold_count, jp good / normal / bad ratings). A sold listing keeps its full data. jp adds the item's full public comment list (text, date, is_seller; who wrote each is not returned); a jp Mercari Shops product (22-character id) answers is_shop with its shop and some of the shop's other products. Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's earlier price when above price, with discount_percent computed against it. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Mercari item id (items[].item_id of a search answer): m and 11 digits, e.g. 'm38943035688', or on jp a 22-character Mercari Shops product id.
+            url: A Mercari item link (https://www.mercari.com/us/item/<id>/, https://jp.mercari.com/item/<id> or a /shops/product/ link): its market is used.
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_item", {"item_id": item_id, "url": url, "country": country}, extra)
+
+    async def category(
+        self,
+        category_id: Union[str, int],
+        *,
+        country: Optional[Literal["us", "jp"]] = None,
+        query: Optional[str] = None,
+        brand_id: Optional[Union[str, int]] = None,
+        status: Optional[Literal["on_sale", "sold", "all"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc", "likes", "recently_sold"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        shipping: Optional[Literal["free", "buyer_pays"]] = None,
+        size_id: Optional[Union[str, int]] = None,
+        deals_only: Optional[bool] = None,
+        shops_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Listings in one Mercari category (category_id from categories()), paged and sorted, optionally with keywords: category (category_id, name on us), items (item_id, title, url, price, original_price, discount_percent, currency, status (on_sale, trading = sold and in transit, sold), condition (new, like_new, good, fair, poor, bad) and condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping, created_at; jp adds is_shop, shop_id, is_auction and updated_at. Grid results carry no likes and no sold time (item() has both)), total, page, has_more, status, sort and filters. Depth: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91. Filters: status (on_sale default, sold, all), sort (relevance, newest, price_asc, price_desc; likes on jp, recently_sold on us), price_min / price_max, condition, shipping (free, buyer_pays), size_id and deals_only (us), shops_only (jp). An unknown category id is a charged 404. Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's earlier price when above price, with discount_percent computed against it. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id of the market (categories()), e.g. us 797 Consoles, jp 1289 (Pokemon card game).
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            query: Optional keywords within the category.
+            brand_id: A brand id of the same market.
+            status: on_sale (default), sold (sold listings, including items sold but still in transit: sold prices), or all.
+            page: Results page, 1-based: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91.
+            sort: relevance (default), newest, price_asc, price_desc; likes (jp only); recently_sold (us only). jp newest follows Mercari Japan's own order (relisted items move up).
+            price_min: Lowest price: US dollars on us, whole yen on jp.
+            price_max: Highest price: US dollars on us, whole yen on jp.
+            condition: One or more of: new, like_new, good, fair, poor; bad (jp only). Several are ORed, e.g. ['new', 'like_new'].
+            shipping: free (the seller pays shipping) or buyer_pays.
+            size_id: us only: a Mercari US size id.
+            deals_only: us only: only listings on Mercari's deals filter (price dropped below the seller's earlier price).
+            shops_only: jp only: only Mercari Shops products (business sellers).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_category", {"category_id": category_id, "country": country, "query": query, "brand_id": brand_id, "status": status, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "condition": condition, "shipping": shipping, "size_id": size_id, "deals_only": deals_only, "shops_only": shops_only}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[Literal["us", "jp"]] = None,
+        parent_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Mercari's category tree: categories (category_id, name, parent_id, level, has_children; us adds title). us answers one level at a time (the 17 top-level categories, or the children of parent_id); jp answers the whole tree (8,700+ categories, Japanese names) or the children of parent_id. Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            parent_id: A category id: its children. Omitted: us answers the 17 top-level categories, jp the whole tree.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_categories", {"country": country, "parent_id": parent_id}, extra)
+
+    async def brands(
+        self,
+        *,
+        country: Optional[Literal["us", "jp"]] = None,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Mercari's brand list (us about 28,800 brands, jp about 52,600), filtered by name with query and paged by 1,000: brands (brand_id, name; jp adds subname and the katakana reading), total, brands_in_market, page, has_more. Pass brand_id to brand() or as a search filter. Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            query: Filter brands by name, e.g. 'nike' (case-insensitive; on jp also the katakana reading).
+            page: Page of 1,000 brands, 1-based.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_brands", {"country": country, "query": query, "page": page}, extra)
+
+    async def brand(
+        self,
+        brand_id: Union[str, int],
+        *,
+        country: Optional[Literal["us", "jp"]] = None,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        status: Optional[Literal["on_sale", "sold", "all"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc", "likes", "recently_sold"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        shipping: Optional[Literal["free", "buyer_pays"]] = None,
+        size_id: Optional[Union[str, int]] = None,
+        deals_only: Optional[bool] = None,
+        shops_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Listings of one Mercari brand (brand_id from brands()), paged and sorted, optionally within a category or with keywords: brand (brand_id, name), items (item_id, title, url, price, original_price, discount_percent, currency, status (on_sale, trading = sold and in transit, sold), condition (new, like_new, good, fair, poor, bad) and condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping, created_at; jp adds is_shop, shop_id, is_auction and updated_at. Grid results carry no likes and no sold time (item() has both)), total, page, has_more, status, sort and filters. Depth: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91. Filters: status (on_sale default, sold, all), sort (relevance, newest, price_asc, price_desc; likes on jp, recently_sold on us), price_min / price_max, condition, shipping (free, buyer_pays), size_id and deals_only (us), shops_only (jp). An unknown brand id is a charged 404 on us. Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's earlier price when above price, with discount_percent computed against it. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Item, category, brand and seller ids are per market: an id from us is not valid on jp (a not-found, charged). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand_id: A brand id of the market (brands()), e.g. us 4591 Nintendo, jp 539 COACH.
+            country: Market: 'us' (default; mercari.com, USD, English) or 'jp' (Mercari Japan, JPY, Japanese). Mercari UK closed (gb / uk answer 400); any other value answers 400 before anything is charged.
+            query: Optional keywords within the brand.
+            category_id: A category id of the same market.
+            status: on_sale (default), sold (sold listings, including items sold but still in transit: sold prices), or all.
+            page: Results page, 1-based: us 50 per page up to page 20 (1,000 results), jp 120 per page up to page 91.
+            sort: relevance (default), newest, price_asc, price_desc; likes (jp only); recently_sold (us only). jp newest follows Mercari Japan's own order (relisted items move up).
+            price_min: Lowest price: US dollars on us, whole yen on jp.
+            price_max: Highest price: US dollars on us, whole yen on jp.
+            condition: One or more of: new, like_new, good, fair, poor; bad (jp only). Several are ORed, e.g. ['new', 'like_new'].
+            shipping: free (the seller pays shipping) or buyer_pays.
+            size_id: us only: a Mercari US size id.
+            deals_only: us only: only listings on Mercari's deals filter (price dropped below the seller's earlier price).
+            shops_only: jp only: only Mercari Shops products (business sellers).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_brand", {"brand_id": brand_id, "country": country, "query": query, "category_id": category_id, "status": status, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "condition": condition, "shipping": shipping, "size_id": size_id, "deals_only": deals_only, "shops_only": shops_only}, extra)
+
+    async def deals(
+        self,
+        *,
+        country: Optional[Literal["us"]] = None,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        brand_id: Optional[Union[str, int]] = None,
+        status: Optional[Literal["on_sale", "sold", "all"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_asc", "price_desc", "likes", "recently_sold"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        shipping: Optional[Literal["free", "buyer_pays"]] = None,
+        size_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Listings on Mercari's deals filter (Mercari US): listings whose price the seller dropped, each with original_price (the earlier price) and discount_percent, optionally narrowed by keywords, category_id, brand_id and the search filters, paged and sorted (50 per page, up to page 20): items (item_id, title, url, price, original_price, discount_percent, currency, status (on_sale, trading = sold and in transit, sold), condition (new, like_new, good, fair, poor, bad) and condition_name, brand, category_id, size, thumbnail, seller_id, free_shipping, created_at; jp adds is_shop, shop_id, is_auction and updated_at. Grid results carry no likes and no sold time (item() has both)). Prices are numbers: US dollars on us, whole yen on jp; original_price is the seller's earlier price when above price, with discount_percent computed against it. Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: 'us' only (mercari.com, USD, English; the default). Any other value answers 400 before anything is charged.
+            query: Optional keywords.
+            category_id: A US category id to narrow the deals.
+            brand_id: A US brand id.
+            status: on_sale (default), sold (sold listings, including items sold but still in transit: sold prices), or all.
+            page: Results page, 1-based (50 per page, up to page 20).
+            sort: relevance (default), newest, price_asc, price_desc; likes (jp only); recently_sold (us only). jp newest follows Mercari Japan's own order (relisted items move up).
+            price_min: Lowest price: US dollars on us, whole yen on jp.
+            price_max: Highest price: US dollars on us, whole yen on jp.
+            condition: One or more of: new, like_new, good, fair, poor; bad (jp only). Several are ORed, e.g. ['new', 'like_new'].
+            shipping: free (the seller pays shipping) or buyer_pays.
+            size_id: us only: a Mercari US size id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_deals", {"country": country, "query": query, "category_id": category_id, "brand_id": brand_id, "status": status, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "condition": condition, "shipping": shipping, "size_id": size_id}, extra)
+
+    async def trending(
+        self,
+        *,
+        country: Optional[Literal["us"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What is trending on Mercari US as its trending page lists it: keywords (position, keyword, search_rank, rank_change, search_volume_change_percent, trend) and brands (position, brand_id, name, demand, demand_change, sold_rate_7d, recent_listings), as Mercari shows them. us only (no Japanese trending). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: 'us' only (mercari.com, USD, English; the default). Any other value answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_trending", {"country": country}, extra)
+
+    async def seller(
+        self,
+        seller_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Mercari Japan seller's public profile by seller_id or link: seller (seller_id, name, rating, ratings good / normal / bad, review_count, listings_count, followers, following, badges, is_official, phone_verified, joined, bio, url) and listings (the first 30 as the profile shows them: item_id, title, url, price, status, likes, comment_count, created_at), listings_has_more. An unknown seller is a charged 404. jp only: US seller profiles and reviews and US search suggestions are not available. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A Mercari Japan seller id (seller_id of a search or item answer), e.g. '477123966'.
+            url: A Mercari Japan profile link (https://jp.mercari.com/user/profile/<id>).
+            country: Market: 'jp' only (Mercari Japan, JPY, Japanese; the default for this endpoint). Any other value answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_seller", {"seller_id": seller_id, "url": url, "country": country}, extra)
+
+    async def seller_reviews(
+        self,
+        seller_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The most recent 100 reviews of a Mercari Japan user by seller_id or link: seller_id, name, summary (rating, good / normal / bad counts, review_count), reviews (rating good, normal or bad; text; date; role: whether the user was the seller or the buyer), has_more. Who wrote each review is never returned. jp only (US reviews are not available). jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A Mercari Japan seller id (seller_id of a search or item answer), e.g. '477123966'.
+            url: A Mercari Japan profile link (https://jp.mercari.com/user/profile/<id>).
+            country: Market: 'jp' only (Mercari Japan, JPY, Japanese; the default for this endpoint). Any other value answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_seller_reviews", {"seller_id": seller_id, "url": url, "country": country}, extra)
+
+    async def shop(
+        self,
+        shop_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Mercari Shops shop (a business seller on Mercari Japan) by shop_id or link: shop (shop_id, name, description, rating, review_count, followers, is_open, has_time_sale, badges, thumbnail, created_at, url). No product list: for its products use search() with shops_only or item() with one of its product ids. jp only. jp data is in Japanese as sellers wrote it (not translated), prices in yen; jp answers take longer (search 30-60 s, other endpoints 10-30 s). Every answer carries country, currency and language. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            shop_id: A Mercari Shops shop id (22 characters; shop_id of a search answer, shop.shop_id of an item answer), e.g. 'LThudSk3aoGvKcW6R3sA6m'.
+            url: A Mercari Shops link (https://jp.mercari.com/shops/profile/<id>).
+            country: Market: 'jp' only (Mercari Japan, JPY, Japanese; the default for this endpoint). Any other value answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("mercari_shop", {"shop_id": shop_id, "url": url, "country": country}, extra)

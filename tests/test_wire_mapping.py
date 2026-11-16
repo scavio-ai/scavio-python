@@ -4864,3 +4864,133 @@ def test_asos_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         asos.product(country="gb")
+
+
+def test_mercari_credits_paths_and_wire(monkeypatch):
+    """mercari (0.65.0): 11 endpoints on /api/v1/mercari, 1 credit each, 240 s floor.
+
+    country us (default) or jp: search, item, category, categories, brands, brand on both;
+    deals and trending us only; seller, seller_reviews and shop jp only. gb / uk (Mercari UK
+    closed) are not in any country literal.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "mercari"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "deals", "item", "search", "seller",
+        "seller_reviews", "shop", "trending",
+    ]
+    markets = {
+        "search": '"us", "jp"', "item": '"us", "jp"', "category": '"us", "jp"',
+        "categories": '"us", "jp"', "brands": '"us", "jp"', "brand": '"us", "jp"',
+        "deals": '"us"', "trending": '"us"', "seller": '"jp"', "seller_reviews": '"jp"',
+        "shop": '"jp"',
+    }
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/mercari/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        country = {p.name: p for p in ep.params}["country"].annotation
+        assert country == "Optional[Literal[" + markets[m] + "]]", m
+        for cc in ("gb", "uk"):
+            assert f'"{cc}"' not in country, (m, cc)
+    assert eps["search"].one_of == (("query", "category_id", "brand_id"),)
+    assert eps["item"].one_of == (("item_id", "url"),)
+    for m in ("seller", "seller_reviews"):
+        assert eps[m].one_of == (("seller_id", "url"),), m
+    assert eps["shop"].one_of == (("shop_id", "url"),)
+    for m in ("search", "category", "brand", "deals"):
+        params = {p.name: p for p in eps[m].params}
+        assert params["status"].annotation == 'Optional[Literal["on_sale", "sold", "all"]]', m
+        assert params["sort"].annotation == (
+            'Optional[Literal["relevance", "newest", "price_asc", "price_desc", "likes", '
+            '"recently_sold"]]'
+        ), m
+    for m in ("search", "category", "brand"):
+        names = {p.name for p in eps[m].params}
+        assert {"deals_only", "shops_only"} <= names, m
+    assert not {"deals_only", "shops_only"} & {p.name for p in eps["deals"].params}
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    mercari = client.mercari
+    mercari.search("nintendo switch")
+    mercari.search("nintendo switch", status="sold", sort="recently_sold", page=2)
+    mercari.search(
+        "ポケモンカード",
+        country="jp",
+        price_min=1000,
+        price_max=5000.5,
+        condition=["new", "like_new"],
+        shipping="free",
+        shops_only=True,
+    )
+    mercari.search(category_id=797, brand_id="4591", deals_only=True, size_id=12)
+    mercari.item("m38943035688")
+    mercari.item(url="https://jp.mercari.com/item/m65962821601")
+    mercari.category("797", status="sold")
+    mercari.categories(parent_id="7")
+    mercari.categories(country="jp")
+    mercari.brands(query="nike", page=2)
+    mercari.brand(4591, category_id="797", sort="price_asc")
+    mercari.deals(query="jordan")
+    mercari.trending()
+    mercari.seller("477123966")
+    mercari.seller_reviews(url="https://jp.mercari.com/user/profile/477123966")
+    mercari.shop("LThudSk3aoGvKcW6R3sA6m")
+    base = "/api/v1/mercari/"
+    assert seen == [
+        (base + "search", {"query": "nintendo switch"}, 240.0),
+        (
+            base + "search",
+            {"query": "nintendo switch", "status": "sold", "page": 2, "sort": "recently_sold"},
+            240.0,
+        ),
+        (
+            base + "search",
+            {
+                "query": "ポケモンカード",
+                "country": "jp",
+                "price_min": 1000,
+                "price_max": 5000.5,
+                "condition": ["new", "like_new"],
+                "shipping": "free",
+                "shops_only": True,
+            },
+            240.0,
+        ),
+        (
+            base + "search",
+            {"category_id": 797, "brand_id": "4591", "size_id": 12, "deals_only": True},
+            240.0,
+        ),
+        (base + "item", {"item_id": "m38943035688"}, 240.0),
+        (base + "item", {"url": "https://jp.mercari.com/item/m65962821601"}, 240.0),
+        (base + "category", {"category_id": "797", "status": "sold"}, 240.0),
+        (base + "categories", {"parent_id": "7"}, 240.0),
+        (base + "categories", {"country": "jp"}, 240.0),
+        (base + "brands", {"query": "nike", "page": 2}, 240.0),
+        (base + "brand", {"brand_id": 4591, "category_id": "797", "sort": "price_asc"}, 240.0),
+        (base + "deals", {"query": "jordan"}, 240.0),
+        (base + "trending", {}, 240.0),
+        (base + "seller", {"seller_id": "477123966"}, 240.0),
+        (
+            base + "seller-reviews",
+            {"url": "https://jp.mercari.com/user/profile/477123966"},
+            240.0,
+        ),
+        (base + "shop", {"shop_id": "LThudSk3aoGvKcW6R3sA6m"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        mercari.search(country="us")
+    with pytest.raises(ScavioError):
+        mercari.item(country="jp")
+    with pytest.raises(ScavioError):
+        mercari.seller()
+    with pytest.raises(ScavioError):
+        mercari.shop()

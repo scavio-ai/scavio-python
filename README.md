@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 84 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 85 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -31,6 +31,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
 | ASOS Prices by Country and Currency, Online Stock by Size, Reviews by Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
+| Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
@@ -3262,6 +3263,80 @@ category. No outlet (ASOS's outlet categories are empty), no promo codes
 (shown only to signed-in shoppers) and no price history (poll `stock`). Failed
 calls are not charged; a not-found is charged.
 
+### 54. Marketplace -- Mercari sold prices, listings, items and sellers, US and Japan
+
+Mercari US (mercari.com, USD, English) and Mercari Japan (jp.mercari.com, JPY,
+Japanese). Namespace `mercari`, 11 endpoints: `search`, `item`, `category`,
+`categories`, `brands`, `brand`, `deals`, `trending`, `seller`,
+`seller_reviews`, `shop`. Pick the market with `country` (`us`, the default,
+or `jp`). 1 credit per call. The request timeout is raised to at least 240s
+(Mercari Japan calls typically take 30-60s for search).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mercari = client.mercari
+
+# --- Asking prices vs sold prices for the same query, from one endpoint.
+# status="sold" returns sold listings (sold and in transit) with their prices.
+on_sale = mercari.search("nintendo switch")["data"]
+sold = mercari.search("nintendo switch", status="sold", sort="recently_sold")["data"]
+print(on_sale["total"], [(i["title"], i["price"]) for i in on_sale["items"][:3]])
+print(sold["total"], [(i["title"], i["price"], i["status"]) for i in sold["items"][:3]])
+
+# --- One listing: price, the seller's earlier price, sold_at, shipping, likes, seller summary.
+# Grids carry no likes and no sold time; item() has both. Sold items keep full data.
+it = mercari.item("m38943035688")["data"]
+print(it["price"], it["original_price"], it["discount_percent"], it["status"], it["sold_at"])
+print(it["shipping"], it["likes"], it["seller"])
+
+# --- Mercari Japan: Japanese as sellers wrote it, prices in yen; comments on the item.
+jp = mercari.search("ポケモンカード", country="jp")["data"]
+jp_item = mercari.item("m65962821601", country="jp")["data"]
+print(jp["page_size"], jp["max_page"], [c["text"] for c in jp_item["comments"][:3]])
+
+# --- Categories, brands and their listings (ids are per market).
+electronics = mercari.categories(parent_id="7")["data"]["categories"]
+in_cat = mercari.category("797", status="sold")["data"]
+nike = mercari.brands(query="nike")["data"]["brands"]
+nintendo = mercari.brand("4591", sort="price_asc")["data"]
+
+# --- US only: the deals filter (price dropped) and Mercari's trending keywords and brands.
+deals = mercari.deals()["data"]
+trending = mercari.trending()["data"]
+print([(k["keyword"], k["rank_change"]) for k in trending["keywords"][:5]])
+
+# --- Japan only: seller profile with good / normal / bad ratings, reviews, Mercari Shops shop.
+seller = mercari.seller("477123966")["data"]
+reviews = mercari.seller_reviews("477123966")["data"]
+shop = mercari.shop("LThudSk3aoGvKcW6R3sA6m")["data"]
+print(seller["seller"]["ratings"], reviews["summary"], shop["shop"]["name"])
+```
+
+Markets per endpoint: `search`, `item`, `category`, `categories`, `brands` and
+`brand` on us and jp; `deals` and `trending` us only; `seller`,
+`seller_reviews` and `shop` jp only. A market an endpoint does not serve,
+Mercari UK (closed: `gb` / `uk`) and any other value answer 400 before
+anything is charged. Item, category, brand and seller ids are per market: an
+id from us is not valid on jp.
+
+`status` is `on_sale` (default), `sold` (sold and in transit) or `all`, so
+asking and sold prices for the same query come from one call each. Search
+depth: us 50 per page up to page 20 (1,000 results), jp 120 per page up to
+page 91. Sorts: relevance, newest, price_asc, price_desc, plus `likes` on jp
+and `recently_sold` on us; jp `newest` follows Mercari Japan's own order,
+where relisted items move up. Prices are numbers, US dollars on us and whole
+yen on jp; `original_price` is the seller's earlier price when above `price`,
+with `discount_percent` against it. `brands` covers about 28,800 US and 52,600
+Japanese brands in pages of 1,000; `categories` answers one level at a time on
+us and the full tree (or one parent's children) on jp. `seller_reviews`
+returns the most recent 100 reviews with no reviewer names; `shop` is the
+Mercari Shops shop profile only (for its products use `search` with
+`shops_only=True` or `item`). Not available: US seller profiles and reviews,
+US search suggestions, Japanese trending and price-drop history. Failed calls
+are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3411,6 +3486,7 @@ Scavio works with popular AI/LLM frameworks:
 | H&M (`hm`) | `search`, `product`, `stock`, `stores`, `category`, `deals`, `new_arrivals`, `suggestions`, `production`; 47 countries via `country` and `language` (`product` not on mo, tw or the shared EU store; `stores` not on mo) | `product` 2, the rest 1 each |
 | Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
 | ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
+| Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3427,6 +3503,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.65.0
+
+- **New `mercari` namespace** (sync and async) for Mercari US and Mercari
+  Japan, 11 endpoints: `search`, `item`, `category`, `categories`,
+  `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`,
+  `shop`. `country` us (default) or jp; `search` with `status="sold"`
+  returns sold listings with their prices. 1 credit each. 240s timeout
+  floor.
 
 ### Changed in 0.64.0
 

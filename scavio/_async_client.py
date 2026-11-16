@@ -56,6 +56,7 @@ from ._namespaces_async import (
     _AsyncMaisonsDuMondeNamespace,
     _AsyncMenardsNamespace,
     _AsyncMercadoLibreNamespace,
+    _AsyncMercariNamespace,
     _AsyncMetaAdsNamespace,
     _AsyncMicroCenterNamespace,
     _AsyncNintendoNamespace,
@@ -232,6 +233,7 @@ class AsyncScavioClient:
         self.hm = _AsyncHmNamespace(self)
         self.zara = _AsyncZaraNamespace(self)
         self.asos = _AsyncAsosNamespace(self)
+        self.mercari = _AsyncMercariNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -54,6 +54,7 @@ from ._namespaces_sync import (
     _MaisonsDuMondeNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
+    _MercariNamespace,
     _MetaAdsNamespace,
     _MicroCenterNamespace,
     _NintendoNamespace,
@@ -237,6 +238,7 @@ class ScavioClient:
         self.hm = _HmNamespace(self)
         self.zara = _ZaraNamespace(self)
         self.asos = _AsosNamespace(self)
+        self.mercari = _MercariNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
