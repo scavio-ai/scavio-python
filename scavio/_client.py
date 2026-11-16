@@ -88,6 +88,7 @@ from ._namespaces_sync import (
     _XNamespace,
     _YelpNamespace,
     _YouTubeNamespace,
+    _ZaraNamespace,
     _ZillowNamespace,
 )
 from ._params import build_body
@@ -233,6 +234,7 @@ class ScavioClient:
         self.trendyol = _TrendyolNamespace(self)
         self.nintendo = _NintendoNamespace(self)
         self.hm = _HmNamespace(self)
+        self.zara = _ZaraNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

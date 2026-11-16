@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 82 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 83 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Vinted, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -28,6 +28,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
+| Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
@@ -3076,6 +3077,97 @@ history (poll to track changes), no checkout or member-only cart prices, and
 H&M's sibling brands (COS, Weekday, & Other Stories, Monki, ARKET) are not
 covered. Failed calls are not charged; a not-found is charged.
 
+### 52. Fashion -- Zara prices by country, stock by size online and in stores
+
+Zara in 102 storefronts. Namespace `zara`, 12 endpoints: `search`,
+`product`, `materials`, `stock`, `stores`, `store_stock`, `categories`,
+`category`, `deals`, `new_arrivals`, `prices`, `suggestions`. Pick the
+market with `country` (default `us`) and the language with `language`
+(default Zara's own default for the market). The request timeout is raised
+to at least 120s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+zara = client.zara
+
+# --- Zara prices by country: one reference in up to 10 markets per call, each in its own currency.
+p = zara.prices("4591/381", countries=["us", "gb", "es", "de", "fr", "it", "jp", "kr", "mx", "pl"])["data"]
+for m in p["markets"]:
+    print(m["country"], m["currency"], m["price"], m["old_price"], m["title"])
+print("not sold in:", p["not_sold"])
+
+# --- Search, then the product page (product_id + seo_slug) and its online stock by size.
+res = zara.search("blazer")["data"]
+print(res["total"], [(i["display_reference"], i["title"], i["price"]) for i in res["items"][:3]])
+item = res["items"][0]
+prod = zara.product(product_id=item["product_id"], slug=item["seo_slug"])["data"]
+for c in prod["colors"]:
+    print(c["name"], c["price"], [(s["name"], s["availability"]) for s in c["sizes"]])
+st = zara.stock("588478514")["data"]
+print(st["sizes_in_stock"], "/", st["sizes_total"])
+
+# --- Materials and origin, as the product page states them.
+mat = zara.materials("588478514")["data"]
+print(mat["composition"], mat["origin"])
+
+# --- Stores near a point, then units per size in those stores (sales floor vs stockroom).
+stores = zara.stores(40.7128, -74.006)["data"]["stores"]
+ids = [s["store_id"] for s in stores[:8]]
+units = zara.store_stock("553306790", store_ids=ids)["data"]
+print(units["stores_with_stock"], units["stores_without_stock"])
+
+# --- Category tree, one category, the SPECIAL PRICES list and new arrivals.
+tree = zara.categories(section="woman")["data"]
+dresses = zara.category("2420896", sort="price_asc")["data"]
+deals = zara.deals(section="woman")["data"]  # empty (not an error) where a market has no special-prices list
+new = zara.new_arrivals(country="gb", section="woman")["data"]
+print(zara.suggestions("jea")["data"]["suggestions"])
+```
+
+Credits are what each request spent (`credits_used` in the response): 2 per
+call for `search`, `materials`, `stock`, `stores`, `categories` and
+`category`; `product` 2 (4 when opened by `reference` or when the slug is
+another market's or language's, 6 for both); `store_stock` 2 with
+`store_ids`, 4 with `lat` + `lng`; `deals` 4 (2 when the market has no
+special-prices category); `new_arrivals` 4; `prices` 2 per market that
+answered; `suggestions` 2 (4 when the English fallback runs). China (`cn`,
+Zara's separate site) costs 1 credit per call instead of 2.
+
+Markets: the 102 Zara storefronts with an online store of their own, each in
+its own currency and Zara's own languages (205 market-languages; the first
+listed is Zara's default), e.g. us (USD; en, es), ca (CAD; en, fr), mx, br,
+gb (GBP; the United Kingdom), ie, de, at, fr, be, nl, lu, it, es (es, en, eu,
+gl, ca), pt, ch (CHF; en, fr, de, it), se, dk, no, fi, pl, cz, sk, hu, ro, bg,
+gr, hr, si, rs, tr, ua, il, ae, sa, kw, qa, bh, om, jo, lb, eg, ma, tn, dz, in,
+jp (JPY; ja, en), kr (KRW; ko, en), cn (CNY; zh, en), hk, mo, tw (zh-Hant,
+en), sg, my, ph, th, id, vn, kh, au, nz, za and the rest of Latin America and
+Europe Zara sells online in; ic is the Canary Islands, xe Abu Dhabi, Al Ain
+and Ras Al Khaimah, xk Kosovo. The full list with currencies and languages is
+in the `country` docstring. Every endpoint serves all 102 except `stores` and
+`store_stock` (not ao or iq: Zara lists no stores there), `new_arrivals` (not
+dz) and `suggestions` (not ad, al, am, az, ba, dz, mk, mo, uz or xk).
+Belarus, uk (use gb) and the countries Zara serves only from its worldwide
+store answer 400 before anything is charged.
+
+Product ids (one per colour) and references are global on Zara's
+international site, so `prices` compares one reference across markets in a
+single call; China (`cn`) runs its own ids, so use the reference there.
+Prices are numbers in the market's own currency, never converted;
+`old_price` is set only on a markdown. Zara runs seasonal sales and lists
+special prices between them: `deals` resolves each market's special-prices
+list live and answers an empty list (not an error) where a market has none
+for the section; in fr, be, lu, mc and iq Zara lists special prices without a
+previous price. `stock` is online stock per size; `store_stock` is units in
+physical stores. `materials` gives composition, care and the country of
+production as Zara states it (France shows traceability steps; no factory
+names). Category ids are shared across the northern-hemisphere catalogue;
+au, za and br run their own (get them from `categories`). No reviews (Zara
+shows none), no price history (poll `prices`), and Inditex's other brands
+(Pull&Bear, Massimo Dutti, Bershka, Stradivarius, Oysho, Zara Home, Lefties)
+are not covered. Failed calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3223,6 +3315,7 @@ Scavio works with popular AI/LLM frameworks:
 | Trendyol (`trendyol`) | `search`, `product`, `category`, `brand`, `reviews`, `questions`, `seller`, `deals`, `coupons`, `rankings`, `suggestions`, `delivery`; 35 markets via `country` and `language` (`deals` and `coupons` tr only; `rankings` not on the English-language EU storefronts) | 1 each |
 | Nintendo (`nintendo`) | `search`, `product`, `prices`, `deals`, `releases`, `dlc`; 46 countries via `country` and `language` (`prices` also kr, hk, tw and il) | 1 each |
 | H&M (`hm`) | `search`, `product`, `stock`, `stores`, `category`, `deals`, `new_arrivals`, `suggestions`, `production`; 47 countries via `country` and `language` (`product` not on mo, tw or the shared EU store; `stores` not on mo) | `product` 2, the rest 1 each |
+| Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3239,6 +3332,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.63.0
+
+- **New `zara` namespace** (sync and async) for Zara, 12 endpoints:
+  `search`, `product`, `materials`, `stock`, `stores`, `store_stock`,
+  `categories`, `category`, `deals`, `new_arrivals`, `prices`,
+  `suggestions`. 102 storefronts via `country` and `language`; `prices`
+  compares one reference across up to 10 markets per call. Billed what each
+  call spent (`credits_used`). 120s timeout floor.
 
 ### Changed in 0.62.0
 

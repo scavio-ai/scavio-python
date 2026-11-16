@@ -90,6 +90,7 @@ from ._namespaces_async import (
     _AsyncXNamespace,
     _AsyncYelpNamespace,
     _AsyncYouTubeNamespace,
+    _AsyncZaraNamespace,
     _AsyncZillowNamespace,
 )
 from ._params import build_body
@@ -228,6 +229,7 @@ class AsyncScavioClient:
         self.trendyol = _AsyncTrendyolNamespace(self)
         self.nintendo = _AsyncNintendoNamespace(self)
         self.hm = _AsyncHmNamespace(self)
+        self.zara = _AsyncZaraNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

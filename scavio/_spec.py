@@ -1751,6 +1751,132 @@ _HM_NOTE = (
 )
 
 
+# Zara params shared across endpoints (zara.com: 102 storefronts with an online store of their
+# own, each in its own currency and Zara's own languages; cn is zara.cn, Zara's separate China
+# site). search, product, materials, stock, categories, category, deals and prices serve all
+# 102; stores and store_stock not ao or iq; new_arrivals not dz; suggestions not ad al am az ba
+# dz mk mo uz xk. Every request is billed what it spent (credits_used in the answer).
+# Storefront -> "<currency> <languages in Zara's order>" (the first is Zara's default).
+_ZARA_MARKETS = {
+    "ad": "EUR ca en fr es", "ae": "AED en ar", "al": "ALL sq en", "am": "AMD ru hy en",
+    "ao": "EUR pt en", "ar": "ARS es en", "at": "EUR de en", "au": "AUD en", "aw": "AWG en es",
+    "az": "AZN ru en", "ba": "BAM hr en", "be": "EUR en nl fr", "bg": "EUR bg en",
+    "bh": "BHD en ar", "br": "BRL pt en", "ca": "CAD en fr", "ch": "CHF en fr de it",
+    "cl": "CLP es en", "cn": "CNY zh en", "co": "COP es en", "cr": "CRC es en", "cw": "XCG en",
+    "cy": "EUR el en", "cz": "CZK cs en", "de": "EUR de en", "dk": "DKK da en",
+    "do": "DOP es en", "dz": "DZD ar en fr", "ec": "USD es en", "ee": "EUR et en",
+    "eg": "EGP ar en", "es": "EUR es en eu gl ca", "fi": "EUR fi sv en", "fr": "EUR fr en",
+    "gb": "GBP en", "ge": "GEL en ka", "gr": "EUR el en", "gt": "GTQ es en",
+    "hk": "HKD en zh-Hant", "hn": "HNL es en", "hr": "EUR hr en", "hu": "HUF hu en",
+    "ic": "EUR es en", "id": "IDR id en", "ie": "EUR en", "il": "ILS he en", "in": "INR en",
+    "iq": "IQD en", "is": "ISK en", "it": "EUR it en", "jo": "JOD en ar", "jp": "JPY ja en",
+    "kh": "KHR en", "kr": "KRW ko en", "kw": "KWD en ar", "kz": "KZT ru kk en",
+    "lb": "LBP en ar", "lt": "EUR lt en", "lu": "EUR fr en de", "lv": "EUR lv en",
+    "ma": "MAD fr en", "mc": "EUR fr en", "me": "EUR sr en", "mk": "MKD mk sq en",
+    "mo": "MOP zh-Hant en", "mt": "EUR en", "mx": "MXN es en", "my": "MYR en", "ni": "NIO es en",
+    "nl": "EUR en nl", "no": "NOK no en", "nz": "NZD en", "om": "OMR en ar", "pa": "PAB es en",
+    "pe": "PEN es en", "ph": "PHP en", "pl": "PLN pl uk en", "pr": "USD es en",
+    "pt": "EUR pt en", "py": "PYG es en", "qa": "QAR en ar", "ro": "RON ro en",
+    "rs": "RSD sr en", "sa": "SAR en", "se": "SEK sv en", "sg": "SGD en", "si": "EUR sl en",
+    "sk": "EUR sk en", "sv": "USD es en", "th": "THB th en", "tn": "TND fr ar en",
+    "tr": "TRY tr en", "tw": "TWD zh-Hant en", "ua": "UAH uk en", "us": "USD en es",
+    "uy": "UYU es en", "uz": "UZS uz en ru", "ve": "USD es en", "vn": "VND vi en",
+    "xe": "AED en", "xk": "EUR sq en", "za": "ZAR en",
+}
+_ZARA_COUNTRIES = tuple(_ZARA_MARKETS)
+_ZARA_STORE_COUNTRIES = tuple(c for c in _ZARA_COUNTRIES if c not in ("ao", "iq"))
+_ZARA_NEW_ARRIVALS_COUNTRIES = tuple(c for c in _ZARA_COUNTRIES if c != "dz")
+_ZARA_NO_SUGGESTIONS = ("ad", "al", "am", "az", "ba", "dz", "mk", "mo", "uz", "xk")
+_ZARA_SUGGESTIONS_COUNTRIES = tuple(c for c in _ZARA_COUNTRIES if c not in _ZARA_NO_SUGGESTIONS)
+_ZARA_MARKET_LIST = ", ".join(
+    f"{c} ({v.split()[0]}; {', '.join(v.split()[1:])})" for c, v in _ZARA_MARKETS.items()
+)
+_ZARA_HELD = (
+    " gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, "
+    "xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store "
+    "answer 400 before anything is charged."
+)
+_ZARA_COUNTRY = _lit(
+    "country",
+    _ZARA_COUNTRIES,
+    "Zara market (default 'us'), with its currency and languages (the first is Zara's "
+    "default): " + _ZARA_MARKET_LIST + "." + _ZARA_HELD,
+)
+_ZARA_STORE_COUNTRY = _lit(
+    "country",
+    _ZARA_STORE_COUNTRIES,
+    "Zara market (default 'us'): every storefront except ao and iq (Zara lists no stores "
+    "there).",
+)
+_ZARA_NEW_ARRIVALS_COUNTRY = _lit(
+    "country",
+    _ZARA_NEW_ARRIVALS_COUNTRIES,
+    "Zara market (default 'us'): every storefront except dz (Zara shows no new-arrivals "
+    "category there).",
+)
+_ZARA_SUGGESTIONS_COUNTRY = _lit(
+    "country",
+    _ZARA_SUGGESTIONS_COUNTRIES,
+    "Zara market (default 'us'): every storefront except ad, al, am, az, ba, dz, mk, mo, uz "
+    "and xk (use search() there).",
+)
+_ZARA_LANGUAGES = (
+    "ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he",
+    "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl",
+    "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant",
+)
+_ZARA_LANGUAGE = _lit(
+    "language",
+    _ZARA_LANGUAGES,
+    "Language of the market (default Zara's own default for it; the languages each market "
+    "serves are listed under country). Titles, descriptions, colours and category names come "
+    "back in it; a language the market does not serve answers 400.",
+)
+_ZARA_PRODUCT_ID = (
+    "A Zara product id: the colour's product id (items[].product_id of any answer, the v1 of a "
+    "product link), e.g. '553306790'. Global on Zara's international site; cn runs its own ids."
+)
+_ZARA_REFERENCE = (
+    "A Zara reference as printed on the product page (display_reference of any answer), e.g. "
+    "'4591/381'; '4591/381/800' names one colour."
+)
+_ZARA_SORT = _lit(
+    "sort",
+    ("relevance", "price_asc", "price_desc"),
+    "relevance (default, Zara's own order), price_asc or price_desc.",
+)
+_ZARA_PAGE = _int("page", "Results page, 1-based (up to 100).")
+_ZARA_PAGE_SIZE = _int("page_size", "Items per page, 1 to 96 (default 24).")
+_ZARA_SEARCH_SECTION = _lit(
+    "section", ("woman", "man", "kids", "home"), "woman, man, kids or home (default: every section)."
+)
+_ZARA_TREE_SECTION = _lit(
+    "section", ("woman", "man", "girl", "boy"), "woman (default), man, girl or boy."
+)
+_ZARA_LAT = "Latitude of a point in the country, e.g. 40.7128 New York, 51.5072 London."
+_ZARA_LNG = "Longitude, e.g. -74.006 New York, -0.1276 London."
+_ZARA_IDS = (
+    " Product ids (the colour's product id) and references are global on Zara's international "
+    "site: the same id names the same colour in every market. China (cn) is Zara's separate "
+    "site with its own ids: use the reference across markets."
+)
+_ZARA_PRICES = (
+    " Prices are numbers in the market's own currency, never converted: price, old_price (set "
+    "only on a markdown, above price) and discount_percent. No price history: poll prices()."
+)
+_ZARA_ITEM = (
+    "product_id, reference, display_reference, title (in the request language), url, seo_slug, "
+    "section, family, subfamily, price, old_price, discount_percent, currency, availability, "
+    "colors (product_id, color_id, name, price, old_price, discount_percent, availability, "
+    "tags), additional_colors, tags and image"
+)
+_ZARA_NOTE = (
+    " Every answer carries country, language and currency. Failed upstream calls are not "
+    "charged; a not-found is charged."
+)
+_ZARA_CN = " China (cn) costs 1 credit per call instead of 2."
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -9980,6 +10106,372 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=120.0,
     ),
+    # ============================= Zara =============================
+    # 12 endpoints on /api/v1/zara, billed what each request spent (credits_used): 2 credits
+    # per Zara call (1 on cn); product 2/4/6, store_stock 2/4, deals 4 (2 without a
+    # special-prices category), new_arrivals 4, prices 2 per market that answered,
+    # suggestions 2/4. 120 s timeout floor (lists and the tree are large).
+    Endpoint(
+        key="zara_search",
+        namespace="zara",
+        method="search",
+        http="POST",
+        path="/api/v1/zara/search",
+        summary=(
+            "Search one Zara market's catalogue by keyword, or look up a reference (all its "
+            "colours; the answer adds sold_here): items (" + _ZARA_ITEM + "), count, total, "
+            "page, page_size (up to 96, default 24), has_more, sort, sorts_offered, section, "
+            "filters, facets (color and size values with counts; colours carry hex) and "
+            "price_range. For some queries Zara answers in its own order and offers no price "
+            "sort (sorts_offered is empty and a note says so); cn takes no sort."
+            + _ZARA_PRICES + _ZARA_IDS + _ZARA_NOTE
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="Search keywords in any language, e.g. 'blazer'. One of query or reference.",
+            ),
+            _str("reference", _ZARA_REFERENCE),
+            _ZARA_COUNTRY,
+            _ZARA_LANGUAGE,
+            _ZARA_SEARCH_SECTION,
+            _ZARA_PAGE,
+            _ZARA_PAGE_SIZE,
+            _ZARA_SORT,
+            _str("color", "Colour: one value of the color facet of an earlier answer in the same "
+                 "market (e.g. 'black')."),
+            _str("size", "Size: one value of the size facet of an earlier answer (e.g. '38')."),
+            _float("price_min", "Lowest price, in the market's currency."),
+            _float("price_max", "Highest price, in the market's currency."),
+        ),
+        one_of=(("query", "reference"),),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_product",
+        namespace="zara",
+        method="product",
+        http="POST",
+        path="/api/v1/zara/product",
+        summary=(
+            "One Zara product by link, product_id + slug, or reference: product_id, reference, "
+            "display_reference, title, description, url, seo_slug, section, family, subfamily, "
+            "first_visible_date, price, old_price, discount_percent, currency, composition "
+            "(part, components with material and percent), colors (color_id, name, hex, "
+            "product_id, reference, prices, promotions with name, start and end, sizes with "
+            "size_id, name, sku, availability (online stock: in_stock, out_of_stock, "
+            "low_on_stock, coming_soon as Zara states it) and demand, tags, "
+            "store_stock_available, images, url) and color_count. A product id alone does not "
+            "open a Zara product page: send its slug (items[].seo_slug of a search answer), a "
+            "url or a reference. Not available: reviews (Zara shows none), price history, "
+            "Inditex's other brands. An unknown product is a charged 404."
+            + _ZARA_PRICES + _ZARA_IDS + _ZARA_NOTE
+        ),
+        params=(
+            _str(
+                "url",
+                "A Zara product link (https://www.zara.com/<country>/<language>/<slug>-p<8 "
+                "digits>.html?v1=<product id>), from any market: its market is used unless "
+                "country is sent.",
+            ),
+            _str("product_id", _ZARA_PRODUCT_ID + " Goes with slug."),
+            _str(
+                "slug",
+                "The product's slug (items[].seo_slug of a search answer), e.g. "
+                "'100-wool-suit-blazer-p04591381'; goes with product_id.",
+            ),
+            _str("reference", _ZARA_REFERENCE),
+            _ZARA_COUNTRY,
+            _ZARA_LANGUAGE,
+        ),
+        one_of=(("url", "product_id", "reference"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits; 4 when the slug is another market's or language's (Zara's own "
+            "link is followed once) or when opened by reference; 6 for both. 1 per call on cn. "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_materials",
+        namespace="zara",
+        method="materials",
+        http="POST",
+        path="/api/v1/zara/materials",
+        summary=(
+            "Composition, care and origin of a Zara product as its product page states them, in "
+            "the market's language: title, composition (part, components with material and "
+            "percent), sustainable_materials, certifications (name, description, certified_by, "
+            "lines), care (notes, instructions, icons), origin (the country of production as "
+            "Zara states it, e.g. 'Made in Bangladesh') and, on fr, traceability (each "
+            "production step and its country). Zara names no factories. An unknown product is a "
+            "charged 404." + _ZARA_NOTE
+        ),
+        params=(_req("product_id", _ZARA_PRODUCT_ID), _ZARA_COUNTRY, _ZARA_LANGUAGE),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_stock",
+        namespace="zara",
+        method="stock",
+        http="POST",
+        path="/api/v1/zara/stock",
+        summary=(
+            "Online availability per size of one Zara colour: product_id, skus (sku, "
+            "availability as Zara states it: in_stock, out_of_stock, low_on_stock, "
+            "coming_soon), sizes_total and sizes_in_stock. Online stock, not store stock "
+            "(store_stock() answers units per store). Match sku to product()'s "
+            "colors[].sizes[].sku for the size name. An unknown product is a charged 404."
+            + _ZARA_NOTE
+        ),
+        params=(_req("product_id", _ZARA_PRODUCT_ID), _ZARA_COUNTRY),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_stores",
+        namespace="zara",
+        method="stores",
+        http="POST",
+        path="/api/v1/zara/stores",
+        summary=(
+            "Zara stores near a point of the country, nearest first: stores (store_id, kind, "
+            "type, address_lines, city, state, state_code, postal_code, country, country_code, "
+            "lat, lng, distance_km, phones, opening_hours with 7 dated days of date, weekday, "
+            "open, close, sections, services, pickup, online_store, status, timezone), count "
+            "and total. Pass store_id values to store_stock() as store_ids. Not on ao or iq "
+            "(Zara lists no stores there)." + _ZARA_NOTE
+        ),
+        params=(
+            Param("lat", "float", required=True, doc=_ZARA_LAT),
+            Param("lng", "float", required=True, doc=_ZARA_LNG),
+            _ZARA_STORE_COUNTRY,
+            _ZARA_LANGUAGE,
+        ),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_store_stock",
+        namespace="zara",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/zara/store-stock",
+        summary=(
+            "Units of one Zara colour in physical stores, per size: stores (store_id, sizes "
+            "with size_id, size, units, on_sale, sales_floor_units and stockroom_units, "
+            "units_total, locations in the store with area, floor, section and zone, store), "
+            "stores_checked, stores_with_stock and stores_without_stock. By up to 8 store_ids "
+            "(from stores()) or by lat + lng (the 8 nearest stores, with their address). Store "
+            "stock, not online stock. Not on ao or iq (Zara lists no stores there)." + _ZARA_NOTE
+        ),
+        params=(
+            _req("product_id", _ZARA_PRODUCT_ID),
+            _str_list(
+                "store_ids",
+                "Up to 8 store ids (stores[].store_id of stores()), e.g. ['3904', '3862']. One of "
+                "store_ids or lat + lng.",
+            ),
+            _float("lat", _ZARA_LAT + " With lng, instead of store_ids."),
+            _float("lng", _ZARA_LNG),
+            _ZARA_STORE_COUNTRY,
+            _ZARA_LANGUAGE,
+        ),
+        one_of=(("store_ids", "lat"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits with store_ids, 4 with lat + lng (a stores lookup first); 1 per "
+            "call on cn. credits_used in the response is the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_categories",
+        namespace="zara",
+        method="categories",
+        http="POST",
+        path="/api/v1/zara/categories",
+        summary=(
+            "The category tree of a Zara market in the request language: categories (id, name, "
+            "section, parent_id, level, leaf, redirect_id (Zara's view-all list of a parent), "
+            "key) and count. Pass a leaf id (or a parent's redirect_id) to category(). Category "
+            "ids are shared across Zara's northern-hemisphere markets; au, za and br run their "
+            "own catalogue and ids." + _ZARA_NOTE
+        ),
+        params=(
+            _ZARA_COUNTRY,
+            _ZARA_LANGUAGE,
+            _lit(
+                "section",
+                ("woman", "man", "kids", "home", "beauty"),
+                "Only one part of the tree: woman, man, kids, home or beauty.",
+            ),
+        ),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_category",
+        namespace="zara",
+        method="category",
+        http="POST",
+        path="/api/v1/zara/category",
+        summary=(
+            "Every product of one Zara category (a leaf id from categories()), paged and sorted "
+            "over the whole list: category_id, items (" + _ZARA_ITEM + "), count, total "
+            "(exact), page, page_size, total_pages, has_more, sort, sorts_offered, on_sale and "
+            "on_sale_count. No category name (categories() has it). An unknown id is a charged "
+            "404 and a parent without products of its own a charged 400 (use a leaf id or the "
+            "parent's redirect_id)." + _ZARA_PRICES + _ZARA_IDS + _ZARA_NOTE
+        ),
+        params=(
+            _req(
+                "category_id",
+                "A Zara category id: a leaf id of categories() (or a parent's redirect_id), "
+                "e.g. '2420896' (women's dresses on us).",
+            ),
+            _ZARA_COUNTRY,
+            _ZARA_LANGUAGE,
+            _ZARA_PAGE,
+            _ZARA_PAGE_SIZE,
+            _ZARA_SORT,
+            _bool("on_sale", "Only marked-down items (with old_price)."),
+        ),
+        credits=2,
+        credits_note="Costs 2 credits (1 on cn).",
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_deals",
+        namespace="zara",
+        method="deals",
+        http="POST",
+        path="/api/v1/zara/deals",
+        summary=(
+            "The market's SPECIAL PRICES category for a section (default woman), found in the "
+            "market's live category tree on every call (Zara changes it when a sale starts): "
+            "section, category_id, category_name, items (" + _ZARA_ITEM + ") with old_price and "
+            "discount_percent, marked_down, on_sale_count, count, total, page, page_size, "
+            "total_pages, has_more and sort. Zara runs seasonal sales and lists special prices "
+            "between them; where Zara shows no special-prices category for the section the "
+            "answer has no items and a note, not an error. On fr, be, lu, mc and iq Zara lists "
+            "special prices without a previous price." + _ZARA_PRICES + _ZARA_NOTE
+        ),
+        params=(
+            _ZARA_COUNTRY,
+            _ZARA_LANGUAGE,
+            _ZARA_TREE_SECTION,
+            _ZARA_PAGE,
+            _ZARA_PAGE_SIZE,
+            _ZARA_SORT,
+        ),
+        credits=4,
+        credits_note=(
+            "Costs 4 credits (the tree and the list); 2 when the market has no special-prices "
+            "category; 1 on cn. credits_used in the response is the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_new_arrivals",
+        namespace="zara",
+        method="new_arrivals",
+        http="POST",
+        path="/api/v1/zara/new-arrivals",
+        summary=(
+            "The market's NEW ARRIVALS > THE NEW category for a section (default woman), found "
+            "in the market's live category tree on every call: section, category_id, "
+            "category_name, items (" + _ZARA_ITEM + "), count, total, page, page_size, "
+            "total_pages, has_more and sort. Not on dz (Zara shows no new-arrivals category "
+            "there)." + _ZARA_PRICES + _ZARA_NOTE
+        ),
+        params=(
+            _ZARA_NEW_ARRIVALS_COUNTRY,
+            _ZARA_LANGUAGE,
+            _ZARA_TREE_SECTION,
+            _ZARA_PAGE,
+            _ZARA_PAGE_SIZE,
+            _ZARA_SORT,
+        ),
+        credits=4,
+        credits_note=(
+            "Costs 4 credits (the tree and the list); 1 on cn. credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_prices",
+        namespace="zara",
+        method="prices",
+        http="POST",
+        path="/api/v1/zara/prices",
+        summary=(
+            "Zara prices by country: one reference across up to 10 markets in one call "
+            "(default us, gb, es, de, fr, it, jp, kr, mx, pl): reference, markets (country, "
+            "language, currency, available, title, price (the lowest current price among the "
+            "reference's colours), old_price, discount_percent, product_id, url, colors), "
+            "not_sold (the markets that do not sell it), errors (markets that failed, not "
+            "charged) and count. Each price is in that market's own currency and never "
+            "converted. Any of the 102 storefronts (gb for the United Kingdom)." + _ZARA_IDS
+        ),
+        params=(
+            _req("reference", _ZARA_REFERENCE),
+            _lit_list(
+                "countries",
+                _ZARA_COUNTRIES,
+                "1 to 10 markets (default us, gb, es, de, fr, it, jp, kr, mx, pl).",
+            ),
+            _lit(
+                "language",
+                _ZARA_LANGUAGES,
+                "Language for the titles where the market serves it (else the market's "
+                "default).",
+            ),
+        ),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits per market that answered (1 on cn); failed markets are not "
+            "charged. credits_used in the response is the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="zara_suggestions",
+        namespace="zara",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/zara/suggestions",
+        summary=(
+            "Zara search suggestions for what a shopper has typed, in the market's language: "
+            "query, section, suggestions (text), count and language_used. Where Zara has no "
+            "suggestions in the request language, the market's English suggestions are "
+            "answered instead (language_used en, with a note). Not on ad, al, am, az, ba, dz, "
+            "mk, mo, uz or xk (use search() there)." + _ZARA_NOTE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'jea'."),
+            _ZARA_SUGGESTIONS_COUNTRY,
+            _ZARA_LANGUAGE,
+            _ZARA_SEARCH_SECTION,
+        ),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits, 4 when the English fallback is used; 1 on cn. credits_used in the "
+            "response is the exact charge."
+        ),
+        min_timeout=120.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -17004,6 +17496,7 @@ NAMESPACES: tuple[str, ...] = (
     "trendyol",
     "nintendo",
     "hm",
+    "zara",
 )
 
 

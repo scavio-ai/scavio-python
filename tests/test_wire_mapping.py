@@ -609,7 +609,7 @@ def test_extract_signature_is_url_plus_two_keywords(client_cls):
 
 # --- Body-priced surfaces: no flat "Costs N credits." -----------------------
 
-BODY_PRICED = {"walmart", "threads", "kuaishou", "instagram", "_core"}
+BODY_PRICED = {"walmart", "threads", "kuaishou", "instagram", "zara", "_core"}
 # Namespaces priced per endpoint: only these keys scale with the body
 # (warehouse count, or country "ca"); the rest of the namespace is flat.
 BODY_PRICED_KEYS = {
@@ -4578,3 +4578,149 @@ def test_hm_credits_paths_and_wire(monkeypatch):
         hm.stock()
     with pytest.raises(ScavioError):
         hm.production()
+
+
+def test_zara_credits_paths_and_wire(monkeypatch):
+    """zara (0.63.0): 12 endpoints on /api/v1/zara, billed what each call spent, 120 s floor.
+
+    102 storefronts via country + language: stores and store_stock not ao or iq; new_arrivals
+    not dz; suggestions not ad al am az ba dz mk mo uz xk. search takes query or reference;
+    product takes url, product_id (+ slug) or reference; store_stock takes store_ids or lat.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "zara"}
+    assert sorted(eps) == [
+        "categories", "category", "deals", "materials", "new_arrivals", "prices", "product",
+        "search", "stock", "store_stock", "stores", "suggestions",
+    ]
+    credits = {"deals": 4, "new_arrivals": 4}
+    drops = {
+        "stores": ("ao", "iq"),
+        "store_stock": ("ao", "iq"),
+        "new_arrivals": ("dz",),
+        "suggestions": ("ad", "al", "am", "az", "ba", "dz", "mk", "mo", "uz", "xk"),
+    }
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/zara/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 120.0, ep.key
+        assert ep.credits == credits.get(m, 2), ep.key
+        assert ep.credits_note and "cn" in ep.credits_note, ep.key
+        params = {p.name: p for p in ep.params}
+        if m == "prices":
+            countries = params["countries"].annotation
+            assert countries.startswith("Optional[list[Literal[")
+            assert countries.count('"') // 2 == 102
+            continue
+        country = params["country"].annotation
+        assert country.count('"') // 2 == 102 - len(drops.get(m, ())), m
+        for cc in drops.get(m, ()):
+            assert f'"{cc}"' not in country, (m, cc)
+        assert '"uk"' not in country and '"by"' not in country, m
+        if m != "stock":
+            assert params["language"].annotation.count('"') // 2 == 45, m
+            assert '"zh-Hant"' in params["language"].annotation, m
+        else:
+            assert "language" not in params
+    assert eps["search"].one_of == (("query", "reference"),)
+    assert eps["product"].one_of == (("url", "product_id", "reference"),)
+    assert eps["store_stock"].one_of == (("store_ids", "lat"),)
+    assert {p.name: p for p in eps["stores"].params}["lat"].annotation == "float"
+    assert {p.name: p for p in eps["store_stock"].params}["store_ids"].annotation == (
+        "Optional[list[str]]"
+    )
+    assert {p.name: p for p in eps["deals"].params}["section"].annotation == (
+        'Optional[Literal["woman", "man", "girl", "boy"]]'
+    )
+    assert {p.name: p for p in eps["categories"].params}["section"].annotation == (
+        'Optional[Literal["woman", "man", "kids", "home", "beauty"]]'
+    )
+    assert {p.name: p for p in eps["search"].params}["sort"].annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc"]]'
+    )
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    zara = client.zara
+    zara.search("blazer")
+    zara.search(reference="4591/381", country="jp")
+    zara.search(
+        "jeans",
+        country="es",
+        language="es",
+        section="woman",
+        page=2,
+        page_size=96,
+        sort="price_asc",
+        price_min=10,
+        price_max=50.5,
+    )
+    zara.product(product_id="588478514", slug="trf-low-rise-wide-leg-jeans-p08727223")
+    zara.product(reference="4591/381", country="hk", language="zh-Hant")
+    zara.materials("588478514", country="fr")
+    zara.stock("588478514")
+    zara.stores(40.7128, -74.006)
+    zara.store_stock("553306790", store_ids=["3904", "3862"])
+    zara.store_stock("553306790", lat=35.6762, lng=139.6503, country="jp")
+    zara.categories(section="woman")
+    zara.category("2420896", on_sale=True)
+    zara.deals(country="fr", section="man")
+    zara.new_arrivals(country="gb", section="woman")
+    zara.prices("4591/381", countries=["us", "gb", "cn"])
+    zara.suggestions("jea")
+    base = "/api/v1/zara/"
+    assert seen == [
+        (base + "search", {"query": "blazer"}, 120.0),
+        (base + "search", {"reference": "4591/381", "country": "jp"}, 120.0),
+        (
+            base + "search",
+            {
+                "query": "jeans",
+                "country": "es",
+                "language": "es",
+                "section": "woman",
+                "page": 2,
+                "page_size": 96,
+                "sort": "price_asc",
+                "price_min": 10,
+                "price_max": 50.5,
+            },
+            120.0,
+        ),
+        (
+            base + "product",
+            {"product_id": "588478514", "slug": "trf-low-rise-wide-leg-jeans-p08727223"},
+            120.0,
+        ),
+        (
+            base + "product",
+            {"reference": "4591/381", "country": "hk", "language": "zh-Hant"},
+            120.0,
+        ),
+        (base + "materials", {"product_id": "588478514", "country": "fr"}, 120.0),
+        (base + "stock", {"product_id": "588478514"}, 120.0),
+        (base + "stores", {"lat": 40.7128, "lng": -74.006}, 120.0),
+        (base + "store-stock", {"product_id": "553306790", "store_ids": ["3904", "3862"]}, 120.0),
+        (
+            base + "store-stock",
+            {"product_id": "553306790", "lat": 35.6762, "lng": 139.6503, "country": "jp"},
+            120.0,
+        ),
+        (base + "categories", {"section": "woman"}, 120.0),
+        (base + "category", {"category_id": "2420896", "on_sale": True}, 120.0),
+        (base + "deals", {"country": "fr", "section": "man"}, 120.0),
+        (base + "new-arrivals", {"country": "gb", "section": "woman"}, 120.0),
+        (base + "prices", {"reference": "4591/381", "countries": ["us", "gb", "cn"]}, 120.0),
+        (base + "suggestions", {"query": "jea"}, 120.0),
+    ]
+    with pytest.raises(ScavioError):
+        zara.search()
+    with pytest.raises(ScavioError):
+        zara.product(country="gb")
+    with pytest.raises(ScavioError):
+        zara.store_stock("553306790")

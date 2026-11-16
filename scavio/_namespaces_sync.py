@@ -91,6 +91,7 @@ __all__ = [
     "_TrendyolNamespace",
     "_NintendoNamespace",
     "_HmNamespace",
+    "_ZaraNamespace",
 ]
 
 class _GoogleNamespace:
@@ -13750,3 +13751,310 @@ class _HmNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("hm_production", {"article_code": article_code, "url": url, "country": country}, extra)
+
+class _ZaraNamespace:
+    """Zara search, product, materials, online stock, stores, store stock, categories, category, deals, new arrivals, prices by country and suggestions endpoints for 102 storefronts across Europe, the Americas, the Middle East, Africa, Asia and Oceania."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        reference: Optional[str] = None,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        section: Optional[Literal["woman", "man", "kids", "home"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search one Zara market's catalogue by keyword, or look up a reference (all its colours; the answer adds sold_here): items (product_id, reference, display_reference, title (in the request language), url, seo_slug, section, family, subfamily, price, old_price, discount_percent, currency, availability, colors (product_id, color_id, name, price, old_price, discount_percent, availability, tags), additional_colors, tags and image), count, total, page, page_size (up to 96, default 24), has_more, sort, sorts_offered, section, filters, facets (color and size values with counts; colours carry hex) and price_range. For some queries Zara answers in its own order and offers no price sort (sorts_offered is empty and a note says so); cn takes no sort. Prices are numbers in the market's own currency, never converted: price, old_price (set only on a markdown, above price) and discount_percent. No price history: poll prices(). Product ids (the colour's product id) and references are global on Zara's international site: the same id names the same colour in every market. China (cn) is Zara's separate site with its own ids: use the reference across markets. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            query: Search keywords in any language, e.g. 'blazer'. One of query or reference.
+            reference: A Zara reference as printed on the product page (display_reference of any answer), e.g. '4591/381'; '4591/381/800' names one colour.
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            section: woman, man, kids or home (default: every section).
+            page: Results page, 1-based (up to 100).
+            page_size: Items per page, 1 to 96 (default 24).
+            sort: relevance (default, Zara's own order), price_asc or price_desc.
+            color: Colour: one value of the color facet of an earlier answer in the same market (e.g. 'black').
+            size: Size: one value of the size facet of an earlier answer (e.g. '38').
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_search", {"query": query, "reference": reference, "country": country, "language": language, "section": section, "page": page, "page_size": page_size, "sort": sort, "color": color, "size": size, "price_min": price_min, "price_max": price_max}, extra)
+
+    def product(
+        self,
+        *,
+        url: Optional[str] = None,
+        product_id: Optional[str] = None,
+        slug: Optional[str] = None,
+        reference: Optional[str] = None,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Zara product by link, product_id + slug, or reference: product_id, reference, display_reference, title, description, url, seo_slug, section, family, subfamily, first_visible_date, price, old_price, discount_percent, currency, composition (part, components with material and percent), colors (color_id, name, hex, product_id, reference, prices, promotions with name, start and end, sizes with size_id, name, sku, availability (online stock: in_stock, out_of_stock, low_on_stock, coming_soon as Zara states it) and demand, tags, store_stock_available, images, url) and color_count. A product id alone does not open a Zara product page: send its slug (items[].seo_slug of a search answer), a url or a reference. Not available: reviews (Zara shows none), price history, Inditex's other brands. An unknown product is a charged 404. Prices are numbers in the market's own currency, never converted: price, old_price (set only on a markdown, above price) and discount_percent. No price history: poll prices(). Product ids (the colour's product id) and references are global on Zara's international site: the same id names the same colour in every market. China (cn) is Zara's separate site with its own ids: use the reference across markets. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits; 4 when the slug is another market's or language's (Zara's own link is
+        followed once) or when opened by reference; 6 for both. 1 per call on cn. credits_used
+        in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            url: A Zara product link (https://www.zara.com/<country>/<language>/<slug>-p<8 digits>.html?v1=<product id>), from any market: its market is used unless country is sent.
+            product_id: A Zara product id: the colour's product id (items[].product_id of any answer, the v1 of a product link), e.g. '553306790'. Global on Zara's international site; cn runs its own ids. Goes with slug.
+            slug: The product's slug (items[].seo_slug of a search answer), e.g. '100-wool-suit-blazer-p04591381'; goes with product_id.
+            reference: A Zara reference as printed on the product page (display_reference of any answer), e.g. '4591/381'; '4591/381/800' names one colour.
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_product", {"url": url, "product_id": product_id, "slug": slug, "reference": reference, "country": country, "language": language}, extra)
+
+    def materials(
+        self,
+        product_id: str,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Composition, care and origin of a Zara product as its product page states them, in the market's language: title, composition (part, components with material and percent), sustainable_materials, certifications (name, description, certified_by, lines), care (notes, instructions, icons), origin (the country of production as Zara states it, e.g. 'Made in Bangladesh') and, on fr, traceability (each production step and its country). Zara names no factories. An unknown product is a charged 404. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            product_id: A Zara product id: the colour's product id (items[].product_id of any answer, the v1 of a product link), e.g. '553306790'. Global on Zara's international site; cn runs its own ids.
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_materials", {"product_id": product_id, "country": country, "language": language}, extra)
+
+    def stock(
+        self,
+        product_id: str,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online availability per size of one Zara colour: product_id, skus (sku, availability as Zara states it: in_stock, out_of_stock, low_on_stock, coming_soon), sizes_total and sizes_in_stock. Online stock, not store stock (store_stock() answers units per store). Match sku to product()'s colors[].sizes[].sku for the size name. An unknown product is a charged 404. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            product_id: A Zara product id: the colour's product id (items[].product_id of any answer, the v1 of a product link), e.g. '553306790'. Global on Zara's international site; cn runs its own ids.
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_stock", {"product_id": product_id, "country": country}, extra)
+
+    def stores(
+        self,
+        lat: float,
+        lng: float,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Zara stores near a point of the country, nearest first: stores (store_id, kind, type, address_lines, city, state, state_code, postal_code, country, country_code, lat, lng, distance_km, phones, opening_hours with 7 dated days of date, weekday, open, close, sections, services, pickup, online_store, status, timezone), count and total. Pass store_id values to store_stock() as store_ids. Not on ao or iq (Zara lists no stores there). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            lat: Latitude of a point in the country, e.g. 40.7128 New York, 51.5072 London.
+            lng: Longitude, e.g. -74.006 New York, -0.1276 London.
+            country: Zara market (default 'us'): every storefront except ao and iq (Zara lists no stores there).
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_stores", {"lat": lat, "lng": lng, "country": country, "language": language}, extra)
+
+    def store_stock(
+        self,
+        product_id: str,
+        *,
+        store_ids: Optional[list[str]] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        country: Optional[Literal["ad", "ae", "al", "am", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units of one Zara colour in physical stores, per size: stores (store_id, sizes with size_id, size, units, on_sale, sales_floor_units and stockroom_units, units_total, locations in the store with area, floor, section and zone, store), stores_checked, stores_with_stock and stores_without_stock. By up to 8 store_ids (from stores()) or by lat + lng (the 8 nearest stores, with their address). Store stock, not online stock. Not on ao or iq (Zara lists no stores there). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits with store_ids, 4 with lat + lng (a stores lookup first); 1 per call on
+        cn. credits_used in the response is the exact charge. Returns the API response as a
+        dict.
+
+        Args:
+            product_id: A Zara product id: the colour's product id (items[].product_id of any answer, the v1 of a product link), e.g. '553306790'. Global on Zara's international site; cn runs its own ids.
+            store_ids: Up to 8 store ids (stores[].store_id of stores()), e.g. ['3904', '3862']. One of store_ids or lat + lng.
+            lat: Latitude of a point in the country, e.g. 40.7128 New York, 51.5072 London. With lng, instead of store_ids.
+            lng: Longitude, e.g. -74.006 New York, -0.1276 London.
+            country: Zara market (default 'us'): every storefront except ao and iq (Zara lists no stores there).
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_store_stock", {"product_id": product_id, "store_ids": store_ids, "lat": lat, "lng": lng, "country": country, "language": language}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        section: Optional[Literal["woman", "man", "kids", "home", "beauty"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of a Zara market in the request language: categories (id, name, section, parent_id, level, leaf, redirect_id (Zara's view-all list of a parent), key) and count. Pass a leaf id (or a parent's redirect_id) to category(). Category ids are shared across Zara's northern-hemisphere markets; au, za and br run their own catalogue and ids. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            section: Only one part of the tree: woman, man, kids, home or beauty.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_categories", {"country": country, "language": language, "section": section}, extra)
+
+    def category(
+        self,
+        category_id: str,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        on_sale: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every product of one Zara category (a leaf id from categories()), paged and sorted over the whole list: category_id, items (product_id, reference, display_reference, title (in the request language), url, seo_slug, section, family, subfamily, price, old_price, discount_percent, currency, availability, colors (product_id, color_id, name, price, old_price, discount_percent, availability, tags), additional_colors, tags and image), count, total (exact), page, page_size, total_pages, has_more, sort, sorts_offered, on_sale and on_sale_count. No category name (categories() has it). An unknown id is a charged 404 and a parent without products of its own a charged 400 (use a leaf id or the parent's redirect_id). Prices are numbers in the market's own currency, never converted: price, old_price (set only on a markdown, above price) and discount_percent. No price history: poll prices(). Product ids (the colour's product id) and references are global on Zara's international site: the same id names the same colour in every market. China (cn) is Zara's separate site with its own ids: use the reference across markets. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits (1 on cn). Returns the API response as a dict.
+
+        Args:
+            category_id: A Zara category id: a leaf id of categories() (or a parent's redirect_id), e.g. '2420896' (women's dresses on us).
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            page: Results page, 1-based (up to 100).
+            page_size: Items per page, 1 to 96 (default 24).
+            sort: relevance (default, Zara's own order), price_asc or price_desc.
+            on_sale: Only marked-down items (with old_price).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_category", {"category_id": category_id, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "on_sale": on_sale}, extra)
+
+    def deals(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        section: Optional[Literal["woman", "man", "girl", "boy"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The market's SPECIAL PRICES category for a section (default woman), found in the market's live category tree on every call (Zara changes it when a sale starts): section, category_id, category_name, items (product_id, reference, display_reference, title (in the request language), url, seo_slug, section, family, subfamily, price, old_price, discount_percent, currency, availability, colors (product_id, color_id, name, price, old_price, discount_percent, availability, tags), additional_colors, tags and image) with old_price and discount_percent, marked_down, on_sale_count, count, total, page, page_size, total_pages, has_more and sort. Zara runs seasonal sales and lists special prices between them; where Zara shows no special-prices category for the section the answer has no items and a note, not an error. On fr, be, lu, mc and iq Zara lists special prices without a previous price. Prices are numbers in the market's own currency, never converted: price, old_price (set only on a markdown, above price) and discount_percent. No price history: poll prices(). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 4 credits (the tree and the list); 2 when the market has no special-prices
+        category; 1 on cn. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            country: Zara market (default 'us'), with its currency and languages (the first is Zara's default): ad (EUR; ca, en, fr, es), ae (AED; en, ar), al (ALL; sq, en), am (AMD; ru, hy, en), ao (EUR; pt, en), ar (ARS; es, en), at (EUR; de, en), au (AUD; en), aw (AWG; en, es), az (AZN; ru, en), ba (BAM; hr, en), be (EUR; en, nl, fr), bg (EUR; bg, en), bh (BHD; en, ar), br (BRL; pt, en), ca (CAD; en, fr), ch (CHF; en, fr, de, it), cl (CLP; es, en), cn (CNY; zh, en), co (COP; es, en), cr (CRC; es, en), cw (XCG; en), cy (EUR; el, en), cz (CZK; cs, en), de (EUR; de, en), dk (DKK; da, en), do (DOP; es, en), dz (DZD; ar, en, fr), ec (USD; es, en), ee (EUR; et, en), eg (EGP; ar, en), es (EUR; es, en, eu, gl, ca), fi (EUR; fi, sv, en), fr (EUR; fr, en), gb (GBP; en), ge (GEL; en, ka), gr (EUR; el, en), gt (GTQ; es, en), hk (HKD; en, zh-Hant), hn (HNL; es, en), hr (EUR; hr, en), hu (HUF; hu, en), ic (EUR; es, en), id (IDR; id, en), ie (EUR; en), il (ILS; he, en), in (INR; en), iq (IQD; en), is (ISK; en), it (EUR; it, en), jo (JOD; en, ar), jp (JPY; ja, en), kh (KHR; en), kr (KRW; ko, en), kw (KWD; en, ar), kz (KZT; ru, kk, en), lb (LBP; en, ar), lt (EUR; lt, en), lu (EUR; fr, en, de), lv (EUR; lv, en), ma (MAD; fr, en), mc (EUR; fr, en), me (EUR; sr, en), mk (MKD; mk, sq, en), mo (MOP; zh-Hant, en), mt (EUR; en), mx (MXN; es, en), my (MYR; en), ni (NIO; es, en), nl (EUR; en, nl), no (NOK; no, en), nz (NZD; en), om (OMR; en, ar), pa (PAB; es, en), pe (PEN; es, en), ph (PHP; en), pl (PLN; pl, uk, en), pr (USD; es, en), pt (EUR; pt, en), py (PYG; es, en), qa (QAR; en, ar), ro (RON; ro, en), rs (RSD; sr, en), sa (SAR; en), se (SEK; sv, en), sg (SGD; en), si (EUR; sl, en), sk (EUR; sk, en), sv (USD; es, en), th (THB; th, en), tn (TND; fr, ar, en), tr (TRY; tr, en), tw (TWD; zh-Hant, en), ua (UAH; uk, en), us (USD; en, es), uy (UYU; es, en), uz (UZS; uz, en, ru), ve (USD; es, en), vn (VND; vi, en), xe (AED; en), xk (EUR; sq, en), za (ZAR; en). gb is the United Kingdom, ic the Canary Islands, xe Abu Dhabi, Al Ain and Ras Al Khaimah, xk Kosovo. Belarus, uk (use gb) and the countries Zara serves only from its worldwide store answer 400 before anything is charged.
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            section: woman (default), man, girl or boy.
+            page: Results page, 1-based (up to 100).
+            page_size: Items per page, 1 to 96 (default 24).
+            sort: relevance (default, Zara's own order), price_asc or price_desc.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_deals", {"country": country, "language": language, "section": section, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    def new_arrivals(
+        self,
+        *,
+        country: Optional[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        section: Optional[Literal["woman", "man", "girl", "boy"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The market's NEW ARRIVALS > THE NEW category for a section (default woman), found in the market's live category tree on every call: section, category_id, category_name, items (product_id, reference, display_reference, title (in the request language), url, seo_slug, section, family, subfamily, price, old_price, discount_percent, currency, availability, colors (product_id, color_id, name, price, old_price, discount_percent, availability, tags), additional_colors, tags and image), count, total, page, page_size, total_pages, has_more and sort. Not on dz (Zara shows no new-arrivals category there). Prices are numbers in the market's own currency, never converted: price, old_price (set only on a markdown, above price) and discount_percent. No price history: poll prices(). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 4 credits (the tree and the list); 1 on cn. credits_used in the response is the
+        exact charge. Returns the API response as a dict.
+
+        Args:
+            country: Zara market (default 'us'): every storefront except dz (Zara shows no new-arrivals category there).
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            section: woman (default), man, girl or boy.
+            page: Results page, 1-based (up to 100).
+            page_size: Items per page, 1 to 96 (default 24).
+            sort: relevance (default, Zara's own order), price_asc or price_desc.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_new_arrivals", {"country": country, "language": language, "section": section, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    def prices(
+        self,
+        reference: str,
+        *,
+        countries: Optional[list[Literal["ad", "ae", "al", "am", "ao", "ar", "at", "au", "aw", "az", "ba", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "dz", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mk", "mo", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "uz", "ve", "vn", "xe", "xk", "za"]]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Zara prices by country: one reference across up to 10 markets in one call (default us, gb, es, de, fr, it, jp, kr, mx, pl): reference, markets (country, language, currency, available, title, price (the lowest current price among the reference's colours), old_price, discount_percent, product_id, url, colors), not_sold (the markets that do not sell it), errors (markets that failed, not charged) and count. Each price is in that market's own currency and never converted. Any of the 102 storefronts (gb for the United Kingdom). Product ids (the colour's product id) and references are global on Zara's international site: the same id names the same colour in every market. China (cn) is Zara's separate site with its own ids: use the reference across markets.
+
+        Costs 2 credits per market that answered (1 on cn); failed markets are not charged.
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            reference: A Zara reference as printed on the product page (display_reference of any answer), e.g. '4591/381'; '4591/381/800' names one colour.
+            countries: 1 to 10 markets (default us, gb, es, de, fr, it, jp, kr, mx, pl).
+            language: Language for the titles where the market serves it (else the market's default).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_prices", {"reference": reference, "countries": countries, "language": language}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["ae", "ao", "ar", "at", "au", "aw", "be", "bg", "bh", "br", "ca", "ch", "cl", "cn", "co", "cr", "cw", "cy", "cz", "de", "dk", "do", "ec", "ee", "eg", "es", "fi", "fr", "gb", "ge", "gr", "gt", "hk", "hn", "hr", "hu", "ic", "id", "ie", "il", "in", "iq", "is", "it", "jo", "jp", "kh", "kr", "kw", "kz", "lb", "lt", "lu", "lv", "ma", "mc", "me", "mt", "mx", "my", "ni", "nl", "no", "nz", "om", "pa", "pe", "ph", "pl", "pr", "pt", "py", "qa", "ro", "rs", "sa", "se", "sg", "si", "sk", "sv", "th", "tn", "tr", "tw", "ua", "us", "uy", "ve", "vn", "xe", "za"]] = None,
+        language: Optional[Literal["ar", "bg", "ca", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "gl", "he", "hr", "hu", "hy", "id", "it", "ja", "ka", "kk", "ko", "lt", "lv", "mk", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sq", "sr", "sv", "th", "tr", "uk", "uz", "vi", "zh", "zh-Hant"]] = None,
+        section: Optional[Literal["woman", "man", "kids", "home"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Zara search suggestions for what a shopper has typed, in the market's language: query, section, suggestions (text), count and language_used. Where Zara has no suggestions in the request language, the market's English suggestions are answered instead (language_used en, with a note). Not on ad, al, am, az, ba, dz, mk, mo, uz or xk (use search() there). Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits, 4 when the English fallback is used; 1 on cn. credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'jea'.
+            country: Zara market (default 'us'): every storefront except ad, al, am, az, ba, dz, mk, mo, uz and xk (use search() there).
+            language: Language of the market (default Zara's own default for it; the languages each market serves are listed under country). Titles, descriptions, colours and category names come back in it; a language the market does not serve answers 400.
+            section: woman, man, kids or home (default: every section).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zara_suggestions", {"query": query, "country": country, "language": language, "section": section}, extra)
