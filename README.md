@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 85 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 86 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -41,6 +41,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
+| bol.com Buy Box, Every Seller's Offer, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
 | OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
 | Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
@@ -3344,6 +3345,76 @@ Mercari Shops shop profile only (for its products use `search` with
 US search suggestions, Japanese trending and price-drop history. Failed calls
 are not charged; a not-found is charged.
 
+### 55. Marketplace -- bol.com competitor prices, every seller's offer, sellers and deals
+
+bol.com, the Netherlands and Belgium (EUR). Namespace `bolcom`, 9 endpoints:
+`search`, `product`, `offers`, `seller`, `seller_products`, `category`,
+`brand`, `deals`, `campaign`. 2 credits per call; `product(ean=...)` is 4
+(a search plus the product page, billed on what it actually cost). Pick the
+storefront with `country` and `language`: nl-nl (`country="nl"`, the
+default, Dutch), be-nl (`country="be"`, Dutch) or be-fr (`country="be"`,
+`language="fr"`, French). The request timeout is raised to at least 240s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bolcom = client.bolcom
+
+# --- Competitor prices on one product: the buy box, cheapest / fastest, offer counts.
+# product_id is a 16-digit STRING: never pass it as an int.
+p = bolcom.product("9300000239314960")["data"]
+bb = p["buy_box"]
+print(p["ean"], bb["price"], bb["reference_price"], bb["reference_price_type"], bb["seller"]["name"])
+print(p["offer_count"], p["cheapest_new"], p["fastest_new"])
+
+# --- Every seller's offer on that product (price, condition, shipping cost, seller rating).
+# The list does not mark the buy box: compare offer_id with buy_box["offer_id"].
+offers = bolcom.offers("9300000240171936")["data"]
+print(offers["counts"], [(o["seller"]["name"], o["price"], o["condition"]) for o in offers["offers"]])
+
+# --- By EAN (4 credits), on the French-language Belgian storefront.
+by_ean = bolcom.product(ean="4242005483976", country="be", language="fr")["data"]
+print(by_ean["requested_ean"], by_ean["product_id"], by_ean["storefront"])
+
+# --- Search: up to page 10, filters, sponsored items flagged; list items carry no EAN.
+res = bolcom.search("airpods", sort="price_asc", condition="new", delivery="tomorrow")["data"]
+print(res["total"], res["max_page"], [(i["title"], i["offer"]["price"], i["sponsored"]) for i in res["items"][:5]])
+
+# --- Sellers: rating out of 10, sub-ratings, public trader data; and what they sell.
+seller = bolcom.seller("1770745")["data"]["seller"]
+print(seller["rating"], seller["rating_details"], seller["positive_percent"], seller["business"])
+catalog = bolcom.seller_products("1767374", country="be")["data"]
+
+# --- Category, brand (brand_id, not the brand_facet_id search filter), deals, promotions.
+cat = bolcom.category("8440", sort="price_asc", deals_only=True)["data"]
+apple = bolcom.brand("5070005")["data"]
+deals = bolcom.deals()["data"]
+promo = bolcom.campaign(deals["day_deal"]["campaign_id"])["data"]
+```
+
+Every endpoint serves all three storefronts. Product, EAN, category, seller
+and offer ids are the same on every storefront; prices, offers and stock can
+differ between the Netherlands and Belgium. On be-fr bol's own texts are
+French, some partner titles stay Dutch and review texts are bol's translation
+(`is_translated`). `reference_price_type` is `rrp` (the supplier's
+recommended price) or `most_shown_price` (bol's most-shown non-promotional
+price over the last 90 days); `discount_percent` is against it.
+`brand_facet_id` (the `search` / `category` filter, a value id from the brand
+facet: Apple 4294862300) and `brand_id` (items' `brand.brand_id`, `brand()`:
+Apple 5070005) are different id spaces. Search stops at page 10 (about 280
+results) and sorts by relevance (default), popularity, price_asc, price_desc,
+rating or wishlist, with no newest sort; sorting by anything but relevance can
+narrow bol's result set, and price sorts follow bol's own ordering (small
+inversions against the live buy-box price occur). `seller_products`,
+`category`, `brand` and `campaign` default to popularity and do not offer
+relevance. `product` returns the first 10 reviews as bol shows them, pooled
+across the product family, with no reviewer names, plus bol's own AI review
+topics. Deal products carry `seller_id` only. Not available: search
+suggestions, review paging, seller review texts, price history or 30-day
+lowest price, pickup points, bol Select member prices and a variant selector.
+Failed calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3494,6 +3565,7 @@ Scavio works with popular AI/LLM frameworks:
 | Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
 | ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
+| bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
@@ -3510,6 +3582,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.66.0
+
+- **New `bolcom` namespace** (sync and async) for bol.com (the Netherlands
+  and Belgium), 9 endpoints: `search`, `product`, `offers`, `seller`,
+  `seller_products`, `category`, `brand`, `deals`, `campaign`. Storefronts
+  nl-nl (default), be-nl and be-fr via `country` and `language`;
+  `product_id` is a string. 2 credits each, `product` by `ean` 4. 240s
+  timeout floor.
 
 ### Changed in 0.65.0
 

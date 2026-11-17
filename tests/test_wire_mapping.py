@@ -625,6 +625,7 @@ BODY_PRICED_KEYS = {
     "ikea_compare",
     "ashley_search",
     "ashley_product",
+    "bolcom_product",
 }
 
 
@@ -4994,3 +4995,123 @@ def test_mercari_credits_paths_and_wire(monkeypatch):
         mercari.seller()
     with pytest.raises(ScavioError):
         mercari.shop()
+
+
+def test_bolcom_credits_paths_and_wire(monkeypatch):
+    """bolcom (0.66.0): 9 endpoints on /api/v1/bolcom, 2 credits each (product by ean 4).
+
+    Storefronts nl-nl, be-nl, be-fr on every endpoint (country nl / be, language nl / fr).
+    product_id is a string (16 digits). Listing endpoints sort by popularity, never relevance.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "bolcom"}
+    assert sorted(eps) == [
+        "brand", "campaign", "category", "deals", "offers", "product", "search", "seller",
+        "seller_products",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/bolcom/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 2, ep.key
+        params = {p.name: p for p in ep.params}
+        assert params["country"].annotation == 'Optional[Literal["nl", "be"]]', m
+        assert params["language"].annotation == 'Optional[Literal["nl", "fr"]]', m
+    assert "4 by ean" in eps["product"].credits_note
+    for m in ("product", "offers"):
+        assert {p.name: p for p in eps[m].params}["product_id"].annotation == "Optional[str]", m
+    assert eps["product"].one_of == (("product_id", "url", "ean"),)
+    assert eps["offers"].one_of == (("product_id", "url"),)
+    for m in ("seller", "seller_products"):
+        assert eps[m].one_of == (("seller_id", "url"),), m
+    assert eps["brand"].one_of == (("brand_id", "url"),)
+    assert eps["campaign"].one_of == (("campaign_id", "url"),)
+    search_sort = {p.name: p for p in eps["search"].params}["sort"].annotation
+    assert '"relevance"' in search_sort and '"newest"' not in search_sort
+    for m in ("seller_products", "category", "brand", "campaign"):
+        sort = {p.name: p for p in eps[m].params}["sort"].annotation
+        assert sort == (
+            'Optional[Literal["popularity", "price_asc", "price_desc", "rating", "wishlist"]]'
+        ), m
+    for m in ("search", "category"):
+        names = {p.name for p in eps[m].params}
+        assert {"brand_facet_id", "facets", "delivery", "condition", "select_deals"} <= names, m
+    assert "brand_facet_id" not in {p.name for p in eps["brand"].params}
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    bolcom = client.bolcom
+    bolcom.search("airpods")
+    bolcom.search(
+        "aspirateur",
+        country="be",
+        language="fr",
+        page=2,
+        sort="price_asc",
+        condition=["refurbished", "second_hand"],
+        delivery="tomorrow",
+        brand_facet_id="4294862300",
+        facets=["58334"],
+        price_min=10,
+        price_max=99.5,
+    )
+    bolcom.product("9300000239314960")
+    bolcom.product(ean="4242005483976", country="be", language="fr")
+    bolcom.offers("9300000240171936", country="be")
+    bolcom.seller("1770745")
+    bolcom.seller_products("1767374", page=2, sort="rating")
+    bolcom.category("8440", deals_only=True, select_deals=True)
+    bolcom.brand("5070005", sort="price_desc")
+    bolcom.deals()
+    bolcom.campaign("555136", page=2)
+    base = "/api/v1/bolcom/"
+    assert seen == [
+        (base + "search", {"query": "airpods"}, 240.0),
+        (
+            base + "search",
+            {
+                "query": "aspirateur",
+                "country": "be",
+                "language": "fr",
+                "page": 2,
+                "sort": "price_asc",
+                "price_min": 10,
+                "price_max": 99.5,
+                "condition": ["refurbished", "second_hand"],
+                "delivery": "tomorrow",
+                "brand_facet_id": "4294862300",
+                "facets": ["58334"],
+            },
+            240.0,
+        ),
+        (base + "product", {"product_id": "9300000239314960"}, 240.0),
+        (
+            base + "product",
+            {"ean": "4242005483976", "country": "be", "language": "fr"},
+            240.0,
+        ),
+        (base + "offers", {"product_id": "9300000240171936", "country": "be"}, 240.0),
+        (base + "seller", {"seller_id": "1770745"}, 240.0),
+        (base + "seller-products", {"seller_id": "1767374", "page": 2, "sort": "rating"}, 240.0),
+        (
+            base + "category",
+            {"category_id": "8440", "deals_only": True, "select_deals": True},
+            240.0,
+        ),
+        (base + "brand", {"brand_id": "5070005", "sort": "price_desc"}, 240.0),
+        (base + "deals", {}, 240.0),
+        (base + "campaign", {"campaign_id": "555136", "page": 2}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        bolcom.product()
+    with pytest.raises(ScavioError):
+        bolcom.offers(country="be")
+    with pytest.raises(ScavioError):
+        bolcom.seller_products()
+    with pytest.raises(ScavioError):
+        bolcom.campaign()

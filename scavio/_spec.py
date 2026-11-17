@@ -2132,6 +2132,104 @@ _MERCARI_SELLER_URL = _str(
 )
 
 
+# bol.com params shared across endpoints (the Netherlands and Belgium, EUR). Storefronts follow
+# the backend allowlist (BOLCOM_ENDPOINT_MARKETS): every endpoint serves nl-nl, be-nl and be-fr
+# (country nl / be, language nl / fr; fr only with be). 2 credits per call; product by ean 4.
+_BOLCOM_COUNTRY = _lit(
+    "country",
+    ("nl", "be"),
+    "Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). "
+    "Anything else answers 400 before anything is charged.",
+)
+_BOLCOM_LANGUAGE = _lit(
+    "language",
+    ("nl", "fr"),
+    "Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). "
+    "nl + fr answers 400.",
+)
+_BOLCOM_LOCALE = (_BOLCOM_COUNTRY, _BOLCOM_LANGUAGE)
+_BOLCOM_LIST_SORT = _lit(
+    "sort",
+    ("popularity", "price_asc", "price_desc", "rating", "wishlist"),
+    "popularity (default), price_asc, price_desc, rating or wishlist (most wished for). "
+    "relevance is not offered on listing pages (400). Price sorts follow bol's own ordering; "
+    "small inversions against the live buy-box price occur.",
+)
+_BOLCOM_LIST_PAGING = (
+    _int(
+        "page",
+        "Results page, 1-based, about 24 items per page (max_page in the answer). A page past "
+        "the end answers an empty page with a note.",
+    ),
+    _BOLCOM_LIST_SORT,
+)
+_BOLCOM_CONDITIONS = 'Literal["new", "refurbished", "second_hand"]'
+_BOLCOM_DELIVERY = 'Literal["today", "tomorrow", "evening", "sunday", "free_shipping"]'
+_BOLCOM_FILTERS = (
+    _float("price_min", "Lowest price in euros."),
+    _float("price_max", "Highest price in euros."),
+    Param(
+        "condition",
+        f"Optional[Union[{_BOLCOM_CONDITIONS}, list[{_BOLCOM_CONDITIONS}]]]",
+        doc="new, refurbished or second_hand (one or a list).",
+    ),
+    _bool("deals_only", "Only products on a deal."),
+    _bool("select_deals", "Only bol Select member deals."),
+    Param(
+        "delivery",
+        f"Optional[Union[{_BOLCOM_DELIVERY}, list[{_BOLCOM_DELIVERY}]]]",
+        doc="Delivery filters as bol offers them: today, tomorrow, evening, sunday, "
+        "free_shipping (one or a list).",
+    ),
+    _str_or_int(
+        "brand_facet_id",
+        "A brand VALUE id from the brand facet of an earlier answer (facets[].values[].id of "
+        "the Merk / Marque facet, e.g. 4294862300 = Apple). A different id space from brand_id "
+        "(items[].brand.brand_id, brand()): Apple is brand_facet_id 4294862300, brand_id "
+        "5070005.",
+    ),
+    Param(
+        "facets",
+        "Optional[list[Union[str, int]]]",
+        doc="Facet value ids from facets[].values[].id of an earlier answer (any facet: "
+        "colour, size, rating band ...), up to 10. Ids bol did not apply come back in "
+        "filters_ignored.",
+    ),
+)
+_BOLCOM_PRODUCT_ID = Param(
+    "product_id",
+    "Optional[str]",
+    positional=True,
+    doc="A bol.com product id as a STRING (items[].product_id of a search answer), e.g. "
+    "'9300000239314960'. 16 digits: never pass it as an int.",
+)
+_BOLCOM_ITEM = (
+    " items (product_id as a string, title, url, brand with brand_id and name, category, "
+    "rating with average and count, offer: the buy box with offer_id, price, reference_price, "
+    "reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, "
+    "sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; "
+    "cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, "
+    "family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), "
+    "count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, "
+    "filters_ignored and facets (id, name, values with id, count and applied; ranges with min "
+    "and max)."
+)
+_BOLCOM_PRICES = (
+    " Prices are numbers in euros. reference_price is the price bol shows next to the price: "
+    "reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's "
+    "most-shown non-promotional price over the last 90 days); discount_percent is against it. "
+    "bol shows no price history and no 30-day lowest price."
+)
+_BOLCOM_NOTE = (
+    " Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, "
+    "language, storefront and currency. Product, EAN, category, seller and offer ids are the "
+    "same on every storefront; prices, offers and stock can differ between the Netherlands and "
+    "Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review "
+    "texts are bol's translation (is_translated). Failed upstream calls are not charged; a "
+    "not-found is charged."
+)
+
+
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
         "ean",
@@ -11319,6 +11417,285 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== bol.com ==============================
+    # 9 endpoints on /api/v1/bolcom, 2 credits each (product by ean 4, billed on actual cost).
+    # Storefronts nl-nl, be-nl, be-fr on every endpoint. Pages take 2-16 s; the backend retries
+    # once inside a 225 s deadline: 240 s timeout floor everywhere.
+    Endpoint(
+        key="bolcom_search",
+        namespace="bolcom",
+        method="search",
+        http="POST",
+        path="/api/v1/bolcom/search",
+        summary=(
+            "Search bol.com (the Netherlands and Belgium) by keyword:" + _BOLCOM_ITEM
+            + " Also query and dominant_category. Filters: category_id, price_min / price_max, "
+            "condition, deals_only, select_deals, delivery, brand_facet_id and raw facet value "
+            "ids. Search stops at page 10 (about 280 results); sorts relevance (default), "
+            "popularity, price_asc, price_desc, rating, wishlist (no newest); sorting by "
+            "anything but relevance can narrow bol's result set, and price sorts follow bol's "
+            "own ordering (small inversions occur). Sponsored items are flagged."
+            + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search keywords, e.g. 'airpods' (Dutch or French work best; an EAN finds that "
+                "product).",
+            ),
+            *_BOLCOM_LOCALE,
+            _int(
+                "page",
+                "Results page, 1-based, about 24-30 items per page. bol.com search stops at "
+                "page 10 (higher answers 400).",
+            ),
+            _lit(
+                "sort",
+                ("relevance", "popularity", "price_asc", "price_desc", "rating", "wishlist"),
+                "relevance (default), popularity, price_asc, price_desc, rating or wishlist (most "
+                "wished for). No newest sort. Anything but relevance can narrow the result set.",
+            ),
+            _str_or_int(
+                "category_id",
+                "Search within one category: a category id from the category facet or a "
+                "product's category_path, e.g. 8440.",
+            ),
+            *_BOLCOM_FILTERS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_product",
+        namespace="bolcom",
+        method="product",
+        http="POST",
+        path="/api/v1/bolcom/product",
+        summary=(
+            "One bol.com product by product_id, link or EAN, the competitor-price call: "
+            "product_id, ean, title, subtitle, brand, description (plain text), specifications "
+            "(group, name, key, value), category_path, buy_box (offer_id, price, "
+            "reference_price, reference_price_type, discount_percent, condition, seller with "
+            "seller_id, name, sold_by_bol, rating out of 10, rating_percent and top_seller, "
+            "shipping_cost, delivery_text, delivery_date, low_stock, labels), offer_count, "
+            "cheapest_new, fastest_new, cheapest_second_hand, refurbished (grades with their "
+            "cheapest offer), energy_label, images, video, series, rating (average, count, 1-5 "
+            "distribution), review_topics and review_summary (bol's own AI-generated "
+            "summaries; review_summary can be None), reviews (the first 10 as bol shows them, "
+            "pooled across the product family, each with the product_id it was written for; no "
+            "reviewer names), more_reviews; by ean also requested_ean. Every seller's offer is "
+            "on offers(). An unknown product answers 404 (charged). Not available: review "
+            "paging beyond the first 10, price history, pickup points, bol Select member "
+            "prices, a structured variant selector." + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=(
+            _BOLCOM_PRODUCT_ID,
+            _str(
+                "url",
+                "A bol.com product link (the url of a search or product answer); its storefront "
+                "is used unless country / language are sent.",
+            ),
+            _str(
+                "ean",
+                "An EAN / GTIN (8, 12, 13 or 14 digits), e.g. '4242005483976': finds the product "
+                "carrying it. 4 credits.",
+            ),
+            *_BOLCOM_LOCALE,
+        ),
+        one_of=(("product_id", "url", "ean"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits; 4 by ean (a search plus the product page, billed on actual cost)."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_offers",
+        namespace="bolcom",
+        method="offers",
+        http="POST",
+        path="/api/v1/bolcom/offers",
+        summary=(
+            "Every seller's offer for one bol.com product, for price comparison and price "
+            "monitoring: product_id, title, url, counts (new, refurbished, second_hand), offers "
+            "(offer_id, price, reference_price, reference_price_type, discount_percent, "
+            "condition, refurbished_grade, second_hand_state, condition_note, shipping_cost, "
+            "delivery_text, delivery_date, seller with seller_id, name, sold_by_bol, rating out "
+            "of 10, rating_percent and top_seller, labels), count, has_more. The list does not "
+            "mark the buy box: product()'s buy_box.offer_id names it. Fewer sellers ship to "
+            "Belgium. An unknown product answers 404 (charged)." + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=(
+            _BOLCOM_PRODUCT_ID,
+            _str("url", "A bol.com product link or its price overview link."),
+            *_BOLCOM_LOCALE,
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_seller",
+        namespace="bolcom",
+        method="seller",
+        http="POST",
+        path="/api/v1/bolcom/seller",
+        summary=(
+            "A bol.com seller's public profile by seller_id or link: seller (seller_id, name, "
+            "url, active_since, description, rating out of 10 with product_info, delivery_time, "
+            "shipping and service sub-ratings, rating_method, reviews_used_for_rating, "
+            "positive_percent, top_seller, reviews positive / neutral / negative / total, "
+            "product_count, business: company_name, city, country, registration_number, "
+            "vat_number and country_of_origin as bol publishes them under EU trader rules; no "
+            "street address). Review texts are not returned; the seller's products are on "
+            "seller_products(). An unknown seller answers 404 (charged)." + _BOLCOM_NOTE
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A bol.com seller id (offer.seller_id or buy_box.seller.seller_id of an "
+                "answer), e.g. '1770745'. Seller id '0' is bol itself.",
+            ),
+            _str("url", "A bol.com seller page link (seller.url of a seller answer)."),
+            *_BOLCOM_LOCALE,
+        ),
+        one_of=(("seller_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_seller_products",
+        namespace="bolcom",
+        method="seller_products",
+        http="POST",
+        path="/api/v1/bolcom/seller-products",
+        summary=(
+            "The products a bol.com seller sells, by seller_id or link, paged and sorted "
+            "(default popularity): seller (seller_id, name) and" + _BOLCOM_ITEM
+            + " Each item's offer is the product's buy box, which may be another seller's."
+            + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A bol.com seller id, e.g. '1767374'.",
+            ),
+            _str("url", "A bol.com seller page link."),
+            *_BOLCOM_LOCALE,
+            *_BOLCOM_LIST_PAGING,
+        ),
+        one_of=(("seller_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_category",
+        namespace="bolcom",
+        method="category",
+        http="POST",
+        path="/api/v1/bolcom/category",
+        summary=(
+            "Products in one bol.com category, paged, sorted (default popularity) and filtered "
+            "like search() (price, condition, deals_only, select_deals, delivery, "
+            "brand_facet_id, facets): category (category_id, name, url, breadcrumbs) and"
+            + _BOLCOM_ITEM + " Categories go deeper than search (tens of pages). An unknown "
+            "category answers 404 (charged)." + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=(
+            Param(
+                "category_id",
+                "Union[str, int]",
+                required=True,
+                doc="A bol.com category id (category_path[].category_id of a product, the "
+                "category facet of a search), e.g. '8440'.",
+            ),
+            *_BOLCOM_LOCALE,
+            *_BOLCOM_LIST_PAGING,
+            *_BOLCOM_FILTERS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_brand",
+        namespace="bolcom",
+        method="brand",
+        http="POST",
+        path="/api/v1/bolcom/brand",
+        summary=(
+            "Products of one brand on bol.com by brand_id or a brand link, paged and sorted "
+            "(default popularity): brand (brand_id, name, premium_brand) and" + _BOLCOM_ITEM
+            + " brand_id is items[].brand.brand_id (Apple 5070005), not the brand_facet_id "
+            "search filter. An unknown brand answers 404 (charged)." + _BOLCOM_PRICES
+            + _BOLCOM_NOTE
+        ),
+        params=(
+            Param(
+                "brand_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A bol.com brand id (brand.brand_id of a search or product answer), e.g. "
+                "'5070005' (Apple).",
+            ),
+            _str("url", "A bol.com brand page link."),
+            *_BOLCOM_LOCALE,
+            *_BOLCOM_LIST_PAGING,
+        ),
+        one_of=(("brand_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_deals",
+        namespace="bolcom",
+        method="deals",
+        http="POST",
+        path="/api/v1/bolcom/deals",
+        summary=(
+            "Today's bol.com deals as its deals page serves them: day_deal (title, campaign_id, "
+            "url, ends_at, highlighted_product) and category_deals (category_id, category_name, "
+            "products with product_id, title, url, image and offer: price, reference price, "
+            "discount, labels; deal products carry seller_id only), more_deal_category_ids, "
+            "count. Open the day deal's products with campaign() and its campaign_id."
+            + _BOLCOM_PRICES + _BOLCOM_NOTE
+        ),
+        params=_BOLCOM_LOCALE,
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bolcom_campaign",
+        namespace="bolcom",
+        method="campaign",
+        http="POST",
+        path="/api/v1/bolcom/campaign",
+        summary=(
+            "The products of one bol.com promotion (a Black Friday deal list, the day deal ...) "
+            "by campaign_id or link, paged and sorted (default popularity): campaign "
+            "(campaign_id, name, description, type, ends_at) and" + _BOLCOM_ITEM
+            + " An ended or unknown campaign answers 404 (charged)." + _BOLCOM_PRICES
+            + _BOLCOM_NOTE
+        ),
+        params=(
+            Param(
+                "campaign_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A bol.com campaign id (labels[].campaign_id of an offer, "
+                "day_deal.campaign_id of deals()), e.g. '555136'.",
+            ),
+            _str("url", "A bol.com campaign (promotion) link."),
+            *_BOLCOM_LOCALE,
+            *_BOLCOM_LIST_PAGING,
+        ),
+        one_of=(("campaign_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -18346,6 +18723,7 @@ NAMESPACES: tuple[str, ...] = (
     "zara",
     "asos",
     "mercari",
+    "bolcom",
 )
 
 

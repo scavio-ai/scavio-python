@@ -16,6 +16,7 @@ from ._namespaces_async import (
     _AsyncAshleyNamespace,
     _AsyncAsosNamespace,
     _AsyncBestBuyNamespace,
+    _AsyncBolcomNamespace,
     _AsyncBookingNamespace,
     _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
@@ -234,6 +235,7 @@ class AsyncScavioClient:
         self.zara = _AsyncZaraNamespace(self)
         self.asos = _AsyncAsosNamespace(self)
         self.mercari = _AsyncMercariNamespace(self)
+        self.bolcom = _AsyncBolcomNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

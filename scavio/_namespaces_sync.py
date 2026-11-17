@@ -94,6 +94,7 @@ __all__ = [
     "_ZaraNamespace",
     "_AsosNamespace",
     "_MercariNamespace",
+    "_BolcomNamespace",
 ]
 
 class _GoogleNamespace:
@@ -14696,3 +14697,256 @@ class _MercariNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("mercari_shop", {"shop_id": shop_id, "url": url, "country": country}, extra)
+
+class _BolcomNamespace:
+    """bol.com search, product (by id, link or EAN), offers (every seller's offer), seller, seller products, category, brand, deals and campaign endpoints for the bol.com storefronts nl-nl, be-nl and be-fr (the Netherlands and Belgium, EUR)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_asc", "price_desc", "rating", "wishlist"]] = None,
+        category_id: Optional[Union[str, int]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[Literal["new", "refurbished", "second_hand"], list[Literal["new", "refurbished", "second_hand"]]]] = None,
+        deals_only: Optional[bool] = None,
+        select_deals: Optional[bool] = None,
+        delivery: Optional[Union[Literal["today", "tomorrow", "evening", "sunday", "free_shipping"], list[Literal["today", "tomorrow", "evening", "sunday", "free_shipping"]]]] = None,
+        brand_facet_id: Optional[Union[str, int]] = None,
+        facets: Optional[list[Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search bol.com (the Netherlands and Belgium) by keyword: items (product_id as a string, title, url, brand with brand_id and name, category, rating with average and count, offer: the buy box with offer_id, price, reference_price, reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, filters_ignored and facets (id, name, values with id, count and applied; ranges with min and max). Also query and dominant_category. Filters: category_id, price_min / price_max, condition, deals_only, select_deals, delivery, brand_facet_id and raw facet value ids. Search stops at page 10 (about 280 results); sorts relevance (default), popularity, price_asc, price_desc, rating, wishlist (no newest); sorting by anything but relevance can narrow bol's result set, and price sorts follow bol's own ordering (small inversions occur). Sponsored items are flagged. Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'airpods' (Dutch or French work best; an EAN finds that product).
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            page: Results page, 1-based, about 24-30 items per page. bol.com search stops at page 10 (higher answers 400).
+            sort: relevance (default), popularity, price_asc, price_desc, rating or wishlist (most wished for). No newest sort. Anything but relevance can narrow the result set.
+            category_id: Search within one category: a category id from the category facet or a product's category_path, e.g. 8440.
+            price_min: Lowest price in euros.
+            price_max: Highest price in euros.
+            condition: new, refurbished or second_hand (one or a list).
+            deals_only: Only products on a deal.
+            select_deals: Only bol Select member deals.
+            delivery: Delivery filters as bol offers them: today, tomorrow, evening, sunday, free_shipping (one or a list).
+            brand_facet_id: A brand VALUE id from the brand facet of an earlier answer (facets[].values[].id of the Merk / Marque facet, e.g. 4294862300 = Apple). A different id space from brand_id (items[].brand.brand_id, brand()): Apple is brand_facet_id 4294862300, brand_id 5070005.
+            facets: Facet value ids from facets[].values[].id of an earlier answer (any facet: colour, size, rating band ...), up to 10. Ids bol did not apply come back in filters_ignored.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_search", {"query": query, "country": country, "language": language, "page": page, "sort": sort, "category_id": category_id, "price_min": price_min, "price_max": price_max, "condition": condition, "deals_only": deals_only, "select_deals": select_deals, "delivery": delivery, "brand_facet_id": brand_facet_id, "facets": facets}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        ean: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One bol.com product by product_id, link or EAN, the competitor-price call: product_id, ean, title, subtitle, brand, description (plain text), specifications (group, name, key, value), category_path, buy_box (offer_id, price, reference_price, reference_price_type, discount_percent, condition, seller with seller_id, name, sold_by_bol, rating out of 10, rating_percent and top_seller, shipping_cost, delivery_text, delivery_date, low_stock, labels), offer_count, cheapest_new, fastest_new, cheapest_second_hand, refurbished (grades with their cheapest offer), energy_label, images, video, series, rating (average, count, 1-5 distribution), review_topics and review_summary (bol's own AI-generated summaries; review_summary can be None), reviews (the first 10 as bol shows them, pooled across the product family, each with the product_id it was written for; no reviewer names), more_reviews; by ean also requested_ean. Every seller's offer is on offers(). An unknown product answers 404 (charged). Not available: review paging beyond the first 10, price history, pickup points, bol Select member prices, a structured variant selector. Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits; 4 by ean (a search plus the product page, billed on actual cost).
+        Returns the API response as a dict.
+
+        Args:
+            product_id: A bol.com product id as a STRING (items[].product_id of a search answer), e.g. '9300000239314960'. 16 digits: never pass it as an int.
+            url: A bol.com product link (the url of a search or product answer); its storefront is used unless country / language are sent.
+            ean: An EAN / GTIN (8, 12, 13 or 14 digits), e.g. '4242005483976': finds the product carrying it. 4 credits.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_product", {"product_id": product_id, "url": url, "ean": ean, "country": country, "language": language}, extra)
+
+    def offers(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every seller's offer for one bol.com product, for price comparison and price monitoring: product_id, title, url, counts (new, refurbished, second_hand), offers (offer_id, price, reference_price, reference_price_type, discount_percent, condition, refurbished_grade, second_hand_state, condition_note, shipping_cost, delivery_text, delivery_date, seller with seller_id, name, sold_by_bol, rating out of 10, rating_percent and top_seller, labels), count, has_more. The list does not mark the buy box: product()'s buy_box.offer_id names it. Fewer sellers ship to Belgium. An unknown product answers 404 (charged). Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: A bol.com product id as a STRING (items[].product_id of a search answer), e.g. '9300000239314960'. 16 digits: never pass it as an int.
+            url: A bol.com product link or its price overview link.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_offers", {"product_id": product_id, "url": url, "country": country, "language": language}, extra)
+
+    def seller(
+        self,
+        seller_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A bol.com seller's public profile by seller_id or link: seller (seller_id, name, url, active_since, description, rating out of 10 with product_info, delivery_time, shipping and service sub-ratings, rating_method, reviews_used_for_rating, positive_percent, top_seller, reviews positive / neutral / negative / total, product_count, business: company_name, city, country, registration_number, vat_number and country_of_origin as bol publishes them under EU trader rules; no street address). Review texts are not returned; the seller's products are on seller_products(). An unknown seller answers 404 (charged). Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            seller_id: A bol.com seller id (offer.seller_id or buy_box.seller.seller_id of an answer), e.g. '1770745'. Seller id '0' is bol itself.
+            url: A bol.com seller page link (seller.url of a seller answer).
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_seller", {"seller_id": seller_id, "url": url, "country": country, "language": language}, extra)
+
+    def seller_products(
+        self,
+        seller_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popularity", "price_asc", "price_desc", "rating", "wishlist"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products a bol.com seller sells, by seller_id or link, paged and sorted (default popularity): seller (seller_id, name) and items (product_id as a string, title, url, brand with brand_id and name, category, rating with average and count, offer: the buy box with offer_id, price, reference_price, reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, filters_ignored and facets (id, name, values with id, count and applied; ranges with min and max). Each item's offer is the product's buy box, which may be another seller's. Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            seller_id: A bol.com seller id, e.g. '1767374'.
+            url: A bol.com seller page link.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            page: Results page, 1-based, about 24 items per page (max_page in the answer). A page past the end answers an empty page with a note.
+            sort: popularity (default), price_asc, price_desc, rating or wishlist (most wished for). relevance is not offered on listing pages (400). Price sorts follow bol's own ordering; small inversions against the live buy-box price occur.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_seller_products", {"seller_id": seller_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
+
+    def category(
+        self,
+        category_id: Union[str, int],
+        *,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popularity", "price_asc", "price_desc", "rating", "wishlist"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Union[Literal["new", "refurbished", "second_hand"], list[Literal["new", "refurbished", "second_hand"]]]] = None,
+        deals_only: Optional[bool] = None,
+        select_deals: Optional[bool] = None,
+        delivery: Optional[Union[Literal["today", "tomorrow", "evening", "sunday", "free_shipping"], list[Literal["today", "tomorrow", "evening", "sunday", "free_shipping"]]]] = None,
+        brand_facet_id: Optional[Union[str, int]] = None,
+        facets: Optional[list[Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products in one bol.com category, paged, sorted (default popularity) and filtered like search() (price, condition, deals_only, select_deals, delivery, brand_facet_id, facets): category (category_id, name, url, breadcrumbs) and items (product_id as a string, title, url, brand with brand_id and name, category, rating with average and count, offer: the buy box with offer_id, price, reference_price, reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, filters_ignored and facets (id, name, values with id, count and applied; ranges with min and max). Categories go deeper than search (tens of pages). An unknown category answers 404 (charged). Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: A bol.com category id (category_path[].category_id of a product, the category facet of a search), e.g. '8440'.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            page: Results page, 1-based, about 24 items per page (max_page in the answer). A page past the end answers an empty page with a note.
+            sort: popularity (default), price_asc, price_desc, rating or wishlist (most wished for). relevance is not offered on listing pages (400). Price sorts follow bol's own ordering; small inversions against the live buy-box price occur.
+            price_min: Lowest price in euros.
+            price_max: Highest price in euros.
+            condition: new, refurbished or second_hand (one or a list).
+            deals_only: Only products on a deal.
+            select_deals: Only bol Select member deals.
+            delivery: Delivery filters as bol offers them: today, tomorrow, evening, sunday, free_shipping (one or a list).
+            brand_facet_id: A brand VALUE id from the brand facet of an earlier answer (facets[].values[].id of the Merk / Marque facet, e.g. 4294862300 = Apple). A different id space from brand_id (items[].brand.brand_id, brand()): Apple is brand_facet_id 4294862300, brand_id 5070005.
+            facets: Facet value ids from facets[].values[].id of an earlier answer (any facet: colour, size, rating band ...), up to 10. Ids bol did not apply come back in filters_ignored.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_category", {"category_id": category_id, "country": country, "language": language, "page": page, "sort": sort, "price_min": price_min, "price_max": price_max, "condition": condition, "deals_only": deals_only, "select_deals": select_deals, "delivery": delivery, "brand_facet_id": brand_facet_id, "facets": facets}, extra)
+
+    def brand(
+        self,
+        brand_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popularity", "price_asc", "price_desc", "rating", "wishlist"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products of one brand on bol.com by brand_id or a brand link, paged and sorted (default popularity): brand (brand_id, name, premium_brand) and items (product_id as a string, title, url, brand with brand_id and name, category, rating with average and count, offer: the buy box with offer_id, price, reference_price, reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, filters_ignored and facets (id, name, values with id, count and applied; ranges with min and max). brand_id is items[].brand.brand_id (Apple 5070005), not the brand_facet_id search filter. An unknown brand answers 404 (charged). Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            brand_id: A bol.com brand id (brand.brand_id of a search or product answer), e.g. '5070005' (Apple).
+            url: A bol.com brand page link.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            page: Results page, 1-based, about 24 items per page (max_page in the answer). A page past the end answers an empty page with a note.
+            sort: popularity (default), price_asc, price_desc, rating or wishlist (most wished for). relevance is not offered on listing pages (400). Price sorts follow bol's own ordering; small inversions against the live buy-box price occur.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_brand", {"brand_id": brand_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
+
+    def deals(
+        self,
+        *,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Today's bol.com deals as its deals page serves them: day_deal (title, campaign_id, url, ends_at, highlighted_product) and category_deals (category_id, category_name, products with product_id, title, url, image and offer: price, reference price, discount, labels; deal products carry seller_id only), more_deal_category_ids, count. Open the day deal's products with campaign() and its campaign_id. Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_deals", {"country": country, "language": language}, extra)
+
+    def campaign(
+        self,
+        campaign_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popularity", "price_asc", "price_desc", "rating", "wishlist"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one bol.com promotion (a Black Friday deal list, the day deal ...) by campaign_id or link, paged and sorted (default popularity): campaign (campaign_id, name, description, type, ends_at) and items (product_id as a string, title, url, brand with brand_id and name, category, rating with average and count, offer: the buy box with offer_id, price, reference_price, reference_price_type, discount_percent, discount_shown, condition, seller_id, seller_name, sold_by_bol, delivery_text, delivery_date, low_stock and labels with campaign_id; cheapest_second_hand and cheapest_refurbished when bol shows them, energy_label, image, family_id, sponsored for a paid placement; no EAN, product() has it), total (bol's count), count, sponsored_count, page, max_page, has_more, sort, sorts_offered, filters, filters_ignored and facets (id, name, values with id, count and applied; ranges with min and max). An ended or unknown campaign answers 404 (charged). Prices are numbers in euros. reference_price is the price bol shows next to the price: reference_price_type rrp (the supplier's recommended price) or most_shown_price (bol's most-shown non-promotional price over the last 90 days); discount_percent is against it. bol shows no price history and no 30-day lowest price. Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, language, storefront and currency. Product, EAN, category, seller and offer ids are the same on every storefront; prices, offers and stock can differ between the Netherlands and Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review texts are bol's translation (is_translated). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            campaign_id: A bol.com campaign id (labels[].campaign_id of an offer, day_deal.campaign_id of deals()), e.g. '555136'.
+            url: A bol.com campaign (promotion) link.
+            country: Storefront country: 'nl' (default, bol.com Netherlands) or 'be' (bol.com Belgium). Anything else answers 400 before anything is charged.
+            language: Storefront language: 'nl' (default) or 'fr' (only with country 'be': storefront be-fr). nl + fr answers 400.
+            page: Results page, 1-based, about 24 items per page (max_page in the answer). A page past the end answers an empty page with a note.
+            sort: popularity (default), price_asc, price_desc, rating or wishlist (most wished for). relevance is not offered on listing pages (400). Price sorts follow bol's own ordering; small inversions against the live buy-box price occur.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bolcom_campaign", {"campaign_id": campaign_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
