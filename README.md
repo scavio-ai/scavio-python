@@ -41,7 +41,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
-| bol.com Buy Box, Every Seller's Offer, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
+| bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
 | OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
 | Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
@@ -3345,7 +3345,7 @@ Mercari Shops shop profile only (for its products use `search` with
 US search suggestions, Japanese trending and price-drop history. Failed calls
 are not charged; a not-found is charged.
 
-### 55. Marketplace -- bol.com competitor prices, every seller's offer, sellers and deals
+### 55. Marketplace -- bol.com competitor prices, lowest-priced seller offers, sellers and deals
 
 bol.com, the Netherlands and Belgium (EUR). Namespace `bolcom`, 9 endpoints:
 `search`, `product`, `offers`, `seller`, `seller_products`, `category`,
@@ -3368,10 +3368,11 @@ bb = p["buy_box"]
 print(p["ean"], bb["price"], bb["reference_price"], bb["reference_price_type"], bb["seller"]["name"])
 print(p["offer_count"], p["cheapest_new"], p["fastest_new"])
 
-# --- Every seller's offer on that product (price, condition, shipping cost, seller rating).
+# --- The 10 lowest-priced offers on that product (price, condition, shipping cost, seller rating),
+# with counts by condition for all its offers; has_more when bol has more (no paging).
 # The list does not mark the buy box: compare offer_id with buy_box["offer_id"].
 offers = bolcom.offers("9300000240171936")["data"]
-print(offers["counts"], [(o["seller"]["name"], o["price"], o["condition"]) for o in offers["offers"]])
+print(offers["counts"], offers["has_more"], [(o["seller"]["name"], o["price"], o["condition"]) for o in offers["offers"]])
 
 # --- By EAN (4 credits), on the French-language Belgian storefront.
 by_ean = bolcom.product(ean="4242005483976", country="be", language="fr")["data"]
@@ -3381,7 +3382,7 @@ print(by_ean["requested_ean"], by_ean["product_id"], by_ean["storefront"])
 res = bolcom.search("airpods", sort="price_asc", condition="new", delivery="tomorrow")["data"]
 print(res["total"], res["max_page"], [(i["title"], i["offer"]["price"], i["sponsored"]) for i in res["items"][:5]])
 
-# --- Sellers: rating out of 10, sub-ratings, public trader data; and what they sell.
+# --- Sellers: rating out of 10, up to four sub-ratings, public trader data; and what they sell.
 seller = bolcom.seller("1770745")["data"]["seller"]
 print(seller["rating"], seller["rating_details"], seller["positive_percent"], seller["business"])
 catalog = bolcom.seller_products("1767374", country="be")["data"]
@@ -3396,8 +3397,8 @@ promo = bolcom.campaign(deals["day_deal"]["campaign_id"])["data"]
 Every endpoint serves all three storefronts. Product, EAN, category, seller
 and offer ids are the same on every storefront; prices, offers and stock can
 differ between the Netherlands and Belgium. On be-fr bol's own texts are
-French, some partner titles stay Dutch and review texts are bol's translation
-(`is_translated`). `reference_price_type` is `rrp` (the supplier's
+French, some partner titles and the review topics stay Dutch, and review texts
+are bol's translation (`is_translated`). `reference_price_type` is `rrp` (the supplier's
 recommended price) or `most_shown_price` (bol's most-shown non-promotional
 price over the last 90 days); `discount_percent` is against it.
 `brand_facet_id` (the `search` / `category` filter, a value id from the brand
@@ -3407,8 +3408,10 @@ results) and sorts by relevance (default), popularity, price_asc, price_desc,
 rating or wishlist, with no newest sort; sorting by anything but relevance can
 narrow bol's result set, and price sorts follow bol's own ordering (small
 inversions against the live buy-box price occur). `seller_products`,
-`category`, `brand` and `campaign` default to popularity and do not offer
-relevance. `product` returns the first 10 reviews as bol shows them, pooled
+`category`, `brand` and `campaign` default to popularity, page 1 to 500, and do
+not offer relevance; a campaign item's offer is its buy box, which does not
+always carry the campaign's label. `deals` links the day deal on the asked
+storefront. `product` returns the first 10 reviews as bol shows them, pooled
 across the product family, with no reviewer names, plus bol's own AI review
 topics. Deal products carry `seller_id` only. Not available: search
 suggestions, review paging, seller review texts, price history or 30-day
@@ -3590,7 +3593,8 @@ for field-level details.
   `seller_products`, `category`, `brand`, `deals`, `campaign`. Storefronts
   nl-nl (default), be-nl and be-fr via `country` and `language`;
   `product_id` is a string. 2 credits each, `product` by `ean` 4. 240s
-  timeout floor.
+  timeout floor. `offers` returns the 10 lowest-priced offers with counts by
+  condition for all (`has_more`, no paging); listing pages run 1 to 500.
 
 ### Changed in 0.65.0
 

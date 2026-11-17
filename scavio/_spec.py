@@ -2158,8 +2158,9 @@ _BOLCOM_LIST_SORT = _lit(
 _BOLCOM_LIST_PAGING = (
     _int(
         "page",
-        "Results page, 1-based, about 24 items per page (max_page in the answer). A page past "
-        "the end answers an empty page with a note.",
+        "Results page, 1-based (1-500), about 24 items per page (max_page in the answer; bol "
+        "lists at most 500 pages, higher answers 400). A page past max_page answers an empty "
+        "page with a note.",
     ),
     _BOLCOM_LIST_SORT,
 )
@@ -2224,7 +2225,8 @@ _BOLCOM_NOTE = (
     " Storefronts: nl-nl (default), be-nl and be-fr, all EUR; every answer carries country, "
     "language, storefront and currency. Product, EAN, category, seller and offer ids are the "
     "same on every storefront; prices, offers and stock can differ between the Netherlands and "
-    "Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch and review "
+    "Belgium. On be-fr bol's own texts are French, some partner titles stay Dutch, "
+    "review_topics (topic and summary) come back in Dutch as bol serves them, and review "
     "texts are bol's translation (is_translated). Failed upstream calls are not charged; a "
     "not-found is charged."
 )
@@ -11476,15 +11478,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "product_id, ean, title, subtitle, brand, description (plain text), specifications "
             "(group, name, key, value), category_path, buy_box (offer_id, price, "
             "reference_price, reference_price_type, discount_percent, condition, seller with "
-            "seller_id, name, sold_by_bol, rating out of 10, rating_percent and top_seller, "
+            "seller_id, name, sold_by_bol, rating out of 10 and top_seller, "
             "shipping_cost, delivery_text, delivery_date, low_stock, labels), offer_count, "
             "cheapest_new, fastest_new, cheapest_second_hand, refurbished (grades with their "
             "cheapest offer), energy_label, images, video, series, rating (average, count, 1-5 "
             "distribution), review_topics and review_summary (bol's own AI-generated "
             "summaries; review_summary can be None), reviews (the first 10 as bol shows them, "
             "pooled across the product family, each with the product_id it was written for; no "
-            "reviewer names), more_reviews; by ean also requested_ean. Every seller's offer is "
-            "on offers(). An unknown product answers 404 (charged). Not available: review "
+            "reviewer names), more_reviews; by ean also requested_ean. The 10 lowest-priced "
+            "offers are on offers(). An unknown product answers 404 (charged). Not available: review "
             "paging beyond the first 10, price history, pickup points, bol Select member "
             "prices, a structured variant selector." + _BOLCOM_PRICES + _BOLCOM_NOTE
         ),
@@ -11516,12 +11518,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/bolcom/offers",
         summary=(
-            "Every seller's offer for one bol.com product, for price comparison and price "
-            "monitoring: product_id, title, url, counts (new, refurbished, second_hand), offers "
-            "(offer_id, price, reference_price, reference_price_type, discount_percent, "
+            "The lowest-priced 10 offers for one bol.com product, for price comparison and "
+            "price monitoring: product_id, title, url, counts (new, refurbished, second_hand: "
+            "all of the product's offers), offers (up to 10, lowest price first: offer_id, price, reference_price, reference_price_type, discount_percent, "
             "condition, refurbished_grade, second_hand_state, condition_note, shipping_cost, "
             "delivery_text, delivery_date, seller with seller_id, name, sold_by_bol, rating out "
-            "of 10, rating_percent and top_seller, labels), count, has_more. The list does not "
+            "of 10 and top_seller, labels), count, has_more (True when bol has more offers than "
+            "the 10 returned: the higher-priced ones are not returned and there is no paging). "
+            "The list does not "
             "mark the buy box: product()'s buy_box.offer_id names it. Fewer sellers ship to "
             "Belgium. An unknown product answers 404 (charged)." + _BOLCOM_PRICES + _BOLCOM_NOTE
         ),
@@ -11542,9 +11546,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/bolcom/seller",
         summary=(
             "A bol.com seller's public profile by seller_id or link: seller (seller_id, name, "
-            "url, active_since, description, rating out of 10 with product_info, delivery_time, "
-            "shipping and service sub-ratings, rating_method, reviews_used_for_rating, "
-            "positive_percent, top_seller, reviews positive / neutral / negative / total, "
+            "url, active_since, description, rating out of 10 with up to four sub-ratings "
+            "(product_info, delivery_time, shipping, service; some sellers have fewer), "
+            "rating_method (recent_reviews: the last 3 months; all_reviews: all of the seller's "
+            "reviews), reviews_used_for_rating, positive_percent (bol's positive percentage over "
+            "those reviews), top_seller, reviews positive / neutral / negative / total, "
             "product_count, business: company_name, city, country, registration_number, "
             "vat_number and country_of_origin as bol publishes them under EU trader rules; no "
             "street address). Review texts are not returned; the seller's products are on "
@@ -11602,7 +11608,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "Products in one bol.com category, paged, sorted (default popularity) and filtered "
             "like search() (price, condition, deals_only, select_deals, delivery, "
             "brand_facet_id, facets): category (category_id, name, url, breadcrumbs) and"
-            + _BOLCOM_ITEM + " Categories go deeper than search (tens of pages). An unknown "
+            + _BOLCOM_ITEM + " Categories go deeper than search (up to page 500). An unknown "
             "category answers 404 (charged)." + _BOLCOM_PRICES + _BOLCOM_NOTE
         ),
         params=(
@@ -11657,7 +11663,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/bolcom/deals",
         summary=(
             "Today's bol.com deals as its deals page serves them: day_deal (title, campaign_id, "
-            "url, ends_at, highlighted_product) and category_deals (category_id, category_name, "
+            "url on the asked storefront, ends_at, highlighted_product) and category_deals (category_id, category_name, "
             "products with product_id, title, url, image and offer: price, reference price, "
             "discount, labels; deal products carry seller_id only), more_deal_category_ids, "
             "count. Open the day deal's products with campaign() and its campaign_id."
@@ -11677,7 +11683,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "The products of one bol.com promotion (a Black Friday deal list, the day deal ...) "
             "by campaign_id or link, paged and sorted (default popularity): campaign "
             "(campaign_id, name, description, type, ends_at) and" + _BOLCOM_ITEM
-            + " An ended or unknown campaign answers 404 (charged)." + _BOLCOM_PRICES
+            + " Each item's offer is the product's buy box, which does not always carry this "
+            "campaign's label. An ended or unknown campaign answers 404 (charged)." + _BOLCOM_PRICES
             + _BOLCOM_NOTE
         ),
         params=(

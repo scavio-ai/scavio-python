@@ -374,7 +374,7 @@ _NS_META = {
     ),
     "bolcom": (
         "Bolcom",
-        "bol.com search, product (by id, link or EAN), offers (every seller's offer), seller, "
+        "bol.com search, product (by id, link or EAN), offers (the 10 lowest-priced), seller, "
         "seller products, category, brand, deals and campaign endpoints for the bol.com "
         "storefronts nl-nl, be-nl and be-fr (the Netherlands and Belgium, EUR).",
     ),
