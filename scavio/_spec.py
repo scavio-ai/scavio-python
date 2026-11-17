@@ -2231,6 +2231,125 @@ _BOLCOM_NOTE = (
     "not-found is charged."
 )
 
+# Uniqlo params shared across endpoints (uniqlo.com and Uniqlo's Greater China sites). Markets
+# follow UNIQLO_ENDPOINT_COUNTRIES: us, jp, kr serve every endpoint; tw, hk, cn search + product
+# (their own product codes); the other 35 storefronts (incl. Uniqlo's EU store) product + prices.
+# Storefront -> "<currency> <languages, the first is the default>".
+_UNIQLO_MARKETS = {
+    "us": "USD en", "jp": "JPY ja", "kr": "KRW ko",
+    "au": "AUD en", "be": "EUR nl fr en", "ca": "CAD en fr", "de": "EUR de en", "dk": "DKK en",
+    "es": "EUR es en", "fr": "EUR fr en", "gb": "GBP en", "id": "IDR id en", "in": "INR en",
+    "it": "EUR it en", "my": "MYR en", "nl": "EUR nl en", "ph": "PHP en", "se": "SEK en",
+    "sg": "SGD en", "th": "THB th en", "vn": "VND vi en",
+    "at": "EUR en", "bg": "EUR en", "cz": "EUR en", "ee": "EUR en", "fi": "EUR en", "gr": "EUR en",
+    "hr": "EUR en", "hu": "EUR en", "ie": "EUR en", "lt": "EUR en", "lu": "EUR en", "lv": "EUR en",
+    "pl": "EUR en", "pt": "EUR en", "ro": "EUR en", "si": "EUR en", "sk": "EUR en",
+    "tw": "TWD zh-Hant", "hk": "HKD zh-Hant", "cn": "CNY zh-Hans",
+}
+_UNIQLO_A = ("us", "jp", "kr")
+_UNIQLO_C = ("tw", "hk", "cn")
+_UNIQLO_B = tuple(c for c in _UNIQLO_MARKETS if c not in _UNIQLO_A + _UNIQLO_C)
+
+
+def _UNIQLO_MARKET_LIST(codes: Sequence[str]) -> str:
+    return ", ".join(
+        f"{c} ({_UNIQLO_MARKETS[c].split()[0]}; {', '.join(_UNIQLO_MARKETS[c].split()[1:])})"
+        for c in codes
+    )
+
+
+_UNIQLO_HELD = (
+    " gb is the United Kingdom (uk accepted); at, bg, cz, ee, fi, gr, hr, hu, ie, lt, lu, lv, pl, "
+    "pt, ro, si and sk are Uniqlo's EU store (EUR, English). Countries with no Uniqlo online "
+    "store (ch, no, nz, mx, tr, ae, il, ru), markets an endpoint does not serve and languages a "
+    "market does not serve (dk da, se sv, us es, jp en, kr en, in hi, my ms) answer 400 before "
+    "anything is charged."
+)
+_UNIQLO_COUNTRY_A = _lit("country", _UNIQLO_A, "Uniqlo market (default 'us'): us, jp or kr.")
+_UNIQLO_COUNTRY_SEARCH = _lit(
+    "country",
+    _UNIQLO_A + _UNIQLO_C,
+    "Uniqlo market (default 'us'): " + _UNIQLO_MARKET_LIST(_UNIQLO_A + _UNIQLO_C) + ".",
+)
+_UNIQLO_COUNTRY_PRODUCT = _lit(
+    "country",
+    _UNIQLO_A + _UNIQLO_B + _UNIQLO_C + ("uk",),
+    "Uniqlo market (default 'us'), with its currency and languages (the first is the "
+    "default): every endpoint on " + _UNIQLO_MARKET_LIST(_UNIQLO_A) + "; search + product on "
+    + _UNIQLO_MARKET_LIST(_UNIQLO_C) + "; product + prices on " + _UNIQLO_MARKET_LIST(_UNIQLO_B)
+    + "." + _UNIQLO_HELD,
+)
+_UNIQLO_PRICES_COUNTRIES = _UNIQLO_A + _UNIQLO_B + ("uk",)
+_UNIQLO_LANGUAGES = (
+    "en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans",
+)
+_UNIQLO_LANGUAGE = _lit(
+    "language",
+    _UNIQLO_LANGUAGES,
+    "Language of the market as Uniqlo offers it (default the local language; the languages "
+    "each market serves are listed under product()'s country). Titles, descriptions and colour "
+    "names come back in it; a language the market does not serve answers 400.",
+)
+_UNIQLO_PRODUCT_ID = (
+    "A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. "
+    "'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn."
+)
+_UNIQLO_PRICE_GROUP = _str("price_group", "Price group (items[].price_group, default '00').")
+_UNIQLO_PAGE = _int("page", "Results page, 1-based (up to 500).")
+_UNIQLO_PAGE_SIZE = _int(
+    "page_size",
+    "Items per page, 1 to 100 (default 24; 48 at most on tw, hk, cn). Uniqlo answers up to "
+    "offset 500.",
+)
+_UNIQLO_SORT_A = _lit(
+    "sort",
+    ("featured", "newest", "price_asc", "price_desc", "top_rated"),
+    "featured (default, Uniqlo's order), newest, price_asc, price_desc or top_rated.",
+)
+_UNIQLO_GENDER = _lit("gender", ("women", "men", "kids", "baby"), "women, men, kids or baby.")
+_UNIQLO_FLAG = _lit(
+    "flag",
+    ("sale", "limited_offer", "new", "new_color", "coming_soon", "online_only"),
+    "Only items Uniqlo flags: sale, limited_offer, new, new_color, coming_soon, online_only "
+    "(jp only).",
+)
+_UNIQLO_CATEGORY_PATH_DOC = (
+    "Category path: 1 to 4 ids (gender, class, category, subcategory), a node's path from "
+    "categories(), comma-joined or as a list. Ids are per market ('22210,23296,23339' is women > "
+    "bottoms > jeans on us)."
+)
+_UNIQLO_LAT = "Latitude of a point in the country (40.758 New York, 35.6595 Tokyo, 37.5636 Seoul)."
+_UNIQLO_LNG = "Longitude (-73.9855 New York, 139.7005 Tokyo, 126.9826 Seoul)."
+_UNIQLO_LIMIT = _int("limit", "Stores, 1 to 10 (default 10).")
+_UNIQLO_PRICES = (
+    " Prices are numbers in the market's own currency, never converted: price is Uniqlo's "
+    "regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or "
+    "limited-time-offer drop only as a flag (promo_price equals price there): on_sale, "
+    "limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; "
+    "Europe and Southeast Asia show promo_price below price. No price history."
+)
+_UNIQLO_IDS = (
+    " Product ids (e.g. E479000-000) are global on uniqlo.com: the same id opens the product in "
+    "every market that sells it. Uniqlo's Greater China sites (tw, hk, cn) use their own codes "
+    "(u0000000055478), not valid elsewhere."
+)
+_UNIQLO_ITEM = (
+    "product_id, price_group, title (in the request language), url, gender, price, promo_price, "
+    "currency, discount_percent, on_sale, limited_offer, price_flags, flags (Uniqlo's raw flag "
+    "codes), colors (code, display_code, name), sizes (code, name), lengths, rating, "
+    "review_count, image, store_only"
+)
+_UNIQLO_LIST = "total, count, page, page_size, has_more, sort, facets"
+_UNIQLO_A_NOTE = (
+    " us, jp and kr only; other markets answer 400 before anything is charged. Every answer "
+    "carries country, language and currency. Failed upstream calls are not charged; a not-found "
+    "is charged."
+)
+_UNIQLO_NOTE = (
+    " Every answer carries country, language and currency. Failed upstream calls are not "
+    "charged; a not-found is charged."
+)
+
 
 def _carrefour_ean(doc: str = "") -> Param:
     return _req(
@@ -11703,6 +11822,384 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=240.0,
     ),
+    # ============================== Uniqlo ===============================
+    # 12 endpoints on /api/v1/uniqlo, 1 credit each; store_stock 2 when resolved from
+    # product_id + color + size; prices 1 per market that answered. us, jp, kr serve every
+    # endpoint; tw, hk, cn search + product; the other storefronts product + prices. Calls can
+    # queue and retry on the backend: 240 s timeout floor everywhere.
+    Endpoint(
+        key="uniqlo_search",
+        namespace="uniqlo",
+        method="search",
+        http="POST",
+        path="/api/v1/uniqlo/search",
+        summary=(
+            "Search Uniqlo's catalogue by keyword. On us, jp, kr: items (" + _UNIQLO_ITEM + "), "
+            + _UNIQLO_LIST + " (colors, sizes, lengths, flags with counts, price ranges, genders "
+            "/ classes / categories) and related_keywords; up to 100 per page; filters gender, "
+            "category_path, flag, color, size, price_min / price_max. On tw (TWD), hk (HKD) and "
+            "cn (CNY), Uniqlo's Greater China catalogue in Chinese: items (product_id u-code, "
+            "style_code, title, url, gender, price, promo_price, max_price, discount_percent, "
+            "on_sale, limited_offer, colors and sizes as codes, rating, review_count, in_stock, "
+            "season, image), total, sort best_selling available, price_min / price_max. Not "
+            "served on Uniqlo's other storefronts (use product() and prices() there)."
+            + _UNIQLO_PRICES + _UNIQLO_IDS + _UNIQLO_NOTE
+        ),
+        params=(
+            _req("query", "Search keywords in the market's language (Chinese on tw, hk, cn), "
+                 "e.g. 'heattech'."),
+            _UNIQLO_COUNTRY_SEARCH,
+            _UNIQLO_LANGUAGE,
+            _UNIQLO_PAGE,
+            _UNIQLO_PAGE_SIZE,
+            _lit(
+                "sort",
+                ("featured", "newest", "price_asc", "price_desc", "top_rated", "best_selling"),
+                "featured (default, Uniqlo's order), newest, price_asc, price_desc, top_rated "
+                "(us, jp, kr), best_selling (tw, hk, cn).",
+            ),
+            _UNIQLO_GENDER,
+            _str_or_list("category_path", _UNIQLO_CATEGORY_PATH_DOC),
+            _UNIQLO_FLAG,
+            _str("color", "Colour code from facets.colors (e.g. 'COL09') or its 2-digit display "
+                 "code ('09')."),
+            _str("size", "Size code from facets.sizes (e.g. 'SMA004' = M, 'INS030' = 30 inch)."),
+            _float("price_min", "Lowest price, in the market's currency."),
+            _float("price_max", "Highest price, in the market's currency."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_product",
+        namespace="uniqlo",
+        method="product",
+        http="POST",
+        path="/api/v1/uniqlo/product",
+        summary=(
+            "One Uniqlo product by product_id or link, on 41 markets: product_id, price_group, "
+            "title, description, information, design_details, composition, washing, care, "
+            "countries_of_origin, gender, category (gender, class, category, subcategory with "
+            "ids), price, promo_price, currency, discount_percent, on_sale, limited_offer, "
+            "price_flags, lowest_price_30d (the 30-day lowest price Uniqlo shows next to a "
+            "discount in Europe), tax, flags, colors (code, name, image), sizes, lengths, rating "
+            "(average, count, fit 1 tight to 5 loose, distribution), review_count, images, "
+            "size_chart_url, tags, best_seller, discontinued. On us, jp, kr also variants "
+            "(l2_id, sku, color, size, length, price, promo_price, price_flags; per-size stock "
+            "is stock()). On tw, hk, cn the Greater China product (variants with per-SKU online "
+            "stock on tw and hk). A product a market does not sell is a charged 404. Ratings are "
+            "Uniqlo's per region: the European markets share one pool. Not available: price "
+            "history, store-level prices, GU (Uniqlo's sister brand)."
+            + _UNIQLO_PRICES + _UNIQLO_IDS + _UNIQLO_NOTE
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=_UNIQLO_PRODUCT_ID + " One of product_id or url.",
+            ),
+            _str(
+                "url",
+                "A Uniqlo product link from any market (https://www.uniqlo.com/<country>/"
+                "<language>/products/<id>/<price group>, or a tw / hk / cn product link): its "
+                "market is used unless country is sent.",
+            ),
+            _UNIQLO_PRICE_GROUP,
+            _UNIQLO_COUNTRY_PRODUCT,
+            _UNIQLO_LANGUAGE,
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_stock",
+        namespace="uniqlo",
+        method="stock",
+        http="POST",
+        path="/api/v1/uniqlo/stock",
+        summary=(
+            "Online stock of every variant of a Uniqlo product (colour x size x length): "
+            "product_id, title, variants (l2_id, sku, color, size, length with code and name, "
+            "status in_stock / low_stock / out_of_stock as Uniqlo states it, status_raw, "
+            "quantity, quantity_capped, back_in_stock, in_transit, sold_online, price, "
+            "promo_price, on_sale, price_flags), variants_total, variants_in_stock. Online "
+            "stock, not store stock (store_stock() answers per store). Uniqlo caps the quantity "
+            "it shows at 11 (quantity_capped true means 11 or more). An unknown product is a "
+            "charged 404." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _req("product_id", _UNIQLO_PRODUCT_ID),
+            _UNIQLO_PRICE_GROUP,
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_store_stock",
+        namespace="uniqlo",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/uniqlo/store-stock",
+        summary=(
+            "Stock of one Uniqlo variant in the stores nearest a point: l2_id, point, stores "
+            "(store_code, name, distance_km, status in_stock / low_stock / out_of_stock as "
+            "Uniqlo states it, status_raw, store_status, order_and_pick, sections; no unit counts "
+            "per store), count, stores_with_stock, total_stores. By l2_id (variants[].l2_id of "
+            "stock() or product()) or by product_id + color + size (+ length), resolved through "
+            "the product's variant list. Store stock, not online stock; many stores answer "
+            "out_of_stock, which is Uniqlo's real answer." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            Param("lat", "float", required=True, doc=_UNIQLO_LAT),
+            Param("lng", "float", required=True, doc=_UNIQLO_LNG),
+            _str("l2_id", "Variant id (variants[].l2_id of stock() or product()), e.g. "
+                 "'08665900'. One of l2_id or product_id + color + size."),
+            _str("product_id", _UNIQLO_PRODUCT_ID + " With color and size, instead of l2_id."),
+            _UNIQLO_PRICE_GROUP,
+            _str("color", "With product_id: colour code (colors[].code, e.g. 'COL67')."),
+            _str("size", "With product_id: size code (sizes[].code, e.g. 'INS028')."),
+            _str("length", "With product_id, when the product comes in lengths: length code "
+                 "(lengths[].code)."),
+            _UNIQLO_LIMIT,
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        one_of=(("l2_id", "product_id"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit with l2_id, 2 with product_id + color + size (the variant lookup, "
+            "then the store stock). credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_stores",
+        namespace="uniqlo",
+        method="stores",
+        http="POST",
+        path="/api/v1/uniqlo/stores",
+        summary=(
+            "Uniqlo stores nearest a point, or one store by store_id: point, stores (store_id, "
+            "store_code, name, address, postal_code, city, region, country, lat, lng, "
+            "distance_km, phone, opening_hours (mon to sun open / close), today, status, "
+            "store_type, open_date, click_and_collect, inventory_shown, pickup_location, "
+            "sections, services, accessibility), count, total (every store of the market), page, "
+            "limit, has_more." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _float("lat", _UNIQLO_LAT + " With lng, instead of store_id."),
+            _float("lng", _UNIQLO_LNG),
+            _str("store_id", "One store by id (stores[].store_id)."),
+            _UNIQLO_LIMIT,
+            _int("page", "Results page, 1-based (up to 100)."),
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        one_of=(("lat", "store_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_reviews",
+        namespace="uniqlo",
+        method="reviews",
+        http="POST",
+        path="/api/v1/uniqlo/reviews",
+        summary=(
+            "Customer reviews of a Uniqlo product: product_id, rating (average, count, fit "
+            "average, distribution 1 to 5), reviews (review_id, rating, title, text, created_at "
+            "ISO, fit 1 tight to 5 loose with fit_label (None when the reviewer gave none), "
+            "purchased_size, purchased_color, height_range, weight_range, age_range, gender, "
+            "shoe_size, helpful_count, incentivized, syndicated), total, count, page, page_size "
+            "(up to 25), has_more, sort. Reviewer names and locations are not returned. Review "
+            "totals are pooled per region as Uniqlo shows them. An unknown product is a charged "
+            "404." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _req("product_id", _UNIQLO_PRODUCT_ID),
+            _int("page", "Results page, 1-based (up to 1000)."),
+            _int("page_size", "Reviews per page, 1 to 25 (default 10)."),
+            _lit(
+                "sort",
+                ("newest", "oldest", "most_helpful", "highest", "lowest"),
+                "newest (default), oldest, most_helpful, highest or lowest.",
+            ),
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_suggestions",
+        namespace="uniqlo",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/uniqlo/suggestions",
+        summary=(
+            "Uniqlo search suggestions for a partial query, in the market's language: "
+            "suggestions (text), categories (id usable in category_path, title, gender and "
+            "parent with ids), features (Uniqlo's feature pages, title and url), count. With no "
+            "query: trending (Uniqlo's trending search words: text, type, url)." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="What the shopper has typed so far, e.g. 'jea'. None: Uniqlo's trending "
+                "search words.",
+            ),
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_category",
+        namespace="uniqlo",
+        method="category",
+        http="POST",
+        path="/api/v1/uniqlo/category",
+        summary=(
+            "Every product of one Uniqlo category path (gender[, class[, category[, "
+            "subcategory]]] ids from categories()), paged and sorted: category_path, items ("
+            + _UNIQLO_ITEM + "), " + _UNIQLO_LIST + ", optional flag."
+            + _UNIQLO_PRICES + _UNIQLO_A_NOTE
+        ),
+        params=(
+            Param("category_path", "Union[str, list[str]]", required=True,
+                  doc=_UNIQLO_CATEGORY_PATH_DOC),
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+            _UNIQLO_PAGE,
+            _UNIQLO_PAGE_SIZE,
+            _UNIQLO_SORT_A,
+            _UNIQLO_FLAG,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_deals",
+        namespace="uniqlo",
+        method="deals",
+        http="POST",
+        path="/api/v1/uniqlo/deals",
+        summary=(
+            "Uniqlo's sale (type sale) or limited-time offers (type limited_offer) of a market, "
+            "optionally for one gender: type, gender, items (" + _UNIQLO_ITEM + ") with "
+            "limited_offer start / end where Uniqlo shows them, " + _UNIQLO_LIST + "."
+            + _UNIQLO_PRICES + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "limited_offer"),
+                "sale (default: items flagged Sale) or limited_offer (items flagged "
+                "Limited-Time Offer).",
+            ),
+            _UNIQLO_GENDER,
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+            _UNIQLO_PAGE,
+            _UNIQLO_PAGE_SIZE,
+            _UNIQLO_SORT_A,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_new_arrivals",
+        namespace="uniqlo",
+        method="new_arrivals",
+        http="POST",
+        path="/api/v1/uniqlo/new-arrivals",
+        summary=(
+            "Items Uniqlo flags New on a market, optionally for one gender: gender, items ("
+            + _UNIQLO_ITEM + "), " + _UNIQLO_LIST + "." + _UNIQLO_PRICES + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _UNIQLO_GENDER,
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+            _UNIQLO_PAGE,
+            _UNIQLO_PAGE_SIZE,
+            _UNIQLO_SORT_A,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_categories",
+        namespace="uniqlo",
+        method="categories",
+        http="POST",
+        path="/api/v1/uniqlo/categories",
+        summary=(
+            "The category tree of a Uniqlo market in its language: nodes (id, name, key, level "
+            "1 gender / 2 class / 3 category / 4 subcategory, gender_id, parent_id, path: the "
+            "ids to pass as category_path to search() or category()), count. Optional gender "
+            "filter and include_subcategories. Ids are per market." + _UNIQLO_A_NOTE
+        ),
+        params=(
+            _UNIQLO_GENDER,
+            _bool("include_subcategories", "Add the subcategory level (a much larger answer). "
+                  "Default False."),
+            _UNIQLO_COUNTRY_A,
+            _UNIQLO_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="uniqlo_prices",
+        namespace="uniqlo",
+        method="prices",
+        http="POST",
+        path="/api/v1/uniqlo/prices",
+        summary=(
+            "Uniqlo prices by country: one uniqlo.com product across up to 10 markets in one "
+            "call (default jp, us, gb, de, fr, kr, au, ca, sg, th): product_id, price_group, "
+            "markets (country, language, currency, available, title, product_id, price, "
+            "promo_price, discount_percent, on_sale, limited_offer, price_flags, "
+            "lowest_price_30d (Europe), tax, url), not_sold (the markets that do not sell it), "
+            "errors (markets that failed, not charged), count. Each price is in that market's "
+            "own currency and never converted. Any of the 38 uniqlo.com markets (us, jp, kr and "
+            "the product + prices storefronts listed under product()'s country); Greater China "
+            "(tw, hk, cn) uses its own product codes and is not offered here."
+            + _UNIQLO_PRICES + _UNIQLO_IDS
+        ),
+        params=(
+            _req("product_id", "A uniqlo.com product id (E + 6 digits + -000, e.g. "
+                 "'E479000-000'), the same in every market."),
+            _UNIQLO_PRICE_GROUP,
+            _lit_list(
+                "countries",
+                _UNIQLO_PRICES_COUNTRIES,
+                "1 to 10 markets (default jp, us, gb, de, fr, kr, au, ca, sg, th); gb (or uk) "
+                "for the United Kingdom.",
+            ),
+            _lit(
+                "language",
+                _UNIQLO_LANGUAGES,
+                "Language for the titles where the market serves it (else the market's "
+                "default).",
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit per market that answered (a market that does not sell the product "
+            "answers too); failed markets are not charged. credits_used in the response is the "
+            "exact charge."
+        ),
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -18731,6 +19228,7 @@ NAMESPACES: tuple[str, ...] = (
     "asos",
     "mercari",
     "bolcom",
+    "uniqlo",
 )
 
 

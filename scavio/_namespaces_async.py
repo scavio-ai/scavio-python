@@ -95,6 +95,7 @@ __all__ = [
     "_AsyncAsosNamespace",
     "_AsyncMercariNamespace",
     "_AsyncBolcomNamespace",
+    "_AsyncUniqloNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -14950,3 +14951,335 @@ class _AsyncBolcomNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("bolcom_campaign", {"campaign_id": campaign_id, "url": url, "country": country, "language": language, "page": page, "sort": sort}, extra)
+
+class _AsyncUniqloNamespace:
+    """Uniqlo search, product, online stock, store stock, stores, reviews, suggestions, category, deals, new arrivals, categories and prices by country endpoints: every endpoint on us, jp and kr, search + product on tw, hk and cn, product + prices on 35 more storefronts across Europe, Asia-Pacific and Canada."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "jp", "kr", "tw", "hk", "cn"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["featured", "newest", "price_asc", "price_desc", "top_rated", "best_selling"]] = None,
+        gender: Optional[Literal["women", "men", "kids", "baby"]] = None,
+        category_path: Optional[Union[str, list[str]]] = None,
+        flag: Optional[Literal["sale", "limited_offer", "new", "new_color", "coming_soon", "online_only"]] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Uniqlo's catalogue by keyword. On us, jp, kr: items (product_id, price_group, title (in the request language), url, gender, price, promo_price, currency, discount_percent, on_sale, limited_offer, price_flags, flags (Uniqlo's raw flag codes), colors (code, display_code, name), sizes (code, name), lengths, rating, review_count, image, store_only), total, count, page, page_size, has_more, sort, facets (colors, sizes, lengths, flags with counts, price ranges, genders / classes / categories) and related_keywords; up to 100 per page; filters gender, category_path, flag, color, size, price_min / price_max. On tw (TWD), hk (HKD) and cn (CNY), Uniqlo's Greater China catalogue in Chinese: items (product_id u-code, style_code, title, url, gender, price, promo_price, max_price, discount_percent, on_sale, limited_offer, colors and sizes as codes, rating, review_count, in_stock, season, image), total, sort best_selling available, price_min / price_max. Not served on Uniqlo's other storefronts (use product() and prices() there). Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. Product ids (e.g. E479000-000) are global on uniqlo.com: the same id opens the product in every market that sells it. Uniqlo's Greater China sites (tw, hk, cn) use their own codes (u0000000055478), not valid elsewhere. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords in the market's language (Chinese on tw, hk, cn), e.g. 'heattech'.
+            country: Uniqlo market (default 'us'): us (USD; en), jp (JPY; ja), kr (KRW; ko), tw (TWD; zh-Hant), hk (HKD; zh-Hant), cn (CNY; zh-Hans).
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            page: Results page, 1-based (up to 500).
+            page_size: Items per page, 1 to 100 (default 24; 48 at most on tw, hk, cn). Uniqlo answers up to offset 500.
+            sort: featured (default, Uniqlo's order), newest, price_asc, price_desc, top_rated (us, jp, kr), best_selling (tw, hk, cn).
+            gender: women, men, kids or baby.
+            category_path: Category path: 1 to 4 ids (gender, class, category, subcategory), a node's path from categories(), comma-joined or as a list. Ids are per market ('22210,23296,23339' is women > bottoms > jeans on us).
+            flag: Only items Uniqlo flags: sale, limited_offer, new, new_color, coming_soon, online_only (jp only).
+            color: Colour code from facets.colors (e.g. 'COL09') or its 2-digit display code ('09').
+            size: Size code from facets.sizes (e.g. 'SMA004' = M, 'INS030' = 30 inch).
+            price_min: Lowest price, in the market's currency.
+            price_max: Highest price, in the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_search", {"query": query, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "gender": gender, "category_path": category_path, "flag": flag, "color": color, "size": size, "price_min": price_min, "price_max": price_max}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        price_group: Optional[str] = None,
+        country: Optional[Literal["us", "jp", "kr", "au", "be", "ca", "de", "dk", "es", "fr", "gb", "id", "in", "it", "my", "nl", "ph", "se", "sg", "th", "vn", "at", "bg", "cz", "ee", "fi", "gr", "hr", "hu", "ie", "lt", "lu", "lv", "pl", "pt", "ro", "si", "sk", "tw", "hk", "cn", "uk"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Uniqlo product by product_id or link, on 41 markets: product_id, price_group, title, description, information, design_details, composition, washing, care, countries_of_origin, gender, category (gender, class, category, subcategory with ids), price, promo_price, currency, discount_percent, on_sale, limited_offer, price_flags, lowest_price_30d (the 30-day lowest price Uniqlo shows next to a discount in Europe), tax, flags, colors (code, name, image), sizes, lengths, rating (average, count, fit 1 tight to 5 loose, distribution), review_count, images, size_chart_url, tags, best_seller, discontinued. On us, jp, kr also variants (l2_id, sku, color, size, length, price, promo_price, price_flags; per-size stock is stock()). On tw, hk, cn the Greater China product (variants with per-SKU online stock on tw and hk). A product a market does not sell is a charged 404. Ratings are Uniqlo's per region: the European markets share one pool. Not available: price history, store-level prices, GU (Uniqlo's sister brand). Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. Product ids (e.g. E479000-000) are global on uniqlo.com: the same id opens the product in every market that sells it. Uniqlo's Greater China sites (tw, hk, cn) use their own codes (u0000000055478), not valid elsewhere. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. 'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn. One of product_id or url.
+            url: A Uniqlo product link from any market (https://www.uniqlo.com/<country>/<language>/products/<id>/<price group>, or a tw / hk / cn product link): its market is used unless country is sent.
+            price_group: Price group (items[].price_group, default '00').
+            country: Uniqlo market (default 'us'), with its currency and languages (the first is the default): every endpoint on us (USD; en), jp (JPY; ja), kr (KRW; ko); search + product on tw (TWD; zh-Hant), hk (HKD; zh-Hant), cn (CNY; zh-Hans); product + prices on au (AUD; en), be (EUR; nl, fr, en), ca (CAD; en, fr), de (EUR; de, en), dk (DKK; en), es (EUR; es, en), fr (EUR; fr, en), gb (GBP; en), id (IDR; id, en), in (INR; en), it (EUR; it, en), my (MYR; en), nl (EUR; nl, en), ph (PHP; en), se (SEK; en), sg (SGD; en), th (THB; th, en), vn (VND; vi, en), at (EUR; en), bg (EUR; en), cz (EUR; en), ee (EUR; en), fi (EUR; en), gr (EUR; en), hr (EUR; en), hu (EUR; en), ie (EUR; en), lt (EUR; en), lu (EUR; en), lv (EUR; en), pl (EUR; en), pt (EUR; en), ro (EUR; en), si (EUR; en), sk (EUR; en). gb is the United Kingdom (uk accepted); at, bg, cz, ee, fi, gr, hr, hu, ie, lt, lu, lv, pl, pt, ro, si and sk are Uniqlo's EU store (EUR, English). Countries with no Uniqlo online store (ch, no, nz, mx, tr, ae, il, ru), markets an endpoint does not serve and languages a market does not serve (dk da, se sv, us es, jp en, kr en, in hi, my ms) answer 400 before anything is charged.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_product", {"product_id": product_id, "url": url, "price_group": price_group, "country": country, "language": language}, extra)
+
+    async def stock(
+        self,
+        product_id: str,
+        *,
+        price_group: Optional[str] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online stock of every variant of a Uniqlo product (colour x size x length): product_id, title, variants (l2_id, sku, color, size, length with code and name, status in_stock / low_stock / out_of_stock as Uniqlo states it, status_raw, quantity, quantity_capped, back_in_stock, in_transit, sold_online, price, promo_price, on_sale, price_flags), variants_total, variants_in_stock. Online stock, not store stock (store_stock() answers per store). Uniqlo caps the quantity it shows at 11 (quantity_capped true means 11 or more). An unknown product is a charged 404. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. 'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn.
+            price_group: Price group (items[].price_group, default '00').
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_stock", {"product_id": product_id, "price_group": price_group, "country": country, "language": language}, extra)
+
+    async def store_stock(
+        self,
+        lat: float,
+        lng: float,
+        *,
+        l2_id: Optional[str] = None,
+        product_id: Optional[str] = None,
+        price_group: Optional[str] = None,
+        color: Optional[str] = None,
+        size: Optional[str] = None,
+        length: Optional[str] = None,
+        limit: Optional[int] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Stock of one Uniqlo variant in the stores nearest a point: l2_id, point, stores (store_code, name, distance_km, status in_stock / low_stock / out_of_stock as Uniqlo states it, status_raw, store_status, order_and_pick, sections; no unit counts per store), count, stores_with_stock, total_stores. By l2_id (variants[].l2_id of stock() or product()) or by product_id + color + size (+ length), resolved through the product's variant list. Store stock, not online stock; many stores answer out_of_stock, which is Uniqlo's real answer. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit with l2_id, 2 with product_id + color + size (the variant lookup, then
+        the store stock). credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            lat: Latitude of a point in the country (40.758 New York, 35.6595 Tokyo, 37.5636 Seoul).
+            lng: Longitude (-73.9855 New York, 139.7005 Tokyo, 126.9826 Seoul).
+            l2_id: Variant id (variants[].l2_id of stock() or product()), e.g. '08665900'. One of l2_id or product_id + color + size.
+            product_id: A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. 'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn. With color and size, instead of l2_id.
+            price_group: Price group (items[].price_group, default '00').
+            color: With product_id: colour code (colors[].code, e.g. 'COL67').
+            size: With product_id: size code (sizes[].code, e.g. 'INS028').
+            length: With product_id, when the product comes in lengths: length code (lengths[].code).
+            limit: Stores, 1 to 10 (default 10).
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_store_stock", {"lat": lat, "lng": lng, "l2_id": l2_id, "product_id": product_id, "price_group": price_group, "color": color, "size": size, "length": length, "limit": limit, "country": country, "language": language}, extra)
+
+    async def stores(
+        self,
+        *,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        store_id: Optional[str] = None,
+        limit: Optional[int] = None,
+        page: Optional[int] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Uniqlo stores nearest a point, or one store by store_id: point, stores (store_id, store_code, name, address, postal_code, city, region, country, lat, lng, distance_km, phone, opening_hours (mon to sun open / close), today, status, store_type, open_date, click_and_collect, inventory_shown, pickup_location, sections, services, accessibility), count, total (every store of the market), page, limit, has_more. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            lat: Latitude of a point in the country (40.758 New York, 35.6595 Tokyo, 37.5636 Seoul). With lng, instead of store_id.
+            lng: Longitude (-73.9855 New York, 139.7005 Tokyo, 126.9826 Seoul).
+            store_id: One store by id (stores[].store_id).
+            limit: Stores, 1 to 10 (default 10).
+            page: Results page, 1-based (up to 100).
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_stores", {"lat": lat, "lng": lng, "store_id": store_id, "limit": limit, "page": page, "country": country, "language": language}, extra)
+
+    async def reviews(
+        self,
+        product_id: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest", "most_helpful", "highest", "lowest"]] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of a Uniqlo product: product_id, rating (average, count, fit average, distribution 1 to 5), reviews (review_id, rating, title, text, created_at ISO, fit 1 tight to 5 loose with fit_label (None when the reviewer gave none), purchased_size, purchased_color, height_range, weight_range, age_range, gender, shoe_size, helpful_count, incentivized, syndicated), total, count, page, page_size (up to 25), has_more, sort. Reviewer names and locations are not returned. Review totals are pooled per region as Uniqlo shows them. An unknown product is a charged 404. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. 'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn.
+            page: Results page, 1-based (up to 1000).
+            page_size: Reviews per page, 1 to 25 (default 10).
+            sort: newest (default), oldest, most_helpful, highest or lowest.
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_reviews", {"product_id": product_id, "page": page, "page_size": page_size, "sort": sort, "country": country, "language": language}, extra)
+
+    async def suggestions(
+        self,
+        query: Optional[str] = None,
+        *,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Uniqlo search suggestions for a partial query, in the market's language: suggestions (text), categories (id usable in category_path, title, gender and parent with ids), features (Uniqlo's feature pages, title and url), count. With no query: trending (Uniqlo's trending search words: text, type, url). us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'jea'. None: Uniqlo's trending search words.
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    async def category(
+        self,
+        category_path: Union[str, list[str]],
+        *,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["featured", "newest", "price_asc", "price_desc", "top_rated"]] = None,
+        flag: Optional[Literal["sale", "limited_offer", "new", "new_color", "coming_soon", "online_only"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every product of one Uniqlo category path (gender[, class[, category[, subcategory]]] ids from categories()), paged and sorted: category_path, items (product_id, price_group, title (in the request language), url, gender, price, promo_price, currency, discount_percent, on_sale, limited_offer, price_flags, flags (Uniqlo's raw flag codes), colors (code, display_code, name), sizes (code, name), lengths, rating, review_count, image, store_only), total, count, page, page_size, has_more, sort, facets, optional flag. Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_path: Category path: 1 to 4 ids (gender, class, category, subcategory), a node's path from categories(), comma-joined or as a list. Ids are per market ('22210,23296,23339' is women > bottoms > jeans on us).
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            page: Results page, 1-based (up to 500).
+            page_size: Items per page, 1 to 100 (default 24; 48 at most on tw, hk, cn). Uniqlo answers up to offset 500.
+            sort: featured (default, Uniqlo's order), newest, price_asc, price_desc or top_rated.
+            flag: Only items Uniqlo flags: sale, limited_offer, new, new_color, coming_soon, online_only (jp only).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_category", {"category_path": category_path, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort, "flag": flag}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["sale", "limited_offer"]] = None,
+        gender: Optional[Literal["women", "men", "kids", "baby"]] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["featured", "newest", "price_asc", "price_desc", "top_rated"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Uniqlo's sale (type sale) or limited-time offers (type limited_offer) of a market, optionally for one gender: type, gender, items (product_id, price_group, title (in the request language), url, gender, price, promo_price, currency, discount_percent, on_sale, limited_offer, price_flags, flags (Uniqlo's raw flag codes), colors (code, display_code, name), sizes (code, name), lengths, rating, review_count, image, store_only) with limited_offer start / end where Uniqlo shows them, total, count, page, page_size, has_more, sort, facets. Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: sale (default: items flagged Sale) or limited_offer (items flagged Limited-Time Offer).
+            gender: women, men, kids or baby.
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            page: Results page, 1-based (up to 500).
+            page_size: Items per page, 1 to 100 (default 24; 48 at most on tw, hk, cn). Uniqlo answers up to offset 500.
+            sort: featured (default, Uniqlo's order), newest, price_asc, price_desc or top_rated.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_deals", {"type": type, "gender": gender, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    async def new_arrivals(
+        self,
+        *,
+        gender: Optional[Literal["women", "men", "kids", "baby"]] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["featured", "newest", "price_asc", "price_desc", "top_rated"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Items Uniqlo flags New on a market, optionally for one gender: gender, items (product_id, price_group, title (in the request language), url, gender, price, promo_price, currency, discount_percent, on_sale, limited_offer, price_flags, flags (Uniqlo's raw flag codes), colors (code, display_code, name), sizes (code, name), lengths, rating, review_count, image, store_only), total, count, page, page_size, has_more, sort, facets. Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            gender: women, men, kids or baby.
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            page: Results page, 1-based (up to 500).
+            page_size: Items per page, 1 to 100 (default 24; 48 at most on tw, hk, cn). Uniqlo answers up to offset 500.
+            sort: featured (default, Uniqlo's order), newest, price_asc, price_desc or top_rated.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_new_arrivals", {"gender": gender, "country": country, "language": language, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    async def categories(
+        self,
+        *,
+        gender: Optional[Literal["women", "men", "kids", "baby"]] = None,
+        include_subcategories: Optional[bool] = None,
+        country: Optional[Literal["us", "jp", "kr"]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of a Uniqlo market in its language: nodes (id, name, key, level 1 gender / 2 class / 3 category / 4 subcategory, gender_id, parent_id, path: the ids to pass as category_path to search() or category()), count. Optional gender filter and include_subcategories. Ids are per market. us, jp and kr only; other markets answer 400 before anything is charged. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            gender: women, men, kids or baby.
+            include_subcategories: Add the subcategory level (a much larger answer). Default False.
+            country: Uniqlo market (default 'us'): us, jp or kr.
+            language: Language of the market as Uniqlo offers it (default the local language; the languages each market serves are listed under product()'s country). Titles, descriptions and colour names come back in it; a language the market does not serve answers 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_categories", {"gender": gender, "include_subcategories": include_subcategories, "country": country, "language": language}, extra)
+
+    async def prices(
+        self,
+        product_id: str,
+        *,
+        price_group: Optional[str] = None,
+        countries: Optional[list[Literal["us", "jp", "kr", "au", "be", "ca", "de", "dk", "es", "fr", "gb", "id", "in", "it", "my", "nl", "ph", "se", "sg", "th", "vn", "at", "bg", "cz", "ee", "fi", "gr", "hr", "hu", "ie", "lt", "lu", "lv", "pl", "pt", "ro", "si", "sk", "uk"]]] = None,
+        language: Optional[Literal["en", "ja", "ko", "de", "es", "fr", "id", "it", "nl", "th", "vi", "zh-Hant", "zh-Hans"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Uniqlo prices by country: one uniqlo.com product across up to 10 markets in one call (default jp, us, gb, de, fr, kr, au, ca, sg, th): product_id, price_group, markets (country, language, currency, available, title, product_id, price, promo_price, discount_percent, on_sale, limited_offer, price_flags, lowest_price_30d (Europe), tax, url), not_sold (the markets that do not sell it), errors (markets that failed, not charged), count. Each price is in that market's own currency and never converted. Any of the 38 uniqlo.com markets (us, jp, kr and the product + prices storefronts listed under product()'s country); Greater China (tw, hk, cn) uses its own product codes and is not offered here. Prices are numbers in the market's own currency, never converted: price is Uniqlo's regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or limited-time-offer drop only as a flag (promo_price equals price there): on_sale, limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; Europe and Southeast Asia show promo_price below price. No price history. Product ids (e.g. E479000-000) are global on uniqlo.com: the same id opens the product in every market that sells it. Uniqlo's Greater China sites (tw, hk, cn) use their own codes (u0000000055478), not valid elsewhere.
+
+        Costs 1 credit per market that answered (a market that does not sell the product answers
+        too); failed markets are not charged. credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            product_id: A uniqlo.com product id (E + 6 digits + -000, e.g. 'E479000-000'), the same in every market.
+            price_group: Price group (items[].price_group, default '00').
+            countries: 1 to 10 markets (default jp, us, gb, de, fr, kr, au, ca, sg, th); gb (or uk) for the United Kingdom.
+            language: Language for the titles where the market serves it (else the market's default).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uniqlo_prices", {"product_id": product_id, "price_group": price_group, "countries": countries, "language": language}, extra)

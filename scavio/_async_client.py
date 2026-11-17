@@ -85,6 +85,7 @@ from ._namespaces_async import (
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
     _AsyncUltaNamespace,
+    _AsyncUniqloNamespace,
     _AsyncVintedNamespace,
     _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
@@ -236,6 +237,7 @@ class AsyncScavioClient:
         self.asos = _AsyncAsosNamespace(self)
         self.mercari = _AsyncMercariNamespace(self)
         self.bolcom = _AsyncBolcomNamespace(self)
+        self.uniqlo = _AsyncUniqloNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

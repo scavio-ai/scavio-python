@@ -626,6 +626,8 @@ BODY_PRICED_KEYS = {
     "ashley_search",
     "ashley_product",
     "bolcom_product",
+    "uniqlo_store_stock",
+    "uniqlo_prices",
 }
 
 
@@ -5115,3 +5117,105 @@ def test_bolcom_credits_paths_and_wire(monkeypatch):
         bolcom.seller_products()
     with pytest.raises(ScavioError):
         bolcom.campaign()
+
+
+def test_uniqlo_credits_paths_and_wire(monkeypatch):
+    """uniqlo (0.67.0): 12 endpoints on /api/v1/uniqlo, 1 credit each, 240 s floor.
+
+    store_stock 2 when resolved from product_id + color + size; prices 1 per market that
+    answered. us / jp / kr serve every endpoint; tw / hk / cn search + product; 35 more
+    storefronts product + prices (38 prices markets, 41 product markets, uk alias of gb).
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "uniqlo"}
+    assert sorted(eps) == [
+        "categories", "category", "deals", "new_arrivals", "prices", "product", "reviews",
+        "search", "stock", "store_stock", "stores", "suggestions",
+    ]
+    a_only = {"stock", "store_stock", "stores", "reviews", "suggestions", "category", "deals",
+              "new_arrivals", "categories"}
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/uniqlo/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1, ep.key
+        params = {p.name: p for p in ep.params}
+        if m in a_only:
+            assert params["country"].annotation == 'Optional[Literal["us", "jp", "kr"]]', m
+    search_c = {p.name: p for p in eps["search"].params}["country"].annotation
+    assert search_c == 'Optional[Literal["us", "jp", "kr", "tw", "hk", "cn"]]'
+    product_c = {p.name: p for p in eps["product"].params}["country"].annotation
+    assert product_c.count('"') // 2 == 42  # 41 markets + the uk alias
+    assert '"ch"' not in product_c and '"mx"' not in product_c
+    prices_c = {p.name: p for p in eps["prices"].params}["countries"].annotation
+    assert prices_c.count('"') // 2 == 39  # 38 markets + the uk alias
+    assert '"tw"' not in prices_c and '"cn"' not in prices_c and '"hk"' not in prices_c
+    assert "2 with product_id" in eps["store_stock"].credits_note
+    assert "per market" in eps["prices"].credits_note
+    assert eps["product"].one_of == (("product_id", "url"),)
+    assert eps["store_stock"].one_of == (("l2_id", "product_id"),)
+    assert eps["stores"].one_of == (("lat", "store_id"),)
+    search_sort = {p.name: p for p in eps["search"].params}["sort"].annotation
+    assert '"best_selling"' in search_sort and '"top_rated"' in search_sort
+    for m in ("category", "deals", "new_arrivals"):
+        sort = {p.name: p for p in eps[m].params}["sort"].annotation
+        assert '"best_selling"' not in sort, m
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    uniqlo = client.uniqlo
+    uniqlo.search("heattech")
+    uniqlo.search("牛仔褲", country="tw", sort="best_selling", page_size=48)
+    uniqlo.product("E479000-000", country="de", language="de")
+    uniqlo.product(url="https://www.uniqlo.com/us/en/products/E479000-000/00")
+    uniqlo.stock("E479000-000")
+    uniqlo.store_stock(40.758, -73.9855, l2_id="08665900")
+    uniqlo.store_stock(35.6595, 139.7005, product_id="E479000-000", color="COL04",
+                       size="INS022", country="jp")
+    uniqlo.stores(lat=37.5636, lng=126.9826, country="kr", limit=5)
+    uniqlo.reviews("E479000-000", sort="most_helpful", page_size=25)
+    uniqlo.suggestions()
+    uniqlo.category(["22210", "23296", "23339"], flag="sale")
+    uniqlo.deals(type="limited_offer", gender="women")
+    uniqlo.new_arrivals(country="jp")
+    uniqlo.categories(include_subcategories=True)
+    uniqlo.prices("E479000-000", countries=["jp", "us", "uk"])
+    base = "/api/v1/uniqlo/"
+    assert seen == [
+        (base + "search", {"query": "heattech"}, 240.0),
+        (base + "search", {"query": "牛仔褲", "country": "tw", "page_size": 48,
+                           "sort": "best_selling"}, 240.0),
+        (base + "product", {"product_id": "E479000-000", "country": "de", "language": "de"},
+         240.0),
+        (base + "product", {"url": "https://www.uniqlo.com/us/en/products/E479000-000/00"},
+         240.0),
+        (base + "stock", {"product_id": "E479000-000"}, 240.0),
+        (base + "store-stock", {"lat": 40.758, "lng": -73.9855, "l2_id": "08665900"}, 240.0),
+        (
+            base + "store-stock",
+            {"lat": 35.6595, "lng": 139.7005, "product_id": "E479000-000", "color": "COL04",
+             "size": "INS022", "country": "jp"},
+            240.0,
+        ),
+        (base + "stores", {"lat": 37.5636, "lng": 126.9826, "limit": 5, "country": "kr"}, 240.0),
+        (base + "reviews", {"product_id": "E479000-000", "page_size": 25, "sort": "most_helpful"},
+         240.0),
+        (base + "suggestions", {}, 240.0),
+        (base + "category", {"category_path": ["22210", "23296", "23339"], "flag": "sale"},
+         240.0),
+        (base + "deals", {"type": "limited_offer", "gender": "women"}, 240.0),
+        (base + "new-arrivals", {"country": "jp"}, 240.0),
+        (base + "categories", {"include_subcategories": True}, 240.0),
+        (base + "prices", {"product_id": "E479000-000", "countries": ["jp", "us", "uk"]}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        uniqlo.product()
+    with pytest.raises(ScavioError):
+        uniqlo.store_stock(40.758, -73.9855)
+    with pytest.raises(ScavioError):
+        uniqlo.stores()

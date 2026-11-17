@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 86 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 87 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -29,6 +29,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
 | Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
+| Uniqlo Prices by Country, Online and Store Stock by Size, Reviews with Fit and Limited Offers (41 markets; 12 endpoints) | Yes | No | No | No |
 | ASOS Prices by Country and Currency, Online Stock by Size, Reviews by Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
@@ -3417,6 +3418,95 @@ topics. Deal products carry `seller_id` only. Not available: search
 suggestions, review paging, seller review texts, price history or 30-day
 lowest price, pickup points, bol Select member prices and a variant selector.
 Failed calls are not charged; a not-found is charged.
+
+### 56. Fashion -- Uniqlo prices by country, stock by size online and in stores, reviews with fit
+
+Uniqlo in 41 markets. Namespace `uniqlo`, 12 endpoints: `search`,
+`product`, `stock`, `store_stock`, `stores`, `reviews`, `suggestions`,
+`category`, `deals`, `new_arrivals`, `categories`, `prices`. Pick the market
+with `country` (default `us`) and the language with `language` (default the
+market's local language). 1 credit per call; `store_stock` is 2 when resolved
+from `product_id` + `color` + `size` (1 with `l2_id`), and `prices` is 1 per
+market that answered. The request timeout is raised to at least 240s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+uniqlo = client.uniqlo
+
+# --- Uniqlo prices by country: one product id in up to 10 markets per call, each in its own currency.
+p = uniqlo.prices("E479000-000")["data"]  # default jp, us, gb, de, fr, kr, au, ca, sg, th
+for m in p["markets"]:
+    print(m["country"], m["currency"], m["price"], m["promo_price"], m["on_sale"], m["title"])
+print("not sold in:", p["not_sold"])
+
+# --- On us, jp and kr a sale or limited-time offer is a FLAG: promo_price equals price there.
+prod = uniqlo.product("E479000-000")["data"]
+print(prod["title"], prod["price"], prod["promo_price"], prod["limited_offer"], prod["price_flags"])
+
+# --- The same id on a European storefront, in its own language.
+de = uniqlo.product("E479000-000", country="de", language="de")["data"]
+
+# --- Online stock per colour x size, then one variant in the stores near a point.
+st = uniqlo.stock("E479000-000")["data"]
+print(st["variants_in_stock"], "/", st["variants_total"])
+v = st["variants"][0]
+print(v["l2_id"], v["color"]["name"], v["size"]["name"], v["status"], v["quantity"], v["quantity_capped"])
+near = uniqlo.store_stock(40.758, -73.9855, l2_id="08665900")["data"]  # 1 credit
+print(near["stores_with_stock"], "of", near["total_stores"])
+same = uniqlo.store_stock(40.758, -73.9855, product_id="E479000-000", color="COL04", size="INS022")  # 2 credits
+
+# --- Reviews with fit (1 tight .. 5 loose) and the purchased size.
+rev = uniqlo.reviews("E479000-000", sort="most_helpful")["data"]
+print(rev["rating"])
+for r in rev["reviews"]:
+    print(r["rating"], r["fit"], r["fit_label"], r["purchased_size"], r["height_range"], r["title"])
+
+# --- Search, the category tree, one category, deals, new arrivals, stores and suggestions.
+res = uniqlo.search("heattech", sort="price_asc")["data"]
+print(res["total"], [(i["product_id"], i["title"], i["price"]) for i in res["items"][:3]])
+tree = uniqlo.categories(gender="women")["data"]
+jeans = uniqlo.category("22210,23296,23339")["data"]
+offers = uniqlo.deals(type="limited_offer")["data"]
+new = uniqlo.new_arrivals(country="jp", gender="men")["data"]
+stores = uniqlo.stores(lat=40.758, lng=-73.9855)["data"]
+print(uniqlo.suggestions("jea")["data"]["suggestions"])
+
+# --- Greater China (tw, hk, cn): search + product, with Uniqlo's own codes there.
+tw = uniqlo.search("牛仔褲", country="tw")["data"]
+twp = uniqlo.product("u0000000055478", country="tw")["data"]
+```
+
+Markets by endpoint:
+- **Every endpoint:** us (USD, en), jp (JPY, ja), kr (KRW, ko).
+- **`search` + `product`:** tw (TWD), hk (HKD), cn (CNY), Uniqlo's Greater
+  China sites, in Chinese, with their own product codes (not valid elsewhere).
+- **`product` + `prices`:** au, be (nl, fr, en), ca (en, fr), de, dk (en), es,
+  fr, gb (GBP; `uk` accepted), id, in, it, my, nl, ph, se (en), sg, th, vn, and
+  Uniqlo's EU store (EUR, English) for at, bg, cz, ee, fi, gr, hr, hu, ie, lt,
+  lu, lv, pl, pt, ro, si and sk.
+
+Countries with no Uniqlo online store (ch, no, nz, mx, tr, ae, il, ru), a
+market an endpoint does not serve and a language a market does not serve
+answer 400 before anything is charged. The full list with currencies and
+languages is in `product()`'s `country` docstring.
+
+Product ids (`E479000-000`) are global on uniqlo.com, so `prices` compares
+one id across markets in a single call. Prices are numbers in the market's
+own currency, never converted. On us, jp and kr Uniqlo shows a sale or
+limited-time-offer drop only as a flag: `promo_price` equals `price` there,
+and `on_sale`, `limited_offer` and `price_flags` (with start and end dates)
+carry it; Europe and Southeast Asia show `promo_price` below `price`.
+`stock` is online stock per variant (Uniqlo caps the quantity it shows at
+11); `store_stock` is the status per store near a point, with no unit counts,
+and many stores answer `out_of_stock`, which is Uniqlo's real answer. Search
+sorts are featured, newest, price_asc, price_desc and top_rated on us, jp,
+kr, and best_selling instead of top_rated on tw, hk, cn. Review totals are
+pooled per region (the European markets share one pool); reviews carry no
+reviewer names or locations. No price history (poll `prices` and store your
+own), no store-level prices, and GU is not covered. Failed calls are not
+charged; a not-found is charged.
 
 ## Error Handling
 

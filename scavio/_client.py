@@ -83,6 +83,7 @@ from ._namespaces_sync import (
     _TripadvisorNamespace,
     _TrustpilotNamespace,
     _UltaNamespace,
+    _UniqloNamespace,
     _VintedNamespace,
     _WalgreensNamespace,
     _WalmartNamespace,
@@ -241,6 +242,7 @@ class ScavioClient:
         self.asos = _AsosNamespace(self)
         self.mercari = _MercariNamespace(self)
         self.bolcom = _BolcomNamespace(self)
+        self.uniqlo = _UniqloNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
