@@ -2294,7 +2294,11 @@ _UNIQLO_PRODUCT_ID = (
     "A Uniqlo product id (items[].product_id): E + 6 digits + -000 on uniqlo.com (e.g. "
     "'E479000-000'), the same in every market; u + 13 digits on tw, hk and cn."
 )
-_UNIQLO_PRICE_GROUP = _str("price_group", "Price group (items[].price_group, default '00').")
+_UNIQLO_PRICE_GROUP = _str(
+    "price_group",
+    "Price group (items[].price_group, default '00' = Uniqlo's regular price list; '01' is "
+    "mostly the Select Colors/Sizes Only sale price search lists for some colours / sizes).",
+)
 _UNIQLO_PAGE = _int("page", "Results page, 1-based (up to 500).")
 _UNIQLO_PAGE_SIZE = _int(
     "page_size",
@@ -2323,10 +2327,24 @@ _UNIQLO_LNG = "Longitude (-73.9855 New York, 139.7005 Tokyo, 126.9826 Seoul)."
 _UNIQLO_LIMIT = _int("limit", "Stores, 1 to 10 (default 10).")
 _UNIQLO_PRICES = (
     " Prices are numbers in the market's own currency, never converted: price is Uniqlo's "
-    "regular price, promo_price its promotional price. On us, jp and kr Uniqlo shows a sale or "
-    "limited-time-offer drop only as a flag (promo_price equals price there): on_sale, "
-    "limited_offer (start, end) and price_flags (code, name, start, end, ISO dates) carry it; "
-    "Europe and Southeast Asia show promo_price below price. No price history."
+    "regular price, promo_price its promotional price. On us, jp, kr and ca (and on some items "
+    "sg, my and in) Uniqlo marks a drop with flags only, so promo_price equals price; in Europe, "
+    "Australia and most of Southeast Asia promo_price is below price. on_sale, limited_offer and "
+    "price_flags (code, name, start, end, ISO dates) carry the flags. Only a limited-time offer "
+    "has a window: quote Uniqlo's own label in price_flags.name (e.g. 'until 11/18'), not a date "
+    "read from end; a sale flag carries a start but no end, and Select Colors/Sizes Only "
+    "carries no dates. No price history."
+)
+_UNIQLO_PRICE_GROUPS = (
+    " price_group: product and prices default to 00, Uniqlo's regular price list. Search can "
+    "list the same product_id a second time in price group 01, mostly Uniqlo's Select "
+    "Colors/Sizes Only sale price for some colours / sizes (us E471601-000: 00 at 29.9, 01 at "
+    "19.9); pass price_group '01' to product() to read that price and the colours / sizes it "
+    "covers. prices() compares group 00 unless price_group is sent."
+)
+_UNIQLO_GU = (
+    " GU is a separate brand and not a separate platform here; Uniqlo's own listings can "
+    "include GU collaboration items (kr limited offers did)."
 )
 _UNIQLO_IDS = (
     " Product ids (e.g. E479000-000) are global on uniqlo.com: the same id opens the product in "
@@ -11843,7 +11861,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "on_sale, limited_offer, colors and sizes as codes, rating, review_count, in_stock, "
             "season, image), total, sort best_selling available, price_min / price_max. Not "
             "served on Uniqlo's other storefronts (use product() and prices() there)."
-            + _UNIQLO_PRICES + _UNIQLO_IDS + _UNIQLO_NOTE
+            + _UNIQLO_PRICES + _UNIQLO_PRICE_GROUPS + _UNIQLO_IDS + _UNIQLO_NOTE
         ),
         params=(
             _req("query", "Search keywords in the market's language (Chinese on tw, hk, cn), "
@@ -11889,8 +11907,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "is stock()). On tw, hk, cn the Greater China product (variants with per-SKU online "
             "stock on tw and hk). A product a market does not sell is a charged 404. Ratings are "
             "Uniqlo's per region: the European markets share one pool. Not available: price "
-            "history, store-level prices, GU (Uniqlo's sister brand)."
-            + _UNIQLO_PRICES + _UNIQLO_IDS + _UNIQLO_NOTE
+            "history, store-level prices." + _UNIQLO_GU
+            + _UNIQLO_PRICES + _UNIQLO_PRICE_GROUPS + _UNIQLO_IDS + _UNIQLO_NOTE
         ),
         params=(
             Param(
@@ -11945,13 +11963,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/uniqlo/store-stock",
         summary=(
-            "Stock of one Uniqlo variant in the stores nearest a point: l2_id, point, stores "
+            "Stock of one Uniqlo variant in the stores nearest a point: l2_id, price_group, "
+            "point, stores "
             "(store_code, name, distance_km, status in_stock / low_stock / out_of_stock as "
             "Uniqlo states it, status_raw, store_status, order_and_pick, sections; no unit counts "
             "per store), count, stores_with_stock, total_stores. By l2_id (variants[].l2_id of "
-            "stock() or product()) or by product_id + color + size (+ length), resolved through "
-            "the product's variant list. Store stock, not online stock; many stores answer "
-            "out_of_stock, which is Uniqlo's real answer." + _UNIQLO_A_NOTE
+            "stock() or product()) with its price_group (default 00), or by product_id + color + "
+            "size (+ length, + price_group), resolved through the product's variant list. Send "
+            "the price group the variant came from: a variant of price group 01 asked as 00 reads "
+            "out of stock in every store. Store stock, not online stock." + _UNIQLO_A_NOTE
         ),
         params=(
             Param("lat", "float", required=True, doc=_UNIQLO_LAT),
@@ -11959,7 +11979,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("l2_id", "Variant id (variants[].l2_id of stock() or product()), e.g. "
                  "'08665900'. One of l2_id or product_id + color + size."),
             _str("product_id", _UNIQLO_PRODUCT_ID + " With color and size, instead of l2_id."),
-            _UNIQLO_PRICE_GROUP,
+            _str(
+                "price_group",
+                "Price group the variant came from (items[].price_group or the product's "
+                "price_group, default '00'), with l2_id or with product_id + color + size. A "
+                "variant of price group 01 asked as 00 reads out of stock in every store.",
+            ),
             _str("color", "With product_id: colour code (colors[].code, e.g. 'COL67')."),
             _str("size", "With product_id: size code (sizes[].code, e.g. 'INS028')."),
             _str("length", "With product_id, when the product comes in lengths: length code "
@@ -12094,8 +12119,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Uniqlo's sale (type sale) or limited-time offers (type limited_offer) of a market, "
             "optionally for one gender: type, gender, items (" + _UNIQLO_ITEM + ") with "
-            "limited_offer start / end where Uniqlo shows them, " + _UNIQLO_LIST + "."
-            + _UNIQLO_PRICES + _UNIQLO_A_NOTE
+            "limited_offer (name: Uniqlo's own label, start / end its window) where Uniqlo shows "
+            "them, " + _UNIQLO_LIST + ". Uniqlo's own listings can include GU collaboration items "
+            "(kr limited offers did)." + _UNIQLO_PRICES + _UNIQLO_PRICE_GROUPS + _UNIQLO_A_NOTE
         ),
         params=(
             _lit(
@@ -12173,7 +12199,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "own currency and never converted. Any of the 38 uniqlo.com markets (us, jp, kr and "
             "the product + prices storefronts listed under product()'s country); Greater China "
             "(tw, hk, cn) uses its own product codes and is not offered here."
-            + _UNIQLO_PRICES + _UNIQLO_IDS
+            + _UNIQLO_PRICES + _UNIQLO_PRICE_GROUPS + _UNIQLO_IDS
         ),
         params=(
             _req("product_id", "A uniqlo.com product id (E + 6 digits + -000, e.g. "

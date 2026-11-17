@@ -3441,7 +3441,7 @@ for m in p["markets"]:
     print(m["country"], m["currency"], m["price"], m["promo_price"], m["on_sale"], m["title"])
 print("not sold in:", p["not_sold"])
 
-# --- On us, jp and kr a sale or limited-time offer is a FLAG: promo_price equals price there.
+# --- On us, jp, kr and ca (and some items on sg, my, in) a drop is a FLAG: promo_price equals price there.
 prod = uniqlo.product("E479000-000")["data"]
 print(prod["title"], prod["price"], prod["promo_price"], prod["limited_offer"], prod["price_flags"])
 
@@ -3453,7 +3453,7 @@ st = uniqlo.stock("E479000-000")["data"]
 print(st["variants_in_stock"], "/", st["variants_total"])
 v = st["variants"][0]
 print(v["l2_id"], v["color"]["name"], v["size"]["name"], v["status"], v["quantity"], v["quantity_capped"])
-near = uniqlo.store_stock(40.758, -73.9855, l2_id="08665900")["data"]  # 1 credit
+near = uniqlo.store_stock(40.758, -73.9855, l2_id="08665900", price_group="00")["data"]  # 1 credit; send the variant's price group
 print(near["stores_with_stock"], "of", near["total_stores"])
 same = uniqlo.store_stock(40.758, -73.9855, product_id="E479000-000", color="COL04", size="INS022")  # 2 credits
 
@@ -3494,19 +3494,34 @@ languages is in `product()`'s `country` docstring.
 
 Product ids (`E479000-000`) are global on uniqlo.com, so `prices` compares
 one id across markets in a single call. Prices are numbers in the market's
-own currency, never converted. On us, jp and kr Uniqlo shows a sale or
-limited-time-offer drop only as a flag: `promo_price` equals `price` there,
-and `on_sale`, `limited_offer` and `price_flags` (with start and end dates)
-carry it; Europe and Southeast Asia show `promo_price` below `price`.
+own currency, never converted. On us, jp, kr and ca (and on some items sg,
+my and in) Uniqlo marks a drop with flags only, so `promo_price` equals
+`price`; in Europe, Australia and most of Southeast Asia `promo_price` is
+below `price`. `on_sale`, `limited_offer` and `price_flags` carry the flags.
+Only a limited-time offer has a window: quote Uniqlo's own label in
+`price_flags.name` (e.g. "until 11/18"), not a date read from `end`; a sale
+flag carries a start but no end, and Select Colors/Sizes Only carries no
+dates.
+
+`price_group`: `product` and `prices` default to `"00"`, Uniqlo's regular
+price list. Search can list the same `product_id` a second time in price
+group `"01"`, mostly Uniqlo's Select Colors/Sizes Only sale price for some
+colours / sizes; pass `price_group="01"` to `product` to read that price and
+the colours / sizes it covers. `prices` compares group `"00"` unless
+`price_group` is sent.
+
 `stock` is online stock per variant (Uniqlo caps the quantity it shows at
-11); `store_stock` is the status per store near a point, with no unit counts,
-and many stores answer `out_of_stock`, which is Uniqlo's real answer. Search
+11); `store_stock` is the status per store near a point, with no unit counts.
+Send `store_stock` the price group the variant came from (`price_group`,
+default `"00"`): a variant of price group 01 asked as 00 reads out of stock
+in every store. Search
 sorts are featured, newest, price_asc, price_desc and top_rated on us, jp,
 kr, and best_selling instead of top_rated on tw, hk, cn. Review totals are
 pooled per region (the European markets share one pool); reviews carry no
 reviewer names or locations. No price history (poll `prices` and store your
-own), no store-level prices, and GU is not covered. Failed calls are not
-charged; a not-found is charged.
+own) and no store-level prices. GU is a separate brand and not a separate
+platform here; Uniqlo's own listings can include GU collaboration items (kr
+limited offers did). Failed calls are not charged; a not-found is charged.
 
 ## Error Handling
 

@@ -5175,6 +5175,7 @@ def test_uniqlo_credits_paths_and_wire(monkeypatch):
     uniqlo.product(url="https://www.uniqlo.com/us/en/products/E479000-000/00")
     uniqlo.stock("E479000-000")
     uniqlo.store_stock(40.758, -73.9855, l2_id="08665900")
+    uniqlo.store_stock(40.758, -73.9855, l2_id="08665900", price_group="01")
     uniqlo.store_stock(35.6595, 139.7005, product_id="E479000-000", color="COL04",
                        size="INS022", country="jp")
     uniqlo.stores(lat=37.5636, lng=126.9826, country="kr", limit=5)
@@ -5196,6 +5197,8 @@ def test_uniqlo_credits_paths_and_wire(monkeypatch):
          240.0),
         (base + "stock", {"product_id": "E479000-000"}, 240.0),
         (base + "store-stock", {"lat": 40.758, "lng": -73.9855, "l2_id": "08665900"}, 240.0),
+        (base + "store-stock", {"lat": 40.758, "lng": -73.9855, "l2_id": "08665900",
+                                "price_group": "01"}, 240.0),
         (
             base + "store-stock",
             {"lat": 35.6595, "lng": 139.7005, "product_id": "E479000-000", "color": "COL04",
