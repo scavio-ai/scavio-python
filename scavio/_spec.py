@@ -2666,12 +2666,12 @@ _DEPOP_GROUP_FILTERS = (
 )
 _DEPOP_ITEM = (
     "product_id, slug, url, title, description, brand (id, name, slug), category, group, "
-    "product_type, status (on_sale, sold), seller_country, pictures (first 3) and "
-    "picture_count, sizes, condition, colors, gender, kids, like_count, boosted, discounted, "
-    "discount_percentage, price"
+    "product_type, status, pictures (first 3) and picture_count, sizes, condition, colors, "
+    "gender, kids, like_count, boosted, discounted, discount_percentage, price"
 )
+_DEPOP_MARKET_ITEM = _DEPOP_ITEM + ", buyer_market_price"
 _DEPOP_LIST_OUT = (
-    "items (" + _DEPOP_ITEM + "), count, total_count (Depop's approximate count of matches), "
+    "items (" + _DEPOP_MARKET_ITEM + "; status on_sale), count, total_count (Depop's approximate count of matches), "
     "country, currency, sort, filters"
 )
 _DEPOP_FIRST_24 = (
@@ -2681,13 +2681,24 @@ _DEPOP_FIRST_24 = (
     "than the market's come last)."
 )
 _DEPOP_PRICES = (
-    " Prices are numbers for a buyer in the market, as Depop shows them: price (the listing "
-    "price), original_price, buyer_fee, tax (tax_type, e.g. UK_IMPORT_VAT), shipping "
-    "(shipping_boundary national / international), total (their sum) and headline_price "
-    "(Depop's headline, which may leave out shipping). The same listing shows a different total "
-    "in each market. price.currency is the seller's listing currency, usually the market's (a "
-    "few sellers list in USD or GBP elsewhere). On us Depop shows a buyer fee on some calls and "
-    "not on others: report what it returns."
+    " Prices are numbers as Depop shows them to a buyer in the market: price (the listing "
+    "price), original_price (the seller's own original price before a markdown; seller-set, it "
+    "can be far above price), buyer_fee, tax (tax_type, e.g. UK_IMPORT_VAT), shipping (the "
+    "shipping the buyer pays; shipping_boundary national / international, as Depop rates the "
+    "listing's country against the market), total (computed by Scavio: price + buyer_fee + tax "
+    "+ shipping) and headline_price (the price Depop itself headlines in that market: on us it "
+    "leaves out shipping, on gb it includes the fee and shipping). The same listing shows a "
+    "different total in each market. price.currency is the listing's currency, usually the "
+    "market's (a few sellers list in another one, e.g. USD or GBP on ca, ie, de, fr, it). On us "
+    "Depop returns a buyer fee on some calls and not on others for the same listing: report "
+    "what it returns."
+)
+_DEPOP_MARKET_PRICE = (
+    " buyer_market_price is true when the listing is priced in the market's currency. False: "
+    "the listing is priced in another currency (often a seller in the market who lists in USD "
+    "or GBP) and Depop shows it unconverted, with the listing's own price block; product() "
+    "returns the same block, so no price in the market's currency exists for it. List items "
+    "carry no seller country: product() has seller.country."
 )
 _DEPOP_TEXT = (
     " Depop's interface is English on every market; titles and descriptions are what sellers "
@@ -12359,7 +12370,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "conditions, colors, price_min / price_max, on_sale (marked down), gender, group / "
             "product_type (ids from categories()), kids, size. Listing ids are global; search "
             "shows that market's sellers."
-            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOT_AVAILABLE + _DEPOP_NOTE
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_MARKET_PRICE + _DEPOP_TEXT + _DEPOP_NOT_AVAILABLE + _DEPOP_NOTE
         ),
         params=(_req("query", "Search keywords, e.g. 'levis 501'."), _DEPOP_COUNTRY)
         + _DEPOP_FILTERS
@@ -12379,12 +12390,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "product_id, slug, url, status (on_sale, sold), title, description, hashtags, brand, "
             "category (group, product type, breadcrumbs with the category path), condition, "
             "colors, sizes, gender, kids, pictures, like_count, boosted, quantity, shipping "
-            "(method, parcel_size, payer, free_shipping, national_cost), discounted, "
+            "(method, parcel_size, payer, free_shipping, national_cost: the seller's domestic "
+            "shipping rate, which can differ from price.shipping, the shipping the buyer pays), "
+            "discounted, "
             "discount_percentage, price (buyer market), listing_price (the seller's own currency "
-            "and price), seller (id, username, url, verified, country, reviews_rating, "
+            "and price), seller (id, username, url, verified, country: the seller account's "
+            "country, reviews_rating, "
             "reviews_total, items_sold, last_seen, average_shipping_days). Listing ids and slugs "
-            "are global: the same listing priced from another market adds that buyer's fee, tax "
-            "and shipping. No seller names or city, no views or listing date (shop_products() "
+            "are global: the same listing priced from another market shows that buyer's fee, tax "
+            "and shipping, in the listing's own currency. No seller names or city, no views or listing date (shop_products() "
             "has created_at / updated_at)."
             + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
         ),
@@ -12422,7 +12436,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "mens/bottoms/jeans) in a buyer market: " + _DEPOP_LIST_OUT + ", category. Sorts "
             "relevance, price_asc, price_desc. Filters: brand_ids, conditions, colors, price_min "
             "/ price_max, on_sale, size; gender on kids."
-            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_MARKET_PRICE + _DEPOP_TEXT + _DEPOP_NOTE
         ),
         params=(
             Param(
@@ -12450,7 +12464,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "The first 24 listings of one Depop brand (slug from brands()) in a buyer market: "
             "brand (id, name, slug), " + _DEPOP_LIST_OUT + ". An unknown brand is a charged "
             "404. Sorts relevance, price_asc, price_desc; filters as search() (no brand_ids)."
-            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_MARKET_PRICE + _DEPOP_TEXT + _DEPOP_NOTE
         ),
         params=(
             _req("slug", "Brand slug (brands[].slug, items[].brand.slug), e.g. 'carhartt', "
@@ -12472,9 +12486,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "One of Depop's curated explore pages (slug, e.g. 90s-menswear) in a buyer market: "
             "title, search_query (the search the page runs), the first 24 listings ("
-            + _DEPOP_ITEM + "), count, total_count, and more_slugs (the market's other explore "
+            + _DEPOP_MARKET_ITEM + "; status on_sale), count, total_count, and more_slugs (the market's other explore "
             "pages). An unknown page is a charged 404."
-            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_MARKET_PRICE + _DEPOP_TEXT + _DEPOP_NOTE
         ),
         params=(
             _req("slug", "Explore page slug (depop.com/explore/<slug>/), e.g. '90s-menswear', "
@@ -12527,7 +12541,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/depop/shop-products",
         summary=(
             "A Depop shop's listings for sale, paged by cursor (up to 24 per page): shop "
-            "(shop_id, username), items (" + _DEPOP_ITEM + ", created_at, updated_at), count, "
+            "(shop_id, username), items (" + _DEPOP_ITEM + ", created_at, updated_at; status "
+            "on_sale), count, "
             "has_more, next_cursor. Prices are in the seller's listing currency. Global (no "
             "country). 1 credit per page." + _DEPOP_NOTE
         ),
@@ -12545,7 +12560,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "A Depop shop's sold listings with the price they sold at (price, original_price, "
             "discounted, discount_percentage), paged by cursor (up to 24 per page): shop, items ("
-            + _DEPOP_ITEM + ", created_at, updated_at; status sold), count, has_more, "
+            + _DEPOP_ITEM + ", created_at, updated_at; status sold = sold on Depop, "
+            "marked_as_sold = the seller marked it sold, which may be outside Depop, so its price "
+            "may not be a Depop sale), count, has_more, "
             "next_cursor. updated_at is the listing's last update: Depop shows no sale date. "
             "Prices are in the seller's listing currency. This is Depop's only sold data: sold "
             "prices come per shop, there is no keyword search of sold listings. Global (no "
@@ -12659,8 +12676,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/depop/similar",
         summary=(
             "Listings Depop shows as similar to one listing, for a US buyer: product_id, country, "
-            "currency, items (" + _DEPOP_ITEM + ", created_at, updated_at), count. Market: us "
-            "only." + _DEPOP_PRICES + _DEPOP_NOTE
+            "currency, items (" + _DEPOP_MARKET_ITEM + ", created_at, updated_at), count. Market: "
+            "us only." + _DEPOP_PRICES + _DEPOP_MARKET_PRICE + _DEPOP_NOTE
         ),
         params=(
             Param(

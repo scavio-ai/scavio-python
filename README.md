@@ -3547,19 +3547,22 @@ depop = client.depop
 res = depop.search("levis 501", country="gb", sort="price_asc", conditions=["used_excellent"])["data"]
 print(res["count"], res["total_count"], res["currency"])
 for item in res["items"][:3]:
-    p = item["price"]  # numbers as a buyer in the market sees them
-    print(item["title"], p["currency"], p["price"], p["buyer_fee"], p["tax"], p["shipping"], p["total"])
+    p = item["price"]  # numbers as a buyer in the market sees them; total = Scavio's sum of the parts
+    # buyer_market_price False: priced in another currency, shown unconverted
+    print(item["title"], item["buyer_market_price"], p["currency"], p["price"], p["buyer_fee"], p["tax"], p["shipping"], p["total"])
 
 # --- One listing priced for a buyer in a market, plus the seller's own price.
-# Listing ids are global: the same listing from another market adds that buyer's fee, tax and shipping.
+# Listing ids are global: the same listing from another market shows that buyer's fee, tax and shipping.
+# seller.country is the seller account's country (list items carry no seller country).
 item = depop.product("f0omem-levis-550-38x36-blue-jeans-662f")["data"]
 print(item["price"], item["listing_price"], item["seller"]["reviews_rating"], item["seller"]["items_sold"])
 
 # --- What a shop's items sold for. Depop has no keyword sold search: sold prices come per shop,
-# and Depop shows no sale date (updated_at is the listing's last update).
+# and Depop shows no sale date (updated_at is the listing's last update). status is "sold" (sold on
+# Depop) or "marked_as_sold" (the seller marked it sold, which may be outside Depop).
 sold = depop.shop_sold("flomem")["data"]
 for s in sold["items"][:3]:
-    print(s["title"], s["price"]["price"], s["price"]["currency"], s["discount_percentage"], s["updated_at"])
+    print(s["title"], s["status"], s["price"]["price"], s["price"]["currency"], s["discount_percentage"], s["updated_at"])
 more = depop.shop_sold("flomem", cursor=sold["next_cursor"]) if sold["has_more"] else None
 
 # --- Shop profile, listings for sale, reviews (no reviewer names), shop search.
@@ -3588,9 +3591,15 @@ charged.
 The market is the buyer's country: search shows that market's sellers, and
 prices are what a buyer there pays as Depop shows them (`price`,
 `original_price`, `buyer_fee`, `tax` with `tax_type`, `shipping` with
-`shipping_boundary`, `total`, `headline_price`). `price.currency` is the
-listing's currency: usually the market's, but some sellers list in another
-one. On us, Depop returns a buyer fee on some calls and not on others for the
+`shipping_boundary`, `total` (Scavio's sum of price, buyer fee, tax and
+shipping), `headline_price` (the price Depop itself headlines: us leaves out
+shipping, gb includes the fee and shipping)). `original_price` is the
+seller's own original price and can be far above `price`; `shipping` is what
+the buyer pays (product's `shipping.national_cost` is the seller's domestic
+rate and can differ). `price.currency` is the listing's currency: usually the
+market's, but some sellers list in another one; list items carry
+`buyer_market_price`, False for those, which Depop shows unconverted (product
+too). List items carry no seller country; product has `seller.country`. On us, Depop returns a buyer fee on some calls and not on others for the
 same listing, so read what comes back. Sorts are relevance, `price_asc` and
 `price_desc` (newest and most popular are not available). Depop's interface
 is English in every storefront; titles and descriptions are what sellers
@@ -3768,6 +3777,10 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.68.1
+
+- `depop` docstrings: list items carry `buyer_market_price` and no seller country (`product` has `seller.country`); `shop_sold` status `sold` or `marked_as_sold`; price wording (`total` is Scavio's sum, `headline_price` Depop's own headline).
 
 ### Changed in 0.68.0
 
