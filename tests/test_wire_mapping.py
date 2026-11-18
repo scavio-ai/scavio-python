@@ -628,6 +628,11 @@ BODY_PRICED_KEYS = {
     "bolcom_product",
     "uniqlo_store_stock",
     "uniqlo_prices",
+    "depop_search",
+    "depop_product",
+    "depop_category",
+    "depop_brand",
+    "depop_explore",
 }
 
 
@@ -5222,3 +5227,98 @@ def test_uniqlo_credits_paths_and_wire(monkeypatch):
         uniqlo.store_stock(40.758, -73.9855)
     with pytest.raises(ScavioError):
         uniqlo.stores()
+
+
+def test_depop_credits_paths_and_wire(monkeypatch):
+    """depop (0.68.0): 14 endpoints on /api/v1/depop, 240 s floor.
+
+    search / category / brand / explore 1 credit (nz 5); product us 1, gb au ie ca de fr it 2,
+    nz 6; the rest 1. search, product, category, brand, explore and suggestions on 9 buyer
+    markets (uk alias of gb); similar us only; shop data, categories and brands global.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "depop"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "explore", "product", "search", "shop",
+        "shop_products", "shop_reviews", "shop_sold", "shops_search", "similar", "suggestions",
+    ]
+    markets = 'Optional[Literal["us", "gb", "uk", "au", "ie", "ca", "nz", "de", "fr", "it"]]'
+    market_eps = {"search", "product", "category", "brand", "explore", "suggestions"}
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/depop/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1, ep.key
+        params = {p.name: p for p in ep.params}
+        if m in market_eps:
+            assert params["country"].annotation == markets, m
+        elif m == "similar":
+            assert params["country"].annotation == 'Optional[Literal["us"]]'
+        else:
+            assert "country" not in params, m
+    for m in ("search", "category", "brand", "explore"):
+        assert "5 credits on nz" in eps[m].credits_note, m
+    assert "2 credits on gb" in eps["product"].credits_note
+    assert "6 credits on nz" in eps["product"].credits_note
+    assert eps["suggestions"].credits_note is None
+    sort = {p.name: p for p in eps["search"].params}["sort"].annotation
+    assert sort == 'Optional[Literal["relevance", "price_asc", "price_desc"]]'
+    assert eps["product"].one_of == (("slug", "url", "product_id"),)
+    for m in ("shop", "shop_products", "shop_sold", "shop_reviews"):
+        assert eps[m].one_of == (("username", "shop_id"),), m
+    assert eps["brands"].one_of == (("letter", "slug"),)
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    depop = client.depop
+    depop.search("levis 501")
+    depop.search("levis 501", country="gb", sort="price_asc", brand_ids=[31],
+                 conditions=["used_excellent"], price_max=40, on_sale=True)
+    depop.product("f0omem-levis-550-38x36-blue-jeans-662f")
+    depop.product(product_id=1002884801, country="nz")
+    depop.category("mens/bottoms/jeans", country="de")
+    depop.brand("carhartt")
+    depop.explore("90s-menswear")
+    depop.suggestions("carh", country="au")
+    depop.shop("flomem")
+    depop.shop_products(shop_id=46847613, limit=10)
+    depop.shop_sold("flomem", cursor="abc")
+    depop.shop_reviews("flomem", role="buyer", page=2)
+    depop.shops_search("y2k")
+    depop.categories(language="de", include_sizes=True)
+    depop.brands("c")
+    depop.brands(slug="carhartt")
+    depop.similar(1002884801)
+    base = "/api/v1/depop/"
+    assert seen == [
+        (base + "search", {"query": "levis 501"}, 240.0),
+        (base + "search", {"query": "levis 501", "country": "gb", "sort": "price_asc",
+                           "brand_ids": [31], "conditions": ["used_excellent"], "price_max": 40,
+                           "on_sale": True}, 240.0),
+        (base + "product", {"slug": "f0omem-levis-550-38x36-blue-jeans-662f"}, 240.0),
+        (base + "product", {"product_id": 1002884801, "country": "nz"}, 240.0),
+        (base + "category", {"category": "mens/bottoms/jeans", "country": "de"}, 240.0),
+        (base + "brand", {"slug": "carhartt"}, 240.0),
+        (base + "explore", {"slug": "90s-menswear"}, 240.0),
+        (base + "suggestions", {"query": "carh", "country": "au"}, 240.0),
+        (base + "shop", {"username": "flomem"}, 240.0),
+        (base + "shop-products", {"shop_id": 46847613, "limit": 10}, 240.0),
+        (base + "shop-sold", {"username": "flomem", "cursor": "abc"}, 240.0),
+        (base + "shop-reviews", {"username": "flomem", "role": "buyer", "page": 2}, 240.0),
+        (base + "shops-search", {"query": "y2k"}, 240.0),
+        (base + "categories", {"language": "de", "include_sizes": True}, 240.0),
+        (base + "brands", {"letter": "c"}, 240.0),
+        (base + "brands", {"slug": "carhartt"}, 240.0),
+        (base + "similar", {"product_id": 1002884801}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        depop.product()
+    with pytest.raises(ScavioError):
+        depop.shop()
+    with pytest.raises(ScavioError):
+        depop.brands()

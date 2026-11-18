@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 87 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 88 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -33,6 +33,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | ASOS Prices by Country and Currency, Online Stock by Size, Reviews by Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
+| Depop Listings by Buyer Market, Shop Sold Prices, Shop Profiles and Reviews (9 markets; 14 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
@@ -3523,6 +3524,82 @@ own) and no store-level prices. GU is a separate brand and not a separate
 platform here; Uniqlo's own listings can include GU collaboration items (kr
 limited offers did). Failed calls are not charged; a not-found is charged.
 
+### 57. Marketplace -- Depop resale prices, shop sold prices, shops and reviews
+
+Depop (depop.com) across its 9 storefronts. Namespace `depop`, 14 endpoints:
+`search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`,
+`shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`,
+`brands`, `similar`. Pick the buyer market with `country`: us (USD, the
+default), gb (GBP; `uk` accepted), au (AUD), ie (EUR), ca (CAD), nz (NZD), de
+(EUR), fr (EUR), it (EUR). `search`, `category`, `brand` and `explore` cost 1
+credit (5 on nz); `product` 1 on us, 2 on gb, au, ie, ca, de, fr, it and 6 on
+nz; everything else 1. The request timeout is raised to at least 240s
+(storefront pages can take up to about a minute).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+depop = client.depop
+
+# --- What listings ask in one buyer market: the first 24 results per query.
+# Depop serves no next page: narrow with filters, sort or a price range.
+res = depop.search("levis 501", country="gb", sort="price_asc", conditions=["used_excellent"])["data"]
+print(res["count"], res["total_count"], res["currency"])
+for item in res["items"][:3]:
+    p = item["price"]  # numbers as a buyer in the market sees them
+    print(item["title"], p["currency"], p["price"], p["buyer_fee"], p["tax"], p["shipping"], p["total"])
+
+# --- One listing priced for a buyer in a market, plus the seller's own price.
+# Listing ids are global: the same listing from another market adds that buyer's fee, tax and shipping.
+item = depop.product("f0omem-levis-550-38x36-blue-jeans-662f")["data"]
+print(item["price"], item["listing_price"], item["seller"]["reviews_rating"], item["seller"]["items_sold"])
+
+# --- What a shop's items sold for. Depop has no keyword sold search: sold prices come per shop,
+# and Depop shows no sale date (updated_at is the listing's last update).
+sold = depop.shop_sold("flomem")["data"]
+for s in sold["items"][:3]:
+    print(s["title"], s["price"]["price"], s["price"]["currency"], s["discount_percentage"], s["updated_at"])
+more = depop.shop_sold("flomem", cursor=sold["next_cursor"]) if sold["has_more"] else None
+
+# --- Shop profile, listings for sale, reviews (no reviewer names), shop search.
+shop = depop.shop("flomem")["data"]
+print(shop["reviews_rating"], shop["reviews_total"], shop["items_sold"], shop["last_seen"])
+for_sale = depop.shop_products("flomem")["data"]
+reviews = depop.shop_reviews("flomem", role="seller")["data"]
+shops = depop.shops_search("y2k")["data"]["shops"]
+
+# --- Category tree (paths feed category(), ids feed search filters), brands, browse.
+tree = depop.categories(language="en")["data"]["departments"]
+jeans = depop.category("mens/bottoms/jeans", country="de")["data"]
+brands = depop.brands("c")["data"]["brands"]          # slug feeds brand(), id feeds brand_ids
+carhartt = depop.brand("carhartt", sort="price_desc")["data"]
+nineties = depop.explore("90s-menswear")["data"]      # more_slugs lists the market's other pages
+hints = depop.suggestions("carh")["data"]["suggestions"]
+similar = depop.similar(1002884801)["data"]["items"]  # us only
+```
+
+Markets per endpoint: `search`, `product`, `category`, `brand`, `explore` and
+`suggestions` on all nine; `similar` us only; `shop`, `shop_products`,
+`shop_sold`, `shop_reviews`, `shops_search`, `categories` and `brands` are
+global (no `country`). Any other country answers 400 before anything is
+charged.
+
+The market is the buyer's country: search shows that market's sellers, and
+prices are what a buyer there pays as Depop shows them (`price`,
+`original_price`, `buyer_fee`, `tax` with `tax_type`, `shipping` with
+`shipping_boundary`, `total`, `headline_price`). `price.currency` is the
+listing's currency: usually the market's, but some sellers list in another
+one. On us, Depop returns a buyer fee on some calls and not on others for the
+same listing, so read what comes back. Sorts are relevance, `price_asc` and
+`price_desc` (newest and most popular are not available). Depop's interface
+is English in every storefront; titles and descriptions are what sellers
+wrote (often German, French or Italian on de, fr, it), and `categories`
+answers group and product type names in en, en-US, de, fr or it. Not
+available: results past the first 24, keyword sold search, trending
+searches, views, join date, Top Seller badge, offers / bundles, price history,
+`similar` outside us. Failed calls are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3673,6 +3750,7 @@ Scavio works with popular AI/LLM frameworks:
 | Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
 | ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
+| Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
@@ -3690,6 +3768,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.68.0
+
+- **New `depop` namespace** (sync and async) for Depop, 14 endpoints:
+  `search`, `product`, `category`, `brand`, `explore`, `suggestions`,
+  `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`,
+  `categories`, `brands`, `similar`. Buyer markets us (default), gb, au,
+  ie, ca, nz, de, fr, it via `country`; shop data, `categories` and
+  `brands` are global, `similar` us only. `search`, `category`, `brand`,
+  `explore` 1 credit (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr
+  it, 6 on nz; the rest 1. 240s timeout floor.
 
 ### Changed in 0.66.0
 

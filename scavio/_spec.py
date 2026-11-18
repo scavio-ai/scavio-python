@@ -2605,6 +2605,122 @@ _OLX_CHARGE = (
 )
 
 
+
+# Depop params shared across endpoints (depop.com buyer markets). Markets follow
+# DEPOP_ENDPOINT_COUNTRIES: search, product, category, brand, explore and suggestions on us, gb
+# (uk alias), au, ie, ca, nz, de, fr, it; similar us only; shop, shop-products, shop-sold,
+# shop-reviews, shops-search, categories and brands global (no country).
+_DEPOP_MARKETS = ("us", "gb", "uk", "au", "ie", "ca", "nz", "de", "fr", "it")
+_DEPOP_COUNTRY = _lit(
+    "country",
+    _DEPOP_MARKETS,
+    "Buyer market (default 'us'): us (USD), gb (GBP; 'uk' accepted), au (AUD), ie (EUR), ca "
+    "(CAD), nz (NZD), de (EUR), fr (EUR), it (EUR). Results and prices are what a buyer in "
+    "that country sees. Any other country answers 400 before anything is charged.",
+)
+_DEPOP_COUNTRY_US = _lit(
+    "country",
+    ("us",),
+    "Buyer market: 'us' only (USD; the default). Any other value answers 400 before anything "
+    "is charged.",
+)
+_DEPOP_ID = 'Optional[Union[str, int]]'
+_DEPOP_STR_LIST = "Optional[Union[str, list[str]]]"
+_DEPOP_CONDITIONS = ("brand_new", "used_like_new", "used_excellent", "used_good", "used_fair")
+_DEPOP_COLORS = (
+    "black", "blue", "brown", "burgundy", "cream", "gold", "green", "grey", "khaki", "multi",
+    "navy", "orange", "pink", "purple", "red", "silver", "tan", "white", "yellow",
+)
+_DEPOP_SORT = _lit(
+    "sort",
+    ("relevance", "price_asc", "price_desc"),
+    "relevance (default), price_asc, price_desc. Newest and most popular orders are not "
+    "available.",
+)
+_DEPOP_FILTERS = (
+    _DEPOP_SORT,
+    Param(
+        "brand_ids",
+        "Optional[Union[str, list[Union[str, int]]]]",
+        doc="Brand ids (brands[].id of brands(), items[].brand.id), up to 20, e.g. [1673] "
+        "Carhartt.",
+    ),
+    Param("conditions", _DEPOP_STR_LIST, doc="Conditions: " + ", ".join(_DEPOP_CONDITIONS) + "."),
+    Param("colors", _DEPOP_STR_LIST, doc="Colours: " + ", ".join(_DEPOP_COLORS) + "."),
+    _float("price_min", "Lowest listing price, in the market's currency."),
+    _float("price_max", "Highest listing price, in the market's currency."),
+    _bool("on_sale", "Only listings the seller marked down (items[].discounted)."),
+    _lit("gender", ("male", "female", "unisex"), "male, female, unisex."),
+    Param(
+        "size",
+        _DEPOP_STR_LIST,
+        doc="Size filter values (size_set_id.size_id, from categories(include_sizes=True)), "
+        "e.g. '4.15'. Depop honours it only partly.",
+    ),
+)
+_DEPOP_GROUP_FILTERS = (
+    _str("group", "Group id from categories() (tops, bottoms, footwear ...)."),
+    Param("product_type", _DEPOP_STR_LIST, doc="Product type ids from categories() (jeans, "
+          "hoodies ...)."),
+    _bool("kids", "Only kids' listings (True) or none (False)."),
+)
+_DEPOP_ITEM = (
+    "product_id, slug, url, title, description, brand (id, name, slug), category, group, "
+    "product_type, status (on_sale, sold), seller_country, pictures (first 3) and "
+    "picture_count, sizes, condition, colors, gender, kids, like_count, boosted, discounted, "
+    "discount_percentage, price"
+)
+_DEPOP_LIST_OUT = (
+    "items (" + _DEPOP_ITEM + "), count, total_count (Depop's approximate count of matches), "
+    "country, currency, sort, filters"
+)
+_DEPOP_FIRST_24 = (
+    " Only the first 24 results per query: Depop serves no next page, so narrow with filters, "
+    "sort or a price range to reach more listings. price_asc / price_desc return Depop's first "
+    "24 for that order, in strict listing-price order (listings priced in another currency "
+    "than the market's come last)."
+)
+_DEPOP_PRICES = (
+    " Prices are numbers for a buyer in the market, as Depop shows them: price (the listing "
+    "price), original_price, buyer_fee, tax (tax_type, e.g. UK_IMPORT_VAT), shipping "
+    "(shipping_boundary national / international), total (their sum) and headline_price "
+    "(Depop's headline, which may leave out shipping). The same listing shows a different total "
+    "in each market. price.currency is the seller's listing currency, usually the market's (a "
+    "few sellers list in USD or GBP elsewhere). On us Depop shows a buyer fee on some calls and "
+    "not on others: report what it returns."
+)
+_DEPOP_TEXT = (
+    " Depop's interface is English on every market; titles and descriptions are what sellers "
+    "wrote (often the local language on de, fr, it)."
+)
+_DEPOP_NOT_AVAILABLE = (
+    " Not available: results past the first 24, keyword search of sold listings (Depop has "
+    "none: sold prices come per shop from shop_sold()), trending searches, views, join date, "
+    "Top Seller badge, offers / bundles, price history."
+)
+_DEPOP_NOTE = " Failed upstream calls are not charged; a not-found is charged."
+_DEPOP_LIST_CREDITS = (
+    "Costs 1 credit on us, gb, au, ie, ca, de, fr and it, and 5 credits on nz. credits_used in "
+    "the response is the exact charge."
+)
+_DEPOP_SHOP_REF = (
+    Param(
+        "username",
+        "Optional[str]",
+        positional=True,
+        doc="Shop username (depop.com/<username>/), e.g. 'flomem'.",
+    ),
+    Param(
+        "shop_id",
+        _DEPOP_ID,
+        doc="Shop id (shop_id of shop(), seller.id of product()), e.g. 46847613.",
+    ),
+)
+_DEPOP_SHOP_PAGING = (
+    _str("cursor", "next_cursor of the previous page."),
+    _int("limit", "Listings per page, 1 to 24 (default 24)."),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -12226,6 +12342,338 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         min_timeout=240.0,
     ),
+    # ============================== Depop ==============================
+    # 14 endpoints on /api/v1/depop. search / category / brand / explore 1 credit (nz 5); product
+    # us 1, gb au ie ca de fr it 2, nz 6; everything else 1. Storefront pages take up to about a
+    # minute and the backend queues and retries: 240 s timeout floor everywhere.
+    Endpoint(
+        key="depop_search",
+        namespace="depop",
+        method="search",
+        http="POST",
+        path="/api/v1/depop/search",
+        summary=(
+            "Search Depop listings for sale in one buyer market: " + _DEPOP_LIST_OUT
+            + ", facets (counts per department / group / product type, brand, colour, "
+            "condition, size). Sorts relevance, price_asc, price_desc. Filters: brand_ids, "
+            "conditions, colors, price_min / price_max, on_sale (marked down), gender, group / "
+            "product_type (ids from categories()), kids, size. Listing ids are global; search "
+            "shows that market's sellers."
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOT_AVAILABLE + _DEPOP_NOTE
+        ),
+        params=(_req("query", "Search keywords, e.g. 'levis 501'."), _DEPOP_COUNTRY)
+        + _DEPOP_FILTERS
+        + _DEPOP_GROUP_FILTERS,
+        credits=1,
+        credits_note=_DEPOP_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_product",
+        namespace="depop",
+        method="product",
+        http="POST",
+        path="/api/v1/depop/product",
+        summary=(
+            "One Depop listing by slug, link or product_id, priced for a buyer in the market: "
+            "product_id, slug, url, status (on_sale, sold), title, description, hashtags, brand, "
+            "category (group, product type, breadcrumbs with the category path), condition, "
+            "colors, sizes, gender, kids, pictures, like_count, boosted, quantity, shipping "
+            "(method, parcel_size, payer, free_shipping, national_cost), discounted, "
+            "discount_percentage, price (buyer market), listing_price (the seller's own currency "
+            "and price), seller (id, username, url, verified, country, reviews_rating, "
+            "reviews_total, items_sold, last_seen, average_shipping_days). Listing ids and slugs "
+            "are global: the same listing priced from another market adds that buyer's fee, tax "
+            "and shipping. No seller names or city, no views or listing date (shop_products() "
+            "has created_at / updated_at)."
+            + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc="Listing slug (items[].slug), e.g. 'f0omem-levis-550-38x36-blue-jeans-662f'.",
+            ),
+            _str(
+                "url",
+                "A depop.com product link (https://www.depop.com/products/<slug>/); the market "
+                "is country, not the link.",
+            ),
+            Param("product_id", _DEPOP_ID, doc="Product id (items[].product_id), e.g. 1002884801."),
+            _DEPOP_COUNTRY,
+        ),
+        one_of=(("slug", "url", "product_id"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit on us, 2 credits on gb, au, ie, ca, de, fr and it, and 6 credits on "
+            "nz. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_category",
+        namespace="depop",
+        method="category",
+        http="POST",
+        path="/api/v1/depop/category",
+        summary=(
+            "The first 24 listings of one Depop category (path from categories(), e.g. "
+            "mens/bottoms/jeans) in a buyer market: " + _DEPOP_LIST_OUT + ", category. Sorts "
+            "relevance, price_asc, price_desc. Filters: brand_ids, conditions, colors, price_min "
+            "/ price_max, on_sale, size; gender on kids."
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+        ),
+        params=(
+            Param(
+                "category",
+                "Union[str, list[str]]",
+                required=True,
+                doc="Category path department[/group[/product_type]] (mens, womens, kids, "
+                "everything-else), e.g. 'mens/bottoms/jeans', 'womens/tops', 'kids'.",
+            ),
+            _DEPOP_COUNTRY,
+        )
+        + _DEPOP_FILTERS
+        + _DEPOP_GROUP_FILTERS,
+        credits=1,
+        credits_note=_DEPOP_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_brand",
+        namespace="depop",
+        method="brand",
+        http="POST",
+        path="/api/v1/depop/brand",
+        summary=(
+            "The first 24 listings of one Depop brand (slug from brands()) in a buyer market: "
+            "brand (id, name, slug), " + _DEPOP_LIST_OUT + ". An unknown brand is a charged "
+            "404. Sorts relevance, price_asc, price_desc; filters as search() (no brand_ids)."
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+        ),
+        params=(
+            _req("slug", "Brand slug (brands[].slug, items[].brand.slug), e.g. 'carhartt', "
+                 "'levi-s', 'nike'."),
+            _DEPOP_COUNTRY,
+        )
+        + _DEPOP_FILTERS
+        + _DEPOP_GROUP_FILTERS,
+        credits=1,
+        credits_note=_DEPOP_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_explore",
+        namespace="depop",
+        method="explore",
+        http="POST",
+        path="/api/v1/depop/explore",
+        summary=(
+            "One of Depop's curated explore pages (slug, e.g. 90s-menswear) in a buyer market: "
+            "title, search_query (the search the page runs), the first 24 listings ("
+            + _DEPOP_ITEM + "), count, total_count, and more_slugs (the market's other explore "
+            "pages). An unknown page is a charged 404."
+            + _DEPOP_FIRST_24 + _DEPOP_PRICES + _DEPOP_TEXT + _DEPOP_NOTE
+        ),
+        params=(
+            _req("slug", "Explore page slug (depop.com/explore/<slug>/), e.g. '90s-menswear', "
+                 "'90s-womenswear'. Every answer lists the market's other pages in more_slugs."),
+            _DEPOP_COUNTRY,
+        ),
+        credits=1,
+        credits_note=_DEPOP_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_suggestions",
+        namespace="depop",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/depop/suggestions",
+        summary=(
+            "Depop search suggestions for a partial query, ranked for a buyer market: "
+            "suggestions (text, group, gender, filter_label such as \"in Men's Footwear\"), "
+            "count." + _DEPOP_NOTE
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'carh'."), _DEPOP_COUNTRY),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_shop",
+        namespace="depop",
+        method="shop",
+        http="POST",
+        path="/api/v1/depop/shop",
+        summary=(
+            "A Depop shop (seller) by username or shop_id: shop_id, username, url, bio, "
+            "verified, followers, following, reviews_rating, reviews_total, seller_ratings, "
+            "buyer_ratings, items_sold, last_seen, category_counts (listings per department and "
+            "category). Shop data is global (no country). No real names or avatars; Depop shows "
+            "no join date or Top Seller badge here. An unknown shop is a charged 404."
+            + _DEPOP_NOTE
+        ),
+        params=_DEPOP_SHOP_REF,
+        one_of=(("username", "shop_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_shop_products",
+        namespace="depop",
+        method="shop_products",
+        http="POST",
+        path="/api/v1/depop/shop-products",
+        summary=(
+            "A Depop shop's listings for sale, paged by cursor (up to 24 per page): shop "
+            "(shop_id, username), items (" + _DEPOP_ITEM + ", created_at, updated_at), count, "
+            "has_more, next_cursor. Prices are in the seller's listing currency. Global (no "
+            "country). 1 credit per page." + _DEPOP_NOTE
+        ),
+        params=_DEPOP_SHOP_REF + _DEPOP_SHOP_PAGING,
+        one_of=(("username", "shop_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_shop_sold",
+        namespace="depop",
+        method="shop_sold",
+        http="POST",
+        path="/api/v1/depop/shop-sold",
+        summary=(
+            "A Depop shop's sold listings with the price they sold at (price, original_price, "
+            "discounted, discount_percentage), paged by cursor (up to 24 per page): shop, items ("
+            + _DEPOP_ITEM + ", created_at, updated_at; status sold), count, has_more, "
+            "next_cursor. updated_at is the listing's last update: Depop shows no sale date. "
+            "Prices are in the seller's listing currency. This is Depop's only sold data: sold "
+            "prices come per shop, there is no keyword search of sold listings. Global (no "
+            "country). 1 credit per page." + _DEPOP_NOTE
+        ),
+        params=_DEPOP_SHOP_REF + _DEPOP_SHOP_PAGING,
+        one_of=(("username", "shop_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_shop_reviews",
+        namespace="depop",
+        method="shop_reviews",
+        http="POST",
+        path="/api/v1/depop/shop-reviews",
+        summary=(
+            "Reviews a Depop shop received as a seller (role seller, default) or as a buyer "
+            "(role buyer), 24 per page: shop, role, page, reviews (date, rating, text, product "
+            "with product_id and image), count, has_more. Reviewer names are not returned. "
+            "Global (no country). 1 credit per page." + _DEPOP_NOTE
+        ),
+        params=_DEPOP_SHOP_REF
+        + (
+            _lit(
+                "role",
+                ("seller", "buyer"),
+                "seller (default: reviews the shop got from buyers) or buyer (reviews it got "
+                "from sellers).",
+            ),
+            _int("page", "Page, 1-based (up to 200), 24 reviews each."),
+        ),
+        one_of=(("username", "shop_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_shops_search",
+        namespace="depop",
+        method="shops_search",
+        http="POST",
+        path="/api/v1/depop/shops-search",
+        summary=(
+            "Depop shops whose username matches a query: query, shops (shop_id, username, url), "
+            "count. Use shop() for a shop's ratings and items sold. Global (no country)."
+            + _DEPOP_NOTE
+        ),
+        params=(_req("query", "Part of a shop username, e.g. 'y2k'."),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_categories",
+        namespace="depop",
+        method="categories",
+        http="POST",
+        path="/api/v1/depop/categories",
+        summary=(
+            "Depop's category tree: language, departments (id, name, path) > groups (id, name, "
+            "path) > product_types (id, name, path), count. path is the input of category(); "
+            "group and product type ids are search filters. Group and product type names in en, "
+            "en-US, de, fr or it; department names in English. include_sizes adds size_sets "
+            "(size systems per department with size filter values). Global (no country)."
+            + _DEPOP_NOTE
+        ),
+        params=(
+            _lit(
+                "language",
+                ("en", "en-US", "de", "fr", "it"),
+                "Names of groups and product types: en (default), en-US, de, fr, it.",
+            ),
+            _bool(
+                "include_sizes",
+                "Add size_sets (size systems and their size filter values). Larger answer.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_brands",
+        namespace="depop",
+        method="brands",
+        http="POST",
+        path="/api/v1/depop/brands",
+        summary=(
+            "Depop brands by first letter (a-z, 0-9): letter, brands (id, name, slug), count; or "
+            "one brand by slug with its description. slug is the input of brand(), id the "
+            "brand_ids filter. An unknown slug is a charged 404. Global (no country)."
+            + _DEPOP_NOTE
+        ),
+        params=(
+            Param(
+                "letter",
+                "Optional[str]",
+                positional=True,
+                doc="First letter a-z, or 0-9 for brands starting with a digit or symbol, e.g. "
+                "'c'.",
+            ),
+            _str("slug", "One brand by slug (with its description)."),
+        ),
+        one_of=(("letter", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="depop_similar",
+        namespace="depop",
+        method="similar",
+        http="POST",
+        path="/api/v1/depop/similar",
+        summary=(
+            "Listings Depop shows as similar to one listing, for a US buyer: product_id, country, "
+            "currency, items (" + _DEPOP_ITEM + ", created_at, updated_at), count. Market: us "
+            "only." + _DEPOP_PRICES + _DEPOP_NOTE
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Union[str, int]",
+                required=True,
+                doc="Product id (items[].product_id), e.g. 1002884801.",
+            ),
+            _DEPOP_COUNTRY_US,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -19255,6 +19703,7 @@ NAMESPACES: tuple[str, ...] = (
     "mercari",
     "bolcom",
     "uniqlo",
+    "depop",
 )
 
 
