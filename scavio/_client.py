@@ -65,6 +65,7 @@ from ._namespaces_sync import (
     _OlxNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
+    _PoshmarkNamespace,
     _PublixNamespace,
     _RealtorNamespace,
     _RedditNamespace,
@@ -245,6 +246,7 @@ class ScavioClient:
         self.bolcom = _BolcomNamespace(self)
         self.uniqlo = _UniqloNamespace(self)
         self.depop = _DepopNamespace(self)
+        self.poshmark = _PoshmarkNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

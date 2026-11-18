@@ -97,6 +97,7 @@ __all__ = [
     "_BolcomNamespace",
     "_UniqloNamespace",
     "_DepopNamespace",
+    "_PoshmarkNamespace",
 ]
 
 class _GoogleNamespace:
@@ -15632,3 +15633,373 @@ class _DepopNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("depop_similar", {"product_id": product_id, "country": country}, extra)
+
+class _PoshmarkNamespace:
+    """Poshmark search, sold, category, brand, brands, suggestions, parties, party listings and similar endpoints for poshmark.com (us) and poshmark.ca (ca), plus global listing, closet, closet listings, Love Notes, closets search and category tree endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        page: Optional[int] = None,
+        availability: Optional[Literal["available", "sold", "all"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        department: Optional[Literal["Women", "Men", "Kids", "Home", "Pets", "Electronics"]] = None,
+        category: Optional[str] = None,
+        subcategory: Optional[str] = None,
+        sort: Optional[Literal["relevance", "just_shared", "just_in", "price_asc", "price_desc", "price_drop", "most_liked"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Literal["new_with_tags", "new_with_tags_or_boutique", "boutique", "like_new", "good", "fair"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Poshmark listings in one market (us poshmark.com USD, ca poshmark.ca CAD): market, currency, sort, availability, filters, page, page_size, total, has_more, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market), facets (top 25 brands, colours and category counts), query. availability available (default), sold or all. Filters: brand (up to 10), department, category / subcategory (from categories()), size, condition, color, price_min / price_max. 48 listings per page; total is Poshmark's approximate count of matches; about 5,000 listings are reachable per query (page up to 105); has_more says if the next page has listings. Sold listings stop at 10 pages = 480 per query and filter combination (Poshmark's own limit): narrow with filters or split by price_min / price_max ranges to reach more; a sold page above 10 answers 400 before anything is charged. Not available: Posh Shows, trending searches, the full brand directory (brands() gives the top 50; brand inputs take any name), Love Notes beyond the latest 100, sold results beyond 480 per query and filter combination, offers, bundles, price history. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'lululemon align'.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            page: Page, 1 to 105, 48 listings each (about 5,000 reachable per query). Sold listings stop at page 10.
+            availability: available (default), sold or all. Sold pages stop at 10 (480 listings).
+            brand: Brand names as Poshmark writes them (items[].brand, brands(), suggestions()), one or up to 10, e.g. 'Coach'.
+            department: Department: Women, Men, Kids, Home, Pets, Electronics.
+            category: Category slug or name from categories() (e.g. 'Bags', 'Pants_&_Jumpsuits'). Needs department.
+            subcategory: Subcategory slug or name from categories() (e.g. 'Totes', 'Leggings'). Needs category.
+            sort: relevance (default), just_shared, just_in (newest listed), price_asc, price_desc, price_drop (recently price dropped), most_liked.
+            size: Sizes as Poshmark writes them (items[].size, e.g. 10, M, OS), up to 10.
+            condition: One condition: new_with_tags, new_with_tags_or_boutique, boutique (Boutique retail listings), like_new, good, fair. Item condition reads the same names (not_new_with_tags on some older listings; None when the seller set none).
+            color: Colours, up to 5: Red, Pink, Orange, Yellow, Green, Blue, Purple, Gold, Silver, Black, Gray, White, Cream, Brown, Tan.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price, whole units of the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_search", {"query": query, "country": country, "page": page, "availability": availability, "brand": brand, "department": department, "category": category, "subcategory": subcategory, "sort": sort, "size": size, "condition": condition, "color": color, "price_min": price_min, "price_max": price_max}, extra)
+
+    def sold(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        page: Optional[int] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        department: Optional[Literal["Women", "Men", "Kids", "Home", "Pets", "Electronics"]] = None,
+        category: Optional[str] = None,
+        subcategory: Optional[str] = None,
+        sort: Optional[Literal["relevance", "just_shared", "just_in", "price_asc", "price_desc", "price_drop", "most_liked"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Literal["new_with_tags", "new_with_tags_or_boutique", "boutique", "like_new", "good", "fair"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sold Poshmark listings by keyword, with sold prices and sold dates, in one market (us USD, ca CAD): market, currency, sort, availability, filters, page, page_size, total, has_more, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market), facets (top 25 brands, colours and category counts), query (every item status sold, with sold_at). On a sold listing, price is the price shown on the sold listing (Poshmark says a sold listing reflects the final order price; offers are private and not returned) and sold_at is the date Poshmark marked it sold. Sold listings stop at 10 pages = 480 per query and filter combination (Poshmark's own limit): narrow with filters or split by price_min / price_max ranges to reach more; a sold page above 10 answers 400 before anything is charged. total is Poshmark's approximate count of sold matches, far more than the 480 reachable. Filters: brand, department, category / subcategory, size, condition, color, price_min / price_max. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, e.g. 'coach bag'.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            page: Page, 1 to 10, 48 sold listings each (480 per query and filter combination).
+            brand: Brand names as Poshmark writes them (items[].brand, brands(), suggestions()), one or up to 10, e.g. 'Coach'.
+            department: Department: Women, Men, Kids, Home, Pets, Electronics.
+            category: Category slug or name from categories() (e.g. 'Bags', 'Pants_&_Jumpsuits'). Needs department.
+            subcategory: Subcategory slug or name from categories() (e.g. 'Totes', 'Leggings'). Needs category.
+            sort: relevance (default), just_shared, just_in (newest listed), price_asc, price_desc, price_drop (recently price dropped), most_liked.
+            size: Sizes as Poshmark writes them (items[].size, e.g. 10, M, OS), up to 10.
+            condition: One condition: new_with_tags, new_with_tags_or_boutique, boutique (Boutique retail listings), like_new, good, fair. Item condition reads the same names (not_new_with_tags on some older listings; None when the seller set none).
+            color: Colours, up to 5: Red, Pink, Orange, Yellow, Green, Blue, Purple, Gold, Silver, Black, Gray, White, Cream, Brown, Tan.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price, whole units of the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_sold", {"query": query, "country": country, "page": page, "brand": brand, "department": department, "category": category, "subcategory": subcategory, "sort": sort, "size": size, "condition": condition, "color": color, "price_min": price_min, "price_max": price_max}, extra)
+
+    def product(
+        self,
+        listing_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Poshmark listing in full by listing_id or link: listing_id, url, title, description, status (available, sold, not_for_sale), sold_at, market (the listing's market), price, original_price (seller-entered), first_price, price_drop_percent, price_drop_text, shipping {text, price, discounted_from}, shipping_discount, bundle_discount (the seller's bundle offer text), promotions, brand, brand_slug, condition, department, category, subcategories, category_path, size, sizes [{size, quantity_available, quantity_sold}], multi_size, colors, style_tags, pictures, video_count, like_count, comment_count, share_count, comments [{text, created_at}; no authors, @mentions of other users shown as @user], created_at, published_at, updated_at, seller {username, url, home_market, posh_ambassador (posh_ambassador, posh_ambassador_ii or None), super_seller, followers, following, listings, shares, items_sold (Poshmark's rounded figure, e.g. 700+), orders_shipped, love_notes, on_vacation, last_active_at, joined_at}, detail (full, or basic when only the core fields could be read). On a sold listing price is the price shown on the sold listing. Listing ids and closets are global: they open from either market, in the listing's own currency (no conversion). Real names, avatars, cities, likers, comment authors and Love Note buyers are never returned (only seller usernames). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            listing_id: Listing id (items[].listing_id, 24 hex characters), e.g. '6ad80f0dce5b0ace7ee9abd7'.
+            url: A poshmark.com or poshmark.ca listing link.
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_product", {"listing_id": listing_id, "url": url, "country": country}, extra)
+
+    def category(
+        self,
+        department: Literal["Women", "Men", "Kids", "Home", "Pets", "Electronics"],
+        *,
+        category: Optional[str] = None,
+        subcategory: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        page: Optional[int] = None,
+        availability: Optional[Literal["available", "sold", "all"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        sort: Optional[Literal["relevance", "just_shared", "just_in", "price_asc", "price_desc", "price_drop", "most_liked"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Literal["new_with_tags", "new_with_tags_or_boutique", "boutique", "like_new", "good", "fair"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Poshmark category's listings in a market (us USD, ca CAD): department (required), category and subcategory (slugs or names from categories()); answers department / category / subcategory as Poshmark matched them, then market, currency, sort, availability, filters, page, page_size, total, has_more, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market), facets (top 25 brands, colours and category counts). A category Poshmark does not know is a charged 404. availability available (default), sold or all. Filters: brand, size, condition, color, price_min / price_max. 48 listings per page; total is Poshmark's approximate count of matches; about 5,000 listings are reachable per query (page up to 105); has_more says if the next page has listings. Sold listings stop at 10 pages = 480 per query and filter combination (Poshmark's own limit): narrow with filters or split by price_min / price_max ranges to reach more; a sold page above 10 answers 400 before anything is charged. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: Department: Women, Men, Kids, Home, Pets, Electronics.
+            category: Category slug or name from categories() (e.g. 'Bags', 'Pants_&_Jumpsuits'). Needs department.
+            subcategory: Subcategory slug or name from categories() (e.g. 'Totes', 'Leggings'). Needs category.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            page: Page, 1 to 105, 48 listings each (about 5,000 reachable per query). Sold listings stop at page 10.
+            availability: available (default), sold or all. Sold pages stop at 10 (480 listings).
+            brand: Brand names as Poshmark writes them (items[].brand, brands(), suggestions()), one or up to 10, e.g. 'Coach'.
+            sort: relevance (default), just_shared, just_in (newest listed), price_asc, price_desc, price_drop (recently price dropped), most_liked.
+            size: Sizes as Poshmark writes them (items[].size, e.g. 10, M, OS), up to 10.
+            condition: One condition: new_with_tags, new_with_tags_or_boutique, boutique (Boutique retail listings), like_new, good, fair. Item condition reads the same names (not_new_with_tags on some older listings; None when the seller set none).
+            color: Colours, up to 5: Red, Pink, Orange, Yellow, Green, Blue, Purple, Gold, Silver, Black, Gray, White, Cream, Brown, Tan.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price, whole units of the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_category", {"department": department, "category": category, "subcategory": subcategory, "country": country, "page": page, "availability": availability, "brand": brand, "sort": sort, "size": size, "condition": condition, "color": color, "price_min": price_min, "price_max": price_max}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        department: Optional[Literal["Women", "Men", "Kids", "Home", "Pets", "Electronics"]] = None,
+        category: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        page: Optional[int] = None,
+        availability: Optional[Literal["available", "sold", "all"]] = None,
+        sort: Optional[Literal["relevance", "just_shared", "just_in", "price_asc", "price_desc", "price_drop", "most_liked"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Literal["new_with_tags", "new_with_tags_or_boutique", "boutique", "like_new", "good", "fair"]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Poshmark brand's listings in a market (us USD, ca CAD), optionally in one department and category: brand {id, name}, brand_slug, department, category, then market, currency, sort, availability, filters, page, page_size, total, has_more, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market), facets (top 25 brands, colours and category counts). An unknown brand is a charged 404. availability available (default), sold or all. Filters: size, condition, color, price_min / price_max. 48 listings per page; total is Poshmark's approximate count of matches; about 5,000 listings are reachable per query (page up to 105); has_more says if the next page has listings. Sold listings stop at 10 pages = 480 per query and filter combination (Poshmark's own limit): narrow with filters or split by price_min / price_max ranges to reach more; a sold page above 10 answers 400 before anything is charged. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: One brand: its name ('Coach', 'lululemon athletica') or slug (items[].brand_slug, e.g. 'lululemon_athletica').
+            department: Department: Women, Men, Kids, Home, Pets, Electronics.
+            category: Category slug or name from categories() (e.g. 'Bags', 'Pants_&_Jumpsuits'). Needs department.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            page: Page, 1 to 105, 48 listings each (about 5,000 reachable per query). Sold listings stop at page 10.
+            availability: available (default), sold or all. Sold pages stop at 10 (480 listings).
+            sort: relevance (default), just_shared, just_in (newest listed), price_asc, price_desc, price_drop (recently price dropped), most_liked.
+            size: Sizes as Poshmark writes them (items[].size, e.g. 10, M, OS), up to 10.
+            condition: One condition: new_with_tags, new_with_tags_or_boutique, boutique (Boutique retail listings), like_new, good, fair. Item condition reads the same names (not_new_with_tags on some older listings; None when the seller set none).
+            color: Colours, up to 5: Red, Pink, Orange, Yellow, Green, Blue, Purple, Gold, Silver, Black, Gray, White, Cream, Brown, Tan.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price, whole units of the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_brand", {"brand": brand, "department": department, "category": category, "country": country, "page": page, "availability": availability, "sort": sort, "size": size, "condition": condition, "color": color, "price_min": price_min, "price_max": price_max}, extra)
+
+    def closet(
+        self,
+        username: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Poshmark closet (seller) by username: username, url, home_market, posh_ambassador (posh_ambassador, posh_ambassador_ii or None), super_seller, followers, following, listings, shares, items_sold (Poshmark's rounded figure, e.g. 700+), orders_shipped, love_notes (total received), on_vacation, last_active_at, joined_at, description. Closets are global. An unknown username is a charged 404. Real names, avatars, cities, likers, comment authors and Love Note buyers are never returned (only seller usernames). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Closet username (poshmark.com/closet/<username>, items[].seller_username), e.g. 'thriftedbyher'.
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_closet", {"username": username, "country": country}, extra)
+
+    def closet_listings(
+        self,
+        username: str,
+        *,
+        availability: Optional[Literal["available", "sold"]] = None,
+        page: Optional[int] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Poshmark closet's listings, available (default) or sold, 48 per page: username, market (the seller's home market: listings are read there automatically, so prices are in its currency; still 1 credit), currency, availability, on_vacation (a closet on vacation hold shows no available listings), page, page_size, total, has_more, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market). On a sold listing, price is the price shown on the sold listing (Poshmark says a sold listing reflects the final order price; offers are private and not returned) and sold_at is the date Poshmark marked it sold. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Closet username (poshmark.com/closet/<username>, items[].seller_username), e.g. 'thriftedbyher'.
+            availability: available (default) or sold.
+            page: Page, 48 listings each.
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_closet_listings", {"username": username, "availability": availability, "page": page, "country": country}, extra)
+
+    def love_notes(
+        self,
+        username: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The latest Love Notes a Poshmark closet received (buyer notes left with a 5-star rating): username, count (at most 100: Poshmark shows only the latest 100, no paging), total (all Love Notes received, from the closet's stats), complete, notes [{comment, created_at, listing_id, picture_url}]. No author is returned. Closets are global. An unknown username is a charged 404. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            username: Closet username (poshmark.com/closet/<username>, items[].seller_username), e.g. 'thriftedbyher'.
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_love_notes", {"username": username, "country": country}, extra)
+
+    def closets_search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Poshmark closets whose username matches a query, 24 per page: query, page, total, has_more, count, closets [{username, url, home_market, joined_at}]. Global (both markets). Use closet() for a closet's stats. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Part of a closet username, e.g. 'vintage'.
+            page: Page, 1 to 200, 24 closets each.
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_closets_search", {"query": query, "page": page, "country": country}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Poshmark's category tree (the same on us and ca): count (6 departments), category_count, subcategory_count, departments [{id, name, slug, categories [{id, name, slug, subcategories [{id, name, slug}]}]}]. Slugs are the department / category / subcategory inputs of search(), sold(), category() and brand(). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Optional: the Poshmark domain to ask, 'us' (default) or 'ca'. The data is global: the same record answers on both, prices stay in the listing's own currency (no conversion).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_categories", {"country": country}, extra)
+
+    def brands(
+        self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Poshmark's top 50 brands in a market: market, count, brands [{id, name}]. name is the input of brand() and the brand filter. The full brand directory is not available; brand inputs take any brand name. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_brands", {"country": country}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Poshmark brand and brand + category suggestions for a partial query in a market (us, ca): market, query, count, suggestions [{type (brand, brand_category), text, brand, brand_id, category}]. Poshmark suggests brands (and a brand's categories when the query names one brand), not free-text searches. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'lulu'.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_suggestions", {"query": query, "country": country}, extra)
+
+    def parties(
+        self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        status: Optional[Literal["all", "scheduled", "archived"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Posh Parties of one market (us, ca; each market has its own parties): upcoming ones and those of the last few days (20). market, status, count, parties [{party_id, url, name, type (style, department, category, brand), status (scheduled, archived), start_time, end_time, listing_count, theme_brands, theme_departments, theme_categories [{department, category}], hosts (usernames), market}]. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            status: all (default), scheduled (upcoming) or archived (ended).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_parties", {"country": country, "status": status}, extra)
+
+    def party_listings(
+        self,
+        party_id: str,
+        *,
+        cursor: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Listings shared to one Posh Party, 20 per page by cursor (ended parties still list): market, currency, party_id, count, has_more, next_cursor, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market). Party ids are per market: ask with the party's own market (another market's id answers only a few unrelated listings). An unknown party id answers 0 items. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            party_id: Party id (parties[].party_id of parties()), e.g. '6af437b4ccaeb9c6a30f84a3'.
+            cursor: next_cursor of the previous page.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_party_listings", {"party_id": party_id, "cursor": cursor, "country": country}, extra)
+
+    def similar(
+        self,
+        listing_id: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Listings Poshmark shows as similar to one listing (16, no paging), from the market asked (us USD, ca CAD; ask with the listing's own market): market, listing_id, count, items (listing_id, url, title, price {amount, currency}, original_price (the original price the seller entered, None when none), first_price (the price it was first listed at: above price after a price drop, below it when the seller raised the price), price_drop_percent, size, brand, brand_slug, condition, department, category, subcategories, colors, status (available, sold, not_for_sale), sold_at, picture_url, picture_count, like_count, comment_count, share_count, shipping_discount, seller_username, created_at, updated_at, market). An unknown listing is a charged 404. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            listing_id: Listing id (items[].listing_id), e.g. '6ad80f0dce5b0ace7ee9abd7'.
+            country: Market (default 'us'): us (poshmark.com, USD) or ca (poshmark.ca, CAD); results are that market's own listings in its currency. Any other country answers 400 before anything is charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("poshmark_similar", {"listing_id": listing_id, "country": country}, extra)

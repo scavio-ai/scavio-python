@@ -67,6 +67,7 @@ from ._namespaces_async import (
     _AsyncOlxNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
+    _AsyncPoshmarkNamespace,
     _AsyncPublixNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
@@ -240,6 +241,7 @@ class AsyncScavioClient:
         self.bolcom = _AsyncBolcomNamespace(self)
         self.uniqlo = _AsyncUniqloNamespace(self)
         self.depop = _AsyncDepopNamespace(self)
+        self.poshmark = _AsyncPoshmarkNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -5322,3 +5322,98 @@ def test_depop_credits_paths_and_wire(monkeypatch):
         depop.shop()
     with pytest.raises(ScavioError):
         depop.brands()
+
+
+def test_poshmark_credits_paths_and_wire(monkeypatch):
+    """poshmark (0.69.0): 15 endpoints on /api/v1/poshmark, 1 credit each, 240 s floor.
+
+    Every endpoint accepts us and ca. product, closet, closet_listings, love_notes, closets_search
+    and categories are global (country only picks the domain asked). category needs department;
+    product takes one of listing_id or url.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "poshmark"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "closet", "closet_listings",
+        "closets_search", "love_notes", "parties", "party_listings", "product", "search",
+        "similar", "sold", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/poshmark/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        params = {p.name: p for p in ep.params}
+        assert params["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "just_shared", "just_in", "price_asc", "price_desc", '
+        '"price_drop", "most_liked"]]'
+    )
+    assert search["condition"].annotation == (
+        'Optional[Literal["new_with_tags", "new_with_tags_or_boutique", "boutique", "like_new", '
+        '"good", "fair"]]'
+    )
+    assert "availability" not in {p.name for p in eps["sold"].params}
+    assert "480 per query" in eps["search"].summary and "480 per query" in eps["sold"].summary
+    dept = {p.name: p for p in eps["category"].params}["department"]
+    assert dept.required
+    assert eps["product"].one_of == (("listing_id", "url"),)
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    posh = client.poshmark
+    posh.search("lululemon align")
+    posh.search("lululemon align", country="ca", availability="all", brand=["lululemon athletica"],
+                department="Women", condition="like_new", sort="price_drop", size="10",
+                color=["Black"], price_min=20, price_max=60, page=2)
+    posh.sold("coach bag", page=10, category="Bags", department="Women")
+    posh.product("6ad80f0dce5b0ace7ee9abd7")
+    posh.product(url="https://poshmark.ca/listing/x-6af9e2547049a1ea8b9d2617", country="ca")
+    posh.category("Women", category="Bags", subcategory="Totes", availability="sold")
+    posh.brand("Coach", department="Women")
+    posh.closet("thriftedbyher")
+    posh.closet_listings("thriftedbyher", availability="sold", page=2)
+    posh.love_notes("thriftedbyher")
+    posh.closets_search("vintage", page=2)
+    posh.categories()
+    posh.brands(country="ca")
+    posh.suggestions("lulu")
+    posh.parties(status="scheduled")
+    posh.party_listings("6af437b4ccaeb9c6a30f84a3", cursor="abc")
+    posh.similar("6ad80f0dce5b0ace7ee9abd7")
+    base = "/api/v1/poshmark/"
+    assert seen == [
+        (base + "search", {"query": "lululemon align"}, 240.0),
+        (base + "search", {"query": "lululemon align", "country": "ca", "page": 2,
+                           "availability": "all", "brand": ["lululemon athletica"],
+                           "department": "Women", "sort": "price_drop", "size": "10",
+                           "condition": "like_new", "color": ["Black"], "price_min": 20,
+                           "price_max": 60}, 240.0),
+        (base + "sold", {"query": "coach bag", "page": 10, "department": "Women",
+                         "category": "Bags"}, 240.0),
+        (base + "product", {"listing_id": "6ad80f0dce5b0ace7ee9abd7"}, 240.0),
+        (base + "product", {"url": "https://poshmark.ca/listing/x-6af9e2547049a1ea8b9d2617",
+                            "country": "ca"}, 240.0),
+        (base + "category", {"department": "Women", "category": "Bags", "subcategory": "Totes",
+                             "availability": "sold"}, 240.0),
+        (base + "brand", {"brand": "Coach", "department": "Women"}, 240.0),
+        (base + "closet", {"username": "thriftedbyher"}, 240.0),
+        (base + "closet-listings", {"username": "thriftedbyher", "availability": "sold",
+                                    "page": 2}, 240.0),
+        (base + "love-notes", {"username": "thriftedbyher"}, 240.0),
+        (base + "closets-search", {"query": "vintage", "page": 2}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "brands", {"country": "ca"}, 240.0),
+        (base + "suggestions", {"query": "lulu"}, 240.0),
+        (base + "parties", {"status": "scheduled"}, 240.0),
+        (base + "party-listings", {"party_id": "6af437b4ccaeb9c6a30f84a3", "cursor": "abc"}, 240.0),
+        (base + "similar", {"listing_id": "6ad80f0dce5b0ace7ee9abd7"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        posh.product()

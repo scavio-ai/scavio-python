@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 88 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 89 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -34,6 +34,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
 | Depop Listings by Buyer Market, Shop Sold Prices, Shop Profiles and Reviews (9 markets; 14 endpoints) | Yes | No | No | No |
+| Poshmark Sold Prices, Listings, Closets and Love Notes (US and Canada; 15 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
@@ -3609,6 +3610,84 @@ available: results past the first 24, keyword sold search, trending
 searches, views, join date, Top Seller badge, offers / bundles, price history,
 `similar` outside us. Failed calls are not charged; a not-found is charged.
 
+### 58. Marketplace -- Poshmark sold prices, listings, closets and Love Notes
+
+Poshmark on poshmark.com (us, USD) and poshmark.ca (ca, CAD); both
+storefronts are English. Namespace `poshmark`, 15 endpoints: `search`,
+`sold`, `product`, `category`, `brand`, `closet`, `closet_listings`,
+`love_notes`, `closets_search`, `categories`, `brands`, `suggestions`,
+`parties`, `party_listings`, `similar`. Pick the market with `country` (us is
+the default). 1 credit per call on every endpoint. The request timeout is
+raised to at least 240s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+posh = client.poshmark
+
+# --- Sold prices by keyword: the price shown on the sold listing and the date Poshmark
+# marked it sold. Up to 480 sold listings per query and filter combination (10 pages of 48):
+# narrow with filters or split by price range to reach more.
+sold = posh.sold("coach bag", department="Women", category="Bags", condition="good")["data"]
+print(sold["count"], sold["total"], sold["currency"], sold["has_more"])
+for item in sold["items"][:3]:
+    print(item["title"], item["price"]["amount"], item["price"]["currency"], item["sold_at"])
+under_100 = posh.sold("coach bag", price_max=100, page=2)["data"]
+
+# --- Active listings: original price the seller entered, first price and price drops.
+res = posh.search("lululemon align", country="ca", sort="price_drop")["data"]
+for item in res["items"][:3]:
+    print(item["title"], item["price"], item["original_price"], item["first_price"], item["price_drop_percent"])
+
+# --- One listing in full (listing ids are global: it opens from either market in its own currency).
+listing = posh.product("6ad80f0dce5b0ace7ee9abd7")["data"]
+print(listing["price"], listing["shipping"], listing["seller"]["items_sold"], listing["seller"]["love_notes"])
+
+# --- Closets: stats, listings (available or sold) and the latest 100 Love Notes.
+closet = posh.closet("thriftedbyher")["data"]
+print(closet["posh_ambassador"], closet["followers"], closet["items_sold"], closet["orders_shipped"])
+closet_sold = posh.closet_listings("thriftedbyher", availability="sold")["data"]
+notes = posh.love_notes("thriftedbyher")["data"]
+print(notes["count"], notes["total"], notes["notes"][0]["comment"])
+closets = posh.closets_search("vintage")["data"]["closets"]
+
+# --- Browse: category tree, category and brand grids, top brands, suggestions, parties, similar.
+tree = posh.categories()["data"]["departments"]
+bags = posh.category("Women", category="Bags", availability="sold")["data"]
+coach = posh.brand("Coach", sort="just_in")["data"]
+top = posh.brands()["data"]["brands"]
+hints = posh.suggestions("lulu")["data"]["suggestions"]
+parties = posh.parties(status="scheduled")["data"]["parties"]
+if parties:
+    shared = posh.party_listings(parties[0]["party_id"])["data"]
+similar = posh.similar("6ad80f0dce5b0ace7ee9abd7")["data"]["items"]
+```
+
+Search, sold, category, brand, brands, suggestions, parties, party listings
+and similar return that market's own listings in its currency. Listing ids
+and closets are global: a listing opens from either market in its own
+currency (no conversion), and closet listings are read in the seller's home
+market. Any other country answers 400 before anything is charged.
+
+On a sold listing, `price` is the price shown on the sold listing (Poshmark
+says a sold listing reflects the final order price; offers are private and
+not returned) and `sold_at` is the date Poshmark marked it sold.
+`original_price` is the original price the seller entered; `first_price` is
+the price it was first listed at, which can be below `price` when the seller
+raised the price. `total` is Poshmark's approximate count; active search
+reaches about 5,000 listings per query (105 pages of 48), sold search 480 per
+query and filter combination. Conditions: `new_with_tags`,
+`new_with_tags_or_boutique`, `boutique`, `like_new`, `good`, `fair`. Sorts:
+relevance, `just_shared`, `just_in`, `price_asc`, `price_desc`,
+`price_drop`, `most_liked`. `items_sold` is Poshmark's display string (e.g.
+`700+`). Seller usernames only: no real names, cities, likers, comment
+authors or Love Note buyers. Not available: sold results beyond 480 per query
+and filter combination, Love Notes beyond the latest 100, Posh Shows,
+trending searches, the full brand directory (top 50; brand inputs take any
+name), offers, bundles, price history. Failed calls are not charged; a
+not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3760,6 +3839,7 @@ Scavio works with popular AI/LLM frameworks:
 | ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
 | Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
+| Poshmark (`poshmark`) | `search`, `sold`, `product`, `category`, `brand`, `closet`, `closet_listings`, `love_notes`, `closets_search`, `categories`, `brands`, `suggestions`, `parties`, `party_listings`, `similar`; `country` us or ca (`product`, closet endpoints and `categories` global) | 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
@@ -3777,6 +3857,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.69.0
+
+- **New `poshmark` namespace** (sync and async) for Poshmark, 15 endpoints:
+  `search`, `sold`, `product`, `category`, `brand`, `closet`,
+  `closet_listings`, `love_notes`, `closets_search`, `categories`,
+  `brands`, `suggestions`, `parties`, `party_listings`, `similar`.
+  Markets us (default, USD) and ca (CAD) via `country`; listing ids and
+  closets are global. Sold search up to 480 per query and filter
+  combination. 1 credit each. 240s timeout floor.
 
 ### Changed in 0.68.1
 
