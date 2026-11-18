@@ -2854,6 +2854,133 @@ _POSHMARK_NOT_AVAILABLE = (
 )
 _POSHMARK_NOTE = " Failed upstream calls are not charged; a not-found is charged."
 
+
+# thredUP params shared across endpoints. One US store (thredup.com, USD; it ships to the US and
+# Canada), so there is no country param. thredUP has no men's department.
+_THREDUP_DEPARTMENTS = (
+    "women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity",
+    "accessories",
+)
+_THREDUP_ASSORTMENTS = ("women", "girls", "boys")
+_THREDUP_CONDITIONS = ("new_with_tags", "excellent", "very_good", "good", "flawed")
+_THREDUP_SELLER_TYPES = ("thredup", "direct_listing", "dropship")
+_THREDUP_SORTS = ("default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop")
+_THREDUP_COLORS = (
+    "black", "grey", "white", "ivory", "tan", "brown", "purple", "blue", "teal", "green", "red",
+    "pink", "orange", "yellow",
+)
+_THREDUP_MATERIALS = (
+    "natural", "cashmere", "cotton", "linen", "silk", "wool", "leather", "suede", "blend",
+    "cashmere blend", "cotton blend", "linen blend", "silk blend", "wool blend", "synthetic",
+    "acrylic", "faux fur", "nylon", "polyester", "rayon", "spandex", "vegan leather",
+)
+_THREDUP_PATTERNS = (
+    "animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block",
+    "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots",
+    "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed",
+)
+_THREDUP_DEPARTMENT_DOC = (
+    "Department: " + ", ".join(_THREDUP_DEPARTMENTS) + " (thredUP has no men's department)."
+)
+_THREDUP_DEPARTMENT = _lit(
+    "department", _THREDUP_DEPARTMENTS, _THREDUP_DEPARTMENT_DOC + " Default 'women'."
+)
+_THREDUP_ASSORTMENT = _lit("department", _THREDUP_ASSORTMENTS, "women (default), girls or boys.")
+_THREDUP_BRAND = _str(
+    "brand",
+    "Brand as thredUP writes it (items[].brand, brands() brands[].brand, suggestions()), e.g. "
+    "'Patagonia'. '<Brand> - all brands' covers a brand's sub-lines.",
+)
+_THREDUP_CATEGORY = _str(
+    "category",
+    "Category tag from categories() (categories[].category), e.g. 'dresses', 'jeans', "
+    "'outerwear', 'one-pieces'.",
+)
+_THREDUP_SORT = _lit(
+    "sort",
+    _THREDUP_SORTS,
+    "default (the page's own order: relevance for a search, recommended for a list, recently "
+    "discounted for sold; the answer's sort says which), recommended, relevance, newest, "
+    "price_high, price_low, price_drop (recently discounted).",
+)
+_THREDUP_FILTERS_NO_SORT = (
+    Param(
+        "size",
+        "Optional[Union[int, str, list[Union[int, str]]]]",
+        doc="Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to "
+        "10. Ids, not labels.",
+    ),
+    _str_or_list(
+        "condition",
+        "Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed "
+        "Gems).",
+    ),
+    _str_or_list("color", "Colours, up to 5: " + ", ".join(_THREDUP_COLORS) + "."),
+    _str_or_list("material", "Material groups, up to 5: " + ", ".join(_THREDUP_MATERIALS) + "."),
+    _lit("pattern", _THREDUP_PATTERNS, "One pattern."),
+    _float(
+        "price_min",
+        "Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base "
+        "price, so an item can show slightly outside the range.",
+    ),
+    _float("price_max", "Highest price, whole USD (approximate, see price_min)."),
+    _bool("clearance", "Only clearance items."),
+    _str_or_list(
+        "seller_type",
+        "Who sells (default all three): thredup (items thredUP prices and ships), direct_listing "
+        "(Direct Listings: private sellers list and ship), dropship (partner listings).",
+    ),
+    _int(
+        "page",
+        "Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).",
+    ),
+)
+_THREDUP_FILTERS = (_THREDUP_SORT,) + _THREDUP_FILTERS_NO_SORT
+_THREDUP_ITEM_NUMBER = Param(
+    "item_number",
+    "Optional[Union[int, str]]",
+    positional=True,
+    doc="thredUP item number (items[].item_number; the number at the end of a "
+    "thredup.com/product/... link), e.g. 241601590.",
+)
+_THREDUP_URL = _str(
+    "url", "A thredup.com item link (https://www.thredup.com/product/<slug>/<item number>)."
+)
+_THREDUP_ITEM = (
+    "item_number, url, title, brand, category, category_tags, department, size, condition "
+    "(new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, "
+    "percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; "
+    "price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, "
+    "direct_listing, dropship), status (available, reserved, sold), colors, materials, "
+    "picture_url, picture_count, favorite_count"
+)
+_THREDUP_LIST_OUT = (
+    "sort (the order applied), filters, page, page_size (119), total (thredUP's approximate "
+    "count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, "
+    "currency, items (" + _THREDUP_ITEM + ")"
+)
+_THREDUP_STORE = (
+    "thredUP's US store (thredup.com, USD; it ships to the US and Canada; no country param)"
+)
+_THREDUP_PAGES = (
+    " 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: "
+    "narrow with filters or split by price_min / price_max to reach more; a later page answers "
+    "400 before anything is charged)."
+)
+_THREDUP_FILTER_TEXT = (
+    " Filters: department (default women), brand, category, size (sizing ids), condition, "
+    "color, material, pattern, price_min / price_max (whole USD, approximate: matched on the "
+    "base price), clearance, seller_type (thredup, direct_listing, dropship; all three by "
+    "default)."
+)
+_THREDUP_RETAIL = (
+    " estimated_retail is the estimated original retail price (thredUP's estimate; on Direct "
+    "Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * "
+    "100), computed from the price and the estimated retail, None when there is no estimated "
+    "retail or it is not above the price."
+)
+_THREDUP_NOTE = " Failed upstream calls are not charged; a not-found is charged."
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -13155,6 +13282,258 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== thredUP ==============================
+    # 12 endpoints on /api/v1/thredup, 1 credit each, one US store (no country param). List
+    # pages take 15-45 s and the backend retries: 240 s timeout floor, like Poshmark.
+    Endpoint(
+        key="thredup_search",
+        namespace="thredup",
+        method="search",
+        http="POST",
+        path="/api/v1/thredup/search",
+        summary=(
+            "Search " + _THREDUP_STORE + ": query, " + _THREDUP_LIST_OUT + ". Free text is "
+            "matched loosely (semantic: it matches the look, so 'lululemon' also returns similar "
+            "brands); for one brand use brand." + _THREDUP_FILTER_TEXT + _THREDUP_PAGES
+            + _THREDUP_RETAIL + " Not available: product reviews (thredUP shows none), seller "
+            "shops, sold dates, men's clothing, price history." + _THREDUP_NOTE
+        ),
+        params=(
+            _req("query", "Search text, e.g. 'denim jacket'. Semantic: use brand for one brand."),
+            _THREDUP_BRAND,
+            _THREDUP_DEPARTMENT,
+            _THREDUP_CATEGORY,
+        )
+        + _THREDUP_FILTERS,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_sold",
+        namespace="thredup",
+        method="sold",
+        http="POST",
+        path="/api/v1/thredup/sold",
+        summary=(
+            "Sold thredUP listings by filters only: brand and / or category required, no keyword "
+            "(thredUP answers no sold items for free text). status (sold), " + _THREDUP_LIST_OUT
+            + "; every item status sold, price is the price the item last listed at. thredUP "
+            "shows no sold date." + _THREDUP_FILTER_TEXT + _THREDUP_PAGES + _THREDUP_RETAIL
+            + _THREDUP_NOTE
+        ),
+        params=(_THREDUP_BRAND, _THREDUP_DEPARTMENT, _THREDUP_CATEGORY) + _THREDUP_FILTERS,
+        one_of=(("brand", "category"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_product",
+        namespace="thredup",
+        method="product",
+        http="POST",
+        path="/api/v1/thredup/product",
+        summary=(
+            "One thredUP item in full by item_number or link: " + _THREDUP_ITEM + ", plus "
+            "description (the seller's text on Direct Listings), brand_id, departments, sale, "
+            "condition_notes (the flaws thredUP noted), condition_detail, size_detail {chart, "
+            "scale, value}, sizing_id, measurements, characteristics {fit, pattern, material, "
+            "sleeve_length, neckline, features, stretch, care, inseam_in, rise_in, length_in, "
+            "chest_in, waist_in}, style_tags, pictures, authentication, certified_authenticity "
+            "(partner listings), direct_listing {shipping_cost, shipping_covered, "
+            "buyer_protection_price, on_vacation} (Direct Listings only), similar_brands. Sold "
+            "items still answer (status sold, the price they last listed at)." + _THREDUP_RETAIL
+            + " No seller or consignor names or ids are returned." + _THREDUP_NOTE
+        ),
+        params=(_THREDUP_ITEM_NUMBER, _THREDUP_URL),
+        one_of=(("item_number", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_category",
+        namespace="thredup",
+        method="category",
+        http="POST",
+        path="/api/v1/thredup/category",
+        summary=(
+            "One department's category on " + _THREDUP_STORE + ": department and category (a tag "
+            "from categories()) required. department, category, " + _THREDUP_LIST_OUT + "."
+            + _THREDUP_FILTER_TEXT + _THREDUP_PAGES + _THREDUP_RETAIL + _THREDUP_NOTE
+        ),
+        params=(
+            Param(
+                "department",
+                "Literal[" + ", ".join(f'"{d}"' for d in _THREDUP_DEPARTMENTS) + "]",
+                required=True,
+                doc=_THREDUP_DEPARTMENT_DOC,
+            ),
+            _req("category", "Category tag from categories() (categories[].category), e.g. "
+                 "'dresses'."),
+            _THREDUP_BRAND,
+        )
+        + _THREDUP_FILTERS,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_brand",
+        namespace="thredup",
+        method="brand",
+        http="POST",
+        path="/api/v1/thredup/brand",
+        summary=(
+            "One brand's items on " + _THREDUP_STORE + " in a department (default women): brand, "
+            "department, " + _THREDUP_LIST_OUT + ". An unknown brand answers 0 items."
+            + _THREDUP_FILTER_TEXT + _THREDUP_PAGES + _THREDUP_RETAIL + _THREDUP_NOTE
+        ),
+        params=(
+            _req("brand", "Brand as thredUP writes it (brands() brands[].brand, items[].brand), "
+                 "e.g. 'Madewell'."),
+            _THREDUP_DEPARTMENT,
+            _THREDUP_CATEGORY,
+        )
+        + _THREDUP_FILTERS,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_deals",
+        namespace="thredup",
+        method="deals",
+        http="POST",
+        path="/api/v1/thredup/deals",
+        summary=(
+            "thredUP's deal collections on " + _THREDUP_STORE + ": clearance, under_10 (Under "
+            "$10, matched on the base price), new_arrivals (newest first) and price_drops "
+            "(recently discounted first), in a department (default women) with the usual "
+            "filters. collection, department, " + _THREDUP_LIST_OUT + ". sort only for clearance "
+            "and under_10; under_10 takes no price_min / price_max." + _THREDUP_PAGES
+            + _THREDUP_RETAIL + _THREDUP_NOTE
+        ),
+        params=(
+            Param(
+                "collection",
+                'Literal["clearance", "under_10", "new_arrivals", "price_drops"]',
+                required=True,
+                doc="clearance, under_10, new_arrivals or price_drops.",
+            ),
+            _THREDUP_BRAND,
+            _THREDUP_DEPARTMENT,
+            _THREDUP_CATEGORY,
+        )
+        + _THREDUP_FILTERS_NO_SORT
+        + (
+            _lit("sort", _THREDUP_SORTS, "Only for clearance and under_10 (new_arrivals and "
+                 "price_drops are sorts themselves)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_rescue_boxes",
+        namespace="thredup",
+        method="rescue_boxes",
+        http="POST",
+        path="/api/v1/thredup/rescue-boxes",
+        summary=(
+            "thredUP Rescue boxes (mystery bundles of items): count, available_count, currency, "
+            "boxes [{id, name, description, available, sizes, picture_url, bundles [{items (e.g. "
+            "'5 Items'), price, currency, state (listed = on sale now), sizes}]}]." + _THREDUP_NOTE
+        ),
+        params=(),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_categories",
+        namespace="thredup",
+        method="categories",
+        http="POST",
+        path="/api/v1/thredup/categories",
+        summary=(
+            "One thredUP department's categories and filter values (default women), the inputs "
+            "of the list endpoints: department, categories [{name, category}], other_departments "
+            "[{name, department}], sizes [{group, label, long_label, size (the sizing id for "
+            "size)}], conditions [{label, condition}], colors [{label, color}], materials [{label, "
+            "material}], patterns [{label, pattern}], price_ranges [{label, price_min, "
+            "price_max}], category_count, size_count." + _THREDUP_NOTE
+        ),
+        params=(_THREDUP_DEPARTMENT,),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_brands",
+        namespace="thredup",
+        method="brands",
+        http="POST",
+        path="/api/v1/thredup/brands",
+        summary=(
+            "thredUP's brand directory per department (default women): query (brands matching a "
+            "term), letter (every brand under one letter A-Z, paged with page and limit) or "
+            "neither (the letter groups, 50 brands each). brands [{id, name, brand (the brand "
+            "input of brand(), search() and sold())}], total, page, limit, has_more, count; "
+            "groups [{letter, total, count, brands}] without query or letter. Send query or "
+            "letter, not both." + _THREDUP_NOTE
+        ),
+        params=(
+            _str("query", "Brands matching a term, e.g. 'coach'."),
+            _str("letter", "Every brand under one letter, A-Z."),
+            _THREDUP_DEPARTMENT,
+            _int("page", "Page of a letter or query answer, 1 to 1000."),
+            _int("limit", "Brands per page, 1 to 500 (default 100)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_suggestions",
+        namespace="thredup",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/thredup/suggestions",
+        summary=(
+            "thredUP's search suggestions for a partial query (department women, girls or boys): "
+            "query, department, count, suggestions [{text, query (the free-text part), "
+            "department, brand, category, free_text}]. Each suggestion is a ready filter set: "
+            "pass brand / category / department / query to search()." + _THREDUP_NOTE
+        ),
+        params=(_req("query", "What the shopper has typed so far, e.g. 'made'."), _THREDUP_ASSORTMENT),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_trending",
+        namespace="thredup",
+        method="trending",
+        http="POST",
+        path="/api/v1/thredup/trending",
+        summary=(
+            "Trending searches on thredUP for a department (women, girls or boys): department, "
+            "count, searches [{text, query, department, brand, category, free_text}]."
+            + _THREDUP_NOTE
+        ),
+        params=(_THREDUP_ASSORTMENT,),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="thredup_similar",
+        namespace="thredup",
+        method="similar",
+        http="POST",
+        path="/api/v1/thredup/similar",
+        summary=(
+            "Items thredUP shows as similar to one item (by item_number or link; the first 120, "
+            "no paging): item_number, total, total_capped, page_size, count, currency, items ("
+            + _THREDUP_ITEM + "). An unknown item is a charged 404." + _THREDUP_RETAIL
+            + _THREDUP_NOTE
+        ),
+        params=(_THREDUP_ITEM_NUMBER, _THREDUP_URL),
+        one_of=(("item_number", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -20186,6 +20565,7 @@ NAMESPACES: tuple[str, ...] = (
     "uniqlo",
     "depop",
     "poshmark",
+    "thredup",
 )
 
 

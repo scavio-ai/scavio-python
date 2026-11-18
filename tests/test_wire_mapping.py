@@ -5417,3 +5417,108 @@ def test_poshmark_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         posh.product()
+
+
+def test_thredup_credits_paths_and_wire(monkeypatch):
+    """thredup (0.70.0): 12 endpoints on /api/v1/thredup, 1 credit each, 240 s floor.
+
+    One US store, so no endpoint takes country. sold takes no query and needs brand or
+    category; product and similar take one of item_number or url; category needs department and
+    category; deals needs collection.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "thredup"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "deals", "product", "rescue_boxes",
+        "search", "similar", "sold", "suggestions", "trending",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/thredup/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        assert "country" not in {p.name for p in ep.params}, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["default", "recommended", "relevance", "newest", "price_high", '
+        '"price_low", "price_drop"]]'
+    )
+    assert "Literal[\"women\", \"girls\"" in search["department"].annotation
+    assert "men\"" not in search["department"].annotation.replace("women\"", "")
+    assert "query" not in {p.name for p in eps["sold"].params}
+    assert eps["sold"].one_of == (("brand", "category"),)
+    assert eps["product"].one_of == (("item_number", "url"),)
+    assert eps["similar"].one_of == (("item_number", "url"),)
+    cat = {p.name: p for p in eps["category"].params}
+    assert cat["department"].required and cat["category"].required
+    assert {p.name: p for p in eps["deals"].params}["collection"].required
+    assert eps["rescue_boxes"].params == ()
+    assert "no sold date" in eps["sold"].summary
+    assert "estimated original retail" in eps["search"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    tu = client.thredup
+    tu.search("denim jacket")
+    tu.search("denim jacket", brand="Levi's", department="women", size=[20778, 795],
+              condition=["excellent", "new_with_tags"], color="blue", material=["cotton"],
+              pattern="solid", price_min=10, price_max=40, clearance=True,
+              seller_type=["thredup", "direct_listing"], sort="price_low", page=21)
+    tu.sold(brand="Coach", department="handbags")
+    tu.sold(category="dresses", page=2)
+    tu.product(241601590)
+    tu.product(url="https://www.thredup.com/product/women-zenim-denim-jacket/241601590")
+    tu.category("women", "dresses", brand="Madewell", sort="newest")
+    tu.brand("Madewell", category="jeans")
+    tu.deals("clearance", department="women", sort="price_low")
+    tu.deals("price_drops", brand="Madewell")
+    tu.rescue_boxes()
+    tu.categories()
+    tu.categories(department="girls")
+    tu.brands(query="coach")
+    tu.brands(letter="M", page=2, limit=500)
+    tu.suggestions("made")
+    tu.suggestions("made", department="boys")
+    tu.trending()
+    tu.similar(241601590)
+    base = "/api/v1/thredup/"
+    assert seen == [
+        (base + "search", {"query": "denim jacket"}, 240.0),
+        (base + "search", {"query": "denim jacket", "brand": "Levi's", "department": "women",
+                           "sort": "price_low", "size": [20778, 795],
+                           "condition": ["excellent", "new_with_tags"], "color": "blue",
+                           "material": ["cotton"], "pattern": "solid", "price_min": 10,
+                           "price_max": 40, "clearance": True,
+                           "seller_type": ["thredup", "direct_listing"], "page": 21}, 240.0),
+        (base + "sold", {"brand": "Coach", "department": "handbags"}, 240.0),
+        (base + "sold", {"category": "dresses", "page": 2}, 240.0),
+        (base + "product", {"item_number": 241601590}, 240.0),
+        (base + "product",
+         {"url": "https://www.thredup.com/product/women-zenim-denim-jacket/241601590"}, 240.0),
+        (base + "category", {"department": "women", "category": "dresses", "brand": "Madewell",
+                             "sort": "newest"}, 240.0),
+        (base + "brand", {"brand": "Madewell", "category": "jeans"}, 240.0),
+        (base + "deals", {"collection": "clearance", "department": "women",
+                          "sort": "price_low"}, 240.0),
+        (base + "deals", {"collection": "price_drops", "brand": "Madewell"}, 240.0),
+        (base + "rescue-boxes", {}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"department": "girls"}, 240.0),
+        (base + "brands", {"query": "coach"}, 240.0),
+        (base + "brands", {"letter": "M", "page": 2, "limit": 500}, 240.0),
+        (base + "suggestions", {"query": "made"}, 240.0),
+        (base + "suggestions", {"query": "made", "department": "boys"}, 240.0),
+        (base + "trending", {}, 240.0),
+        (base + "similar", {"item_number": 241601590}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        tu.product()
+    with pytest.raises(ScavioError):
+        tu.similar()
+    with pytest.raises(ScavioError):
+        tu.sold()

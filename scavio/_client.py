@@ -79,6 +79,7 @@ from ._namespaces_sync import (
     _TargetNamespace,
     _TcgplayerNamespace,
     _ThreadsNamespace,
+    _ThredupNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
     _TrendyolNamespace,
@@ -247,6 +248,7 @@ class ScavioClient:
         self.uniqlo = _UniqloNamespace(self)
         self.depop = _DepopNamespace(self)
         self.poshmark = _PoshmarkNamespace(self)
+        self.thredup = _ThredupNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

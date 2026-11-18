@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.69.0"
-description = "Python SDK for the Scavio Search API - real-time data from 89 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, Macy's, Kohl's, IKEA, Wayfair, Lowe's, Nordstrom, Sephora, Ulta, ALDI, Walgreens, CVS, PetSmart, Chewy, HEB, Kroger, Publix, Carrefour, Allegro, OLX, Mercado Libre, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.70.0"
+description = "Python SDK for the Scavio Search API - real-time data from 90 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Kohl's, IKEA, Wayfair, Lowe's, Nordstrom, Sephora, Ulta, ALDI, Walgreens, CVS, PetSmart, HEB, Kroger, Publix, Carrefour, Allegro, OLX, Mercado Libre, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -83,6 +83,10 @@ keywords = [
     "poshmark-api",
     "poshmark-sold-prices",
     "poshmark-closet",
+    "thredup",
+    "thredup-api",
+    "thredup-prices",
+    "thredup-sold",
     "macys",
     "macys-api",
     "saks",

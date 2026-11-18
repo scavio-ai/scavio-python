@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 89 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 90 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -35,6 +35,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
 | Depop Listings by Buyer Market, Shop Sold Prices, Shop Profiles and Reviews (9 markets; 14 endpoints) | Yes | No | No | No |
 | Poshmark Sold Prices, Listings, Closets and Love Notes (US and Canada; 15 endpoints) | Yes | No | No | No |
+| thredUP Prices, Estimated Retail, Sold Listings and Deals (US store; 12 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
@@ -3688,6 +3689,78 @@ trending searches, the full brand directory (top 50; brand inputs take any
 name), offers, bundles, price history. Failed calls are not charged; a
 not-found is charged.
 
+### 59. Marketplace -- thredUP prices, estimated retail, sold listings and deals
+
+thredUP's US store (thredup.com, English, USD; thredUP ships to the US and
+Canada from it), so there is no `country` param. Namespace `thredup`, 12
+endpoints: `search`, `sold`, `product`, `category`, `brand`, `deals`,
+`rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`,
+`similar`. 1 credit per call on every endpoint. List calls take 15 to 45
+seconds; the request timeout is raised to at least 240s.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tu = client.thredup
+
+# --- Prices: the price, the estimated original retail, % off, condition and who priced it.
+res = tu.search("denim jacket", seller_type="thredup", condition=["excellent", "new_with_tags"])["data"]
+print(res["sort"], res["count"], res["total"], res["total_capped"], res["has_more"])
+for item in res["items"][:3]:
+    print(item["title"], item["price"], item["estimated_retail"], item["percent_off"], item["seller_type"], item["condition"])
+
+# --- One item in full: the flaws thredUP noted, measurements, materials, characteristics.
+item = tu.product(241601590)["data"]
+print(item["price"], item["estimated_retail"], item["percent_off"], item["condition_notes"], item["measurements"], item["materials"])
+
+# --- Sold listings: filters only (brand and / or category, no keyword), with the price the
+# item last listed at. thredUP shows no sold date.
+sold = tu.sold(brand="Coach", department="handbags")["data"]
+for s in sold["items"][:3]:
+    print(s["title"], s["price"], s["estimated_retail"], s["condition"], s["status"])
+
+# --- Category and filter values: sizing ids feed `size`, tags feed `category`.
+cats = tu.categories(department="women")["data"]
+small = [s["size"] for s in cats["sizes"] if s["label"] == "S"]
+dresses = tu.category("women", "dresses", size=small, sort="price_low")["data"]
+
+# --- Brands, deals, Rescue boxes, suggestions, trending, similar.
+coach = tu.brands(query="coach")["data"]["brands"]
+madewell = tu.brand("Madewell", category="jeans")["data"]
+clearance = tu.deals("clearance", department="women")["data"]
+drops = tu.deals("price_drops", brand="Madewell")["data"]
+boxes = tu.rescue_boxes()["data"]["boxes"]
+for box in boxes[:2]:
+    print(box["name"], [(b["items"], b["price"], b["state"]) for b in box["bundles"]])
+hints = tu.suggestions("made")["data"]["suggestions"]
+trending = tu.trending()["data"]["searches"]
+similar = tu.similar(241601590)["data"]["items"]
+```
+
+`estimated_retail` is the estimated original retail: thredUP's own estimate
+on items thredUP prices, entered by the seller on Direct Listing items.
+`percent_off` is computed from the price and the estimated retail
+(`round((1 - price / estimated_retail) * 100)`), `None` when the estimated
+retail is missing or not above the price. `seller_type` is `thredup`,
+`direct_listing` (peer sellers) or `dropship` (partner listings); `status`
+is `available`, `reserved` or `sold`. Conditions: `new_with_tags`,
+`excellent`, `very_good`, `good`, `flawed`. Departments: `women` (default),
+`girls`, `boys`, `handbags`, `shoes`, `designer`, `plus`, `juniors`,
+`maternity`, `accessories`; thredUP has no men's department.
+
+List endpoints answer 119 items per page, pages 1 to 21 (about 2,500 items
+per query and filter combination); `total` caps at 10,000 (`total_capped`
+True means 10,000+). Free text is matched loosely (semantic), so use `brand`
+for one brand. `size` takes sizing ids from `categories`, not labels;
+`condition`, `color` and `material` take up to 5 values. The price filter
+is approximate (thredUP matches a base price). Every answer reports the
+`sort` applied: `default`, `recommended`, `relevance`, `newest`,
+`price_high`, `price_low`, `price_drop`. Not available: product reviews
+(thredUP shows none), seller shops, sold dates, men's clothing, price
+history. No seller or consignor names or ids are returned. Failed calls are
+not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3840,6 +3913,7 @@ Scavio works with popular AI/LLM frameworks:
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
 | Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
 | Poshmark (`poshmark`) | `search`, `sold`, `product`, `category`, `brand`, `closet`, `closet_listings`, `love_notes`, `closets_search`, `categories`, `brands`, `suggestions`, `parties`, `party_listings`, `similar`; `country` us or ca (`product`, closet endpoints and `categories` global) | 1 each |
+| thredUP (`thredup`) | `search`, `sold`, `product`, `category`, `brand`, `deals`, `rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`, `similar`; thredUP's US store (no `country`) | 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
@@ -3857,6 +3931,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.70.0
+
+- **New `thredup` namespace** (sync and async) for thredUP, 12 endpoints:
+  `search`, `sold`, `product`, `category`, `brand`, `deals`,
+  `rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`,
+  `similar`. thredUP's US store (USD), no `country` param. Sold listings
+  by brand or category with no sold date. 1 credit each. 240s timeout floor.
 
 ### Changed in 0.69.0
 

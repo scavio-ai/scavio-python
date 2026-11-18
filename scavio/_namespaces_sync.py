@@ -98,6 +98,7 @@ __all__ = [
     "_UniqloNamespace",
     "_DepopNamespace",
     "_PoshmarkNamespace",
+    "_ThredupNamespace",
 ]
 
 class _GoogleNamespace:
@@ -16003,3 +16004,346 @@ class _PoshmarkNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("poshmark_similar", {"listing_id": listing_id, "country": country}, extra)
+
+class _ThredupNamespace:
+    """thredUP search, sold, product, category, brand, deals, rescue boxes, categories, brands, suggestions, trending and similar endpoints for thredUP's US store (thredup.com, USD)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[str] = None,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        category: Optional[str] = None,
+        sort: Optional[Literal["default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop"]] = None,
+        size: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        pattern: Optional[Literal["animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block", "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots", "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        clearance: Optional[bool] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search thredUP's US store (thredup.com, USD; it ships to the US and Canada; no country param): query, sort (the order applied), filters, page, page_size (119), total (thredUP's approximate count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count). Free text is matched loosely (semantic: it matches the look, so 'lululemon' also returns similar brands); for one brand use brand. Filters: department (default women), brand, category, size (sizing ids), condition, color, material, pattern, price_min / price_max (whole USD, approximate: matched on the base price), clearance, seller_type (thredup, direct_listing, dropship; all three by default). 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: narrow with filters or split by price_min / price_max to reach more; a later page answers 400 before anything is charged). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Not available: product reviews (thredUP shows none), seller shops, sold dates, men's clothing, price history. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search text, e.g. 'denim jacket'. Semantic: use brand for one brand.
+            brand: Brand as thredUP writes it (items[].brand, brands() brands[].brand, suggestions()), e.g. 'Patagonia'. '<Brand> - all brands' covers a brand's sub-lines.
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            category: Category tag from categories() (categories[].category), e.g. 'dresses', 'jeans', 'outerwear', 'one-pieces'.
+            sort: default (the page's own order: relevance for a search, recommended for a list, recently discounted for sold; the answer's sort says which), recommended, relevance, newest, price_high, price_low, price_drop (recently discounted).
+            size: Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to 10. Ids, not labels.
+            condition: Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed Gems).
+            color: Colours, up to 5: black, grey, white, ivory, tan, brown, purple, blue, teal, green, red, pink, orange, yellow.
+            material: Material groups, up to 5: natural, cashmere, cotton, linen, silk, wool, leather, suede, blend, cashmere blend, cotton blend, linen blend, silk blend, wool blend, synthetic, acrylic, faux fur, nylon, polyester, rayon, spandex, vegan leather.
+            pattern: One pattern.
+            price_min: Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base price, so an item can show slightly outside the range.
+            price_max: Highest price, whole USD (approximate, see price_min).
+            clearance: Only clearance items.
+            seller_type: Who sells (default all three): thredup (items thredUP prices and ships), direct_listing (Direct Listings: private sellers list and ship), dropship (partner listings).
+            page: Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_search", {"query": query, "brand": brand, "department": department, "category": category, "sort": sort, "size": size, "condition": condition, "color": color, "material": material, "pattern": pattern, "price_min": price_min, "price_max": price_max, "clearance": clearance, "seller_type": seller_type, "page": page}, extra)
+
+    def sold(
+        self,
+        *,
+        brand: Optional[str] = None,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        category: Optional[str] = None,
+        sort: Optional[Literal["default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop"]] = None,
+        size: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        pattern: Optional[Literal["animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block", "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots", "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        clearance: Optional[bool] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sold thredUP listings by filters only: brand and / or category required, no keyword (thredUP answers no sold items for free text). status (sold), sort (the order applied), filters, page, page_size (119), total (thredUP's approximate count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count); every item status sold, price is the price the item last listed at. thredUP shows no sold date. Filters: department (default women), brand, category, size (sizing ids), condition, color, material, pattern, price_min / price_max (whole USD, approximate: matched on the base price), clearance, seller_type (thredup, direct_listing, dropship; all three by default). 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: narrow with filters or split by price_min / price_max to reach more; a later page answers 400 before anything is charged). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: Brand as thredUP writes it (items[].brand, brands() brands[].brand, suggestions()), e.g. 'Patagonia'. '<Brand> - all brands' covers a brand's sub-lines.
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            category: Category tag from categories() (categories[].category), e.g. 'dresses', 'jeans', 'outerwear', 'one-pieces'.
+            sort: default (the page's own order: relevance for a search, recommended for a list, recently discounted for sold; the answer's sort says which), recommended, relevance, newest, price_high, price_low, price_drop (recently discounted).
+            size: Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to 10. Ids, not labels.
+            condition: Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed Gems).
+            color: Colours, up to 5: black, grey, white, ivory, tan, brown, purple, blue, teal, green, red, pink, orange, yellow.
+            material: Material groups, up to 5: natural, cashmere, cotton, linen, silk, wool, leather, suede, blend, cashmere blend, cotton blend, linen blend, silk blend, wool blend, synthetic, acrylic, faux fur, nylon, polyester, rayon, spandex, vegan leather.
+            pattern: One pattern.
+            price_min: Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base price, so an item can show slightly outside the range.
+            price_max: Highest price, whole USD (approximate, see price_min).
+            clearance: Only clearance items.
+            seller_type: Who sells (default all three): thredup (items thredUP prices and ships), direct_listing (Direct Listings: private sellers list and ship), dropship (partner listings).
+            page: Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_sold", {"brand": brand, "department": department, "category": category, "sort": sort, "size": size, "condition": condition, "color": color, "material": material, "pattern": pattern, "price_min": price_min, "price_max": price_max, "clearance": clearance, "seller_type": seller_type, "page": page}, extra)
+
+    def product(
+        self,
+        item_number: Optional[Union[int, str]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One thredUP item in full by item_number or link: item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count, plus description (the seller's text on Direct Listings), brand_id, departments, sale, condition_notes (the flaws thredUP noted), condition_detail, size_detail {chart, scale, value}, sizing_id, measurements, characteristics {fit, pattern, material, sleeve_length, neckline, features, stretch, care, inseam_in, rise_in, length_in, chest_in, waist_in}, style_tags, pictures, authentication, certified_authenticity (partner listings), direct_listing {shipping_cost, shipping_covered, buyer_protection_price, on_vacation} (Direct Listings only), similar_brands. Sold items still answer (status sold, the price they last listed at). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. No seller or consignor names or ids are returned. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: thredUP item number (items[].item_number; the number at the end of a thredup.com/product/... link), e.g. 241601590.
+            url: A thredup.com item link (https://www.thredup.com/product/<slug>/<item number>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_product", {"item_number": item_number, "url": url}, extra)
+
+    def category(
+        self,
+        department: Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"],
+        category: str,
+        *,
+        brand: Optional[str] = None,
+        sort: Optional[Literal["default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop"]] = None,
+        size: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        pattern: Optional[Literal["animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block", "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots", "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        clearance: Optional[bool] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One department's category on thredUP's US store (thredup.com, USD; it ships to the US and Canada; no country param): department and category (a tag from categories()) required. department, category, sort (the order applied), filters, page, page_size (119), total (thredUP's approximate count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count). Filters: department (default women), brand, category, size (sizing ids), condition, color, material, pattern, price_min / price_max (whole USD, approximate: matched on the base price), clearance, seller_type (thredup, direct_listing, dropship; all three by default). 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: narrow with filters or split by price_min / price_max to reach more; a later page answers 400 before anything is charged). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department).
+            category: Category tag from categories() (categories[].category), e.g. 'dresses'.
+            brand: Brand as thredUP writes it (items[].brand, brands() brands[].brand, suggestions()), e.g. 'Patagonia'. '<Brand> - all brands' covers a brand's sub-lines.
+            sort: default (the page's own order: relevance for a search, recommended for a list, recently discounted for sold; the answer's sort says which), recommended, relevance, newest, price_high, price_low, price_drop (recently discounted).
+            size: Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to 10. Ids, not labels.
+            condition: Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed Gems).
+            color: Colours, up to 5: black, grey, white, ivory, tan, brown, purple, blue, teal, green, red, pink, orange, yellow.
+            material: Material groups, up to 5: natural, cashmere, cotton, linen, silk, wool, leather, suede, blend, cashmere blend, cotton blend, linen blend, silk blend, wool blend, synthetic, acrylic, faux fur, nylon, polyester, rayon, spandex, vegan leather.
+            pattern: One pattern.
+            price_min: Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base price, so an item can show slightly outside the range.
+            price_max: Highest price, whole USD (approximate, see price_min).
+            clearance: Only clearance items.
+            seller_type: Who sells (default all three): thredup (items thredUP prices and ships), direct_listing (Direct Listings: private sellers list and ship), dropship (partner listings).
+            page: Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_category", {"department": department, "category": category, "brand": brand, "sort": sort, "size": size, "condition": condition, "color": color, "material": material, "pattern": pattern, "price_min": price_min, "price_max": price_max, "clearance": clearance, "seller_type": seller_type, "page": page}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        category: Optional[str] = None,
+        sort: Optional[Literal["default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop"]] = None,
+        size: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        pattern: Optional[Literal["animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block", "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots", "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        clearance: Optional[bool] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's items on thredUP's US store (thredup.com, USD; it ships to the US and Canada; no country param) in a department (default women): brand, department, sort (the order applied), filters, page, page_size (119), total (thredUP's approximate count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count). An unknown brand answers 0 items. Filters: department (default women), brand, category, size (sizing ids), condition, color, material, pattern, price_min / price_max (whole USD, approximate: matched on the base price), clearance, seller_type (thredup, direct_listing, dropship; all three by default). 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: narrow with filters or split by price_min / price_max to reach more; a later page answers 400 before anything is charged). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: Brand as thredUP writes it (brands() brands[].brand, items[].brand), e.g. 'Madewell'.
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            category: Category tag from categories() (categories[].category), e.g. 'dresses', 'jeans', 'outerwear', 'one-pieces'.
+            sort: default (the page's own order: relevance for a search, recommended for a list, recently discounted for sold; the answer's sort says which), recommended, relevance, newest, price_high, price_low, price_drop (recently discounted).
+            size: Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to 10. Ids, not labels.
+            condition: Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed Gems).
+            color: Colours, up to 5: black, grey, white, ivory, tan, brown, purple, blue, teal, green, red, pink, orange, yellow.
+            material: Material groups, up to 5: natural, cashmere, cotton, linen, silk, wool, leather, suede, blend, cashmere blend, cotton blend, linen blend, silk blend, wool blend, synthetic, acrylic, faux fur, nylon, polyester, rayon, spandex, vegan leather.
+            pattern: One pattern.
+            price_min: Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base price, so an item can show slightly outside the range.
+            price_max: Highest price, whole USD (approximate, see price_min).
+            clearance: Only clearance items.
+            seller_type: Who sells (default all three): thredup (items thredUP prices and ships), direct_listing (Direct Listings: private sellers list and ship), dropship (partner listings).
+            page: Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_brand", {"brand": brand, "department": department, "category": category, "sort": sort, "size": size, "condition": condition, "color": color, "material": material, "pattern": pattern, "price_min": price_min, "price_max": price_max, "clearance": clearance, "seller_type": seller_type, "page": page}, extra)
+
+    def deals(
+        self,
+        collection: Literal["clearance", "under_10", "new_arrivals", "price_drops"],
+        *,
+        brand: Optional[str] = None,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        category: Optional[str] = None,
+        size: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        material: Optional[Union[str, list[str]]] = None,
+        pattern: Optional[Literal["animal print", "argyle", "camo", "checkered-gingham", "chevron-herringbone", "color block", "floral", "graphic", "hearts", "houndstooth", "metallic", "paisley", "plaid", "polka dots", "print", "solid", "stars", "stripes", "tie-dye", "tropical", "tweed"]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        clearance: Optional[bool] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["default", "recommended", "relevance", "newest", "price_high", "price_low", "price_drop"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """thredUP's deal collections on thredUP's US store (thredup.com, USD; it ships to the US and Canada; no country param): clearance, under_10 (Under $10, matched on the base price), new_arrivals (newest first) and price_drops (recently discounted first), in a department (default women) with the usual filters. collection, department, sort (the order applied), filters, page, page_size (119), total (thredUP's approximate count; it caps at 10,000: total_capped True means 10,000+), total_capped, has_more, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count). sort only for clearance and under_10; under_10 takes no price_min / price_max. 119 items per page, pages 1 to 21 (about 2,500 items per query and filter combination: narrow with filters or split by price_min / price_max to reach more; a later page answers 400 before anything is charged). estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection: clearance, under_10, new_arrivals or price_drops.
+            brand: Brand as thredUP writes it (items[].brand, brands() brands[].brand, suggestions()), e.g. 'Patagonia'. '<Brand> - all brands' covers a brand's sub-lines.
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            category: Category tag from categories() (categories[].category), e.g. 'dresses', 'jeans', 'outerwear', 'one-pieces'.
+            size: Sizing ids from categories() (sizes[].size, e.g. 20778 = women's Small tops), up to 10. Ids, not labels.
+            condition: Conditions, up to 5: new_with_tags, excellent, very_good, good, flawed (thredUP's Flawed Gems).
+            color: Colours, up to 5: black, grey, white, ivory, tan, brown, purple, blue, teal, green, red, pink, orange, yellow.
+            material: Material groups, up to 5: natural, cashmere, cotton, linen, silk, wool, leather, suede, blend, cashmere blend, cotton blend, linen blend, silk blend, wool blend, synthetic, acrylic, faux fur, nylon, polyester, rayon, spandex, vegan leather.
+            pattern: One pattern.
+            price_min: Lowest price, whole USD. Approximate: thredUP matches the price filter on an item's base price, so an item can show slightly outside the range.
+            price_max: Highest price, whole USD (approximate, see price_min).
+            clearance: Only clearance items.
+            seller_type: Who sells (default all three): thredup (items thredUP prices and ships), direct_listing (Direct Listings: private sellers list and ship), dropship (partner listings).
+            page: Page, 1 to 21, 119 items each (about 2,500 items per query and filter combination).
+            sort: Only for clearance and under_10 (new_arrivals and price_drops are sorts themselves).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_deals", {"collection": collection, "brand": brand, "department": department, "category": category, "size": size, "condition": condition, "color": color, "material": material, "pattern": pattern, "price_min": price_min, "price_max": price_max, "clearance": clearance, "seller_type": seller_type, "page": page, "sort": sort}, extra)
+
+    def rescue_boxes(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """thredUP Rescue boxes (mystery bundles of items): count, available_count, currency, boxes [{id, name, description, available, sizes, picture_url, bundles [{items (e.g. '5 Items'), price, currency, state (listed = on sale now), sizes}]}]. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_rescue_boxes", {}, extra)
+
+    def categories(
+        self,
+        *,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One thredUP department's categories and filter values (default women), the inputs of the list endpoints: department, categories [{name, category}], other_departments [{name, department}], sizes [{group, label, long_label, size (the sizing id for size)}], conditions [{label, condition}], colors [{label, color}], materials [{label, material}], patterns [{label, pattern}], price_ranges [{label, price_min, price_max}], category_count, size_count. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_categories", {"department": department}, extra)
+
+    def brands(
+        self,
+        *,
+        query: Optional[str] = None,
+        letter: Optional[str] = None,
+        department: Optional[Literal["women", "girls", "boys", "handbags", "shoes", "designer", "plus", "juniors", "maternity", "accessories"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """thredUP's brand directory per department (default women): query (brands matching a term), letter (every brand under one letter A-Z, paged with page and limit) or neither (the letter groups, 50 brands each). brands [{id, name, brand (the brand input of brand(), search() and sold())}], total, page, limit, has_more, count; groups [{letter, total, count, brands}] without query or letter. Send query or letter, not both. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Brands matching a term, e.g. 'coach'.
+            letter: Every brand under one letter, A-Z.
+            department: Department: women, girls, boys, handbags, shoes, designer, plus, juniors, maternity, accessories (thredUP has no men's department). Default 'women'.
+            page: Page of a letter or query answer, 1 to 1000.
+            limit: Brands per page, 1 to 500 (default 100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_brands", {"query": query, "letter": letter, "department": department, "page": page, "limit": limit}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        department: Optional[Literal["women", "girls", "boys"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """thredUP's search suggestions for a partial query (department women, girls or boys): query, department, count, suggestions [{text, query (the free-text part), department, brand, category, free_text}]. Each suggestion is a ready filter set: pass brand / category / department / query to search(). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'made'.
+            department: women (default), girls or boys.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_suggestions", {"query": query, "department": department}, extra)
+
+    def trending(
+        self,
+        *,
+        department: Optional[Literal["women", "girls", "boys"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Trending searches on thredUP for a department (women, girls or boys): department, count, searches [{text, query, department, brand, category, free_text}]. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: women (default), girls or boys.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_trending", {"department": department}, extra)
+
+    def similar(
+        self,
+        item_number: Optional[Union[int, str]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Items thredUP shows as similar to one item (by item_number or link; the first 120, no paging): item_number, total, total_capped, page_size, count, currency, items (item_number, url, title, brand, category, category_tags, department, size, condition (new_with_tags, excellent, very_good, good, flawed), price, currency, estimated_retail, percent_off, promo {percent, price, code} (a promotion code thredUP offers on the item; price stays the list price), clearance, final_sale, new_with_tags, seller_type (thredup, direct_listing, dropship), status (available, reserved, sold), colors, materials, picture_url, picture_count, favorite_count). An unknown item is a charged 404. estimated_retail is the estimated original retail price (thredUP's estimate; on Direct Listing items the seller enters it); percent_off is round((1 - price / estimated_retail) * 100), computed from the price and the estimated retail, None when there is no estimated retail or it is not above the price. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: thredUP item number (items[].item_number; the number at the end of a thredup.com/product/... link), e.g. 241601590.
+            url: A thredup.com item link (https://www.thredup.com/product/<slug>/<item number>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("thredup_similar", {"item_number": item_number, "url": url}, extra)

@@ -81,6 +81,7 @@ from ._namespaces_async import (
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
     _AsyncThreadsNamespace,
+    _AsyncThredupNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
     _AsyncTrendyolNamespace,
@@ -242,6 +243,7 @@ class AsyncScavioClient:
         self.uniqlo = _AsyncUniqloNamespace(self)
         self.depop = _AsyncDepopNamespace(self)
         self.poshmark = _AsyncPoshmarkNamespace(self)
+        self.thredup = _AsyncThredupNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
