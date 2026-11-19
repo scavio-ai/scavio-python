@@ -5525,7 +5525,7 @@ def test_thredup_credits_paths_and_wire(monkeypatch):
 
 
 def test_fashionnova_credits_paths_and_wire(monkeypatch):
-    """fashionnova (0.71.0): 7 endpoints on /api/v1/fashionnova, 1 credit each, 240 s floor.
+    """fashionnova (0.71.0, 0.71.1): 7 endpoints on /api/v1/fashionnova, 1 credit each, 240 s floor.
 
     search, product and collection take country (104 storefronts) and language (en, es);
     categories, suggestions and reviews are the same for every storefront and similar answers
@@ -5561,7 +5561,14 @@ def test_fashionnova_credits_paths_and_wire(monkeypatch):
         'Optional[Literal["highest_rated", "most_recent", "most_helpful", "lowest_rated"]]'
     )
     assert reviews["star"].annotation == "Optional[Literal[1, 2, 3, 4, 5]]"
-    assert "one English review pool" in eps["reviews"].summary
+    assert "per style, not per colour" in eps["reviews"].summary
+    assert "mostly English" in eps["reviews"].summary
+    # 0.71.1: collections list up to about 10,000 products (page 166), code price flag.
+    coll = {p.name: p for p in eps["collection"].params}
+    assert "1 to 166" in coll["page"].doc and "1 to 166" in eps["collection"].summary
+    assert "dedupe by product_id + color" in eps["collection"].summary
+    for m in ("search", "collection", "product", "similar"):
+        assert "code_lowers_price" in eps[m].summary, m
     assert "27 EEA" in eps["search"].summary and "no compare-at" in eps["search"].summary
     assert "Fashion Nova's own AI summary" in eps["product"].summary
 

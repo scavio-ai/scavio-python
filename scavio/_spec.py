@@ -3079,13 +3079,15 @@ _FASHIONNOVA_REF = (_FASHIONNOVA_HANDLE, _FASHIONNOVA_URL, _FASHIONNOVA_COLOR)
 _FASHIONNOVA_CARD = (
     "product_id, handle (the style), color, color_slug, title, base_title, url, product_type, "
     "price, compare_at, percent_off, on_sale, currency, price_with_code {price, currency}, "
-    "final_sale, badge, in_stock, coming_soon, limited, sizes_in_stock, sizes [{size, quantity, "
+    "code_lowers_price, final_sale, badge (the site's label), in_stock, coming_soon, limited, "
+    "sizes_in_stock, sizes [{size, quantity, "
     "available, low_stock}], image, colors [{color, color_slug, product_id}]"
 )
 _FASHIONNOVA_LIST_OUT = (
     "country, language, currency, sort, filters, unrecognized_filters (only when filters names "
     "a facet this list does not offer: the site matches nothing on it, so fix the name), page, "
-    "page_size (60), total, total_pages, has_more, count, items (" + _FASHIONNOVA_CARD + "), "
+    "page_size (60), total, total_pages (approximate: it can differ between pages of one "
+    "list), has_more, count, items (" + _FASHIONNOVA_CARD + "), "
     "facets [{name, title, values [{value, label}]}] (the filter inputs this list offers)"
 )
 _FASHIONNOVA_FILTER_TEXT = (
@@ -3098,8 +3100,12 @@ _FASHIONNOVA_PRICES = (
     " Prices are numbers in the storefront's currency, never converted: price is the lowest size "
     "price, compare_at the site's struck-through price, percent_off = round((1 - price / "
     "compare_at) * 100) (computed by Scavio from the two) and on_sale = compare_at above price "
-    "(None / False without a compare-at). price_with_code is the price the site shows with its "
-    "current promo code, when it shows one; final_sale flags a final-sale item. In the 27 EEA "
+    "(None / False without a compare-at). price_with_code is the price with Fashion Nova's "
+    "current code as the page computes it (40% off compare_at), when the page carries one; when "
+    "it is not below price the code does not lower the price: code_lowers_price says which "
+    "(True when price_with_code is below price, None without a code price). badge is the site's "
+    "label; percent_off is computed from price and compare_at, so the two can differ. "
+    "final_sale flags a final-sale item. In the 27 EEA "
     "storefronts (" + _FASHIONNOVA_EEA + ") prices include VAT and Fashion Nova shows no "
     "compare-at price, so compare_at and percent_off are None and on_sale False there."
 )
@@ -3109,12 +3115,14 @@ _FASHIONNOVA_STOCK = (
 )
 _FASHIONNOVA_REVIEW = (
     "id, rating, title, body, date, verified_buyer, votes_up, votes_down, fit (runs_small, "
-    "true_to_size, runs_large: the page's own fit labels), fit_score, size_purchased, usual_size, "
-    "color_purchased, language, topics. Reviewer names are never returned."
+    "true_to_size, runs_large: the page's own fit labels), fit_score, size_purchased and "
+    "usual_size (the reviewer's own free text), color_purchased, language (per review: the pool "
+    "is mostly English), topics. Reviewer names are never returned."
 )
 _FASHIONNOVA_NOT_AVAILABLE = (
     " Not available: stores and store stock (Fashion Nova lists no stores), a brand directory "
-    "(everything is Fashion Nova), price history (poll and store the answers), gift cards, "
+    "or brand filter (brand is the store's vendor field; collab and licensed brand names appear "
+    "in titles), price history (poll and store the answers), gift cards, "
     "new-arrival dates."
 )
 _FASHIONNOVA_NOTE = (
@@ -13690,7 +13698,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "stock: query, " + _FASHIONNOVA_LIST_OUT + ". The search is semantic (loosely related "
             "items further down): its total moves between calls and a later page can repeat a few "
             "items; it shows its first 18 pages of 60 (6 under a sort other than featured). Narrow "
-            "with filters, or use collection() for full depth." + _FASHIONNOVA_FILTER_TEXT
+            "with filters, or use collection() for more depth." + _FASHIONNOVA_FILTER_TEXT
             + _FASHIONNOVA_PRICES + _FASHIONNOVA_STOCK + _FASHIONNOVA_NOT_AVAILABLE
             + _FASHIONNOVA_NOTE
         ),
@@ -13717,7 +13725,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "currency, product_id, handle, color, color_slug, title, base_title, url, brand, "
             "division, product_type, description, details, materials, attributes, model_height "
             "(when the site gives it), price, compare_at, percent_off, on_sale, price_with_code, "
-            "promo (the site's promo line), final_sale, badge, in_stock, coming_soon, limited, "
+            "code_lowers_price, promo (the site's promo line), final_sale, badge, in_stock, coming_soon, limited, "
             "sizes [{size, sku, price, compare_at, quantity, available, low_stock}], images, "
             "colors (every colour of the style with its price, compare_at, percent_off, stock and "
             "sizes), rating {average, count, histogram, fit, fit_score}, reviews (the first 3: "
@@ -13739,9 +13747,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/fashionnova/collection",
         summary=(
-            "One Fashion Nova collection by handle or link, to full depth (pages 1 to 200 of 60; "
-            "has_more follows the site's page count, and a page can hold fewer than 60 without "
-            "being the last): handle, title, description, url, " + _FASHIONNOVA_LIST_OUT + ". "
+            "One Fashion Nova collection by handle or link, pages 1 to 166 of 60: a collection "
+            "lists up to about 10,000 products (total can be larger); has_more follows the site's "
+            "page count (a page can hold fewer than 60 without being the last) and is False at "
+            "page 166. Consecutive pages can repeat a few products (the list moves while you "
+            "page): dedupe by product_id + color. Returns handle, title, description, url, "
+            + _FASHIONNOVA_LIST_OUT + ". "
             "Handles: sale (the markdown collection; there is no clearance collection), "
             "best-sellers, new, new-this-week, back-in-stock, coming-soon, jeans, dresses, mens, "
             "plus ... (categories() lists them; the same handles work in every storefront). An "
@@ -13764,7 +13775,12 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
         )
         + _FASHIONNOVA_LIST_PARAMS
-        + (_int("page", "Page, 60 per page, 1 to 200."),),
+        + (
+            _int(
+                "page",
+                "Page, 60 per page, 1 to 166 (a collection lists up to about 10,000 products).",
+            ),
+        ),
         one_of=(("handle", "url"),),
         credits=1,
         min_timeout=240.0,
@@ -13818,8 +13834,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "most_helpful or lowest_rated, optionally one star rating. handle, color_slug, sort, "
             "star, page, page_size, language (en), total (reviews matching the filter, as "
             "returned), has_more, rating {average, count, histogram, fit, fit_score}, count, "
-            "reviews (" + _FASHIONNOVA_REVIEW + "). Fashion Nova keeps one English review pool for "
-            "every storefront, so there is no country param. Takes 20 to 60 seconds. An unknown "
+            "reviews (" + _FASHIONNOVA_REVIEW + "). Reviews are per style, not per colour (every "
+            "colour returns the same reviews), in one pool Fashion Nova shares across every "
+            "storefront, mostly English, so there is no country param. Takes 20 to 60 seconds. An unknown "
             "product answers 404 (charged)." + _FASHIONNOVA_CHARGE
         ),
         params=_FASHIONNOVA_REF
