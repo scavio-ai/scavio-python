@@ -99,6 +99,7 @@ __all__ = [
     "_DepopNamespace",
     "_PoshmarkNamespace",
     "_ThredupNamespace",
+    "_FashionnovaNamespace",
 ]
 
 class _GoogleNamespace:
@@ -16347,3 +16348,193 @@ class _ThredupNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("thredup_similar", {"item_number": item_number, "url": url}, extra)
+
+class _FashionnovaNamespace:
+    """Fashion Nova search, product, collection, categories, suggestions, reviews and similar endpoints across Fashion Nova's 104 country storefronts (local currency, en or es)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["ac", "ad", "ae", "ag", "ai", "al", "am", "ao", "at", "au", "ax", "be", "bl", "ca", "cc", "ch", "ck", "cl", "cx", "cy", "cz", "de", "dk", "do", "ee", "eh", "es", "fi", "fk", "fo", "fr", "gb", "gf", "gg", "gl", "gp", "gr", "gs", "hk", "hu", "ie", "il", "io", "iq", "is", "it", "jp", "kg", "ki", "kr", "ky", "lt", "lu", "lv", "mc", "me", "mf", "mq", "mt", "mx", "my", "mz", "ng", "nl", "no", "nr", "nu", "nz", "pe", "ph", "pl", "pm", "pn", "pt", "qa", "re", "ro", "ru", "sa", "sb", "sc", "se", "sg", "sh", "si", "sj", "sk", "sx", "ta", "tf", "tj", "tk", "tm", "to", "tv", "um", "us", "va", "wf", "ws", "xk", "yt", "za", "zz"]] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        sort: Optional[Literal["featured", "best_selling", "price_low", "price_high", "newest"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        division: Optional[Union[Literal["women", "curve"], list[Literal["women", "curve"]]]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search one Fashion Nova storefront for sale prices, compare-at prices and sizes in stock: query, country, language, currency, sort, filters, unrecognized_filters (only when filters names a facet this list does not offer: the site matches nothing on it, so fix the name), page, page_size (60), total, total_pages, has_more, count, items (product_id, handle (the style), color, color_slug, title, base_title, url, product_type, price, compare_at, percent_off, on_sale, currency, price_with_code {price, currency}, final_sale, badge, in_stock, coming_soon, limited, sizes_in_stock, sizes [{size, quantity, available, low_stock}], image, colors [{color, color_slug, product_id}]), facets [{name, title, values [{value, label}]}] (the filter inputs this list offers). The search is semantic (loosely related items further down): its total moves between calls and a later page can repeat a few items; it shows its first 18 pages of 60 (6 under a sort other than featured). Narrow with filters, or use collection() for full depth. Filters (several values = OR): size, color (colour families), price_min / price_max (whole units of the storefront's currency), division (women, curve), category, and filters (any other facet by facets[].name: occasion, fit_type, rise, stretch, wash, fabric, detail, neckline, sleeve, print ...). Prices are numbers in the storefront's currency, never converted: price is the lowest size price, compare_at the site's struck-through price, percent_off = round((1 - price / compare_at) * 100) (computed by Scavio from the two) and on_sale = compare_at above price (None / False without a compare-at). price_with_code is the price the site shows with its current promo code, when it shows one; final_sale flags a final-sale item. In the 27 EEA storefronts (at, be, cy, cz, de, dk, ee, es, fi, fr, gr, hu, ie, is, it, lt, lu, lv, mt, nl, no, pl, pt, ro, se, si, sk) prices include VAT and Fashion Nova shows no compare-at price, so compare_at and percent_off are None and on_sale False there. sizes[].quantity is the units in stock Fashion Nova's page shows for the size (available, low_stock); not a guaranteed inventory count. Not available: stores and store stock (Fashion Nova lists no stores), a brand directory (everything is Fashion Nova), price history (poll and store the answers), gift cards, new-arrival dates. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search text, e.g. 'bodycon dress'. Semantic: narrow with filters.
+            country: Country (default 'us'), ISO-2 lower case: the storefront and its currency, the 104 countries in Fashion Nova's own country selector, each in its own currency (37 currencies: us USD, ca CAD, gb GBP, au AUD, mx MXN, jp JPY, ae AED, the euro countries EUR ...; 'zz' is the site's International storefront, USD). A country Fashion Nova does not run answers 400 before anything is charged.
+            language: en (default) or es (Spanish titles, descriptions and attributes; only in the 67 countries whose storefront serves Spanish, not us; elsewhere 400 before anything is charged).
+            sort: featured (default), best_selling, price_low, price_high, newest.
+            size: Sizes (facets name size), e.g. ['M', 'L'] or '7': up to 10 in a list, or 15 comma-separated.
+            color: Colour families, up to 10 (facets name color): black, blue, white, pink, brown, red, yellow, green, gray, purple, orange, gold, silver, nude, ivory ...
+            price_min: Lowest price, whole units of the storefront's currency.
+            price_max: Highest price, whole units of the storefront's currency.
+            division: women or curve (Fashion Nova's plus range), or both.
+            category: Categories as the site writes them (facets name category), e.g. 'Jeans', 'Dresses'.
+            filters: Other facets by facets[].name: value or list of values (facets[].values[].value), e.g. {'fit_type': 'Baggy', 'rise': 'High Rise'}. Up to 10 facets. A facet the list does not offer matches nothing and is listed in unrecognized_filters.
+            page: Page, 60 per page: 1 to 18, or 1 to 6 with a sort other than featured (the site's search shows no more).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_search", {"query": query, "country": country, "language": language, "sort": sort, "size": size, "color": color, "price_min": price_min, "price_max": price_max, "division": division, "category": category, "filters": filters, "page": page}, extra)
+
+    def product(
+        self,
+        handle: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        color: Optional[str] = None,
+        country: Optional[Literal["ac", "ad", "ae", "ag", "ai", "al", "am", "ao", "at", "au", "ax", "be", "bl", "ca", "cc", "ch", "ck", "cl", "cx", "cy", "cz", "de", "dk", "do", "ee", "eh", "es", "fi", "fk", "fo", "fr", "gb", "gf", "gg", "gl", "gp", "gr", "gs", "hk", "hu", "ie", "il", "io", "iq", "is", "it", "jp", "kg", "ki", "kr", "ky", "lt", "lu", "lv", "mc", "me", "mf", "mq", "mt", "mx", "my", "mz", "ng", "nl", "no", "nr", "nu", "nz", "pe", "ph", "pl", "pm", "pn", "pt", "qa", "re", "ro", "ru", "sa", "sb", "sc", "se", "sg", "sh", "si", "sj", "sk", "sx", "ta", "tf", "tj", "tk", "tm", "to", "tv", "um", "us", "va", "wf", "ws", "xk", "yt", "za", "zz"]] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Fashion Nova style in one colour by handle (+ color) or link: country, language, currency, product_id, handle, color, color_slug, title, base_title, url, brand, division, product_type, description, details, materials, attributes, model_height (when the site gives it), price, compare_at, percent_off, on_sale, price_with_code, promo (the site's promo line), final_sale, badge, in_stock, coming_soon, limited, sizes [{size, sku, price, compare_at, quantity, available, low_stock}], images, colors (every colour of the style with its price, compare_at, percent_off, stock and sizes), rating {average, count, histogram, fit, fit_score}, reviews (the first 3: id, rating, title, body, date, verified_buyer, votes_up, votes_down, fit (runs_small, true_to_size, runs_large: the page's own fit labels), fit_score, size_purchased, usual_size, color_purchased, language, topics. Reviewer names are never returned.), site_ai_review_summary (Fashion Nova's own AI summary of its reviews, labelled as such: summary, buy_if, topics, generated_at), size_guide {title, inches, cm}, delivery {standard, rush}, default_collection, collections. An unknown handle, or a colour the style does not have, answers 404 (charged). Prices are numbers in the storefront's currency, never converted: price is the lowest size price, compare_at the site's struck-through price, percent_off = round((1 - price / compare_at) * 100) (computed by Scavio from the two) and on_sale = compare_at above price (None / False without a compare-at). price_with_code is the price the site shows with its current promo code, when it shows one; final_sale flags a final-sale item. In the 27 EEA storefronts (at, be, cy, cz, de, dk, ee, es, fi, fr, gr, hu, ie, is, it, lt, lu, lv, mt, nl, no, pl, pt, ro, se, si, sk) prices include VAT and Fashion Nova shows no compare-at price, so compare_at and percent_off are None and on_sale False there. sizes[].quantity is the units in stock Fashion Nova's page shows for the size (available, low_stock); not a guaranteed inventory count. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Style handle (items[].handle), e.g. 'san-diego-sculpting-stretch-flare-jeans'; a colour handle <style>-fncolorname-<colour> is accepted too.
+            url: A fashionnova.com product link (https://www.fashionnova.com/products/<handle>?color=<colour>), any storefront.
+            color: Colour slug (items[].color_slug, colors[].color_slug), e.g. 'black-wash'. Default: the style's default colour.
+            country: Country (default 'us'), ISO-2 lower case: the storefront and its currency, the 104 countries in Fashion Nova's own country selector, each in its own currency (37 currencies: us USD, ca CAD, gb GBP, au AUD, mx MXN, jp JPY, ae AED, the euro countries EUR ...; 'zz' is the site's International storefront, USD). A country Fashion Nova does not run answers 400 before anything is charged.
+            language: en (default) or es (Spanish titles, descriptions and attributes; only in the 67 countries whose storefront serves Spanish, not us; elsewhere 400 before anything is charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_product", {"handle": handle, "url": url, "color": color, "country": country, "language": language}, extra)
+
+    def collection(
+        self,
+        handle: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["ac", "ad", "ae", "ag", "ai", "al", "am", "ao", "at", "au", "ax", "be", "bl", "ca", "cc", "ch", "ck", "cl", "cx", "cy", "cz", "de", "dk", "do", "ee", "eh", "es", "fi", "fk", "fo", "fr", "gb", "gf", "gg", "gl", "gp", "gr", "gs", "hk", "hu", "ie", "il", "io", "iq", "is", "it", "jp", "kg", "ki", "kr", "ky", "lt", "lu", "lv", "mc", "me", "mf", "mq", "mt", "mx", "my", "mz", "ng", "nl", "no", "nr", "nu", "nz", "pe", "ph", "pl", "pm", "pn", "pt", "qa", "re", "ro", "ru", "sa", "sb", "sc", "se", "sg", "sh", "si", "sj", "sk", "sx", "ta", "tf", "tj", "tk", "tm", "to", "tv", "um", "us", "va", "wf", "ws", "xk", "yt", "za", "zz"]] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        sort: Optional[Literal["featured", "best_selling", "price_low", "price_high", "newest"]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        division: Optional[Union[Literal["women", "curve"], list[Literal["women", "curve"]]]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Fashion Nova collection by handle or link, to full depth (pages 1 to 200 of 60; has_more follows the site's page count, and a page can hold fewer than 60 without being the last): handle, title, description, url, country, language, currency, sort, filters, unrecognized_filters (only when filters names a facet this list does not offer: the site matches nothing on it, so fix the name), page, page_size (60), total, total_pages, has_more, count, items (product_id, handle (the style), color, color_slug, title, base_title, url, product_type, price, compare_at, percent_off, on_sale, currency, price_with_code {price, currency}, final_sale, badge, in_stock, coming_soon, limited, sizes_in_stock, sizes [{size, quantity, available, low_stock}], image, colors [{color, color_slug, product_id}]), facets [{name, title, values [{value, label}]}] (the filter inputs this list offers). Handles: sale (the markdown collection; there is no clearance collection), best-sellers, new, new-this-week, back-in-stock, coming-soon, jeans, dresses, mens, plus ... (categories() lists them; the same handles work in every storefront). An unknown handle answers 404 (charged). Filters (several values = OR): size, color (colour families), price_min / price_max (whole units of the storefront's currency), division (women, curve), category, and filters (any other facet by facets[].name: occasion, fit_type, rise, stretch, wash, fabric, detail, neckline, sleeve, print ...). Prices are numbers in the storefront's currency, never converted: price is the lowest size price, compare_at the site's struck-through price, percent_off = round((1 - price / compare_at) * 100) (computed by Scavio from the two) and on_sale = compare_at above price (None / False without a compare-at). price_with_code is the price the site shows with its current promo code, when it shows one; final_sale flags a final-sale item. In the 27 EEA storefronts (at, be, cy, cz, de, dk, ee, es, fi, fr, gr, hu, ie, is, it, lt, lu, lv, mt, nl, no, pl, pt, ro, se, si, sk) prices include VAT and Fashion Nova shows no compare-at price, so compare_at and percent_off are None and on_sale False there. Every answer carries country, language and currency. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Collection handle (categories() categories[].handle / sections[].items[].handle), e.g. 'sale', 'best-sellers', 'new', 'back-in-stock', 'jeans'.
+            url: A fashionnova.com collection link (https://www.fashionnova.com/collections/<handle>).
+            country: Country (default 'us'), ISO-2 lower case: the storefront and its currency, the 104 countries in Fashion Nova's own country selector, each in its own currency (37 currencies: us USD, ca CAD, gb GBP, au AUD, mx MXN, jp JPY, ae AED, the euro countries EUR ...; 'zz' is the site's International storefront, USD). A country Fashion Nova does not run answers 400 before anything is charged.
+            language: en (default) or es (Spanish titles, descriptions and attributes; only in the 67 countries whose storefront serves Spanish, not us; elsewhere 400 before anything is charged).
+            sort: featured (default), best_selling, price_low, price_high, newest.
+            size: Sizes (facets name size), e.g. ['M', 'L'] or '7': up to 10 in a list, or 15 comma-separated.
+            color: Colour families, up to 10 (facets name color): black, blue, white, pink, brown, red, yellow, green, gray, purple, orange, gold, silver, nude, ivory ...
+            price_min: Lowest price, whole units of the storefront's currency.
+            price_max: Highest price, whole units of the storefront's currency.
+            division: women or curve (Fashion Nova's plus range), or both.
+            category: Categories as the site writes them (facets name category), e.g. 'Jeans', 'Dresses'.
+            filters: Other facets by facets[].name: value or list of values (facets[].values[].value), e.g. {'fit_type': 'Baggy', 'rise': 'High Rise'}. Up to 10 facets. A facet the list does not offer matches nothing and is listed in unrecognized_filters.
+            page: Page, 60 per page, 1 to 200.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_collection", {"handle": handle, "url": url, "country": country, "language": language, "sort": sort, "size": size, "color": color, "price_min": price_min, "price_max": price_max, "division": division, "category": category, "filters": filters, "page": page}, extra)
+
+    def categories(
+        self,
+        *,
+        division: Optional[Literal["women", "men", "curve"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Fashion Nova's navigation for one division (women default, men, curve), as collection handles for collection(): division, count, collection_count, categories [{name, handle, url, sections [{name, items [{name, handle, url}]}]}] (handle is None for a link that is not a collection), trending_searches (the site's own trending searches for the division). The same handles work in every storefront. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            division: women (default), men or curve.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_categories", {"division": division}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        division: Optional[Literal["women", "men", "curve"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Fashion Nova's search suggestions for a partial query (division women default, men, curve): query, division, count, queries (suggested searches), products [{product_id, title, title_es, handle, color_slug, url, image}] (no prices: call product()), collections [{handle, title}]. The same for every storefront (no country param). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'dress'.
+            division: women (default), men or curve.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_suggestions", {"query": query, "division": division}, extra)
+
+    def reviews(
+        self,
+        handle: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        color: Optional[str] = None,
+        sort: Optional[Literal["highest_rated", "most_recent", "most_helpful", "lowest_rated"]] = None,
+        star: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A page of one Fashion Nova style's reviews by handle (+ color) or link: 10 per page, pages 1 to 8, sorted highest_rated (default, the page's own), most_recent, most_helpful or lowest_rated, optionally one star rating. handle, color_slug, sort, star, page, page_size, language (en), total (reviews matching the filter, as returned), has_more, rating {average, count, histogram, fit, fit_score}, count, reviews (id, rating, title, body, date, verified_buyer, votes_up, votes_down, fit (runs_small, true_to_size, runs_large: the page's own fit labels), fit_score, size_purchased, usual_size, color_purchased, language, topics. Reviewer names are never returned.). Fashion Nova keeps one English review pool for every storefront, so there is no country param. Takes 20 to 60 seconds. An unknown product answers 404 (charged). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Style handle (items[].handle), e.g. 'san-diego-sculpting-stretch-flare-jeans'; a colour handle <style>-fncolorname-<colour> is accepted too.
+            url: A fashionnova.com product link (https://www.fashionnova.com/products/<handle>?color=<colour>), any storefront.
+            color: Colour slug (items[].color_slug, colors[].color_slug), e.g. 'black-wash'. Default: the style's default colour.
+            sort: highest_rated (default), most_recent, most_helpful, lowest_rated.
+            star: Only reviews with this star rating (1-5).
+            page: Page, 10 reviews each, 1 to 8.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_reviews", {"handle": handle, "url": url, "color": color, "sort": sort, "star": star, "page": page}, extra)
+
+    def similar(
+        self,
+        handle: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        color: Optional[str] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Products Fashion Nova recommends as similar to one style (by handle (+ color) or link), from the US store in USD: handle, color_slug, product_id, title, country (us), language, currency, count, items (product_id, handle (the style), color, color_slug, title, base_title, url, product_type, price, compare_at, percent_off, on_sale, currency, price_with_code {price, currency}, final_sale, badge, in_stock, coming_soon, limited, sizes_in_stock, sizes [{size, quantity, available, low_stock}], image, colors [{color, color_slug, product_id}]). An unknown product answers 404 (charged). Prices are numbers in the storefront's currency, never converted: price is the lowest size price, compare_at the site's struck-through price, percent_off = round((1 - price / compare_at) * 100) (computed by Scavio from the two) and on_sale = compare_at above price (None / False without a compare-at). price_with_code is the price the site shows with its current promo code, when it shows one; final_sale flags a final-sale item. In the 27 EEA storefronts (at, be, cy, cz, de, dk, ee, es, fi, fr, gr, hu, ie, is, it, lt, lu, lv, mt, nl, no, pl, pt, ro, se, si, sk) prices include VAT and Fashion Nova shows no compare-at price, so compare_at and percent_off are None and on_sale False there. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Style handle (items[].handle), e.g. 'san-diego-sculpting-stretch-flare-jeans'; a colour handle <style>-fncolorname-<colour> is accepted too.
+            url: A fashionnova.com product link (https://www.fashionnova.com/products/<handle>?color=<colour>), any storefront.
+            color: Colour slug (items[].color_slug, colors[].color_slug), e.g. 'black-wash'. Default: the style's default colour.
+            limit: Products to return, 1 to 24 (default 12).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("fashionnova_similar", {"handle": handle, "url": url, "color": color, "limit": limit}, extra)

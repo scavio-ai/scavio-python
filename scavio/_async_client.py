@@ -33,6 +33,7 @@ from ._namespaces_async import (
     _AsyncDollarGeneralNamespace,
     _AsyncEbayNamespace,
     _AsyncFanaticsNamespace,
+    _AsyncFashionnovaNamespace,
     _AsyncFootlockerNamespace,
     _AsyncG2Namespace,
     _AsyncGeminiNamespace,
@@ -244,6 +245,7 @@ class AsyncScavioClient:
         self.depop = _AsyncDepopNamespace(self)
         self.poshmark = _AsyncPoshmarkNamespace(self)
         self.thredup = _AsyncThredupNamespace(self)
+        self.fashionnova = _AsyncFashionnovaNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

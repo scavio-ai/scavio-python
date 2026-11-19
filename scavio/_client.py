@@ -31,6 +31,7 @@ from ._namespaces_sync import (
     _DollarGeneralNamespace,
     _EbayNamespace,
     _FanaticsNamespace,
+    _FashionnovaNamespace,
     _FootlockerNamespace,
     _G2Namespace,
     _GeminiNamespace,
@@ -249,6 +250,7 @@ class ScavioClient:
         self.depop = _DepopNamespace(self)
         self.poshmark = _PoshmarkNamespace(self)
         self.thredup = _ThredupNamespace(self)
+        self.fashionnova = _FashionnovaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

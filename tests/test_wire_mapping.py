@@ -5522,3 +5522,99 @@ def test_thredup_credits_paths_and_wire(monkeypatch):
         tu.similar()
     with pytest.raises(ScavioError):
         tu.sold()
+
+
+def test_fashionnova_credits_paths_and_wire(monkeypatch):
+    """fashionnova (0.71.0): 7 endpoints on /api/v1/fashionnova, 1 credit each, 240 s floor.
+
+    search, product and collection take country (104 storefronts) and language (en, es);
+    categories, suggestions and reviews are the same for every storefront and similar answers
+    from the US store, so none of those takes country. product, reviews and similar take one of
+    handle or url; collection takes one of handle or url.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "fashionnova"}
+    assert sorted(eps) == [
+        "categories", "collection", "product", "reviews", "search", "similar", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/fashionnova/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        names = {p.name for p in ep.params}
+        if m in ("search", "product", "collection"):
+            assert {"country", "language"} <= names, m
+        else:
+            assert "country" not in names and "language" not in names, m
+    search = {p.name: p for p in eps["search"].params}
+    country = search["country"].annotation
+    assert country.count('"') == 2 * 104
+    assert '"zz"' in country and '"us"' in country and '"uk"' not in country
+    assert search["language"].annotation == 'Optional[Literal["en", "es"]]'
+    assert search["sort"].annotation == (
+        'Optional[Literal["featured", "best_selling", "price_low", "price_high", "newest"]]'
+    )
+    for m in ("product", "collection", "reviews", "similar"):
+        assert eps[m].one_of == (("handle", "url"),), m
+    reviews = {p.name: p for p in eps["reviews"].params}
+    assert reviews["sort"].annotation == (
+        'Optional[Literal["highest_rated", "most_recent", "most_helpful", "lowest_rated"]]'
+    )
+    assert reviews["star"].annotation == "Optional[Literal[1, 2, 3, 4, 5]]"
+    assert "one English review pool" in eps["reviews"].summary
+    assert "27 EEA" in eps["search"].summary and "no compare-at" in eps["search"].summary
+    assert "Fashion Nova's own AI summary" in eps["product"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    fn = client.fashionnova
+    fn.search("bodycon dress")
+    fn.search("bodycon dress", country="mx", language="es", sort="price_low", size=["M", "L"],
+              color="black", price_min=10, price_max=40, division=["women", "curve"],
+              category="Dresses", filters={"occasion": "Club"}, page=6)
+    fn.product("san-diego-sculpting-stretch-flare-jeans", color="black-wash", country="fr")
+    fn.product(url="https://www.fashionnova.com/products/san-diego-sculpting-stretch-flare-jeans")
+    fn.collection("sale")
+    fn.collection("sale", country="gb", sort="best_selling", page=200)
+    fn.categories()
+    fn.categories(division="men")
+    fn.suggestions("dress")
+    fn.suggestions("dress", division="curve")
+    fn.reviews("san-diego-sculpting-stretch-flare-jeans", color="black-wash", sort="most_recent",
+               star=5, page=8)
+    fn.similar("san-diego-sculpting-stretch-flare-jeans", limit=24)
+    base = "/api/v1/fashionnova/"
+    assert seen == [
+        (base + "search", {"query": "bodycon dress"}, 240.0),
+        (base + "search", {"query": "bodycon dress", "country": "mx", "language": "es",
+                           "sort": "price_low", "size": ["M", "L"], "color": "black",
+                           "price_min": 10, "price_max": 40, "division": ["women", "curve"],
+                           "category": "Dresses", "filters": {"occasion": "Club"},
+                           "page": 6}, 240.0),
+        (base + "product", {"handle": "san-diego-sculpting-stretch-flare-jeans",
+                            "color": "black-wash", "country": "fr"}, 240.0),
+        (base + "product",
+         {"url": "https://www.fashionnova.com/products/san-diego-sculpting-stretch-flare-jeans"},
+         240.0),
+        (base + "collection", {"handle": "sale"}, 240.0),
+        (base + "collection", {"handle": "sale", "country": "gb", "sort": "best_selling",
+                               "page": 200}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"division": "men"}, 240.0),
+        (base + "suggestions", {"query": "dress"}, 240.0),
+        (base + "suggestions", {"query": "dress", "division": "curve"}, 240.0),
+        (base + "reviews", {"handle": "san-diego-sculpting-stretch-flare-jeans",
+                            "color": "black-wash", "sort": "most_recent", "star": 5,
+                            "page": 8}, 240.0),
+        (base + "similar", {"handle": "san-diego-sculpting-stretch-flare-jeans",
+                            "limit": 24}, 240.0),
+    ]
+    for call in (fn.product, fn.collection, fn.reviews, fn.similar):
+        with pytest.raises(ScavioError):
+            call()

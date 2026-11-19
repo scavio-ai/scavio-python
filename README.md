@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 90 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 91 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -31,6 +31,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Zara Prices by Country, Online and Store Stock by Size, Materials, Special Prices and Stores (102 storefronts; 12 endpoints) | Yes | No | No | No |
 | Uniqlo Prices by Country, Online and Store Stock by Size, Reviews with Fit and Limited Offers (41 markets; 12 endpoints) | Yes | No | No | No |
 | ASOS Prices by Country and Currency, Online Stock by Size, Reviews by Store, Sale and New In (235 countries; 11 endpoints) | Yes | No | No | No |
+| Fashion Nova Sale Prices, Compare-At Prices, Sizes in Stock and Reviews (104 countries; 7 endpoints) | Yes | No | No | No |
 | Vinted Listings, Prices, Sellers, Brands and Categories across 27 country sites (9 endpoints) | Yes | No | No | No |
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
 | Depop Listings by Buyer Market, Shop Sold Prices, Shop Profiles and Reviews (9 markets; 14 endpoints) | Yes | No | No | No |
@@ -3761,6 +3762,90 @@ is approximate (thredUP matches a base price). Every answer reports the
 history. No seller or consignor names or ids are returned. Failed calls are
 not charged; a not-found is charged.
 
+### 60. Fashion -- Fashion Nova sale prices, compare-at prices, sizes in stock, reviews
+
+Fashion Nova in 104 countries. Namespace `fashionnova`, 7 endpoints:
+`search`, `product`, `collection`, `categories`, `suggestions`, `reviews`,
+`similar`. 1 credit per call on every endpoint. Pick the storefront with
+`country` (default `us`) and the language with `language` (`en` default,
+`es` in 67 countries). Review calls take 20 to 60 seconds; the request timeout
+is raised to at least 240s on every endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+fn = client.fashionnova
+
+# --- Sale prices: price, compare-at (struck-through) price, percent off, final sale, sizes in stock.
+res = fn.search("bodycon dress", country="us", sort="best_selling")["data"]
+print(res["currency"], res["total"], res["total_pages"], res["has_more"])
+for item in res["items"][:3]:
+    print(item["title"], item["price"], item["compare_at"], item["percent_off"],
+          item["final_sale"], item["sizes_in_stock"])
+
+# --- One style in one colour: every size with its SKU, price, compare-at and quantity.
+jeans = fn.product("san-diego-sculpting-stretch-flare-jeans", color="black-wash", country="gb")["data"]
+print(jeans["currency"], jeans["price"], jeans["compare_at"], jeans["percent_off"], jeans["promo"])
+for size in jeans["sizes"][:3]:
+    print(size["size"], size["sku"], size["price"], size["quantity"], size["low_stock"])
+print(jeans["rating"], jeans["site_ai_review_summary"])  # Fashion Nova's own AI review summary
+
+# --- Spanish storefront: titles, descriptions and attributes in Spanish, prices in MXN.
+mx = fn.product("san-diego-sculpting-stretch-flare-jeans", country="mx", language="es")["data"]
+
+# --- Collections page through fully: sale, best-sellers, new, new-this-week, back-in-stock ...
+sale = fn.collection("sale", country="ca", filters={"occasion": "Vacation"})["data"]
+print(sale["total"], sale["total_pages"], sale.get("unrecognized_filters"))
+
+# --- Navigation (collection handles), suggestions, reviews (one English pool), similar (US store).
+tree = fn.categories(division="women")["data"]["categories"]
+hints = fn.suggestions("dress")["data"]["queries"]
+reviews = fn.reviews("san-diego-sculpting-stretch-flare-jeans", sort="most_recent", star=5)["data"]
+for r in reviews["reviews"][:3]:
+    print(r["rating"], r["title"], r["fit"], r["size_purchased"], r["usual_size"])
+similar = fn.similar("san-diego-sculpting-stretch-flare-jeans", limit=24)["data"]["items"]
+```
+
+Markets: the 104 countries in Fashion Nova's own country selector, each in
+its own currency (37 currencies: us USD, ca CAD, gb GBP, au AUD, mx MXN, jp
+JPY, ae AED, the euro countries EUR ...; `zz` is the site's International
+storefront in USD). `language="es"` is served in 67 countries (not the US
+store). A country or language Fashion Nova does not run answers 400 before
+anything is charged. `categories` and `suggestions` are the same in every
+storefront, `reviews` is one English pool shared by every market (no
+`country`), and `similar` answers from the US store in USD.
+
+Prices are numbers in the storefront's currency, never converted: `price`
+(the lowest size price), `compare_at` (the site's struck-through price),
+`percent_off` (computed by Scavio: `round((1 - price / compare_at) * 100)`),
+`on_sale`, `price_with_code` (the price with the site's current promo code,
+when it shows one) and `final_sale`. In the 27 EEA countries (at, be, cy, cz,
+de, dk, ee, es, fi, fr, gr, hu, ie, is, it, lt, lu, lv, mt, nl, no, pl, pt,
+ro, se, si, sk) Fashion Nova shows VAT-inclusive prices and no compare-at
+price, so `compare_at` and `percent_off` are `None` there. The same jeans read
+on 2026-11-19: us 18 USD (compare-at 34.99, 49% off), ca 27 CAD (51), gb 17
+GBP (32), au 31 AUD (60), mx 338 MXN (656), fr 20.95 EUR (no compare-at).
+`sizes[].quantity` is the stock Fashion Nova's page shows per size, not a
+guaranteed inventory count.
+
+`search` is semantic and matched loosely: its `total` moves between calls, a
+later page can repeat a few items, and it shows its first 18 pages of 60 (6
+under a sort other than `featured`); narrow with filters. `collection` pages
+through fully (pages 1 to 200; `has_more` follows the site's page count).
+Filters: `size`, `color`, `price_min` / `price_max` (whole units of the
+storefront's currency), `division` (`women`, `curve`), `category`, and
+`filters` for any other facet by `facets[].name`; a facet the list does not
+offer matches nothing and is listed in `unrecognized_filters` (present only
+then). Sorts:
+`featured`, `best_selling`, `price_low`, `price_high`, `newest`. `reviews`:
+`highest_rated` (default), `most_recent`, `most_helpful`, `lowest_rated`,
+`star` 1-5, 10 per page, pages 1 to 8, totals as returned; reviewer names are
+never returned. Not available: stores (Fashion Nova lists none), a brand
+directory (everything is Fashion Nova), price history (poll and store the
+answers), gift cards, new-arrival dates. Failed calls are not charged; a
+not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -3910,6 +3995,7 @@ Scavio works with popular AI/LLM frameworks:
 | H&M (`hm`) | `search`, `product`, `stock`, `stores`, `category`, `deals`, `new_arrivals`, `suggestions`, `production`; 47 countries via `country` and `language` (`product` not on mo, tw or the shared EU store; `stores` not on mo) | `product` 2, the rest 1 each |
 | Zara (`zara`) | `search`, `product`, `materials`, `stock`, `stores`, `store_stock`, `categories`, `category`, `deals`, `new_arrivals`, `prices`, `suggestions`; 102 storefronts via `country` and `language` (`stores` and `store_stock` not ao or iq, `new_arrivals` not dz, `suggestions` not on ad al am az ba dz mk mo uz xk) | billed what each call spent: 2 per call; `product` 2 to 6, `store_stock` 2 or 4, `deals` and `new_arrivals` 4, `prices` 2 per market that answered, `suggestions` 2 or 4; 1 per call on `cn` |
 | ASOS (`asos`) | `search`, `product`, `stock`, `reviews`, `suggestions`, `category`, `categories`, `brands`, `deals`, `new_arrivals`, `markets`; 235 countries via `country` and `currency` (245 country-currency combinations; `suggestions` not on pl) | 1 each |
+| Fashion Nova (`fashionnova`) | `search`, `product`, `collection`, `categories`, `suggestions`, `reviews`, `similar`; 104 countries via `country`, `language` en or es (es in 67; `categories`, `suggestions` and `reviews` global, `similar` US store) | 1 each |
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
 | Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
 | Poshmark (`poshmark`) | `search`, `sold`, `product`, `category`, `brand`, `closet`, `closet_listings`, `love_notes`, `closets_search`, `categories`, `brands`, `suggestions`, `parties`, `party_listings`, `similar`; `country` us or ca (`product`, closet endpoints and `categories` global) | 1 each |
@@ -3931,6 +4017,14 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.71.0
+
+- **New `fashionnova` namespace** (sync and async) for Fashion Nova, 7
+  endpoints: `search`, `product`, `collection`, `categories`, `suggestions`,
+  `reviews`, `similar`. 104 countries via `country` (local currency) and
+  `language` (`en`, or `es` in 67 countries): price, compare-at price, percent
+  off, final sale and per-size stock. 1 credit each. 240s timeout floor.
 
 ### Changed in 0.70.0
 
