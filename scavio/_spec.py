@@ -14125,7 +14125,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "Customer reviews of one Argos product by product_id or link, up to 100 per page and "
             "every review reachable: product_id, sort, rating, page, limit, total (for the star "
             "filter), has_more, count, summary (Argos's own AI-generated summary of the reviews, "
-            "labelled by summary_source), stats {product_name, brand, review_count, "
+            "labelled by summary_source), stats {product_name, review_count, "
             "average_rating, rating_distribution, recommended_percent, secondary_averages [{label, "
             "average}], first_review_at, last_review_at}, reviews [{id, rating, title, text, "
             "submitted_at, recommended, helpful_count, not_helpful_count, secondary_ratings, "
