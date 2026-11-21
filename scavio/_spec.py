@@ -3248,6 +3248,94 @@ _ARGOS_NOTE = (
 )
 _ARGOS_CHARGE = " Failed upstream calls are not charged; a not-found is charged."
 
+# Media Expert params shared across endpoints (mediaexpert.pl: one Polish store, PLN, Polish; no
+# country input). 13 endpoints, billed on actual cost: 1 to 3 credits per call (credits_used).
+_MEDIAEXPERT_SORT = _lit(
+    "sort",
+    (
+        "relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc",
+        "brand_asc", "brand_desc", "discount",
+    ),
+    "relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own "
+    "price order, kept as given: it follows promotional and code prices and is approximate "
+    "against price, so re-sort the page if you need a strict order), rating, newest, name_asc, "
+    "name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.",
+)
+_MEDIAEXPERT_LIST_PARAMS = (
+    _MEDIAEXPERT_SORT,
+    _int("page", "Page, 1 to 100 (total_pages says how deep the list goes)."),
+    _ilit(
+        "limit",
+        (5, 10, 15, 20, 30, 50),
+        "Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert "
+        "offers.",
+    ),
+)
+_MEDIAEXPERT_FILTERS = _str_or_list(
+    "filters",
+    "Up to 10 filters: facets[].values[].filter of an earlier answer (brand, promotions, Top Hit, "
+    "instalments, energy class, specifications, marketplace seller), e.g. ['samsung', "
+    "'pojemnosc-kg_od-10-kg']. Several filters narrow together. There is no price filter.",
+)
+_MEDIAEXPERT_PRODUCT_ID = Param(
+    "product_id",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc="Media Expert product id: items[].product_id (up to 8 digits), e.g. '8128227'. The offer "
+    "id (items[].offer_id, 9-10 digits) is refused.",
+)
+_MEDIAEXPERT_URL = _str(
+    "url", "A Media Expert product link (https://www.mediaexpert.pl/<category>/<product>)."
+)
+_MEDIAEXPERT_PRICES = (
+    " Prices are numbers in PLN: price (the listed price), old_price (Media Expert's "
+    "struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days "
+    "that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), "
+    "code_price {price, code, valid_from, valid_to} (the price with a discount code, the code "
+    "and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows "
+    "one) and discount_percent (computed by Scavio from old_price, or for a code price from "
+    "price, to the lowest price you can pay)."
+)
+_MEDIAEXPERT_ITEM = (
+    "product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, "
+    "for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, "
+    "code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: "
+    "available, preorder, not_available, advance for marketplace shipping), availability_label "
+    "(as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True "
+    "for third-party marketplace sellers), in_store, energy_class, warranty_months, "
+    "top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes "
+    "under the price, e.g. Darmowa dostawa: free delivery)"
+)
+_MEDIAEXPERT_LIST_CORE = (
+    "sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: "
+    "total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items ("
+    + _MEDIAEXPERT_ITEM + ")"
+)
+_MEDIAEXPERT_FACETS = (
+    "facets [{code, name, values [{name, count, filter}]}] (send filter back in filters)"
+)
+_MEDIAEXPERT_LIST_OUT = (
+    "kind (products, or subcategories for a parent category page: subcategories [{category_id, "
+    "name, path, url, product_count}]), title, breadcrumbs, " + _MEDIAEXPERT_LIST_CORE + ", "
+    + _MEDIAEXPERT_FACETS
+)
+_MEDIAEXPERT_NOTE = (
+    " One store: mediaexpert.pl, PLN, no country input; names, specifications, labels and "
+    "reviews are in Polish, as Media Expert writes them."
+)
+_MEDIAEXPERT_NOT_AVAILABLE = (
+    " Not available: a price filter, Q&A (Media Expert has none), leaflets, price history (poll "
+    "and store the answers), unit counts, checkout prices, other countries or languages."
+)
+_MEDIAEXPERT_BILL = (
+    " Failed upstream calls are not charged; a not-found is charged; credits_used in the "
+    "response is the exact charge."
+)
+_MEDIAEXPERT_LIST_CREDITS = (
+    "Costs 1 credit unsorted, 3 credits with a sort or when Media Expert loads the list lazily "
+    "(one more lookup for the rest of the page)." + _MEDIAEXPERT_BILL
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -14271,6 +14359,392 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=240.0,
     ),
+    # ============================ Media Expert ============================
+    # 13 endpoints on /api/v1/mediaexpert, one Polish store (PLN), no country input. Billed on
+    # actual cost, 1 to 3 credits per call: credits is the floor, credits_note the range.
+    # Lists can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="mediaexpert_search",
+        namespace="mediaexpert",
+        method="search",
+        http="POST",
+        path="/api/v1/mediaexpert/search",
+        summary=(
+            "Search Media Expert for prices, old prices, the Omnibus 30-day low and code prices: "
+            "query, category_id, redirected_to {type, path, url} (Media Expert sends many single "
+            "words to a category page, e.g. telewizor; the list then is that category's, with "
+            "its " + _MEDIAEXPERT_FACETS + "), " + _MEDIAEXPERT_LIST_CORE + ". 30 products per "
+            "page by default (up to 50), up to 100 pages." + _MEDIAEXPERT_PRICES
+            + _MEDIAEXPERT_NOT_AVAILABLE + _MEDIAEXPERT_NOTE
+        ),
+        params=(
+            _req("query", "Search text (Polish works best: telewizor, pralka, iphone 17)."),
+            _str_or_int(
+                "category_id",
+                "Narrow the search to one category id (categories() categories[].category_id).",
+            ),
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=(
+            "Costs 3 credits for a search page (Media Expert loads search lists lazily: one more "
+            "lookup for the rest of the page), 1 credit when it answers with a full category "
+            "page." + _MEDIAEXPERT_BILL
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_product",
+        namespace="mediaexpert",
+        method="product",
+        http="POST",
+        path="/api/v1/mediaexpert/product",
+        summary=(
+            "One Media Expert product in full by product_id or link: requested, "
+            + _MEDIAEXPERT_ITEM + ", marketplace, eans, description (plain text), images, "
+            "key_attributes [{name, values}], specifications [{group, attributes [{name, "
+            "values}]}], variants [{name, options [{value, product_id}]}] (colour, memory ...), "
+            "delivery {delivery_label, store_pickup_label, parcel_locker_label (as Media Expert "
+            "words them, e.g. w poniedziałek: on Monday), collect_in_1h, delivery_info, "
+            "min_shipping_price}, installments {monthly, months, interest_rate}, seller {id, "
+            "name, slug, marketplace, url, rating {total, recommended, not_recommended, "
+            "recommended_percent}}, preorder, renewed, product_set, first_listed_at, "
+            "rating_summary {average, recommendations, verified_purchases, features}, "
+            "breadcrumbs, related [{product_id, name, url, image}]. A product Media Expert no "
+            "longer lists is a charged 404." + _MEDIAEXPERT_PRICES + _MEDIAEXPERT_NOTE
+            + _MEDIAEXPERT_BILL
+        ),
+        params=(_MEDIAEXPERT_PRODUCT_ID, _MEDIAEXPERT_URL),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_store_stock",
+        namespace="mediaexpert",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/mediaexpert/store-stock",
+        summary=(
+            "One product's stock indicator at the Media Expert stores nearest a Polish city, "
+            "town or postcode (up to 40, nearest first; small towns list the nearest stores and "
+            "pickup points): product_id, location, count, in_stock_count, collect_in_1h_count, "
+            "stores [{store_id, name, code, type (store or pickup_point), address {street, "
+            "house_number, apartment, postcode, city, province}, phone, latitude, longitude, "
+            "distance_km, hours [{day, open, close}], stock_level, in_stock, collect_in_1h (Media "
+            "Expert's 'Odbierz za godzinę': ready to collect within an hour), button_label, "
+            "order_to_store_day (when it is not on the shelf: the day an order reaches that "
+            "store, as Media Expert words it), display_unit, availability, availability_label}]. "
+            "stock_level is Media Expert's stock indicator, a bucket, not a unit count (seen: 0, "
+            "2, 9, 20; 0 = none on the shelf). Send items[].product_id, not the offer id: an "
+            "offer id answers 400 before anything is charged; an unknown product id is a "
+            "charged 404; a marketplace item (shipped by its seller, never in stores) is a "
+            "charged 400." + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Union[str, int]",
+                required=True,
+                doc="Media Expert product id (items[].product_id), e.g. '8128227'. Marketplace "
+                "items are not stocked in stores.",
+            ),
+            _req("location", "A Polish city or town (Warszawa, Kraków, Sanok) or a postcode (00-950)."),
+            _int("limit", "Stores, nearest first, 1 to 40 (default 40)."),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_stores",
+        namespace="mediaexpert",
+        method="stores",
+        http="POST",
+        path="/api/v1/mediaexpert/stores",
+        summary=(
+            "Every Media Expert store (about 640) or the stores of one city: city, total_stores, "
+            "count, stores [{store_id, store (the reference for store), url, address {street, "
+            "house_number, apartment, postcode, city}, latitude, longitude, hours [{day, open, "
+            "close}], closed_today, next_open_day, services (e.g. Skrytka ME Box, the store's "
+            "parcel locker)}]. Or one store's page by store: the same fields plus phone, events "
+            "and alerts. No stock here: for stock near a place use store_stock()."
+            + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            Param(
+                "city",
+                "Optional[str]",
+                positional=True,
+                doc="Only the stores in this city (as Media Expert writes it; case and Polish "
+                "accents do not matter), e.g. 'Warszawa'. Omit both for every store.",
+            ),
+            _str(
+                "store",
+                "One store's page: stores[].store (e.g. 'warszawa/al-jerozolimskie-148') or its "
+                "mediaexpert.pl/sklepy/... link.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_reviews",
+        namespace="mediaexpert",
+        method="reviews",
+        http="POST",
+        path="/api/v1/mediaexpert/reviews",
+        summary=(
+            "Media Expert's own customer reviews of one product, up to 100 per page and every "
+            "review reachable, by sku (1 call) or by product_id or link (the page names the "
+            "sku): sku, product_id, sort, rating_min, rating_max, verified_only, page, limit, "
+            "total, total_pages, has_more, count, average_rating, recommendations, "
+            "verified_purchases, features [{name, average}] (Media Expert's per-feature "
+            "averages), reviews [{id, rating, title, text, created_at, verified_purchase (Media "
+            "Expert's 'confirmed by purchase'), incentivized (the review came from a Media "
+            "Expert promotional campaign, 'Opinia z akcji promocyjnej'), incentive_label, "
+            "feature_ratings [{name, rating}], helpful_yes, helpful_no, store_reply_count}]. "
+            "With a star range Media Expert gives no total (has_more means a full page). Review "
+            "text is in Polish. No reviewer name or any reviewer identity is returned. "
+            "Marketplace offers carry no product code and have no Media Expert reviews (charged "
+            "404)." + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="Media Expert product code: items[].sku, e.g. '709727' (the cheapest way in: "
+                "1 call).",
+            ),
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                doc="Media Expert product id (items[].product_id), e.g. '8128227'.",
+            ),
+            _MEDIAEXPERT_URL,
+            _lit(
+                "sort",
+                ("most_helpful", "least_helpful", "newest", "oldest", "highest_rating", "lowest_rating"),
+                "most_helpful (default, Media Expert's own order), least_helpful, newest, oldest, "
+                "highest_rating, lowest_rating.",
+            ),
+            _int("rating_min", "Lowest star rating to include (1-5)."),
+            _int("rating_max", "Highest star rating to include (1-5)."),
+            _bool("verified", "Only reviews Media Expert marks as confirmed by purchase."),
+            _int("page", "Page (every review is reachable)."),
+            _int("limit", "Reviews per page, 1 to 100 (default 10)."),
+        ),
+        one_of=(("sku", "product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_category",
+        namespace="mediaexpert",
+        method="category",
+        http="POST",
+        path="/api/v1/mediaexpert/category",
+        summary=(
+            "One Media Expert category's products by path, with filters "
+            "(facets[].values[].filter), sort and paging: category, filters, "
+            + _MEDIAEXPERT_LIST_OUT + "." + _MEDIAEXPERT_PRICES + _MEDIAEXPERT_NOTE
+        ),
+        params=(
+            _req(
+                "category",
+                "A category path (categories() categories[].path, breadcrumbs[].path) or its "
+                "mediaexpert.pl link, e.g. 'agd/pralki-i-suszarki/pralki'.",
+            ),
+            _MEDIAEXPERT_FILTERS,
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=_MEDIAEXPERT_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_categories",
+        namespace="mediaexpert",
+        method="categories",
+        http="POST",
+        path="/api/v1/mediaexpert/categories",
+        summary=(
+            "Media Expert's category tree (24 departments, about 5,000 categories), or one "
+            "category's subtree: category (the starting node), depth, count, node_count, "
+            "categories [{category_id, name, path (the input of category()), url, "
+            "product_count, child_count, children}]." + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            _str("category", "Start the tree at this category path (e.g. 'agd')."),
+            _str_or_int("category_id", "Start the tree at this category id (e.g. '12900')."),
+            _int(
+                "depth",
+                "Levels to return, 1 to 6 (default 2 from the top, 3 from a category). "
+                "child_count says what lies below a cut.",
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_brands",
+        namespace="mediaexpert",
+        method="brands",
+        http="POST",
+        path="/api/v1/mediaexpert/brands",
+        summary=(
+            "Media Expert's brand directory (about 16,000 brands): query, letter, total_brands, "
+            "matches, page, limit, has_more, count, featured, brands [{brand_id, name, slug (the "
+            "input of brand()), url}]." + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="Only brands whose name contains this text, e.g. 'sams'.",
+            ),
+            _str("letter", "Only brands starting with this letter or digit."),
+            _int("page", "Page."),
+            _int("limit", "Brands per page, 1 to 1000 (default 100)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_brand",
+        namespace="mediaexpert",
+        method="brand",
+        http="POST",
+        path="/api/v1/mediaexpert/brand",
+        summary=(
+            "One brand's products on Media Expert, optionally inside a category, with filters, "
+            "sort and paging: brand, category, filters, " + _MEDIAEXPERT_LIST_OUT + "."
+            + _MEDIAEXPERT_PRICES + _MEDIAEXPERT_NOTE
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand: brands[].slug (e.g. 'samsung', 'amica') or its mediaexpert.pl/<brand> "
+                "link.",
+            ),
+            _str(
+                "category",
+                "Only this brand inside one category path (e.g. 'agd/pralki-i-suszarki/pralki').",
+            ),
+            _MEDIAEXPERT_FILTERS,
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=_MEDIAEXPERT_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_promotions",
+        namespace="mediaexpert",
+        method="promotions",
+        http="POST",
+        path="/api/v1/mediaexpert/promotions",
+        summary=(
+            "Media Expert promotion lists, Black Weeks included: without list, the lists its "
+            "promotions page links (query, black_weeks, total_lists, count, lists [{list (the "
+            "input of list), list_id, name, url, black_weeks}]); with list, that list's products "
+            "(list, list_id, url, " + _MEDIAEXPERT_LIST_OUT + "). Every product also carries its "
+            "own promotion data (old_price, omnibus_lowest_30d, code_price)."
+            + _MEDIAEXPERT_PRICES
+        ),
+        params=(
+            Param(
+                "list",
+                "Optional[str]",
+                positional=True,
+                doc="One promotion list: lists[].list (e.g. "
+                "'32975-logitech-black-weeks-czas-na-nowy-poziom-sprzetu') or its "
+                "mediaexpert.pl/lista,... link. Without it, the promotion lists.",
+            ),
+            _str("query", "Only lists whose name or reference contains this text (without list)."),
+            _bool("black_weeks", "Only Black Weeks / Black Friday lists (without list)."),
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=(
+            "Costs 1 credit for the promotion lists; a list's products cost 1 credit unsorted, 3 "
+            "credits with a sort or when Media Expert loads the list lazily." + _MEDIAEXPERT_BILL
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_outlet",
+        namespace="mediaexpert",
+        method="outlet",
+        http="POST",
+        path="/api/v1/mediaexpert/outlet",
+        summary=(
+            "Media Expert's outlet (ex-display, returned and end-of-line items at outlet "
+            "prices): without category, the outlet's groups (kind subcategories, with product "
+            "counts); with an outlet group path, its subgroups or products ("
+            + _MEDIAEXPERT_LIST_OUT + "). old_price is the price before the outlet price."
+            + _MEDIAEXPERT_PRICES
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                positional=True,
+                doc="An outlet group path (subcategories[].path), e.g. "
+                "'outlet/outlet-agd/outlet-lodowki-wolnostojace'. Without it, the outlet's "
+                "groups.",
+            ),
+            _MEDIAEXPERT_FILTERS,
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=_MEDIAEXPERT_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_seller",
+        namespace="mediaexpert",
+        method="seller",
+        http="POST",
+        path="/api/v1/mediaexpert/seller",
+        summary=(
+            "A marketplace seller on Media Expert (third-party sellers next to Media Expert's "
+            "own stock): seller {seller_id, name, slug, url, rating {total, recommended, "
+            "not_recommended, recommended_percent}, min_shipping_price, delivery_info, "
+            "categories [{category_id, name, product_count}]}, and its offers: "
+            + _MEDIAEXPERT_LIST_CORE + "." + _MEDIAEXPERT_PRICES
+        ),
+        params=(
+            _req(
+                "seller",
+                "A marketplace seller: items[].seller.slug (e.g. 'autobi') or its "
+                "mediaexpert.pl/sprzedawca-marketplace/... link.",
+            ),
+        )
+        + _MEDIAEXPERT_LIST_PARAMS,
+        credits=1,
+        credits_note=_MEDIAEXPERT_LIST_CREDITS,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="mediaexpert_suggestions",
+        namespace="mediaexpert",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/mediaexpert/suggestions",
+        summary=(
+            "Media Expert's search suggestions for a partial query: query, count, suggestions "
+            "[{phrase, searches (how many times shoppers searched it, Media Expert's count), "
+            "average_results}], categories [{name, path, url}]." + _MEDIAEXPERT_BILL
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'pral'."),
+            _int("limit", "Suggestions, 1 to 10 (default 8, as on the site)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -21305,6 +21779,7 @@ NAMESPACES: tuple[str, ...] = (
     "thredup",
     "fashionnova",
     "argos",
+    "mediaexpert",
 )
 
 

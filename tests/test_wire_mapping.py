@@ -633,6 +633,12 @@ BODY_PRICED_KEYS = {
     "depop_category",
     "depop_brand",
     "depop_explore",
+    "mediaexpert_search",
+    "mediaexpert_category",
+    "mediaexpert_brand",
+    "mediaexpert_promotions",
+    "mediaexpert_outlet",
+    "mediaexpert_seller",
 }
 
 
@@ -5722,5 +5728,112 @@ def test_argos_credits_paths_and_wire(monkeypatch):
         (base + "suggestions", {"query": "lego", "limit": 5}, 240.0),
     ]
     for call in (ar.product, ar.reviews, ar.questions, ar.stores):
+        with pytest.raises(ScavioError):
+            call()
+
+
+def test_mediaexpert_credits_paths_and_wire(monkeypatch):
+    """mediaexpert (0.73.0): 13 endpoints on /api/v1/mediaexpert, actual cost 1 to 3 credits.
+
+    One Polish store (mediaexpert.pl, PLN), so no endpoint takes country. product takes one of
+    product_id or url; reviews one of sku, product_id or url. Variable-cost endpoints state
+    their range in credits_note; flat ones keep credits.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "mediaexpert"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "outlet", "product", "promotions",
+        "reviews", "search", "seller", "store_stock", "stores", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/mediaexpert/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "country" not in {p.name for p in ep.params}, m
+    flat = {m: ep.credits for m, ep in eps.items() if ep.credits_note is None}
+    assert flat == {
+        "product": 1, "store_stock": 2, "stores": 1, "reviews": 1, "categories": 2,
+        "brands": 1, "suggestions": 1,
+    }
+    for m in ("search", "category", "brand", "promotions", "outlet", "seller"):
+        assert eps[m].credits == 1 and "3 credits" in eps[m].credits_note, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", '
+        '"name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]]'
+    )
+    assert search["limit"].annotation == "Optional[Literal[5, 10, 15, 20, 30, 50]]"
+    assert eps["product"].one_of == (("product_id", "url"),)
+    assert eps["reviews"].one_of == (("sku", "product_id", "url"),)
+    stock = {p.name: p for p in eps["store_stock"].params}
+    assert stock["product_id"].required and stock["location"].required
+    assert "not a unit count" in eps["store_stock"].summary
+    assert "omnibus_lowest_30d" in eps["product"].summary
+    assert "No reviewer name" in eps["reviews"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    me = client.mediaexpert
+    me.search("telewizor")
+    me.search("iphone 17", category_id="12900", sort="price_asc", page=2, limit=50)
+    me.product("8128227")
+    me.product(url="https://www.mediaexpert.pl/telewizory-i-rtv/telewizory/x")
+    me.store_stock("8128227", "Warszawa")
+    me.store_stock(8128227, "00-950", limit=10)
+    me.stores()
+    me.stores("Krakow")
+    me.stores(store="warszawa/al-jerozolimskie-148")
+    me.reviews("709727")
+    me.reviews(product_id="8128227", sort="newest", rating_min=1, rating_max=2, verified=True,
+               page=2, limit=100)
+    me.category("agd/pralki-i-suszarki/pralki", filters=["bosch", "pojemnosc-kg_od-10-kg"],
+                sort="price_asc")
+    me.categories(category="agd", depth=2)
+    me.brands("sams", limit=50)
+    me.brand("samsung", category="telewizory-i-rtv/telewizory", sort="price_desc")
+    me.promotions(black_weeks=True)
+    me.promotions("32975-logitech-black-weeks-czas-na-nowy-poziom-sprzetu", page=2)
+    me.outlet()
+    me.outlet("outlet/outlet-agd/outlet-lodowki-wolnostojace", limit=20)
+    me.seller("autobi", page=2)
+    me.suggestions("pral", limit=5)
+    base = "/api/v1/mediaexpert/"
+    assert seen == [
+        (base + "search", {"query": "telewizor"}, 240.0),
+        (base + "search", {"query": "iphone 17", "category_id": "12900", "sort": "price_asc",
+                           "page": 2, "limit": 50}, 240.0),
+        (base + "product", {"product_id": "8128227"}, 240.0),
+        (base + "product", {"url": "https://www.mediaexpert.pl/telewizory-i-rtv/telewizory/x"},
+         240.0),
+        (base + "store-stock", {"product_id": "8128227", "location": "Warszawa"}, 240.0),
+        (base + "store-stock", {"product_id": 8128227, "location": "00-950", "limit": 10}, 240.0),
+        (base + "stores", {}, 240.0),
+        (base + "stores", {"city": "Krakow"}, 240.0),
+        (base + "stores", {"store": "warszawa/al-jerozolimskie-148"}, 240.0),
+        (base + "reviews", {"sku": "709727"}, 240.0),
+        (base + "reviews", {"product_id": "8128227", "sort": "newest", "rating_min": 1,
+                            "rating_max": 2, "verified": True, "page": 2, "limit": 100}, 240.0),
+        (base + "category", {"category": "agd/pralki-i-suszarki/pralki",
+                             "filters": ["bosch", "pojemnosc-kg_od-10-kg"], "sort": "price_asc"},
+         240.0),
+        (base + "categories", {"category": "agd", "depth": 2}, 240.0),
+        (base + "brands", {"query": "sams", "limit": 50}, 240.0),
+        (base + "brand", {"brand": "samsung", "category": "telewizory-i-rtv/telewizory",
+                          "sort": "price_desc"}, 240.0),
+        (base + "promotions", {"black_weeks": True}, 240.0),
+        (base + "promotions", {"list": "32975-logitech-black-weeks-czas-na-nowy-poziom-sprzetu",
+                               "page": 2}, 240.0),
+        (base + "outlet", {}, 240.0),
+        (base + "outlet", {"category": "outlet/outlet-agd/outlet-lodowki-wolnostojace",
+                           "limit": 20}, 240.0),
+        (base + "seller", {"seller": "autobi", "page": 2}, 240.0),
+        (base + "suggestions", {"query": "pral", "limit": 5}, 240.0),
+    ]
+    for call in (me.product, me.reviews):
         with pytest.raises(ScavioError):
             call()

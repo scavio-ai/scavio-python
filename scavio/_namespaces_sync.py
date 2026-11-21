@@ -101,6 +101,7 @@ __all__ = [
     "_ThredupNamespace",
     "_FashionnovaNamespace",
     "_ArgosNamespace",
+    "_MediaExpertNamespace",
 ]
 
 class _GoogleNamespace:
@@ -16810,3 +16811,321 @@ class _ArgosNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("argos_suggestions", {"query": query, "limit": limit}, extra)
+
+class _MediaExpertNamespace:
+    """Media Expert search, product, store stock, stores, reviews, category, categories, brands, brand, promotions, outlet, seller and suggestions endpoints for mediaexpert.pl (Poland, PLN)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Media Expert for prices, old prices, the Omnibus 30-day low and code prices: query, category_id, redirected_to {type, path, url} (Media Expert sends many single words to a category page, e.g. telewizor; the list then is that category's, with its facets [{code, name, values [{name, count, filter}]}] (send filter back in filters)), sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)). 30 products per page by default (up to 50), up to 100 pages. Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay). Not available: a price filter, Q&A (Media Expert has none), leaflets, price history (poll and store the answers), unit counts, checkout prices, other countries or languages. One store: mediaexpert.pl, PLN, no country input; names, specifications, labels and reviews are in Polish, as Media Expert writes them.
+
+        Costs 3 credits for a search page (Media Expert loads search lists lazily: one more
+        lookup for the rest of the page), 1 credit when it answers with a full category page.
+        Failed upstream calls are not charged; a not-found is charged; credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            query: Search text (Polish works best: telewizor, pralka, iphone 17).
+            category_id: Narrow the search to one category id (categories() categories[].category_id).
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_search", {"query": query, "category_id": category_id, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Media Expert product in full by product_id or link: requested, product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery), marketplace, eans, description (plain text), images, key_attributes [{name, values}], specifications [{group, attributes [{name, values}]}], variants [{name, options [{value, product_id}]}] (colour, memory ...), delivery {delivery_label, store_pickup_label, parcel_locker_label (as Media Expert words them, e.g. w poniedziałek: on Monday), collect_in_1h, delivery_info, min_shipping_price}, installments {monthly, months, interest_rate}, seller {id, name, slug, marketplace, url, rating {total, recommended, not_recommended, recommended_percent}}, preorder, renewed, product_set, first_listed_at, rating_summary {average, recommendations, verified_purchases, features}, breadcrumbs, related [{product_id, name, url, image}]. A product Media Expert no longer lists is a charged 404. Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay). One store: mediaexpert.pl, PLN, no country input; names, specifications, labels and reviews are in Polish, as Media Expert writes them. Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Media Expert product id: items[].product_id (up to 8 digits), e.g. '8128227'. The offer id (items[].offer_id, 9-10 digits) is refused.
+            url: A Media Expert product link (https://www.mediaexpert.pl/<category>/<product>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_product", {"product_id": product_id, "url": url}, extra)
+
+    def store_stock(
+        self,
+        product_id: Union[str, int],
+        location: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product's stock indicator at the Media Expert stores nearest a Polish city, town or postcode (up to 40, nearest first; small towns list the nearest stores and pickup points): product_id, location, count, in_stock_count, collect_in_1h_count, stores [{store_id, name, code, type (store or pickup_point), address {street, house_number, apartment, postcode, city, province}, phone, latitude, longitude, distance_km, hours [{day, open, close}], stock_level, in_stock, collect_in_1h (Media Expert's 'Odbierz za godzinę': ready to collect within an hour), button_label, order_to_store_day (when it is not on the shelf: the day an order reaches that store, as Media Expert words it), display_unit, availability, availability_label}]. stock_level is Media Expert's stock indicator, a bucket, not a unit count (seen: 0, 2, 9, 20; 0 = none on the shelf). Send items[].product_id, not the offer id: an offer id answers 400 before anything is charged; an unknown product id is a charged 404; a marketplace item (shipped by its seller, never in stores) is a charged 400. Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Media Expert product id (items[].product_id), e.g. '8128227'. Marketplace items are not stocked in stores.
+            location: A Polish city or town (Warszawa, Kraków, Sanok) or a postcode (00-950).
+            limit: Stores, nearest first, 1 to 40 (default 40).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_store_stock", {"product_id": product_id, "location": location, "limit": limit}, extra)
+
+    def stores(
+        self,
+        city: Optional[str] = None,
+        *,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every Media Expert store (about 640) or the stores of one city: city, total_stores, count, stores [{store_id, store (the reference for store), url, address {street, house_number, apartment, postcode, city}, latitude, longitude, hours [{day, open, close}], closed_today, next_open_day, services (e.g. Skrytka ME Box, the store's parcel locker)}]. Or one store's page by store: the same fields plus phone, events and alerts. No stock here: for stock near a place use store_stock(). Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            city: Only the stores in this city (as Media Expert writes it; case and Polish accents do not matter), e.g. 'Warszawa'. Omit both for every store.
+            store: One store's page: stores[].store (e.g. 'warszawa/al-jerozolimskie-148') or its mediaexpert.pl/sklepy/... link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_stores", {"city": city, "store": store}, extra)
+
+    def reviews(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        sort: Optional[Literal["most_helpful", "least_helpful", "newest", "oldest", "highest_rating", "lowest_rating"]] = None,
+        rating_min: Optional[int] = None,
+        rating_max: Optional[int] = None,
+        verified: Optional[bool] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert's own customer reviews of one product, up to 100 per page and every review reachable, by sku (1 call) or by product_id or link (the page names the sku): sku, product_id, sort, rating_min, rating_max, verified_only, page, limit, total, total_pages, has_more, count, average_rating, recommendations, verified_purchases, features [{name, average}] (Media Expert's per-feature averages), reviews [{id, rating, title, text, created_at, verified_purchase (Media Expert's 'confirmed by purchase'), incentivized (the review came from a Media Expert promotional campaign, 'Opinia z akcji promocyjnej'), incentive_label, feature_ratings [{name, rating}], helpful_yes, helpful_no, store_reply_count}]. With a star range Media Expert gives no total (has_more means a full page). Review text is in Polish. No reviewer name or any reviewer identity is returned. Marketplace offers carry no product code and have no Media Expert reviews (charged 404). Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: Media Expert product code: items[].sku, e.g. '709727' (the cheapest way in: 1 call).
+            product_id: Media Expert product id (items[].product_id), e.g. '8128227'.
+            url: A Media Expert product link (https://www.mediaexpert.pl/<category>/<product>).
+            sort: most_helpful (default, Media Expert's own order), least_helpful, newest, oldest, highest_rating, lowest_rating.
+            rating_min: Lowest star rating to include (1-5).
+            rating_max: Highest star rating to include (1-5).
+            verified: Only reviews Media Expert marks as confirmed by purchase.
+            page: Page (every review is reachable).
+            limit: Reviews per page, 1 to 100 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_reviews", {"sku": sku, "product_id": product_id, "url": url, "sort": sort, "rating_min": rating_min, "rating_max": rating_max, "verified": verified, "page": page, "limit": limit}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        filters: Optional[Union[str, list[str]]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Media Expert category's products by path, with filters (facets[].values[].filter), sort and paging: category, filters, kind (products, or subcategories for a parent category page: subcategories [{category_id, name, path, url, product_count}]), title, breadcrumbs, sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)), facets [{code, name, values [{name, count, filter}]}] (send filter back in filters). Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay). One store: mediaexpert.pl, PLN, no country input; names, specifications, labels and reviews are in Polish, as Media Expert writes them.
+
+        Costs 1 credit unsorted, 3 credits with a sort or when Media Expert loads the list
+        lazily (one more lookup for the rest of the page). Failed upstream calls are not
+        charged; a not-found is charged; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            category: A category path (categories() categories[].path, breadcrumbs[].path) or its mediaexpert.pl link, e.g. 'agd/pralki-i-suszarki/pralki'.
+            filters: Up to 10 filters: facets[].values[].filter of an earlier answer (brand, promotions, Top Hit, instalments, energy class, specifications, marketplace seller), e.g. ['samsung', 'pojemnosc-kg_od-10-kg']. Several filters narrow together. There is no price filter.
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_category", {"category": category, "filters": filters, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def categories(
+        self,
+        *,
+        category: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        depth: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert's category tree (24 departments, about 5,000 categories), or one category's subtree: category (the starting node), depth, count, node_count, categories [{category_id, name, path (the input of category()), url, product_count, child_count, children}]. Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category: Start the tree at this category path (e.g. 'agd').
+            category_id: Start the tree at this category id (e.g. '12900').
+            depth: Levels to return, 1 to 6 (default 2 from the top, 3 from a category). child_count says what lies below a cut.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_categories", {"category": category, "category_id": category_id, "depth": depth}, extra)
+
+    def brands(
+        self,
+        query: Optional[str] = None,
+        *,
+        letter: Optional[str] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert's brand directory (about 16,000 brands): query, letter, total_brands, matches, page, limit, has_more, count, featured, brands [{brand_id, name, slug (the input of brand()), url}]. Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Only brands whose name contains this text, e.g. 'sams'.
+            letter: Only brands starting with this letter or digit.
+            page: Page.
+            limit: Brands per page, 1 to 1000 (default 100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_brands", {"query": query, "letter": letter, "page": page, "limit": limit}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        category: Optional[str] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Media Expert, optionally inside a category, with filters, sort and paging: brand, category, filters, kind (products, or subcategories for a parent category page: subcategories [{category_id, name, path, url, product_count}]), title, breadcrumbs, sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)), facets [{code, name, values [{name, count, filter}]}] (send filter back in filters). Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay). One store: mediaexpert.pl, PLN, no country input; names, specifications, labels and reviews are in Polish, as Media Expert writes them.
+
+        Costs 1 credit unsorted, 3 credits with a sort or when Media Expert loads the list
+        lazily (one more lookup for the rest of the page). Failed upstream calls are not
+        charged; a not-found is charged; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            brand: A brand: brands[].slug (e.g. 'samsung', 'amica') or its mediaexpert.pl/<brand> link.
+            category: Only this brand inside one category path (e.g. 'agd/pralki-i-suszarki/pralki').
+            filters: Up to 10 filters: facets[].values[].filter of an earlier answer (brand, promotions, Top Hit, instalments, energy class, specifications, marketplace seller), e.g. ['samsung', 'pojemnosc-kg_od-10-kg']. Several filters narrow together. There is no price filter.
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_brand", {"brand": brand, "category": category, "filters": filters, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def promotions(
+        self,
+        list: Optional[str] = None,
+        *,
+        query: Optional[str] = None,
+        black_weeks: Optional[bool] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert promotion lists, Black Weeks included: without list, the lists its promotions page links (query, black_weeks, total_lists, count, lists [{list (the input of list), list_id, name, url, black_weeks}]); with list, that list's products (list, list_id, url, kind (products, or subcategories for a parent category page: subcategories [{category_id, name, path, url, product_count}]), title, breadcrumbs, sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)), facets [{code, name, values [{name, count, filter}]}] (send filter back in filters)). Every product also carries its own promotion data (old_price, omnibus_lowest_30d, code_price). Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay).
+
+        Costs 1 credit for the promotion lists; a list's products cost 1 credit unsorted, 3
+        credits with a sort or when Media Expert loads the list lazily. Failed upstream calls
+        are not charged; a not-found is charged; credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            list: One promotion list: lists[].list (e.g. '32975-logitech-black-weeks-czas-na-nowy-poziom-sprzetu') or its mediaexpert.pl/lista,... link. Without it, the promotion lists.
+            query: Only lists whose name or reference contains this text (without list).
+            black_weeks: Only Black Weeks / Black Friday lists (without list).
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_promotions", {"list": list, "query": query, "black_weeks": black_weeks, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def outlet(
+        self,
+        category: Optional[str] = None,
+        *,
+        filters: Optional[Union[str, list[str]]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert's outlet (ex-display, returned and end-of-line items at outlet prices): without category, the outlet's groups (kind subcategories, with product counts); with an outlet group path, its subgroups or products (kind (products, or subcategories for a parent category page: subcategories [{category_id, name, path, url, product_count}]), title, breadcrumbs, sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)), facets [{code, name, values [{name, count, filter}]}] (send filter back in filters)). old_price is the price before the outlet price. Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay).
+
+        Costs 1 credit unsorted, 3 credits with a sort or when Media Expert loads the list
+        lazily (one more lookup for the rest of the page). Failed upstream calls are not
+        charged; a not-found is charged; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            category: An outlet group path (subcategories[].path), e.g. 'outlet/outlet-agd/outlet-lodowki-wolnostojace'. Without it, the outlet's groups.
+            filters: Up to 10 filters: facets[].values[].filter of an earlier answer (brand, promotions, Top Hit, instalments, energy class, specifications, marketplace seller), e.g. ['samsung', 'pojemnosc-kg_od-10-kg']. Several filters narrow together. There is no price filter.
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_outlet", {"category": category, "filters": filters, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def seller(
+        self,
+        seller: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "newest", "name_asc", "name_desc", "brand_asc", "brand_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[Literal[5, 10, 15, 20, 30, 50]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A marketplace seller on Media Expert (third-party sellers next to Media Expert's own stock): seller {seller_id, name, slug, url, rating {total, recommended, not_recommended, recommended_percent}, min_shipping_price, delivery_info, categories [{category_id, name, product_count}]}, and its offers: sort, page, page_size, total (Media Expert's count; it stops at 5,000 for broad searches: total_capped), total_capped, total_pages (up to 100), has_more, count, currency, items (product_id (for product() and store_stock()), offer_id, sku (Media Expert's product code, for reviews()), ean, name, brand, model, url, image, price, old_price, omnibus_lowest_30d, code_price, discount_percent, discount_shown, currency, availability (Media Expert's type: available, preorder, not_available, advance for marketplace shipping), availability_label (as shown), rating, review_count, seller {id, name, slug, marketplace} (marketplace True for third-party marketplace sellers), in_store, energy_class, warranty_months, top_product, outlet, category {category_id, name, path}, labels (Media Expert's notes under the price, e.g. Darmowa dostawa: free delivery)). Prices are numbers in PLN: price (the listed price), old_price (Media Expert's struck-through price, as shown), omnibus_lowest_30d (the lowest price of the last 30 days that Media Expert shows next to a promotion under the EU Omnibus Directive, as shown), code_price {price, code, valid_from, valid_to} (the price with a discount code, the code and its dates), discount_shown {amount, percent} (Media Expert's own figure, where it shows one) and discount_percent (computed by Scavio from old_price, or for a code price from price, to the lowest price you can pay).
+
+        Costs 1 credit unsorted, 3 credits with a sort or when Media Expert loads the list
+        lazily (one more lookup for the rest of the page). Failed upstream calls are not
+        charged; a not-found is charged; credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            seller: A marketplace seller: items[].seller.slug (e.g. 'autobi') or its mediaexpert.pl/sprzedawca-marketplace/... link.
+            sort: relevance (default: Media Expert's own order), price_asc, price_desc (Media Expert's own price order, kept as given: it follows promotional and code prices and is approximate against price, so re-sort the page if you need a strict order), rating, newest, name_asc, name_desc, brand_asc, brand_desc, discount. Any sort costs 3 credits.
+            page: Page, 1 to 100 (total_pages says how deep the list goes).
+            limit: Products per page: 5, 10, 15, 20, 30 or 50 (default 30), the page sizes Media Expert offers.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_seller", {"seller": seller, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Media Expert's search suggestions for a partial query: query, count, suggestions [{phrase, searches (how many times shoppers searched it, Media Expert's count), average_results}], categories [{name, path, url}]. Failed upstream calls are not charged; a not-found is charged; credits_used in the response is the exact charge.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'pral'.
+            limit: Suggestions, 1 to 10 (default 8, as on the site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mediaexpert_suggestions", {"query": query, "limit": limit}, extra)

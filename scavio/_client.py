@@ -56,6 +56,7 @@ from ._namespaces_sync import (
     _LowesNamespace,
     _MacysNamespace,
     _MaisonsDuMondeNamespace,
+    _MediaExpertNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
     _MercariNamespace,
@@ -253,6 +254,7 @@ class ScavioClient:
         self.thredup = _ThredupNamespace(self)
         self.fashionnova = _FashionnovaNamespace(self)
         self.argos = _ArgosNamespace(self)
+        self.mediaexpert = _MediaExpertNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

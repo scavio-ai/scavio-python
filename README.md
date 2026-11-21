@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 92 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 93 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -45,6 +45,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Argos Store Stock by UK Postcode, Prices, Was Prices, Badges and Reviews (UK; 10 endpoints) | Yes | No | No | No |
+| Media Expert Black Week Prices, Omnibus 30-Day Low, Code Prices, Store Stock and Reviews (Poland; 13 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -3938,6 +3939,91 @@ answers), a brand directory (brand is a filter), Argos Ireland, card or
 checkout prices, Argos Pay terms. Failed calls are not charged; a not-found is
 charged.
 
+### 62. Retail -- Media Expert Black Week prices, Omnibus 30-day low, store stock
+
+Media Expert (mediaexpert.pl, Poland, PLN). Namespace `mediaexpert`, 13
+endpoints: `search`, `product`, `store_stock`, `stores`, `reviews`,
+`category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`,
+`suggestions`. Billed on actual cost, 1 to 3 credits per call
+(`credits_used` reports each one). One store, so there is no `country`;
+names, specifications, labels and reviews come back in Polish, as Media
+Expert writes them. The request timeout is raised to at least 240s on every
+endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+me = client.mediaexpert
+
+# --- Prices: price, old price, the Omnibus 30-day low Media Expert shows, the code price.
+p = me.product("8128227")["data"]
+print(p["name"], p["price"], p["old_price"], p["omnibus_lowest_30d"], p["currency"])
+print(p["code_price"], p["discount_shown"], p["discount_percent"])  # code_price: {price, code, valid_from, valid_to} or None
+
+# --- Store stock: Media Expert's stock indicator at the 40 stores nearest a city or postcode.
+stock = me.store_stock("8128227", "Warszawa")["data"]
+print(stock["count"], stock["in_stock_count"], stock["collect_in_1h_count"])
+for s in stock["stores"][:3]:
+    print(s["name"], s["distance_km"], s["stock_level"], s["collect_in_1h"], s["order_to_store_day"])
+
+# --- Search: 30 per page (up to 50); many single words redirect to a category page.
+res = me.search("telewizor")["data"]
+print(res["redirected_to"], res["total"], res["total_capped"], res["page_size"])
+for item in res["items"][:3]:
+    print(item["product_id"], item["name"], item["price"], item["old_price"],
+          item["omnibus_lowest_30d"], item["code_price"], item["seller"])
+
+# --- Reviews by sku (items[].sku): up to 100 per page, verified-purchase and promotional flags.
+reviews = me.reviews("709727", sort="newest", verified=True, limit=100)["data"]
+print(reviews["total"], reviews["average_rating"], reviews["verified_purchases"])
+for r in reviews["reviews"][:3]:
+    print(r["rating"], r["title"], r["verified_purchase"], r["incentivized"])
+
+# --- Black Weeks promotion lists, categories, brands, outlet, marketplace sellers, stores.
+lists = me.promotions(black_weeks=True)["data"]["lists"]
+bw = me.promotions(lists[0]["list"])["data"]
+tree = me.categories(depth=2)["data"]["categories"]
+washers = me.category("agd/pralki-i-suszarki/pralki", filters=["bosch"])["data"]
+brands = me.brands("sams")["data"]["brands"]
+samsung = me.brand("samsung")["data"]
+outlet = me.outlet()["data"]
+seller = me.seller("autobi")["data"]
+stores = me.stores("Warszawa")["data"]["stores"]
+hints = me.suggestions("pral")["data"]["suggestions"]
+```
+
+Credits, as `credits_used` reports them: `product`, `stores`, `brands`,
+`reviews` and `suggestions` cost 1; `store_stock` and `categories` cost 2;
+`search` costs 3 for a search page (Media Expert loads search lists lazily,
+so the rest of the page takes one more lookup) or 1 when Media Expert answers
+the term with a full category page; `category`, `brand`, `outlet`, `seller`
+and a promotion list's products cost 1 unsorted and 3 with a sort or a lazily
+loaded list (the promotion lists themselves and the outlet's groups cost 1).
+
+Prices are numbers in PLN: `price`, `old_price` (Media Expert's
+struck-through price), `omnibus_lowest_30d` (the lowest price of the last 30
+days that Media Expert shows next to a promotion, under the EU Omnibus
+Directive), `code_price` `{price, code, valid_from, valid_to}` (the price with
+a discount code), `discount_shown` (Media Expert's own figure) and
+`discount_percent` (computed by Scavio). Store stock is Media Expert's stock
+indicator, a bucket (seen: 0, 2, 9, 20), not a unit count, with
+`collect_in_1h` (Odbierz za godzinę) and `order_to_store_day` when the item is
+not on the shelf. Send `product_id`, not `offer_id` (an offer id is refused
+before anything is charged); marketplace items (sold and shipped by a
+marketplace seller, `seller.marketplace` True) are never stocked in stores (a
+charged 400) and have no Media Expert reviews. Lists return 30 per page by
+default (`limit` 5, 10, 15, 20, 30 or 50), up to 100 pages, and stop counting
+at 5,000 (`total_capped`). Price sorts are Media Expert's own order, which
+follows promotional and code prices, so re-sort a page for a strict order.
+There is no price filter; `filters` takes `facets[].values[].filter`.
+`reviews`: `most_helpful` (default), `least_helpful`, `newest`, `oldest`,
+`highest_rating`, `lowest_rating`, `rating_min` / `rating_max`, `verified`;
+no reviewer identity is returned. Not available: Q&A (Media Expert has none),
+leaflets, price history (poll and store the answers), unit counts, checkout
+prices, other countries or languages. Failed calls are not charged; a
+not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -4080,6 +4166,7 @@ Scavio works with popular AI/LLM frameworks:
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Argos (`argos`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`; one UK store (argos.co.uk, GBP), no `country` | 2 each |
+| Media Expert (`mediaexpert`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`, `suggestions`; one Polish store (mediaexpert.pl, PLN), no `country` | actual cost, 1 to 3: `store_stock` and `categories` 2; `search` 3 (1 when it redirects to a full category page); `category`, `brand`, `outlet`, `seller` and promotion-list products 1 unsorted, 3 sorted or lazily loaded; the rest 1 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4110,6 +4197,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.73.0
+
+- **New `mediaexpert` namespace** (sync and async) for Media Expert
+  (mediaexpert.pl, Poland, PLN), 13 endpoints: `search`, `product`,
+  `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`,
+  `brand`, `promotions`, `outlet`, `seller`, `suggestions`. Price, old
+  price, the Omnibus 30-day low Media Expert shows and the code price with
+  its code and dates; Media Expert's stock indicator (not unit counts) at the
+  40 stores nearest a Polish city or postcode; reviews up to 100 per page.
+  Billed on actual cost, 1 to 3 credits per call. 240s timeout floor.
+- **`argos`** docstrings: review `stats` no longer lists `brand`; Trusted
+  Seller items' delivery fields are `None` (the seller sets delivery).
 
 ### Changed in 0.72.1
 
