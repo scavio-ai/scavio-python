@@ -3203,7 +3203,8 @@ _ARGOS_ITEM = (
     "has_variations, argos_pay {available, offering, message}, image"
 )
 _ARGOS_LIST_OUT = (
-    "sort, filters, page, page_size (24), total, total_pages, has_more, count, "
+    "sort, filters, page, page_size (24), total (Argos stops counting at 10,000), total_capped "
+    "(True means 10,000 or more), total_pages, has_more, count, "
     "tu_clothing_excluded (Tu Clothing items Argos lists but sells on its own site: left out and "
     "counted here), currency, items (" + _ARGOS_ITEM + "), facets [{name, label, values [{value, "
     "label, count, children}]}] (the filter inputs this list offers)"
@@ -3224,13 +3225,16 @@ _ARGOS_STATES = (
     " Collection state per store and product: collect_now (in stock to collect right away), "
     "collect_today / collect_tomorrow (from a time today or tomorrow: available_from has it), "
     "collect_later, out_of_stock, not_available (Argos is not selling it now), other. Delivery "
-    "state: same_day, next_day, later, out_of_stock, not_available, other. Argos shows no unit "
-    "counts: the answer is whether and when, never how many."
+    "state: same_day, next_day, later (Argos's 'Delivery within N days', with days = N), "
+    "out_of_stock, not_available, other. Delivery available_from is the date Argos returns, as "
+    "given (it can read today on a next-day message): quote message and state. Argos shows no "
+    "unit counts: the answer is whether and when, never how many."
 )
 _ARGOS_STORE_OUT = (
-    "store_id, name, store (the store reference for stores()), url, type (argos_store, "
-    "inside_sainsburys, collection_point: an Argos counter in a Sainsbury's), brand, "
-    "distance_miles, address {lines, town, county, postcode}, latitude, longitude, phone, hours "
+    "store_id, name, store (the store reference for stores()), url, type (argos_store: a "
+    "standalone Argos store; inside_sainsburys: an Argos counter inside a Sainsbury's store; "
+    "collection_point: a collect-only point, collection only, no shop), brand, "
+    "distance_miles, address {lines, town, county, postcode}, latitude, longitude, phone (+44...), hours "
     "{monday..sunday: [{open, close}]}, special_hours"
 )
 _ARGOS_NOT_AVAILABLE = (
@@ -14015,7 +14019,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "One Argos product in full by product_id or link: product_id, requested_id, url, "
             "template (argos or trusted_seller), name, brand, seller, seller_name (Argos; None for "
             "Trusted Seller items, whose page names no seller), ean, price, was_price, save, "
-            "offer_text, currency, badges [{badge, type, text, starts_at, ends_at}], description, "
+            "offer_text, currency, badges [{badge, type, text, starts_at, ends_at}] (one entry per "
+            "badge code, with the earliest start and latest end Argos gives), description, "
             "features (the specification lines), images, variants [{product_id, options, price}], "
             "special_offers [{id, title, description, starts_at, ends_at}], nectar_points, "
             "care_plans [{name, type, duration, price, excess, promotion}], payment_options "
@@ -14023,7 +14028,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "(frequently bought together [{product_id, name, price, url}]), breadcrumb [{name, "
             "category_id, url}], dimensions, energy_class, deliverable, collectable, "
             "delivery_price, free_delivery, fast_track, globally_out_of_stock, end_of_line, "
-            "max_quantity, rating, review_count, recommended_percent, rating_distribution, "
+            "max_quantity, rating (None when the product has no reviews), review_count, "
+            "recommended_percent, rating_distribution, "
             "secondary_ratings, question_count, answer_count, reviews (the first 10 as on the "
             "page; no reviewer names: reviews() pages them all). Trusted Seller items carry the "
             "fields their page shows (price, was price, description, images, breadcrumb, "
@@ -14047,12 +14053,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "stores near a UK postcode (nearest first), and delivered to a postcode. Returns "
             "postcode, delivery_postcode, max_distance, product_ids, count, stores ["
             + _ARGOS_STORE_OUT + ", products [{product_id, state, available_from, message}]], "
-            "delivery {postcode, products [{product_id, state, available_from, fast_track (Fast "
+            "delivery {postcode, products [{product_id, state, available_from, days, fast_track (Fast "
             "Track same-day delivery), message}]}, products [{product_id, known, collectable, "
             "deliverable, globally_out_of_stock}]." + _ARGOS_STATES + " postcode is where stores "
             "are searched; delivery_postcode (default postcode) is where delivery is checked. "
             "Trusted Seller items are never stocked in stores (their ids answer 400). A malformed "
-            "postcode or id answers 400 before anything is charged." + _ARGOS_CHARGE
+            "postcode or id answers 400 before anything is charged; a well-formed postcode that "
+            "does not exist (e.g. ZZ99 9ZZ) gets no answer from Argos and ends in an unbilled 502 "
+            "after about 50 seconds." + _ARGOS_CHARGE
         ),
         params=(
             Param(
@@ -14083,7 +14091,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "max_distance, count, stores [" + _ARGOS_STORE_OUT + "]; no stock (use "
             "store_stock()). Or one store by store (stores[].store): store_id, store, url, name, "
             "type, description, address {street, town, region, postcode, country}, latitude, "
-            "longitude, phone, opening_hours (as Argos lists them), hours [{day, open, close}], "
+            "longitude, phone (+44...), opening_hours (as Argos lists them), hours [{day, open, close}], "
             "special_hours [{date, open, close, closed}] (holiday and seasonal hours), services "
             "(e.g. Tu Collection Point). Send one of postcode or store." + _ARGOS_CHARGE
         ),
@@ -14251,7 +14259,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/argos/suggestions",
         summary=(
             "Argos's search suggestions for a partial query: query, count, suggestions [{text, "
-            "weight (Argos's popularity weight)}]." + _ARGOS_CHARGE
+            "weight (Argos's popularity weight)}], in Argos's order (not sorted by weight)."
+            + _ARGOS_CHARGE
         ),
         params=(
             _req("query", "What the shopper has typed so far, e.g. 'lego'."),

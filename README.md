@@ -3910,10 +3910,13 @@ Store stock is availability, not unit counts. Each store answers a collection
 state per product: `collect_now`, `collect_today`, `collect_tomorrow`,
 `collect_later`, `out_of_stock`, `not_available`, with `available_from` and the
 site's message; `delivery` answers `same_day` (Fast Track), `next_day`,
-`later`, `out_of_stock` or `not_available`. `postcode` is where stores are
+`later` (Argos's "Delivery within N days", with `days`), `out_of_stock` or
+`not_available`; quote delivery from `state` and `message` (`available_from`
+is the date Argos returns, as given). `postcode` is where stores are
 searched (up to 10 stores within 50 miles); `delivery_postcode` (default
-`postcode`) is where delivery is checked. Store types: `argos_store`,
-`inside_sainsburys`, `collection_point`. Trusted Seller items are never
+`postcode`) is where delivery is checked. Store types: `argos_store` (a
+standalone Argos store), `inside_sainsburys` (an Argos counter inside a
+Sainsbury's store), `collection_point` (a collect-only point, no shop). Trusted Seller items are never
 stocked in stores (400).
 
 Prices are numbers in GBP as Argos shows them: `price`, `was_price` (the
@@ -3923,7 +3926,7 @@ site's was price), `save` (computed by Scavio as `was_price - price`),
 `trusted_seller` (Argos's marketplace; the page names no seller, so
 `seller_name` is `None` there). `search`, `category` and `deals` return 24 per
 page, pages 1 to 200 (`total_pages` says how deep the list goes; `top_100` is
-2 pages of 60); Tu Clothing items are left out and counted in
+2 pages of 60; Argos stops counting at 10,000, flagged by `total_capped`); Tu Clothing items are left out and counted in
 `tu_clothing_excluded`. Filters: `brand`, `category`, `seller`, `offers`,
 `new_in`, `colour`, `price_min` / `price_max`, `rating_min` and `filters` (any
 facet by `facets[].name`); sorts `relevance`, `price_low`, `price_high`,
@@ -4107,6 +4110,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.72.1
+
+- **`argos`** docstrings: delivery `later` is Argos's "Delivery within N
+  days" with the new `days` field; `total_capped` on search, category and
+  deals (Argos stops counting at 10,000); store types defined (a collection
+  point is collect-only, `inside_sainsburys` an Argos counter in a
+  Sainsbury's store); product `rating` is `None` without reviews; one badge
+  entry per code; phones as `+44...`; a postcode that does not exist ends in
+  an unbilled 502 after about 50 seconds.
 
 ### Changed in 0.72.0
 
