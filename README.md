@@ -4119,7 +4119,9 @@ for field-level details.
   point is collect-only, `inside_sainsburys` an Argos counter in a
   Sainsbury's store); product `rating` is `None` without reviews; one badge
   entry per code; phones as `+44...`; a postcode that does not exist ends in
-  an unbilled 502 after about 50 seconds.
+  an unbilled 502 after about 50 seconds. Trusted Seller items: `free_delivery`
+  and `delivery_cost` (lists) and `delivery_price` / `free_delivery`
+  (product) are `None` (the seller sets delivery; Argos shows no charge).
 
 ### Changed in 0.72.0
 

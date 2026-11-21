@@ -3199,7 +3199,8 @@ _ARGOS_ITEM = (
     "product_id, url, name, brand, price, was_price, save, offer_text, currency, clearance, "
     "badges, rating, review_count, seller (argos: sold by Argos, or trusted_seller: Argos's "
     "marketplace of third-party sellers), deliverable, reservable (in-store collection), buyable, "
-    "free_delivery, delivery_cost (None for Trusted Seller items: the seller sets it), "
+    "free_delivery and delivery_cost (both None for Trusted Seller items: the seller sets "
+    "delivery, and Argos shows no charge for it), "
     "has_variations, argos_pay {available, offering, message}, image"
 )
 _ARGOS_LIST_OUT = (
@@ -14033,7 +14034,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "secondary_ratings, question_count, answer_count, reviews (the first 10 as on the "
             "page; no reviewer names: reviews() pages them all). Trusted Seller items carry the "
             "fields their page shows (price, was price, description, images, breadcrumb, "
-            "delivery). A withdrawn or unknown product answers 404 (charged); a Tu Clothing id "
+            "deliverable; delivery_price and free_delivery are None: the seller sets delivery "
+            "and the page shows no charge). A withdrawn or unknown product answers 404 (charged); a Tu Clothing id "
             "(tuc...) answers 400 (Tu items have no product page on argos.co.uk)."
             + _ARGOS_PRICES + _ARGOS_NOTE
         ),
