@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 91 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 92 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -44,6 +44,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
+| Argos Store Stock by UK Postcode, Prices, Was Prices, Badges and Reviews (UK; 10 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -3854,6 +3855,86 @@ licensed brand names appear in titles), price history (poll and store the
 answers), gift cards, new-arrival dates. Failed calls are not charged; a
 not-found is charged.
 
+### 61. Retail -- Argos store stock, prices, was prices, reviews
+
+Argos (argos.co.uk, UK, GBP). Namespace `argos`, 10 endpoints: `search`,
+`product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`,
+`category`, `deals`, `suggestions`. 2 credits per call on every endpoint. One
+store, so there is no `country` (Argos Ireland closed in 2023). The request
+timeout is raised to at least 240s on every endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ar = client.argos
+
+# --- Store stock: which Argos stores near a UK postcode can hand over each product, and when.
+stock = ar.store_stock(["8377058", "7163184"], "SW1A 1AA")["data"]
+for store in stock["stores"][:3]:
+    print(store["name"], store["type"], store["distance_miles"])
+    for p in store["products"]:
+        print("  ", p["product_id"], p["state"], p["available_from"])  # e.g. collect_tomorrow
+for p in stock["delivery"]["products"]:
+    print(p["product_id"], p["state"], p["fast_track"])  # e.g. next_day
+
+# --- Prices: price, was price, save (computed), the site's offer text and badges.
+res = ar.search("air fryer", seller="argos", sort="price_low")["data"]
+print(res["total"], res["total_pages"], res["page_size"], res["tu_clothing_excluded"])
+for item in res["items"][:3]:
+    print(item["name"], item["price"], item["was_price"], item["save"], item["offer_text"],
+          item["badges"], item["seller"])
+
+# --- One product: EAN, badges with dates, specs, variants, care plans, first 10 reviews.
+kettle = ar.product("8377058")["data"]
+print(kettle["template"], kettle["ean"], kettle["price"], kettle["was_price"], kettle["badges"])
+
+# --- Reviews: up to 100 per page, 5 sorts, star filter, syndicated reviews flagged.
+reviews = ar.reviews("7163184", sort="most_helpful", rating=[1, 2], limit=100)["data"]
+print(reviews["total"], reviews["summary_source"], reviews["summary"])  # Argos's own AI summary
+for r in reviews["reviews"][:3]:
+    print(r["rating"], r["title"], r["syndicated"], r["syndication_source"])
+
+# --- Stores, Q&A, departments, categories, deal collections, suggestions.
+stores = ar.stores("M1 1AE")["data"]["stores"]
+one = ar.stores(store=stores[0]["store"])["data"]
+qa = ar.questions("8377058")["data"]["questions"]
+tree = ar.categories()["data"]["departments"]
+kettles = ar.category("29560", sort="rating")["data"]
+bf = ar.deals("black_friday")["data"]
+top = ar.deals("top_100", page=1)["data"]
+hints = ar.suggestions("lego")["data"]["suggestions"]
+```
+
+Store stock is availability, not unit counts. Each store answers a collection
+state per product: `collect_now`, `collect_today`, `collect_tomorrow`,
+`collect_later`, `out_of_stock`, `not_available`, with `available_from` and the
+site's message; `delivery` answers `same_day` (Fast Track), `next_day`,
+`later`, `out_of_stock` or `not_available`. `postcode` is where stores are
+searched (up to 10 stores within 50 miles); `delivery_postcode` (default
+`postcode`) is where delivery is checked. Store types: `argos_store`,
+`inside_sainsburys`, `collection_point`. Trusted Seller items are never
+stocked in stores (400).
+
+Prices are numbers in GBP as Argos shows them: `price`, `was_price` (the
+site's was price), `save` (computed by Scavio as `was_price - price`),
+`offer_text` (the site's own words, e.g. Half Price) and `badges` as given
+(e.g. `Black_Friday`, `price_guarantee`). `seller` is `argos` or
+`trusted_seller` (Argos's marketplace; the page names no seller, so
+`seller_name` is `None` there). `search`, `category` and `deals` return 24 per
+page, pages 1 to 200 (`total_pages` says how deep the list goes; `top_100` is
+2 pages of 60); Tu Clothing items are left out and counted in
+`tu_clothing_excluded`. Filters: `brand`, `category`, `seller`, `offers`,
+`new_in`, `colour`, `price_min` / `price_max`, `rating_min` and `filters` (any
+facet by `facets[].name`); sorts `relevance`, `price_low`, `price_high`,
+`rating`. `reviews`: `newest` (default), `oldest`, `most_helpful`,
+`highest_rating`, `lowest_rating`, `rating` star filter, up to 100 per page
+with every review reachable; reviewer names, locations, ages and genders are
+never returned. Not available: unit counts, price history (poll and store the
+answers), a brand directory (brand is a filter), Argos Ireland, card or
+checkout prices, Argos Pay terms. Failed calls are not charged; a not-found is
+charged.
+
 ## Error Handling
 
 ```python
@@ -3995,6 +4076,7 @@ Scavio works with popular AI/LLM frameworks:
 | Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
+| Argos (`argos`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`; one UK store (argos.co.uk, GBP), no `country` | 2 each |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4025,6 +4107,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.72.0
+
+- **New `argos` namespace** (sync and async) for Argos (argos.co.uk, UK,
+  GBP), 10 endpoints: `search`, `product`, `store_stock`, `stores`,
+  `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`.
+  Store stock near a UK postcode as collection and delivery states (no unit
+  counts), price, was price, offers and badges, reviews up to 100 per page.
+  2 credits each. 240s timeout floor.
 
 ### Changed in 0.71.1
 

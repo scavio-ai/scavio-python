@@ -3131,6 +3131,118 @@ _FASHIONNOVA_NOTE = (
 )
 _FASHIONNOVA_CHARGE = " Failed upstream calls are not charged; a not-found is charged."
 
+# Argos params shared across endpoints (argos.co.uk: one UK store, GBP; Argos Ireland closed in
+# 2023, so there is no country input). 10 endpoints, 2 credits per call on every endpoint.
+_ARGOS_SORT = _lit(
+    "sort",
+    ("relevance", "price_low", "price_high", "rating"),
+    "relevance (default: Argos's Most Popular), price_low, price_high, rating (customer rating).",
+)
+_ARGOS_CATEGORY = _str_or_int(
+    "category",
+    "Category id (categories() category_id, or the category facet's values), e.g. '29560' "
+    "Kettles.",
+)
+_ARGOS_OFFERS = Param(
+    "offers",
+    'Optional[Union[Literal["clearance", "special_offer", "black_friday"], '
+    'list[Literal["clearance", "special_offer", "black_friday"]]]]',
+    doc="Offers, up to 3 (OR): clearance, special_offer, black_friday.",
+)
+_ARGOS_LIST_PARAMS = (
+    _str_or_list(
+        "brand",
+        "Brands, up to 10 (OR): facets name brands, values[].value in lower case, e.g. "
+        "'russell hobbs', 'ninja'.",
+    ),
+    _lit(
+        "seller",
+        ("argos", "trusted_seller"),
+        "argos (sold and fulfilled by Argos) or trusted_seller (Argos's marketplace of "
+        "third-party sellers).",
+    ),
+    _bool("new_in", "Only products Argos marks New In."),
+    _str_or_list(
+        "colour", "Colour groups, up to 10 (facets name colour group), e.g. 'blacks', 'whites'."
+    ),
+    _float("price_min", "Lowest price, GBP (any amount: the range is sent as is)."),
+    _float("price_max", "Highest price, GBP."),
+    _ilit(
+        "rating_min",
+        (1, 2, 3, 4, 5),
+        "Customer rating: 5 (five stars only) or 1-4 (that many stars or more).",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Union[str, list[str]]]]",
+        doc="Any facet by facets[].name: a value or list of values (facets[].values[].value; "
+        "values of one facet are OR, facets are AND), e.g. {'kettle capacity (l)': '1.6l - "
+        "2.0l'}. Up to 10 facets.",
+    ),
+    _ARGOS_SORT,
+    _int("page", "Page, 24 products each, 1 to 200 (total_pages says how deep the list goes)."),
+)
+_ARGOS_PRODUCT_ID = Param(
+    "product_id",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc="Argos product id: a 7-digit catalogue number (items[].product_id, e.g. '8377058') or a "
+    "Trusted Seller item id (8 letters and digits).",
+)
+_ARGOS_URL = _str("url", "An Argos product link (https://www.argos.co.uk/product/<id>/).")
+_ARGOS_REF = (_ARGOS_PRODUCT_ID, _ARGOS_URL)
+_ARGOS_MAX_DISTANCE = _int(
+    "max_distance", "Search radius in miles, 1 to 50 (default 50, as on Argos's product page)."
+)
+_ARGOS_MAX_RESULTS = _int("max_results", "Stores, 1 to 10 (default 10, the most Argos returns).")
+_ARGOS_ITEM = (
+    "product_id, url, name, brand, price, was_price, save, offer_text, currency, clearance, "
+    "badges, rating, review_count, seller (argos: sold by Argos, or trusted_seller: Argos's "
+    "marketplace of third-party sellers), deliverable, reservable (in-store collection), buyable, "
+    "free_delivery, delivery_cost (None for Trusted Seller items: the seller sets it), "
+    "has_variations, argos_pay {available, offering, message}, image"
+)
+_ARGOS_LIST_OUT = (
+    "sort, filters, page, page_size (24), total, total_pages, has_more, count, "
+    "tu_clothing_excluded (Tu Clothing items Argos lists but sells on its own site: left out and "
+    "counted here), currency, items (" + _ARGOS_ITEM + "), facets [{name, label, values [{value, "
+    "label, count, children}]}] (the filter inputs this list offers)"
+)
+_ARGOS_FILTER_TEXT = (
+    " Filters: brand (several = OR), category, seller, offers, new_in, colour, price_min / "
+    "price_max (GBP, any range), rating_min, and filters (any facet by facets[].name). Sorts: "
+    "relevance (default), price_low, price_high, rating."
+)
+_ARGOS_PRICES = (
+    " Prices are numbers in GBP as Argos shows them: price (now), was_price (the site's was "
+    "price, shown on offers), save = was_price - price (computed by Scavio where both exist), "
+    "offer_text (the site's own words, e.g. Half Price, Save £60.00). Badges are the site's codes "
+    "as given (e.g. Black_Friday, VALUE_amazing_deals, price_guarantee); neither says a price is "
+    "the lowest anywhere."
+)
+_ARGOS_STATES = (
+    " Collection state per store and product: collect_now (in stock to collect right away), "
+    "collect_today / collect_tomorrow (from a time today or tomorrow: available_from has it), "
+    "collect_later, out_of_stock, not_available (Argos is not selling it now), other. Delivery "
+    "state: same_day, next_day, later, out_of_stock, not_available, other. Argos shows no unit "
+    "counts: the answer is whether and when, never how many."
+)
+_ARGOS_STORE_OUT = (
+    "store_id, name, store (the store reference for stores()), url, type (argos_store, "
+    "inside_sainsburys, collection_point: an Argos counter in a Sainsbury's), brand, "
+    "distance_miles, address {lines, town, county, postcode}, latitude, longitude, phone, hours "
+    "{monday..sunday: [{open, close}]}, special_hours"
+)
+_ARGOS_NOT_AVAILABLE = (
+    " Not available: unit counts, price history (poll and store the answers), a brand directory "
+    "(brand is a filter), Argos Ireland, card or checkout prices, Argos Pay terms."
+)
+_ARGOS_NOTE = (
+    " One store: argos.co.uk, GBP, no country input. Failed upstream calls are not charged; a "
+    "not-found is charged."
+)
+_ARGOS_CHARGE = " Failed upstream calls are not charged; a not-found is charged."
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -13870,6 +13982,284 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # =============================== Argos ===============================
+    # 10 endpoints on /api/v1/argos, 2 credits each, one UK store (GBP), no country input.
+    # Store stock and review pages can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="argos_search",
+        namespace="argos",
+        method="search",
+        http="POST",
+        path="/api/v1/argos/search",
+        summary=(
+            "Search Argos for prices, was prices, offers and badges: query, " + _ARGOS_LIST_OUT
+            + ". 24 products per page, pages 1 to 200; narrow with filters." + _ARGOS_FILTER_TEXT
+            + _ARGOS_PRICES + _ARGOS_NOT_AVAILABLE + _ARGOS_NOTE
+        ),
+        params=(
+            _req("query", "Search text, e.g. 'air fryer'."),
+            _ARGOS_CATEGORY,
+            _ARGOS_OFFERS,
+        )
+        + _ARGOS_LIST_PARAMS,
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_product",
+        namespace="argos",
+        method="product",
+        http="POST",
+        path="/api/v1/argos/product",
+        summary=(
+            "One Argos product in full by product_id or link: product_id, requested_id, url, "
+            "template (argos or trusted_seller), name, brand, seller, seller_name (Argos; None for "
+            "Trusted Seller items, whose page names no seller), ean, price, was_price, save, "
+            "offer_text, currency, badges [{badge, type, text, starts_at, ends_at}], description, "
+            "features (the specification lines), images, variants [{product_id, options, price}], "
+            "special_offers [{id, title, description, starts_at, ends_at}], nectar_points, "
+            "care_plans [{name, type, duration, price, excess, promotion}], payment_options "
+            "[{provider, message, plans [{offering, months, apr}]}], argos_pay, bundles "
+            "(frequently bought together [{product_id, name, price, url}]), breadcrumb [{name, "
+            "category_id, url}], dimensions, energy_class, deliverable, collectable, "
+            "delivery_price, free_delivery, fast_track, globally_out_of_stock, end_of_line, "
+            "max_quantity, rating, review_count, recommended_percent, rating_distribution, "
+            "secondary_ratings, question_count, answer_count, reviews (the first 10 as on the "
+            "page; no reviewer names: reviews() pages them all). Trusted Seller items carry the "
+            "fields their page shows (price, was price, description, images, breadcrumb, "
+            "delivery). A withdrawn or unknown product answers 404 (charged); a Tu Clothing id "
+            "(tuc...) answers 400 (Tu items have no product page on argos.co.uk)."
+            + _ARGOS_PRICES + _ARGOS_NOTE
+        ),
+        params=_ARGOS_REF,
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_store_stock",
+        namespace="argos",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/argos/store-stock",
+        summary=(
+            "Argos store stock: whether 1 to 10 Argos products can be collected at the Argos "
+            "stores near a UK postcode (nearest first), and delivered to a postcode. Returns "
+            "postcode, delivery_postcode, max_distance, product_ids, count, stores ["
+            + _ARGOS_STORE_OUT + ", products [{product_id, state, available_from, message}]], "
+            "delivery {postcode, products [{product_id, state, available_from, fast_track (Fast "
+            "Track same-day delivery), message}]}, products [{product_id, known, collectable, "
+            "deliverable, globally_out_of_stock}]." + _ARGOS_STATES + " postcode is where stores "
+            "are searched; delivery_postcode (default postcode) is where delivery is checked. "
+            "Trusted Seller items are never stocked in stores (their ids answer 400). A malformed "
+            "postcode or id answers 400 before anything is charged." + _ARGOS_CHARGE
+        ),
+        params=(
+            Param(
+                "product_ids",
+                "Union[str, list[Union[str, int]]]",
+                required=True,
+                doc="1 to 10 Argos catalogue numbers (7 digits), as a list or comma-separated, "
+                "e.g. ['8377058', '7163184'].",
+            ),
+            _req("postcode", "A full UK postcode where stores are searched, e.g. 'SW1A 1AA'."),
+            _str(
+                "delivery_postcode", "Postcode for home delivery availability (default: postcode)."
+            ),
+            _ARGOS_MAX_DISTANCE,
+            _ARGOS_MAX_RESULTS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_stores",
+        namespace="argos",
+        method="stores",
+        http="POST",
+        path="/api/v1/argos/stores",
+        summary=(
+            "Argos stores near a UK postcode (nearest first, up to 10 within 50 miles): postcode, "
+            "max_distance, count, stores [" + _ARGOS_STORE_OUT + "]; no stock (use "
+            "store_stock()). Or one store by store (stores[].store): store_id, store, url, name, "
+            "type, description, address {street, town, region, postcode, country}, latitude, "
+            "longitude, phone, opening_hours (as Argos lists them), hours [{day, open, close}], "
+            "special_hours [{date, open, close, closed}] (holiday and seasonal hours), services "
+            "(e.g. Tu Collection Point). Send one of postcode or store." + _ARGOS_CHARGE
+        ),
+        params=(
+            Param(
+                "postcode",
+                "Optional[str]",
+                positional=True,
+                doc="Stores near this full UK postcode, e.g. 'M1 1AE'.",
+            ),
+            _str(
+                "store",
+                "One store: stores[].store (the store's id and name, e.g. "
+                "'661-manchester-arndale-argos') or its argos.co.uk/stores/... link. A bare store "
+                "id is not accepted.",
+            ),
+            _ARGOS_MAX_DISTANCE,
+            _ARGOS_MAX_RESULTS,
+        ),
+        one_of=(("postcode", "store"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_reviews",
+        namespace="argos",
+        method="reviews",
+        http="POST",
+        path="/api/v1/argos/reviews",
+        summary=(
+            "Customer reviews of one Argos product by product_id or link, up to 100 per page and "
+            "every review reachable: product_id, sort, rating, page, limit, total (for the star "
+            "filter), has_more, count, summary (Argos's own AI-generated summary of the reviews, "
+            "labelled by summary_source), stats {product_name, brand, review_count, "
+            "average_rating, rating_distribution, recommended_percent, secondary_averages [{label, "
+            "average}], first_review_at, last_review_at}, reviews [{id, rating, title, text, "
+            "submitted_at, recommended, helpful_count, not_helpful_count, secondary_ratings, "
+            "syndicated, syndication_source (the brand site a syndicated review came from), "
+            "argos_colleague (written by an Argos colleague), badges, photos, "
+            "reviewed_product_id, reviewed_product_name (reviews are shared across a product's "
+            "colours and sizes), brand_response {count, department, date}}]. No reviewer name, "
+            "location, age or gender is returned; a brand's reply is reported by presence and "
+            "date only." + _ARGOS_CHARGE
+        ),
+        params=_ARGOS_REF
+        + (
+            _lit(
+                "sort",
+                ("newest", "oldest", "most_helpful", "highest_rating", "lowest_rating"),
+                "newest (default), oldest, most_helpful (Argos's helpfulness order: the share of "
+                "helpful votes, not their count), highest_rating, lowest_rating.",
+            ),
+            Param(
+                "rating",
+                "Optional[Union[Literal[1, 2, 3, 4, 5], list[Literal[1, 2, 3, 4, 5]]]]",
+                doc="Only reviews with these star ratings (one or a list), e.g. [1, 2].",
+            ),
+            _int("page", "Page (page * limit up to total)."),
+            _int("limit", "Reviews per page, 1 to 100 (default 20)."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_questions",
+        namespace="argos",
+        method="questions",
+        http="POST",
+        path="/api/v1/argos/questions",
+        summary=(
+            "Customer questions about one Argos product (by product_id or link) with their "
+            "answers: product_id, sort, page, limit, total, has_more, count, questions [{id, "
+            "question, details, submitted_at, answer_count, answers [{id, text, submitted_at, "
+            "source (staff: Argos's Q&A team, brand, or customer), best_answer, helpful_count, "
+            "not_helpful_count}]}]. No asker or answerer names (a greeting's first name is cut)."
+            + _ARGOS_CHARGE
+        ),
+        params=_ARGOS_REF
+        + (
+            _lit("sort", ("newest", "oldest"), "newest (default) or oldest."),
+            _int("page", "Page."),
+            _int("limit", "Questions per page, 1 to 50 (default 10)."),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_categories",
+        namespace="argos",
+        method="categories",
+        http="POST",
+        path="/api/v1/argos/categories",
+        summary=(
+            "Argos's department tree as its navigation shows it (14 departments): count, "
+            "link_count, departments [{name, category_id, url, groups [{name, category_id, url, "
+            "links [{name, category_id (for category()), url, url_filters (filters the link adds "
+            "after the category, or None)}]}]}]." + _ARGOS_CHARGE
+        ),
+        params=(),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_category",
+        namespace="argos",
+        method="category",
+        http="POST",
+        path="/api/v1/argos/category",
+        summary=(
+            "One Argos category's products, 24 per page: category_id, query (optional text inside "
+            "it), " + _ARGOS_LIST_OUT + "." + _ARGOS_FILTER_TEXT + _ARGOS_PRICES + _ARGOS_NOTE
+        ),
+        params=(
+            Param(
+                "category_id",
+                "Union[str, int]",
+                required=True,
+                doc="Category id: categories() category_id (any level), the category facet's "
+                "values, or the c:<id> of an argos.co.uk browse link ('29560' Kettles, '29575' Air "
+                "fryers).",
+            ),
+            _str("query", "Optional text inside the category."),
+            _ARGOS_OFFERS,
+        )
+        + _ARGOS_LIST_PARAMS,
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_deals",
+        namespace="argos",
+        method="deals",
+        http="POST",
+        path="/api/v1/argos/deals",
+        summary=(
+            "Argos deal collections: black_friday (Argos's Black Friday deals), clearance and "
+            "special_offers (Half Price, Save £X, multi-buys) as full lists, 24 per page with "
+            "optional query, category, filters and sorts (" + _ARGOS_LIST_OUT + "); or top_100, "
+            "Argos's own Top 100 deals list (2 pages of 60, page only: collection, page, "
+            "page_size, total, total_pages, has_more, count, items)." + _ARGOS_PRICES
+            + _ARGOS_CHARGE
+        ),
+        params=(
+            Param(
+                "collection",
+                'Literal["black_friday", "clearance", "special_offers", "top_100"]',
+                required=True,
+                doc="black_friday, clearance, special_offers or top_100.",
+            ),
+            _str("query", "Optional text within the collection (top_100 takes page only)."),
+            _ARGOS_CATEGORY,
+        )
+        + _ARGOS_LIST_PARAMS[:-1]
+        + (_int("page", "Page: 24 products each, or 1 to 2 (60 each) for top_100."),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="argos_suggestions",
+        namespace="argos",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/argos/suggestions",
+        summary=(
+            "Argos's search suggestions for a partial query: query, count, suggestions [{text, "
+            "weight (Argos's popularity weight)}]." + _ARGOS_CHARGE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'lego'."),
+            _int("limit", "Suggestions, 1 to 10 (default 10)."),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -20903,6 +21293,7 @@ NAMESPACES: tuple[str, ...] = (
     "poshmark",
     "thredup",
     "fashionnova",
+    "argos",
 )
 
 

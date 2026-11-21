@@ -5625,3 +5625,102 @@ def test_fashionnova_credits_paths_and_wire(monkeypatch):
     for call in (fn.product, fn.collection, fn.reviews, fn.similar):
         with pytest.raises(ScavioError):
             call()
+
+
+def test_argos_credits_paths_and_wire(monkeypatch):
+    """argos (0.72.0): 10 endpoints on /api/v1/argos, 2 credits each, 240 s floor.
+
+    One UK store (argos.co.uk, GBP), so no endpoint takes country. product, reviews and
+    questions take one of product_id or url; stores takes one of postcode or store.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "argos"}
+    assert sorted(eps) == [
+        "categories", "category", "deals", "product", "questions", "reviews", "search",
+        "store_stock", "stores", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/argos/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 2 and ep.credits_note is None, ep.key
+        assert "country" not in {p.name for p in ep.params}, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_low", "price_high", "rating"]]'
+    )
+    assert search["seller"].annotation == 'Optional[Literal["argos", "trusted_seller"]]'
+    assert search["rating_min"].annotation == "Optional[Literal[1, 2, 3, 4, 5]]"
+    for m in ("product", "reviews", "questions"):
+        assert eps[m].one_of == (("product_id", "url"),), m
+    assert eps["stores"].one_of == (("postcode", "store"),)
+    stock = {p.name: p for p in eps["store_stock"].params}
+    assert stock["product_ids"].required and stock["postcode"].required
+    assert "no unit counts" in eps["store_stock"].summary
+    deals = {p.name: p for p in eps["deals"].params}
+    assert deals["collection"].annotation == (
+        'Literal["black_friday", "clearance", "special_offers", "top_100"]'
+    )
+    reviews = {p.name: p for p in eps["reviews"].params}
+    assert reviews["sort"].annotation == (
+        'Optional[Literal["newest", "oldest", "most_helpful", "highest_rating", '
+        '"lowest_rating"]]'
+    )
+    assert "Argos's own AI-generated summary" in eps["reviews"].summary
+    assert "No reviewer name" in eps["reviews"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ar = client.argos
+    ar.search("air fryer")
+    ar.search("air fryer", brand=["ninja", "tower"], seller="argos", offers="clearance",
+              price_min=40, price_max=150, rating_min=4, sort="price_low", page=2,
+              filters={"capacity": "5l - 6.9l"})
+    ar.product("8377058")
+    ar.product(url="https://www.argos.co.uk/product/8377058/")
+    ar.store_stock(["8377058", "7163184"], "SW1A 1AA")
+    ar.store_stock("8377058,7163184", "SW1A 1AA", delivery_postcode="M1 1AE", max_distance=20,
+                   max_results=5)
+    ar.stores("M1 1AE")
+    ar.stores(store="661-manchester-arndale-argos")
+    ar.reviews("7163184", sort="most_helpful", rating=[1, 2], page=2, limit=100)
+    ar.questions("8377058", sort="oldest", limit=50)
+    ar.categories()
+    ar.category("29560", sort="rating", new_in=True)
+    ar.deals("black_friday", query="lego", page=3)
+    ar.deals("top_100", page=2)
+    ar.suggestions("lego", limit=5)
+    base = "/api/v1/argos/"
+    assert seen == [
+        (base + "search", {"query": "air fryer"}, 240.0),
+        (base + "search", {"query": "air fryer", "offers": "clearance",
+                           "brand": ["ninja", "tower"], "seller": "argos", "price_min": 40,
+                           "price_max": 150, "rating_min": 4,
+                           "filters": {"capacity": "5l - 6.9l"}, "sort": "price_low",
+                           "page": 2}, 240.0),
+        (base + "product", {"product_id": "8377058"}, 240.0),
+        (base + "product", {"url": "https://www.argos.co.uk/product/8377058/"}, 240.0),
+        (base + "store-stock", {"product_ids": ["8377058", "7163184"], "postcode": "SW1A 1AA"},
+         240.0),
+        (base + "store-stock", {"product_ids": "8377058,7163184", "postcode": "SW1A 1AA",
+                                "delivery_postcode": "M1 1AE", "max_distance": 20,
+                                "max_results": 5}, 240.0),
+        (base + "stores", {"postcode": "M1 1AE"}, 240.0),
+        (base + "stores", {"store": "661-manchester-arndale-argos"}, 240.0),
+        (base + "reviews", {"product_id": "7163184", "sort": "most_helpful", "rating": [1, 2],
+                            "page": 2, "limit": 100}, 240.0),
+        (base + "questions", {"product_id": "8377058", "sort": "oldest", "limit": 50}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "category", {"category_id": "29560", "new_in": True, "sort": "rating"}, 240.0),
+        (base + "deals", {"collection": "black_friday", "query": "lego", "page": 3}, 240.0),
+        (base + "deals", {"collection": "top_100", "page": 2}, 240.0),
+        (base + "suggestions", {"query": "lego", "limit": 5}, 240.0),
+    ]
+    for call in (ar.product, ar.reviews, ar.questions, ar.stores):
+        with pytest.raises(ScavioError):
+            call()

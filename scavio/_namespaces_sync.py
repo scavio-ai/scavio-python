@@ -100,6 +100,7 @@ __all__ = [
     "_PoshmarkNamespace",
     "_ThredupNamespace",
     "_FashionnovaNamespace",
+    "_ArgosNamespace",
 ]
 
 class _GoogleNamespace:
@@ -16538,3 +16539,274 @@ class _FashionnovaNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("fashionnova_similar", {"handle": handle, "url": url, "color": color, "limit": limit}, extra)
+
+class _ArgosNamespace:
+    """Argos search, product, store stock, stores, reviews, questions, categories, category, deals and suggestions endpoints for argos.co.uk (UK, GBP)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        category: Optional[Union[str, int]] = None,
+        offers: Optional[Union[Literal["clearance", "special_offer", "black_friday"], list[Literal["clearance", "special_offer", "black_friday"]]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Literal["argos", "trusted_seller"]] = None,
+        new_in: Optional[bool] = None,
+        colour: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        rating_min: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "rating"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Argos for prices, was prices, offers and badges: query, sort, filters, page, page_size (24), total, total_pages, has_more, count, tu_clothing_excluded (Tu Clothing items Argos lists but sells on its own site: left out and counted here), currency, items (product_id, url, name, brand, price, was_price, save, offer_text, currency, clearance, badges, rating, review_count, seller (argos: sold by Argos, or trusted_seller: Argos's marketplace of third-party sellers), deliverable, reservable (in-store collection), buyable, free_delivery, delivery_cost (None for Trusted Seller items: the seller sets it), has_variations, argos_pay {available, offering, message}, image), facets [{name, label, values [{value, label, count, children}]}] (the filter inputs this list offers). 24 products per page, pages 1 to 200; narrow with filters. Filters: brand (several = OR), category, seller, offers, new_in, colour, price_min / price_max (GBP, any range), rating_min, and filters (any facet by facets[].name). Sorts: relevance (default), price_low, price_high, rating. Prices are numbers in GBP as Argos shows them: price (now), was_price (the site's was price, shown on offers), save = was_price - price (computed by Scavio where both exist), offer_text (the site's own words, e.g. Half Price, Save £60.00). Badges are the site's codes as given (e.g. Black_Friday, VALUE_amazing_deals, price_guarantee); neither says a price is the lowest anywhere. Not available: unit counts, price history (poll and store the answers), a brand directory (brand is a filter), Argos Ireland, card or checkout prices, Argos Pay terms. One store: argos.co.uk, GBP, no country input. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search text, e.g. 'air fryer'.
+            category: Category id (categories() category_id, or the category facet's values), e.g. '29560' Kettles.
+            offers: Offers, up to 3 (OR): clearance, special_offer, black_friday.
+            brand: Brands, up to 10 (OR): facets name brands, values[].value in lower case, e.g. 'russell hobbs', 'ninja'.
+            seller: argos (sold and fulfilled by Argos) or trusted_seller (Argos's marketplace of third-party sellers).
+            new_in: Only products Argos marks New In.
+            colour: Colour groups, up to 10 (facets name colour group), e.g. 'blacks', 'whites'.
+            price_min: Lowest price, GBP (any amount: the range is sent as is).
+            price_max: Highest price, GBP.
+            rating_min: Customer rating: 5 (five stars only) or 1-4 (that many stars or more).
+            filters: Any facet by facets[].name: a value or list of values (facets[].values[].value; values of one facet are OR, facets are AND), e.g. {'kettle capacity (l)': '1.6l - 2.0l'}. Up to 10 facets.
+            sort: relevance (default: Argos's Most Popular), price_low, price_high, rating (customer rating).
+            page: Page, 24 products each, 1 to 200 (total_pages says how deep the list goes).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_search", {"query": query, "category": category, "offers": offers, "brand": brand, "seller": seller, "new_in": new_in, "colour": colour, "price_min": price_min, "price_max": price_max, "rating_min": rating_min, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Argos product in full by product_id or link: product_id, requested_id, url, template (argos or trusted_seller), name, brand, seller, seller_name (Argos; None for Trusted Seller items, whose page names no seller), ean, price, was_price, save, offer_text, currency, badges [{badge, type, text, starts_at, ends_at}], description, features (the specification lines), images, variants [{product_id, options, price}], special_offers [{id, title, description, starts_at, ends_at}], nectar_points, care_plans [{name, type, duration, price, excess, promotion}], payment_options [{provider, message, plans [{offering, months, apr}]}], argos_pay, bundles (frequently bought together [{product_id, name, price, url}]), breadcrumb [{name, category_id, url}], dimensions, energy_class, deliverable, collectable, delivery_price, free_delivery, fast_track, globally_out_of_stock, end_of_line, max_quantity, rating, review_count, recommended_percent, rating_distribution, secondary_ratings, question_count, answer_count, reviews (the first 10 as on the page; no reviewer names: reviews() pages them all). Trusted Seller items carry the fields their page shows (price, was price, description, images, breadcrumb, delivery). A withdrawn or unknown product answers 404 (charged); a Tu Clothing id (tuc...) answers 400 (Tu items have no product page on argos.co.uk). Prices are numbers in GBP as Argos shows them: price (now), was_price (the site's was price, shown on offers), save = was_price - price (computed by Scavio where both exist), offer_text (the site's own words, e.g. Half Price, Save £60.00). Badges are the site's codes as given (e.g. Black_Friday, VALUE_amazing_deals, price_guarantee); neither says a price is the lowest anywhere. One store: argos.co.uk, GBP, no country input. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Argos product id: a 7-digit catalogue number (items[].product_id, e.g. '8377058') or a Trusted Seller item id (8 letters and digits).
+            url: An Argos product link (https://www.argos.co.uk/product/<id>/).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_product", {"product_id": product_id, "url": url}, extra)
+
+    def store_stock(
+        self,
+        product_ids: Union[str, list[Union[str, int]]],
+        postcode: str,
+        *,
+        delivery_postcode: Optional[str] = None,
+        max_distance: Optional[int] = None,
+        max_results: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Argos store stock: whether 1 to 10 Argos products can be collected at the Argos stores near a UK postcode (nearest first), and delivered to a postcode. Returns postcode, delivery_postcode, max_distance, product_ids, count, stores [store_id, name, store (the store reference for stores()), url, type (argos_store, inside_sainsburys, collection_point: an Argos counter in a Sainsbury's), brand, distance_miles, address {lines, town, county, postcode}, latitude, longitude, phone, hours {monday..sunday: [{open, close}]}, special_hours, products [{product_id, state, available_from, message}]], delivery {postcode, products [{product_id, state, available_from, fast_track (Fast Track same-day delivery), message}]}, products [{product_id, known, collectable, deliverable, globally_out_of_stock}]. Collection state per store and product: collect_now (in stock to collect right away), collect_today / collect_tomorrow (from a time today or tomorrow: available_from has it), collect_later, out_of_stock, not_available (Argos is not selling it now), other. Delivery state: same_day, next_day, later, out_of_stock, not_available, other. Argos shows no unit counts: the answer is whether and when, never how many. postcode is where stores are searched; delivery_postcode (default postcode) is where delivery is checked. Trusted Seller items are never stocked in stores (their ids answer 400). A malformed postcode or id answers 400 before anything is charged. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_ids: 1 to 10 Argos catalogue numbers (7 digits), as a list or comma-separated, e.g. ['8377058', '7163184'].
+            postcode: A full UK postcode where stores are searched, e.g. 'SW1A 1AA'.
+            delivery_postcode: Postcode for home delivery availability (default: postcode).
+            max_distance: Search radius in miles, 1 to 50 (default 50, as on Argos's product page).
+            max_results: Stores, 1 to 10 (default 10, the most Argos returns).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_store_stock", {"product_ids": product_ids, "postcode": postcode, "delivery_postcode": delivery_postcode, "max_distance": max_distance, "max_results": max_results}, extra)
+
+    def stores(
+        self,
+        postcode: Optional[str] = None,
+        *,
+        store: Optional[str] = None,
+        max_distance: Optional[int] = None,
+        max_results: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Argos stores near a UK postcode (nearest first, up to 10 within 50 miles): postcode, max_distance, count, stores [store_id, name, store (the store reference for stores()), url, type (argos_store, inside_sainsburys, collection_point: an Argos counter in a Sainsbury's), brand, distance_miles, address {lines, town, county, postcode}, latitude, longitude, phone, hours {monday..sunday: [{open, close}]}, special_hours]; no stock (use store_stock()). Or one store by store (stores[].store): store_id, store, url, name, type, description, address {street, town, region, postcode, country}, latitude, longitude, phone, opening_hours (as Argos lists them), hours [{day, open, close}], special_hours [{date, open, close, closed}] (holiday and seasonal hours), services (e.g. Tu Collection Point). Send one of postcode or store. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            postcode: Stores near this full UK postcode, e.g. 'M1 1AE'.
+            store: One store: stores[].store (the store's id and name, e.g. '661-manchester-arndale-argos') or its argos.co.uk/stores/... link. A bare store id is not accepted.
+            max_distance: Search radius in miles, 1 to 50 (default 50, as on Argos's product page).
+            max_results: Stores, 1 to 10 (default 10, the most Argos returns).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_stores", {"postcode": postcode, "store": store, "max_distance": max_distance, "max_results": max_results}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["newest", "oldest", "most_helpful", "highest_rating", "lowest_rating"]] = None,
+        rating: Optional[Union[Literal[1, 2, 3, 4, 5], list[Literal[1, 2, 3, 4, 5]]]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Argos product by product_id or link, up to 100 per page and every review reachable: product_id, sort, rating, page, limit, total (for the star filter), has_more, count, summary (Argos's own AI-generated summary of the reviews, labelled by summary_source), stats {product_name, brand, review_count, average_rating, rating_distribution, recommended_percent, secondary_averages [{label, average}], first_review_at, last_review_at}, reviews [{id, rating, title, text, submitted_at, recommended, helpful_count, not_helpful_count, secondary_ratings, syndicated, syndication_source (the brand site a syndicated review came from), argos_colleague (written by an Argos colleague), badges, photos, reviewed_product_id, reviewed_product_name (reviews are shared across a product's colours and sizes), brand_response {count, department, date}}]. No reviewer name, location, age or gender is returned; a brand's reply is reported by presence and date only. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Argos product id: a 7-digit catalogue number (items[].product_id, e.g. '8377058') or a Trusted Seller item id (8 letters and digits).
+            url: An Argos product link (https://www.argos.co.uk/product/<id>/).
+            sort: newest (default), oldest, most_helpful (Argos's helpfulness order: the share of helpful votes, not their count), highest_rating, lowest_rating.
+            rating: Only reviews with these star ratings (one or a list), e.g. [1, 2].
+            page: Page (page * limit up to total).
+            limit: Reviews per page, 1 to 100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_reviews", {"product_id": product_id, "url": url, "sort": sort, "rating": rating, "page": page, "limit": limit}, extra)
+
+    def questions(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["newest", "oldest"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions about one Argos product (by product_id or link) with their answers: product_id, sort, page, limit, total, has_more, count, questions [{id, question, details, submitted_at, answer_count, answers [{id, text, submitted_at, source (staff: Argos's Q&A team, brand, or customer), best_answer, helpful_count, not_helpful_count}]}]. No asker or answerer names (a greeting's first name is cut). Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Argos product id: a 7-digit catalogue number (items[].product_id, e.g. '8377058') or a Trusted Seller item id (8 letters and digits).
+            url: An Argos product link (https://www.argos.co.uk/product/<id>/).
+            sort: newest (default) or oldest.
+            page: Page.
+            limit: Questions per page, 1 to 50 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_questions", {"product_id": product_id, "url": url, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Argos's department tree as its navigation shows it (14 departments): count, link_count, departments [{name, category_id, url, groups [{name, category_id, url, links [{name, category_id (for category()), url, url_filters (filters the link adds after the category, or None)}]}]}]. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_categories", {}, extra)
+
+    def category(
+        self,
+        category_id: Union[str, int],
+        *,
+        query: Optional[str] = None,
+        offers: Optional[Union[Literal["clearance", "special_offer", "black_friday"], list[Literal["clearance", "special_offer", "black_friday"]]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Literal["argos", "trusted_seller"]] = None,
+        new_in: Optional[bool] = None,
+        colour: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        rating_min: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "rating"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Argos category's products, 24 per page: category_id, query (optional text inside it), sort, filters, page, page_size (24), total, total_pages, has_more, count, tu_clothing_excluded (Tu Clothing items Argos lists but sells on its own site: left out and counted here), currency, items (product_id, url, name, brand, price, was_price, save, offer_text, currency, clearance, badges, rating, review_count, seller (argos: sold by Argos, or trusted_seller: Argos's marketplace of third-party sellers), deliverable, reservable (in-store collection), buyable, free_delivery, delivery_cost (None for Trusted Seller items: the seller sets it), has_variations, argos_pay {available, offering, message}, image), facets [{name, label, values [{value, label, count, children}]}] (the filter inputs this list offers). Filters: brand (several = OR), category, seller, offers, new_in, colour, price_min / price_max (GBP, any range), rating_min, and filters (any facet by facets[].name). Sorts: relevance (default), price_low, price_high, rating. Prices are numbers in GBP as Argos shows them: price (now), was_price (the site's was price, shown on offers), save = was_price - price (computed by Scavio where both exist), offer_text (the site's own words, e.g. Half Price, Save £60.00). Badges are the site's codes as given (e.g. Black_Friday, VALUE_amazing_deals, price_guarantee); neither says a price is the lowest anywhere. One store: argos.co.uk, GBP, no country input. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: Category id: categories() category_id (any level), the category facet's values, or the c:<id> of an argos.co.uk browse link ('29560' Kettles, '29575' Air fryers).
+            query: Optional text inside the category.
+            offers: Offers, up to 3 (OR): clearance, special_offer, black_friday.
+            brand: Brands, up to 10 (OR): facets name brands, values[].value in lower case, e.g. 'russell hobbs', 'ninja'.
+            seller: argos (sold and fulfilled by Argos) or trusted_seller (Argos's marketplace of third-party sellers).
+            new_in: Only products Argos marks New In.
+            colour: Colour groups, up to 10 (facets name colour group), e.g. 'blacks', 'whites'.
+            price_min: Lowest price, GBP (any amount: the range is sent as is).
+            price_max: Highest price, GBP.
+            rating_min: Customer rating: 5 (five stars only) or 1-4 (that many stars or more).
+            filters: Any facet by facets[].name: a value or list of values (facets[].values[].value; values of one facet are OR, facets are AND), e.g. {'kettle capacity (l)': '1.6l - 2.0l'}. Up to 10 facets.
+            sort: relevance (default: Argos's Most Popular), price_low, price_high, rating (customer rating).
+            page: Page, 24 products each, 1 to 200 (total_pages says how deep the list goes).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_category", {"category_id": category_id, "query": query, "offers": offers, "brand": brand, "seller": seller, "new_in": new_in, "colour": colour, "price_min": price_min, "price_max": price_max, "rating_min": rating_min, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def deals(
+        self,
+        collection: Literal["black_friday", "clearance", "special_offers", "top_100"],
+        *,
+        query: Optional[str] = None,
+        category: Optional[Union[str, int]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Literal["argos", "trusted_seller"]] = None,
+        new_in: Optional[bool] = None,
+        colour: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        rating_min: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "rating"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Argos deal collections: black_friday (Argos's Black Friday deals), clearance and special_offers (Half Price, Save £X, multi-buys) as full lists, 24 per page with optional query, category, filters and sorts (sort, filters, page, page_size (24), total, total_pages, has_more, count, tu_clothing_excluded (Tu Clothing items Argos lists but sells on its own site: left out and counted here), currency, items (product_id, url, name, brand, price, was_price, save, offer_text, currency, clearance, badges, rating, review_count, seller (argos: sold by Argos, or trusted_seller: Argos's marketplace of third-party sellers), deliverable, reservable (in-store collection), buyable, free_delivery, delivery_cost (None for Trusted Seller items: the seller sets it), has_variations, argos_pay {available, offering, message}, image), facets [{name, label, values [{value, label, count, children}]}] (the filter inputs this list offers)); or top_100, Argos's own Top 100 deals list (2 pages of 60, page only: collection, page, page_size, total, total_pages, has_more, count, items). Prices are numbers in GBP as Argos shows them: price (now), was_price (the site's was price, shown on offers), save = was_price - price (computed by Scavio where both exist), offer_text (the site's own words, e.g. Half Price, Save £60.00). Badges are the site's codes as given (e.g. Black_Friday, VALUE_amazing_deals, price_guarantee); neither says a price is the lowest anywhere. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            collection: black_friday, clearance, special_offers or top_100.
+            query: Optional text within the collection (top_100 takes page only).
+            category: Category id (categories() category_id, or the category facet's values), e.g. '29560' Kettles.
+            brand: Brands, up to 10 (OR): facets name brands, values[].value in lower case, e.g. 'russell hobbs', 'ninja'.
+            seller: argos (sold and fulfilled by Argos) or trusted_seller (Argos's marketplace of third-party sellers).
+            new_in: Only products Argos marks New In.
+            colour: Colour groups, up to 10 (facets name colour group), e.g. 'blacks', 'whites'.
+            price_min: Lowest price, GBP (any amount: the range is sent as is).
+            price_max: Highest price, GBP.
+            rating_min: Customer rating: 5 (five stars only) or 1-4 (that many stars or more).
+            filters: Any facet by facets[].name: a value or list of values (facets[].values[].value; values of one facet are OR, facets are AND), e.g. {'kettle capacity (l)': '1.6l - 2.0l'}. Up to 10 facets.
+            sort: relevance (default: Argos's Most Popular), price_low, price_high, rating (customer rating).
+            page: Page: 24 products each, or 1 to 2 (60 each) for top_100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_deals", {"collection": collection, "query": query, "category": category, "brand": brand, "seller": seller, "new_in": new_in, "colour": colour, "price_min": price_min, "price_max": price_max, "rating_min": rating_min, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Argos's search suggestions for a partial query: query, count, suggestions [{text, weight (Argos's popularity weight)}]. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'lego'.
+            limit: Suggestions, 1 to 10 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("argos_suggestions", {"query": query, "limit": limit}, extra)

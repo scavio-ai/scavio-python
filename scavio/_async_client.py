@@ -13,6 +13,7 @@ from ._namespaces_async import (
     _AsyncAllegroNamespace,
     _AsyncAmazonNamespace,
     _AsyncAppStoreNamespace,
+    _AsyncArgosNamespace,
     _AsyncAshleyNamespace,
     _AsyncAsosNamespace,
     _AsyncBestBuyNamespace,
@@ -246,6 +247,7 @@ class AsyncScavioClient:
         self.poshmark = _AsyncPoshmarkNamespace(self)
         self.thredup = _AsyncThredupNamespace(self)
         self.fashionnova = _AsyncFashionnovaNamespace(self)
+        self.argos = _AsyncArgosNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

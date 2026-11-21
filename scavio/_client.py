@@ -11,6 +11,7 @@ from ._namespaces_sync import (
     _AllegroNamespace,
     _AmazonNamespace,
     _AppStoreNamespace,
+    _ArgosNamespace,
     _AshleyNamespace,
     _AsosNamespace,
     _BestBuyNamespace,
@@ -251,6 +252,7 @@ class ScavioClient:
         self.poshmark = _PoshmarkNamespace(self)
         self.thredup = _ThredupNamespace(self)
         self.fashionnova = _FashionnovaNamespace(self)
+        self.argos = _ArgosNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
