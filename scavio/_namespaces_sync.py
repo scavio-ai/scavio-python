@@ -102,6 +102,7 @@ __all__ = [
     "_FashionnovaNamespace",
     "_ArgosNamespace",
     "_MediaExpertNamespace",
+    "_ActionNamespace",
 ]
 
 class _GoogleNamespace:
@@ -17129,3 +17130,417 @@ class _MediaExpertNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("mediaexpert_suggestions", {"query": query, "limit": limit}, extra)
+
+class _ActionNamespace:
+    """Action (action.com, the European non-food discount store) search, product, products, category, categories, brand, brands, new arrivals, weekly deals, collection, suggestions, stores, store, reviews and webshop endpoints for 19 storefronts in 16 countries."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        brand_filter: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Action (action.com, the European non-food discount store), 24 products a page with total and total_pages: query, country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. Sorts relevance, price_asc, price_desc, newest; filters category_filter, price_range, brand_filter, new_only (values from facets). A search with no match answers 200 with total 0. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Not available: store stock (Action does not publish it), price history (poll and store the answers), leaflets, checkout, other countries. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search text (the storefront's language works best: 'kerst', 'weihnachten', 'noel', 'opbergbox').
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            brand_filter: Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').
+            new_only: New products only (Action's Nieuw / Neu label).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_search", {"query": query, "country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "brand_filter": brand_filter, "new_only": new_only}, extra)
+
+    def product(
+        self,
+        product_code: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Action (action.com, the European non-food discount store) product in full on one market, by article number or link: requested, country, language, market (the storefront, e.g. nl-nl), currency, product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings, images, brand_info {name, brand_id, own_brand, slug, url}, long_description, highlights, specifications [{name, value}], aisle (the store aisle Action names), deposit, category {name, path, url}, subcategory, related_categories, sustainability {title, certifications}, warning_label, hazards {biocide, dangerous_good, plant_protection}, availability (in stock online as Action marks it), related [{product_code, title, url, image, price, regular_price, is_deal}]. An article the market does not sell is a charged 404. No EAN here (EANs are on webshop_product()). Action does not publish store stock. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_code: Action article number: items[].product_code (7 digits, the same code in every market), e.g. '3225277'.
+            url: An action.com product link (https://www.action.com/<market>/p/<code>/<name>/); the market comes from the link.
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_product", {"product_code": product_code, "url": url, "country": country, "language": language}, extra)
+
+    def products(
+        self,
+        product_codes: list[Union[str, int]],
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 60 Action (action.com, the European non-food discount store) articles priced on one market in one request: requested, country, language, market (the storefront, e.g. nl-nl), currency, count, not_sold (codes the market does not sell), items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings). To compare one article's price across markets, call once per country with the same product_codes. None sold: a charged 404. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_codes: 1 to 60 Action article numbers (items[].product_code), e.g. ['3225277', '3011615'].
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_products", {"product_codes": product_codes, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        brand_filter: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Action (action.com, the European non-food discount store) category's products by path, with filters, sort and paging: category, country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path (categories() categories[].path, e.g. 'wonen' or 'wonen/woonaccessoires') or its action.com/<market>/c/... link.
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            brand_filter: Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').
+            new_only: New products only (Action's Nieuw / Neu label).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_category", {"category": category, "country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "brand_filter": brand_filter, "new_only": new_only}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        depth: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Action (action.com, the European non-food discount store)'s category tree on one market (15 departments, about 300 categories in 3 levels): country, language, market (the storefront, e.g. nl-nl), currency, depth, count, node_count, categories [{category_id, name, path (the input of category()), url, level, child_count, children}]. Names are in the storefront's language. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            depth: Levels to return, 1 to 3 (default 3).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_categories", {"country": country, "language": language, "depth": depth}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Action (action.com, the European non-food discount store), with sort, paging and filters: brand, country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand: brands() brands[].slug or a product's brand_info.slug (e.g. 'max-more', 'magic-village') or its action.com/<market>/brand/<slug>/ link.
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            new_only: New products only (Action's Nieuw / Neu label).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_brand", {"brand": brand, "country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "new_only": new_only}, extra)
+
+    def brands(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Action (action.com, the European non-food discount store)'s own brands (about 54 private labels, e.g. Max & More, Magic Village) as its own-brands page lists them: country, language, market (the storefront, e.g. nl-nl), currency, query, total_brands, count, brands [{name, slug (the input of brand()), url, image}]. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            query: Brands whose name contains this text.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_brands", {"country": country, "language": language, "query": query}, extra)
+
+    def new_arrivals(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        brand_filter: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Action (action.com, the European non-food discount store)'s new products on one market (about 200), with sort, paging and filters: country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            brand_filter: Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_new_arrivals", {"country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "brand_filter": brand_filter}, extra)
+
+    def weekly_deals(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        brand_filter: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """This week's Action (action.com, the European non-food discount store) deals on one market (about 130 to 190; a deal week runs Wednesday to Tuesday, the same week everywhere, and the assortment changes weekly): week_id (Action's week id, e.g. Promo2026Week47), label (as shown), valid_from, valid_to (ISO dates: the label has no year, Scavio takes it from the week id), loyalty_deals (Belgium: Action Plus card deals the page shows beside the grid, items with deal.loyalty_card), country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. 23 deals a page. regular_price is the price outside the deal. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            brand_filter: Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').
+            new_only: New products only (Action's Nieuw / Neu label).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_weekly_deals", {"country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "brand_filter": brand_filter, "new_only": new_only}, extra)
+
+    def collection(
+        self,
+        collection: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        category_filter: Optional[str] = None,
+        price_range: Optional[str] = None,
+        brand_filter: Optional[str] = None,
+        new_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Action (action.com, the European non-food discount store) collection (a seasonal moment page, e.g. black-friday, kerst, sinterklaas, basics) with sort, paging and filters: collection, collection_tag, country, language, market (the storefront, e.g. nl-nl), currency, title, filters, sort, page, page_size, total, total_pages, has_more, count, items (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings), facets [{facet (category, price_range, brand, new), input (the field to send a value back in), name, values [{name, value, count, selected}]}]. Action is action.com, the European non-food discount store (not Action S.A., the Polish IT distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the storefront's language, as Action writes them (Dutch on the default nl storefront); prices are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), never converted. Article numbers (product_code) are the same in every market; prices are set per market, so price one article on each market you report. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection: An Action collection: its slug ('black-friday', 'kerst', 'sinterklaas', 'basics') or its action.com/<market>/moment/<slug>/ link. An unknown slug is a charged 404.
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, Action's own order), price_asc, price_desc or newest.
+            page: Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the list goes.
+            category_filter: Narrow to one department: a value of facets[facet=category].values[].value (in the storefront's language, e.g. 'Hobby').
+            price_range: A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', '>20'; the bands follow the market's currency).
+            brand_filter: Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').
+            new_only: New products only (Action's Nieuw / Neu label).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_collection", {"collection": collection, "country": country, "language": language, "sort": sort, "page": page, "category_filter": category_filter, "price_range": price_range, "brand_filter": brand_filter, "new_only": new_only}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Action (action.com, the European non-food discount store)'s search suggestions for a partial query: country, language, market (the storefront, e.g. nl-nl), currency, query, count, suggestions (search terms), category_suggestion {query, category}, products (product_code, title, description, url, image, brand, price, regular_price (Action's struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), discount_percent (computed by Scavio from regular_price), price_note (Action's note on the struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, is_deal, deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus card deal, Belgium), loyalty_label}, labels [{code (deal, new, sustainable_choice, loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings; up to 5). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'opberg'.
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    def stores(
+        self,
+        query: Optional[str] = None,
+        *,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 20 Action (action.com, the European non-food discount store) stores nearest a city, town, postcode or point, as Action's store finder lists them (they may cross a border: each store names its country_code): country, language, market (the storefront, e.g. nl-nl), currency, query, latitude, longitude, complete (false when the store finder is down and the stores come from Action's store list: store_id, coordinates, distance and dates, no address or hours), count, countries, stores [{store_id, name, store (the input of store()), url, country_code, address {street, house_number, street2, postcode, city, country}, latitude, longitude, distance_km (only for lat/lng input, nearest first), opening_date, closing_date (a store announced to close), hours [{date, day, closed, open, close}] (7 dated days)}]. A store announced to open later carries its opening_date. Send one of query or lat + lng. Action does not publish store stock. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A city, town or postcode, e.g. 'Amsterdam'.
+            lat: Latitude (with lng): the 20 stores nearest this point, with distance_km.
+            lng: Longitude (with lat).
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_stores", {"query": query, "lat": lat, "lng": lng, "country": country, "language": language}, extra)
+
+    def store(
+        self,
+        store: Optional[str] = None,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        country: Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si"]] = None,
+        language: Optional[Literal["nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Action (action.com, the European non-food discount store) store by its reference (stores[].store, link or slug) or by store_id: country, language, market (the storefront, e.g. nl-nl), currency, store_id, name, store, url, country_code, address, latitude, longitude, opening_date, closing_date, hours [{date, day, closed, open, close}] (7 dated days). No phone or services. By store_id the request reads two sources, still 1 credit. Action does not publish store stock. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: A store: stores() stores[].store (e.g. '/nl-nl/winkels/amsterdam-kinkerstraat/'), its action.com link, or its slug ('amsterdam-kinkerstraat') with country.
+            store_id: Or an Action store id (stores[].store_id, e.g. '1260' or '3A11').
+            country: The Action storefront's country (default 'nl'): nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de (Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt (Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si (Slovenia).
+            language: The storefront's language where a country has more than one: be nl (default) or fr; ch de (default), fr or it. Other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_store", {"store": store, "store_id": store_id, "country": country, "language": language}, extra)
+
+    def reviews(
+        self,
+        product_code: Union[str, int],
+        *,
+        country: Optional[Literal["nl", "de", "fr", "pl"]] = None,
+        scope: Optional[Literal["local", "international", "all"]] = None,
+        sort: Optional[Literal["relevant", "newest", "oldest", "highest", "lowest"]] = None,
+        rating: Optional[list[Literal[1, 2, 3, 4, 5]]] = None,
+        query: Optional[str] = None,
+        limit: Optional[int] = None,
+        offset: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Action (action.com, the European non-food discount store) article, up to 100 per call with offset paging. Action publishes reviews on four storefronts only (nl, de, fr, pl; other countries answer 400, not charged): country, language, market (the storefront, e.g. nl-nl), currency, product_code, scope, sort, rating, query, offset, limit, total, local_total, international_total, count, has_more, reviews [{review_id, language (the review's own language, e.g. nl-NL), rating, title, text, reviewed_at, recommends, aspect_ratings [{aspect, name, rating}], pros, cons}]. scope local (default) is the reviews written on that storefront, in its language; international the reviews written on the other three; all both (offset + limit up to 100; 2 reads, still 1 credit). No reviewer name or any reviewer identity is returned. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_code: Action article number (items[].product_code), e.g. '3224838'.
+            country: 'nl' (default), 'de', 'fr' or 'pl': the four storefronts where Action publishes reviews.
+            scope: local (default: reviews written on this storefront), international (the reviews written on the other three) or all (both; offset + limit up to 100).
+            sort: relevant (default, Action's own order), newest, oldest, highest or lowest.
+            rating: Star ratings to include, e.g. [1, 2].
+            query: Reviews that mention this text.
+            limit: Reviews per call, 1 to 100 (default 20).
+            offset: Reviews to skip (paging).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_reviews", {"product_code": product_code, "country": country, "scope": scope, "sort": sort, "rating": rating, "query": query, "limit": limit, "offset": offset}, extra)
+
+    def webshop_search(
+        self,
+        query: Optional[str] = None,
+        *,
+        category: Optional[str] = None,
+        page: Optional[int] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the Action (action.com, the European non-food discount store) webshop (shop.action.com: nl-nl, nl-be and fr-be only), or list one of its categories: country, language, market (the storefront, e.g. nl-nl), currency, query, category, page, page_size, total, total_pages, has_more, count, items [{ean, product_code, title, subtitle, url, image, brand, price, regular_price, currency, discount_percent, stock_level (Action's online stock level: HIGH ... SOLD_OUT), stock_label (as shown), order_limit, shipping_cost, is_deal, is_new, promo_label}]. stock_level is the webshop's online stock, not store stock. Send one of query or category. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search text, e.g. 'stofzuiger'.
+            category: Or a webshop category slug (the /c/<slug> part of a shop.action.com link, e.g. 'alle-tijdelijke-deals').
+            page: Page.
+            country: 'nl' (default) or 'be': the Action webshop (shop.action.com) serves nl-nl, nl-be and fr-be only.
+            language: For be: 'nl' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_webshop_search", {"query": query, "category": category, "page": page, "country": country, "language": language}, extra)
+
+    def webshop_product(
+        self,
+        ean: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Action (action.com, the European non-food discount store) webshop product (shop.action.com) by EAN or link: requested, country, language, market (the storefront, e.g. nl-nl), currency, ean, product_code, title, subtitle, url, image, images, brand, price, regular_price, currency, discount_percent, stock_level (online stock), stock_label, order_limit, order_minimum, order_multiple, shipping_cost, availability {status, release_date, end_date}, is_deal, is_new, promo_label, description, highlights, specifications, supplier {name, address}, other_markets (the same product's webshop links in the other webshop markets). An EAN the webshop does not sell is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            ean: The product's EAN (webshop_search() items[].ean), e.g. '8718969571098'.
+            url: Or a shop.action.com product link.
+            country: 'nl' (default) or 'be': the Action webshop (shop.action.com) serves nl-nl, nl-be and fr-be only.
+            language: For be: 'nl' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("action_webshop_product", {"ean": ean, "url": url, "country": country, "language": language}, extra)

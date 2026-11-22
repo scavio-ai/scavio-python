@@ -6,6 +6,7 @@ from ._exceptions import ScavioError
 from ._extract import ExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
+    _ActionNamespace,
     _AirbnbNamespace,
     _AldiNamespace,
     _AllegroNamespace,
@@ -255,6 +256,7 @@ class ScavioClient:
         self.fashionnova = _FashionnovaNamespace(self)
         self.argos = _ArgosNamespace(self)
         self.mediaexpert = _MediaExpertNamespace(self)
+        self.action = _ActionNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

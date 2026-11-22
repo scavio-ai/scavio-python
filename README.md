@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 93 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 94 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -46,6 +46,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Argos Store Stock by UK Postcode, Prices, Was Prices, Badges and Reviews (UK; 10 endpoints) | Yes | No | No | No |
 | Media Expert Black Week Prices, Omnibus 30-Day Low, Code Prices, Store Stock and Reviews (Poland; 13 endpoints) | Yes | No | No | No |
+| Action Weekly Deals, Prices by Country, Stores, Opening Hours and Reviews (19 storefronts in 16 countries; 16 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -4024,6 +4025,90 @@ leaflets, price history (poll and store the answers), unit counts, checkout
 prices, other countries or languages. Failed calls are not charged; a
 not-found is charged.
 
+### 63. Retail -- Action weekly deal prices by country, stores and opening hours
+
+Action (action.com), the European non-food discount store, on 19 storefronts
+in 16 countries. Namespace `action`, 16 endpoints, 1 credit each: `search`,
+`product`, `products`, `category`, `categories`, `brand`, `brands`,
+`new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`,
+`store`, `reviews`, `webshop_search`, `webshop_product`. Every endpoint takes
+`country` (nl by default, be, fr, lu, de, at, ch, it, es, pt, pl, cz, sk, ro,
+hr, si) and, for be and ch, `language` (be nl or fr; ch de, fr or it). The
+request timeout is raised to at least 240s on every endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ac = client.action
+
+# --- This week's deals: Action's week id and validity dates (Wednesday to Tuesday).
+deals = ac.weekly_deals()["data"]
+print(deals["week_id"], deals["label"], deals["valid_from"], deals["valid_to"], deals["total"])
+for item in deals["items"][:3]:
+    print(item["product_code"], item["title"], item["price"], item["regular_price"],
+          item["deal"]["valid_to"])
+
+# --- One article number everywhere, priced per market: one call per country.
+codes = ["3225277", "3011615", "3225488"]
+for country in ("nl", "de", "pl"):
+    res = ac.products(codes, country=country)["data"]
+    print(country, res["currency"], res["not_sold"],
+          [(i["product_code"], i["price"]) for i in res["items"]])
+
+# --- The 20 stores nearest a city or postcode, with 7 dated days of opening hours (no stock).
+stores = ac.stores("Amsterdam")["data"]
+for s in stores["stores"][:3]:
+    print(s["store_id"], s["name"], s["country_code"], s["address"]["postcode"], s["hours"][0])
+one = ac.store(stores["stores"][0]["store"])["data"]
+
+# --- Search, one product, reviews (nl, de, fr, pl only), the webshop (nl and be only).
+res = ac.search("kerst", sort="price_asc")["data"]
+p = ac.product("3225277", country="be", language="fr")["data"]
+reviews = ac.reviews("3224838", scope="all", sort="newest")["data"]
+web = ac.webshop_search("stofzuiger")["data"]
+ean = ac.webshop_product(web["items"][0]["ean"])["data"]
+print(ean["stock_level"], ean["order_limit"], ean["shipping_cost"], ean["availability"])
+
+# --- Categories, own brands, new arrivals, the Black Friday collection, suggestions.
+tree = ac.categories(depth=2)["data"]["categories"]
+home = ac.category("wonen/woonaccessoires")["data"]
+brands = ac.brands()["data"]["brands"]
+max_more = ac.brand("max-more")["data"]
+new = ac.new_arrivals(country="de")["data"]
+bf = ac.collection("black-friday")["data"]
+hints = ac.suggestions("opberg")["data"]["suggestions"]
+```
+
+Prices are numbers in the market's currency (EUR; CHF on ch, PLN on pl, CZK
+on cz, RON on ro), never converted: `price`, `regular_price` (Action's
+struck-through price), `unit_price` (as shown), `discount_percent` (computed by
+Scavio) and `price_note` (Action's note on the struck-through price, e.g. the
+EU 30-day lowest price in Poland). Article numbers (`product_code`) are the
+same in every market and prices are set per market. Titles and labels come
+back in the storefront's language, as Action writes them (Dutch on the default
+nl storefront). Lists return 24 products a page (23 on weekly deals) up to page
+200, with `total` and `total_pages`; sorts `relevance`, `price_asc`,
+`price_desc`, `newest`; filters `category_filter`, `price_range`,
+`brand_filter`, `new_only` take values from `facets`.
+
+`weekly_deals`: `week_id` (e.g. Promo2026Week47), Action's `label` and ISO
+`valid_from` / `valid_to` dates; a deal week runs Wednesday to Tuesday and the
+assortment changes weekly; Belgium adds Action Plus `loyalty_deals`. `brands`
+lists Action's own brands (about 54 private labels). `stores` gives the 20
+nearest stores to a city, postcode or `lat` / `lng` (they may cross a border:
+`country_code` per store; `distance_km` only for `lat` / `lng`). Action does not
+publish store stock. `reviews` exist on nl, de, fr and pl only (other countries
+answer 400, not charged), scope `local` (default, that storefront's language),
+`international` or `all` (`offset + limit` up to 100); no reviewer identity is
+returned. `webshop_search` and `webshop_product` read shop.action.com (nl-nl,
+nl-be, fr-be): EAN, online `stock_level` (not store stock), `order_limit`,
+`shipping_cost`, release and end dates; EANs come only from the webshop. Not
+available: store stock, price history (poll and store the answers), leaflets,
+checkout, other countries. Failed calls and refused inputs are not charged; a
+not-found (an article the market does not sell, an unknown slug or EAN) is
+charged.
+
 ## Error Handling
 
 ```python
@@ -4167,6 +4252,7 @@ Scavio works with popular AI/LLM frameworks:
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Argos (`argos`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`; one UK store (argos.co.uk, GBP), no `country` | 2 each |
 | Media Expert (`mediaexpert`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`, `suggestions`; one Polish store (mediaexpert.pl, PLN), no `country` | actual cost, 1 to 3: `store_stock` and `categories` 2; `search` 3 (1 when it redirects to a full category page); `category`, `brand`, `outlet`, `seller` and promotion-list products 1 unsorted, 3 sorted or lazily loaded; the rest 1 |
+| Action (`action`) | `search`, `product`, `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`, `webshop_search`, `webshop_product`; 19 storefronts (`country`, plus `language` for be and ch); `reviews` nl, de, fr, pl; webshop nl, be | 1 each |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4197,6 +4283,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.74.0
+
+- **New `action` namespace** (sync and async) for Action (action.com), the
+  European non-food discount store, 16 endpoints: `search`, `product`,
+  `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`,
+  `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`,
+  `webshop_search`, `webshop_product`. 19 storefronts in 16 countries
+  (`country` + `language`); this week's deals with Action's week id and
+  validity dates; up to 60 article numbers priced on one market per call; the
+  20 stores nearest a city or postcode with opening hours (Action does not
+  publish store stock). 1 credit per call. 240s timeout floor.
 
 ### Changed in 0.73.0
 

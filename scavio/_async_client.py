@@ -8,6 +8,7 @@ from ._exceptions import ScavioError
 from ._extract import AsyncExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
+    _AsyncActionNamespace,
     _AsyncAirbnbNamespace,
     _AsyncAldiNamespace,
     _AsyncAllegroNamespace,
@@ -250,6 +251,7 @@ class AsyncScavioClient:
         self.fashionnova = _AsyncFashionnovaNamespace(self)
         self.argos = _AsyncArgosNamespace(self)
         self.mediaexpert = _AsyncMediaExpertNamespace(self)
+        self.action = _AsyncActionNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

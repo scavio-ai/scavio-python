@@ -3336,6 +3336,117 @@ _MEDIAEXPERT_LIST_CREDITS = (
     "(one more lookup for the rest of the page)." + _MEDIAEXPERT_BILL
 )
 
+# Action params shared across endpoints (action.com: 19 storefronts in 16 countries, country +
+# language where a country has two or three). 16 endpoints, 1 credit each. reviews serve nl, de,
+# fr and pl only; webshop_search and webshop_product serve the webshop (shop.action.com) nl-nl,
+# nl-be and fr-be only.
+_ACTION_COUNTRIES = (
+    "nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", "sk", "ro", "hr", "si",
+)
+_ACTION_MARKETS = (
+    "nl (Netherlands), be (Belgium: language nl or fr), fr (France), lu (Luxembourg), de "
+    "(Germany), at (Austria), ch (Switzerland: language de, fr or it), it (Italy), es (Spain), pt "
+    "(Portugal), pl (Poland), cz (Czechia), sk (Slovakia), ro (Romania), hr (Croatia), si "
+    "(Slovenia)"
+)
+_ACTION_COUNTRY = _lit(
+    "country",
+    _ACTION_COUNTRIES,
+    "The Action storefront's country (default 'nl'): " + _ACTION_MARKETS + ".",
+)
+_ACTION_LANGUAGE = _lit(
+    "language",
+    ("nl", "fr", "de", "it", "es", "pt", "pl", "cs", "sk", "ro", "hr", "sl"),
+    "The storefront's language where a country has more than one: be nl (default) or fr; ch de "
+    "(default), fr or it. Other countries have one language: leave it out (another language "
+    "answers 400, not charged).",
+)
+_ACTION_MARKET = (_ACTION_COUNTRY, _ACTION_LANGUAGE)
+_ACTION_LIST_PARAMS = (
+    _lit(
+        "sort",
+        ("relevance", "price_asc", "price_desc", "newest"),
+        "relevance (default, Action's own order), price_asc, price_desc or newest.",
+    ),
+    _int(
+        "page",
+        "Page, 1 to 200 (24 products a page, 23 on weekly deals); total_pages says how deep the "
+        "list goes.",
+    ),
+    _str(
+        "category_filter",
+        "Narrow to one department: a value of facets[facet=category].values[].value (in the "
+        "storefront's language, e.g. 'Hobby').",
+    ),
+    _str(
+        "price_range",
+        "A price band: a value of facets[facet=price_range].values[].value (e.g. '2-5', '<1', "
+        "'>20'; the bands follow the market's currency).",
+    ),
+    _str(
+        "brand_filter",
+        "Narrow to one brand: a value of facets[facet=brand].values[].value (e.g. 'Disney').",
+    ),
+    _bool("new_only", "New products only (Action's Nieuw / Neu label)."),
+)
+_ACTION_BRAND_LIST_PARAMS = tuple(p for p in _ACTION_LIST_PARAMS if p.name != "brand_filter")
+_ACTION_NEW_LIST_PARAMS = tuple(p for p in _ACTION_LIST_PARAMS if p.name != "new_only")
+_ACTION_WEBSHOP_MARKET = (
+    _lit(
+        "country",
+        ("nl", "be"),
+        "'nl' (default) or 'be': the Action webshop (shop.action.com) serves nl-nl, nl-be and "
+        "fr-be only.",
+    ),
+    _lit("language", ("nl", "fr"), "For be: 'nl' (default) or 'fr'."),
+)
+_ACTION_NAME = "Action (action.com, the European non-food discount store)"
+_ACTION_STORE = (
+    " Action is action.com, the European non-food discount store (not Action S.A., the Polish IT "
+    "distributor), on 19 storefronts in 16 countries. Titles, descriptions and labels come in the "
+    "storefront's language, as Action writes them (Dutch on the default nl storefront); prices "
+    "are numbers in the market's currency (EUR, CHF on ch, PLN on pl, CZK on cz, RON on ro), "
+    "never converted. Article numbers (product_code) are the same in every market; prices are "
+    "set per market, so price one article on each market you report."
+)
+_ACTION_MARKET_OUT = "country, language, market (the storefront, e.g. nl-nl), currency"
+_ACTION_DEAL = (
+    "deal {label (Action's validity label, e.g. 18-11 t/m 24-11), valid_from, valid_to (ISO "
+    "dates; the label has no year, Scavio adds the nearest one), loyalty_card (an Action Plus "
+    "card deal, Belgium), loyalty_label}"
+)
+_ACTION_ITEM = (
+    "product_code, title, description, url, image, brand, price, regular_price (Action's "
+    "struck-through price, as shown), currency, unit_price (as shown, e.g. € 1,00/m), "
+    "discount_percent (computed by Scavio from regular_price), price_note (Action's note on the "
+    "struck-through price, e.g. the EU 30-day lowest price in Poland), available, is_new, "
+    "is_deal, " + _ACTION_DEAL + ", labels [{code (deal, new, sustainable_choice, "
+    "loyalty_card_deal), label, note}], rating, review_count, energy_label, has_warnings"
+)
+_ACTION_FACETS = (
+    "facets [{facet (category, price_range, brand, new), input (the field to send a value back "
+    "in), name, values [{name, value, count, selected}]}]"
+)
+_ACTION_LIST = (
+    _ACTION_MARKET_OUT + ", title, filters, sort, page, page_size, total, total_pages, has_more, "
+    "count, items (" + _ACTION_ITEM + "), " + _ACTION_FACETS
+)
+_ACTION_NO_STOCK = " Action does not publish store stock."
+_ACTION_NOT_AVAILABLE = (
+    " Not available: store stock (Action does not publish it), price history (poll and store "
+    "the answers), leaflets, checkout, other countries."
+)
+_ACTION_CHARGE = (
+    " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+)
+_ACTION_CODE = Param(
+    "product_code",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc="Action article number: items[].product_code (7 digits, the same code in every market), "
+    "e.g. '3225277'.",
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -14745,6 +14856,419 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # =============================== Action ===============================
+    # 16 endpoints on /api/v1/action, 1 credit each (store by store_id and reviews scope all read
+    # two sources, still 1 credit). 19 storefronts: country + language. Lists can queue behind
+    # the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="action_search",
+        namespace="action",
+        method="search",
+        http="POST",
+        path="/api/v1/action/search",
+        summary=(
+            "Search " + _ACTION_NAME + ", 24 products a page with total and total_pages: query, "
+            + _ACTION_LIST + ". Sorts relevance, price_asc, price_desc, newest; filters "
+            "category_filter, price_range, brand_filter, new_only (values from facets). A search "
+            "with no match answers 200 with total 0." + _ACTION_STORE + _ACTION_NOT_AVAILABLE
+            + _ACTION_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search text (the storefront's language works best: 'kerst', 'weihnachten', "
+                "'noel', 'opbergbox').",
+            ),
+            *_ACTION_MARKET,
+            *_ACTION_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_product",
+        namespace="action",
+        method="product",
+        http="POST",
+        path="/api/v1/action/product",
+        summary=(
+            "One " + _ACTION_NAME + " product in full on one market, by article number or link: "
+            "requested, " + _ACTION_MARKET_OUT + ", " + _ACTION_ITEM + ", images, brand_info "
+            "{name, brand_id, own_brand, slug, url}, long_description, highlights, specifications "
+            "[{name, value}], aisle (the store aisle Action names), deposit, category {name, path, "
+            "url}, subcategory, related_categories, sustainability {title, certifications}, "
+            "warning_label, hazards {biocide, dangerous_good, plant_protection}, availability (in "
+            "stock online as Action marks it), related [{product_code, title, url, image, price, "
+            "regular_price, is_deal}]. An article the market does not sell is a charged 404. No "
+            "EAN here (EANs are on webshop_product())." + _ACTION_NO_STOCK + _ACTION_STORE
+            + _ACTION_CHARGE
+        ),
+        params=(
+            _ACTION_CODE,
+            _str(
+                "url",
+                "An action.com product link (https://www.action.com/<market>/p/<code>/<name>/); "
+                "the market comes from the link.",
+            ),
+            *_ACTION_MARKET,
+        ),
+        one_of=(("product_code", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_products",
+        namespace="action",
+        method="products",
+        http="POST",
+        path="/api/v1/action/products",
+        summary=(
+            "Up to 60 " + _ACTION_NAME + " articles priced on one market in one request: "
+            "requested, " + _ACTION_MARKET_OUT + ", count, not_sold (codes the market does not "
+            "sell), items (" + _ACTION_ITEM + "). To compare one article's price across markets, "
+            "call once per country with the same product_codes. None sold: a charged 404."
+            + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(
+            Param(
+                "product_codes",
+                "list[Union[str, int]]",
+                required=True,
+                doc="1 to 60 Action article numbers (items[].product_code), e.g. ['3225277', "
+                "'3011615'].",
+            ),
+            *_ACTION_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_category",
+        namespace="action",
+        method="category",
+        http="POST",
+        path="/api/v1/action/category",
+        summary=(
+            "One " + _ACTION_NAME + " category's products by path, with filters, sort and "
+            "paging: category, " + _ACTION_LIST + "." + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A category path (categories() categories[].path, e.g. 'wonen' or "
+                "'wonen/woonaccessoires') or its action.com/<market>/c/... link.",
+            ),
+            *_ACTION_MARKET,
+            *_ACTION_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_categories",
+        namespace="action",
+        method="categories",
+        http="POST",
+        path="/api/v1/action/categories",
+        summary=(
+            _ACTION_NAME + "'s category tree on one market (15 departments, about 300 "
+            "categories in 3 levels): " + _ACTION_MARKET_OUT + ", depth, count, node_count, "
+            "categories [{category_id, name, path (the input of category()), url, level, "
+            "child_count, children}]. Names are in the storefront's language." + _ACTION_CHARGE
+        ),
+        params=(*_ACTION_MARKET, _int("depth", "Levels to return, 1 to 3 (default 3).")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_brand",
+        namespace="action",
+        method="brand",
+        http="POST",
+        path="/api/v1/action/brand",
+        summary=(
+            "One brand's products on " + _ACTION_NAME + ", with sort, paging and filters: "
+            "brand, " + _ACTION_LIST + "." + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand: brands() brands[].slug or a product's brand_info.slug (e.g. 'max-more', "
+                "'magic-village') or its action.com/<market>/brand/<slug>/ link.",
+            ),
+            *_ACTION_MARKET,
+            *_ACTION_BRAND_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_brands",
+        namespace="action",
+        method="brands",
+        http="POST",
+        path="/api/v1/action/brands",
+        summary=(
+            _ACTION_NAME + "'s own brands (about 54 private labels, e.g. Max & More, Magic "
+            "Village) as its own-brands page lists them: " + _ACTION_MARKET_OUT + ", query, "
+            "total_brands, count, brands [{name, slug (the input of brand()), url, image}]."
+            + _ACTION_CHARGE
+        ),
+        params=(*_ACTION_MARKET, _str("query", "Brands whose name contains this text.")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_new_arrivals",
+        namespace="action",
+        method="new_arrivals",
+        http="POST",
+        path="/api/v1/action/new-arrivals",
+        summary=(
+            _ACTION_NAME + "'s new products on one market (about 200), with sort, paging and "
+            "filters: " + _ACTION_LIST + "." + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(*_ACTION_MARKET, *_ACTION_NEW_LIST_PARAMS),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_weekly_deals",
+        namespace="action",
+        method="weekly_deals",
+        http="POST",
+        path="/api/v1/action/weekly-deals",
+        summary=(
+            "This week's " + _ACTION_NAME + " deals on one market (about 130 to 190; a deal "
+            "week runs Wednesday to Tuesday, the same week everywhere, and the assortment changes "
+            "weekly): week_id (Action's week id, e.g. Promo2026Week47), label (as shown), "
+            "valid_from, valid_to (ISO dates: the label has no year, Scavio takes it from the "
+            "week id), loyalty_deals (Belgium: Action Plus card deals the page shows beside the "
+            "grid, items with deal.loyalty_card), " + _ACTION_LIST + ". 23 deals a page. "
+            "regular_price is the price outside the deal." + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(*_ACTION_MARKET, *_ACTION_LIST_PARAMS),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_collection",
+        namespace="action",
+        method="collection",
+        http="POST",
+        path="/api/v1/action/collection",
+        summary=(
+            "One " + _ACTION_NAME + " collection (a seasonal moment page, e.g. black-friday, "
+            "kerst, sinterklaas, basics) with sort, paging and filters: collection, "
+            "collection_tag, " + _ACTION_LIST + "." + _ACTION_STORE + _ACTION_CHARGE
+        ),
+        params=(
+            _req(
+                "collection",
+                "An Action collection: its slug ('black-friday', 'kerst', 'sinterklaas', "
+                "'basics') or its action.com/<market>/moment/<slug>/ link. An unknown slug is a "
+                "charged 404.",
+            ),
+            *_ACTION_MARKET,
+            *_ACTION_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_suggestions",
+        namespace="action",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/action/suggestions",
+        summary=(
+            _ACTION_NAME + "'s search suggestions for a partial query: " + _ACTION_MARKET_OUT
+            + ", query, count, suggestions (search terms), category_suggestion {query, "
+            "category}, products (" + _ACTION_ITEM + "; up to 5)." + _ACTION_CHARGE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'opberg'."),
+            *_ACTION_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_stores",
+        namespace="action",
+        method="stores",
+        http="POST",
+        path="/api/v1/action/stores",
+        summary=(
+            "The 20 " + _ACTION_NAME + " stores nearest a city, town, postcode or point, as "
+            "Action's store finder lists them (they may cross a border: each store names its "
+            "country_code): " + _ACTION_MARKET_OUT + ", query, latitude, longitude, complete "
+            "(false when the store finder is down and the stores come from Action's store list: "
+            "store_id, coordinates, distance and dates, no address or hours), count, countries, "
+            "stores [{store_id, name, store (the input of store()), url, country_code, address "
+            "{street, house_number, street2, postcode, city, country}, latitude, longitude, "
+            "distance_km (only for lat/lng input, nearest first), opening_date, closing_date (a "
+            "store announced to close), hours [{date, day, closed, open, close}] (7 dated "
+            "days)}]. A store announced to open later carries its opening_date. Send one of "
+            "query or lat + lng." + _ACTION_NO_STOCK + _ACTION_CHARGE
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="A city, town or postcode, e.g. 'Amsterdam'.",
+            ),
+            _float(
+                "lat", "Latitude (with lng): the 20 stores nearest this point, with distance_km."
+            ),
+            _float("lng", "Longitude (with lat)."),
+            *_ACTION_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_store",
+        namespace="action",
+        method="store",
+        http="POST",
+        path="/api/v1/action/store",
+        summary=(
+            "One " + _ACTION_NAME + " store by its reference (stores[].store, link or slug) or "
+            "by store_id: " + _ACTION_MARKET_OUT + ", store_id, name, store, url, country_code, "
+            "address, latitude, longitude, opening_date, closing_date, hours [{date, day, closed, "
+            "open, close}] (7 dated days). No phone or services. By store_id the request reads "
+            "two sources, still 1 credit." + _ACTION_NO_STOCK + _ACTION_CHARGE
+        ),
+        params=(
+            Param(
+                "store",
+                "Optional[str]",
+                positional=True,
+                doc="A store: stores() stores[].store (e.g. "
+                "'/nl-nl/winkels/amsterdam-kinkerstraat/'), its action.com link, or its slug "
+                "('amsterdam-kinkerstraat') with country.",
+            ),
+            _str_or_int(
+                "store_id", "Or an Action store id (stores[].store_id, e.g. '1260' or '3A11')."
+            ),
+            *_ACTION_MARKET,
+        ),
+        one_of=(("store", "store_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_reviews",
+        namespace="action",
+        method="reviews",
+        http="POST",
+        path="/api/v1/action/reviews",
+        summary=(
+            "Customer reviews of one " + _ACTION_NAME + " article, up to 100 per call with "
+            "offset paging. Action publishes reviews on four storefronts only (nl, de, fr, pl; "
+            "other countries answer 400, not charged): " + _ACTION_MARKET_OUT + ", product_code, "
+            "scope, sort, rating, query, offset, limit, total, local_total, international_total, "
+            "count, has_more, reviews [{review_id, language (the review's own language, e.g. "
+            "nl-NL), rating, title, text, reviewed_at, recommends, aspect_ratings [{aspect, name, "
+            "rating}], pros, cons}]. scope local (default) is the reviews written on that "
+            "storefront, in its language; international the reviews written on the other three; "
+            "all both (offset + limit up to 100; 2 reads, still 1 credit). No reviewer name or "
+            "any reviewer identity is returned." + _ACTION_CHARGE
+        ),
+        params=(
+            Param(
+                "product_code",
+                "Union[str, int]",
+                required=True,
+                doc="Action article number (items[].product_code), e.g. '3224838'.",
+            ),
+            _lit(
+                "country",
+                ("nl", "de", "fr", "pl"),
+                "'nl' (default), 'de', 'fr' or 'pl': the four storefronts where Action publishes "
+                "reviews.",
+            ),
+            _lit(
+                "scope",
+                ("local", "international", "all"),
+                "local (default: reviews written on this storefront), international (the reviews "
+                "written on the other three) or all (both; offset + limit up to 100).",
+            ),
+            _lit(
+                "sort",
+                ("relevant", "newest", "oldest", "highest", "lowest"),
+                "relevant (default, Action's own order), newest, oldest, highest or lowest.",
+            ),
+            _ilit_list("rating", (1, 2, 3, 4, 5), "Star ratings to include, e.g. [1, 2]."),
+            _str("query", "Reviews that mention this text."),
+            _int("limit", "Reviews per call, 1 to 100 (default 20)."),
+            _int("offset", "Reviews to skip (paging)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_webshop_search",
+        namespace="action",
+        method="webshop_search",
+        http="POST",
+        path="/api/v1/action/webshop-search",
+        summary=(
+            "Search the " + _ACTION_NAME + " webshop (shop.action.com: nl-nl, nl-be and fr-be "
+            "only), or list one of its categories: " + _ACTION_MARKET_OUT + ", query, category, "
+            "page, page_size, total, total_pages, has_more, count, items [{ean, product_code, "
+            "title, subtitle, url, image, brand, price, regular_price, currency, "
+            "discount_percent, stock_level (Action's online stock level: HIGH ... SOLD_OUT), "
+            "stock_label (as shown), order_limit, shipping_cost, is_deal, is_new, promo_label}]. "
+            "stock_level is the webshop's online stock, not store stock. Send one of query or "
+            "category." + _ACTION_CHARGE
+        ),
+        params=(
+            Param("query", "Optional[str]", positional=True, doc="Search text, e.g. 'stofzuiger'."),
+            _str(
+                "category",
+                "Or a webshop category slug (the /c/<slug> part of a shop.action.com link, e.g. "
+                "'alle-tijdelijke-deals').",
+            ),
+            _int("page", "Page."),
+            *_ACTION_WEBSHOP_MARKET,
+        ),
+        one_of=(("query", "category"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="action_webshop_product",
+        namespace="action",
+        method="webshop_product",
+        http="POST",
+        path="/api/v1/action/webshop-product",
+        summary=(
+            "One " + _ACTION_NAME + " webshop product (shop.action.com) by EAN or link: "
+            "requested, " + _ACTION_MARKET_OUT + ", ean, product_code, title, subtitle, url, "
+            "image, images, brand, price, regular_price, currency, discount_percent, stock_level "
+            "(online stock), stock_label, order_limit, order_minimum, order_multiple, "
+            "shipping_cost, availability {status, release_date, end_date}, is_deal, is_new, "
+            "promo_label, description, highlights, specifications, supplier {name, address}, "
+            "other_markets (the same product's webshop links in the other webshop markets). An "
+            "EAN the webshop does not sell is a charged 404." + _ACTION_CHARGE
+        ),
+        params=(
+            Param(
+                "ean",
+                "Optional[str]",
+                positional=True,
+                doc="The product's EAN (webshop_search() items[].ean), e.g. '8718969571098'.",
+            ),
+            _str("url", "Or a shop.action.com product link."),
+            *_ACTION_WEBSHOP_MARKET,
+        ),
+        one_of=(("ean", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -21780,6 +22304,7 @@ NAMESPACES: tuple[str, ...] = (
     "fashionnova",
     "argos",
     "mediaexpert",
+    "action",
 )
 
 

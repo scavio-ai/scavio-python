@@ -5837,3 +5837,123 @@ def test_mediaexpert_credits_paths_and_wire(monkeypatch):
     for call in (me.product, me.reviews):
         with pytest.raises(ScavioError):
             call()
+
+
+def test_action_credits_paths_and_wire(monkeypatch):
+    """action (0.74.0): 16 endpoints on /api/v1/action, 1 credit each.
+
+    19 storefronts (country + language for be and ch). product takes one of product_code or
+    url; store one of store or store_id; webshop_search one of query or category;
+    webshop_product one of ean or url. reviews serve nl, de, fr and pl; the webshop nl and be.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "action"}
+    assert sorted(eps) == [
+        "brand", "brands", "categories", "category", "collection", "new_arrivals", "product",
+        "products", "reviews", "search", "store", "stores", "suggestions", "webshop_product",
+        "webshop_search", "weekly_deals",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/action/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        assert "action.com, the European non-food discount store" in ep.summary, ep.key
+    countries = {m: {p.name: p for p in ep.params}["country"].annotation for m, ep in eps.items()}
+    assert countries["search"] == (
+        'Optional[Literal["nl", "be", "fr", "lu", "de", "at", "ch", "it", "es", "pt", "pl", "cz", '
+        '"sk", "ro", "hr", "si"]]'
+    )
+    assert countries["reviews"] == 'Optional[Literal["nl", "de", "fr", "pl"]]'
+    assert countries["webshop_search"] == countries["webshop_product"] == (
+        'Optional[Literal["nl", "be"]]'
+    )
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "newest"]]'
+    )
+    assert "brand_filter" not in {p.name for p in eps["brand"].params}
+    assert "new_only" not in {p.name for p in eps["new_arrivals"].params}
+    assert eps["product"].one_of == (("product_code", "url"),)
+    assert eps["store"].one_of == (("store", "store_id"),)
+    assert eps["webshop_search"].one_of == (("query", "category"),)
+    assert eps["webshop_product"].one_of == (("ean", "url"),)
+    assert {p.name: p for p in eps["products"].params}["product_codes"].required
+    assert {p.name: p for p in eps["reviews"].params}["product_code"].required
+    assert "Promo2026Week47" in eps["weekly_deals"].summary
+    assert "Wednesday to Tuesday" in eps["weekly_deals"].summary
+    assert "does not publish store stock" in eps["stores"].summary
+    assert "No reviewer name" in eps["reviews"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ac = client.action
+    ac.search("kerst")
+    ac.search("weihnachten", country="de", sort="price_asc", page=2, price_range="2-5",
+              new_only=True)
+    ac.product("3225277")
+    ac.product("3225277", country="ch", language="fr")
+    ac.product(url="https://www.action.com/nl-nl/p/3225277/dennenslinger-met-led/")
+    ac.products(["3225277", "3011615", "3225488"], country="pl")
+    ac.category("wonen/woonaccessoires", brand_filter="Disney")
+    ac.categories(country="ro", depth=2)
+    ac.brand("max-more", sort="newest")
+    ac.brands()
+    ac.brands(query="max")
+    ac.new_arrivals(country="de")
+    ac.weekly_deals()
+    ac.weekly_deals(country="be", language="fr", page=2)
+    ac.collection("black-friday")
+    ac.suggestions("opberg")
+    ac.stores("Amsterdam")
+    ac.stores(lat=52.37, lng=4.89, country="nl")
+    ac.store("/nl-nl/winkels/amsterdam-kinkerstraat/")
+    ac.store(store_id="1260")
+    ac.reviews("3224838", scope="all", sort="newest")
+    ac.reviews("3224838", country="de", rating=[1, 2], query="kapot", limit=100, offset=20)
+    ac.webshop_search("stofzuiger")
+    ac.webshop_search(category="alle-tijdelijke-deals", country="be", language="fr", page=2)
+    ac.webshop_product("8718969571098")
+    base = "/api/v1/action/"
+    assert seen == [
+        (base + "search", {"query": "kerst"}, 240.0),
+        (base + "search", {"query": "weihnachten", "country": "de", "sort": "price_asc",
+                           "page": 2, "price_range": "2-5", "new_only": True}, 240.0),
+        (base + "product", {"product_code": "3225277"}, 240.0),
+        (base + "product", {"product_code": "3225277", "country": "ch", "language": "fr"},
+         240.0),
+        (base + "product", {"url": "https://www.action.com/nl-nl/p/3225277/dennenslinger-met-led/"},
+         240.0),
+        (base + "products", {"product_codes": ["3225277", "3011615", "3225488"],
+                             "country": "pl"}, 240.0),
+        (base + "category", {"category": "wonen/woonaccessoires", "brand_filter": "Disney"},
+         240.0),
+        (base + "categories", {"country": "ro", "depth": 2}, 240.0),
+        (base + "brand", {"brand": "max-more", "sort": "newest"}, 240.0),
+        (base + "brands", {}, 240.0),
+        (base + "brands", {"query": "max"}, 240.0),
+        (base + "new-arrivals", {"country": "de"}, 240.0),
+        (base + "weekly-deals", {}, 240.0),
+        (base + "weekly-deals", {"country": "be", "language": "fr", "page": 2}, 240.0),
+        (base + "collection", {"collection": "black-friday"}, 240.0),
+        (base + "suggestions", {"query": "opberg"}, 240.0),
+        (base + "stores", {"query": "Amsterdam"}, 240.0),
+        (base + "stores", {"lat": 52.37, "lng": 4.89, "country": "nl"}, 240.0),
+        (base + "store", {"store": "/nl-nl/winkels/amsterdam-kinkerstraat/"}, 240.0),
+        (base + "store", {"store_id": "1260"}, 240.0),
+        (base + "reviews", {"product_code": "3224838", "scope": "all", "sort": "newest"}, 240.0),
+        (base + "reviews", {"product_code": "3224838", "country": "de", "rating": [1, 2],
+                            "query": "kapot", "limit": 100, "offset": 20}, 240.0),
+        (base + "webshop-search", {"query": "stofzuiger"}, 240.0),
+        (base + "webshop-search", {"category": "alle-tijdelijke-deals", "country": "be",
+                                   "language": "fr", "page": 2}, 240.0),
+        (base + "webshop-product", {"ean": "8718969571098"}, 240.0),
+    ]
+    for call in (ac.product, ac.store, ac.webshop_search, ac.webshop_product):
+        with pytest.raises(ScavioError):
+            call()
