@@ -104,6 +104,7 @@ __all__ = [
     "_AsyncMediaExpertNamespace",
     "_AsyncActionNamespace",
     "_AsyncHemaNamespace",
+    "_AsyncAutozoneNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -17875,3 +17876,251 @@ class _AsyncHemaNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("hema_reviews", {"sku": sku, "country": country, "language": language, "sort": sort, "page": page}, extra)
+
+class _AsyncAutozoneNamespace:
+    """AutoZone (autozone.com, the US auto parts retailer) search, product, category, brand, vehicles, reviews, stores, store, categories, clearance, rebates and store stock endpoints (also autozone.com.br and autozone.com.mx)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "br"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        brand: Optional[str] = None,
+        filters: Optional[dict[str, Union[str, float]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search AutoZone (autozone.com, the US auto parts retailer) by keywords, an AutoZone part number or another brand's part number (cross-reference: an OEM or competitor number such as PH3614 or FL-820S finds the parts AutoZone matches to it): country, language, currency, query, sort, filters, min_price, max_price, ranking_variant (the ranking variant AutoZone served; AutoZone runs ranking tests, so totals and order can differ between two identical calls), part_number_search, match_type, corrected_query, oem_part_number, oem_brand, redirected_to, list_source, priced_for, title, total (as AutoZone reports it), count, page_size (24), items (position, id (the input of product() and reviews()), part_number, name, brand, sub_brand, part_type, url, image, location (e.g. Front, Rear), fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit (as AutoZone gives it, e.g. NEEDS_BASE_VEHICLE)}, oem_part_number, oem_brand (the cross-referenced part number and brand), attributes, sponsored, price, was_price (AutoZone's struck-through price, as shown), deal_price, discount_percent (computed by Scavio from was_price), core_charge (the refundable core deposit AutoZone adds until the old part is returned; 0 when none), currency, warranty, clearance, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}. List items carry no rating (product() has it)), facets [{facet (the key to send in filters), name, values [{value (the value to send), label, count, selected}]}], notes. AutoZone's pages list the first 24 results only (no paging): narrow with one facet filter, a price range or sort. A search AutoZone sends straight to one product page answers redirected_to and redirect_product_id with no items. For the parts that fit one vehicle use category() with vehicle. Prices and stock are as AutoZone shows them for the store it assigns to the request: every answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone prices differ by store (core charges too), so the same item can cost more or less elsewhere and two calls can be priced for different stores; never report a price as national. There is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise. On br (autozone.com.br: Portuguese text, BRL) prices are for AutoZone store 7602 Sao Paulo (Interlagos). Not available: results past the first 24, stores near a ZIP, stock at a chosen US or Mexican store, search suggestions, VIN lookup, engine-level fitment, repair guides, AutoZonePro / commercial pricing, Mexico prices, price history (poll and store the answers), checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit on us (the default), 2 credits on br. Returns the API response as a dict.
+
+        Args:
+            query: Keywords ('brake pads'), an AutoZone part number ('DG1210') or another brand's part number ('PH3614', 'FL-820S'). Brazil: Portuguese keywords ('pastilha de freio').
+            country: 'us' (autozone.com, USD, default) or 'br' (autozone.com.br, BRL, 2 credits). Mexico search and product are not offered (AutoZone Mexico prices only for a Mexican store it does not reliably assign).
+            sort: relevance (default, AutoZone's own order), price_asc or price_desc.
+            brand: A brand as facets lists it (e.g. 'Duralast Gold'): the same as filters['sub_brand_name_display_s'].
+            filters: One facet: {'<facets[].facet>': '<facets[].values[].value>'}, e.g. {'position_name_s': 'Front'} or {'sub_brand_name_display_s': 'Duralast Gold'}. AutoZone's pages apply one at a time.
+            min_price: Lowest price, in the market's currency (USD; BRL on br).
+            max_price: Highest price, in the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_search", {"query": query, "country": country, "sort": sort, "brand": brand, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def product(
+        self,
+        id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "br"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One AutoZone (autozone.com, the US auto parts retailer) product in full by item id or link: country, language, currency, requested_id, priced_for, id, part_number, name, brand, sub_brand, part_type, url, brand_path, description, features, specifications [{name, value}], breadcrumbs [{name, path, page_type}], images, safety_data_sheets (PDF links), fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit}, location, price, was_price, deal_price, discount_percent (computed by Scavio from was_price), core_charge (refundable core deposit; 0 when none), warranty, clearance, deal {available, price, label (e.g. Bundle and Save), quantity}, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}, rating {average, count, with_text, ratings_only, recommended_percent, distribution [{stars, count, percent}]}. The product page carries no per-vehicle fit list: use category() with vehicle for what fits. An id AutoZone does not have is a charged 404. Prices and stock are as AutoZone shows them for the store it assigns to the request: every answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone prices differ by store (core charges too), so the same item can cost more or less elsewhere and two calls can be priced for different stores; never report a price as national. There is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise. On br (autozone.com.br: Portuguese text, BRL) prices are for AutoZone store 7602 Sao Paulo (Interlagos). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit on us (the default), 2 credits on br. Returns the API response as a dict.
+
+        Args:
+            id: AutoZone item id (items[].id, the number at the end of the product link), e.g. '1399158'. Send one of id or url.
+            url: Or the product link (https://www.autozone.com/p/<name>/<id>, or autozone.com.br); the market comes from the link.
+            country: 'us' (autozone.com, USD, default) or 'br' (autozone.com.br, BRL, 2 credits). Mexico search and product are not offered (AutoZone Mexico prices only for a Mexican store it does not reliably assign).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_product", {"id": id, "url": url, "country": country}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        vehicle: Optional[dict[str, Union[str, int]]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Union[str, float]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One AutoZone (autozone.com, the US auto parts retailer) part type's products by path or link, optionally only the parts that fit a vehicle (year, make, model), sorted and filtered (us): country, category, requested_vehicle, filters, min_price, max_price, sort, list_type (products, or group for a page that only groups part types), page_type, vehicle {year, make, model} (as AutoZone applied it), priced_for, title, total (as AutoZone reports it), count, page_size (24), items (position, id (the input of product() and reviews()), part_number, name, brand, sub_brand, part_type, url, image, location (e.g. Front, Rear), fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit (as AutoZone gives it, e.g. NEEDS_BASE_VEHICLE)}, oem_part_number, oem_brand (the cross-referenced part number and brand), attributes, sponsored, price, was_price (AutoZone's struck-through price, as shown), deal_price, discount_percent (computed by Scavio from was_price), core_charge (the refundable core deposit AutoZone adds until the old part is returned; 0 when none), currency, warranty, clearance, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}. List items carry no rating (product() has it)), facets [{facet (the key to send in filters), name, values [{value (the value to send), label, count, selected}]}], notes. AutoZone's pages list the first 24 results only (no paging): narrow with one facet filter, a price range or sort. Vehicle fit is at year / make / model level: items AutoZone ties to an engine read fitment.vehicle_fit NEEDS_BASE_VEHICLE (engine-level fitment is not offered). Prices and stock are as AutoZone shows them for the store it assigns to the request: every answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone prices differ by store (core charges too), so the same item can cost more or less elsewhere and two calls can be priced for different stores; never report a price as national. There is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A part type path (categories() children[].path with has_products True, e.g. '/brakes-and-traction-control/brake-pads' or '/batteries-starting-and-charging/battery') or its AutoZone link.
+            vehicle: Only the parts that fit this year / make / model, e.g. {'year': 2018, 'make': 'Ford', 'model': 'F-150'} (names as vehicles() lists them). An unknown make or model for that year is a charged 404.
+            sort: relevance (default, AutoZone's own order), price_asc or price_desc.
+            filters: One facet: {'<facets[].facet>': '<facets[].values[].value>'}, e.g. {'position_name_s': 'Front'} or {'sub_brand_name_display_s': 'Duralast Gold'}. AutoZone's pages apply one at a time.
+            min_price: Lowest price, in the market's currency (USD; BRL on br).
+            max_price: Highest price, in the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_category", {"category": category, "vehicle": vehicle, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on AutoZone (autozone.com, the US auto parts retailer) (a brand page, or the brand within one part type; us): country, brand, category, path, priced_for, title, total (as AutoZone reports it), count, page_size (24), items (position, id (the input of product() and reviews()), part_number, name, brand, sub_brand, part_type, url, image, location (e.g. Front, Rear), fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit (as AutoZone gives it, e.g. NEEDS_BASE_VEHICLE)}, oem_part_number, oem_brand (the cross-referenced part number and brand), attributes, sponsored, price, was_price (AutoZone's struck-through price, as shown), deal_price, discount_percent (computed by Scavio from was_price), core_charge (the refundable core deposit AutoZone adds until the old part is returned; 0 when none), currency, warranty, clearance, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}. List items carry no rating (product() has it)), facets [{facet (the key to send in filters), name, values [{value (the value to send), label, count, selected}]}], notes. AutoZone's pages list the first 24 results only (no paging): narrow with one facet filter, a price range or sort. An unknown brand is a charged 404. Prices and stock are as AutoZone shows them for the store it assigns to the request: every answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone prices differ by store (core charges too), so the same item can cost more or less elsewhere and two calls can be priced for different stores; never report a price as national. There is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand slug ('duralast', 'duralast-gold', 'mobil-1') or its AutoZone link (/brands/<brand> or <category>/b/brand/<brand>).
+            category: Optional part type path: that brand's products in that part type (e.g. '/brakes-and-traction-control/brake-rotor').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_brand", {"brand": brand, "category": category}, extra)
+
+    async def vehicles(
+        self,
+        *,
+        level: Optional[Literal["years", "makes", "models", "submodels", "engines"]] = None,
+        year: Optional[int] = None,
+        make_id: Optional[int] = None,
+        model_id: Optional[int] = None,
+        country: Optional[Literal["us", "br", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """AutoZone (autozone.com, the US auto parts retailer)'s vehicle selector, one level at a time: years, then makes for a year, models for a make, submodels and engines for a model (us; br and mx: years, makes, models). Returns country, level, year, make_id, model_id, count and years, makes [{make_id, name, popular}], models [{model_id, name, vehicle_type, popular}], submodels [{submodel_id, name, drive_type}] or engines [{engine_id, name, drive_type, region}]. Send the make and model names as vehicle to category(). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            level: years (default), makes (needs year), models (year + make_id), submodels and engines (year + make_id + model_id; us only).
+            year: Model year, e.g. 2018.
+            make_id: makes[].make_id (54 = Ford on us).
+            model_id: models[].model_id (666 = F-150 on us).
+            country: 'us' (autozone.com, default), 'br' (autozone.com.br) or 'mx' (autozone.com.mx).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_vehicles", {"level": level, "year": year, "make_id": make_id, "model_id": model_id, "country": country}, extra)
+
+    async def reviews(
+        self,
+        id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["default", "most_recent", "most_helpful"]] = None,
+        stars: Optional[list[int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one AutoZone (autozone.com, the US auto parts retailer) product, 10 a page, full depth, sorted and filtered by stars (us only: AutoZone's Brazilian and Mexican sites show no reviews): country, id, sort, stars, page, page_size, total_reviews, total_matching (with the star filter), total_pages, has_more, average_rating, rating_distribution [{stars, count, percent}], summary (page 1 without a star filter: AutoZone's review summary {text, features [{name, mentions, positive, negative}]}, or None), count, reviews [{review_id, rating, title, text, recommends, verified_purchase, incentivized, syndicated, syndicated_from, submitted_at, vehicle (the reviewer's vehicle as written), helpful_votes, not_helpful_votes, images [{url, thumbnail_url, caption}]}]. No reviewer name or any reviewer identity is returned. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: AutoZone item id (items[].id, the number at the end of the product link), e.g. '1399158'. Send one of id or url.
+            url: Or the product link.
+            page: Page (10 reviews a page); total_pages says how deep they go.
+            sort: default (AutoZone's order), most_recent or most_helpful.
+            stars: Only reviews with these star ratings, e.g. [1, 2].
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_reviews", {"id": id, "url": url, "page": page, "sort": sort, "stars": stars}, extra)
+
+    async def stores(
+        self,
+        *,
+        country: Optional[Literal["us", "br", "mx"]] = None,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """AutoZone (autozone.com, the US auto parts retailer)'s store directory in the US, Brazil or Mexico, one level at a time: no state = states [{state (the input), name, store_count, new_store}] with total_stores; state = cities [{city, city_slug (the input), store_count, new_store}]; state + city = stores [{store_number, name, slug (the input of store()), url, address {line1, line2, city, state, postal_code, country_code}, timezone, closed, hours [{day, open, close, closed}], holiday_hours [{date, closed, open, close}]}] with total (a city page lists up to 50 stores). Phone and coordinates come with store(). There is no stores-near-a-ZIP search. An unknown state or city is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: 'us' (autozone.com, default), 'br' (autozone.com.br) or 'mx' (autozone.com.mx).
+            state: A state from the states list (states[].state: 'tx', 'vt', 'nuevo-leon', 'sao-paulo'): lists its cities.
+            city: With state: a city slug (cities[].city_slug, e.g. 'houston'): lists its stores.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_stores", {"country": country, "state": state, "city": city}, extra)
+
+    async def store(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "br", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One AutoZone (autozone.com, the US auto parts retailer) store by slug or link (us, br, mx): country, store_number, name, label (e.g. Barre #3470), slug, url, address, phone, toll_free_phone, latitude, longitude, timezone, closed, hours [{day, open, close, closed}], holiday_hours [{date, closed, open, close}]. A store number alone is not an input: take the slug from stores(). An unknown store is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A store slug (stores[].slug), e.g. 'vt/barre/18-overlook-dr.html'. Send one of slug or url.
+            url: Or the store page link; the market comes from the link.
+            country: 'us' (autozone.com, default), 'br' (autozone.com.br) or 'mx' (autozone.com.mx).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_store", {"slug": slug, "url": url, "country": country}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[Literal["us", "br", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """AutoZone (autozone.com, the US auto parts retailer)'s category menu (us, br, mx; about 23 departments): country, count, node_count, categories [{name, path, page_type, child_count, children [{name, path (the input of category()), page_type, has_products (True for part types with a product list)}]}], popular [{name, path}]. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: 'us' (autozone.com, default), 'br' (autozone.com.br) or 'mx' (autozone.com.mx).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_categories", {"country": country}, extra)
+
+    async def clearance(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """AutoZone (autozone.com, the US auto parts retailer)'s clearance list (us): country, path, priced_for, title, total (as AutoZone reports it), count, page_size (24), items (position, id (the input of product() and reviews()), part_number, name, brand, sub_brand, part_type, url, image, location (e.g. Front, Rear), fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit (as AutoZone gives it, e.g. NEEDS_BASE_VEHICLE)}, oem_part_number, oem_brand (the cross-referenced part number and brand), attributes, sponsored, price, was_price (AutoZone's struck-through price, as shown), deal_price, discount_percent (computed by Scavio from was_price), core_charge (the refundable core deposit AutoZone adds until the old part is returned; 0 when none), currency, warranty, clearance, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}. List items carry no rating (product() has it)), facets [{facet (the key to send in filters), name, values [{value (the value to send), label, count, selected}]}], notes. AutoZone's pages list the first 24 results only (no paging): narrow with one facet filter, a price range or sort. Prices and stock are as AutoZone shows them for the store it assigns to the request: every answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone prices differ by store (core charges too), so the same item can cost more or less elsewhere and two calls can be priced for different stores; never report a price as national. There is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_clearance", {}, extra)
+
+    async def rebates(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """AutoZone (autozone.com, the US auto parts retailer)'s current mail-in rebates (us): country, count, rebates [{title, end_date (last purchase day), postmark_date (last day to mail the form), form_url (the rebate form, PDF)}], as AutoZone lists them. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_rebates", {}, extra)
+
+    async def store_stock(
+        self,
+        store_number: Union[str, int],
+        *,
+        id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One AutoZone Brazil product at a store you choose (autozone.com.br, Brazil only: AutoZone keeps a chosen store there; stock at a chosen US or Mexican store is not offered): country, requested_id, store_number, priced_for (the store AutoZone priced for: the one asked), id, part_number, name, brand, url, price, was_price, deal_price, core_charge, in_store {available, quantity}, availability {store_pickup {available, quantity}, ship_to_home {available, quantity, estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, same_day {available, quantity}, sister_stores_available, sister_store_count}. Portuguese text, BRL. Stock as AutoZone reports it, not a promise. If AutoZone does not apply the store the call fails unbilled. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_number: A Brazilian store number (stores[].store_number from stores(country='br')), e.g. '7602'.
+            id: AutoZone Brazil item id (items[].id from a br search()), e.g. '100123563'. Send one of id or url.
+            url: Or the autozone.com.br product link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autozone_store_stock", {"store_number": store_number, "id": id, "url": url}, extra)

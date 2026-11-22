@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 95 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 96 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -48,6 +48,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Media Expert Black Week Prices, Omnibus 30-Day Low, Code Prices, Store Stock and Reviews (Poland; 13 endpoints) | Yes | No | No | No |
 | Action Weekly Deals, Prices by Country, Stores, Opening Hours and Reviews (19 storefronts in 16 countries; 16 endpoints) | Yes | No | No | No |
 | HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
+| AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -4192,6 +4193,96 @@ ordering, other countries (no UK or Spain). Failed calls and refused inputs
 are not charged; a not-found (an article number HEMA does not have, an
 unknown store id, a place the store finder cannot find) is charged.
 
+### 65. Auto Parts -- AutoZone parts prices by vehicle, core charges, warranty, stores
+
+AutoZone (autozone.com), the US auto parts retailer, plus autozone.com.br and
+autozone.com.mx. Namespace `autozone`, 12 endpoints: `search`, `product`,
+`category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`,
+`clearance`, `rebates`, `store_stock`. 1 credit per call; 2 on `search` and
+`product` with `country="br"` and on `store_stock` (Brazil only). `country` is
+us by default; br on `search`, `product`, `vehicles`, `stores`, `store` and
+`categories`; mx on `vehicles`, `stores`, `store` and `categories` only.
+`category`, `brand`, `reviews`, `clearance` and `rebates` are us only and take
+no `country`. The request timeout is raised to at least 240s on every
+endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+az = client.autozone
+
+# --- Parts that fit one vehicle: the same part type unfiltered, then for a 2018 Ford F-150.
+pads = az.category("/brakes-and-traction-control/brake-pads")["data"]
+fit = az.category("/brakes-and-traction-control/brake-pads",
+                  vehicle={"year": 2018, "make": "Ford", "model": "F-150"})["data"]
+print(pads["total"], fit["total"], fit["priced_for"])
+for it in fit["items"][:3]:
+    print(it["part_number"], it["name"], it["price"], it["core_charge"], it["warranty"],
+          it["fitment"]["vehicle_fit"])
+
+# --- Vehicle names come from the selector, one level at a time.
+makes = az.vehicles(level="makes", year=2018)["data"]["makes"]
+models = az.vehicles(level="models", year=2018, make_id=54)["data"]["models"]
+
+# --- Another brand's part number finds the parts AutoZone matches to it.
+xref = az.search("PH3614")["data"]
+print(xref["total"], xref["oem_part_number"], xref["oem_brand"])
+
+# --- One product in full: price, deal, core charge, warranty, pickup and ratings.
+p = az.product("1399158")["data"]
+print(p["priced_for"], p["price"], p["deal_price"], p["core_charge"], p["warranty"])
+print(p["availability"]["store_pickup"], p["rating"]["average"])
+
+# --- Reviews, the store directory, one store, clearance and rebates.
+reviews = az.reviews("1399158", sort="most_recent")["data"]
+states = az.stores()["data"]["states"]
+houston = az.stores(state="tx", city="houston")["data"]["stores"]
+barre = az.store("vt/barre/18-overlook-dr.html")["data"]
+rebates = az.rebates()["data"]["rebates"]
+
+# --- Brazil: search and one product at a Brazilian store you choose (BRL, Portuguese text).
+br = az.search("pastilha de freio", country="br")["data"]
+stock = az.store_stock("9403", id="100112748")["data"]
+print(stock["priced_for"], stock["price"], stock["in_store"])
+```
+
+Every price is AutoZone's price for the store AutoZone assigns to the request,
+named in `priced_for` (`store_number`, `address`, `city`, `state`, `zip`).
+AutoZone prices differ by store, core charges too, so the same part can cost
+more or less elsewhere and two calls can be priced for different stores; there
+is no store or ZIP input on us. Items carry `price`, `was_price` (AutoZone's
+struck-through price, as shown), `deal_price`, `discount_percent` (computed by
+Scavio from the was price), `core_charge` (the refundable deposit AutoZone adds
+on parts like batteries until the old part is returned; 0 when none),
+`warranty` and availability per fulfilment option (store pickup, ship to home,
+next day, same day). Lists (`search`, `category`, `brand`, `clearance`) return
+the first 24 results with AutoZone's `total` and no paging: narrow with one
+facet filter (`filters={facets[].facet: value}`), `brand`, `min_price` /
+`max_price` or `sort` (`relevance`, `price_asc`, `price_desc`). List items carry
+no rating (`product` does).
+
+`search` takes keywords, AutoZone part numbers and other brands' part numbers
+(cross-reference); AutoZone runs ranking tests (`ranking_variant`), so totals
+and order can differ between two identical calls. `category` with `vehicle`
+returns the parts that fit at year / make / model level (names as `vehicles`
+lists them); items AutoZone ties to an engine read `fitment.vehicle_fit`
+NEEDS_BASE_VEHICLE. `product` adds specifications, features, safety data
+sheets, the deal label and the rating distribution; it carries no per-vehicle
+fit list. `reviews` (us) are 10 a page at full depth, sorts `default`,
+`most_recent`, `most_helpful`, a `stars` filter, AutoZone's review summary on
+page 1 and the reviewer's vehicle as written; no reviewer identity is returned.
+`stores` walks the directory (states, then cities, then a city's stores) and
+`store` reads one store by slug; there is no stores-near-a-ZIP search.
+`store_stock` is Brazil only: one product at a Brazilian store you choose with
+its in-store quantity; Brazil `search` and `product` are priced for store 7602
+Sao Paulo (Interlagos). Not available: results past the first 24, stores near
+a ZIP, stock at a chosen US or Mexican store, search suggestions, VIN lookup,
+engine-level fitment, repair guides, AutoZonePro / commercial pricing, Mexico
+prices, price history (poll and store the answers), checkout. Failed calls and
+refused inputs are not charged; a not-found (an unknown item id, vehicle,
+brand, state, city or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4337,6 +4428,7 @@ Scavio works with popular AI/LLM frameworks:
 | Media Expert (`mediaexpert`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`, `suggestions`; one Polish store (mediaexpert.pl, PLN), no `country` | actual cost, 1 to 3: `store_stock` and `categories` 2; `search` 3 (1 when it redirects to a full category page); `category`, `brand`, `outlet`, `seller` and promotion-list products 1 unsorted, 3 sorted or lazily loaded; the rest 1 |
 | Action (`action`) | `search`, `product`, `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`, `webshop_search`, `webshop_product`; 19 storefronts (`country`, plus `language` for be and ch); `reviews` nl, de, fr, pl; webshop nl, be | 1 each |
 | HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
+| AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4367,6 +4459,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.76.0
+
+- **New `autozone` namespace** (sync and async) for AutoZone (autozone.com),
+  the US auto parts retailer, 12 endpoints: `search`, `product`, `category`,
+  `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`,
+  `clearance`, `rebates`, `store_stock`. Parts that fit a year / make / model,
+  part-number cross-reference, price, was price, deal price, core charge and
+  warranty for the store AutoZone prices the request for (`priced_for`),
+  reviews, the store directory, clearance and mail-in rebates; Brazil search,
+  product and store stock at a chosen store; Mexico vehicles, stores and
+  categories. 1 credit per call, 2 on br search / product and store_stock.
+  240s timeout floor.
 
 ### Changed in 0.75.0
 

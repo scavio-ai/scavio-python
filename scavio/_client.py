@@ -15,6 +15,7 @@ from ._namespaces_sync import (
     _ArgosNamespace,
     _AshleyNamespace,
     _AsosNamespace,
+    _AutozoneNamespace,
     _BestBuyNamespace,
     _BolcomNamespace,
     _BookingNamespace,
@@ -259,6 +260,7 @@ class ScavioClient:
         self.mediaexpert = _MediaExpertNamespace(self)
         self.action = _ActionNamespace(self)
         self.hema = _HemaNamespace(self)
+        self.autozone = _AutozoneNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

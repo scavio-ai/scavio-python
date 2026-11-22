@@ -3561,6 +3561,88 @@ _HEMA_SKU = Param(
     "'15300147', or a colour group id (e.g. '4230175BLACK').",
 )
 
+# AutoZone params shared across endpoints (autozone.com, the US auto parts retailer; also
+# autozone.com.br and autozone.com.mx). 12 endpoints, 1 credit each, 2 on br search, br product
+# and store_stock (br only). search and product serve us and br; vehicles, stores, store and
+# categories us, br, mx; category, brand, reviews, clearance and rebates us only (no country).
+# Lists are the first 24 results only (the backend refuses page > 1), so no page param.
+_AZ_NAME = "AutoZone (autozone.com, the US auto parts retailer)"
+_AZ_ALL_COUNTRY = _lit(
+    "country",
+    ("us", "br", "mx"),
+    "'us' (autozone.com, default), 'br' (autozone.com.br) or 'mx' (autozone.com.mx).",
+)
+_AZ_PRICE_COUNTRY = _lit(
+    "country",
+    ("us", "br"),
+    "'us' (autozone.com, USD, default) or 'br' (autozone.com.br, BRL, 2 credits). Mexico search "
+    "and product are not offered (AutoZone Mexico prices only for a Mexican store it does not "
+    "reliably assign).",
+)
+_AZ_SORT = _lit(
+    "sort",
+    ("relevance", "price_asc", "price_desc"),
+    "relevance (default, AutoZone's own order), price_asc or price_desc.",
+)
+_AZ_FILTERS = Param(
+    "filters",
+    "Optional[dict[str, Union[str, float]]]",
+    doc="One facet: {'<facets[].facet>': '<facets[].values[].value>'}, e.g. "
+    "{'position_name_s': 'Front'} or {'sub_brand_name_display_s': 'Duralast Gold'}. AutoZone's "
+    "pages apply one at a time.",
+)
+_AZ_PRICE_RANGE = (
+    _float("min_price", "Lowest price, in the market's currency (USD; BRL on br)."),
+    _float("max_price", "Highest price, in the market's currency."),
+)
+_AZ_ID = Param(
+    "id",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc="AutoZone item id (items[].id, the number at the end of the product link), e.g. "
+    "'1399158'. Send one of id or url.",
+)
+_AZ_PRICES = (
+    " Prices and stock are as AutoZone shows them for the store it assigns to the request: every "
+    "answer names that store in priced_for {store_number, address, city, state, zip}. AutoZone "
+    "prices differ by store (core charges too), so the same item can cost more or less elsewhere "
+    "and two calls can be priced for different stores; never report a price as national. There "
+    "is no store or ZIP input on us. Stock is as AutoZone reports it, not a promise."
+)
+_AZ_BR = (
+    " On br (autozone.com.br: Portuguese text, BRL) prices are for AutoZone store 7602 Sao Paulo "
+    "(Interlagos)."
+)
+_AZ_NOT_AVAILABLE = (
+    " Not available: results past the first 24, stores near a ZIP, stock at a chosen US or "
+    "Mexican store, search suggestions, VIN lookup, engine-level fitment, repair guides, "
+    "AutoZonePro / commercial pricing, Mexico prices, price history (poll and store the "
+    "answers), checkout."
+)
+_AZ_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_AZ_AVAIL = (
+    "availability {store_pickup {available, quantity}, ship_to_home {available, quantity, "
+    "estimated_delivery}, next_day {available, quantity, order_cutoff, estimated_delivery}, "
+    "same_day {available, quantity}, sister_stores_available, sister_store_count}"
+)
+_AZ_ITEM = (
+    "position, id (the input of product() and reviews()), part_number, name, brand, sub_brand, "
+    "part_type, url, image, location (e.g. Front, Rear), fitment {type (UNIVERSAL or "
+    "VEHICLE_SPECIFIC), vehicle_fit (as AutoZone gives it, e.g. NEEDS_BASE_VEHICLE)}, "
+    "oem_part_number, oem_brand (the cross-referenced part number and brand), attributes, "
+    "sponsored, price, was_price (AutoZone's struck-through price, as shown), deal_price, "
+    "discount_percent (computed by Scavio from was_price), core_charge (the refundable core "
+    "deposit AutoZone adds until the old part is returned; 0 when none), currency, warranty, "
+    "clearance, " + _AZ_AVAIL + ". List items carry no rating (product() has it)"
+)
+_AZ_LIST = (
+    "priced_for, title, total (as AutoZone reports it), count, page_size (24), items ("
+    + _AZ_ITEM + "), facets [{facet (the key to send in filters), name, values [{value (the "
+    "value to send), label, count, selected}]}], notes. AutoZone's pages list the first 24 "
+    "results only (no paging): narrow with one facet filter, a price range or sort"
+)
+_AZ_BR_CREDITS_NOTE = "Costs 1 credit on us (the default), 2 credits on br."
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -15718,6 +15800,348 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== AutoZone ==============================
+    # 12 endpoints on /api/v1/autozone. 1 credit each; br search and br product 2
+    # (credits_note; credits is the floor); store_stock (Brazil only) 2. Calls can queue
+    # behind the backend's upstream limit and br pages are slow: 240 s floor.
+    Endpoint(
+        key="autozone_search",
+        namespace="autozone",
+        method="search",
+        http="POST",
+        path="/api/v1/autozone/search",
+        summary=(
+            "Search " + _AZ_NAME + " by keywords, an AutoZone part number or another brand's "
+            "part number (cross-reference: an OEM or competitor number such as PH3614 or FL-820S "
+            "finds the parts AutoZone matches to it): country, language, currency, query, sort, "
+            "filters, min_price, max_price, ranking_variant (the ranking variant AutoZone served; "
+            "AutoZone runs ranking tests, so totals and order can differ between two identical "
+            "calls), part_number_search, match_type, corrected_query, oem_part_number, oem_brand, "
+            "redirected_to, list_source, " + _AZ_LIST + ". A search AutoZone sends straight to "
+            "one product page answers redirected_to and redirect_product_id with no items. For "
+            "the parts that fit one vehicle use category() with vehicle."
+            + _AZ_PRICES + _AZ_BR + _AZ_NOT_AVAILABLE + _AZ_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Keywords ('brake pads'), an AutoZone part number ('DG1210') or another brand's "
+                "part number ('PH3614', 'FL-820S'). Brazil: Portuguese keywords ('pastilha de "
+                "freio').",
+            ),
+            _AZ_PRICE_COUNTRY,
+            _AZ_SORT,
+            _str(
+                "brand",
+                "A brand as facets lists it (e.g. 'Duralast Gold'): the same as "
+                "filters['sub_brand_name_display_s'].",
+            ),
+            _AZ_FILTERS,
+            *_AZ_PRICE_RANGE,
+        ),
+        credits=1,
+        credits_note=_AZ_BR_CREDITS_NOTE,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_product",
+        namespace="autozone",
+        method="product",
+        http="POST",
+        path="/api/v1/autozone/product",
+        summary=(
+            "One " + _AZ_NAME + " product in full by item id or link: country, language, "
+            "currency, requested_id, priced_for, id, part_number, name, brand, sub_brand, "
+            "part_type, url, brand_path, description, features, specifications [{name, value}], "
+            "breadcrumbs [{name, path, page_type}], images, safety_data_sheets (PDF links), "
+            "fitment {type (UNIVERSAL or VEHICLE_SPECIFIC), vehicle_fit}, location, price, "
+            "was_price, deal_price, discount_percent (computed by Scavio from was_price), "
+            "core_charge (refundable core deposit; 0 when none), warranty, clearance, deal "
+            "{available, price, label (e.g. Bundle and Save), quantity}, " + _AZ_AVAIL + ", "
+            "rating {average, count, with_text, ratings_only, recommended_percent, distribution "
+            "[{stars, count, percent}]}. The product page carries no per-vehicle fit list: use "
+            "category() with vehicle for what fits. An id AutoZone does not have is a charged "
+            "404." + _AZ_PRICES + _AZ_BR + _AZ_CHARGE
+        ),
+        params=(
+            _AZ_ID,
+            _str(
+                "url",
+                "Or the product link (https://www.autozone.com/p/<name>/<id>, or "
+                "autozone.com.br); the market comes from the link.",
+            ),
+            _AZ_PRICE_COUNTRY,
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        credits_note=_AZ_BR_CREDITS_NOTE,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_category",
+        namespace="autozone",
+        method="category",
+        http="POST",
+        path="/api/v1/autozone/category",
+        summary=(
+            "One " + _AZ_NAME + " part type's products by path or link, optionally only the "
+            "parts that fit a vehicle (year, make, model), sorted and filtered (us): country, "
+            "category, requested_vehicle, filters, min_price, max_price, sort, list_type "
+            "(products, or group for a page that only groups part types), page_type, vehicle "
+            "{year, make, model} (as AutoZone applied it), " + _AZ_LIST + ". Vehicle fit is at "
+            "year / make / model level: items AutoZone ties to an engine read "
+            "fitment.vehicle_fit NEEDS_BASE_VEHICLE (engine-level fitment is not offered)."
+            + _AZ_PRICES + _AZ_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A part type path (categories() children[].path with has_products True, e.g. "
+                "'/brakes-and-traction-control/brake-pads' or "
+                "'/batteries-starting-and-charging/battery') or its AutoZone link.",
+            ),
+            Param(
+                "vehicle",
+                "Optional[dict[str, Union[str, int]]]",
+                doc="Only the parts that fit this year / make / model, e.g. {'year': 2018, "
+                "'make': 'Ford', 'model': 'F-150'} (names as vehicles() lists them). An unknown "
+                "make or model for that year is a charged 404.",
+            ),
+            _AZ_SORT,
+            _AZ_FILTERS,
+            *_AZ_PRICE_RANGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_brand",
+        namespace="autozone",
+        method="brand",
+        http="POST",
+        path="/api/v1/autozone/brand",
+        summary=(
+            "One brand's products on " + _AZ_NAME + " (a brand page, or the brand within one "
+            "part type; us): country, brand, category, path, " + _AZ_LIST + ". An unknown brand "
+            "is a charged 404." + _AZ_PRICES + _AZ_CHARGE
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand slug ('duralast', 'duralast-gold', 'mobil-1') or its AutoZone link "
+                "(/brands/<brand> or <category>/b/brand/<brand>).",
+            ),
+            _str(
+                "category",
+                "Optional part type path: that brand's products in that part type (e.g. "
+                "'/brakes-and-traction-control/brake-rotor').",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_vehicles",
+        namespace="autozone",
+        method="vehicles",
+        http="POST",
+        path="/api/v1/autozone/vehicles",
+        summary=(
+            _AZ_NAME + "'s vehicle selector, one level at a time: years, then makes for a year, "
+            "models for a make, submodels and engines for a model (us; br and mx: years, makes, "
+            "models). Returns country, level, year, make_id, model_id, count and years, makes "
+            "[{make_id, name, popular}], models [{model_id, name, vehicle_type, popular}], "
+            "submodels [{submodel_id, name, drive_type}] or engines [{engine_id, name, "
+            "drive_type, region}]. Send the make and model names as vehicle to category()."
+            + _AZ_CHARGE
+        ),
+        params=(
+            _lit(
+                "level",
+                ("years", "makes", "models", "submodels", "engines"),
+                "years (default), makes (needs year), models (year + make_id), submodels and "
+                "engines (year + make_id + model_id; us only).",
+            ),
+            _int("year", "Model year, e.g. 2018."),
+            _int("make_id", "makes[].make_id (54 = Ford on us)."),
+            _int("model_id", "models[].model_id (666 = F-150 on us)."),
+            _AZ_ALL_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_reviews",
+        namespace="autozone",
+        method="reviews",
+        http="POST",
+        path="/api/v1/autozone/reviews",
+        summary=(
+            "Customer reviews of one " + _AZ_NAME + " product, 10 a page, full depth, sorted and "
+            "filtered by stars (us only: AutoZone's Brazilian and Mexican sites show no "
+            "reviews): country, id, sort, stars, page, page_size, total_reviews, total_matching "
+            "(with the star filter), total_pages, has_more, average_rating, rating_distribution "
+            "[{stars, count, percent}], summary (page 1 without a star filter: AutoZone's review "
+            "summary {text, features [{name, mentions, positive, negative}]}, or None), count, "
+            "reviews [{review_id, rating, title, text, recommends, verified_purchase, "
+            "incentivized, syndicated, syndicated_from, submitted_at, vehicle (the reviewer's "
+            "vehicle as written), helpful_votes, not_helpful_votes, images [{url, thumbnail_url, "
+            "caption}]}]. No reviewer name or any reviewer identity is returned." + _AZ_CHARGE
+        ),
+        params=(
+            _AZ_ID,
+            _str("url", "Or the product link."),
+            _int("page", "Page (10 reviews a page); total_pages says how deep they go."),
+            _lit(
+                "sort",
+                ("default", "most_recent", "most_helpful"),
+                "default (AutoZone's order), most_recent or most_helpful.",
+            ),
+            _int_list("stars", "Only reviews with these star ratings, e.g. [1, 2]."),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_stores",
+        namespace="autozone",
+        method="stores",
+        http="POST",
+        path="/api/v1/autozone/stores",
+        summary=(
+            _AZ_NAME + "'s store directory in the US, Brazil or Mexico, one level at a time: no "
+            "state = states [{state (the input), name, store_count, new_store}] with "
+            "total_stores; state = cities [{city, city_slug (the input), store_count, "
+            "new_store}]; state + city = stores [{store_number, name, slug (the input of "
+            "store()), url, address {line1, line2, city, state, postal_code, country_code}, "
+            "timezone, closed, hours [{day, open, close, closed}], holiday_hours [{date, closed, "
+            "open, close}]}] with total (a city page lists up to 50 stores). Phone and "
+            "coordinates come with store(). There is no stores-near-a-ZIP search. An unknown "
+            "state or city is a charged 404." + _AZ_CHARGE
+        ),
+        params=(
+            _AZ_ALL_COUNTRY,
+            _str(
+                "state",
+                "A state from the states list (states[].state: 'tx', 'vt', 'nuevo-leon', "
+                "'sao-paulo'): lists its cities.",
+            ),
+            _str(
+                "city",
+                "With state: a city slug (cities[].city_slug, e.g. 'houston'): lists its stores.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_store",
+        namespace="autozone",
+        method="store",
+        http="POST",
+        path="/api/v1/autozone/store",
+        summary=(
+            "One " + _AZ_NAME + " store by slug or link (us, br, mx): country, store_number, "
+            "name, label (e.g. Barre #3470), slug, url, address, phone, toll_free_phone, "
+            "latitude, longitude, timezone, closed, hours [{day, open, close, closed}], "
+            "holiday_hours [{date, closed, open, close}]. A store number alone is not an input: "
+            "take the slug from stores(). An unknown store is a charged 404." + _AZ_CHARGE
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc="A store slug (stores[].slug), e.g. 'vt/barre/18-overlook-dr.html'. Send one "
+                "of slug or url.",
+            ),
+            _str("url", "Or the store page link; the market comes from the link."),
+            _AZ_ALL_COUNTRY,
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_categories",
+        namespace="autozone",
+        method="categories",
+        http="POST",
+        path="/api/v1/autozone/categories",
+        summary=(
+            _AZ_NAME + "'s category menu (us, br, mx; about 23 departments): country, count, "
+            "node_count, categories [{name, path, page_type, child_count, children [{name, path "
+            "(the input of category()), page_type, has_products (True for part types with a "
+            "product list)}]}], popular [{name, path}]." + _AZ_CHARGE
+        ),
+        params=(_AZ_ALL_COUNTRY,),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_clearance",
+        namespace="autozone",
+        method="clearance",
+        http="POST",
+        path="/api/v1/autozone/clearance",
+        summary=(
+            _AZ_NAME + "'s clearance list (us): country, path, " + _AZ_LIST + "." + _AZ_PRICES
+            + _AZ_CHARGE
+        ),
+        params=(),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_rebates",
+        namespace="autozone",
+        method="rebates",
+        http="POST",
+        path="/api/v1/autozone/rebates",
+        summary=(
+            _AZ_NAME + "'s current mail-in rebates (us): country, count, rebates [{title, "
+            "end_date (last purchase day), postmark_date (last day to mail the form), form_url "
+            "(the rebate form, PDF)}], as AutoZone lists them." + _AZ_CHARGE
+        ),
+        params=(),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autozone_store_stock",
+        namespace="autozone",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/autozone/store-stock",
+        summary=(
+            "One AutoZone Brazil product at a store you choose (autozone.com.br, Brazil only: "
+            "AutoZone keeps a chosen store there; stock at a chosen US or Mexican store is not "
+            "offered): country, requested_id, store_number, priced_for (the store AutoZone "
+            "priced for: the one asked), id, part_number, name, brand, url, price, was_price, "
+            "deal_price, core_charge, in_store {available, quantity}, " + _AZ_AVAIL + ". "
+            "Portuguese text, BRL. Stock as AutoZone reports it, not a promise. If AutoZone does "
+            "not apply the store the call fails unbilled." + _AZ_CHARGE
+        ),
+        params=(
+            Param(
+                "store_number",
+                "Union[str, int]",
+                required=True,
+                doc="A Brazilian store number (stores[].store_number from stores(country='br')), "
+                "e.g. '7602'.",
+            ),
+            _str(
+                "id",
+                "AutoZone Brazil item id (items[].id from a br search()), e.g. '100123563'. Send "
+                "one of id or url.",
+            ),
+            _str("url", "Or the autozone.com.br product link."),
+        ),
+        one_of=(("id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -22755,6 +23179,7 @@ NAMESPACES: tuple[str, ...] = (
     "mediaexpert",
     "action",
     "hema",
+    "autozone",
 )
 
 

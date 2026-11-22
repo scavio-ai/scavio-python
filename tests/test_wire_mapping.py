@@ -639,6 +639,8 @@ BODY_PRICED_KEYS = {
     "mediaexpert_promotions",
     "mediaexpert_outlet",
     "mediaexpert_seller",
+    "autozone_search",
+    "autozone_product",
 }
 
 
@@ -6072,3 +6074,138 @@ def test_hema_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         hm.product()
+
+
+def test_autozone_credits_paths_and_wire(monkeypatch):
+    """autozone (0.76.0): 12 endpoints on /api/v1/autozone.
+
+    1 credit each; br search and br product 2 (credits_note), store_stock (Brazil only) 2.
+    search and product serve us and br; vehicles, stores, store and categories us, br, mx;
+    category, brand, reviews, clearance and rebates are us only and take no country. Lists are
+    the first 24 results only: no page param.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "autozone"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "clearance", "product", "rebates", "reviews",
+        "search", "store", "store_stock", "stores", "vehicles",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/autozone/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "AutoZone" in ep.summary, ep.key
+        names = {p.name for p in ep.params}
+        if m in ("search", "category", "brand", "clearance"):
+            assert "page" not in names, ep.key
+    for m in ("search", "product"):
+        assert eps[m].credits == 1, m
+        assert eps[m].credits_note == "Costs 1 credit on us (the default), 2 credits on br.", m
+    assert eps["store_stock"].credits == 2 and eps["store_stock"].credits_note is None
+    for m in ("category", "brand", "vehicles", "reviews", "stores", "store", "categories",
+              "clearance", "rebates"):
+        assert eps[m].credits == 1 and eps[m].credits_note is None, m
+    countries = {
+        m: {p.name: p for p in ep.params}.get("country")
+        for m, ep in eps.items()
+    }
+    for m in ("search", "product"):
+        assert countries[m].annotation == 'Optional[Literal["us", "br"]]', m
+    for m in ("vehicles", "stores", "store", "categories"):
+        assert countries[m].annotation == 'Optional[Literal["us", "br", "mx"]]', m
+    for m in ("category", "brand", "reviews", "clearance", "rebates", "store_stock"):
+        assert countries[m] is None, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == 'Optional[Literal["relevance", "price_asc", "price_desc"]]'
+    assert search["min_price"].annotation == "Optional[float]"
+    assert eps["product"].one_of == eps["reviews"].one_of == eps["store_stock"].one_of == (
+        ("id", "url"),
+    )
+    assert eps["store"].one_of == (("slug", "url"),)
+    assert {p.name: p for p in eps["store_stock"].params}["store_number"].required
+    assert {p.name: p for p in eps["category"].params}["category"].required
+    for m in ("search", "product", "category", "brand", "clearance"):
+        assert "priced_for" in eps[m].summary, m
+        assert "never report a price as national" in eps[m].summary, m
+    assert "NEEDS_BASE_VEHICLE" in eps["category"].summary
+    assert "cross-reference" in eps["search"].summary
+    assert "No reviewer name" in eps["reviews"].summary
+    assert "Brazil only" in eps["store_stock"].summary
+    assert "stores-near-a-ZIP" in eps["stores"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    az = client.autozone
+    az.search("brake pads")
+    az.search("5w-30", sort="price_asc", min_price=20, max_price=40,
+              filters={"position_name_s": "Front"})
+    az.search("spark plugs", brand="NGK")
+    az.search("pastilha de freio", country="br")
+    az.product("1399158")
+    az.product("100123563", country="br")
+    az.product(url="https://www.autozone.com/p/duralast-floor-jack-d3thj/1399158")
+    az.category("/brakes-and-traction-control/brake-pads",
+                vehicle={"year": 2018, "make": "Ford", "model": "F-150"})
+    az.category("/batteries-starting-and-charging/battery", sort="price_desc")
+    az.brand("duralast")
+    az.brand("duralast-gold", category="/brakes-and-traction-control/brake-rotor")
+    az.vehicles()
+    az.vehicles(level="models", year=2018, make_id=54)
+    az.vehicles(level="makes", year=2020, country="mx")
+    az.reviews("1399158")
+    az.reviews("906340", page=2, sort="most_helpful", stars=[1, 2])
+    az.stores()
+    az.stores(state="tx", city="houston")
+    az.stores(country="br", state="sao-paulo")
+    az.store("vt/barre/18-overlook-dr.html")
+    az.store(url="https://www.autozone.com.mx/ubicaciones/nl/monterrey/x.html")
+    az.categories(country="br")
+    az.clearance()
+    az.rebates()
+    az.store_stock("7602", id="100123563")
+    base = "/api/v1/autozone/"
+    assert seen == [
+        (base + "search", {"query": "brake pads"}, 240.0),
+        (base + "search", {"query": "5w-30", "sort": "price_asc",
+                           "filters": {"position_name_s": "Front"}, "min_price": 20,
+                           "max_price": 40}, 240.0),
+        (base + "search", {"query": "spark plugs", "brand": "NGK"}, 240.0),
+        (base + "search", {"query": "pastilha de freio", "country": "br"}, 240.0),
+        (base + "product", {"id": "1399158"}, 240.0),
+        (base + "product", {"id": "100123563", "country": "br"}, 240.0),
+        (base + "product", {"url": "https://www.autozone.com/p/duralast-floor-jack-d3thj/1399158"},
+         240.0),
+        (base + "category", {"category": "/brakes-and-traction-control/brake-pads",
+                             "vehicle": {"year": 2018, "make": "Ford", "model": "F-150"}}, 240.0),
+        (base + "category", {"category": "/batteries-starting-and-charging/battery",
+                             "sort": "price_desc"}, 240.0),
+        (base + "brand", {"brand": "duralast"}, 240.0),
+        (base + "brand", {"brand": "duralast-gold",
+                          "category": "/brakes-and-traction-control/brake-rotor"}, 240.0),
+        (base + "vehicles", {}, 240.0),
+        (base + "vehicles", {"level": "models", "year": 2018, "make_id": 54}, 240.0),
+        (base + "vehicles", {"level": "makes", "year": 2020, "country": "mx"}, 240.0),
+        (base + "reviews", {"id": "1399158"}, 240.0),
+        (base + "reviews", {"id": "906340", "page": 2, "sort": "most_helpful", "stars": [1, 2]},
+         240.0),
+        (base + "stores", {}, 240.0),
+        (base + "stores", {"state": "tx", "city": "houston"}, 240.0),
+        (base + "stores", {"country": "br", "state": "sao-paulo"}, 240.0),
+        (base + "store", {"slug": "vt/barre/18-overlook-dr.html"}, 240.0),
+        (base + "store", {"url": "https://www.autozone.com.mx/ubicaciones/nl/monterrey/x.html"},
+         240.0),
+        (base + "categories", {"country": "br"}, 240.0),
+        (base + "clearance", {}, 240.0),
+        (base + "rebates", {}, 240.0),
+        (base + "store-stock", {"store_number": "7602", "id": "100123563"}, 240.0),
+    ]
+    for call in (az.product, az.reviews, az.store):
+        with pytest.raises(ScavioError):
+            call()
+    with pytest.raises(ScavioError):
+        az.store_stock("7602")

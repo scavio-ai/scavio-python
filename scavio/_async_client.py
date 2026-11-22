@@ -17,6 +17,7 @@ from ._namespaces_async import (
     _AsyncArgosNamespace,
     _AsyncAshleyNamespace,
     _AsyncAsosNamespace,
+    _AsyncAutozoneNamespace,
     _AsyncBestBuyNamespace,
     _AsyncBolcomNamespace,
     _AsyncBookingNamespace,
@@ -254,6 +255,7 @@ class AsyncScavioClient:
         self.mediaexpert = _AsyncMediaExpertNamespace(self)
         self.action = _AsyncActionNamespace(self)
         self.hema = _AsyncHemaNamespace(self)
+        self.autozone = _AsyncAutozoneNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
