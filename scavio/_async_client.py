@@ -45,6 +45,7 @@ from ._namespaces_async import (
     _AsyncGooglePlayNamespace,
     _AsyncHarborFreightNamespace,
     _AsyncHebNamespace,
+    _AsyncHemaNamespace,
     _AsyncHmNamespace,
     _AsyncHomeDepotNamespace,
     _AsyncIherbNamespace,
@@ -252,6 +253,7 @@ class AsyncScavioClient:
         self.argos = _AsyncArgosNamespace(self)
         self.mediaexpert = _AsyncMediaExpertNamespace(self)
         self.action = _AsyncActionNamespace(self)
+        self.hema = _AsyncHemaNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -43,6 +43,7 @@ from ._namespaces_sync import (
     _GooglePlayNamespace,
     _HarborFreightNamespace,
     _HebNamespace,
+    _HemaNamespace,
     _HmNamespace,
     _HomeDepotNamespace,
     _IherbNamespace,
@@ -257,6 +258,7 @@ class ScavioClient:
         self.argos = _ArgosNamespace(self)
         self.mediaexpert = _MediaExpertNamespace(self)
         self.action = _ActionNamespace(self)
+        self.hema = _HemaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

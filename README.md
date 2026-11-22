@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 94 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 95 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -47,6 +47,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Argos Store Stock by UK Postcode, Prices, Was Prices, Badges and Reviews (UK; 10 endpoints) | Yes | No | No | No |
 | Media Expert Black Week Prices, Omnibus 30-Day Low, Code Prices, Store Stock and Reviews (Poland; 13 endpoints) | Yes | No | No | No |
 | Action Weekly Deals, Prices by Country, Stores, Opening Hours and Reviews (19 storefronts in 16 countries; 16 endpoints) | Yes | No | No | No |
+| HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -4109,6 +4110,88 @@ checkout, other countries. Failed calls and refused inputs are not charged; a
 not-found (an article the market does not sell, an unknown slug or EAN) is
 charged.
 
+### 64. Retail -- HEMA store stock, dated promotions and prices by market
+
+HEMA (hema.com), the Dutch variety store, on its four webshops (nl, be in
+Dutch or French, fr, de), with stores also in Luxembourg and Austria.
+Namespace `hema`, 13 endpoints, 1 credit each: `search`, `product`,
+`category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`,
+`suggestions`, `store_stock`, `stores`, `store`, `reviews`. Every endpoint but
+`store` takes `country` (nl by default, be, fr, de; lu and at only on
+`store_stock` and `stores`) and, for be, `language` (nl or fr). The request
+timeout is raised to at least 240s on every endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+hm = client.hema
+
+# --- HEMA store stock: sellable units per store for up to 12 articles near a city or postcode.
+st = hm.store_stock(["15300147", "10860090"], query="Utrecht")["data"]
+print(st["location"]["formatted_address"], st["summary"])
+for s in st["stores"][:3]:
+    print(s["store_id"], s["name"], s["distance_km"],
+          [(x["sku"], x["sellable_units"], x["stock_level"]) for x in s["stock"]])
+
+# --- One article in full: EAN, variants and the dated price schedule with upcoming promotions.
+p = hm.product("15300147")["data"]
+print(p["ean"], p["price"], p["promotion"])
+for row in p["price_schedule"]:
+    print(row["valid_from"], row["valid_to"], row["price"], row["promotion"])
+
+# --- One article number everywhere, priced per market: one call per country.
+for country in ("nl", "be", "fr", "de"):
+    print(country, hm.product("15300147", country=country)["data"]["price"])
+
+# --- Weekly offers (nl, be): the validity label, ISO date, week and promotion cards.
+offers = hm.offers()["data"]
+print(offers["label"], offers["valid_to"], offers["week"], offers["section_count"])
+
+# --- Search, a category, campaigns, stores, one store, reviews.
+res = hm.search("bougie", country="be", language="fr", sort="price_asc")["data"]
+baby = hm.category("baby/babykleding", filters={"maincolour": "zwart"})["data"]
+xmas = hm.campaign("christmas", country="de")["data"]
+stores = hm.stores("Utrecht")["data"]["stores"]
+one = hm.store("0013", sku="15300147")["data"]
+reviews = hm.reviews("10860090", sort="highest")["data"]
+print(reviews["review_pool"], reviews["total_text_reviews"], reviews["total_ratings"])
+```
+
+Prices are numbers in EUR: `price`, `was_price` (HEMA's struck-through
+price, as shown), `price_from` (a from-price across sizes or colours),
+`unit_price` and `discount_percent` (computed by Scavio from the was price).
+Names, labels and promotion texts come back in the market's language, as HEMA
+writes them (Dutch on the default nl market, e.g. "2+1 gratis"). Article
+numbers (`sku`) are the same in every market and prices are set per market;
+HEMA notes that online prices can differ from store prices. Lists return 24
+products a page up to page 100, with `total` and `total_pages`; sorts
+`relevance`, `price_asc`, `price_desc`, `newest`, `best_selling` (a from-price
+tile is placed by one of its variants' prices); `filters` take
+`{facets[].facet: value or [values]}` (up to 6), plus `new_only`, `price_min`
+and `price_max`. A keyword HEMA sends to a landing page (e.g. kerst) comes back
+as that page's product carousels with `redirected_to` set.
+
+`product` returns the EAN, colour / size variants with stock flags, the dated
+`price_schedule` (upcoming promotions included), online stock,
+`sellable_in_store` and the order limit. `store_stock` gives, per store, the
+sellable units HEMA's store service reports and the stock level (full,
+regular or limited), shelf locations, hours, address and distance: stock as
+HEMA reports it, not a promise that the shelf has it. `stores` lists a
+country's stores or the ones near a place; `store` reads one store by id (any
+HEMA country), with one article's stock when `sku` is given. `offers` (nl, be)
+returns HEMA's validity label as shown, the ISO `valid_to`, the week and the
+promotion cards with their list paths (no products on that page). `campaign`
+takes `christmas` (all markets) or `sinterklaas` (nl, be). `sale` serves nl,
+be and de (France has none). `reviews` are HEMA's own product reviews, pages 1
+to 5 (8, then 30 more a page), sorted `newest` or `highest`; nl, fr and de read
+the Dutch pool, be its own; no reviewer identity is returned. No brands
+endpoint (HEMA sells its own brand). Not available: price history (poll and
+store the answers), checkout or ordering, the photo service and cake
+ordering, other countries (no UK or Spain). Failed calls and refused inputs
+are not charged; a not-found (an article number HEMA does not have, an
+unknown store id, a place the store finder cannot find) is charged.
+
 ## Error Handling
 
 ```python
@@ -4253,6 +4336,7 @@ Scavio works with popular AI/LLM frameworks:
 | Argos (`argos`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`; one UK store (argos.co.uk, GBP), no `country` | 2 each |
 | Media Expert (`mediaexpert`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`, `suggestions`; one Polish store (mediaexpert.pl, PLN), no `country` | actual cost, 1 to 3: `store_stock` and `categories` 2; `search` 3 (1 when it redirects to a full category page); `category`, `brand`, `outlet`, `seller` and promotion-list products 1 unsorted, 3 sorted or lazily loaded; the rest 1 |
 | Action (`action`) | `search`, `product`, `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`, `webshop_search`, `webshop_product`; 19 storefronts (`country`, plus `language` for be and ch); `reviews` nl, de, fr, pl; webshop nl, be | 1 each |
+| HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4283,6 +4367,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.75.0
+
+- **New `hema` namespace** (sync and async) for HEMA (hema.com), the Dutch
+  variety store, 13 endpoints: `search`, `product`, `category`, `categories`,
+  `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`,
+  `stores`, `store`, `reviews`. Webshops nl, be (nl or fr), fr and de; stores
+  also in lu and at. HEMA store stock (sellable units and stock level per
+  store for up to 12 articles near a city or postcode), each article's dated
+  price schedule with upcoming promotions, weekly offers, Christmas and
+  Sinterklaas campaigns and HEMA's own reviews. 1 credit per call. 240s
+  timeout floor.
 
 ### Changed in 0.74.0
 

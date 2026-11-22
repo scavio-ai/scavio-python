@@ -5957,3 +5957,118 @@ def test_action_credits_paths_and_wire(monkeypatch):
     for call in (ac.product, ac.store, ac.webshop_search, ac.webshop_product):
         with pytest.raises(ScavioError):
             call()
+
+
+def test_hema_credits_paths_and_wire(monkeypatch):
+    """hema (0.75.0): 13 endpoints on /api/v1/hema, 1 credit each.
+
+    Webshops nl, be (nl or fr), fr, de; store_stock and stores also lu and at; sale nl, be,
+    de; offers nl, be. product takes one of sku or url; store takes a store id (no country).
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "hema"}
+    assert sorted(eps) == [
+        "campaign", "categories", "category", "new_arrivals", "offers", "product", "reviews",
+        "sale", "search", "store", "store_stock", "stores", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/hema/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        assert "hema.com, the Dutch variety store" in ep.summary, ep.key
+    countries = {
+        m: {p.name: p for p in ep.params}["country"].annotation
+        for m, ep in eps.items()
+        if m != "store"
+    }
+    shop = 'Optional[Literal["nl", "be", "fr", "de"]]'
+    stores = 'Optional[Literal["nl", "be", "fr", "de", "lu", "at"]]'
+    for m in ("search", "product", "category", "categories", "new_arrivals", "campaign",
+              "suggestions", "reviews"):
+        assert countries[m] == shop, m
+    assert countries["store_stock"] == countries["stores"] == stores
+    assert countries["sale"] == 'Optional[Literal["nl", "be", "de"]]'
+    assert countries["offers"] == 'Optional[Literal["nl", "be"]]'
+    assert "country" not in {p.name for p in eps["store"].params}
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_selling"]]'
+    )
+    assert search["filters"].annotation == "Optional[dict[str, Union[str, list[str]]]]"
+    assert search["price_min"].annotation == "Optional[float]"
+    assert "new_only" not in {p.name for p in eps["new_arrivals"].params}
+    assert eps["product"].one_of == (("sku", "url"),)
+    assert {p.name: p for p in eps["store_stock"].params}["skus"].required
+    assert {p.name: p for p in eps["store"].params}["store_id"].required
+    assert {p.name: p for p in eps["reviews"].params}["sku"].required
+    assert "sellable units HEMA's store service reports" in eps["store_stock"].summary
+    assert "not a promise that the shelf has it" in eps["store_stock"].summary
+    assert "upcoming promotions included" in eps["product"].summary
+    assert "No reviewer name" in eps["reviews"].summary
+    assert "brands (HEMA sells its own brand)" in eps["search"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    hm = client.hema
+    hm.search("sokken")
+    hm.search("bougie", country="be", language="fr", sort="price_asc", page=2,
+              filters={"maincolour": ["zwart", "wit"]}, price_min=1.5, price_max=10)
+    hm.product("15300147")
+    hm.product("15300147", country="de")
+    hm.product(url="https://www.hema.nl/speelgoed-hobby/babyspeelgoed/knuffeldoekje-konijn-15300147.html")
+    hm.category("baby/babykleding", new_only=True)
+    hm.categories(depth=1)
+    hm.new_arrivals(country="fr", sort="newest")
+    hm.sale(country="de")
+    hm.offers()
+    hm.offers(country="be", language="fr")
+    hm.campaign("sinterklaas", country="be")
+    hm.suggestions("kerst")
+    hm.store_stock(["15300147", "10860090"], query="Utrecht")
+    hm.store_stock(["15300147"], lat=48.85, lng=2.35, country="fr", in_stock_only=True, limit=5)
+    hm.store_stock(["15300147"], country="lu")
+    hm.stores("Utrecht")
+    hm.stores(country="at")
+    hm.store("0013")
+    hm.store("0013", sku="15300147")
+    hm.reviews("10860090")
+    hm.reviews("10860090", country="be", sort="highest", page=2)
+    base = "/api/v1/hema/"
+    assert seen == [
+        (base + "search", {"query": "sokken"}, 240.0),
+        (base + "search", {"query": "bougie", "country": "be", "language": "fr",
+                           "sort": "price_asc", "page": 2,
+                           "filters": {"maincolour": ["zwart", "wit"]}, "price_min": 1.5,
+                           "price_max": 10}, 240.0),
+        (base + "product", {"sku": "15300147"}, 240.0),
+        (base + "product", {"sku": "15300147", "country": "de"}, 240.0),
+        (base + "product", {"url": "https://www.hema.nl/speelgoed-hobby/babyspeelgoed/"
+                                   "knuffeldoekje-konijn-15300147.html"}, 240.0),
+        (base + "category", {"category": "baby/babykleding", "new_only": True}, 240.0),
+        (base + "categories", {"depth": 1}, 240.0),
+        (base + "new-arrivals", {"country": "fr", "sort": "newest"}, 240.0),
+        (base + "sale", {"country": "de"}, 240.0),
+        (base + "offers", {}, 240.0),
+        (base + "offers", {"country": "be", "language": "fr"}, 240.0),
+        (base + "campaign", {"campaign": "sinterklaas", "country": "be"}, 240.0),
+        (base + "suggestions", {"query": "kerst"}, 240.0),
+        (base + "store-stock", {"skus": ["15300147", "10860090"], "query": "Utrecht"}, 240.0),
+        (base + "store-stock", {"skus": ["15300147"], "lat": 48.85, "lng": 2.35,
+                                "country": "fr", "limit": 5, "in_stock_only": True}, 240.0),
+        (base + "store-stock", {"skus": ["15300147"], "country": "lu"}, 240.0),
+        (base + "stores", {"query": "Utrecht"}, 240.0),
+        (base + "stores", {"country": "at"}, 240.0),
+        (base + "store", {"store_id": "0013"}, 240.0),
+        (base + "store", {"store_id": "0013", "sku": "15300147"}, 240.0),
+        (base + "reviews", {"sku": "10860090"}, 240.0),
+        (base + "reviews", {"sku": "10860090", "country": "be", "sort": "highest", "page": 2},
+         240.0),
+    ]
+    with pytest.raises(ScavioError):
+        hm.product()

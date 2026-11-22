@@ -103,6 +103,7 @@ __all__ = [
     "_ArgosNamespace",
     "_MediaExpertNamespace",
     "_ActionNamespace",
+    "_HemaNamespace",
 ]
 
 class _GoogleNamespace:
@@ -17544,3 +17545,333 @@ class _ActionNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("action_webshop_product", {"ean": ean, "url": url, "country": country, "language": language}, extra)
+
+class _HemaNamespace:
+    """HEMA (hema.com, the Dutch variety store) search, product, category, categories, new arrivals, sale, offers, campaign, suggestions, store stock, stores, store and reviews endpoints for the nl, be, fr and de webshops (stores also lu and at)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_selling"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        new_only: Optional[bool] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search HEMA (hema.com, the Dutch variety store), 24 products a page with total and total_pages: query, country, language, market (e.g. nl-nl), currency, filters, new_only, price_min, price_max, redirected_to (the page HEMA sent the request to, or null), list_type (grid, or landing for a campaign page: its product carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, items (sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status (as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating), facets [{facet (the key to send in filters), name, values [{value, count}], min, max (price)}]. Sorts relevance, price_asc, price_desc, newest, best_selling; filters from facets, new_only, price_min, price_max. HEMA sends some words to a category or campaign page (e.g. kerst): redirected_to names it and a landing page comes back as its product carousels. A search with no match answers 200 with total 0. HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Not available: price history (poll and store the answers), brands (HEMA sells its own brand), checkout or ordering, the photo service and cake ordering, other countries (no UK or Spain). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search text (the market's language works best: 'sokken', 'kaars', 'bougie', 'Kerze').
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, HEMA's own order), price_asc, price_desc, newest or best_selling. A tile with a from-price (price_from) is placed by one of its variants' prices, so a price sort is not always strictly ordered by the price shown.
+            page: Page, 1 to 100 (24 products a page); total_pages says how deep the list goes.
+            filters: Up to 6 facets: {'<facets[].facet>': '<facets[].values[].value>' or [values]} (e.g. size, maincolour, producttype, ref_gender; searchable for online stock), e.g. {'maincolour': 'zwart'}. Values are in the market's language, as facets lists them.
+            new_only: Only HEMA's new collection.
+            price_min: Lowest price (EUR).
+            price_max: Highest price (EUR).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_search", {"query": query, "country": country, "language": language, "sort": sort, "page": page, "filters": filters, "new_only": new_only, "price_min": price_min, "price_max": price_max}, extra)
+
+    def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One HEMA (hema.com, the Dutch variety store) product in full on one market, by article number or link: requested, country, language, market (e.g. nl-nl), currency, sku, ean, name, description, url, status, product_type, parent_sku, images, breadcrumbs, colour, size, main_material, specifications [{key, name, value}], care, safety, nutrition, storage, price, was_price, currency, discount_percent (computed by Scavio from was_price), unit_price {price, unit}, promotion {label (HEMA's mechanic as it writes it, e.g. 2+1 gratis), loyalty_card_only, valid_from, valid_to}, price_schedule [{valid_from, valid_to, price, was_price, promotion, loyalty_card_only, unit_price}] (HEMA's dated prices, upcoming promotions included; valid_to None = open-ended), online_stock {type (LIMITED or UNLIMITED), units}, sellable_in_store, order_limit {min, max, step}, sales_blocked, availability, labels [{text, type, valid_from, valid_to}], variants {variant_axis, group_axis, groups [{value, label, colour_code, url, variants [{sku, label, in_stock, status, url}]}]}, fulfillment, personalizable, complete (False when only part of the page could be read). An article number HEMA does not have is a charged 404. For stock per store use store_stock(). HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: HEMA article number: items[].sku (6 to 8 digits, the same in every market), e.g. '15300147', or a colour group id (e.g. '4230175BLACK').
+            url: Or a HEMA product link (www.hema.nl or www.hema.com/<locale>/...); the market comes from the link.
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_product", {"sku": sku, "url": url, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_selling"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        new_only: Optional[bool] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One HEMA (hema.com, the Dutch variety store) category's products by path or link, with filters, sort and paging: category, country, language, market (e.g. nl-nl), currency, filters, new_only, price_min, price_max, redirected_to (the page HEMA sent the request to, or null), list_type (grid, or landing for a campaign page: its product carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, items (sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status (as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating), facets [{facet (the key to send in filters), name, values [{value, count}], min, max (price)}]. HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path (categories() categories[].path, e.g. 'baby/babykleding') or its HEMA link.
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, HEMA's own order), price_asc, price_desc, newest or best_selling. A tile with a from-price (price_from) is placed by one of its variants' prices, so a price sort is not always strictly ordered by the price shown.
+            page: Page, 1 to 100 (24 products a page); total_pages says how deep the list goes.
+            filters: Up to 6 facets: {'<facets[].facet>': '<facets[].values[].value>' or [values]} (e.g. size, maincolour, producttype, ref_gender; searchable for online stock), e.g. {'maincolour': 'zwart'}. Values are in the market's language, as facets lists them.
+            new_only: Only HEMA's new collection.
+            price_min: Lowest price (EUR).
+            price_max: Highest price (EUR).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_category", {"category": category, "country": country, "language": language, "sort": sort, "page": page, "filters": filters, "new_only": new_only, "price_min": price_min, "price_max": price_max}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        depth: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store)'s category menu on one market (13 to 18 departments, 3 levels): country, language, market (e.g. nl-nl), currency, depth, count, node_count, categories [{name, path (the input of category()), url, level, child_count, children}]. Names are in the market's language. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            depth: Levels to return, 1 to 3 (default 3).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_categories", {"country": country, "language": language, "depth": depth}, extra)
+
+    def new_arrivals(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_selling"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store)'s new collection on one market (about 550 to 1,100 products), with sort, paging and filters: path, country, language, market (e.g. nl-nl), currency, filters, new_only, price_min, price_max, redirected_to (the page HEMA sent the request to, or null), list_type (grid, or landing for a campaign page: its product carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, items (sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status (as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating), facets [{facet (the key to send in filters), name, values [{value, count}], min, max (price)}]. HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, HEMA's own order), price_asc, price_desc, newest or best_selling. A tile with a from-price (price_from) is placed by one of its variants' prices, so a price sort is not always strictly ordered by the price shown.
+            page: Page, 1 to 100 (24 products a page); total_pages says how deep the list goes.
+            filters: Up to 6 facets: {'<facets[].facet>': '<facets[].values[].value>' or [values]} (e.g. size, maincolour, producttype, ref_gender; searchable for online stock), e.g. {'maincolour': 'zwart'}. Values are in the market's language, as facets lists them.
+            price_min: Lowest price (EUR).
+            price_max: Highest price (EUR).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_new_arrivals", {"country": country, "language": language, "sort": sort, "page": page, "filters": filters, "price_min": price_min, "price_max": price_max}, extra)
+
+    def sale(
+        self,
+        *,
+        country: Optional[Literal["nl", "be", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_selling"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Union[str, list[str]]]] = None,
+        new_only: Optional[bool] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store)'s sale page (nl) or outlet page (be, de: lasting price cuts), with sort, paging and filters: path, country, language, market (e.g. nl-nl), currency, filters, new_only, price_min, price_max, redirected_to (the page HEMA sent the request to, or null), list_type (grid, or landing for a campaign page: its product carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, items (sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status (as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating), facets [{facet (the key to send in filters), name, values [{value, count}], min, max (price)}]. France has no sale page (a 400, not charged). HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: 'nl' (default, the sale page), 'be' or 'de' (the outlet page). France has no sale page.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            sort: relevance (default, HEMA's own order), price_asc, price_desc, newest or best_selling. A tile with a from-price (price_from) is placed by one of its variants' prices, so a price sort is not always strictly ordered by the price shown.
+            page: Page, 1 to 100 (24 products a page); total_pages says how deep the list goes.
+            filters: Up to 6 facets: {'<facets[].facet>': '<facets[].values[].value>' or [values]} (e.g. size, maincolour, producttype, ref_gender; searchable for online stock), e.g. {'maincolour': 'zwart'}. Values are in the market's language, as facets lists them.
+            new_only: Only HEMA's new collection.
+            price_min: Lowest price (EUR).
+            price_max: Highest price (EUR).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_sale", {"country": country, "language": language, "sort": sort, "page": page, "filters": filters, "new_only": new_only, "price_min": price_min, "price_max": price_max}, extra)
+
+    def offers(
+        self,
+        *,
+        country: Optional[Literal["nl", "be"]] = None,
+        language: Optional[Literal["nl", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store)'s weekly offers page (nl, be): country, language, market (e.g. nl-nl), currency, path, title, label (HEMA's validity text as shown, e.g. geldig t/m 22 november), valid_to (ISO date: the label has no year, Scavio takes the nearest one), week (HEMA's offer week number), section_count, count, sections [{name, week, cards [{title, subtitle, url, category (the input of category(): the promotion's product list)}]}]. The offers page lists promotion cards, not products: each product's mechanic and dates are on the product lists (promotion) and product() (promotion, price_schedule). fr and de have no offers page (a 400, not charged). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: 'nl' (default) or 'be': the two markets with HEMA's weekly offers page.
+            language: For be: 'nl' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_offers", {"country": country, "language": language}, extra)
+
+    def campaign(
+        self,
+        campaign: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A HEMA (hema.com, the Dutch variety store) campaign page with its products and promotion texts: christmas on every market, sinterklaas on nl and be, or a campaign slug: campaign, slug, country, language, market (e.g. nl-nl), currency, filters, new_only, price_min, price_max, redirected_to (the page HEMA sent the request to, or null), list_type (grid, or landing for a campaign page: its product carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, items (sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status (as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating), facets [{facet (the key to send in filters), name, values [{value, count}], min, max (price)}], carousels [{title, link, count, skus}]. HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in every market; prices are set per market, so price one article on each market you report. HEMA notes that online prices can differ from store prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            campaign: 'christmas' (all markets), 'sinterklaas' (nl and be), a campaign slug ('kerst', 'noel', 'weihnachten', 'saint-nicolas') or its HEMA link.
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_campaign", {"campaign": campaign, "country": country, "language": language}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store)'s search suggestions for a partial query: country, language, market (e.g. nl-nl), currency, query, count, total_results, phrases, categories [{name, product_count, url, category}], products [{sku, name, url, image, price, currency}] (up to 5), terms [{term, count, corrected}], content [{name, url}]. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far, e.g. 'kerst'.
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    def store_stock(
+        self,
+        skus: list[Union[str, int]],
+        *,
+        query: Optional[str] = None,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius_km: Optional[int] = None,
+        country: Optional[Literal["nl", "be", "fr", "de", "lu", "at"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        limit: Optional[int] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA store stock: in-store stock of up to 12 HEMA (hema.com, the Dutch variety store) articles in the stores near a city, postcode or point (or across a country), in the Netherlands, Belgium, France, Germany, Luxembourg and Austria. Per store the sellable units HEMA's store service reports and the stock level (full, regular or limited): country, country_code, skus, location {query, formatted_address, postcode, city, latitude, longitude}, radius_km, limit, in_stock_only, count, summary [{sku, stores_with_stock}], stores [{store_id, name, status (open, renovation), operator (hema or franchise), address {street, postcode, city, country_code}, latitude, longitude, distance_km (from the place asked, nearest first), phone, hours [{day, open, close}], special_hours [{date, type, open, close}], closed_dates, services, stock [{sku, sellable_units (the sellable units HEMA's store service reports for that store; null when it lists none), stock_level (full, regular or limited, as HEMA gives it), stock_indicator, shelf_locations, in_stock}]}]. Stock is as HEMA's store service reports it, not a promise that the shelf has it. Pair it with product() for the article's dated promotion. Send query or lat + lng, not both. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1 to 12 article numbers of one size and colour (items[].sku or variants[].sku; leading zeros are dropped), e.g. ['15300147', '10860090'].
+            query: A city, town or postcode, e.g. 'Utrecht' (HEMA's own store finder places it; a place it cannot find is a charged 404). Leave query and lat / lng out for the whole country.
+            lat: Or latitude (with lng).
+            lng: Longitude (with lat).
+            radius_km: Search radius around the place in km, 1 to 300 (default 50, as HEMA's site uses).
+            country: 'nl' (default), 'be', 'fr', 'de', 'lu' (Luxembourg) or 'at' (Austria): every country with HEMA stores.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            limit: Stores to return, 1 to 50 (default 10).
+            in_stock_only: Only stores that hold at least one of the articles.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_store_stock", {"skus": skus, "query": query, "lat": lat, "lng": lng, "radius_km": radius_km, "country": country, "language": language, "limit": limit, "in_stock_only": in_stock_only}, extra)
+
+    def stores(
+        self,
+        query: Optional[str] = None,
+        *,
+        lat: Optional[float] = None,
+        lng: Optional[float] = None,
+        radius_km: Optional[int] = None,
+        country: Optional[Literal["nl", "be", "fr", "de", "lu", "at"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """HEMA (hema.com, the Dutch variety store) stores of one country (about 570 in nl, 111 be, 69 fr, 17 de, 5 at, 4 lu), or the ones near a city, postcode or point: country, country_code, location, radius_km, limit, count, stores [{store_id, name, status (open, renovation), operator (hema or franchise), address {street, postcode, city, country_code}, latitude, longitude, distance_km (from the place asked, nearest first), phone, hours [{day, open, close}], special_hours [{date, type, open, close}], closed_dates, services}]. Send query or lat + lng, not both, or neither for the whole country. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A city, town or postcode, e.g. 'Utrecht' (HEMA's own store finder places it; a place it cannot find is a charged 404). Leave query and lat / lng out for the whole country.
+            lat: Or latitude (with lng).
+            lng: Longitude (with lat).
+            radius_km: Search radius around the place in km, 1 to 300 (default 50, as HEMA's site uses).
+            country: 'nl' (default), 'be', 'fr', 'de', 'lu' (Luxembourg) or 'at' (Austria): every country with HEMA stores.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            limit: Stores to return (default 20 near a place, every store of the country without one, up to 1000).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_stores", {"query": query, "lat": lat, "lng": lng, "radius_km": radius_km, "country": country, "language": language, "limit": limit}, extra)
+
+    def store(
+        self,
+        store_id: Union[str, int],
+        *,
+        sku: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One HEMA (hema.com, the Dutch variety store) store by id: store_id, name, status, operator, address, latitude, longitude, phone, hours, special_hours, closed_dates, services, delivery_address, country, sku, stock (with sku: {sku, sellable_units, stock_level, stock_indicator, shelf_locations, in_stock}, as HEMA's store service reports it, not a promise that the shelf has it). Works for stores in every HEMA country (nl, be, fr, de, lu, at). A store id HEMA does not know is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A HEMA store id (stores[].store_id, up to 4 digits), e.g. '0013'.
+            sku: An article number: adds that article's stock in this store.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_store", {"store_id": store_id, "sku": sku}, extra)
+
+    def reviews(
+        self,
+        sku: Union[str, int],
+        *,
+        country: Optional[Literal["nl", "be", "fr", "de"]] = None,
+        language: Optional[Literal["nl", "fr", "de"]] = None,
+        sort: Optional[Literal["newest", "highest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one HEMA (hema.com, the Dutch variety store) article, from HEMA's own product reviews: country, language, market (e.g. nl-nl), currency, sku, review_pool (nl-nl or nl-be: the nl, fr and de webshops show the shared Dutch pool; be has its own Belgian pool), review_pool_note, sort, page, offset, page_size, total_text_reviews, total_pages, has_more, average_rating, total_ratings (star ratings, with or without text), ratings_only, recommended, not_recommended, rating_distribution, count, reviews [{review_id, language, rating, title, text, submitted_at, experienced_on, recommends, syndicated, verified_purchaser, badges, helpful_votes, not_helpful_votes}]. No reviewer name or any reviewer identity is returned. Slower than the other endpoints (15 to 70 s). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: HEMA article number (items[].sku), e.g. '10860090'.
+            country: The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only stores(), store() and store_stock() serve them.
+            language: For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out (another language answers 400, not charged).
+            sort: newest (default) or highest (highest rating first).
+            page: 1 = the first 8 reviews, each later page the next 30 (as HEMA's show-more loads them), up to 5.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("hema_reviews", {"sku": sku, "country": country, "language": language, "sort": sort, "page": page}, extra)

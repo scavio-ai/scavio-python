@@ -3447,6 +3447,120 @@ _ACTION_CODE = Param(
     "e.g. '3225277'.",
 )
 
+# HEMA params shared across endpoints (hema.com, the Dutch variety store: webshops nl, be (nl /
+# fr), fr, de; HEMA stores also in lu and at). 13 endpoints, 1 credit each. lu and at serve only
+# stores, store and store_stock; sale serves nl, be, de; offers nl and be.
+_HEMA_SHOP_COUNTRY = _lit(
+    "country",
+    ("nl", "be", "fr", "de"),
+    "The HEMA webshop (default 'nl'): nl (Netherlands, www.hema.nl), be (Belgium: language nl "
+    "or fr), fr (France) or de (Germany). lu and at have HEMA stores but no webshop: only "
+    "stores(), store() and store_stock() serve them.",
+)
+_HEMA_LANGUAGE = _lit(
+    "language",
+    ("nl", "fr", "de"),
+    "For be: 'nl' (default) or 'fr'. The other countries have one language: leave it out "
+    "(another language answers 400, not charged).",
+)
+_HEMA_MARKET = (_HEMA_SHOP_COUNTRY, _HEMA_LANGUAGE)
+_HEMA_STORE_MARKET = (
+    _lit(
+        "country",
+        ("nl", "be", "fr", "de", "lu", "at"),
+        "'nl' (default), 'be', 'fr', 'de', 'lu' (Luxembourg) or 'at' (Austria): every country "
+        "with HEMA stores.",
+    ),
+    _HEMA_LANGUAGE,
+)
+_HEMA_LIST_PARAMS = (
+    _lit(
+        "sort",
+        ("relevance", "price_asc", "price_desc", "newest", "best_selling"),
+        "relevance (default, HEMA's own order), price_asc, price_desc, newest or best_selling. A "
+        "tile with a from-price (price_from) is placed by one of its variants' prices, so a price "
+        "sort is not always strictly ordered by the price shown.",
+    ),
+    _int("page", "Page, 1 to 100 (24 products a page); total_pages says how deep the list goes."),
+    Param(
+        "filters",
+        "Optional[dict[str, Union[str, list[str]]]]",
+        doc="Up to 6 facets: {'<facets[].facet>': '<facets[].values[].value>' or [values]} (e.g. "
+        "size, maincolour, producttype, ref_gender; searchable for online stock), e.g. "
+        "{'maincolour': 'zwart'}. Values are in the market's language, as facets lists them.",
+    ),
+    _bool("new_only", "Only HEMA's new collection."),
+    _float("price_min", "Lowest price (EUR)."),
+    _float("price_max", "Highest price (EUR)."),
+)
+_HEMA_NEW_LIST_PARAMS = tuple(p for p in _HEMA_LIST_PARAMS if p.name != "new_only")
+_HEMA_LOCATION = (
+    _float("lat", "Or latitude (with lng)."),
+    _float("lng", "Longitude (with lat)."),
+    _int(
+        "radius_km",
+        "Search radius around the place in km, 1 to 300 (default 50, as HEMA's site uses).",
+    ),
+)
+_HEMA_QUERY_DOC = (
+    "A city, town or postcode, e.g. 'Utrecht' (HEMA's own store finder places it; a place it "
+    "cannot find is a charged 404). Leave query and lat / lng out for the whole country."
+)
+_HEMA_NAME = "HEMA (hema.com, the Dutch variety store)"
+_HEMA_STORE = (
+    " HEMA is hema.com, the Dutch variety store (not the chemical HEMA, hydroxyethyl "
+    "methacrylate), on its four webshops: nl (www.hema.nl), be in Dutch or French, fr and de. "
+    "Names, labels and promotion texts come in the market's language as HEMA writes them (Dutch "
+    "on the default nl market); prices are numbers in EUR. Article numbers (sku) are the same in "
+    "every market; prices are set per market, so price one article on each market you report. "
+    "HEMA notes that online prices can differ from store prices."
+)
+_HEMA_MARKET_OUT = "country, language, market (e.g. nl-nl), currency"
+_HEMA_ITEM = (
+    "sku (the input of product()), name, url, image, price, was_price (HEMA's struck-through "
+    "price, as shown), price_from (true when HEMA shows a from-price across sizes or colours), "
+    "currency, discount_percent (computed by Scavio from was_price), promotion (HEMA's promotion "
+    "text as it writes it, e.g. 2+1 gratis), labels, product_type, colour, sizes, stock_status "
+    "(as HEMA marks it), online {available, limited_stock, variants [{sku, available}]}, rating"
+)
+_HEMA_FACETS = (
+    "facets [{facet (the key to send in filters), name, values [{value, count}], min, max "
+    "(price)}]"
+)
+_HEMA_LIST = (
+    _HEMA_MARKET_OUT + ", filters, new_only, price_min, price_max, redirected_to (the page HEMA "
+    "sent the request to, or null), list_type (grid, or landing for a campaign page: its product "
+    "carousels, no paging), title, sort, page, page_size, total, total_pages, has_more, count, "
+    "items (" + _HEMA_ITEM + "), " + _HEMA_FACETS
+)
+_HEMA_STORE_FIELDS = (
+    "store_id, name, status (open, renovation), operator (hema or franchise), address {street, "
+    "postcode, city, country_code}, latitude, longitude, distance_km (from the place asked, "
+    "nearest first), phone, hours [{day, open, close}], special_hours [{date, type, open, "
+    "close}], closed_dates, services"
+)
+_HEMA_STOCK = (
+    "stock [{sku, sellable_units (the sellable units HEMA's store service reports for that "
+    "store; null when it lists none), stock_level (full, regular or limited, as HEMA gives it), "
+    "stock_indicator, shelf_locations, in_stock}]"
+)
+_HEMA_STOCK_NOTE = (
+    " Stock is as HEMA's store service reports it, not a promise that the shelf has it."
+)
+_HEMA_NOT_AVAILABLE = (
+    " Not available: price history (poll and store the answers), brands (HEMA sells its own "
+    "brand), checkout or ordering, the photo service and cake ordering, other countries (no UK "
+    "or Spain)."
+)
+_HEMA_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_HEMA_SKU = Param(
+    "sku",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc="HEMA article number: items[].sku (6 to 8 digits, the same in every market), e.g. "
+    "'15300147', or a colour group id (e.g. '4230175BLACK').",
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -15269,6 +15383,341 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ================================ HEMA ================================
+    # 13 endpoints on /api/v1/hema, 1 credit each. Webshops nl, be (nl / fr), fr, de; stores,
+    # store and store_stock also lu and at. Reviews take 15 to 70 s and lists can queue behind
+    # the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="hema_search",
+        namespace="hema",
+        method="search",
+        http="POST",
+        path="/api/v1/hema/search",
+        summary=(
+            "Search " + _HEMA_NAME + ", 24 products a page with total and total_pages: query, "
+            + _HEMA_LIST + ". Sorts relevance, price_asc, price_desc, newest, best_selling; "
+            "filters from facets, new_only, price_min, price_max. HEMA sends some words to a "
+            "category or campaign page (e.g. kerst): redirected_to names it and a landing page "
+            "comes back as its product carousels. A search with no match answers 200 with total "
+            "0." + _HEMA_STORE + _HEMA_NOT_AVAILABLE + _HEMA_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Search text (the market's language works best: 'sokken', 'kaars', 'bougie', "
+                "'Kerze').",
+            ),
+            *_HEMA_MARKET,
+            *_HEMA_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_product",
+        namespace="hema",
+        method="product",
+        http="POST",
+        path="/api/v1/hema/product",
+        summary=(
+            "One " + _HEMA_NAME + " product in full on one market, by article number or link: "
+            "requested, " + _HEMA_MARKET_OUT + ", sku, ean, name, description, url, status, "
+            "product_type, parent_sku, images, breadcrumbs, colour, size, main_material, "
+            "specifications [{key, name, value}], care, safety, nutrition, storage, price, "
+            "was_price, currency, discount_percent (computed by Scavio from was_price), "
+            "unit_price {price, unit}, promotion {label (HEMA's mechanic as it writes it, e.g. "
+            "2+1 gratis), loyalty_card_only, valid_from, valid_to}, price_schedule [{valid_from, "
+            "valid_to, price, was_price, promotion, loyalty_card_only, unit_price}] (HEMA's dated "
+            "prices, upcoming promotions included; valid_to None = open-ended), online_stock "
+            "{type (LIMITED or UNLIMITED), units}, sellable_in_store, order_limit {min, max, "
+            "step}, sales_blocked, availability, labels [{text, type, valid_from, valid_to}], "
+            "variants {variant_axis, group_axis, groups [{value, label, colour_code, url, "
+            "variants [{sku, label, in_stock, status, url}]}]}, fulfillment, personalizable, "
+            "complete (False when only part of the page could be read). An article number HEMA "
+            "does not have is a charged 404. For stock per store use store_stock()."
+            + _HEMA_STORE + _HEMA_CHARGE
+        ),
+        params=(
+            _HEMA_SKU,
+            _str(
+                "url",
+                "Or a HEMA product link (www.hema.nl or www.hema.com/<locale>/...); the market "
+                "comes from the link.",
+            ),
+            *_HEMA_MARKET,
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_category",
+        namespace="hema",
+        method="category",
+        http="POST",
+        path="/api/v1/hema/category",
+        summary=(
+            "One " + _HEMA_NAME + " category's products by path or link, with filters, sort and "
+            "paging: category, " + _HEMA_LIST + "." + _HEMA_STORE + _HEMA_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A category path (categories() categories[].path, e.g. 'baby/babykleding') or its "
+                "HEMA link.",
+            ),
+            *_HEMA_MARKET,
+            *_HEMA_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_categories",
+        namespace="hema",
+        method="categories",
+        http="POST",
+        path="/api/v1/hema/categories",
+        summary=(
+            _HEMA_NAME + "'s category menu on one market (13 to 18 departments, 3 levels): "
+            + _HEMA_MARKET_OUT + ", depth, count, node_count, categories [{name, path (the input "
+            "of category()), url, level, child_count, children}]. Names are in the market's "
+            "language." + _HEMA_CHARGE
+        ),
+        params=(*_HEMA_MARKET, _int("depth", "Levels to return, 1 to 3 (default 3).")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_new_arrivals",
+        namespace="hema",
+        method="new_arrivals",
+        http="POST",
+        path="/api/v1/hema/new-arrivals",
+        summary=(
+            _HEMA_NAME + "'s new collection on one market (about 550 to 1,100 products), with "
+            "sort, paging and filters: path, " + _HEMA_LIST + "." + _HEMA_STORE + _HEMA_CHARGE
+        ),
+        params=(*_HEMA_MARKET, *_HEMA_NEW_LIST_PARAMS),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_sale",
+        namespace="hema",
+        method="sale",
+        http="POST",
+        path="/api/v1/hema/sale",
+        summary=(
+            _HEMA_NAME + "'s sale page (nl) or outlet page (be, de: lasting price cuts), with "
+            "sort, paging and filters: path, " + _HEMA_LIST + ". France has no sale page (a 400, "
+            "not charged)." + _HEMA_STORE + _HEMA_CHARGE
+        ),
+        params=(
+            _lit(
+                "country",
+                ("nl", "be", "de"),
+                "'nl' (default, the sale page), 'be' or 'de' (the outlet page). France has no "
+                "sale page.",
+            ),
+            _HEMA_LANGUAGE,
+            *_HEMA_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_offers",
+        namespace="hema",
+        method="offers",
+        http="POST",
+        path="/api/v1/hema/offers",
+        summary=(
+            _HEMA_NAME + "'s weekly offers page (nl, be): " + _HEMA_MARKET_OUT + ", path, title, "
+            "label (HEMA's validity text as shown, e.g. geldig t/m 22 november), valid_to (ISO "
+            "date: the label has no year, Scavio takes the nearest one), week (HEMA's offer week "
+            "number), section_count, count, sections [{name, week, cards [{title, subtitle, url, "
+            "category (the input of category(): the promotion's product list)}]}]. The offers "
+            "page lists promotion cards, not products: each product's mechanic and dates are on "
+            "the product lists (promotion) and product() (promotion, price_schedule). fr and de "
+            "have no offers page (a 400, not charged)." + _HEMA_CHARGE
+        ),
+        params=(
+            _lit(
+                "country",
+                ("nl", "be"),
+                "'nl' (default) or 'be': the two markets with HEMA's weekly offers page.",
+            ),
+            _lit("language", ("nl", "fr"), "For be: 'nl' (default) or 'fr'."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_campaign",
+        namespace="hema",
+        method="campaign",
+        http="POST",
+        path="/api/v1/hema/campaign",
+        summary=(
+            "A " + _HEMA_NAME + " campaign page with its products and promotion texts: "
+            "christmas on every market, sinterklaas on nl and be, or a campaign slug: campaign, "
+            "slug, " + _HEMA_LIST + ", carousels [{title, link, count, skus}]." + _HEMA_STORE
+            + _HEMA_CHARGE
+        ),
+        params=(
+            _req(
+                "campaign",
+                "'christmas' (all markets), 'sinterklaas' (nl and be), a campaign slug ('kerst', "
+                "'noel', 'weihnachten', 'saint-nicolas') or its HEMA link.",
+            ),
+            *_HEMA_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_suggestions",
+        namespace="hema",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/hema/suggestions",
+        summary=(
+            _HEMA_NAME + "'s search suggestions for a partial query: " + _HEMA_MARKET_OUT + ", "
+            "query, count, total_results, phrases, categories [{name, product_count, url, "
+            "category}], products [{sku, name, url, image, price, currency}] (up to 5), terms "
+            "[{term, count, corrected}], content [{name, url}]." + _HEMA_CHARGE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'kerst'."),
+            *_HEMA_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_store_stock",
+        namespace="hema",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/hema/store-stock",
+        summary=(
+            "HEMA store stock: in-store stock of up to 12 " + _HEMA_NAME + " articles in the "
+            "stores near a city, postcode or point (or across a country), in the Netherlands, "
+            "Belgium, France, Germany, Luxembourg and Austria. Per store the sellable units HEMA's "
+            "store service reports and the stock level (full, regular or limited): country, "
+            "country_code, skus, location {query, formatted_address, postcode, city, latitude, "
+            "longitude}, radius_km, limit, in_stock_only, count, summary [{sku, "
+            "stores_with_stock}], stores [{" + _HEMA_STORE_FIELDS + ", " + _HEMA_STOCK + "}]."
+            + _HEMA_STOCK_NOTE + " Pair it with product() for the article's dated promotion. "
+            "Send query or lat + lng, not both." + _HEMA_CHARGE
+        ),
+        params=(
+            Param(
+                "skus",
+                "list[Union[str, int]]",
+                required=True,
+                doc="1 to 12 article numbers of one size and colour (items[].sku or "
+                "variants[].sku; leading zeros are dropped), e.g. ['15300147', '10860090'].",
+            ),
+            _str("query", _HEMA_QUERY_DOC),
+            *_HEMA_LOCATION,
+            *_HEMA_STORE_MARKET,
+            _int("limit", "Stores to return, 1 to 50 (default 10)."),
+            _bool("in_stock_only", "Only stores that hold at least one of the articles."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_stores",
+        namespace="hema",
+        method="stores",
+        http="POST",
+        path="/api/v1/hema/stores",
+        summary=(
+            _HEMA_NAME + " stores of one country (about 570 in nl, 111 be, 69 fr, 17 de, 5 at, 4 "
+            "lu), or the ones near a city, postcode or point: country, country_code, location, "
+            "radius_km, limit, count, stores [{" + _HEMA_STORE_FIELDS + "}]. Send query or lat + "
+            "lng, not both, or neither for the whole country." + _HEMA_CHARGE
+        ),
+        params=(
+            Param("query", "Optional[str]", positional=True, doc=_HEMA_QUERY_DOC),
+            *_HEMA_LOCATION,
+            *_HEMA_STORE_MARKET,
+            _int(
+                "limit",
+                "Stores to return (default 20 near a place, every store of the country without "
+                "one, up to 1000).",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_store",
+        namespace="hema",
+        method="store",
+        http="POST",
+        path="/api/v1/hema/store",
+        summary=(
+            "One " + _HEMA_NAME + " store by id: store_id, name, status, operator, address, "
+            "latitude, longitude, phone, hours, special_hours, closed_dates, services, "
+            "delivery_address, country, sku, stock (with sku: {sku, sellable_units, stock_level, "
+            "stock_indicator, shelf_locations, in_stock}, as HEMA's store service reports it, not "
+            "a promise that the shelf has it). Works for stores in every HEMA country (nl, be, "
+            "fr, de, lu, at). A store id HEMA does not know is a charged 404." + _HEMA_CHARGE
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc="A HEMA store id (stores[].store_id, up to 4 digits), e.g. '0013'.",
+            ),
+            _str_or_int("sku", "An article number: adds that article's stock in this store."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hema_reviews",
+        namespace="hema",
+        method="reviews",
+        http="POST",
+        path="/api/v1/hema/reviews",
+        summary=(
+            "Customer reviews of one " + _HEMA_NAME + " article, from HEMA's own product "
+            "reviews: " + _HEMA_MARKET_OUT + ", sku, review_pool (nl-nl or nl-be: the nl, fr and "
+            "de webshops show the shared Dutch pool; be has its own Belgian pool), "
+            "review_pool_note, sort, page, offset, page_size, total_text_reviews, total_pages, "
+            "has_more, average_rating, total_ratings (star ratings, with or without text), "
+            "ratings_only, recommended, not_recommended, rating_distribution, count, reviews "
+            "[{review_id, language, rating, title, text, submitted_at, experienced_on, "
+            "recommends, syndicated, verified_purchaser, badges, helpful_votes, "
+            "not_helpful_votes}]. No reviewer name or any reviewer identity is returned. Slower "
+            "than the other endpoints (15 to 70 s)." + _HEMA_CHARGE
+        ),
+        params=(
+            Param(
+                "sku",
+                "Union[str, int]",
+                required=True,
+                doc="HEMA article number (items[].sku), e.g. '10860090'.",
+            ),
+            *_HEMA_MARKET,
+            _lit(
+                "sort", ("newest", "highest"), "newest (default) or highest (highest rating first)."
+            ),
+            _int(
+                "page",
+                "1 = the first 8 reviews, each later page the next 30 (as HEMA's show-more loads "
+                "them), up to 5.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -22305,6 +22754,7 @@ NAMESPACES: tuple[str, ...] = (
     "argos",
     "mediaexpert",
     "action",
+    "hema",
 )
 
 
