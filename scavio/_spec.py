@@ -3643,6 +3643,86 @@ _AZ_LIST = (
 )
 _AZ_BR_CREDITS_NOTE = "Costs 1 credit on us (the default), 2 credits on br."
 
+# Instacart params shared across endpoints (instacart.com, the US and Canada grocery delivery and
+# pickup marketplace; instacart.ca for Canada). 11 endpoints: 1 credit each except search (3, or 2
+# when the page fits in Instacart's first answer) and cross_search (3 for up to 5 stores, 4 for 6 to
+# 10). Every endpoint serves us; ca every endpoint except cross_search and reviews (those take no
+# country). language fr is Canada only and refused on suggestions (no language param there).
+_IC_NAME = (
+    "Instacart (instacart.com, the US and Canada grocery delivery and pickup marketplace)"
+)
+_IC_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (instacart.com, USD, default) or 'ca' (instacart.ca, CAD; zip is then a Canadian "
+    "postal code).",
+)
+_IC_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "'en' (default) or 'fr' (country='ca' only: French names, aisles and price text as Instacart "
+    "shows them in Quebec).",
+)
+_IC_ZIP = Param(
+    "zip",
+    "Union[str, int]",
+    required=True,
+    doc="The delivery ZIP: a US ZIP ('10001') or, with country='ca', a Canadian postal code "
+    "('M5V 2T6' or 'M5V2T6'). Prices, stores and availability are for this location.",
+)
+_IC_RETAILER_DOC = (
+    "A retailer slug or id from retailers() (retailers[].slug or retailer_id, e.g. 'costco', "
+    "'jewel-osco', 'wegmans'). It must serve the ZIP."
+)
+_IC_RETAILER = Param("retailer", "Union[str, int]", required=True, doc=_IC_RETAILER_DOC)
+_IC_PRODUCT_ID = Param(
+    "product_id",
+    "Union[str, int]",
+    required=True,
+    doc="An Instacart product id (items[].product_id, the same at every store, e.g. '16408559'), "
+    "an item id ('items_2683-16408559') or an Instacart product link.",
+)
+_IC_SERVICE_TYPE = _lit(
+    "service_type",
+    ("delivery", "pickup", "instore"),
+    "Which Instacart price: 'delivery' (default), 'pickup', or 'instore' (Instacart's in-store "
+    "prices for that store, where it shows them).",
+)
+_IC_PAGE = _int("page", "Page, from 1 (1-100; total_pages says how deep the list goes).")
+_IC_LIMIT = _int("limit", "Products per page (1-60; default 30).")
+_IC_MARKET = "country, language, currency, zip, place (Instacart's name for the ZIP)"
+_IC_PRICED_FOR = (
+    "priced_for {retailer_id, retailer_slug, retailer_name, service_type, shop_id, "
+    "retailer_location_id, zip, pricing_label (the retailer's pricing statement as Instacart "
+    "shows it, e.g. Prices are higher than your local warehouse.)}"
+)
+_IC_PRICES = (
+    " Every price is Instacart's price for that store, ZIP and service type (priced_for). "
+    "Retailers set their Instacart prices, which can be above their in-store prices: never report "
+    "an Instacart delivery price as the store's shelf price; service_type='instore' returns "
+    "Instacart's in-store prices where it shows them, so a delivery and an in-store price for the "
+    "same product, store and day can be compared. Stock is as Instacart reports it."
+)
+_IC_NOT_AVAILABLE = (
+    " Not available: delivery and service fees or order minimums as numbers (Instacart shows them "
+    "at checkout), coupons, Instacart+ member prices, account, order or cart data, price history "
+    "(poll and store the answers)."
+)
+_IC_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_IC_ITEM = (
+    "product_id (the input of product(), price_compare() and reviews(); the same at every store), "
+    "item_id, name, brand, brand_id, size, price, price_text, currency, was_price (the regular "
+    "price Instacart shows next to a sale price), discount_percent (computed by Scavio from "
+    "was_price), deal (Instacart's offer badge, e.g. Buy 2, get 3 free), promotions, unit_price "
+    "(e.g. $0.25/oz), loyalty_price and loyalty_label (a loyalty-card price, as Instacart shows "
+    "it), in_stock, stock_level, stock_label, dietary, image, url, max_quantity"
+)
+_IC_LIST = (
+    _IC_MARKET + ", " + _IC_PRICED_FOR + ", total, total_pages, has_more, count, items [{"
+    + _IC_ITEM + "}], note"
+)
+_IC_NO_ZONE = " A ZIP where Instacart has no service area answers 200 with an empty list and a note."
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -16142,6 +16222,290 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=240.0,
     ),
+    # ============================== Instacart ==============================
+    # 11 endpoints on /api/v1/instacart. 1 credit each; search 3 (2 when the page fits in
+    # Instacart's first answer) and cross_search 3-4 by max_retailers (credits_note; credits is
+    # the floor). Calls can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="instacart_retailers",
+        namespace="instacart",
+        method="retailers",
+        http="POST",
+        path="/api/v1/instacart/retailers",
+        summary=(
+            "Every store on " + _IC_NAME + " serving a ZIP or Canadian postal code. Start here: "
+            "the slug is the retailer input of the other methods. Returns " + _IC_MARKET + ", "
+            "count, no_markups_count, retailers [{retailer_id, slug, name, retailer_type, "
+            "categories, logo, services, delivery_available, pickup_available, "
+            "instore_available, delivery_eta and pickup_eta (Instacart's text, e.g. Delivery by "
+            "10:45pm), no_markups (Instacart's 'No markups' label: in-store prices online), "
+            "accepts_ebt, store_labels, alcohol_allowed, delivery_shop_id, pickup_shop_id, "
+            "retailer_location_id, url}], note. Delivery fees and order minimums are not part of "
+            "the answer." + _IC_NO_ZONE + " A ZIP Instacart does not recognise is a charged 404."
+            + _IC_CHARGE
+        ),
+        params=(_IC_ZIP, _IC_COUNTRY, _IC_LANGUAGE),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_search",
+        namespace="instacart",
+        method="search",
+        http="POST",
+        path="/api/v1/instacart/search",
+        summary=(
+            "Search one store on " + _IC_NAME + " at a ZIP: sort by price, filter to sale items "
+            "or a brand, page through every match, for delivery, pickup or in-store prices. "
+            "Returns query, sort, on_sale, brand_id, page, limit, " + _IC_LIST + ", "
+            "brand_filters [{brand_id, name}]. A retailer that does not serve the ZIP (or not in "
+            "that service type) is a charged 404." + _IC_PRICES + _IC_NOT_AVAILABLE
+            + " Failed upstream calls and refused inputs are not charged."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'yogurt' (French keywords with language='fr', e.g. 'lait')."),
+            _IC_RETAILER,
+            _IC_ZIP,
+            _IC_COUNTRY,
+            _IC_LANGUAGE,
+            _IC_SERVICE_TYPE,
+            _lit(
+                "sort",
+                ("best_match", "price_asc", "price_desc"),
+                "best_match (default, Instacart's order), price_asc or price_desc.",
+            ),
+            _bool("on_sale", "True: only the products Instacart marks on sale at this store."),
+            _str_or_int(
+                "brand_id",
+                "A brand id from brand_filters[].brand_id of an earlier search (e.g. '18514').",
+            ),
+            _IC_PAGE,
+            _IC_LIMIT,
+        ),
+        credits=2,
+        credits_note="Costs 3 credits (2 when the page fits in Instacart's first answer).",
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_cross_search",
+        namespace="instacart",
+        method="cross_search",
+        http="POST",
+        path="/api/v1/instacart/cross-search",
+        summary=(
+            "One query across up to 10 stores delivering to a US ZIP on " + _IC_NAME + ", each "
+            "store's first matching products priced for delivery from that store (us only). "
+            "Returns " + _IC_MARKET + ", query, service_type, max_retailers, items_per_retailer, "
+            "retailers_matched (stores Instacart found matches at, up to 50), count, groups "
+            "[{retailer_id, retailer_slug, retailer_name, shop_id, retailer_location_id, "
+            "no_markups, matches, count, items [{" + _IC_ITEM + "}]}], note. Stores come in "
+            "Instacart's order." + _IC_PRICES
+            + " Failed upstream calls and refused inputs are not charged."
+        ),
+        params=(
+            _req("query", "Search keywords, e.g. 'milk'."),
+            _IC_ZIP,
+            _int("max_retailers", "Stores to price, 1-10 (default 5). 3 credits up to 5 stores, 4 above."),
+            _int("items_per_retailer", "Products per store, 1-20 (default 5)."),
+        ),
+        credits=3,
+        credits_note="Costs 3 credits for up to 5 stores (max_retailers), 4 for 6 to 10.",
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_product",
+        namespace="instacart",
+        method="product",
+        http="POST",
+        path="/api/v1/instacart/product",
+        summary=(
+            "One product at one store on " + _IC_NAME + ": detail plus that store's price block "
+            "for the ZIP and service type. Returns " + _IC_MARKET + ", product_id, "
+            + _IC_PRICED_FOR + ", available_at_store, name, size, brand, description, "
+            "ingredients, directions, warnings (allergens as given, e.g. Contains: milk.), "
+            "sections [{title, text}], key_nutrients [{name, value, unit}] (the nutrients "
+            "Instacart lists, not a full nutrition panel), images, item {" + _IC_ITEM + "} (None "
+            "when the store shows no price), rating {average_rating, ratings_count, distribution "
+            "[{stars, count, percent}]}, url, note. An id Instacart does not know is a charged "
+            "404." + _IC_PRICES + _IC_CHARGE
+        ),
+        params=(
+            _IC_PRODUCT_ID,
+            _IC_ZIP,
+            _str_or_int(
+                "retailer",
+                "A retailer slug or id from retailers() (required unless the product link names "
+                "the store).",
+            ),
+            _IC_COUNTRY,
+            _IC_LANGUAGE,
+            _IC_SERVICE_TYPE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_price_compare",
+        namespace="instacart",
+        method="price_compare",
+        http="POST",
+        path="/api/v1/instacart/price-compare",
+        summary=(
+            "The same product priced at every store delivering to a ZIP on " + _IC_NAME + ", as "
+            "Instacart shows it for delivery, sorted low to high. Returns " + _IC_MARKET + ", "
+            "product_id, service_type, stores_checked, count, prices [{retailer_id, "
+            "retailer_slug, retailer_name, shop_id, retailer_location_id, price, price_text, "
+            "currency, was_price, discount_percent (computed by Scavio from was_price), "
+            "price_reduction, on_sale, no_markups, url}], note. Unit prices and stock are not in "
+            "this answer (product() gives them per store). A product priced nowhere at the ZIP "
+            "answers 200 with an empty list and a note. These are Instacart delivery prices, not "
+            "shelf prices." + _IC_CHARGE
+        ),
+        params=(_IC_PRODUCT_ID, _IC_ZIP, _IC_COUNTRY, _IC_LANGUAGE),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_categories",
+        namespace="instacart",
+        method="categories",
+        http="POST",
+        path="/api/v1/instacart/categories",
+        summary=(
+            "The department and aisle tree of one store on " + _IC_NAME + ". Returns "
+            + _IC_MARKET + ", retailer_id, retailer_slug, retailer_name, count, aisle_count, "
+            "categories [{id, name, slug (the input of category()), type (department or "
+            "collection), image, aisles [{id, name, slug}]}]." + _IC_CHARGE
+        ),
+        params=(_IC_RETAILER, _IC_ZIP, _IC_COUNTRY, _IC_LANGUAGE),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_category",
+        namespace="instacart",
+        method="category",
+        http="POST",
+        path="/api/v1/instacart/category",
+        summary=(
+            "The products of one department, aisle or collection of a store on " + _IC_NAME
+            + ", paged. Returns category, title, page, limit, " + _IC_LIST + ". A slug the store "
+            "does not have is a charged 404." + _IC_PRICES + _IC_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A department or aisle slug from categories() (categories[].slug or "
+                "categories[].aisles[].slug, e.g. 'produce', 'fresh-fruits').",
+            ),
+            _IC_RETAILER,
+            _IC_ZIP,
+            _IC_COUNTRY,
+            _IC_LANGUAGE,
+            _IC_SERVICE_TYPE,
+            _IC_PAGE,
+            _IC_LIMIT,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_deals",
+        namespace="instacart",
+        method="deals",
+        http="POST",
+        path="/api/v1/instacart/deals",
+        summary=(
+            "The sale items of one store on " + _IC_NAME + " (its Sales collection: sale prices "
+            "with the regular price, multi-buy offers such as Buy 2, get 3 free), paged. Returns "
+            "category, title, page, limit, " + _IC_LIST + ". Coupons are not included."
+            + _IC_PRICES + _IC_CHARGE
+        ),
+        params=(
+            _IC_RETAILER,
+            _IC_ZIP,
+            _IC_COUNTRY,
+            _IC_LANGUAGE,
+            _IC_SERVICE_TYPE,
+            _IC_PAGE,
+            _IC_LIMIT,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_stores",
+        namespace="instacart",
+        method="stores",
+        http="POST",
+        path="/api/v1/instacart/stores",
+        summary=(
+            "The pickup locations of one retailer near a ZIP on " + _IC_NAME + ", nearest first. "
+            "Returns " + _IC_MARKET + ", retailer, retailer_id, retailer_name, retailer_slug, "
+            "total, count, stores [{retailer_location_id, name, address {street, line2, "
+            "postal_code}, latitude, longitude, distance, distance_text, phone, hours [{date, "
+            "hours}] (the next 7 days as Instacart shows them, for the 5 nearest; None for the "
+            "rest)}], note. A retailer with no pickup near the ZIP answers 200 with an empty list "
+            "and a note." + _IC_CHARGE
+        ),
+        params=(
+            _IC_RETAILER,
+            _IC_ZIP,
+            _IC_COUNTRY,
+            _IC_LANGUAGE,
+            _int("limit", "Stores to return (1-50; default 10)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_suggestions",
+        namespace="instacart",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/instacart/suggestions",
+        summary=(
+            "Instacart's search suggestions for a partial query on " + _IC_NAME + ", for one "
+            "store or across every store serving the ZIP. Returns " + _IC_MARKET + ", query, "
+            "scope (retailer or all_retailers), retailer_id, retailer_slug, retailer_name, count, "
+            "suggestions [{type (search_term, collection or retailer), text, search_term, "
+            "category, retailer, image}]. English only (French prefixes come back empty in "
+            "Canada)." + _IC_CHARGE
+        ),
+        params=(
+            _req("query", "What the shopper has typed so far, e.g. 'eg'."),
+            _IC_ZIP,
+            _str_or_int(
+                "retailer",
+                "A retailer slug or id: that store's suggestions. Without it, suggestions across "
+                "every store serving the ZIP.",
+            ),
+            _IC_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="instacart_reviews",
+        namespace="instacart",
+        method="reviews",
+        http="POST",
+        path="/api/v1/instacart/reviews",
+        summary=(
+            "Customer reviews of one product on " + _IC_NAME + ", 15 a page (us only). Returns "
+            "country, product_id, page, page_size, order, has_more, rating {average_rating, "
+            "ratings_count, distribution} (page 1), count, reviews [{review_id, rating (1 to 5), "
+            "title, text, reviewed_on, date, source (the brand or site Instacart names for the "
+            "review), incentivized (Instacart notes the review was written as part of a "
+            "promotion)}], note. No reviewer name or identity is returned." + _IC_CHARGE
+        ),
+        params=(
+            _IC_PRODUCT_ID,
+            _int("page", "Page, from 1 (1-100; 15 reviews a page)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -23180,6 +23544,7 @@ NAMESPACES: tuple[str, ...] = (
     "action",
     "hema",
     "autozone",
+    "instacart",
 )
 
 

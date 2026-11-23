@@ -641,6 +641,8 @@ BODY_PRICED_KEYS = {
     "mediaexpert_seller",
     "autozone_search",
     "autozone_product",
+    "instacart_search",
+    "instacart_cross_search",
 }
 
 
@@ -6209,3 +6211,122 @@ def test_autozone_credits_paths_and_wire(monkeypatch):
             call()
     with pytest.raises(ScavioError):
         az.store_stock("7602")
+
+
+def test_instacart_credits_paths_and_wire(monkeypatch):
+    """instacart (0.77.0): 11 endpoints on /api/v1/instacart.
+
+    1 credit each; search 3 (2 when the page fits in Instacart's first answer) and cross_search
+    3 for up to 5 stores, 4 for 6 to 10 (credits_note; credits is the floor). Every endpoint
+    takes a zip except reviews; us everywhere, ca everywhere except cross_search and reviews
+    (those take no country). language fr is Canada only and not offered on suggestions.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "instacart"}
+    assert sorted(eps) == [
+        "categories", "category", "cross_search", "deals", "price_compare", "product",
+        "retailers", "reviews", "search", "stores", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/instacart/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "Instacart (instacart.com, the US and Canada grocery delivery and pickup " \
+            "marketplace)" in ep.summary, ep.key
+        names = {p.name: p for p in ep.params}
+        if m == "reviews":
+            assert "zip" not in names
+        else:
+            assert names["zip"].required and names["zip"].annotation == "Union[str, int]", m
+        if m in ("cross_search", "reviews"):
+            assert "country" not in names and "language" not in names, m
+        else:
+            assert names["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+        if m == "suggestions":
+            assert "language" not in names
+        elif m not in ("cross_search", "reviews"):
+            assert names["language"].annotation == 'Optional[Literal["en", "fr"]]', m
+        if m in ("search", "categories", "category", "deals", "stores"):
+            assert names["retailer"].required, m
+        if m in ("product", "suggestions"):
+            assert not names["retailer"].required, m
+        if m in ("search", "product", "category", "deals"):
+            assert names["service_type"].annotation == (
+                'Optional[Literal["delivery", "pickup", "instore"]]'
+            ), m
+            assert "priced_for" in ep.summary and "shelf price" in ep.summary, m
+    assert eps["search"].credits == 2
+    assert eps["search"].credits_note == (
+        "Costs 3 credits (2 when the page fits in Instacart's first answer)."
+    )
+    assert eps["cross_search"].credits == 3
+    assert eps["cross_search"].credits_note == (
+        "Costs 3 credits for up to 5 stores (max_retailers), 4 for 6 to 10."
+    )
+    for m in ("retailers", "product", "price_compare", "categories", "category", "deals",
+              "stores", "suggestions", "reviews"):
+        assert eps[m].credits == 1 and eps[m].credits_note is None, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == 'Optional[Literal["best_match", "price_asc", "price_desc"]]'
+    assert search["on_sale"].annotation == "Optional[bool]"
+    assert "service_type" not in {p.name for p in eps["price_compare"].params}
+    assert "No reviewer name" in eps["reviews"].summary
+    assert "us only" in eps["cross_search"].summary and "us only" in eps["reviews"].summary
+    assert "coupons" in eps["search"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ic = client.instacart
+    ic.retailers("10001")
+    ic.retailers("M5V 2T6", country="ca", language="fr")
+    ic.search("yogurt", "jewel-osco", "60540", limit=10)
+    ic.search("milk", "costco", 10001, service_type="instore", sort="price_asc", on_sale=True,
+              brand_id="18514", page=2)
+    ic.search("lait", "metro", "H2X1Y4", country="ca", language="fr", limit=10)
+    ic.cross_search("milk", "10001", max_retailers=3)
+    ic.cross_search("eggs", "10001", max_retailers=10, items_per_retailer=20)
+    ic.product("16408559", "10001", retailer="wegmans")
+    ic.product("16408559", "60540", retailer="jewel-osco", service_type="pickup")
+    ic.price_compare("16408559", "10001")
+    ic.categories("wegmans", "10001")
+    ic.category("produce", "wegmans", "10001", limit=10)
+    ic.deals("jewel-osco", "60540", limit=10)
+    ic.stores("jewel-osco", "60540", limit=5)
+    ic.suggestions("eg", "60540", retailer="jewel-osco")
+    ic.suggestions("eg", "60540")
+    ic.reviews("16408559")
+    ic.reviews("16408559", page=2)
+    base = "/api/v1/instacart/"
+    assert seen == [
+        (base + "retailers", {"zip": "10001"}, 240.0),
+        (base + "retailers", {"zip": "M5V 2T6", "country": "ca", "language": "fr"}, 240.0),
+        (base + "search", {"query": "yogurt", "retailer": "jewel-osco", "zip": "60540",
+                           "limit": 10}, 240.0),
+        (base + "search", {"query": "milk", "retailer": "costco", "zip": 10001,
+                           "service_type": "instore", "sort": "price_asc", "on_sale": True,
+                           "brand_id": "18514", "page": 2}, 240.0),
+        (base + "search", {"query": "lait", "retailer": "metro", "zip": "H2X1Y4",
+                           "country": "ca", "language": "fr", "limit": 10}, 240.0),
+        (base + "cross-search", {"query": "milk", "zip": "10001", "max_retailers": 3}, 240.0),
+        (base + "cross-search", {"query": "eggs", "zip": "10001", "max_retailers": 10,
+                                 "items_per_retailer": 20}, 240.0),
+        (base + "product", {"product_id": "16408559", "zip": "10001", "retailer": "wegmans"},
+         240.0),
+        (base + "product", {"product_id": "16408559", "zip": "60540", "retailer": "jewel-osco",
+                            "service_type": "pickup"}, 240.0),
+        (base + "price-compare", {"product_id": "16408559", "zip": "10001"}, 240.0),
+        (base + "categories", {"retailer": "wegmans", "zip": "10001"}, 240.0),
+        (base + "category", {"category": "produce", "retailer": "wegmans", "zip": "10001",
+                             "limit": 10}, 240.0),
+        (base + "deals", {"retailer": "jewel-osco", "zip": "60540", "limit": 10}, 240.0),
+        (base + "stores", {"retailer": "jewel-osco", "zip": "60540", "limit": 5}, 240.0),
+        (base + "suggestions", {"query": "eg", "zip": "60540", "retailer": "jewel-osco"}, 240.0),
+        (base + "suggestions", {"query": "eg", "zip": "60540"}, 240.0),
+        (base + "reviews", {"product_id": "16408559"}, 240.0),
+        (base + "reviews", {"product_id": "16408559", "page": 2}, 240.0),
+    ]

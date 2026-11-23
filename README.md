@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 96 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 97 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -49,6 +49,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Action Weekly Deals, Prices by Country, Stores, Opening Hours and Reviews (19 storefronts in 16 countries; 16 endpoints) | Yes | No | No | No |
 | HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
 | AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
+| Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
 | bol.com Buy Box, Lowest-Priced Seller Offers, EAN Lookup, Seller Ratings and Deals (Netherlands and Belgium; 9 endpoints) | Yes | No | No | No |
@@ -4283,6 +4284,97 @@ prices, price history (poll and store the answers), checkout. Failed calls and
 refused inputs are not charged; a not-found (an unknown item id, vehicle,
 brand, state, city or store) is charged.
 
+### 66. Grocery -- Instacart prices by store at a ZIP, price compare, delivery vs in-store
+
+Instacart (instacart.com), the US and Canada grocery delivery and pickup
+marketplace, plus instacart.ca. Namespace `instacart`, 11 endpoints:
+`retailers`, `search`, `cross_search`, `product`, `price_compare`,
+`categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`. 1
+credit per call; `search` 3 (2 when the page fits in Instacart's first
+answer); `cross_search` 3 for up to 5 stores, 4 for 6 to 10. `country` is us
+by default; ca (CAD, `zip` a Canadian postal code) on every method except
+`cross_search` and `reviews`, which are us only and take no `country`.
+`language="fr"` (Canada) returns French names, aisles and price text as
+Instacart shows them in Quebec; `suggestions` are English only. Every method
+but `reviews` takes a `zip`. The request timeout is raised to at least 240s
+on every endpoint.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ic = client.instacart
+
+# --- Every store serving a ZIP: the slug is the retailer input of the other methods.
+stores = ic.retailers("10001")["data"]
+print(stores["count"], stores["no_markups_count"])
+for r in stores["retailers"][:5]:
+    print(r["slug"], r["name"], r["delivery_eta"], r["no_markups"], r["accepts_ebt"])
+
+# --- One product priced at every store delivering to the ZIP, low to high.
+cmp = ic.price_compare("16408559", "10001")["data"]
+print(cmp["stores_checked"], cmp["count"])
+for p in cmp["prices"][:5]:
+    print(p["retailer_name"], p["price"], p["was_price"], p["no_markups"])
+
+# --- One store's search, then the same product's delivery and in-store price.
+res = ic.search("yogurt", "jewel-osco", "60540", sort="price_asc", limit=10)["data"]
+print(res["priced_for"]["pricing_label"], res["total"])
+for it in res["items"][:3]:
+    print(it["product_id"], it["name"], it["size"], it["price"], it["unit_price"], it["deal"])
+delivery = ic.product("16408559", "10001", retailer="wegmans")["data"]
+instore = ic.product("16408559", "10001", retailer="wegmans", service_type="instore")["data"]
+print(delivery["priced_for"], delivery["item"], instore["item"])
+print(delivery["ingredients"], delivery["warnings"], delivery["key_nutrients"])
+
+# --- One query across up to 10 stores (us), a store's deals, aisles and pickup locations.
+cross = ic.cross_search("milk", "10001", max_retailers=3)["data"]
+deals = ic.deals("jewel-osco", "60540", limit=10)["data"]["items"]
+tree = ic.categories("wegmans", "10001")["data"]["categories"]
+produce = ic.category("produce", "wegmans", "10001", limit=10)["data"]["items"]
+pickup = ic.stores("jewel-osco", "60540", limit=5)["data"]["stores"]
+
+# --- Suggestions and reviews (us).
+sugg = ic.suggestions("eg", "60540", retailer="jewel-osco")["data"]["suggestions"]
+reviews = ic.reviews("16408559")["data"]
+
+# --- Canada in French: CAD prices and French names at a Montreal store.
+fr = ic.search("lait", "metro", "H2X1Y4", country="ca", language="fr", limit=10)["data"]
+print(fr["currency"], fr["priced_for"]["pricing_label"], fr["items"][0]["price_text"])
+```
+
+Every price is Instacart's price for that store, ZIP and service type, named
+in `priced_for` (`retailer_slug`, `service_type`, `zip` and the retailer's
+`pricing_label` as Instacart shows it, e.g. Costco "Prices are higher than
+your local warehouse."). Retailers set their Instacart prices, which can be
+above their in-store prices, so an Instacart delivery price is not the
+store's shelf price; `service_type="instore"` returns Instacart's in-store
+prices where it shows them, and `pickup` the pickup price. Items carry
+`price`, `price_text`, `was_price` (the regular price next to a sale price),
+`discount_percent` (computed by Scavio from the was price), `deal` (Instacart's
+offer badge, e.g. Buy 2, get 3 free), `unit_price`, `loyalty_price`, stock as
+Instacart reports it and dietary labels. `retailers` marks `no_markups`
+(Instacart's "No markups" label: in-store prices online) and EBT per store.
+
+`product_id` is the same at every store, so a search result feeds `product`,
+`price_compare` and `reviews` directly. `price_compare` returns Instacart
+delivery prices only, with no unit price or stock (`product` gives them per
+store). `cross_search` prices up to 10 stores in Instacart's order, up to 20
+items each. `product` returns ingredients, warnings / allergens as given and
+the key nutrients Instacart lists, not a full nutrition panel. `deals` is the
+store's Sales collection (no coupons). `stores` lists pickup locations nearest
+first, with 7 days of hours for the 5 nearest. `reviews` (us) are 15 a page
+with a syndication `source` and an `incentivized` flag; no reviewer identity
+is returned. A ZIP with no Instacart service area answers an empty list and a
+note. Not available: delivery and service fees or order minimums as numbers
+(Instacart shows them at checkout), coupons, Instacart+ member prices,
+account, order or cart data, price history (poll and store the answers),
+`cross_search` and `reviews` in Canada, French `suggestions`. For direct
+shelf prices see the `kroger`, `costco`, `aldi`, `publix` and `wholefoods`
+namespaces. Failed calls and refused inputs are not charged; a not-found (an
+unknown ZIP, product id or category, or a store that does not serve the ZIP)
+is charged.
+
 ## Error Handling
 
 ```python
@@ -4429,6 +4521,7 @@ Scavio works with popular AI/LLM frameworks:
 | Action (`action`) | `search`, `product`, `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`, `webshop_search`, `webshop_product`; 19 storefronts (`country`, plus `language` for be and ch); `reviews` nl, de, fr, pl; webshop nl, be | 1 each |
 | HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
 | AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
+| Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
 | OLX (`olx`) | `search`, `offer`, `seller`, `seller_ads`, `filters`, `categories`, `locations`, `suggestions`, `similar` | 1 each |
@@ -4459,6 +4552,20 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.77.0
+
+- **New `instacart` namespace** (sync and async) for Instacart
+  (instacart.com), the US and Canada grocery delivery and pickup marketplace,
+  11 endpoints: `retailers`, `search`, `cross_search`, `product`,
+  `price_compare`, `categories`, `category`, `deals`, `stores`,
+  `suggestions`, `reviews`. Instacart prices by store at a ZIP: every store
+  serving a ZIP with its pricing label, one product priced at every store,
+  one query across up to 10 stores, delivery, pickup or in-store prices
+  (`service_type`), each answer naming the store, ZIP and service type in
+  `priced_for`. us and ca (CAD; `language="fr"` for French). 1 credit per
+  call, `search` 3 (2 when the page fits in the first answer),
+  `cross_search` 3-4. 240s timeout floor.
 
 ### Changed in 0.76.0
 

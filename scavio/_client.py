@@ -50,6 +50,7 @@ from ._namespaces_sync import (
     _IherbNamespace,
     _IkeaNamespace,
     _IndeedNamespace,
+    _InstacartNamespace,
     _InstagramNamespace,
     _JcpenneyNamespace,
     _KohlsNamespace,
@@ -261,6 +262,7 @@ class ScavioClient:
         self.action = _ActionNamespace(self)
         self.hema = _HemaNamespace(self)
         self.autozone = _AutozoneNamespace(self)
+        self.instacart = _InstacartNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
