@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 97 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 98 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -49,6 +49,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Action Weekly Deals, Prices by Country, Stores, Opening Hours and Reviews (19 storefronts in 16 countries; 16 endpoints) | Yes | No | No | No |
 | HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
 | AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
+| O'Reilly Auto Parts Part-Number Cross-Reference with Prices, Core Charges, Rebates, Store Stock near a ZIP and VIN Decode (US; Mexico store directory; 14 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4375,6 +4376,99 @@ namespaces. Failed calls and refused inputs are not charged; a not-found (an
 unknown ZIP, product id or category, or a store that does not serve the ZIP)
 is charged.
 
+### 67. Auto Parts -- O'Reilly Auto Parts part-number cross-reference with prices, store stock
+
+O'Reilly Auto Parts (oreillyauto.com), the US auto parts retailer, plus
+O'Reilly's Mexican store directory. Namespace `oreilly`, 14 endpoints:
+`search`, `cross_reference`, `product`, `vehicles`, `compatibility`,
+`category`, `categories`, `brand`, `store_stock`, `stores`, `store`,
+`suggestions`, `rebates`, `deals`. 2 credits per call; `product` by
+`line_code` + `part_number` 4 (by link 2); `cross_reference` 2 with
+`part_type_id` + `manufacturer`, 4 with one of them or when several
+manufacturers use the number, 6 with neither when one manufacturer matches;
+`brand` index (no brand) 4; `store_stock` and `stores` by `zip` 4 (by
+`latitude` + `longitude`, or the directory, 2); `deals` 4. Only `stores` and
+`store` take `country` (us by default, or mx for the Mexican store directory,
+in Spanish); every other method is us only and takes no `country`. The request
+timeout is raised to at least 240s on every endpoint. Pair it with the
+`autozone` namespace for a two-store parts price check on the same part.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+o = client.oreilly
+
+# --- Another brand's part number in, O'Reilly's matching parts out, priced.
+xref = o.cross_reference("PH3614", part_type_id="02269", manufacturer="FRAM")["data"]
+print(xref["total"], xref["replacing_brands"], xref["priced_for"])
+for it in xref["items"][:3]:
+    print(it["line_code"], it["part_number"], it["name"], it["price"], it["core_charge"])
+# Without manufacturer: when several brands use the number, the answer is the lists to
+# choose from (part_types, manufacturers) with no items; send manufacturer next.
+first = o.cross_reference("PH3614")["data"]
+print(first["part_types"], first["manufacturers"])
+
+# --- Parts that fit one vehicle: resolve the base_vehicle_id, then search with it.
+v = o.vehicles(level="resolve", year=2015, make_id=23076, model_id=31549)["data"]["vehicle"]
+pads = o.search("brake pads")["data"]
+fit = o.search("brake pads", vehicle={"base_vehicle_id": v["base_vehicle_id"]})["data"]
+print(pads["total"], fit["total"], fit["vehicle"])
+vin = o.vehicles(level="vin", vin="1HGCM82633A004352")["data"]["vehicle"]
+
+# --- One product in full: price, core charge, deals, rebates, rating, 10 most recent reviews.
+p = o.product(line_code="BB", part_number="SC1001")["data"]
+print(p["priced_for"], p["price"], p["core_charge"], p["rating"], len(p["reviews"]))
+print(o.compatibility("BB", "SC1001", make="Ford")["data"]["models"][:2])
+
+# --- Which stores near a ZIP can hand over the part (states, not unit counts).
+stock = o.store_stock("SSB", "48PLT", zip="60540")["data"]
+for s in stock["stores"][:3]:
+    print(s["store_id"], s["distance_miles"], s["availability"])
+
+# --- Stores near a ZIP, the directory (us and mx), one store, rebates and deals.
+near = o.stores(zip="77002")["data"]["stores"]
+gdl = o.stores(state="jal", city="guadalajara", country="mx")["data"]["stores"]
+store = o.store("4973")["data"]
+rebates = o.rebates()["data"]["rebates"]
+deals = o.deals()["data"]["offers"]
+```
+
+Every price is O'Reilly's price for the store O'Reilly assigns to the request,
+named in `priced_for` (`store_id`, `address`, `city`, `state`, `zip`).
+O'Reilly prices differ by store, so two calls can be priced for different
+stores; there is no store or ZIP input for prices. Items carry `price`,
+`regular_price`, `sale_price`, `discount_percent` (computed by Scavio from the
+regular price when on sale), `core_charge` (the refundable deposit O'Reilly
+adds on parts like batteries until the old part is returned; 0 when none),
+`warranty`, `fit_notes` for the requested vehicle, deals and availability per
+fulfilment option (store pickup with O'Reilly's pickup time, ship to home).
+Lists (`search`, `category`, `brand`, `cross_reference`) return 24 a page and
+O'Reilly serves 20 pages (`page` 1-20; above 20 is a 400, not charged); sort
+`relevance`, `price_desc`, `price_asc`, `best_selling` or `brand`; filter by
+`brand`, `availability` (`store_pickup`, `home_delivery`) or up to 4 attribute
+facets. List items carry no rating (`product` does).
+
+`vehicle` takes `{"base_vehicle_id": ...}` from `vehicles(level="resolve")`;
+O'Reilly pins year, make and model with it, and submodel and engine show in
+`fit_notes`. `vehicles(level="vin")` decodes a 17-character VIN to year, make
+and model with the submodel and engine ids. On `product`, `vehicle_fit.fits` is
+True when O'Reilly gives the part's application for the vehicle and None
+otherwise, never False: check fit with a vehicle `search` or `category`, or
+`compatibility`. `cross_reference` maps another brand's or an OE part number to
+O'Reilly's parts; it can return 0 matches. `product` returns the 10 most recent
+reviews (date, title, text, rating; no reviewer identity) with no paging, sort
+or star filter. `store_stock` reports availability states (in store now, store
+pickup, pickup time), not unit counts. `stores` returns the 25 nearest stores
+within 50 miles of a ZIP or a point with hours, holiday adjustments and
+services, or walks the directory by state (+ city) on us and mx. Not available:
+unit counts in store stock, a chosen store for prices, reviews past the 10 most
+recent, Q&A, Mexico prices or catalog, Canada, license-plate lookup, the weekly
+ad, repair guides or trouble codes, O'Reilly Pro / First Call Online
+commercial pricing, price history (poll and store the answers), checkout.
+Failed calls and refused inputs are not charged; a not-found (an unknown
+product, VIN, category, brand, state, city or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4521,6 +4615,7 @@ Scavio works with popular AI/LLM frameworks:
 | Action (`action`) | `search`, `product`, `products`, `category`, `categories`, `brand`, `brands`, `new_arrivals`, `weekly_deals`, `collection`, `suggestions`, `stores`, `store`, `reviews`, `webshop_search`, `webshop_product`; 19 storefronts (`country`, plus `language` for be and ch); `reviews` nl, de, fr, pl; webshop nl, be | 1 each |
 | HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
 | AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
+| O'Reilly Auto Parts (`oreilly`) | `search`, `cross_reference`, `product`, `vehicles`, `compatibility`, `category`, `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`, `rebates`, `deals`; us (default) on every method; mx on `stores` and `store` only (the Mexican store directory, in Spanish) | 2 each; `product` by `line_code` + `part_number` 4; `cross_reference` 2 / 4 / 6 by inputs; `brand` index 4; `store_stock` and `stores` by `zip` 4; `deals` 4 |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4552,6 +4647,20 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.78.0
+
+- **New `oreilly` namespace** (sync and async) for O'Reilly Auto Parts
+  (oreillyauto.com), the US auto parts retailer, 14 endpoints: `search`,
+  `cross_reference`, `product`, `vehicles`, `compatibility`, `category`,
+  `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`,
+  `rebates`, `deals`. Part-number cross-reference (another brand's or an OE
+  number to O'Reilly's parts), parts that fit a vehicle (`base_vehicle_id`),
+  VIN decode, price, sale price, core charge and rebates for the store O'Reilly
+  prices the request for (`priced_for`), store stock near a ZIP (availability
+  states), stores near a ZIP and the store directory (us and mx), rebates and
+  deals. 2 credits per call (4 or 6 where the request needs more lookups).
+  240s timeout floor.
 
 ### Changed in 0.77.0
 

@@ -106,6 +106,7 @@ __all__ = [
     "_AsyncHemaNamespace",
     "_AsyncAutozoneNamespace",
     "_AsyncInstacartNamespace",
+    "_AsyncOreillyNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -18403,3 +18404,326 @@ class _AsyncInstacartNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("instacart_reviews", {"product_id": product_id, "page": page}, extra)
+
+class _AsyncOreillyNamespace:
+    """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) search, cross-reference, product, vehicles, compatibility, category, categories, brand, store stock, stores, store, suggestions, rebates and deals endpoints (store directory also for Mexico)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_desc", "price_asc", "best_selling", "brand"]] = None,
+        brand: Optional[str] = None,
+        availability: Optional[Literal["store_pickup", "home_delivery"]] = None,
+        filters: Optional[dict[str, Union[str, float]]] = None,
+        vehicle: Optional[dict[str, Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) by keywords or an O'Reilly part number, sorted (relevance, price, best selling, brand), filtered (brand, store pickup / ship to home, attribute facets) and optionally only parts for a vehicle: country, language, currency, query, redirected_to (the category O'Reilly sends the search to, if any), priced_for, vehicle_requested, vehicle {base_vehicle_id, year, make, model} (as O'Reilly applied it), title, total (as O'Reilly reports it), page, page_size (24), total_pages, max_page (O'Reilly serves at most 20 pages), count, sort, sort_applied, brand, availability, filters, items (position, product_id, line_code, part_number (line_code + part_number are the inputs of product(), compatibility() and store_stock()), name, brand (from the Brands facet; None when none), url, image, category, price, regular_price, sale_price, on_sale, sale_type, discount_percent (computed by Scavio from regular_price when on sale), clearance, core_charge (the refundable core deposit O'Reilly adds on parts like batteries until the old part is returned; 0 when none), oil_fee, oil_deposit, currency, unit_of_measure, warranty, fit (as O'Reilly gives it: UNKNOWN, UNIVERSAL, ...), fit_notes [{name, description}] (for the requested vehicle), availability {store_pickup, in_store_now, pickup_time (O'Reilly's words, e.g. 8:30 AM today), ship_to_home, two_day, three_day, special_order, free_shipping, ship_to_home_blocked, store_pickup_blocked, store_restricted, air_shipping_restricted}, deals [{title, description, ends, terms}], attributes [{name, value}]. List items carry no rating (product() has it)), facets [{name, param (the key to send in filters; Brands -> brand, Availability -> availability), values [{label, value (the value to send), url}]}], notes. A page O'Reilly shows as a landing (no product list) answers items [] with links [{name, url}] to its product lists. A part-number search is O'Reilly's text match: to map another brand's or an OE part number to O'Reilly's parts use cross_reference(). Prices are as O'Reilly shows them for the store it assigns to the request: every answer names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ by store and there is no store or ZIP input for prices, so two calls can be priced for different stores; never report a price as national. Availability is as O'Reilly reports it, not a promise. Not available: unit counts in store stock, a chosen store for prices, reviews past the 10 most recent, Q&A, Mexico prices or catalog, Canada, license-plate lookup, the weekly ad, repair guides or trouble codes, O'Reilly Pro / First Call Online commercial pricing, price history (poll and store the answers), checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords ('brake pads') or an O'Reilly part number ('SC1001').
+            page: Page (1-20, 24 items a page). O'Reilly serves the first 20 pages of a list; a page above 20 is a 400, not charged.
+            sort: relevance (default, O'Reilly's order), price_desc, price_asc, best_selling or brand (A-Z).
+            brand: A brand as the Brands facet gives it (facets[].values[].value where facets[].param is Brands, e.g. 'Wagner_OEX').
+            availability: store_pickup (Pick Up in Store) or home_delivery (Ship to Home), as O'Reilly filters them.
+            filters: Up to 4 attribute facets: {'<facets[].param>': '<facets[].values[].value>'} (e.g. Position or Brake Pad Material).
+            vehicle: Only parts for this vehicle: {'base_vehicle_id': 129927} from vehicles(level='resolve') (129927 = 2015 Ford F-150). O'Reilly pins year, make and model with it; submodel and engine show in fit_notes.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_search", {"query": query, "page": page, "sort": sort, "brand": brand, "availability": availability, "filters": filters, "vehicle": vehicle}, extra)
+
+    async def cross_reference(
+        self,
+        part_number: str,
+        *,
+        part_type_id: Optional[str] = None,
+        manufacturer: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s parts that replace another brand's or an OE part number (O'Reilly's own interchange; e.g. FRAM PH3614): part_number, part_types [{id, name}], part_type_id, manufacturers [{id, name}] (the brands that use this number, in O'Reilly's order), manufacturer, replacing_brands, priced_for, total, page, page_size, total_pages, count, items (the search() item shape), facets, notes. When several manufacturers use the number and none is sent, it answers the lists with no items: send manufacturer next (their cross-references differ). Without part_type_id and with one manufacturer matching, the first-listed part type is used and named in notes. No replacement is an empty list (charged). Prices are as O'Reilly shows them for the store it assigns to the request: every answer names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ by store and there is no store or ZIP input for prices, so two calls can be priced for different stores; never report a price as national. Availability is as O'Reilly reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits with part_type_id and manufacturer, 4 with one of them or when several
+        manufacturers use the number, 6 with neither when one manufacturer matches. Returns the
+        API response as a dict.
+
+        Args:
+            part_number: Another brand's or an OE part number (e.g. FRAM 'PH3614', Motorcraft 'FL820S').
+            part_type_id: part_types[].id from an earlier answer (e.g. '02269'; saves a call).
+            manufacturer: The brand whose part number this is (manufacturers[].id from an earlier answer, e.g. 'FRAM'). With part_type_id too: 2 credits.
+            page: Page (1-20, 24 items a page). O'Reilly serves the first 20 pages of a list; a page above 20 is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_cross_reference", {"part_number": part_number, "part_type_id": part_type_id, "manufacturer": manufacturer, "page": page}, extra)
+
+    async def product(
+        self,
+        url: Optional[str] = None,
+        *,
+        line_code: Optional[str] = None,
+        part_number: Optional[str] = None,
+        vehicle: Optional[dict[str, Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) product in full by link or by line_code + part_number (found through O'Reilly's search first), optionally checked against a vehicle: country, requested, priced_for, line_code, part_number, name, brand, url, upc, unit_of_measure, category, part_type_id, universal, price, regular_price, sale_price, on_sale, sale_type, discount_percent (computed by Scavio from regular_price when on sale), clearance, core_charge (the refundable core deposit O'Reilly adds on parts like batteries until the old part is returned; 0 when none), oil_fee, oil_deposit, currency, warranty, availability {store_pickup, in_store_now, pickup_time (O'Reilly's words, e.g. 8:30 AM today), ship_to_home, two_day, three_day, special_order, free_shipping, ship_to_home_blocked, store_pickup_blocked, store_restricted, air_shipping_restricted}, stock_status, deals [{title, description, ends, terms}], rebates [{heading, title, description}], description, specifications [{name, value}], image, images, documents [{name, url}], breadcrumbs [{name, url}], rating {average, count}, reviews (the 10 most recent O'Reilly shows: [{date, title, text, rating}]; no paging, sort or star filter; no reviewer identity), and with vehicle: vehicle_requested, vehicle, vehicle_fit {fits, universal, notes [{name, description, per_vehicle_quantity}], documents}. fits is True when O'Reilly gives the part's application for that vehicle and None when the page gives no fit details; it is never False, so for 'does it fit' use search() or category() with vehicle, or compatibility(). A product O'Reilly does not list is a charged 404. Prices are as O'Reilly shows them for the store it assigns to the request: every answer names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ by store and there is no store or ZIP input for prices, so two calls can be priced for different stores; never report a price as national. Availability is as O'Reilly reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits by url, 4 by line_code + part_number. Returns the API response as a
+        dict.
+
+        Args:
+            url: An O'Reilly product link (items[].url): 2 credits. Send url or line_code + part_number.
+            line_code: O'Reilly line code (items[].line_code, e.g. 'BB', 'MOB', 'WIX').
+            part_number: Part number as O'Reilly lists it (items[].part_number, e.g. 'SC1001'). With line_code: 4 credits.
+            vehicle: Only parts for this vehicle: {'base_vehicle_id': 129927} from vehicles(level='resolve') (129927 = 2015 Ford F-150). O'Reilly pins year, make and model with it; submodel and engine show in fit_notes.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_product", {"url": url, "line_code": line_code, "part_number": part_number, "vehicle": vehicle}, extra)
+
+    async def vehicles(
+        self,
+        *,
+        level: Optional[Literal["types", "years", "makes", "models", "submodels", "engines", "resolve", "vin"]] = None,
+        type_id: Optional[int] = None,
+        year: Optional[int] = None,
+        make_id: Optional[int] = None,
+        model_id: Optional[int] = None,
+        submodel_id: Optional[int] = None,
+        engine_id: Optional[int] = None,
+        vin: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s vehicle selector one level at a time: types [{id, name}], years, makes / models / submodels / engines [{id, name}] (with country, level, type_id, year, make_id, model_id, submodel_id, count). Level resolve returns vehicle {base_vehicle_id, vehicle_id, type, subtype, year, make_id, make, model_id, model, submodel_id, submodel, engine_id, engine, slug, path}: send {'base_vehicle_id': ...} as vehicle to search(), category(), brand() and product(). Level vin decodes a 17-character VIN to vehicle {year, make_id, make, model_id, model, submodels [{id, name}], engines [{id, name}]} (an undecodable VIN is a charged 404). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            level: types, years (default), makes (year), models (year + make_id), submodels (+ model_id), engines (+ submodel_id), resolve (year + make_id + model_id, optional submodel_id / engine_id: the base_vehicle_id) or vin (decode a 17-character VIN).
+            type_id: Vehicle type (types[].id): 1 Automotive (default), 2 Motorcycle & Scooter, 3 ATV & UTV, 4 Personal Watercraft, 5 Snowmobile.
+            year: Model year, e.g. 2015.
+            make_id: makes[].id (23076 = Ford).
+            model_id: models[].id (31549 = F-150).
+            submodel_id: submodels[].id.
+            engine_id: engines[].id (resolve only).
+            vin: A 17-character VIN (level vin).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_vehicles", {"level": level, "type_id": type_id, "year": year, "make_id": make_id, "model_id": model_id, "submodel_id": submodel_id, "engine_id": engine_id, "vin": vin}, extra)
+
+    async def compatibility(
+        self,
+        line_code: str,
+        part_number: str,
+        *,
+        make: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The vehicles one O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) part fits: without make, makes (the makes it fits); with make, models [{model, engine, years}] as O'Reilly lists them. Returns country, line_code, part_number, make, count. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            line_code: O'Reilly line code (items[].line_code, e.g. 'BB', 'MOB', 'WIX').
+            part_number: Part number as O'Reilly lists it (items[].part_number, e.g. 'SC1001').
+            make: A make from makes (e.g. 'Ford'): the models, engines and years the part fits.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_compatibility", {"line_code": line_code, "part_number": part_number, "make": make}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_desc", "price_asc", "best_selling", "brand"]] = None,
+        brand: Optional[str] = None,
+        availability: Optional[Literal["store_pickup", "home_delivery"]] = None,
+        filters: Optional[dict[str, Union[str, float]]] = None,
+        vehicle: Optional[dict[str, Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) category's products by link or path, sorted, filtered and optionally only parts for a vehicle: country, category, url, priced_for, vehicle_requested, vehicle {base_vehicle_id, year, make, model} (as O'Reilly applied it), title, total (as O'Reilly reports it), page, page_size (24), total_pages, max_page (O'Reilly serves at most 20 pages), count, sort, sort_applied, brand, availability, filters, items (position, product_id, line_code, part_number (line_code + part_number are the inputs of product(), compatibility() and store_stock()), name, brand (from the Brands facet; None when none), url, image, category, price, regular_price, sale_price, on_sale, sale_type, discount_percent (computed by Scavio from regular_price when on sale), clearance, core_charge (the refundable core deposit O'Reilly adds on parts like batteries until the old part is returned; 0 when none), oil_fee, oil_deposit, currency, unit_of_measure, warranty, fit (as O'Reilly gives it: UNKNOWN, UNIVERSAL, ...), fit_notes [{name, description}] (for the requested vehicle), availability {store_pickup, in_store_now, pickup_time (O'Reilly's words, e.g. 8:30 AM today), ship_to_home, two_day, three_day, special_order, free_shipping, ship_to_home_blocked, store_pickup_blocked, store_restricted, air_shipping_restricted}, deals [{title, description, ends, terms}], attributes [{name, value}]. List items carry no rating (product() has it)), facets [{name, param (the key to send in filters; Brands -> brand, Availability -> availability), values [{label, value (the value to send), url}]}], notes. A page O'Reilly shows as a landing (no product list) answers items [] with links [{name, url}] to its product lists. A wrong category hash is a charged 404. Prices are as O'Reilly shows them for the store it assigns to the request: every answer names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ by store and there is no store or ZIP input for prices, so two calls can be priced for different stores; never report a price as national. Availability is as O'Reilly reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category: A category link or path (categories() categories[].url, or a facet / landing link): /shop/b/<name>/<12-character hash>, e.g. '/shop/b/brakes/brake-pads---shoes/brake-pads/a99314144bb6'.
+            page: Page (1-20, 24 items a page). O'Reilly serves the first 20 pages of a list; a page above 20 is a 400, not charged.
+            sort: relevance (default, O'Reilly's order), price_desc, price_asc, best_selling or brand (A-Z).
+            brand: A brand as the Brands facet gives it (facets[].values[].value where facets[].param is Brands, e.g. 'Wagner_OEX').
+            availability: store_pickup (Pick Up in Store) or home_delivery (Ship to Home), as O'Reilly filters them.
+            filters: Up to 4 attribute facets: {'<facets[].param>': '<facets[].values[].value>'} (e.g. Position or Brake Pad Material).
+            vehicle: Only parts for this vehicle: {'base_vehicle_id': 129927} from vehicles(level='resolve') (129927 = 2015 Ford F-150). O'Reilly pins year, make and model with it; submodel and engine show in fit_notes.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_category", {"category": category, "page": page, "sort": sort, "brand": brand, "availability": availability, "filters": filters, "vehicle": vehicle}, extra)
+
+    async def categories(
+        self,
+        *,
+        root: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s category tree (about 34 departments, 1,300 nodes): country, root, count, node_count, categories [{hash, name, url (the input of category()), requires_vehicle, children [...]}], featured [{hash, name, url}]. With root: that branch only (an unknown hash is a charged 404). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            root: A category hash (categories[].hash): only that branch.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_categories", {"root": root}, extra)
+
+    async def brand(
+        self,
+        brand: Optional[str] = None,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_desc", "price_asc", "best_selling", "brand"]] = None,
+        availability: Optional[Literal["store_pickup", "home_delivery"]] = None,
+        filters: Optional[dict[str, Union[str, float]]] = None,
+        vehicle: Optional[dict[str, Union[str, int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) by brand link or path, sorted, filtered and optionally only parts for a vehicle: country, brand_path, url, priced_for, vehicle_requested, vehicle {base_vehicle_id, year, make, model} (as O'Reilly applied it), title, total (as O'Reilly reports it), page, page_size (24), total_pages, max_page (O'Reilly serves at most 20 pages), count, sort, sort_applied, brand, availability, filters, items (position, product_id, line_code, part_number (line_code + part_number are the inputs of product(), compatibility() and store_stock()), name, brand (from the Brands facet; None when none), url, image, category, price, regular_price, sale_price, on_sale, sale_type, discount_percent (computed by Scavio from regular_price when on sale), clearance, core_charge (the refundable core deposit O'Reilly adds on parts like batteries until the old part is returned; 0 when none), oil_fee, oil_deposit, currency, unit_of_measure, warranty, fit (as O'Reilly gives it: UNKNOWN, UNIVERSAL, ...), fit_notes [{name, description}] (for the requested vehicle), availability {store_pickup, in_store_now, pickup_time (O'Reilly's words, e.g. 8:30 AM today), ship_to_home, two_day, three_day, special_order, free_shipping, ship_to_home_blocked, store_pickup_blocked, store_restricted, air_shipping_restricted}, deals [{title, description, ends, terms}], attributes [{name, value}]. List items carry no rating (product() has it)), facets [{name, param (the key to send in filters; Brands -> brand, Availability -> availability), values [{label, value (the value to send), url}]}], notes. A page O'Reilly shows as a landing (no product list) answers items [] with links [{name, url}] to its product lists. Without brand: O'Reilly's brand index: count, brands [{name, url}], top_brands and featured_brands [{name, url, image}]. An unknown brand is a charged 404. Prices are as O'Reilly shows them for the store it assigns to the request: every answer names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ by store and there is no store or ZIP input for prices, so two calls can be priced for different stores; never report a price as national. Availability is as O'Reilly reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits for one brand, 4 for the brand index (no brand). Returns the API
+        response as a dict.
+
+        Args:
+            brand: A brand link or path (brands[].url: /shop/brands/a/<brand>/<code>, e.g. 'https://www.oreillyauto.com/shop/brands/a/3m/mmm'). Without it: the brand index.
+            page: Page (1-20, 24 items a page). O'Reilly serves the first 20 pages of a list; a page above 20 is a 400, not charged.
+            sort: relevance (default, O'Reilly's order), price_desc, price_asc, best_selling or brand (A-Z).
+            availability: store_pickup (Pick Up in Store) or home_delivery (Ship to Home), as O'Reilly filters them.
+            filters: Up to 4 attribute facets: {'<facets[].param>': '<facets[].values[].value>'} (e.g. Position or Brake Pad Material).
+            vehicle: Only parts for this vehicle: {'base_vehicle_id': 129927} from vehicles(level='resolve') (129927 = 2015 Ford F-150). O'Reilly pins year, make and model with it; submodel and engine show in fit_notes.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_brand", {"brand": brand, "page": page, "sort": sort, "availability": availability, "filters": filters, "vehicle": vehicle}, extra)
+
+    async def store_stock(
+        self,
+        line_code: str,
+        part_number: str,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        quantity: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Which O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) stores within 50 miles of a ZIP or a point can hand over one part, as O'Reilly reports it: country, line_code, part_number, quantity, zip, latitude, longitude, radius_miles, count, stores [{store_id, address {line1, city, state, zip}, latitude, longitude, distance_miles (computed by Scavio from the requested point), hours_message, closed_all_week, availability {store_pickup, in_store_now, pickup_time (O'Reilly's words), message_hidden}}], notes. O'Reilly shows availability states, not unit counts. Stock is as O'Reilly reports it, not a promise. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 4 credits with zip, 2 with latitude + longitude. Returns the API response as a
+        dict.
+
+        Args:
+            line_code: O'Reilly line code (items[].line_code, e.g. 'BB', 'MOB', 'WIX').
+            part_number: Part number as O'Reilly lists it (items[].part_number, e.g. 'SC1001').
+            zip: A 5-digit US ZIP (looked up on O'Reilly's store finder: 4 credits in all). Send zip or latitude + longitude.
+            latitude: Latitude (with longitude): 2 credits.
+            longitude: Longitude (with latitude).
+            quantity: Quantity to check (default 1).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_store_stock", {"line_code": line_code, "part_number": part_number, "zip": zip, "latitude": latitude, "longitude": longitude, "quantity": quantity}, extra)
+
+    async def stores(
+        self,
+        *,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        country: Optional[Literal["us", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) stores: us near a ZIP or a point: the 25 nearest within 50 miles, stores [{store_id (the input of store()), phone, address {line1, line2, city, county, state, zip, zip4, country}, latitude, longitude, distance_miles, open_now, hours_message, closed_all_week, pickup_opens, hours [{day, open, close, closed, adjustment (holiday)}], services {hydraulic_hoses, paint_mixing, machine_shop}}]; or the store directory by state (us or mx): cities [{city, city_slug, store_count, store_number (cities with one store), url}] with total_stores, and by state + city: stores [{store_number, name, address, city_state, phone, services, url (the input of store())}]. mx lists O'Reilly's Mexican stores in Spanish (states agu, bcs, col, gua, jal, mic, nay, sin, son). An unknown state or city is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 4 credits near a zip, 2 near latitude + longitude or by state (+ city). Returns
+        the API response as a dict.
+
+        Args:
+            zip: A 5-digit US ZIP (looked up on O'Reilly's store finder: 4 credits in all). Send zip or latitude + longitude.
+            latitude: Latitude (with longitude): 2 credits.
+            longitude: Longitude (with latitude).
+            state: The store directory by state: a US state code ('mo', 'tx', 'pr'), or on mx one of agu, bcs, col, gua, jal, mic, nay, sin, son.
+            city: With state: a city (cities[].city_slug or its name, e.g. 'springfield'): that city's stores.
+            country: 'us' (default) or 'mx' (O'Reilly's Mexican store directory, in Spanish; Mexico shows no prices).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "state": state, "city": city, "country": country}, extra)
+
+    async def store(
+        self,
+        store_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        store_number: Optional[Union[str, int]] = None,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        country: Optional[Literal["us", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer) store: us by store_id (country, store_id, phone, address, latitude, longitude, open_now, hours_message, pickup_opens, hours [{day, open, close, closed, adjustment}], services); or by its directory page url (us or mx) or on mx by store_number + state + city: store_number, name, url, phone, address {street, city, region, zip, country}, latitude, longitude, opening_hours, hours [{day, open, close}], services (as the page lists them; Spanish on mx). An unknown store is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: us: an O'Reilly store number (stores[].store_id), e.g. '4973'.
+            url: A store page link from the directory (stores[].url, https://locations.oreillyauto.com/...): us or mx.
+            store_number: mx: the store number, with state and city.
+            state: mx: the state code (with store_number and city).
+            city: mx: the city (cities[].city_slug).
+            country: 'us' (default) or 'mx' (O'Reilly's Mexican store directory, in Spanish; Mexico shows no prices).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_store", {"store_id": store_id, "url": url, "store_number": store_number, "state": state, "city": city, "country": country}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s search suggestions for typed text: country, query, count, suggestions [{name, type (part_type), url (the category it opens: the input of category())}]. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Text a shopper types, e.g. 'brake' (2 characters or more).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_suggestions", {"query": query}, extra)
+
+    async def rebates(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s current rebates (the rebate center): country, count, rebates [{title, details, valid_text, valid_from, valid_to (read by Scavio from valid_text), postmark_by, keywords, categories, terms_url, form_url (PDF), redeem_online_url}], as O'Reilly lists them. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_rebates", {}, extra)
+
+    async def deals(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)'s coupons, offers and promotions page plus its deals menu: country, count, offers [{section, title, code (a promo code the offer text names), validity_text, details, url, image, image_text}], highlights [{title, description, url}], by_category [{title, url}]. Titles, details and validity are O'Reilly's free text. Failed upstream calls and refused inputs are not charged.
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("oreilly_deals", {}, extra)

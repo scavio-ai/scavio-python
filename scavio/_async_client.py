@@ -72,6 +72,7 @@ from ._namespaces_async import (
     _AsyncNordstromNamespace,
     _AsyncNordstromRackNamespace,
     _AsyncOlxNamespace,
+    _AsyncOreillyNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
     _AsyncPoshmarkNamespace,
@@ -258,6 +259,7 @@ class AsyncScavioClient:
         self.hema = _AsyncHemaNamespace(self)
         self.autozone = _AsyncAutozoneNamespace(self)
         self.instacart = _AsyncInstacartNamespace(self)
+        self.oreilly = _AsyncOreillyNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

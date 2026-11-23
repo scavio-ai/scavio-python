@@ -3723,6 +3723,106 @@ _IC_LIST = (
 )
 _IC_NO_ZONE = " A ZIP where Instacart has no service area answers 200 with an empty list and a note."
 
+# O'Reilly Auto Parts params shared across endpoints (oreillyauto.com, the US auto parts retailer;
+# O'Reilly's Mexican store directory on stores and store only). 14 endpoints, 2 credits each;
+# product by line_code + part_number, brand index, store_stock / stores by zip and deals 4;
+# cross_reference 2-6 by inputs. Only stores and store take country (us | mx); the rest are us
+# only and take no country. Lists are 24 a page, pages 1-20.
+_OR_NAME = "O'Reilly Auto Parts (oreillyauto.com, the US auto parts retailer)"
+_OR_COUNTRY = _lit(
+    "country",
+    ("us", "mx"),
+    "'us' (default) or 'mx' (O'Reilly's Mexican store directory, in Spanish; Mexico shows no "
+    "prices).",
+)
+_OR_PAGE = _int(
+    "page",
+    "Page (1-20, 24 items a page). O'Reilly serves the first 20 pages of a list; a page above 20 "
+    "is a 400, not charged.",
+)
+_OR_SORT = _lit(
+    "sort",
+    ("relevance", "price_desc", "price_asc", "best_selling", "brand"),
+    "relevance (default, O'Reilly's order), price_desc, price_asc, best_selling or brand (A-Z).",
+)
+_OR_BRAND_FACET = _str(
+    "brand",
+    "A brand as the Brands facet gives it (facets[].values[].value where facets[].param is "
+    "Brands, e.g. 'Wagner_OEX').",
+)
+_OR_AVAILABILITY = _lit(
+    "availability",
+    ("store_pickup", "home_delivery"),
+    "store_pickup (Pick Up in Store) or home_delivery (Ship to Home), as O'Reilly filters them.",
+)
+_OR_FILTERS = Param(
+    "filters",
+    "Optional[dict[str, Union[str, float]]]",
+    doc="Up to 4 attribute facets: {'<facets[].param>': '<facets[].values[].value>'} (e.g. "
+    "Position or Brake Pad Material).",
+)
+_OR_VEHICLE = Param(
+    "vehicle",
+    "Optional[dict[str, Union[str, int]]]",
+    doc="Only parts for this vehicle: {'base_vehicle_id': 129927} from vehicles(level='resolve') "
+    "(129927 = 2015 Ford F-150). O'Reilly pins year, make and model with it; submodel and engine "
+    "show in fit_notes.",
+)
+_OR_LIST_PARAMS = (_OR_PAGE, _OR_SORT, _OR_BRAND_FACET, _OR_AVAILABILITY, _OR_FILTERS, _OR_VEHICLE)
+_OR_LINE_CODE = "O'Reilly line code (items[].line_code, e.g. 'BB', 'MOB', 'WIX')."
+_OR_PART_NUMBER = "Part number as O'Reilly lists it (items[].part_number, e.g. 'SC1001')."
+_OR_ZIP = _str(
+    "zip",
+    "A 5-digit US ZIP (looked up on O'Reilly's store finder: 4 credits in all). Send zip or "
+    "latitude + longitude.",
+)
+_OR_POINT = (
+    _float("latitude", "Latitude (with longitude): 2 credits."),
+    _float("longitude", "Longitude (with latitude)."),
+)
+_OR_PRICES = (
+    " Prices are as O'Reilly shows them for the store it assigns to the request: every answer "
+    "names that store in priced_for {store_id, address, city, state, zip}. O'Reilly prices differ "
+    "by store and there is no store or ZIP input for prices, so two calls can be priced for "
+    "different stores; never report a price as national. Availability is as O'Reilly reports "
+    "it, not a promise."
+)
+_OR_NOT_AVAILABLE = (
+    " Not available: unit counts in store stock, a chosen store for prices, reviews past the 10 "
+    "most recent, Q&A, Mexico prices or catalog, Canada, license-plate lookup, the weekly ad, "
+    "repair guides or trouble codes, O'Reilly Pro / First Call Online commercial pricing, price "
+    "history (poll and store the answers), checkout."
+)
+_OR_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_OR_AVAIL = (
+    "availability {store_pickup, in_store_now, pickup_time (O'Reilly's words, e.g. 8:30 AM "
+    "today), ship_to_home, two_day, three_day, special_order, free_shipping, "
+    "ship_to_home_blocked, store_pickup_blocked, store_restricted, air_shipping_restricted}"
+)
+_OR_PRICE = (
+    "price, regular_price, sale_price, on_sale, sale_type, discount_percent (computed by Scavio "
+    "from regular_price when on sale), clearance, core_charge (the refundable core deposit "
+    "O'Reilly adds on parts like batteries until the old part is returned; 0 when none), "
+    "oil_fee, oil_deposit, currency"
+)
+_OR_ITEM = (
+    "position, product_id, line_code, part_number (line_code + part_number are the inputs of "
+    "product(), compatibility() and store_stock()), name, brand (from the Brands facet; None "
+    "when none), url, image, category, " + _OR_PRICE + ", unit_of_measure, warranty, fit (as "
+    "O'Reilly gives it: UNKNOWN, UNIVERSAL, ...), fit_notes [{name, description}] (for the "
+    "requested vehicle), " + _OR_AVAIL + ", deals [{title, description, ends, terms}], "
+    "attributes [{name, value}]. List items carry no rating (product() has it)"
+)
+_OR_LIST = (
+    "priced_for, vehicle_requested, vehicle {base_vehicle_id, year, make, model} (as O'Reilly "
+    "applied it), title, total (as O'Reilly reports it), page, page_size (24), total_pages, "
+    "max_page (O'Reilly serves at most 20 pages), count, sort, sort_applied, brand, "
+    "availability, filters, items (" + _OR_ITEM + "), facets [{name, param (the key to send in "
+    "filters; Brands -> brand, Availability -> availability), values [{label, value (the value "
+    "to send), url}]}], notes. A page O'Reilly shows as a landing (no product list) answers "
+    "items [] with links [{name, url}] to its product lists"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -16506,6 +16606,391 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ========================= O'Reilly Auto Parts =========================
+    # 14 endpoints on /api/v1/oreilly. 2 credits each; product by line_code + part_number 4,
+    # cross_reference 2-6 by inputs, brand index 4, store_stock / stores by zip 4
+    # (credits_note; credits is the floor); deals 4. Cross-reference chains up to 3 upstream
+    # calls and calls can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="oreilly_search",
+        namespace="oreilly",
+        method="search",
+        http="POST",
+        path="/api/v1/oreilly/search",
+        summary=(
+            "Search " + _OR_NAME + " by keywords or an O'Reilly part number, sorted (relevance, "
+            "price, best selling, brand), filtered (brand, store pickup / ship to home, attribute "
+            "facets) and optionally only parts for a vehicle: country, language, currency, query, "
+            "redirected_to (the category O'Reilly sends the search to, if any), " + _OR_LIST + ". "
+            "A part-number search is O'Reilly's text match: to map another brand's or an OE part "
+            "number to O'Reilly's parts use cross_reference()."
+            + _OR_PRICES + _OR_NOT_AVAILABLE + _OR_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords ('brake pads') or an O'Reilly part number ('SC1001')."),
+            *_OR_LIST_PARAMS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_cross_reference",
+        namespace="oreilly",
+        method="cross_reference",
+        http="POST",
+        path="/api/v1/oreilly/cross-reference",
+        summary=(
+            _OR_NAME + "'s parts that replace another brand's or an OE part number (O'Reilly's own "
+            "interchange; e.g. FRAM PH3614): part_number, part_types [{id, name}], part_type_id, "
+            "manufacturers [{id, name}] (the brands that use this number, in O'Reilly's order), "
+            "manufacturer, replacing_brands, priced_for, total, page, page_size, total_pages, "
+            "count, items (the search() item shape), facets, notes. When several manufacturers "
+            "use the number and none is sent, it answers the lists with no items: send "
+            "manufacturer next (their cross-references differ). Without part_type_id and with one "
+            "manufacturer matching, the first-listed part type is used and named in notes. No "
+            "replacement is an empty list (charged)." + _OR_PRICES + _OR_CHARGE
+        ),
+        params=(
+            _req(
+                "part_number",
+                "Another brand's or an OE part number (e.g. FRAM 'PH3614', Motorcraft 'FL820S').",
+            ),
+            _str("part_type_id", "part_types[].id from an earlier answer (e.g. '02269'; saves a call)."),
+            _str(
+                "manufacturer",
+                "The brand whose part number this is (manufacturers[].id from an earlier answer, "
+                "e.g. 'FRAM'). With part_type_id too: 2 credits.",
+            ),
+            _OR_PAGE,
+        ),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits with part_type_id and manufacturer, 4 with one of them or when "
+            "several manufacturers use the number, 6 with neither when one manufacturer matches."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_product",
+        namespace="oreilly",
+        method="product",
+        http="POST",
+        path="/api/v1/oreilly/product",
+        summary=(
+            "One " + _OR_NAME + " product in full by link or by line_code + part_number (found "
+            "through O'Reilly's search first), optionally checked against a vehicle: country, "
+            "requested, priced_for, line_code, part_number, name, brand, url, upc, "
+            "unit_of_measure, category, part_type_id, universal, " + _OR_PRICE + ", warranty, "
+            + _OR_AVAIL + ", stock_status, deals [{title, description, ends, terms}], rebates "
+            "[{heading, title, description}], description, specifications [{name, value}], image, "
+            "images, documents [{name, url}], breadcrumbs [{name, url}], rating {average, count}, "
+            "reviews (the 10 most recent O'Reilly shows: [{date, title, text, rating}]; no paging, "
+            "sort or star filter; no reviewer identity), and with vehicle: vehicle_requested, "
+            "vehicle, vehicle_fit {fits, universal, notes [{name, description, "
+            "per_vehicle_quantity}], documents}. fits is True when O'Reilly gives the part's "
+            "application for that vehicle and None when the page gives no fit details; it is "
+            "never False, so for 'does it fit' use search() or category() with vehicle, or "
+            "compatibility(). A product O'Reilly does not list is a charged 404."
+            + _OR_PRICES + _OR_CHARGE
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc="An O'Reilly product link (items[].url): 2 credits. Send url or line_code + "
+                "part_number.",
+            ),
+            _str("line_code", _OR_LINE_CODE),
+            _str("part_number", _OR_PART_NUMBER + " With line_code: 4 credits."),
+            _OR_VEHICLE,
+        ),
+        one_of=(("url", "part_number"),),
+        credits=2,
+        credits_note="Costs 2 credits by url, 4 by line_code + part_number.",
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_vehicles",
+        namespace="oreilly",
+        method="vehicles",
+        http="POST",
+        path="/api/v1/oreilly/vehicles",
+        summary=(
+            _OR_NAME + "'s vehicle selector one level at a time: types [{id, name}], years, makes "
+            "/ models / submodels / engines [{id, name}] (with country, level, type_id, year, "
+            "make_id, model_id, submodel_id, count). Level resolve returns vehicle "
+            "{base_vehicle_id, vehicle_id, type, subtype, year, make_id, make, model_id, model, "
+            "submodel_id, submodel, engine_id, engine, slug, path}: send {'base_vehicle_id': ...} "
+            "as vehicle to search(), category(), brand() and product(). Level vin decodes a "
+            "17-character VIN to vehicle {year, make_id, make, model_id, model, submodels [{id, "
+            "name}], engines [{id, name}]} (an undecodable VIN is a charged 404)." + _OR_CHARGE
+        ),
+        params=(
+            _lit(
+                "level",
+                ("types", "years", "makes", "models", "submodels", "engines", "resolve", "vin"),
+                "types, years (default), makes (year), models (year + make_id), submodels (+ "
+                "model_id), engines (+ submodel_id), resolve (year + make_id + model_id, optional "
+                "submodel_id / engine_id: the base_vehicle_id) or vin (decode a 17-character VIN).",
+            ),
+            _int(
+                "type_id",
+                "Vehicle type (types[].id): 1 Automotive (default), 2 Motorcycle & Scooter, 3 ATV "
+                "& UTV, 4 Personal Watercraft, 5 Snowmobile.",
+            ),
+            _int("year", "Model year, e.g. 2015."),
+            _int("make_id", "makes[].id (23076 = Ford)."),
+            _int("model_id", "models[].id (31549 = F-150)."),
+            _int("submodel_id", "submodels[].id."),
+            _int("engine_id", "engines[].id (resolve only)."),
+            _str("vin", "A 17-character VIN (level vin)."),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_compatibility",
+        namespace="oreilly",
+        method="compatibility",
+        http="POST",
+        path="/api/v1/oreilly/compatibility",
+        summary=(
+            "The vehicles one " + _OR_NAME + " part fits: without make, makes (the makes it "
+            "fits); with make, models [{model, engine, years}] as O'Reilly lists them. Returns "
+            "country, line_code, part_number, make, count." + _OR_CHARGE
+        ),
+        params=(
+            _req("line_code", _OR_LINE_CODE),
+            _req("part_number", _OR_PART_NUMBER),
+            _str("make", "A make from makes (e.g. 'Ford'): the models, engines and years the part fits."),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_category",
+        namespace="oreilly",
+        method="category",
+        http="POST",
+        path="/api/v1/oreilly/category",
+        summary=(
+            "One " + _OR_NAME + " category's products by link or path, sorted, filtered and "
+            "optionally only parts for a vehicle: country, category, url, " + _OR_LIST + ". A "
+            "wrong category hash is a charged 404." + _OR_PRICES + _OR_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A category link or path (categories() categories[].url, or a facet / landing "
+                "link): /shop/b/<name>/<12-character hash>, e.g. "
+                "'/shop/b/brakes/brake-pads---shoes/brake-pads/a99314144bb6'.",
+            ),
+            *_OR_LIST_PARAMS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_categories",
+        namespace="oreilly",
+        method="categories",
+        http="POST",
+        path="/api/v1/oreilly/categories",
+        summary=(
+            _OR_NAME + "'s category tree (about 34 departments, 1,300 nodes): country, root, "
+            "count, node_count, categories [{hash, name, url (the input of category()), "
+            "requires_vehicle, children [...]}], featured [{hash, name, url}]. With root: that "
+            "branch only (an unknown hash is a charged 404)." + _OR_CHARGE
+        ),
+        params=(_str("root", "A category hash (categories[].hash): only that branch."),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_brand",
+        namespace="oreilly",
+        method="brand",
+        http="POST",
+        path="/api/v1/oreilly/brand",
+        summary=(
+            "One brand's products on " + _OR_NAME + " by brand link or path, sorted, filtered and "
+            "optionally only parts for a vehicle: country, brand_path, url, " + _OR_LIST + ". "
+            "Without brand: O'Reilly's brand index: count, brands [{name, url}], top_brands and "
+            "featured_brands [{name, url, image}]. An unknown brand is a charged 404."
+            + _OR_PRICES + _OR_CHARGE
+        ),
+        params=(
+            Param(
+                "brand",
+                "Optional[str]",
+                positional=True,
+                doc="A brand link or path (brands[].url: /shop/brands/a/<brand>/<code>, e.g. "
+                "'https://www.oreillyauto.com/shop/brands/a/3m/mmm'). Without it: the brand index.",
+            ),
+            _OR_PAGE,
+            _OR_SORT,
+            _OR_AVAILABILITY,
+            _OR_FILTERS,
+            _OR_VEHICLE,
+        ),
+        credits=2,
+        credits_note="Costs 2 credits for one brand, 4 for the brand index (no brand).",
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_store_stock",
+        namespace="oreilly",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/oreilly/store-stock",
+        summary=(
+            "Which " + _OR_NAME + " stores within 50 miles of a ZIP or a point can hand over one "
+            "part, as O'Reilly reports it: country, line_code, part_number, quantity, zip, "
+            "latitude, longitude, radius_miles, count, stores [{store_id, address {line1, city, "
+            "state, zip}, latitude, longitude, distance_miles (computed by Scavio from the "
+            "requested point), hours_message, closed_all_week, availability {store_pickup, "
+            "in_store_now, pickup_time (O'Reilly's words), message_hidden}}], notes. O'Reilly "
+            "shows availability states, not unit counts. Stock is as O'Reilly reports it, not a "
+            "promise." + _OR_CHARGE
+        ),
+        params=(
+            _req("line_code", _OR_LINE_CODE),
+            _req("part_number", _OR_PART_NUMBER),
+            _OR_ZIP,
+            *_OR_POINT,
+            _int("quantity", "Quantity to check (default 1)."),
+        ),
+        one_of=(("zip", "latitude"),),
+        credits=2,
+        credits_note="Costs 4 credits with zip, 2 with latitude + longitude.",
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_stores",
+        namespace="oreilly",
+        method="stores",
+        http="POST",
+        path="/api/v1/oreilly/stores",
+        summary=(
+            _OR_NAME + " stores: us near a ZIP or a point: the 25 nearest within 50 miles, stores "
+            "[{store_id (the input of store()), phone, address {line1, line2, city, county, "
+            "state, zip, zip4, country}, latitude, longitude, distance_miles, open_now, "
+            "hours_message, closed_all_week, pickup_opens, hours [{day, open, close, closed, "
+            "adjustment (holiday)}], services {hydraulic_hoses, paint_mixing, machine_shop}}]; or "
+            "the store directory by state (us or mx): cities [{city, city_slug, store_count, "
+            "store_number (cities with one store), url}] with total_stores, and by state + city: "
+            "stores [{store_number, name, address, city_state, phone, services, url (the input of "
+            "store())}]. mx lists O'Reilly's Mexican stores in Spanish (states agu, bcs, col, "
+            "gua, jal, mic, nay, sin, son). An unknown state or city is a charged 404."
+            + _OR_CHARGE
+        ),
+        params=(
+            _OR_ZIP,
+            *_OR_POINT,
+            _str(
+                "state",
+                "The store directory by state: a US state code ('mo', 'tx', 'pr'), or on mx one "
+                "of agu, bcs, col, gua, jal, mic, nay, sin, son.",
+            ),
+            _str(
+                "city",
+                "With state: a city (cities[].city_slug or its name, e.g. 'springfield'): that "
+                "city's stores.",
+            ),
+            _OR_COUNTRY,
+        ),
+        one_of=(("zip", "latitude", "state"),),
+        credits=2,
+        credits_note=(
+            "Costs 4 credits near a zip, 2 near latitude + longitude or by state (+ city)."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_store",
+        namespace="oreilly",
+        method="store",
+        http="POST",
+        path="/api/v1/oreilly/store",
+        summary=(
+            "One " + _OR_NAME + " store: us by store_id (country, store_id, phone, address, "
+            "latitude, longitude, open_now, hours_message, pickup_opens, hours [{day, open, "
+            "close, closed, adjustment}], services); or by its directory page url (us or mx) or "
+            "on mx by store_number + state + city: store_number, name, url, phone, address "
+            "{street, city, region, zip, country}, latitude, longitude, opening_hours, hours "
+            "[{day, open, close}], services (as the page lists them; Spanish on mx). An unknown "
+            "store is a charged 404." + _OR_CHARGE
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="us: an O'Reilly store number (stores[].store_id), e.g. '4973'.",
+            ),
+            _str(
+                "url",
+                "A store page link from the directory (stores[].url, "
+                "https://locations.oreillyauto.com/...): us or mx.",
+            ),
+            _str_or_int("store_number", "mx: the store number, with state and city."),
+            _str("state", "mx: the state code (with store_number and city)."),
+            _str("city", "mx: the city (cities[].city_slug)."),
+            _OR_COUNTRY,
+        ),
+        one_of=(("store_id", "url", "store_number"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_suggestions",
+        namespace="oreilly",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/oreilly/suggestions",
+        summary=(
+            _OR_NAME + "'s search suggestions for typed text: country, query, count, suggestions "
+            "[{name, type (part_type), url (the category it opens: the input of category())}]."
+            + _OR_CHARGE
+        ),
+        params=(_req("query", "Text a shopper types, e.g. 'brake' (2 characters or more)."),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_rebates",
+        namespace="oreilly",
+        method="rebates",
+        http="POST",
+        path="/api/v1/oreilly/rebates",
+        summary=(
+            _OR_NAME + "'s current rebates (the rebate center): country, count, rebates [{title, "
+            "details, valid_text, valid_from, valid_to (read by Scavio from valid_text), "
+            "postmark_by, keywords, categories, terms_url, form_url (PDF), redeem_online_url}], "
+            "as O'Reilly lists them." + _OR_CHARGE
+        ),
+        params=(),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="oreilly_deals",
+        namespace="oreilly",
+        method="deals",
+        http="POST",
+        path="/api/v1/oreilly/deals",
+        summary=(
+            _OR_NAME + "'s coupons, offers and promotions page plus its deals menu: country, "
+            "count, offers [{section, title, code (a promo code the offer text names), "
+            "validity_text, details, url, image, image_text}], highlights [{title, description, "
+            "url}], by_category [{title, url}]. Titles, details and validity are O'Reilly's free "
+            "text. Failed upstream calls and refused inputs are not charged."
+        ),
+        params=(),
+        credits=4,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -23545,6 +24030,7 @@ NAMESPACES: tuple[str, ...] = (
     "hema",
     "autozone",
     "instacart",
+    "oreilly",
 )
 
 

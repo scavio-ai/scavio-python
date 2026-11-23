@@ -70,6 +70,7 @@ from ._namespaces_sync import (
     _NordstromNamespace,
     _NordstromRackNamespace,
     _OlxNamespace,
+    _OreillyNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
     _PoshmarkNamespace,
@@ -263,6 +264,7 @@ class ScavioClient:
         self.hema = _HemaNamespace(self)
         self.autozone = _AutozoneNamespace(self)
         self.instacart = _InstacartNamespace(self)
+        self.oreilly = _OreillyNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

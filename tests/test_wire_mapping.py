@@ -643,6 +643,11 @@ BODY_PRICED_KEYS = {
     "autozone_product",
     "instacart_search",
     "instacart_cross_search",
+    "oreilly_cross_reference",
+    "oreilly_product",
+    "oreilly_brand",
+    "oreilly_store_stock",
+    "oreilly_stores",
 }
 
 
@@ -6330,3 +6335,164 @@ def test_instacart_credits_paths_and_wire(monkeypatch):
         (base + "reviews", {"product_id": "16408559"}, 240.0),
         (base + "reviews", {"product_id": "16408559", "page": 2}, 240.0),
     ]
+
+
+def test_oreilly_credits_paths_and_wire(monkeypatch):
+    """oreilly (0.78.0): 14 endpoints on /api/v1/oreilly.
+
+    2 credits each; product by line_code + part_number 4, cross_reference 2 / 4 / 6 by inputs,
+    brand index 4, store_stock and stores by zip 4 (credits_note; credits is the floor); deals 4.
+    Only stores and store take country (us | mx); the rest are us only and take no country.
+    Lists are 24 a page, pages 1-20.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "oreilly"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "compatibility", "cross_reference", "deals",
+        "product", "rebates", "search", "store", "store_stock", "stores", "suggestions",
+        "vehicles",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/oreilly/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "O'Reilly" in ep.summary, ep.key
+        country = {p.name: p for p in ep.params}.get("country")
+        if m in ("stores", "store"):
+            assert country.annotation == 'Optional[Literal["us", "mx"]]', m
+        else:
+            assert country is None, m
+    for m in ("search", "category", "brand", "cross_reference"):
+        page = {p.name: p for p in eps[m].params}["page"]
+        assert page.annotation == "Optional[int]", m
+        assert "1-20" in page.doc, m
+    for m in ("search", "category"):
+        names = [p.name for p in eps[m].params]
+        assert names[1:] == ["page", "sort", "brand", "availability", "filters", "vehicle"], m
+    sort = {p.name: p for p in eps["search"].params}["sort"]
+    assert sort.annotation == (
+        'Optional[Literal["relevance", "price_desc", "price_asc", "best_selling", "brand"]]'
+    )
+    for m in ("search", "vehicles", "compatibility", "category", "categories", "store",
+              "suggestions", "rebates"):
+        assert eps[m].credits == 2 and eps[m].credits_note is None, m
+    assert eps["deals"].credits == 4 and eps["deals"].credits_note is None
+    assert eps["product"].credits_note == "Costs 2 credits by url, 4 by line_code + part_number."
+    assert eps["cross_reference"].credits_note == (
+        "Costs 2 credits with part_type_id and manufacturer, 4 with one of them or when "
+        "several manufacturers use the number, 6 with neither when one manufacturer matches."
+    )
+    assert eps["brand"].credits_note == (
+        "Costs 2 credits for one brand, 4 for the brand index (no brand)."
+    )
+    assert eps["store_stock"].credits_note == (
+        "Costs 4 credits with zip, 2 with latitude + longitude."
+    )
+    assert eps["stores"].credits_note == (
+        "Costs 4 credits near a zip, 2 near latitude + longitude or by state (+ city)."
+    )
+    assert eps["product"].one_of == (("url", "part_number"),)
+    assert eps["store_stock"].one_of == (("zip", "latitude"),)
+    assert eps["stores"].one_of == (("zip", "latitude", "state"),)
+    assert eps["store"].one_of == (("store_id", "url", "store_number"),)
+    for m in ("compatibility", "store_stock"):
+        req = [p.name for p in eps[m].params if p.required]
+        assert req == ["line_code", "part_number"], m
+    assert {p.name: p for p in eps["stores"].params}["latitude"].annotation == "Optional[float]"
+    for m in ("search", "cross_reference", "product", "category", "brand"):
+        assert "priced_for" in eps[m].summary, m
+        assert "never report a price as national" in eps[m].summary, m
+    assert "never False" in eps["product"].summary
+    assert "10 most recent" in eps["product"].summary
+    assert "not unit counts" in eps["store_stock"].summary
+    assert "Spanish" in eps["stores"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    o = client.oreilly
+    o.search("brake pads")
+    o.search("brake pads", vehicle={"base_vehicle_id": 129927}, sort="price_asc", page=2,
+             availability="store_pickup", brand="Wagner_OEX",
+             filters={"/attributes/prodAttr_32769": "104088"})
+    o.cross_reference("PH3614")
+    o.cross_reference("PH3614", part_type_id="02269", manufacturer="FRAM")
+    o.product("https://www.oreillyauto.com/detail/c/brakebest-select-brake-pads/"
+              "brakebest-select-ceramic-brake-pads/bsg0/sc1001")
+    o.product(line_code="BB", part_number="SC1001", vehicle={"base_vehicle_id": 129927})
+    o.vehicles()
+    o.vehicles(level="resolve", year=2015, make_id=23076, model_id=31549)
+    o.vehicles(level="vin", vin="1HGCM82633A004352")
+    o.compatibility("BB", "SC1001")
+    o.compatibility("BB", "SC1001", make="Ford")
+    o.category("/shop/b/brakes/brake-pads---shoes/brake-pads/a99314144bb6",
+               vehicle={"base_vehicle_id": 129927})
+    o.categories()
+    o.categories(root="95397663b44a")
+    o.brand()
+    o.brand("https://www.oreillyauto.com/shop/brands/a/3m/mmm", sort="best_selling")
+    o.store_stock("BB", "SC1001", zip="77002")
+    o.store_stock("BB", "SC1001", latitude=29.75, longitude=-95.36, quantity=2)
+    o.stores(zip="77002")
+    o.stores(state="mo", city="springfield")
+    o.stores(state="jal", country="mx")
+    o.store("4973")
+    o.store(store_number="7601", state="jal", city="guadalajara", country="mx")
+    o.suggestions("brake")
+    o.rebates()
+    o.deals()
+    base = "/api/v1/oreilly/"
+    assert seen == [
+        (base + "search", {"query": "brake pads"}, 240.0),
+        (base + "search", {"query": "brake pads", "page": 2, "sort": "price_asc",
+                           "brand": "Wagner_OEX", "availability": "store_pickup",
+                           "filters": {"/attributes/prodAttr_32769": "104088"},
+                           "vehicle": {"base_vehicle_id": 129927}}, 240.0),
+        (base + "cross-reference", {"part_number": "PH3614"}, 240.0),
+        (base + "cross-reference", {"part_number": "PH3614", "part_type_id": "02269",
+                                    "manufacturer": "FRAM"}, 240.0),
+        (base + "product", {"url": "https://www.oreillyauto.com/detail/c/brakebest-select-brake-"
+                                   "pads/brakebest-select-ceramic-brake-pads/bsg0/sc1001"}, 240.0),
+        (base + "product", {"line_code": "BB", "part_number": "SC1001",
+                            "vehicle": {"base_vehicle_id": 129927}}, 240.0),
+        (base + "vehicles", {}, 240.0),
+        (base + "vehicles", {"level": "resolve", "year": 2015, "make_id": 23076,
+                             "model_id": 31549}, 240.0),
+        (base + "vehicles", {"level": "vin", "vin": "1HGCM82633A004352"}, 240.0),
+        (base + "compatibility", {"line_code": "BB", "part_number": "SC1001"}, 240.0),
+        (base + "compatibility", {"line_code": "BB", "part_number": "SC1001", "make": "Ford"},
+         240.0),
+        (base + "category", {"category": "/shop/b/brakes/brake-pads---shoes/brake-pads/"
+                                         "a99314144bb6",
+                             "vehicle": {"base_vehicle_id": 129927}}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"root": "95397663b44a"}, 240.0),
+        (base + "brand", {}, 240.0),
+        (base + "brand", {"brand": "https://www.oreillyauto.com/shop/brands/a/3m/mmm",
+                          "sort": "best_selling"}, 240.0),
+        (base + "store-stock", {"line_code": "BB", "part_number": "SC1001", "zip": "77002"},
+         240.0),
+        (base + "store-stock", {"line_code": "BB", "part_number": "SC1001", "latitude": 29.75,
+                                "longitude": -95.36, "quantity": 2}, 240.0),
+        (base + "stores", {"zip": "77002"}, 240.0),
+        (base + "stores", {"state": "mo", "city": "springfield"}, 240.0),
+        (base + "stores", {"state": "jal", "country": "mx"}, 240.0),
+        (base + "store", {"store_id": "4973"}, 240.0),
+        (base + "store", {"store_number": "7601", "state": "jal", "city": "guadalajara",
+                          "country": "mx"}, 240.0),
+        (base + "suggestions", {"query": "brake"}, 240.0),
+        (base + "rebates", {}, 240.0),
+        (base + "deals", {}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        o.product()
+    with pytest.raises(ScavioError):
+        o.store_stock("BB", "SC1001")
+    with pytest.raises(ScavioError):
+        o.stores()
+    with pytest.raises(ScavioError):
+        o.store()
