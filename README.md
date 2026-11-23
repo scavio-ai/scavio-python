@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 98 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 99 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -50,6 +50,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
 | AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
 | O'Reilly Auto Parts Part-Number Cross-Reference with Prices, Core Charges, Rebates, Store Stock near a ZIP and VIN Decode (US; Mexico store directory; 14 endpoints) | Yes | No | No | No |
+| Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4469,6 +4470,94 @@ commercial pricing, price history (poll and store the answers), checkout.
 Failed calls and refused inputs are not charged; a not-found (an unknown
 product, VIN, category, brand, state, city or store) is charged.
 
+### 68. Hardware -- Ace Hardware prices by store, units on hand at nearby stores, weekly ad
+
+Ace Hardware (acehardware.com), the US hardware cooperative. Namespace
+`acehardware`, 11 endpoints: `search`, `product`, `store_stock`, `store`,
+`stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`,
+`paint_colors`. 1 credit per call; `search` 2 (3 when Ace redirects the search
+to a category and the list options are applied to it); `product` 2 (with or
+without `store`); `store_stock` 1 per 5 stores (1 store 1, 25 stores 5,
+`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6). An
+occasional call costs 2 instead of 1; `credits_used` in the response is what
+was charged. US only, so no method takes `country`. The request timeout is
+raised to at least 240s on every endpoint. Pair it with the `homedepot` and
+`lowes` namespaces for a local hardware price check on the same item (brand +
+model).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ace = client.acehardware
+
+# --- The same item priced for three Ace stores (store numbers are 5-digit strings).
+for store in ("10665", "18250", "03085"):
+    p = ace.product("72779", store=store)["data"]
+    print(store, p["priced_for"], p["price"], p["msrp"])
+# Without a store, priced_for names the price list Ace used (CORP is Ace's online price).
+print(ace.product("72779")["data"]["priced_for"])
+
+# --- Exact units on hand at chosen stores, or at one store and its 25 nearest.
+stock = ace.store_stock("72779", stores=["18250", "17309"])["data"]
+for s in stock["stores"]:
+    print(s["store_id"], s["units_in_stock"], s["location_code"], s["distribution_center"])
+nearby = ace.store_stock("72779", store="18250", nearby=True)["data"]  # 6 credits
+print(nearby["count"], nearby["in_stock_count"], nearby["total_units"])
+
+# --- One store, the stores nearest it, and its weekly ad.
+store = ace.store("18250")["data"]
+print(store["name"], store["address"], store["features"], store["nearest_stores"][:3])
+near = ace.stores("03085", details=True, limit=4)["data"]["stores"]
+ad = ace.weekly_ad("18250")["data"]
+print(ad["title"], ad["valid_from"], ad["valid_to"], ad["total_pages"])
+for it in ad["items"][:3]:
+    print(it["heading"], it["title"], it["price_text"], it["item_numbers"])
+page2 = ace.weekly_ad("18250", page=2, ad_group=ad["ad_group"])["data"]
+
+# --- Lists: search, a category, a brand, deals (listing prices, not a store's price).
+hits = ace.search("brass hose nozzle")["data"]
+drills = ace.category("/departments/tools/power-tools/cordless-drills", sort="price_asc")["data"]
+weber = ace.brand("weber")["data"]
+deals = ace.deals(offer="sale")["data"]
+print(hits["total"], drills["total"], weber["total"], [p["code"] for p in deals["promotions"]])
+tree = ace.categories()["data"]["categories"]
+pinks = ace.paint_colors(query="pink")["data"]["colors"]
+print([(c["name"], c["brand"], c["hex"]) for c in pinks[:3]])
+```
+
+Ace stores are independently owned and operated, and the same item can be
+priced differently at different stores (Ace's terms: pricing varies by
+location). `product` with `store` returns the price as Ace shows it for that
+store, with `priced_for` {`store_id`, `price_list`}; without a store,
+`priced_for` names the price list Ace used (`CORP` is Ace's online price).
+Captured 2026-11-23: item 72779 (Ace ice melt, 40 lb) at $35.99 for store
+10665 (New York), $21.99 for 18250 (Chicago) and $18.99 for 03085 (Kalona,
+Iowa). `msrp` is reported as Ace gives it and can be below a store's price.
+Listing prices (`search`, `category`, `brand`, `deals`) are the price Ace shows
+in its listing (`price_list` per item), not a store's price; for a store's
+price call `product` with `store`. Lists return 15, 30 (default), 50, 100 or
+200 a page, sorted `relevance`, `price_asc`, `price_desc`, `name_asc`,
+`name_desc`, `newest` or `oldest`, filtered by `brand`, `offer` (`sale`,
+`ace_rewards`, `buy_and_get`, `buy_more_save`), `on_sale` or facet `filters`.
+
+Store numbers are 5 digits with leading zeros kept (`"03085"`), shown in every
+Ace store page link (acehardware.com/store-details/<number>); there is no store
+search by ZIP or city, and `stores` lists the 25 stores Ace names as nearest to
+one store. `store_stock` returns exact units on hand as Ace reports them
+(`units_in_stock`, `soft_units`, the shelf `location_code` and the regional
+distribution centre's units); Ace answers 0 for a store number or product it
+does not know, exactly as for one out of stock. `weekly_ad` returns one store's
+circular with `valid_from` / `valid_to` and items with the ad's own price text.
+`deals` adds Ace's site-wide promotions with codes and start / end dates.
+`paint_colors` lists about 5,300 colours (Benjamin Moore, Clark+Kensington,
+Magnolia Home) with hex and RGB. Not available: review or Q&A text (rating and
+count only), search suggestions, ZIP or city store search, pickup or delivery
+dates, price history (poll and store the answers), Ace Rewards member prices,
+Ace Handyman, rentals, Ace-licensed stores outside the US, checkout. Failed
+calls and refused inputs are not charged; a not-found (an unknown product,
+category, brand or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4616,6 +4705,7 @@ Scavio works with popular AI/LLM frameworks:
 | HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
 | AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
 | O'Reilly Auto Parts (`oreilly`) | `search`, `cross_reference`, `product`, `vehicles`, `compatibility`, `category`, `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`, `rebates`, `deals`; us (default) on every method; mx on `stores` and `store` only (the Mexican store directory, in Spanish) | 2 each; `product` by `line_code` + `part_number` 4; `cross_reference` 2 / 4 / 6 by inputs; `brand` index 4; `store_stock` and `stores` by `zip` 4; `deals` 4 |
+| Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4647,6 +4737,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.79.0
+
+- **New `acehardware` namespace** (sync and async) for Ace Hardware
+  (acehardware.com), the US hardware cooperative, 11 endpoints: `search`,
+  `product`, `store_stock`, `store`, `stores`, `category`, `categories`,
+  `brand`, `deals`, `weekly_ad`, `paint_colors`. An item's price for the Ace
+  store you pick (`product` with `store`, named in `priced_for`), exact units
+  on hand at up to 25 stores or at one store and its 25 nearest, store details
+  and the 25 nearest stores, each store's weekly ad with valid dates, deals
+  with promo codes, the category tree, brands and Ace's paint colours. US only;
+  no method takes `country`. The request timeout is raised to at least 240s on
+  every endpoint.
 
 ### Changed in 0.78.0
 

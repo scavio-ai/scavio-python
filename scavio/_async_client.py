@@ -8,6 +8,7 @@ from ._exceptions import ScavioError
 from ._extract import AsyncExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
+    _AsyncAcehardwareNamespace,
     _AsyncActionNamespace,
     _AsyncAirbnbNamespace,
     _AsyncAldiNamespace,
@@ -260,6 +261,7 @@ class AsyncScavioClient:
         self.autozone = _AsyncAutozoneNamespace(self)
         self.instacart = _AsyncInstacartNamespace(self)
         self.oreilly = _AsyncOreillyNamespace(self)
+        self.acehardware = _AsyncAcehardwareNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

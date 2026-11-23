@@ -648,6 +648,9 @@ BODY_PRICED_KEYS = {
     "oreilly_brand",
     "oreilly_store_stock",
     "oreilly_stores",
+    "acehardware_search",
+    "acehardware_store_stock",
+    "acehardware_stores",
 }
 
 
@@ -6496,3 +6499,127 @@ def test_oreilly_credits_paths_and_wire(monkeypatch):
         o.stores()
     with pytest.raises(ScavioError):
         o.store()
+
+
+def test_acehardware_credits_paths_and_wire(monkeypatch):
+    """acehardware (0.79.0): 11 endpoints on /api/v1/acehardware, US only (no country).
+
+    search 2 (3 on a category redirect), product 2, store_stock 1 per 5 stores (nearby 6),
+    stores 1 (details 1 lookup per store) (credits_note; credits is the floor); the rest 1.
+    Store numbers are 5-digit strings with leading zeros kept.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "acehardware"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "deals", "paint_colors", "product", "search",
+        "store", "store_stock", "stores", "weekly_ad",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/acehardware/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "Ace" in ep.summary, ep.key
+        assert "country" not in {p.name for p in ep.params}, m
+    for m in ("search", "category"):
+        names = [p.name for p in eps[m].params]
+        assert names[1:] == ["page", "page_size", "sort", "brand", "offer", "on_sale", "filters"], m
+    assert [p.name for p in eps["deals"].params] == [
+        "page", "page_size", "sort", "brand", "offer", "on_sale", "filters",
+    ]
+    assert "brand" not in [p.name for p in eps["brand"].params][1:]
+    sort = {p.name: p for p in eps["search"].params}["sort"]
+    assert sort.annotation == (
+        'Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc", '
+        '"newest", "oldest"]]'
+    )
+    size = {p.name: p for p in eps["search"].params}["page_size"]
+    assert size.annotation == "Optional[Literal[15, 30, 50, 100, 200]]"
+    assert eps["search"].credits == 2
+    assert eps["search"].credits_note == (
+        "Costs 2 credits (3 when Ace redirects the search to a category and the list options "
+        "are applied to it)."
+    )
+    assert eps["product"].credits == 2 and eps["product"].credits_note is None
+    assert eps["store_stock"].credits_note == (
+        "Costs 1 credit per 5 stores (1 store 1, 5 stores 1, 25 stores 5; nearby 6)."
+    )
+    assert eps["stores"].credits_note == (
+        "Costs 1 credit without details; with details 1 lookup per store (25 stores 6 credits)."
+    )
+    for m in ("store", "category", "categories", "brand", "deals", "weekly_ad", "paint_colors"):
+        assert eps[m].credits == 1 and eps[m].credits_note is None, m
+        assert "occasional call costs 2" in eps[m].summary, m
+    assert eps["product"].one_of == (("product_code", "url"),)
+    assert eps["store_stock"].one_of == (("store", "stores"),)
+    for m in ("store", "stores", "weekly_ad"):
+        store = {p.name: p for p in eps[m].params}["store"]
+        assert store.required and store.annotation == "Union[str, int]", m
+        assert "leading zeros" in store.doc, m
+    for m in ("search", "category", "brand", "deals"):
+        assert "not a store's price" in eps[m].summary, m
+    assert "priced_for" in eps["product"].summary
+    assert "exactly as for one out of stock" in eps["store_stock"].summary
+    assert "no public store search by ZIP" in eps["stores"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    a = client.acehardware
+    a.search("brass hose nozzle")
+    a.search("cordless drill", page=2, page_size=50, sort="price_asc", brand="dewalt",
+             offer="sale", filters=["tenant~A00317:lithium-ion"])
+    a.product("72779")
+    a.product("72779", store="03085")
+    a.product(url="https://www.acehardware.com/p/72779", store="10665")
+    a.store_stock("72779", stores=["18250", "17309"])
+    a.store_stock("72779", store="18250", nearby=True)
+    a.store("18250")
+    a.stores("03085", details=True, limit=4)
+    a.category("/departments/tools/power-tools/cordless-drills", sort="newest")
+    a.categories()
+    a.categories("/departments/tools")
+    a.brand()
+    a.brand(query="web")
+    a.brand("weber", on_sale=True)
+    a.deals(offer="ace_rewards")
+    a.weekly_ad("18250")
+    a.weekly_ad("18250", page=2, ad_group="261101_WCAS")
+    a.paint_colors(query="pink")
+    a.paint_colors(brand="Benjamin Moore", page=2, page_size=500)
+    base = "/api/v1/acehardware/"
+    assert seen == [
+        (base + "search", {"query": "brass hose nozzle"}, 240.0),
+        (base + "search", {"query": "cordless drill", "page": 2, "page_size": 50,
+                           "sort": "price_asc", "brand": "dewalt", "offer": "sale",
+                           "filters": ["tenant~A00317:lithium-ion"]}, 240.0),
+        (base + "product", {"product_code": "72779"}, 240.0),
+        (base + "product", {"product_code": "72779", "store": "03085"}, 240.0),
+        (base + "product", {"url": "https://www.acehardware.com/p/72779", "store": "10665"},
+         240.0),
+        (base + "store-stock", {"product_code": "72779", "stores": ["18250", "17309"]}, 240.0),
+        (base + "store-stock", {"product_code": "72779", "store": "18250", "nearby": True},
+         240.0),
+        (base + "store", {"store": "18250"}, 240.0),
+        (base + "stores", {"store": "03085", "details": True, "limit": 4}, 240.0),
+        (base + "category", {"category": "/departments/tools/power-tools/cordless-drills",
+                             "sort": "newest"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"category": "/departments/tools"}, 240.0),
+        (base + "brand", {}, 240.0),
+        (base + "brand", {"query": "web"}, 240.0),
+        (base + "brand", {"brand": "weber", "on_sale": True}, 240.0),
+        (base + "deals", {"offer": "ace_rewards"}, 240.0),
+        (base + "weekly-ad", {"store": "18250"}, 240.0),
+        (base + "weekly-ad", {"store": "18250", "page": 2, "ad_group": "261101_WCAS"}, 240.0),
+        (base + "paint-colors", {"query": "pink"}, 240.0),
+        (base + "paint-colors", {"brand": "Benjamin Moore", "page": 2, "page_size": 500},
+         240.0),
+    ]
+    with pytest.raises(ScavioError):
+        a.product()
+    with pytest.raises(ScavioError):
+        a.store_stock("72779")
