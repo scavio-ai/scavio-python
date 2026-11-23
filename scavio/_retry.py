@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import email.utils
+import math
 import random
 from dataclasses import dataclass, field
 from typing import Optional
@@ -51,9 +52,13 @@ def parse_retry_after(header: Optional[str]) -> Optional[float]:
         return None
     header = header.strip()
     try:
-        return float(header)
+        delay = float(header)
     except ValueError:
         pass
+    else:
+        if header.isascii() and math.isfinite(delay) and delay >= 0:
+            return delay
+        return None
     try:
         parsed = email.utils.parsedate_to_datetime(header)
     except (TypeError, ValueError):

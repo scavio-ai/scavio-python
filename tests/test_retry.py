@@ -184,3 +184,10 @@ async def test_async_network_error_wrapped(monkeypatch):
 async def test_async_timeout_wrapped(monkeypatch):
     with pytest.raises(ScavioTimeoutError):
         await _run_async(monkeypatch, [httpx.ReadTimeout("slow")], max_retries=0)
+
+def test_parse_retry_after_rejects_invalid_numeric_delays():
+    from scavio._retry import parse_retry_after
+
+    for header in ("", "  ", "-1", "NaN", "∞", "１"):
+        assert parse_retry_after(header) is None
+
