@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 100 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 101 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -52,6 +52,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | O'Reilly Auto Parts Part-Number Cross-Reference with Prices, Core Charges, Rebates, Store Stock near a ZIP and VIN Decode (US; Mexico store directory; 14 endpoints) | Yes | No | No | No |
 | Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
 | Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
+| Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4644,6 +4645,91 @@ member prices, live chick availability, Petsense, checkout. Failed calls and
 refused inputs are not charged; a not-found (an unknown item, category, brand,
 store or a ZIP with no store) is charged.
 
+### 70. Arts and Crafts -- Michaels store stock near a ZIP, prices with Reg. labels, variants
+
+Michaels (michaels.com), the US and Canada arts and crafts retailer. Namespace
+`michaels`, 11 endpoints: `search`, `product`, `store_stock`,
+`store_inventory`, `stores`, `store`, `category`, `categories`, `brand`,
+`deals`, `suggestions`. 2 credits per call; `category` and `deals` 4 when the
+category is a `/shop/` link or path (one more call finds its code path; a code
+path costs 2). `credits_used` in the response is what was charged. `country`
+is `"us"` (default, www.michaels.com, USD) or `"ca"` (canada.michaels.com,
+CAD); `language` is `"en"` (default) or `"fr"` (with `"ca"` only). `stores`,
+`categories` and `suggestions` are US only and take no `country`. The request
+timeout is raised to at least 240s on every endpoint. Pair it with the
+`walmart` and `amazon` namespaces (and the
+[Etsy API](https://scavio.dev/etsy-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme))
+for a price check on the same item.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mi = client.michaels
+
+# --- One skein's units at the Michaels stores near a ZIP, as Michaels reports them.
+stock = mi.store_stock("10228177", "10001")["data"]
+print(stock["count"], stock["in_stock_count"], stock["total_units"])
+for s in stock["stores"]:
+    print(s["store_id"], s["name"], s["distance_miles"], s["units"], s["pickup_text"], s["virtual"])
+
+# --- Up to 30 SKUs at one store.
+inv = mi.store_inventory("1191", ["10228177", "10816737"])["data"]
+print([(i["sku"], i["units"]) for i in inv["items"]], inv["not_reported"])
+
+# --- A product: price next to Michaels' own Reg. label, promotions with their dates,
+#     every colour with its price and UPC, online stock (not a store's), Pro-pack price.
+p = mi.product("10228177")["data"]
+print(p["price"], p["was_price_text"], p["online_stock"], p["pro_pack"])
+for promo in p["promotions"]:
+    print(promo["text"], promo["starts"], promo["ends"])
+for v in p["variants"][:5]:
+    print(v["sku"], v["options"], v["price"], v["was_price"], v["upc"])
+
+# --- The same item in Canada (CAD), in English or French.
+ca = mi.product("10816737", country="ca")["data"]
+print(ca["market"]["currency"], ca["price"], ca["was_price_text"])
+
+# --- Lists: search, a category, a brand, deals (Sale, New, Clearance, Great Buy).
+hits = mi.search("yarn", sort="price_asc", on_sale=True)["data"]
+for it in hits["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["was_price_text"], it["seller_type"])
+canvas = mi.category("/shop/art-supplies/artist-canvas")["data"]
+cricut = mi.brand("Cricut")["data"]
+xmas = mi.deals(query="christmas")["data"]
+print(hits["total"], canvas["total"], cricut["total"], xmas["total"])
+
+# --- Stores near a ZIP (US), one store, departments, suggestions.
+for s in mi.stores("60657")["data"]["stores"][:3]:
+    print(s["store_id"], s["name"], s["distance_miles"], s["services"])
+print(mi.store("1040")["data"]["hours_text"])
+tree = mi.categories()["data"]["categories"]
+print([t["term"] for t in mi.suggestions("yarn")["data"]["suggestions"]])
+```
+
+Prices are national per country: the store does not change them, it matters
+for stock. Captured 2026-11-24: Cricut Explore 5 in Teal & Essential Bundle
+(SKU 10816737) at $199.00 next to Michaels' "Reg.$249.00" on www.michaels.com
+and CAD 269.99 next to "Reg.$349.99" on canada.michaels.com. `was_price_text`
+keeps Michaels' own label and `discount_percent` is arithmetic on the two
+prices. `promotions` carry Michaels' own offer text with its start and end
+dates, as given. `store_stock` returns units as Michaels reports them for
+pickup, not a promise (Soft Classic Solid Yarn by Loops & Threads, SKU
+10228177: 85 units at store 1191, New York); virtual or pop-up stores appear
+with 0 units and `virtual: true`. `online_stock` on a product is Michaels'
+online stock, not a store's. Search and the list methods mix Michaels items
+and Marketplace items (`seller_type`); Marketplace items carry a seller id, no
+seller name. A UPC search answers with the product group's lead SKU. With
+`country="ca"` a category is a code path (search facets list them). Lists
+return up to 100 a page (default 40), sorted `best_match`, `best_sellers`,
+`new_arrivals`, `price_asc`, `price_desc` or `rating`, filtered by `brand`,
+price, rating, store pickup, same-day, ship to me, sale, new, clearance, great
+buy, `seller` or facet `filters` ({key: [values]}). Not available: review or
+Q&A text (rating and count only), the weekly ad, coupons, classes and events,
+aisle locations, Marketplace seller names, custom framing, price history (poll
+and store the answers), checkout. Failed calls and refused inputs are not
+charged; a not-found (an unknown product, category, brand or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4793,6 +4879,7 @@ Scavio works with popular AI/LLM frameworks:
 | O'Reilly Auto Parts (`oreilly`) | `search`, `cross_reference`, `product`, `vehicles`, `compatibility`, `category`, `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`, `rebates`, `deals`; us (default) on every method; mx on `stores` and `store` only (the Mexican store directory, in Spanish) | 2 each; `product` by `line_code` + `part_number` 4; `cross_reference` 2 / 4 / 6 by inputs; `brand` index 4; `store_stock` and `stores` by `zip` 4; `deals` 4 |
 | Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
 | Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
+| Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4824,6 +4911,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.81.0
+
+- **New `michaels` namespace** (sync and async) for Michaels (michaels.com),
+  the US and Canada arts and crafts retailer, 11 endpoints: `search`,
+  `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`,
+  `categories`, `brand`, `deals`, `suggestions`. Units of one SKU at the stores
+  near a ZIP or Canadian postal code as Michaels reports them, units of up to
+  30 SKUs at one store, a product with every variant's price and UPC, Michaels'
+  own Reg. label and offer dates, online stock, the category tree, brands and
+  deals. `country` us or ca, `language` en or fr (ca). 2 credits per call
+  (`category` and `deals` 4 with a `/shop/` category). The request timeout is
+  raised to at least 240s on every endpoint.
 
 ### Changed in 0.80.0
 

@@ -3991,6 +3991,118 @@ _TSC_LIST = (
     "[{name, id, values [{label, count, filter (send it in filters)}]}], notes"
 )
 
+# Michaels params shared across endpoints (michaels.com, the US and Canada arts and crafts
+# retailer: www.michaels.com for country us, canada.michaels.com for country ca with language en
+# or fr). 11 endpoints, 2 credits each; category and deals 4 with a category given as a /shop/
+# link or path (credits_note; credits is the floor; credits_used is the truth). stores,
+# categories and suggestions are US only (no country or language there). Prices are national per
+# country; the store matters for stock.
+_MICH_NAME = "Michaels (michaels.com, the US and Canada arts and crafts retailer)"
+_MICH_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (default: www.michaels.com, USD) or 'ca' (canada.michaels.com, CAD).",
+)
+_MICH_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "'en' (default) or 'fr' (country='ca' only: canada.michaels.com/fr, French names and texts).",
+)
+_MICH_MARKET = (_MICH_COUNTRY, _MICH_LANGUAGE)
+_MICH_SKU_DOC = (
+    "A Michaels SKU (items[].sku: 8 digits for Michaels items, e.g. '10228177'; 18 for "
+    "Marketplace items; MP... for Pro packs)."
+)
+_MICH_SKU = Param("sku", "Union[str, int]", required=True, doc=_MICH_SKU_DOC)
+_MICH_STORE_DOC = (
+    "A Michaels store number (store_stock() and stores() list them, e.g. '1040' Chicago IL, "
+    "'4936' Toronto ON)."
+)
+_MICH_STORE = Param("store", "Union[str, int]", required=True, doc=_MICH_STORE_DOC)
+_MICH_ZIP = Param(
+    "zip",
+    "Union[str, int]",
+    required=True,
+    doc="A US ZIP code ('10001'), or with country='ca' a Canadian postal code ('M5V 2T6').",
+)
+_MICH_RADIUS = _int("radius", "Miles around the location (1-200, default 20).")
+_MICH_QUERY_DOC = "Only products matching these keywords."
+_MICH_BRAND_FILTER = _str(
+    "brand", "Only this brand (the Brand facet's values, e.g. 'Cricut', 'Lion Brand Yarn')."
+)
+_MICH_CODE_PATH_DOC = (
+    "Only this category: a code path (categories[].code_path or a By category code facet value, "
+    "e.g. 'root//Categories//809187838')."
+)
+_MICH_LIST_PARAMS = (
+    _int("page", "Page, from 1 ((page - 1) x page_size at most 8000)."),
+    _int("page_size", "Products per page (1-100, default 40)."),
+    _lit(
+        "sort",
+        ("best_match", "best_sellers", "new_arrivals", "price_asc", "price_desc", "rating"),
+        "best_match (default), best_sellers, new_arrivals, price_asc, price_desc or rating: "
+        "Michaels's sort menu.",
+    ),
+    _float("min_price", "Lowest price."),
+    _float("max_price", "Highest price."),
+    _int("min_rating", "Only products rated at least this many stars (1-4)."),
+    _str_or_int("store", "A Michaels store number: only products with free store pickup there."),
+    _bool("pickup", "Free store pickup only (needs store)."),
+    _bool("same_day", "Only products offered for same-day delivery."),
+    _bool("ship_to_me", "Only products Michaels ships."),
+    _bool("on_sale", "Only products in Michaels's Sale filter."),
+    _bool("new", "Only products in Michaels's New filter."),
+    _bool("clearance", "Only products in Michaels's Clearance filter."),
+    _bool("great_buy", "Only products in Michaels's Great Buy filter (www.michaels.com)."),
+    _lit(
+        "seller",
+        ("michaels", "marketplace", "michaels_pro"),
+        "michaels (Michaels's own items), marketplace (MakerPlace sellers) or michaels_pro (Pro "
+        "bulk packs). US only.",
+    ),
+    Param(
+        "filters",
+        "Optional[dict[str, Union[str, list[str]]]]",
+        doc="Facet filters: {facets[].key: [facets[].values[].value]} from an earlier answer, "
+        "sent exactly as given, e.g. {'material': ['Acrylic']} (refinementColor, size, material, "
+        "yarnWeight, ...).",
+    ),
+    *_MICH_MARKET,
+)
+_MICH_DEAL_FLAGS = ("on_sale", "new", "clearance", "great_buy")
+_MICH_DEALS_LIST_PARAMS = tuple(p for p in _MICH_LIST_PARAMS if p.name not in _MICH_DEAL_FLAGS)
+_MICH_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_MICH_PRICES = (
+    " Price and was price as Michaels shows them (was_price_text keeps its own Reg. label); "
+    "discount_percent is computed by Scavio from the two. Prices are national per country (USD "
+    "on www.michaels.com, CAD on canada.michaels.com): the store does not change them, the store "
+    "matters for stock."
+)
+_MICH_NOT_AVAILABLE = (
+    " Not available: review or Q&A text (rating and review_count only), the weekly ad, coupons, "
+    "classes and events, aisle locations, Marketplace seller names, custom framing, price history "
+    "(poll and store the answers), checkout."
+)
+_MICH_ITEM_FIELDS = (
+    "position, sku (the input of product(), store_stock() and store_inventory()), name, url, "
+    "image, images, category, price, was_price, price_min and price_max (across sizes), "
+    "was_price_min, was_price_max, price_text and was_price_text (as Michaels writes them), "
+    "on_sale, discount_percent, unit_price, rating, review_count, seller_type (michaels, "
+    "marketplace, michaels_pro, dropship), channel, sponsored, store_pickup, same_day_delivery, "
+    "ship_to_me, online_only, store_only, badges, gtin, variant_counts, colors [{sku, name}], "
+    "promotions [{text, details, rewards_text, starts, ends}] (dates as Michaels gives them, no "
+    "timezone)"
+)
+_MICH_LIST = (
+    "market {country, language, currency}, total, page, page_size, total_pages, count, sort, "
+    "filters_applied, corrected_query, items (" + _MICH_ITEM_FIELDS + "), facets [{key, name, "
+    "values [{value, count, label}]}] (send key and value in filters), notes"
+)
+_MICH_CATEGORY_NOTE = (
+    "Costs 2 credits with a category code path, 4 with a /shop/ link or path (one more call finds "
+    "its code path; credits_used is what was charged)."
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -17758,6 +17870,302 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== Michaels ==============================
+    # 11 endpoints on /api/v1/michaels: country us | ca, language en | fr (ca only); stores,
+    # categories and suggestions US only (no country there). 2 credits each; category and deals 4
+    # with a /shop/ category (credits_note; credits is the floor). Calls can queue behind the
+    # backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="michaels_search",
+        namespace="michaels",
+        method="search",
+        http="POST",
+        path="/api/v1/michaels/search",
+        summary=(
+            "Search " + _MICH_NAME + " by keywords, a Michaels item number or a UPC (a UPC "
+            "answers with the product group's lead SKU, which can be another colour or size: "
+            "product() lists every variant's UPC), sorted (best match, best sellers, new "
+            "arrivals, price, rating), filtered (brand, price, rating, store pickup, same-day, "
+            "ship to me, sale, new, clearance, great buy, seller, colour, size, material, yarn "
+            "weight, any facet) and paged (up to 100 a page). Michaels items and Marketplace items "
+            "come together (seller_type tells them apart)." + _MICH_PRICES + " Returns query, "
+            "category, " + _MICH_LIST + "." + _MICH_NOT_AVAILABLE + _MICH_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords ('yarn'), a Michaels item number or a UPC.", wire="q"),
+            _MICH_BRAND_FILTER,
+            _str("category", _MICH_CODE_PATH_DOC),
+            *_MICH_LIST_PARAMS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_product",
+        namespace="michaels",
+        method="product",
+        http="POST",
+        path="/api/v1/michaels/product",
+        summary=(
+            "One " + _MICH_NAME + " product in full by SKU or link: market, sku, requested_sku, "
+            "found_requested_sku, master_sku, name, brand, url, image, images, price, was_price, "
+            "price ranges, price_text, was_price_text, on_sale, discount_percent, unit_price, "
+            "rating, review_count, seller_type, channel, seller_id (Marketplace items: the "
+            "seller's id as the page gives it; no seller name), upc, options (the variant's colour "
+            "or size), description, details, specifications [{name, value}], category, breadcrumbs "
+            "[{name, url}], online_stock {units, in_stock} (Michaels's online stock, not a "
+            "store's: use store_stock() for stores), pro_pack {sku, units_per_pack, unit_price, "
+            "unit_price_text}, store_pickup, store_only, online_only, badges, "
+            "same_day_delivery_fee, variant_counts, variants [{sku, options, price, was_price, "
+            "on_sale, discount_percent, upc, online_stock, image}], promotions [{text, details, "
+            "rewards_text, starts, ends}] (Michaels's own offer text and dates), notes."
+            + _MICH_PRICES + " An unknown SKU is a charged 404." + _MICH_CHARGE
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=_MICH_SKU_DOC + " Send sku or url.",
+            ),
+            _str(
+                "url",
+                "A www.michaels.com or canada.michaels.com product link (items[].url), instead of "
+                "sku. The link sets the country.",
+            ),
+            *_MICH_MARKET,
+        ),
+        one_of=(("sku", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_store_stock",
+        namespace="michaels",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/michaels/store-stock",
+        summary=(
+            "Units of one SKU at the " + _MICH_NAME + " stores near a US ZIP or a Canadian postal "
+            "code, exactly as Michaels reports them for pickup: market, sku, location, "
+            "radius_miles, count, in_stock_count, total_units, stores [{store_id, name, address "
+            "{line1, line2, city, state, zip, country}, phone, latitude, longitude, "
+            "distance_miles, units, in_stock, pickup, pickup_text (Michaels's pickup message as "
+            "given, e.g. TODAY), same_day_delivery, open_now, hours, virtual (true: a virtual or "
+            "pop-up store Michaels lists by that name, shown with 0 units)}], notes. Stock is as "
+            "Michaels reports it; Scavio makes no promise of its accuracy. A SKU Michaels does not "
+            "know shows 0 units at every store." + _MICH_CHARGE
+        ),
+        params=(_MICH_SKU, _MICH_ZIP, _MICH_RADIUS, *_MICH_MARKET),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_store_inventory",
+        namespace="michaels",
+        method="store_inventory",
+        http="POST",
+        path="/api/v1/michaels/store-inventory",
+        summary=(
+            "Units of up to 30 SKUs at one " + _MICH_NAME + " store, as Michaels reports them: "
+            "market, store_id, count, in_stock_count, total_units, items [{sku, units}], "
+            "not_reported (SKUs Michaels gave no units for), notes. A store number or SKU Michaels "
+            "does not know answers 0 units or no units: check it with store() or product()."
+            + _MICH_CHARGE
+        ),
+        params=(
+            _MICH_STORE,
+            Param(
+                "skus",
+                "list[Union[str, int]]",
+                required=True,
+                doc="1-30 Michaels SKUs, e.g. ['10228177', '10816737'].",
+            ),
+            *_MICH_MARKET,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_stores",
+        namespace="michaels",
+        method="stores",
+        http="POST",
+        path="/api/v1/michaels/stores",
+        summary=(
+            "The " + _MICH_NAME + " stores near a US ZIP, a city or a point (us only; for Canada, "
+            "store_stock() lists the stores near a postal code): market, location {query, "
+            "latitude, longitude, formatted_address}, radius_miles, count, stores [{position, "
+            "store_id, name, address, phone, latitude, longitude, distance_miles, time_zone, hours "
+            "(the 7 entries Michaels lists for the current week, holiday hours included, "
+            "unlabelled as Michaels gives them), hours_text, curbside_pickup_hours, open_now, "
+            "services {in_store_shopping, store_pickup, curbside_pickup, same_day_delivery, "
+            "custom_framing, frame_and_print, balloon_inflation, birthday_parties, fabrics}, "
+            "virtual}], notes. Send zip, city or latitude + longitude." + _MICH_CHARGE
+        ),
+        params=(
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A US ZIP code (e.g. '60657'). Send zip, city or latitude + longitude.",
+            ),
+            _str("city", "A city, e.g. 'San Francisco, CA'."),
+            _float("latitude", "Latitude (with longitude)."),
+            _float("longitude", "Longitude (with latitude)."),
+            _MICH_RADIUS,
+        ),
+        one_of=(("zip", "city", "latitude"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_store",
+        namespace="michaels",
+        method="store",
+        http="POST",
+        path="/api/v1/michaels/store",
+        summary=(
+            "One " + _MICH_NAME + " store by store number (US or Canada): market, store_id, name, "
+            "address, phone, fax, latitude, longitude, time_zone, hours, hours_text, "
+            "curbside_pickup_hours, services, virtual, open_date, closing_dates, "
+            "temporarily_closed_date, notes. An unknown store number is a charged 404."
+            + _MICH_CHARGE
+        ),
+        params=(_MICH_STORE, *_MICH_MARKET),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_category",
+        namespace="michaels",
+        method="category",
+        http="POST",
+        path="/api/v1/michaels/category",
+        summary=(
+            "One " + _MICH_NAME + " category's products by /shop/ link or path or by code path, "
+            "optionally matching keywords, sorted, filtered and paged." + _MICH_PRICES
+            + " Returns category {code_path, name, path, url}, query, " + _MICH_LIST + ". With "
+            "country='ca' the category must be a code path (search facets By category code list "
+            "them). A wrong category is a charged 404." + _MICH_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A Michaels category: a /shop/ link or path (e.g. "
+                "'/shop/art-supplies/artist-canvas', categories[].path) or its code path "
+                "(categories[].code_path: 2 credits instead of 4).",
+            ),
+            _str("query", _MICH_QUERY_DOC, wire="q"),
+            _MICH_BRAND_FILTER,
+            *_MICH_LIST_PARAMS,
+        ),
+        credits=2,
+        credits_note=_MICH_CATEGORY_NOTE,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_categories",
+        namespace="michaels",
+        method="categories",
+        http="POST",
+        path="/api/v1/michaels/categories",
+        summary=(
+            _MICH_NAME + "'s departments, or one category's subcategories (us only: "
+            "www.michaels.com): market, path, name, url, code_path, leaf, count, categories "
+            "[{name, path (the input of path here), url, code_path (the category input of "
+            "category(), search(), brand() and deals()), leaf, children}], notes. Departments "
+            "without a code_path (Sale, Clearance) are deals pages: use deals(). An unknown path "
+            "is a charged 404." + _MICH_CHARGE
+        ),
+        params=(
+            Param(
+                "path",
+                "Optional[str]",
+                positional=True,
+                doc="A category's /shop/ path or link (categories[].path, e.g. "
+                "'/shop/art-supplies'): its subcategories. Without it: the departments.",
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_brand",
+        namespace="michaels",
+        method="brand",
+        http="POST",
+        path="/api/v1/michaels/brand",
+        summary=(
+            "One brand's products on " + _MICH_NAME + " (Michaels's Brand filter, as Michaels "
+            "names brands), optionally matching keywords or within a category, sorted, filtered "
+            "and paged." + _MICH_PRICES + " Returns brand, query, category, " + _MICH_LIST + ". A "
+            "brand with no products is a charged 404." + _MICH_CHARGE
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand as Michaels names it (the Brand facet values of a search, e.g. 'Cricut', "
+                "'Lion Brand Yarn').",
+            ),
+            _str(
+                "query",
+                "Only this brand's products matching these keywords (default: the brand name).",
+                wire="q",
+            ),
+            _str("category", "Only this category (a code path, categories[].code_path)."),
+            *_MICH_LIST_PARAMS,
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_deals",
+        namespace="michaels",
+        method="deals",
+        http="POST",
+        path="/api/v1/michaels/deals",
+        summary=(
+            _MICH_NAME + "'s Sale (type='sale', default), New, Clearance or Great Buy (US) "
+            "products matching keywords or within a category (query or category is required), "
+            "sorted, filtered and paged: Michaels's own More Ways to Shop filters." + _MICH_PRICES
+            + " Returns type, query, category, " + _MICH_LIST + "." + _MICH_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "new", "clearance", "great_buy"),
+                "sale (default), new, clearance or great_buy (www.michaels.com only).",
+            ),
+            _str(
+                "query",
+                "Deals matching these keywords, e.g. 'christmas' (query or category is required).",
+                wire="q",
+            ),
+            _str("category", "Deals in this category: a code path, or in the US a /shop/ path."),
+            _MICH_BRAND_FILTER,
+            *_MICH_DEALS_LIST_PARAMS,
+        ),
+        one_of=(("query", "category"),),
+        credits=2,
+        credits_note=_MICH_CATEGORY_NOTE,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="michaels_suggestions",
+        namespace="michaels",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/michaels/suggestions",
+        summary=(
+            "The search suggestions " + _MICH_NAME + " shows as you type (us only: "
+            "www.michaels.com): market, query, count, suggestions [{term, categories, brands}], "
+            "notes." + _MICH_CHARGE
+        ),
+        params=(_req("query", "The text typed so far, e.g. 'yarn'.", wire="q"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -24800,6 +25208,7 @@ NAMESPACES: tuple[str, ...] = (
     "oreilly",
     "acehardware",
     "tractorsupply",
+    "michaels",
 )
 
 

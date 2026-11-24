@@ -653,6 +653,8 @@ BODY_PRICED_KEYS = {
     "acehardware_stores",
     "tractorsupply_product",
     "tractorsupply_store_prices",
+    "michaels_category",
+    "michaels_deals",
 }
 
 
@@ -6756,3 +6758,128 @@ def test_tractorsupply_credits_paths_and_wire(monkeypatch):
         t.store_stock("2340147")
     with pytest.raises(ScavioError):
         t.deals()
+
+
+def test_michaels_credits_paths_and_wire(monkeypatch):
+    """michaels (0.81.0): 11 endpoints on /api/v1/michaels.
+
+    2 credits each; category and deals 4 with a /shop/ category (credits_note; credits is the
+    floor). country us | ca and language en | fr everywhere except stores, categories and
+    suggestions (us only: no country there). query is sent as q.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "michaels"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "deals", "product", "search", "store",
+        "store_inventory", "store_stock", "stores", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/michaels/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "Michaels (michaels.com, the US and Canada arts and crafts retailer)" in ep.summary
+        assert ep.credits == 2, m
+        names = {p.name: p for p in ep.params}
+        if m in ("stores", "categories", "suggestions"):
+            assert "country" not in names and "language" not in names, m
+            assert "us only" in ep.summary, m
+        else:
+            assert names["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+            assert names["language"].annotation == 'Optional[Literal["en", "fr"]]', m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+    for m in ("category", "deals"):
+        assert eps[m].credits_note == (
+            "Costs 2 credits with a category code path, 4 with a /shop/ link or path (one more "
+            "call finds its code path; credits_used is what was charged)."
+        ), m
+    for m in eps:
+        if m not in ("category", "deals"):
+            assert eps[m].credits_note is None, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["best_match", "best_sellers", "new_arrivals", "price_asc", '
+        '"price_desc", "rating"]]'
+    )
+    assert search["seller"].annotation == (
+        'Optional[Literal["michaels", "marketplace", "michaels_pro"]]'
+    )
+    assert search["filters"].annotation == "Optional[dict[str, Union[str, list[str]]]]"
+    assert search["min_price"].annotation == "Optional[float]"
+    deals = {p.name for p in eps["deals"].params}
+    assert not deals & {"on_sale", "new", "clearance", "great_buy"}
+    deal_type = {p.name: p for p in eps["deals"].params}["type"]
+    assert deal_type.annotation == 'Optional[Literal["sale", "new", "clearance", "great_buy"]]'
+    assert eps["product"].one_of == (("sku", "url"),)
+    assert eps["deals"].one_of == (("query", "category"),)
+    assert eps["stores"].one_of == (("zip", "city", "latitude"),)
+    inv = {p.name: p for p in eps["store_inventory"].params}
+    assert inv["store"].required and inv["skus"].required
+    assert inv["skus"].annotation == "list[Union[str, int]]"
+    assert "online stock, not a store's" in eps["product"].summary
+    assert "virtual" in eps["store_stock"].summary
+    assert "national per country" in eps["search"].summary
+    for word in ("collect", "scrape", "proxy"):
+        assert all(word not in ep.summary.lower() for ep in eps.values()), word
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    mi = client.michaels
+    mi.search("yarn")
+    mi.search("laine", country="ca", language="fr", page=2, page_size=24, sort="price_asc",
+              brand="Bernat", on_sale=True, min_price=5.0, filters={"material": ["Acrylic"]})
+    mi.product("10228177")
+    mi.product(url="https://canada.michaels.com/en/product/x-10816737", country="ca")
+    mi.store_stock("10228177", "10001", radius=10)
+    mi.store_stock("10519836", "M5V 2T6", country="ca")
+    mi.store_inventory("1191", ["10228177", "10816737"])
+    mi.stores("60657")
+    mi.stores(city="San Francisco, CA", radius=30)
+    mi.store("4936", country="ca")
+    mi.category("/shop/art-supplies/artist-canvas", sort="best_sellers")
+    mi.category("root//Categories//809187838", country="ca", query="acrylic")
+    mi.categories()
+    mi.categories("/shop/art-supplies")
+    mi.brand("Cricut", query="explore")
+    mi.deals(query="christmas")
+    mi.deals(type="clearance", category="root//Categories//809187838", country="ca")
+    mi.suggestions("yarn")
+    base = "/api/v1/michaels/"
+    assert seen == [
+        (base + "search", {"q": "yarn"}, 240.0),
+        (base + "search", {"q": "laine", "brand": "Bernat", "page": 2, "page_size": 24,
+                           "sort": "price_asc", "min_price": 5.0, "on_sale": True,
+                           "filters": {"material": ["Acrylic"]}, "country": "ca",
+                           "language": "fr"}, 240.0),
+        (base + "product", {"sku": "10228177"}, 240.0),
+        (base + "product", {"url": "https://canada.michaels.com/en/product/x-10816737",
+                            "country": "ca"}, 240.0),
+        (base + "store-stock", {"sku": "10228177", "zip": "10001", "radius": 10}, 240.0),
+        (base + "store-stock", {"sku": "10519836", "zip": "M5V 2T6", "country": "ca"}, 240.0),
+        (base + "store-inventory", {"store": "1191", "skus": ["10228177", "10816737"]}, 240.0),
+        (base + "stores", {"zip": "60657"}, 240.0),
+        (base + "stores", {"city": "San Francisco, CA", "radius": 30}, 240.0),
+        (base + "store", {"store": "4936", "country": "ca"}, 240.0),
+        (base + "category", {"category": "/shop/art-supplies/artist-canvas",
+                             "sort": "best_sellers"}, 240.0),
+        (base + "category", {"category": "root//Categories//809187838", "q": "acrylic",
+                             "country": "ca"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"path": "/shop/art-supplies"}, 240.0),
+        (base + "brand", {"brand": "Cricut", "q": "explore"}, 240.0),
+        (base + "deals", {"q": "christmas"}, 240.0),
+        (base + "deals", {"type": "clearance", "category": "root//Categories//809187838",
+                          "country": "ca"}, 240.0),
+        (base + "suggestions", {"q": "yarn"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        mi.product()
+    with pytest.raises(ScavioError):
+        mi.deals()
+    with pytest.raises(ScavioError):
+        mi.stores()
