@@ -651,6 +651,8 @@ BODY_PRICED_KEYS = {
     "acehardware_search",
     "acehardware_store_stock",
     "acehardware_stores",
+    "tractorsupply_product",
+    "tractorsupply_store_prices",
 }
 
 
@@ -6623,3 +6625,134 @@ def test_acehardware_credits_paths_and_wire(monkeypatch):
         a.product()
     with pytest.raises(ScavioError):
         a.store_stock("72779")
+
+
+def test_tractorsupply_credits_paths_and_wire(monkeypatch):
+    """tractorsupply (0.80.0): 12 endpoints on /api/v1/tractorsupply, US only (no country).
+
+    1 credit each; product 2 on the first call for a store not yet looked up, store_prices 1 per
+    5 lookups (credits_note; credits is the floor). Search, product, category, brand and deals
+    need store or zip; store_prices and store_stock need stores, store or zip.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "tractorsupply"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "deals", "fulfillment", "product", "promotions",
+        "search", "store", "store_prices", "store_stock", "stores",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/tractorsupply/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "Tractor Supply" in ep.summary, ep.key
+        assert "country" not in {p.name for p in ep.params}, m
+        assert ep.credits == 1, m
+    list_tail = ["page", "page_size", "sort", "brand", "on_sale", "new", "pickup", "rating",
+                 "filters", "store", "zip"]
+    for m in ("search", "category"):
+        assert [p.name for p in eps[m].params][1:] == list_tail, m
+    assert [p.name for p in eps["brand"].params] == ["brand", "query"] + [
+        n for n in list_tail if n != "brand"
+    ]
+    assert [p.name for p in eps["deals"].params] == ["type", "query"] + [
+        n for n in list_tail if n not in ("on_sale", "new")
+    ]
+    sort = {p.name: p for p in eps["search"].params}["sort"]
+    assert sort.annotation == (
+        'Optional[Literal["popular", "rating", "name_asc", "name_desc", "price_asc", '
+        '"price_desc", "recent", "new_arrivals"]]'
+    )
+    size = {p.name: p for p in eps["search"].params}["page_size"]
+    assert size.annotation == "Optional[Literal[24, 48, 96, 200]]"
+    deal_type = {p.name: p for p in eps["deals"].params}["type"]
+    assert deal_type.annotation == 'Optional[Literal["sale", "new"]]'
+    assert eps["product"].credits_note == (
+        "Costs 1 credit (2 on the first call for a store not yet looked up; credits_used is what "
+        "was charged)."
+    )
+    assert eps["store_prices"].credits_note == (
+        "Costs 1 credit per 5 lookups (each store's price, a store's details when not yet "
+        "known, the item): 25 new stores cost 11."
+    )
+    for m in eps:
+        if m not in ("product", "store_prices"):
+            assert eps[m].credits_note is None, m
+    for m in ("search", "category", "brand", "deals"):
+        assert eps[m].one_of == (("store", "zip"),), m
+        assert "priced_for" in eps[m].summary, m
+    assert eps["product"].one_of == (("item_number", "url"), ("store", "zip"))
+    for m in ("store_prices", "store_stock"):
+        assert eps[m].one_of == (("stores", "store", "zip"),), m
+        assert [p.name for p in eps[m].params] == ["item_number", "stores", "store", "zip",
+                                                   "limit"], m
+    fp = {p.name: p for p in eps["fulfillment"].params}
+    assert fp["item_number"].required and fp["store"].required and fp["zip"].required
+    assert "mapp" in eps["product"].summary
+    assert "in_transit" in eps["store_stock"].summary
+    assert "not a promise" in eps["store_stock"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    t = client.tractorsupply
+    t.search("layer pellets", store="1933")
+    t.search("dog food", zip="59330", page=2, page_size=48, sort="price_asc", brand="Purina",
+             on_sale=True, pickup=True, rating=4, filters=["2bb%3A%2250%20lb%22"])
+    t.product("2340147", store="1933")
+    t.product(url="https://www.tractorsupply.com/tsc/product/x-2340147", zip="59330")
+    t.store_prices("2340147", stores=["1933", "1923"])
+    t.store_prices("2340147", zip="59301", limit=10)
+    t.store_stock("2340147", store="1933")
+    t.store_stock("2340147", zip="59301")
+    t.fulfillment("2340147", "1933", "59330", quantity=2)
+    t.stores("59301", limit=3)
+    t.store("1933")
+    t.category("/tsc/catalog/poultry-feed", store="1933", sort="new_arrivals")
+    t.categories()
+    t.categories("1004851")
+    t.brand("Producer's Pride", store="1933", query="feed")
+    t.deals(store="1933")
+    t.deals(type="new", zip="59330", query="boots")
+    t.promotions("3609112")
+    base = "/api/v1/tractorsupply/"
+    assert seen == [
+        (base + "search", {"query": "layer pellets", "store": "1933"}, 240.0),
+        (base + "search", {"query": "dog food", "page": 2, "page_size": 48, "sort": "price_asc",
+                           "brand": "Purina", "on_sale": True, "pickup": True, "rating": 4,
+                           "filters": ["2bb%3A%2250%20lb%22"], "zip": "59330"}, 240.0),
+        (base + "product", {"item_number": "2340147", "store": "1933"}, 240.0),
+        (base + "product", {"url": "https://www.tractorsupply.com/tsc/product/x-2340147",
+                            "zip": "59330"}, 240.0),
+        (base + "store-prices", {"item_number": "2340147", "stores": ["1933", "1923"]}, 240.0),
+        (base + "store-prices", {"item_number": "2340147", "zip": "59301", "limit": 10}, 240.0),
+        (base + "store-stock", {"item_number": "2340147", "store": "1933"}, 240.0),
+        (base + "store-stock", {"item_number": "2340147", "zip": "59301"}, 240.0),
+        (base + "fulfillment", {"item_number": "2340147", "store": "1933", "zip": "59330",
+                                "quantity": 2}, 240.0),
+        (base + "stores", {"zip": "59301", "limit": 3}, 240.0),
+        (base + "store", {"store": "1933"}, 240.0),
+        (base + "category", {"category": "/tsc/catalog/poultry-feed", "sort": "new_arrivals",
+                             "store": "1933"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"parent_id": "1004851"}, 240.0),
+        (base + "brand", {"brand": "Producer's Pride", "query": "feed", "store": "1933"}, 240.0),
+        (base + "deals", {"store": "1933"}, 240.0),
+        (base + "deals", {"type": "new", "query": "boots", "zip": "59330"}, 240.0),
+        (base + "promotions", {"item_number": "3609112"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        t.search("layer pellets")
+    with pytest.raises(ScavioError):
+        t.product("2340147")
+    with pytest.raises(ScavioError):
+        t.product(store="1933")
+    with pytest.raises(ScavioError):
+        t.store_prices("2340147")
+    with pytest.raises(ScavioError):
+        t.store_stock("2340147")
+    with pytest.raises(ScavioError):
+        t.deals()

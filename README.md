@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 99 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 100 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -51,6 +51,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
 | O'Reilly Auto Parts Part-Number Cross-Reference with Prices, Core Charges, Rebates, Store Stock near a ZIP and VIN Decode (US; Mexico store directory; 14 endpoints) | Yes | No | No | No |
 | Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
+| Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4558,6 +4559,91 @@ Ace Handyman, rentals, Ace-licensed stores outside the US, checkout. Failed
 calls and refused inputs are not charged; a not-found (an unknown product,
 category, brand or store) is charged.
 
+### 69. Farm and Ranch -- Tractor Supply prices by store and price zone, store stock, fulfilment
+
+Tractor Supply (tractorsupply.com), the US rural lifestyle retailer. Namespace
+`tractorsupply`, 12 endpoints: `search`, `product`, `store_prices`,
+`store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`,
+`brand`, `deals`, `promotions`. 1 credit per call; `product` 2 on the first
+call for a store not yet looked up; `store_prices` 1 per 5 lookups (each
+store's price, a store's details when not yet known, the item: 25 new stores
+cost 11). `credits_used` in the response is what was charged. US only, so no
+method takes `country`. The request timeout is raised to at least 240s on
+every endpoint. Pair it with the `acehardware`, `walmart` and `chewy`
+namespaces for a price check on the same item.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tsc = client.tractorsupply
+
+# --- The same bag of feed priced for two stores (store or zip is required).
+for store in ("1933", "1923"):
+    p = tsc.product("2340147", store=store)["data"]
+    print(store, p["priced_for"]["zone"], p["price"], p["mapp"])
+
+# --- One item at up to 25 stores in one call, or at the stores nearest a ZIP.
+sp = tsc.store_prices("2340147", stores=["1933", "1923"])["data"]
+print(sp["price_range"])
+for s in sp["stores"]:
+    print(s["store_id"], s["city"], s["state"], s["zone"], s["price"])
+
+# --- Exact units per store, with stock in transit and its pickup date.
+stock = tsc.store_stock("2340147", zip="59301")["data"]
+print(stock["count"], stock["in_stock_count"], stock["total_units"], stock["in_transit_units"])
+for s in stock["stores"]:
+    print(s["store_id"], s["distance_miles"], s["units"], s["status"], s["in_transit"])
+
+# --- Pickup and delivery options for one item at one store and a ZIP.
+f = tsc.fulfillment("2340147", "1933", "59330")["data"]
+print(f["pickup"], [(o["type"], o["delivery_date"]) for o in f["delivery_options"]])
+
+# --- Stores near a ZIP, one store, an item's promotions.
+for s in tsc.stores("59301")["data"]["stores"]:
+    print(s["store_id"], s["name"], s["zone"], s["services"][:3])
+print(tsc.store("1933")["data"]["hours_text"])
+for promo in tsc.promotions("3609112")["data"]["promotions"]:
+    print(promo["name"], promo["starts"], promo["ends"])
+
+# --- Lists priced for one store: search, a category, a brand, deals.
+hits = tsc.search("layer pellets", store="1933")["data"]
+feed = tsc.category("/tsc/catalog/poultry-feed", store="1933", sort="price_asc")["data"]
+brand = tsc.brand("Producer's Pride", store="1933")["data"]
+sale = tsc.deals(store="1933")["data"]
+print(hits["total"], feed["total"], brand["total"], sale["total"])
+tree = tsc.categories()["data"]["categories"]
+```
+
+Tractor Supply prices by store, so `search`, `product`, `category`, `brand` and
+`deals` need `store` (a Tractor Supply store number) or `zip` (the nearest
+store Tractor Supply lists for it is used); there is no default store. Every
+price answer carries `priced_for` {`store_id`, `zone`, `city`, `state`, `from`,
+`zip`}. Tractor Supply's terms note that prices may vary in different
+geographic markets, and the same item can be priced differently at different
+stores. Captured 2026-11-24: Producer's Pride 16% Layer Pellets, 50 lb (item
+2340147) at $14.49 for store 1933 (Glendive, MT, zone 81) and $20.19 for store
+1923 (Port Orchard, WA, zone 92). Some items carry a manufacturer's minimum
+advertised price (`mapp`) and show one price everywhere. Item numbers are 7
+digits (`items[].item_number`) and are the input of `product`, `store_prices`,
+`store_stock`, `fulfillment` and `promotions`. Lists return 24 (default), 48,
+96 or 200 a page, pages 1-100, sorted `popular`, `rating`, `name_asc`,
+`name_desc`, `price_asc`, `price_desc`, `recent` or `new_arrivals`, filtered
+by `brand`, `on_sale`, `new`, `pickup`, `rating` or facet `filters`.
+
+`store_stock` returns units as Tractor Supply reports them (not a promise),
+the status and in-transit units with the pickup date Tractor Supply gives.
+`fulfillment` returns pickup units and the delivery options (standard, same
+day, ship to store) with delivery dates and order cut-offs. `stores` lists the
+stores nearest a ZIP with address, hours, price zone, services (propane,
+trailer rental, PetVet, pet wash, ...) and dated store events. `promotions`
+lists an item's promotions with start and end dates. Not available: review or
+Q&A text (rating and count only), search suggestions, the weekly ad, a
+clearance list, price history (poll and store the answers), Neighbor's Club
+member prices, live chick availability, Petsense, checkout. Failed calls and
+refused inputs are not charged; a not-found (an unknown item, category, brand,
+store or a ZIP with no store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4706,6 +4792,7 @@ Scavio works with popular AI/LLM frameworks:
 | AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
 | O'Reilly Auto Parts (`oreilly`) | `search`, `cross_reference`, `product`, `vehicles`, `compatibility`, `category`, `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`, `rebates`, `deals`; us (default) on every method; mx on `stores` and `store` only (the Mexican store directory, in Spanish) | 2 each; `product` by `line_code` + `part_number` 4; `cross_reference` 2 / 4 / 6 by inputs; `brand` index 4; `store_stock` and `stores` by `zip` 4; `deals` 4 |
 | Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
+| Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4737,6 +4824,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.80.0
+
+- **New `tractorsupply` namespace** (sync and async) for Tractor Supply
+  (tractorsupply.com), the US rural lifestyle retailer, 12 endpoints:
+  `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`,
+  `store`, `category`, `categories`, `brand`, `deals`, `promotions`. An item's
+  price at the store you pick (`store` or `zip`, named in `priced_for` with the
+  store's price zone), one item's price at up to 25 stores in one call, exact
+  units per store with in-transit stock and its pickup date, pickup and
+  delivery options for a ZIP, stores near a ZIP, the category tree, brands,
+  deals and an item's promotions with dates. US only; no method takes
+  `country`. The request timeout is raised to at least 240s on every endpoint.
 
 ### Changed in 0.79.0
 

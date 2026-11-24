@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.79.0"
-description = "Python SDK for the Scavio Search API - real-time data from 99 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, Publix, Carrefour, Mercado Libre, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.80.0"
+description = "Python SDK for the Scavio Search API - real-time data from 100 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, Mercado Libre, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -30,6 +30,9 @@ keywords = [
     "acehardware",
     "ace-hardware",
     "ace-hardware-api",
+    "tractorsupply",
+    "tractor-supply",
+    "tractor-supply-api",
     "samsclub",
     "canadian-tire",
     "dollar-general",

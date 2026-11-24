@@ -93,6 +93,7 @@ from ._namespaces_async import (
     _AsyncThredupNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
+    _AsyncTractorsupplyNamespace,
     _AsyncTrendyolNamespace,
     _AsyncTripadvisorNamespace,
     _AsyncTrustpilotNamespace,
@@ -262,6 +263,7 @@ class AsyncScavioClient:
         self.instacart = _AsyncInstacartNamespace(self)
         self.oreilly = _AsyncOreillyNamespace(self)
         self.acehardware = _AsyncAcehardwareNamespace(self)
+        self.tractorsupply = _AsyncTractorsupplyNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

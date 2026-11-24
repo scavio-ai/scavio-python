@@ -91,6 +91,7 @@ from ._namespaces_sync import (
     _ThredupNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
+    _TractorsupplyNamespace,
     _TrendyolNamespace,
     _TripadvisorNamespace,
     _TrustpilotNamespace,
@@ -267,6 +268,7 @@ class ScavioClient:
         self.instacart = _InstacartNamespace(self)
         self.oreilly = _OreillyNamespace(self)
         self.acehardware = _AcehardwareNamespace(self)
+        self.tractorsupply = _TractorsupplyNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
