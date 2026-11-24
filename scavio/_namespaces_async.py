@@ -110,6 +110,7 @@ __all__ = [
     "_AsyncAcehardwareNamespace",
     "_AsyncTractorsupplyNamespace",
     "_AsyncMichaelsNamespace",
+    "_AsyncNikeNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -19678,3 +19679,197 @@ class _AsyncMichaelsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("michaels_suggestions", {"query": query}, extra)
+
+class _AsyncNikeNamespace:
+    """Nike (nike.com, including Jordan Brand) search, product (every size with its GTIN), category, brand (Jordan, ACG, SB), deals, releases (the launch calendar with per-size levels), release and reviews endpoints, on 62 storefronts."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["featured", "newest", "price_high", "price_low"]] = None,
+        filter: Optional[Union[str, list[str]]] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cn", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Nike (nike.com, including Jordan Brand) by keywords or a style color on any of its storefronts, sorted (featured, newest, price high or low) and filtered by one facet token of an earlier answer (size, gender, colour, price band, sport, brand). Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per storefront, in its own currency, and differ between markets (also inside the euro zone); no store prices. Returns query, filters_applied, market {country, language, currency, locale}, sort, path, title, total, total_pages, count, items (position, style_color (the input of product(), reviews() and release()), name, subtitle, color, price, full_price, discount_percent, currency, product_type, image, url, by_you (Nike By You), badge, featured_attributes, is_new_until, promotions [{text, starts, ends}] (Nike's offer text with its dates, UTC), colorways [{style_color, color, price, full_price, discount_percent, currency, image, url}] (us, ca, mx and au group every colorway; other storefronts show one per item)), facets [{name, options [{name, count, selected, filter}]}] (send filter back), categories [{name, count, path}], notes. First page only: the 24 product groups Nike's page shows first (total and total_pages are as Nike gives them; Nike's page does not page further). Not available: store locator, in-store or pickup stock, stock levels for regular products (sizes only), review paging or Q&A, search suggestions, pages past the first, member prices, gift cards, Nike Factory store prices, Converse, checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords ('dunk low') or a style color.
+            sort: featured (default), newest, price_high or price_low: Nike's sort menu.
+            filter: ONE facet token exactly as an earlier search answer gives it in facets[].options[].filter, e.g. 'black-90poy'. A token from a filtered answer already carries every filter applied there, so one token narrows step by step.
+            country: Nike storefront (default 'us': www.nike.com; language, default the first listed): us (USD; en, es), at (EUR; de, en), au (AUD; en), be (EUR; nl, de, en, fr), bg (EUR; en), ca (CAD; en, fr), ch (CHF; de, en, fr, it), cn (CNY; zh-Hans), cz (EUR; cs, en), de (EUR; de), dk (DKK; da, en), es (EUR; es, ca), fi (EUR; en), fr (EUR; fr), gb (GBP; en), gr (EUR; el), hr (EUR; en), hu (EUR; hu, en), id (IDR; en), ie (EUR; en), il (ILS; en), it (EUR; it), jp (JPY; ja, en), kr (KRW; ko), lu (EUR; fr, de, en), mx (MXN; es), my (MYR; en), nl (EUR; nl, en), no (NOK; no, en), ph (PHP; en), pl (PLN; pl), pt (EUR; pt, en), ro (RON; en), se (SEK; sv, en), sg (SGD; en), si (EUR; en), sk (EUR; en), th (THB; th), tr (TRY; tr), tw (TWD; zh-Hant), vn (VND; en), za (ZAR; en). cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_search", {"query": query, "sort": sort, "filter": filter, "country": country, "language": language}, extra)
+
+    async def product(
+        self,
+        style_color: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cn", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Nike (nike.com, including Jordan Brand) product by link or style color, on any storefront: market, requested_style_color, found_requested_style_color, style_color, style_code, prebuild_id (Nike By You), name, title, subtitle, url, color, price, full_price, discount_percent, currency, description, features [{header, items}], details [{header, items}], status (Nike's label as given, e.g. BUYABLE_BUY, COMING_SOON, NOTIFY_ME), release_type (FLOW, RELEASE or LAUNCH as given), availability_date, launch {start, end}, launch_product, member_product, by_you, promo_excluded, product_type, brands, genders, sports, categories [{name, values}], badge, featured_attributes, fit_message, size_chart_url, sizes [{label, localized_label, gtin, status}] (every size with its GTIN and Nike's status; sizes, not stock levels: Nike's product page shows no stock), colorways [{group, style_color, color, price, full_price, discount_percent, currency, status, url, image}], images, notes. Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per storefront, in its own currency, and differ between markets (also inside the euro zone); no store prices. The same style color priced on several storefronts is one call per country. A launch-only product answers a charged 404 pointing to release(); an unknown product is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            style_color: A Nike style color: style code, dash, color code (items[].style_color), e.g. 'DD1503-103' (found through Nike's search on the storefront first). Send style_color or url.
+            url: A Nike product link (items[].url; a Nike By You /u/ link too), instead of style_color. Its storefront comes from the link.
+            country: Nike storefront (default 'us': www.nike.com; language, default the first listed): us (USD; en, es), at (EUR; de, en), au (AUD; en), be (EUR; nl, de, en, fr), bg (EUR; en), ca (CAD; en, fr), ch (CHF; de, en, fr, it), cn (CNY; zh-Hans), cz (EUR; cs, en), de (EUR; de), dk (DKK; da, en), es (EUR; es, ca), fi (EUR; en), fr (EUR; fr), gb (GBP; en), gr (EUR; el), hr (EUR; en), hu (EUR; hu, en), id (IDR; en), ie (EUR; en), il (ILS; en), it (EUR; it), jp (JPY; ja, en), kr (KRW; ko), lu (EUR; fr, de, en), mx (MXN; es), my (MYR; en), nl (EUR; nl, en), no (NOK; no, en), ph (PHP; en), pl (PLN; pl), pt (EUR; pt, en), ro (RON; en), se (SEK; sv, en), sg (SGD; en), si (EUR; en), sk (EUR; en), th (THB; th), tr (TRY; tr), tw (TWD; zh-Hant), vn (VND; en), za (ZAR; en). cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_product", {"style_color": style_color, "url": url, "country": country, "language": language}, extra)
+
+    async def category(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["featured", "newest", "price_high", "price_low"]] = None,
+        filter: Optional[Union[str, list[str]]] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cn", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Nike (nike.com, including Jordan Brand) listing by path token or link (men's shoes, running, a collection, ...), sorted and filtered by up to 6 facet tokens. Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per storefront, in its own currency, and differ between markets (also inside the euro zone); no store prices. Returns category, filters_applied, market {country, language, currency, locale}, sort, path, title, total, total_pages, count, items (position, style_color (the input of product(), reviews() and release()), name, subtitle, color, price, full_price, discount_percent, currency, product_type, image, url, by_you (Nike By You), badge, featured_attributes, is_new_until, promotions [{text, starts, ends}] (Nike's offer text with its dates, UTC), colorways [{style_color, color, price, full_price, discount_percent, currency, image, url}] (us, ca, mx and au group every colorway; other storefronts show one per item)), facets [{name, options [{name, count, selected, filter}]}] (send filter back), categories [{name, count, path}], notes. First page only: the 24 product groups Nike's page shows first (total and total_pages are as Nike gives them; Nike's page does not page further). A listing with no products is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Nike listing path token (categories[].path of an earlier answer, or the part after /w/ of a Nike listing link), e.g. 'mens-shoes-nik1zy7ok'. Send path or url.
+            url: A Nike listing link (www.nike.com/.../w/<path>) instead of path. Its storefront comes from the link.
+            sort: featured (default), newest, price_high or price_low: Nike's sort menu.
+            filter: One or more (up to 6) facet tokens exactly as an earlier answer gives them in facets[].options[].filter (size, gender, colour, price band, sport, brand, discount band, ...), e.g. 'black-90poy'. A token from a filtered answer already carries the filters applied there.
+            country: Nike storefront (default 'us': www.nike.com; language, default the first listed): us (USD; en, es), at (EUR; de, en), au (AUD; en), be (EUR; nl, de, en, fr), bg (EUR; en), ca (CAD; en, fr), ch (CHF; de, en, fr, it), cn (CNY; zh-Hans), cz (EUR; cs, en), de (EUR; de), dk (DKK; da, en), es (EUR; es, ca), fi (EUR; en), fr (EUR; fr), gb (GBP; en), gr (EUR; el), hr (EUR; en), hu (EUR; hu, en), id (IDR; en), ie (EUR; en), il (ILS; en), it (EUR; it), jp (JPY; ja, en), kr (KRW; ko), lu (EUR; fr, de, en), mx (MXN; es), my (MYR; en), nl (EUR; nl, en), no (NOK; no, en), ph (PHP; en), pl (PLN; pl), pt (EUR; pt, en), ro (RON; en), se (SEK; sv, en), sg (SGD; en), si (EUR; en), sk (EUR; en), th (THB; th), tr (TRY; tr), tw (TWD; zh-Hant), vn (VND; en), za (ZAR; en). cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_category", {"path": path, "url": url, "sort": sort, "filter": filter, "country": country, "language": language}, extra)
+
+    async def brand(
+        self,
+        brand: Literal["jordan", "acg", "sb"],
+        *,
+        sort: Optional[Literal["featured", "newest", "price_high", "price_low"]] = None,
+        filter: Optional[Union[str, list[str]]] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cn", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Jordan Brand, ACG or Nike SB products on any Nike (nike.com, including Jordan Brand) storefront, sorted and filtered. Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per storefront, in its own currency, and differ between markets (also inside the euro zone); no store prices. Returns brand, filters_applied, market {country, language, currency, locale}, sort, path, title, total, total_pages, count, items (position, style_color (the input of product(), reviews() and release()), name, subtitle, color, price, full_price, discount_percent, currency, product_type, image, url, by_you (Nike By You), badge, featured_attributes, is_new_until, promotions [{text, starts, ends}] (Nike's offer text with its dates, UTC), colorways [{style_color, color, price, full_price, discount_percent, currency, image, url}] (us, ca, mx and au group every colorway; other storefronts show one per item)), facets [{name, options [{name, count, selected, filter}]}] (send filter back), categories [{name, count, path}], notes. First page only: the 24 product groups Nike's page shows first (total and total_pages are as Nike gives them; Nike's page does not page further). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: jordan (Jordan Brand), acg or sb (Nike SB skateboarding).
+            sort: featured (default), newest, price_high or price_low: Nike's sort menu.
+            filter: One or more (up to 6) facet tokens exactly as an earlier answer gives them in facets[].options[].filter (size, gender, colour, price band, sport, brand, discount band, ...), e.g. 'black-90poy'. A token from a filtered answer already carries the filters applied there.
+            country: Nike storefront (default 'us': www.nike.com; language, default the first listed): us (USD; en, es), at (EUR; de, en), au (AUD; en), be (EUR; nl, de, en, fr), bg (EUR; en), ca (CAD; en, fr), ch (CHF; de, en, fr, it), cn (CNY; zh-Hans), cz (EUR; cs, en), de (EUR; de), dk (DKK; da, en), es (EUR; es, ca), fi (EUR; en), fr (EUR; fr), gb (GBP; en), gr (EUR; el), hr (EUR; en), hu (EUR; hu, en), id (IDR; en), ie (EUR; en), il (ILS; en), it (EUR; it), jp (JPY; ja, en), kr (KRW; ko), lu (EUR; fr, de, en), mx (MXN; es), my (MYR; en), nl (EUR; nl, en), no (NOK; no, en), ph (PHP; en), pl (PLN; pl), pt (EUR; pt, en), ro (RON; en), se (SEK; sv, en), sg (SGD; en), si (EUR; en), sk (EUR; en), th (THB; th), tr (TRY; tr), tw (TWD; zh-Hant), vn (VND; en), za (ZAR; en). cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_brand", {"brand": brand, "sort": sort, "filter": filter, "country": country, "language": language}, extra)
+
+    async def deals(
+        self,
+        *,
+        gender: Optional[Literal["men", "women", "unisex", "boys", "girls"]] = None,
+        category: Optional[str] = None,
+        sort: Optional[Literal["featured", "newest", "price_high", "price_low"]] = None,
+        filter: Optional[Union[str, list[str]]] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cn", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Nike (nike.com, including Jordan Brand)'s Sale listing on any storefront, optionally for one gender or one category, sorted and filtered (e.g. by discount band). Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per storefront, in its own currency, and differ between markets (also inside the euro zone); no store prices. Returns gender, category, filters_applied, market {country, language, currency, locale}, sort, path, title, total, total_pages, count, items (position, style_color (the input of product(), reviews() and release()), name, subtitle, color, price, full_price, discount_percent, currency, product_type, image, url, by_you (Nike By You), badge, featured_attributes, is_new_until, promotions [{text, starts, ends}] (Nike's offer text with its dates, UTC), colorways [{style_color, color, price, full_price, discount_percent, currency, image, url}] (us, ca, mx and au group every colorway; other storefronts show one per item)), facets [{name, options [{name, count, selected, filter}]}] (send filter back), categories [{name, count, path}], notes. First page only: the 24 product groups Nike's page shows first (total and total_pages are as Nike gives them; Nike's page does not page further). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            gender: men, women, unisex, boys or girls.
+            category: Only this listing path token (categories[].path of an earlier deals answer, e.g. 'shoes-y7ok').
+            sort: featured (default), newest, price_high or price_low: Nike's sort menu.
+            filter: One or more (up to 6) facet tokens exactly as an earlier answer gives them in facets[].options[].filter (size, gender, colour, price band, sport, brand, discount band, ...), e.g. 'black-90poy'. A token from a filtered answer already carries the filters applied there.
+            country: Nike storefront (default 'us': www.nike.com; language, default the first listed): us (USD; en, es), at (EUR; de, en), au (AUD; en), be (EUR; nl, de, en, fr), bg (EUR; en), ca (CAD; en, fr), ch (CHF; de, en, fr, it), cn (CNY; zh-Hans), cz (EUR; cs, en), de (EUR; de), dk (DKK; da, en), es (EUR; es, ca), fi (EUR; en), fr (EUR; fr), gb (GBP; en), gr (EUR; el), hr (EUR; en), hu (EUR; hu, en), id (IDR; en), ie (EUR; en), il (ILS; en), it (EUR; it), jp (JPY; ja, en), kr (KRW; ko), lu (EUR; fr, de, en), mx (MXN; es), my (MYR; en), nl (EUR; nl, en), no (NOK; no, en), ph (PHP; en), pl (PLN; pl), pt (EUR; pt, en), ro (RON; en), se (SEK; sv, en), sg (SGD; en), si (EUR; en), sk (EUR; en), th (THB; th), tr (TRY; tr), tw (TWD; zh-Hant), vn (VND; en), za (ZAR; en). cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_deals", {"gender": gender, "category": category, "sort": sort, "filter": filter, "country": country, "language": language}, extra)
+
+    async def releases(
+        self,
+        *,
+        view: Optional[Literal["upcoming", "feed", "in_stock"]] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Nike (nike.com, including Jordan Brand)'s launch calendar (the upcoming, feed or in stock tab) on a storefront: market, view, count, thread_count, launches [{style_color, name, subtitle, price, full_price, currency, product_type, release_start, method (LINE or DRAW, as Nike labels it), entry_start, entry_end, exclusive_access, launch_status, thread {slug, title, url}, image, sizes [{size, localized_size, gtin, level (HIGH, MEDIUM, LOW or OOS as Nike gives it), available}]}], notes. Price, release start and method per launch item, and per-size level and availability as Nike gives them; before a launch Nike can show LOW on every size. Not on vn, cn or jp in English. Read-only launch data: no entry or purchase. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            view: upcoming (default), feed or in_stock: the launch calendar's tabs.
+            country: Nike storefront (default 'us'): every storefront except vn and cn (and jp with language='en'): Nike's launch calendar does not list launches there.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_releases", {"view": view, "country": country, "language": language}, extra)
+
+    async def release(
+        self,
+        style_color: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        slug: Optional[str] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One launch of Nike (nike.com, including Jordan Brand)'s launch calendar by link, thread slug or style color (past launches too, back to 2022): market, requested_style_color, found_requested_style_color, thread {slug, title, url}, count, launches [{style_color, name, subtitle, price, full_price, currency, product_type, release_start, method (LINE or DRAW, as Nike labels it), entry_start, entry_end, exclusive_access, launch_status, thread {slug, title, url}, image, sizes [{size, localized_size, gtin, level (HIGH, MEDIUM, LOW or OOS as Nike gives it), available}]}], notes. A thread can list several products (e.g. men's and kids' sizes). An unknown launch, or a style color that is not a launch-calendar product, is a charged 404. Not on vn, cn or jp in English. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            style_color: A Nike style color: style code, dash, color code (items[].style_color) of a launch-calendar product, e.g. 'IX8180-001' (past launches too). Send style_color, url or slug.
+            url: A Nike launch link (launches[].thread.url, e.g. 'https://www.nike.com/launch/t/air-jordan-4-bred'). Its storefront comes from the link.
+            slug: A launch thread slug (launches[].thread.slug) instead of url.
+            country: Nike storefront (default 'us'): every storefront except vn and cn (and jp with language='en'): Nike's launch calendar does not list launches there.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_release", {"style_color": style_color, "url": url, "slug": slug, "country": country, "language": language}, extra)
+
+    async def reviews(
+        self,
+        style_color: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "at", "au", "be", "bg", "ca", "ch", "cz", "de", "dk", "es", "fi", "fr", "gb", "gr", "hr", "hu", "id", "ie", "il", "it", "jp", "kr", "lu", "mx", "my", "nl", "no", "ph", "pl", "pt", "ro", "se", "sg", "si", "sk", "th", "tr", "tw", "vn", "za"]] = None,
+        language: Optional[Literal["en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko", "no", "pl", "pt", "sv", "th", "tr", "zh-Hant"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The review summary of one Nike (nike.com, including Jordan Brand) product by link or style color (www.nike.com storefronts): market, requested_style_color, url, style_color (the colorway the reviews page names, which can differ from the requested one), total_reviews, average_rating, average_size_rating, average_comfort_rating (as Nike gives them), review_summary (Nike's own summary, where Nike shows one), count, reviews [{heading, rating, created_at, text, verified_purchase, sweepstakes_entry}] (the 3 newest reviews Nike's page shows; no reviewer names), notes. Summary and 3 newest reviews only: no paging, sorting or Q&A. A product without a reviews page is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            style_color: A Nike style color: style code, dash, color code (items[].style_color), e.g. 'CW2288-111' (found through Nike's search first). Send style_color or url.
+            url: A Nike product link (items[].url), instead of style_color. Its storefront comes from the link.
+            country: Nike storefront (default 'us'): every www.nike.com storefront; cn (www.nike.com.cn) has no reviews page.
+            language: The storefront language where a country has several (default its primary language; the languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nike_reviews", {"style_color": style_color, "url": url, "country": country, "language": language}, extra)

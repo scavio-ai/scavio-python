@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import inspect
+import re
 
 import pytest
 
@@ -6883,3 +6884,109 @@ def test_michaels_credits_paths_and_wire(monkeypatch):
         mi.deals()
     with pytest.raises(ScavioError):
         mi.stores()
+
+
+def test_nike_credits_paths_and_wire(monkeypatch):
+    """nike (0.82.0): 8 endpoints on /api/v1/nike.
+
+    1 credit each. country (42 countries, 62 storefronts) + language everywhere; releases /
+    release not on vn or cn, reviews not on cn. query is sent as q.
+    """
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nike"}
+    assert sorted(eps) == [
+        "brand", "category", "deals", "product", "release", "releases", "reviews", "search",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/nike/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert "Nike (nike.com, including Jordan Brand)" in ep.summary, m
+        assert ep.credits == 1, m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        assert "country" in names and "language" in names, m
+        assert '"zh-Hans"' in names["language"].annotation, m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+    countries = {m: {p.name: p for p in ep.params}["country"].annotation for m, ep in eps.items()}
+    for m in ("search", "product", "category", "brand", "deals"):
+        assert '"cn"' in countries[m] and '"vn"' in countries[m] and '"gb"' in countries[m], m
+        assert '"uk"' not in countries[m] and '"br"' not in countries[m], m
+    for m in ("releases", "release"):
+        assert '"cn"' not in countries[m] and '"vn"' not in countries[m] and '"jp"' in countries[m]
+    assert '"cn"' not in countries["reviews"] and '"vn"' in countries["reviews"]
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["featured", "newest", "price_high", "price_low"]]'
+    )
+    assert search["filter"].annotation == "Optional[Union[str, list[str]]]"
+    brand = {p.name: p for p in eps["brand"].params}["brand"]
+    assert brand.required and brand.annotation == 'Literal["jordan", "acg", "sb"]'
+    view = {p.name: p for p in eps["releases"].params}["view"]
+    assert view.annotation == 'Optional[Literal["upcoming", "feed", "in_stock"]]'
+    assert eps["product"].one_of == (("style_color", "url"),)
+    assert eps["reviews"].one_of == (("style_color", "url"),)
+    assert eps["release"].one_of == (("style_color", "url", "slug"),)
+    assert eps["category"].one_of == (("path", "url"),)
+    for m in ("search", "category", "brand", "deals"):
+        assert "First page only" in eps[m].summary, m
+    assert "sizes, not stock levels" in eps["product"].summary
+    assert "LINE or DRAW" in eps["releases"].summary
+    assert "3 newest reviews" in eps["reviews"].summary
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"checkout api|stock checker)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    nk = client.nike
+    nk.search("dunk low")
+    nk.search("dunk low", country="gb", sort="price_low", filter="black-90poy")
+    nk.product("DD1503-103", country="fr")
+    nk.product(url="https://www.nike.com/t/dunk-low-womens-shoes-ppQwKZ/IM6572-104")
+    nk.category("mens-shoes-nik1zy7ok", filter=["black-90poy", "mens-nik1"], sort="newest")
+    nk.category(url="https://www.nike.com/w/mens-shoes-nik1zy7ok")
+    nk.brand("jordan", country="ch", language="fr")
+    nk.deals()
+    nk.deals(gender="women", category="shoes-y7ok", country="jp", language="en")
+    nk.releases()
+    nk.releases(view="feed", country="gb")
+    nk.release("IX8180-001")
+    nk.release(slug="air-jordan-4-bred", country="gb")
+    nk.reviews("CW2288-111")
+    base = "/api/v1/nike/"
+    assert seen == [
+        (base + "search", {"q": "dunk low"}, 240.0),
+        (base + "search", {"q": "dunk low", "sort": "price_low", "filter": "black-90poy",
+                           "country": "gb"}, 240.0),
+        (base + "product", {"style_color": "DD1503-103", "country": "fr"}, 240.0),
+        (base + "product", {"url": "https://www.nike.com/t/dunk-low-womens-shoes-ppQwKZ/"
+                                   "IM6572-104"}, 240.0),
+        (base + "category", {"path": "mens-shoes-nik1zy7ok", "sort": "newest",
+                             "filter": ["black-90poy", "mens-nik1"]}, 240.0),
+        (base + "category", {"url": "https://www.nike.com/w/mens-shoes-nik1zy7ok"}, 240.0),
+        (base + "brand", {"brand": "jordan", "country": "ch", "language": "fr"}, 240.0),
+        (base + "deals", {}, 240.0),
+        (base + "deals", {"gender": "women", "category": "shoes-y7ok", "country": "jp",
+                          "language": "en"}, 240.0),
+        (base + "releases", {}, 240.0),
+        (base + "releases", {"view": "feed", "country": "gb"}, 240.0),
+        (base + "release", {"style_color": "IX8180-001"}, 240.0),
+        (base + "release", {"slug": "air-jordan-4-bred", "country": "gb"}, 240.0),
+        (base + "reviews", {"style_color": "CW2288-111"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        nk.product()
+    with pytest.raises(ScavioError):
+        nk.release()
+    with pytest.raises(ScavioError):
+        nk.reviews()
+    with pytest.raises(ScavioError):
+        nk.category()

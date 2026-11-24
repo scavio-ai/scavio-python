@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 101 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 102 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -53,6 +53,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
 | Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
 | Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
+| Nike Sale Prices with Full Price and Discount, Every Size with GTIN, Release Calendar with Per-Size Levels, Same Style Code Across Markets (62 storefronts in 42 countries; 8 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4730,6 +4731,86 @@ aisle locations, Marketplace seller names, custom framing, price history (poll
 and store the answers), checkout. Failed calls and refused inputs are not
 charged; a not-found (an unknown product, category, brand or store) is charged.
 
+### 71. Sneakers and Sportswear -- Nike sale prices, sizes with GTIN, release calendar
+
+Nike (nike.com, including Jordan Brand). Namespace `nike`, 8 endpoints:
+`search`, `product`, `category`, `brand`, `deals`, `releases`, `release`,
+`reviews`. 1 credit per call; `credits_used` in the response is what was
+charged. `country` is a two-letter storefront code (default `"us"`,
+www.nike.com; 62 storefronts in 42 countries, `"cn"` is www.nike.com.cn) and
+`language` picks the storefront language where a country has several (`ch`:
+de, en, fr, it; `be`: nl, de, en, fr; `ca`: en, fr; `us`: en, es; `jp`: ja,
+en). `releases` and `release` are not offered on `vn`, `cn` or `jp` in
+English; `reviews` is not offered on `cn`. The request timeout is raised to at
+least 240s on every endpoint. Nike has no public API for catalog, prices or
+launches. Pair it with the `footlocker`, `dicks`, `amazon` and `ebay`
+namespaces for a price check on the same style code.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+nk = client.nike
+
+# --- One product: price next to Nike's full price and discount percent as Nike gives them,
+#     every size with its GTIN and Nike's status (sizes, not stock levels), colorways.
+p = nk.product("DD1503-103")["data"]
+print(p["name"], p["price"], p["full_price"], p["discount_percent"], p["currency"], p["status"])
+for s in p["sizes"][:5]:
+    print(s["label"], s["localized_label"], s["gtin"], s["status"])
+for c in p["colorways"][:3]:
+    print(c["style_color"], c["color"], c["price"], c["full_price"])
+
+# --- The same style color on other storefronts, each in its own currency.
+for country in ("gb", "fr", "jp"):
+    hits = nk.search("DD1503-103", country=country)["data"]
+    print(country, [(i["style_color"], i["price"], i["currency"]) for i in hits["items"][:1]])
+
+# --- Lists: search, a listing, Jordan / ACG / SB, the Sale listing (first page only: 24 groups).
+hits = nk.search("dunk low", sort="price_low")["data"]
+for it in hits["items"][:5]:
+    print(it["style_color"], it["name"], it["price"], it["full_price"], it["promotions"])
+token = hits["facets"][0]["options"][0]["filter"]
+narrowed = nk.search("dunk low", filter=token)["data"]
+mens = nk.category("mens-shoes-nik1zy7ok")["data"]
+jordan = nk.brand("jordan")["data"]
+sale = nk.deals(gender="women")["data"]
+print(hits["total"], narrowed["total"], mens["total"], jordan["total"], sale["total"])
+
+# --- The launch calendar: price, release start, method and a per-size level for launch items.
+cal = nk.releases()["data"]
+for l in cal["launches"][:3]:
+    print(l["style_color"], l["name"], l["price"], l["release_start"], l["method"])
+    print([(s["size"], s["level"], s["available"]) for s in l["sizes"][:4]])
+bred = nk.release("IX8180-001")["data"]
+print(bred["thread"]["title"], bred["count"])
+
+# --- A review summary: totals, averages, Nike's own summary and the 3 newest reviews.
+r = nk.reviews("CW2288-111")["data"]
+print(r["total_reviews"], r["average_rating"], r["average_size_rating"], r["review_summary"])
+```
+
+Prices are per storefront and differ between markets, also inside the euro
+zone. Captured 2026-11-24: the Nike Dunk Low (style color DD1503-103) at
+$78.97 next to a $120 full price (34%) on www.nike.com, £54.99 next to £109.99
+(50%) on nike.com/gb, €59.99 next to €119.99 (50%) on nike.com/fr and ¥17,050
+on nike.com/jp. `price`, `full_price` and `discount_percent` are as Nike gives
+them; `promotions` carry Nike's offer text with its start and end dates (UTC),
+as given. Search and the list methods return Nike's first page only (the 24
+product groups Nike's page shows first; `total` and `total_pages` as Nike
+gives them); `search` takes one facet token in `filter` (a token from a
+filtered answer already carries the filters applied there), the list methods
+up to 6. Product sizes carry a GTIN and Nike's status, not a stock level.
+Launch items carry `method` (LINE or DRAW, as Nike labels it) and a per-size
+`level` (HIGH, MEDIUM, LOW or OOS as Nike gives it); before a launch Nike can
+show LOW on every size. Read-only data: no entry or purchase. Reviews are the
+summary and the 3 newest reviews, no paging and no reviewer names. Not
+available: store locator, in-store or pickup stock, stock levels for regular
+products, review paging or Q&A, search suggestions, pages past the first,
+member prices, gift cards, Nike Factory store prices, Converse, checkout.
+Failed calls and refused inputs are not charged; a not-found (an unknown
+product, listing or launch) is charged.
+
 ## Error Handling
 
 ```python
@@ -4880,6 +4961,7 @@ Scavio works with popular AI/LLM frameworks:
 | Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
 | Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
 | Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
+| Nike (`nike`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `release`, `reviews`; 62 storefronts in 42 countries (`country` + `language`); `releases` and `release` not on vn, cn or jp in English; `reviews` not on cn | 1 each |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4911,6 +4993,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.82.0
+
+- **New `nike` namespace** (sync and async) for Nike (nike.com, including
+  Jordan Brand), 8 endpoints: `search`, `product`, `category`, `brand`,
+  `deals`, `releases`, `release`, `reviews`. Nike's price next to its own full
+  price and discount percent, every size with its GTIN, the launch calendar
+  with a per-size level for launch items, and the same style code on 62
+  storefronts in 42 countries (`country` + `language`). Lists are Nike's first
+  page only. 1 credit per call. The request timeout is raised to at least 240s
+  on every endpoint.
 
 ### Changed in 0.81.0
 

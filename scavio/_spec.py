@@ -4103,6 +4103,118 @@ _MICH_CATEGORY_NOTE = (
     "its code path; credits_used is what was charged)."
 )
 
+# Nike params shared across endpoints (nike.com, including Jordan Brand: 61 www.nike.com
+# storefronts plus www.nike.com.cn; markets in backend scrapedo-nike.ts MARKET_ROWS). 8
+# endpoints, 1 credit each. country (default us) + language (default the country's primary
+# language). releases / release are not offered on vn, cn or jp with language en; reviews not on
+# cn. Prices are per storefront. search / category / brand / deals return Nike's first page only.
+_NIKE_NAME = "Nike (nike.com, including Jordan Brand)"
+_NIKE_MARKETS = (
+    ("us", "USD", ("en", "es")), ("at", "EUR", ("de", "en")), ("au", "AUD", ("en",)),
+    ("be", "EUR", ("nl", "de", "en", "fr")), ("bg", "EUR", ("en",)), ("ca", "CAD", ("en", "fr")),
+    ("ch", "CHF", ("de", "en", "fr", "it")), ("cn", "CNY", ("zh-Hans",)),
+    ("cz", "EUR", ("cs", "en")), ("de", "EUR", ("de",)), ("dk", "DKK", ("da", "en")),
+    ("es", "EUR", ("es", "ca")), ("fi", "EUR", ("en",)), ("fr", "EUR", ("fr",)),
+    ("gb", "GBP", ("en",)), ("gr", "EUR", ("el",)), ("hr", "EUR", ("en",)),
+    ("hu", "EUR", ("hu", "en")), ("id", "IDR", ("en",)), ("ie", "EUR", ("en",)),
+    ("il", "ILS", ("en",)), ("it", "EUR", ("it",)), ("jp", "JPY", ("ja", "en")),
+    ("kr", "KRW", ("ko",)), ("lu", "EUR", ("fr", "de", "en")), ("mx", "MXN", ("es",)),
+    ("my", "MYR", ("en",)), ("nl", "EUR", ("nl", "en")), ("no", "NOK", ("no", "en")),
+    ("ph", "PHP", ("en",)), ("pl", "PLN", ("pl",)), ("pt", "EUR", ("pt", "en")),
+    ("ro", "RON", ("en",)), ("se", "SEK", ("sv", "en")), ("sg", "SGD", ("en",)),
+    ("si", "EUR", ("en",)), ("sk", "EUR", ("en",)), ("th", "THB", ("th",)),
+    ("tr", "TRY", ("tr",)), ("tw", "TWD", ("zh-Hant",)), ("vn", "VND", ("en",)),
+    ("za", "ZAR", ("en",)),
+)
+_NIKE_COUNTRIES = tuple(c for c, _, _ in _NIKE_MARKETS)
+_NIKE_LAUNCH_COUNTRIES = tuple(c for c in _NIKE_COUNTRIES if c not in ("vn", "cn"))
+_NIKE_REVIEW_COUNTRIES = tuple(c for c in _NIKE_COUNTRIES if c != "cn")
+_NIKE_MARKET_LIST = ", ".join(
+    c + " (" + cur + "; " + ", ".join(langs) + ")" for c, cur, langs in _NIKE_MARKETS
+)
+_NIKE_HELD = (
+    " cn is www.nike.com.cn. Not served (a 400, not charged): ae, sa, ar, br, cl, in (separate "
+    "partner sites), co, pe, kw, qa, eg, ma, nz, pr, ru, uy, hk; uk is gb."
+)
+_NIKE_COUNTRY = _lit(
+    "country",
+    _NIKE_COUNTRIES,
+    "Nike storefront (default 'us': www.nike.com; language, default the first listed): "
+    + _NIKE_MARKET_LIST + "." + _NIKE_HELD,
+)
+_NIKE_LAUNCH_COUNTRY = _lit(
+    "country",
+    _NIKE_LAUNCH_COUNTRIES,
+    "Nike storefront (default 'us'): every storefront except vn and cn (and jp with "
+    "language='en'): Nike's launch calendar does not list launches there.",
+)
+_NIKE_REVIEW_COUNTRY = _lit(
+    "country",
+    _NIKE_REVIEW_COUNTRIES,
+    "Nike storefront (default 'us'): every www.nike.com storefront; cn (www.nike.com.cn) has no "
+    "reviews page.",
+)
+_NIKE_LANGUAGE = _lit(
+    "language",
+    (
+        "en", "es", "de", "nl", "fr", "it", "zh-Hans", "cs", "da", "ca", "el", "hu", "ja", "ko",
+        "no", "pl", "pt", "sv", "th", "tr", "zh-Hant",
+    ),
+    "The storefront language where a country has several (default its primary language; the "
+    "languages each storefront offers are listed under country), e.g. ch: de, en, fr, it; ca: "
+    "en, fr; us: en, es; jp: ja, en. A language the country does not offer answers 400, not "
+    "charged.",
+)
+_NIKE_MARKET = (_NIKE_COUNTRY, _NIKE_LANGUAGE)
+_NIKE_STYLE_DOC = "A Nike style color: style code, dash, color code (items[].style_color)"
+_NIKE_SORT = _lit(
+    "sort",
+    ("featured", "newest", "price_high", "price_low"),
+    "featured (default), newest, price_high or price_low: Nike's sort menu.",
+)
+_NIKE_FILTER = _str_or_list(
+    "filter",
+    "One or more (up to 6) facet tokens exactly as an earlier answer gives them in "
+    "facets[].options[].filter (size, gender, colour, price band, sport, brand, discount band, "
+    "...), e.g. 'black-90poy'. A token from a filtered answer already carries the filters applied "
+    "there.",
+)
+_NIKE_LIST_PARAMS = (_NIKE_SORT, _NIKE_FILTER, *_NIKE_MARKET)
+_NIKE_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_NIKE_PRICES = (
+    " Price and full price as Nike shows them; discount_percent as Nike gives it. Prices are per "
+    "storefront, in its own currency, and differ between markets (also inside the euro zone); no "
+    "store prices."
+)
+_NIKE_FIRST_PAGE = (
+    " First page only: the 24 product groups Nike's page shows first (total and total_pages are "
+    "as Nike gives them; Nike's page does not page further)."
+)
+_NIKE_NOT_AVAILABLE = (
+    " Not available: store locator, in-store or pickup stock, stock levels for regular products "
+    "(sizes only), review paging or Q&A, search suggestions, pages past the first, member prices, "
+    "gift cards, Nike Factory store prices, Converse, checkout."
+)
+_NIKE_ITEM_FIELDS = (
+    "position, style_color (the input of product(), reviews() and release()), name, subtitle, "
+    "color, price, full_price, discount_percent, currency, product_type, image, url, by_you (Nike "
+    "By You), badge, featured_attributes, is_new_until, promotions [{text, starts, ends}] (Nike's "
+    "offer text with its dates, UTC), colorways [{style_color, color, price, full_price, "
+    "discount_percent, currency, image, url}] (us, ca, mx and au group every colorway; other "
+    "storefronts show one per item)"
+)
+_NIKE_LIST = (
+    "market {country, language, currency, locale}, sort, path, title, total, total_pages, count, "
+    "items (" + _NIKE_ITEM_FIELDS + "), facets [{name, options [{name, count, selected, filter}]}] "
+    "(send filter back), categories [{name, count, path}], notes."
+)
+_NIKE_LAUNCH = (
+    "launches [{style_color, name, subtitle, price, full_price, currency, product_type, "
+    "release_start, method (LINE or DRAW, as Nike labels it), entry_start, entry_end, "
+    "exclusive_access, launch_status, thread {slug, title, url}, image, sizes [{size, "
+    "localized_size, gtin, level (HIGH, MEDIUM, LOW or OOS as Nike gives it), available}]}]"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -18166,6 +18278,260 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
         min_timeout=240.0,
     ),
+    # ================================ Nike ================================
+    # 8 endpoints on /api/v1/nike: country (default us, 62 storefronts in 42 countries) +
+    # language where a country has several. releases / release not on vn, cn or jp in English;
+    # reviews not on cn. 1 credit each. Calls can queue behind the backend's upstream limit:
+    # 240 s floor.
+    Endpoint(
+        key="nike_search",
+        namespace="nike",
+        method="search",
+        http="POST",
+        path="/api/v1/nike/search",
+        summary=(
+            "Search " + _NIKE_NAME + " by keywords or a style color on any of its storefronts, "
+            "sorted (featured, newest, price high or low) and filtered by one facet token of an "
+            "earlier answer (size, gender, colour, price band, sport, brand)." + _NIKE_PRICES
+            + " Returns query, filters_applied, " + _NIKE_LIST + _NIKE_FIRST_PAGE
+            + _NIKE_NOT_AVAILABLE + _NIKE_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords ('dunk low') or a style color.", wire="q"),
+            _NIKE_SORT,
+            _str_or_list(
+                "filter",
+                "ONE facet token exactly as an earlier search answer gives it in "
+                "facets[].options[].filter, e.g. 'black-90poy'. A token from a filtered answer "
+                "already carries every filter applied there, so one token narrows step by step.",
+            ),
+            *_NIKE_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_product",
+        namespace="nike",
+        method="product",
+        http="POST",
+        path="/api/v1/nike/product",
+        summary=(
+            "One " + _NIKE_NAME + " product by link or style color, on any storefront: market, "
+            "requested_style_color, found_requested_style_color, style_color, style_code, "
+            "prebuild_id (Nike By You), name, title, subtitle, url, color, price, full_price, "
+            "discount_percent, currency, description, features [{header, items}], details "
+            "[{header, items}], status (Nike's label as given, e.g. BUYABLE_BUY, COMING_SOON, "
+            "NOTIFY_ME), release_type (FLOW, RELEASE or LAUNCH as given), availability_date, "
+            "launch {start, end}, launch_product, member_product, by_you, promo_excluded, "
+            "product_type, brands, genders, sports, categories [{name, values}], badge, "
+            "featured_attributes, fit_message, size_chart_url, sizes [{label, localized_label, "
+            "gtin, status}] (every size with its GTIN and Nike's status; sizes, not stock levels: "
+            "Nike's product page shows no stock), colorways [{group, style_color, color, price, "
+            "full_price, discount_percent, currency, status, url, image}], images, notes."
+            + _NIKE_PRICES + " The same style color priced on several storefronts is one call per "
+            "country. A launch-only product answers a charged 404 pointing to release(); an "
+            "unknown product is a charged 404." + _NIKE_CHARGE
+        ),
+        params=(
+            Param(
+                "style_color",
+                "Optional[str]",
+                positional=True,
+                doc=_NIKE_STYLE_DOC + ", e.g. 'DD1503-103' (found through Nike's search on the "
+                "storefront first). Send style_color or url.",
+            ),
+            _str(
+                "url",
+                "A Nike product link (items[].url; a Nike By You /u/ link too), instead of "
+                "style_color. Its storefront comes from the link.",
+            ),
+            *_NIKE_MARKET,
+        ),
+        one_of=(("style_color", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_category",
+        namespace="nike",
+        method="category",
+        http="POST",
+        path="/api/v1/nike/category",
+        summary=(
+            "One " + _NIKE_NAME + " listing by path token or link (men's shoes, running, a "
+            "collection, ...), sorted and filtered by up to 6 facet tokens." + _NIKE_PRICES
+            + " Returns category, filters_applied, " + _NIKE_LIST + _NIKE_FIRST_PAGE + " A listing "
+            "with no products is a charged 404." + _NIKE_CHARGE
+        ),
+        params=(
+            Param(
+                "path",
+                "Optional[str]",
+                positional=True,
+                doc="A Nike listing path token (categories[].path of an earlier answer, or the "
+                "part after /w/ of a Nike listing link), e.g. 'mens-shoes-nik1zy7ok'. Send path "
+                "or url.",
+            ),
+            _str(
+                "url",
+                "A Nike listing link (www.nike.com/.../w/<path>) instead of path. Its storefront "
+                "comes from the link.",
+            ),
+            *_NIKE_LIST_PARAMS,
+        ),
+        one_of=(("path", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_brand",
+        namespace="nike",
+        method="brand",
+        http="POST",
+        path="/api/v1/nike/brand",
+        summary=(
+            "Jordan Brand, ACG or Nike SB products on any " + _NIKE_NAME + " storefront, sorted "
+            "and filtered." + _NIKE_PRICES + " Returns brand, filters_applied, " + _NIKE_LIST
+            + _NIKE_FIRST_PAGE + _NIKE_CHARGE
+        ),
+        params=(
+            Param(
+                "brand",
+                'Literal["jordan", "acg", "sb"]',
+                required=True,
+                doc="jordan (Jordan Brand), acg or sb (Nike SB skateboarding).",
+            ),
+            *_NIKE_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_deals",
+        namespace="nike",
+        method="deals",
+        http="POST",
+        path="/api/v1/nike/deals",
+        summary=(
+            _NIKE_NAME + "'s Sale listing on any storefront, optionally for one gender or one "
+            "category, sorted and filtered (e.g. by discount band)." + _NIKE_PRICES + " Returns "
+            "gender, category, filters_applied, " + _NIKE_LIST + _NIKE_FIRST_PAGE + _NIKE_CHARGE
+        ),
+        params=(
+            _lit(
+                "gender",
+                ("men", "women", "unisex", "boys", "girls"),
+                "men, women, unisex, boys or girls.",
+            ),
+            _str(
+                "category",
+                "Only this listing path token (categories[].path of an earlier deals answer, e.g. "
+                "'shoes-y7ok').",
+            ),
+            *_NIKE_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_releases",
+        namespace="nike",
+        method="releases",
+        http="POST",
+        path="/api/v1/nike/releases",
+        summary=(
+            _NIKE_NAME + "'s launch calendar (the upcoming, feed or in stock tab) on a "
+            "storefront: market, view, count, thread_count, " + _NIKE_LAUNCH + ", notes. Price, "
+            "release start and method per launch item, and per-size level and availability as "
+            "Nike gives them; before a launch Nike can show LOW on every size. Not on vn, cn or "
+            "jp in English. Read-only launch data: no entry or purchase." + _NIKE_CHARGE
+        ),
+        params=(
+            _lit(
+                "view",
+                ("upcoming", "feed", "in_stock"),
+                "upcoming (default), feed or in_stock: the launch calendar's tabs.",
+            ),
+            _NIKE_LAUNCH_COUNTRY,
+            _NIKE_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_release",
+        namespace="nike",
+        method="release",
+        http="POST",
+        path="/api/v1/nike/release",
+        summary=(
+            "One launch of " + _NIKE_NAME + "'s launch calendar by link, thread slug or style "
+            "color (past launches too, back to 2022): market, requested_style_color, "
+            "found_requested_style_color, thread {slug, title, url}, count, " + _NIKE_LAUNCH
+            + ", notes. A thread can list several products (e.g. men's and kids' sizes). An "
+            "unknown launch, or a style color that is not a launch-calendar product, is a "
+            "charged 404. Not on vn, cn or jp in English." + _NIKE_CHARGE
+        ),
+        params=(
+            Param(
+                "style_color",
+                "Optional[str]",
+                positional=True,
+                doc=_NIKE_STYLE_DOC + " of a launch-calendar product, e.g. 'IX8180-001' (past "
+                "launches too). Send style_color, url or slug.",
+            ),
+            _str(
+                "url",
+                "A Nike launch link (launches[].thread.url, e.g. "
+                "'https://www.nike.com/launch/t/air-jordan-4-bred'). Its storefront comes from "
+                "the link.",
+            ),
+            _str("slug", "A launch thread slug (launches[].thread.slug) instead of url."),
+            _NIKE_LAUNCH_COUNTRY,
+            _NIKE_LANGUAGE,
+        ),
+        one_of=(("style_color", "url", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nike_reviews",
+        namespace="nike",
+        method="reviews",
+        http="POST",
+        path="/api/v1/nike/reviews",
+        summary=(
+            "The review summary of one " + _NIKE_NAME + " product by link or style color "
+            "(www.nike.com storefronts): market, requested_style_color, url, style_color (the "
+            "colorway the reviews page names, which can differ from the requested one), "
+            "total_reviews, average_rating, average_size_rating, average_comfort_rating (as Nike "
+            "gives them), review_summary (Nike's own summary, where Nike shows one), count, "
+            "reviews [{heading, rating, created_at, text, verified_purchase, sweepstakes_entry}] "
+            "(the 3 newest reviews Nike's page shows; no reviewer names), notes. Summary and 3 "
+            "newest reviews only: no paging, sorting or Q&A. A product without a reviews page is "
+            "a charged 404." + _NIKE_CHARGE
+        ),
+        params=(
+            Param(
+                "style_color",
+                "Optional[str]",
+                positional=True,
+                doc=_NIKE_STYLE_DOC + ", e.g. 'CW2288-111' (found through Nike's search first). "
+                "Send style_color or url.",
+            ),
+            _str(
+                "url",
+                "A Nike product link (items[].url), instead of style_color. Its storefront comes "
+                "from the link.",
+            ),
+            _NIKE_REVIEW_COUNTRY,
+            _NIKE_LANGUAGE,
+        ),
+        one_of=(("style_color", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -25209,6 +25575,7 @@ NAMESPACES: tuple[str, ...] = (
     "acehardware",
     "tractorsupply",
     "michaels",
+    "nike",
 )
 
 
