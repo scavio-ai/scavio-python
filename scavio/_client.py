@@ -87,6 +87,7 @@ from ._namespaces_sync import (
     _SECNamespace,
     _SephoraNamespace,
     _SpecsNamespace,
+    _StaplesNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
     _ThreadsNamespace,
@@ -273,6 +274,7 @@ class ScavioClient:
         self.tractorsupply = _TractorsupplyNamespace(self)
         self.michaels = _MichaelsNamespace(self)
         self.nike = _NikeNamespace(self)
+        self.staples = _StaplesNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

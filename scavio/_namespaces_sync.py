@@ -111,6 +111,7 @@ __all__ = [
     "_TractorsupplyNamespace",
     "_MichaelsNamespace",
     "_NikeNamespace",
+    "_StaplesNamespace",
 ]
 
 class _GoogleNamespace:
@@ -19873,3 +19874,279 @@ class _NikeNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("nike_reviews", {"style_color": style_color, "url": url, "country": country, "language": language}, extra)
+
+class _StaplesNamespace:
+    """Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) search, product (price per unit, page yield, promotions), category, categories, deals, coupons, store-stock (units at the stores near a ZIP), stores, store, reviews, questions and trending endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "rating", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        deal: Optional[Literal["on_promotion", "clearance"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) by keywords, a model number or a Staples item number (an item number answers with that product), sorted (best match, price low or high, top rated, newest), filtered (brand, any facet value, price range, On Promotion, Clearance) and paged (40 a page, to page 250). Price and was price as Staples shows them (was_price is Staples' Regular price, given only when above the price); discount_percent is computed by Scavio from the two. Prices are national (USD): ZIP and store change availability, not price. Returns query, redirect {type (product, category, page), item_id, category_id, url} when Staples answers the search with one product or a category, market {country, language, currency, locale}, title, page, page_size, total, total_pages, count, sponsored_count, sort, filters_applied [{group, filter, name}], min_price, max_price, corrected_query, items (position, organic_position, sponsored, item_id (the input of product(), store_stock(), reviews() and questions()), name, url, image, brand, manufacturer, model, price, price_text, was_price, was_price_label, discount_percent, savings [{type, text}], price_per_unit, price_per_unit_unit, price_per_unit_text (Staples' own, e.g. $5.00/Ream or $0.10 Cost Per Page, as given), pack_size, rating, review_count, category {id, name}, department, supercategory, delivery {text, date, type}, in_stock_for_delivery, out_of_stock, pickup_eligible, pickup_message, ship_to_store_eligible, in_store_only, restriction, badges, highlights [{name, value}], supplier_type), facets [{name, values [{filter, name, count, selected}]}] (send filter back in filters), notes. Canada (country='ca', language 'en' or 'fr'): Staples Canada's top matches (about 5): market, query, count, items [{position, item_id, handle, language, name, brand, url, image, price, was_price, discount_percent, currency, available}], suggested_queries, notes; no paging, sort or filters. Not available: the weekly ad, search suggestions, print and tech service prices, ink recycling rewards, Rewards member prices, price match requests, Staples Business Advantage contract prices, price history (poll and store the answers), checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords ('copy paper', 'hp 64xl'), a model number or a Staples item number.
+            page: Page (1-250; 40 products a page).
+            sort: best_match (default), price_low, price_high, rating (top rated) or newest: Staples' sort menu.
+            brand: One or more brands (up to 5) as Staples names them (the Brand facet's values, e.g. 'Hammermill').
+            filters: Up to 10 facet values exactly as an earlier answer gives them in facets[].values[].filter (reams, sheet size, colour, yield, rating, price band, ...); several are combined.
+            min_price: Lowest price (USD).
+            max_price: Highest price (USD).
+            deal: on_promotion or clearance: only products in Staples' On Promotion or Clearance deals filter.
+            country: 'us' (default: www.staples.com, USD) or 'ca' (www.staples.ca, Staples Canada, CAD).
+            language: 'en' (default) or 'fr' (country='ca' only: www.staples.ca/fr, French products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_search", {"query": query, "page": page, "sort": sort, "brand": brand, "filters": filters, "min_price": min_price, "max_price": max_price, "deal": deal, "country": country, "language": language}, extra)
+
+    def product(
+        self,
+        item_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        handle: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        store: Optional[Union[str, int]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) product in full by item number or link: market, requested_item_id, found_requested_item_id, item_id, name, brand, manufacturer, model (manufacturer part number; staples.com publishes no UPC), url, image, images, price, was_price, was_price_label, discount_percent, savings, on_promotion, price_per_unit, price_per_unit_unit (Ream, Cost Per Page, ... as given), pack_size, promotions [{type, name, text}] and offer_expires (Staples' own promotion texts and expiry), coupon_codes [{code, limit}], page_yield, sheets_per_ream, number_of_reams, total_sheets, specifications [{name, value, group}], description, bullets, rating, review_count, question_count, rating_breakdown [{stars, count, percent}], review_summary (Staples' own AI-generated summary), category, hierarchy, breadcrumbs, pickup_eligible, ship_to_store_eligible, free_shipping, free_returns, in_store_only, back_order, coming_soon, clearance, instant_savings, restriction, supplier_type, availability {zip, store, out_of_stock, options [{mode, method, units, earliest_date, latest_date, date_text, order_within, back_order}], pickup {store_number, units, in_stock}} for an optional zip and store, variant_group, variants [{item_id, name, url, price, options [{name, value}], image, selected}] (ream / carton / size packs), currency, notes. Price and was price as Staples shows them (was_price is Staples' Regular price, given only when above the price); discount_percent is computed by Scavio from the two. Prices are national (USD): ZIP and store change availability, not price. An unknown item is a charged 404. Canada (country='ca', by item_id, handle or staples.ca link; language 'en' or 'fr'): market, item_id, handle, language, name, brand, url, image, images, price, was_price, discount_percent, currency (CAD), available, barcode (UPC), rating, review_count, pickup_eligible, clearance, model, breadcrumbs, description, variants [{sku, name, options, price, was_price, discount_percent, available, barcode}], notes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Staples item number (items[].item_id, the number after product_ in a staples.com link, e.g. '122374'). Send item_id, url or (country='ca') handle.
+            url: A staples.com product link (items[].url), or with country='ca' a staples.ca product link, instead of item_id.
+            handle: With country='ca': a Staples Canada product handle (items[].handle of a ca search).
+            zip: A US ZIP code (e.g. '10001'): delivery availability and dates for it (price does not change with it).
+            store: A Staples store number (stores[].store_number, e.g. '1633'): that store's pickup units.
+            country: 'us' (default: www.staples.com, USD) or 'ca' (www.staples.ca, Staples Canada, CAD).
+            language: 'en' (default) or 'fr' (country='ca' only: www.staples.ca/fr, French products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_product", {"item_id": item_id, "url": url, "handle": handle, "zip": zip, "store": store, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "rating", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        deal: Optional[Literal["on_promotion", "clearance"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) class listing by CL id or staples.com category link (us only), sorted, filtered and paged like search(). Price and was price as Staples shows them (was_price is Staples' Regular price, given only when above the price); discount_percent is computed by Scavio from the two. Prices are national (USD): ZIP and store change availability, not price. Returns category {id, name}, market {country, language, currency, locale}, title, page, page_size, total, total_pages, count, sponsored_count, sort, filters_applied [{group, filter, name}], min_price, max_price, corrected_query, items (position, organic_position, sponsored, item_id (the input of product(), store_stock(), reviews() and questions()), name, url, image, brand, manufacturer, model, price, price_text, was_price, was_price_label, discount_percent, savings [{type, text}], price_per_unit, price_per_unit_unit, price_per_unit_text (Staples' own, e.g. $5.00/Ream or $0.10 Cost Per Page, as given), pack_size, rating, review_count, category {id, name}, department, supercategory, delivery {text, date, type}, in_stock_for_delivery, out_of_stock, pickup_eligible, pickup_message, ship_to_store_eligible, in_store_only, restriction, badges, highlights [{name, value}], supplier_type), facets [{name, values [{filter, name, count, selected}]}] (send filter back in filters), notes. An unknown class is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A Staples class id (CL..., e.g. 'CL140691' Copy & Printer Paper: items[].category.id or a CL entry of categories()) or a staples.com category link (/<name>/cat_CL<id>).
+            page: Page (1-250; 40 products a page).
+            sort: best_match (default), price_low, price_high, rating (top rated) or newest: Staples' sort menu.
+            brand: One or more brands (up to 5) as Staples names them (the Brand facet's values, e.g. 'Hammermill').
+            filters: Up to 10 facet values exactly as an earlier answer gives them in facets[].values[].filter (reams, sheet size, colour, yield, rating, price band, ...); several are combined.
+            min_price: Lowest price (USD).
+            max_price: Highest price (USD).
+            deal: on_promotion or clearance: only products in Staples' On Promotion or Clearance deals filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_category", {"category": category, "page": page, "sort": sort, "brand": brand, "filters": filters, "min_price": min_price, "max_price": max_price, "deal": deal}, extra)
+
+    def categories(
+        self,
+        *,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca)'s top-level departments, or one department's sub-departments and classes (us only): market, category {id, name, url}, parents [{id, type, name, url}], count, categories [{id, type (SC, CG, DP, CL), name, url}], notes. A class id (CL) is the input of category() and deals(). An unknown department is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A department id (SC, CG or DP, e.g. 'SC1676' Paper, from an earlier answer or a staples.com link): its sub-departments and classes. Without it: Staples' top-level departments.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_categories", {"category": category}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["on_promotion", "clearance"]] = None,
+        query: Optional[str] = None,
+        category: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "rating", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[str]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca)'s On Promotion (type='on_promotion', default) or Clearance products for keywords or a class (query or category is required; us only), sorted, filtered and paged. Price and was price as Staples shows them (was_price is Staples' Regular price, given only when above the price); discount_percent is computed by Scavio from the two. Prices are national (USD): ZIP and store change availability, not price. Returns type, query or category, redirect, market {country, language, currency, locale}, title, page, page_size, total, total_pages, count, sponsored_count, sort, filters_applied [{group, filter, name}], min_price, max_price, corrected_query, items (position, organic_position, sponsored, item_id (the input of product(), store_stock(), reviews() and questions()), name, url, image, brand, manufacturer, model, price, price_text, was_price, was_price_label, discount_percent, savings [{type, text}], price_per_unit, price_per_unit_unit, price_per_unit_text (Staples' own, e.g. $5.00/Ream or $0.10 Cost Per Page, as given), pack_size, rating, review_count, category {id, name}, department, supercategory, delivery {text, date, type}, in_stock_for_delivery, out_of_stock, pickup_eligible, pickup_message, ship_to_store_eligible, in_store_only, restriction, badges, highlights [{name, value}], supplier_type), facets [{name, values [{filter, name, count, selected}]}] (send filter back in filters), notes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: on_promotion (default) or clearance: Staples' deals filters.
+            query: Deals matching these keywords, e.g. 'laptop' (query or category is required).
+            category: Deals in this class (a CL id or a staples.com category link).
+            page: Page (1-250; 40 products a page).
+            sort: best_match (default), price_low, price_high, rating (top rated) or newest: Staples' sort menu.
+            brand: One or more brands (up to 5) as Staples names them (the Brand facet's values, e.g. 'Hammermill').
+            filters: Up to 10 facet values exactly as an earlier answer gives them in facets[].values[].filter (reams, sheet size, colour, yield, rating, price band, ...); several are combined.
+            min_price: Lowest price (USD).
+            max_price: Highest price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_deals", {"type": type, "query": query, "category": category, "page": page, "sort": sort, "brand": brand, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    def coupons(
+        self,
+        *,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The coupons on Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca)'s public coupons page (us only): market, category, count, categories, coupons [{position, code, headline, details, ends (ISO date), ends_text (as given), channel (Online or omni), category, url, image}], notes. Coupon text and end dates are Staples' own. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Only coupons of this category, as Staples names it (categories of an earlier answer, e.g. 'Printers').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_coupons", {"category": category}, extra)
+
+    def store_stock(
+        self,
+        item_id: Union[str, int],
+        zip: Union[str, int],
+        *,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units of one item at the Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) stores near a US ZIP that have it for pickup today, as Staples reports them: market, item_id, name, image, location, radius_miles, count, total_units, stores [{position, store_number, address {line1, city, state, zip}, phone, distance_miles, units, threshold (the value Staples returns beside the units, as given), in_stock, pickup_type, pickup_text (e.g. Ready in 30 mins), your_store, hours [{day, open, close, closed}]}], notes. Staples lists only stores that have the item (nearest first; 7 to 10 seen); an empty list means no nearby store has it or it is not offered for store pickup. Price does not change by store. An unknown item is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Staples item number (items[].item_id, the number after product_ in a staples.com link, e.g. '122374').
+            zip: A US ZIP code (e.g. '60540'). stores() gives the ZIP codes of the stores near a city.
+            radius: Miles around the ZIP (1-100, default 100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_store_stock", {"item_id": item_id, "zip": zip, "radius": radius}, extra)
+
+    def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        city: Optional[str] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) stores near a US ZIP or city: market, location, radius_miles, count, stores [{position, store_number, name, address {line1, city, state, zip, country}, phone, fax, latitude, longitude, distance_miles, utc_offset, hours [{day, open, close, closed}] (this week's, holiday closures included), services (Print and Marketing Services, Shredding, Recycling, UPS, Amazon Lockers, ... as Staples lists them)}], notes. Send zip or city. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (e.g. '10001'). Send zip or city.
+            city: A US city and state, e.g. 'Chicago, IL', instead of zip.
+            radius: Miles around the location (1-100, default 25).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_stores", {"zip": zip, "city": city, "radius": radius}, extra)
+
+    def store(
+        self,
+        store: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) store by store number: market, store_number, name, address, phone, fax, latitude, longitude, utc_offset, hours, services, notes. An unknown store number is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: A Staples store number (stores[].store_number, e.g. '1574').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_store", {"store": store}, extra)
+
+    def reviews(
+        self,
+        item_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        sort: Optional[Literal["most_relevant", "newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        photos_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Reviews of one Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) item (us only), paged (up to 100 a page), sorted and filtered by stars or photos: market, item_id, name, rating, review_count, rating_breakdown [{stars, count, percent}], review_summary (Staples' own AI-generated summary), sort, rating_filter, photos_only, page, limit, total, total_pages, count, reviews [{id, rating, title, text, date, locale, verified_purchase, incentivized, helpful_votes, unhelpful_votes, photos [{url, thumbnail_url}], product {item_id, name, url} (the variant reviewed: reviews are pooled across the item's sizes and packs), syndicated_from, responses [{text, date}]}], notes. No reviewer names. An unknown item is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Staples item number (items[].item_id, the number after product_ in a staples.com link, e.g. '122374').
+            page: Page (1-based).
+            limit: Reviews per page (1-100, default 10).
+            sort: most_relevant (default, Staples' order), newest, oldest, highest_rating, lowest_rating or most_helpful.
+            rating: Only reviews with this many stars (1-5).
+            photos_only: Only reviews with photos.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_reviews", {"item_id": item_id, "page": page, "limit": limit, "sort": sort, "rating": rating, "photos_only": photos_only}, extra)
+
+    def questions(
+        self,
+        item_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["newest", "most_answered"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions and answers on one Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) item (us only), 10 a page, newest or most answered first: market, item_id, sort, page, total, total_pages, count, questions [{id, text, date, locale, helpful_votes, answer_count, answers [{id, text, date, helpful_votes, staff, badge, reply_count}]}], notes. No asker or answerer names. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Staples item number (items[].item_id, the number after product_ in a staples.com link, e.g. '122374').
+            page: Page (1-based; 10 questions a page).
+            sort: newest (default) or most_answered.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_questions", {"item_id": item_id, "page": page, "sort": sort}, extra)
+
+    def trending(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The trending searches Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca) shows in its search box (us only): market, count, terms, notes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("staples_trending", {}, extra)

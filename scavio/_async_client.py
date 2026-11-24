@@ -89,6 +89,7 @@ from ._namespaces_async import (
     _AsyncSECNamespace,
     _AsyncSephoraNamespace,
     _AsyncSpecsNamespace,
+    _AsyncStaplesNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
     _AsyncThreadsNamespace,
@@ -268,6 +269,7 @@ class AsyncScavioClient:
         self.tractorsupply = _AsyncTractorsupplyNamespace(self)
         self.michaels = _AsyncMichaelsNamespace(self)
         self.nike = _AsyncNikeNamespace(self)
+        self.staples = _AsyncStaplesNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

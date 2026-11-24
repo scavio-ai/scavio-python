@@ -4215,6 +4215,84 @@ _NIKE_LAUNCH = (
     "localized_size, gtin, level (HIGH, MEDIUM, LOW or OOS as Nike gives it), available}]}]"
 )
 
+# Staples params shared across endpoints (staples.com, the US office supply retailer; Staples
+# Canada at staples.ca). 12 endpoints, 1 credit each. country us | ca and language en | fr on
+# search and product only (ca: Staples Canada's top matches and its products); every other
+# endpoint is US only (no country or language there). Prices are national: ZIP and store change
+# availability and pickup units, not price.
+_STP_NAME = "Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca)"
+_STP_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (default: www.staples.com, USD) or 'ca' (www.staples.ca, Staples Canada, CAD).",
+)
+_STP_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "'en' (default) or 'fr' (country='ca' only: www.staples.ca/fr, French products).",
+)
+_STP_MARKET = (_STP_COUNTRY, _STP_LANGUAGE)
+_STP_ITEM_DOC = (
+    "A Staples item number (items[].item_id, the number after product_ in a staples.com link, "
+    "e.g. '122374')."
+)
+_STP_ITEM = Param("item_id", "Union[str, int]", required=True, doc=_STP_ITEM_DOC)
+_STP_SORT = _lit(
+    "sort",
+    ("best_match", "price_low", "price_high", "rating", "newest"),
+    "best_match (default), price_low, price_high, rating (top rated) or newest: Staples' sort "
+    "menu.",
+)
+_STP_DEAL = _lit(
+    "deal",
+    ("on_promotion", "clearance"),
+    "on_promotion or clearance: only products in Staples' On Promotion or Clearance deals filter.",
+)
+_STP_LIST_PARAMS = (
+    _int("page", "Page (1-250; 40 products a page)."),
+    _STP_SORT,
+    _str_or_list(
+        "brand",
+        "One or more brands (up to 5) as Staples names them (the Brand facet's values, e.g. "
+        "'Hammermill').",
+    ),
+    _str_list(
+        "filters",
+        "Up to 10 facet values exactly as an earlier answer gives them in "
+        "facets[].values[].filter (reams, sheet size, colour, yield, rating, price band, ...); "
+        "several are combined.",
+    ),
+    _float("min_price", "Lowest price (USD)."),
+    _float("max_price", "Highest price (USD)."),
+)
+_STP_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_STP_PRICES = (
+    " Price and was price as Staples shows them (was_price is Staples' Regular price, given only "
+    "when above the price); discount_percent is computed by Scavio from the two. Prices are "
+    "national (USD): ZIP and store change availability, not price."
+)
+_STP_NOT_AVAILABLE = (
+    " Not available: the weekly ad, search suggestions, print and tech service prices, ink "
+    "recycling rewards, Rewards member prices, price match requests, Staples Business Advantage "
+    "contract prices, price history (poll and store the answers), checkout."
+)
+_STP_ITEM_FIELDS = (
+    "position, organic_position, sponsored, item_id (the input of product(), store_stock(), "
+    "reviews() and questions()), name, url, image, brand, manufacturer, model, price, price_text, "
+    "was_price, was_price_label, discount_percent, savings [{type, text}], price_per_unit, "
+    "price_per_unit_unit, price_per_unit_text (Staples' own, e.g. $5.00/Ream or $0.10 Cost Per "
+    "Page, as given), pack_size, rating, review_count, category {id, name}, department, "
+    "supercategory, delivery {text, date, type}, in_stock_for_delivery, out_of_stock, "
+    "pickup_eligible, pickup_message, ship_to_store_eligible, in_store_only, restriction, badges, "
+    "highlights [{name, value}], supplier_type"
+)
+_STP_LIST = (
+    "market {country, language, currency, locale}, title, page, page_size, total, total_pages, "
+    "count, sponsored_count, sort, filters_applied [{group, filter, name}], min_price, max_price, "
+    "corrected_query, items (" + _STP_ITEM_FIELDS + "), facets [{name, values [{filter, name, "
+    "count, selected}]}] (send filter back in filters), notes"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -18532,6 +18610,358 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # =============================== Staples ===============================
+    # 12 endpoints on /api/v1/staples: country us | ca + language en | fr on search and product
+    # only; the rest US only (no country there). 1 credit each. Calls can queue behind the
+    # backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="staples_search",
+        namespace="staples",
+        method="search",
+        http="POST",
+        path="/api/v1/staples/search",
+        summary=(
+            "Search " + _STP_NAME + " by keywords, a model number or a Staples item number (an "
+            "item number answers with that product), sorted (best match, price low or high, top "
+            "rated, newest), filtered (brand, any facet value, price range, On Promotion, "
+            "Clearance) and paged (40 a page, to page 250)." + _STP_PRICES + " Returns query, "
+            "redirect {type (product, category, page), item_id, category_id, url} when Staples "
+            "answers the search with one product or a category, " + _STP_LIST + ". Canada "
+            "(country='ca', language 'en' or 'fr'): Staples Canada's top matches (about 5): "
+            "market, query, count, items [{position, item_id, handle, language, name, brand, url, "
+            "image, price, was_price, discount_percent, currency, available}], suggested_queries, "
+            "notes; no paging, sort or filters." + _STP_NOT_AVAILABLE + _STP_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Keywords ('copy paper', 'hp 64xl'), a model number or a Staples item number.",
+                wire="q",
+            ),
+            *_STP_LIST_PARAMS,
+            _STP_DEAL,
+            *_STP_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_product",
+        namespace="staples",
+        method="product",
+        http="POST",
+        path="/api/v1/staples/product",
+        summary=(
+            "One " + _STP_NAME + " product in full by item number or link: market, "
+            "requested_item_id, found_requested_item_id, item_id, name, brand, manufacturer, "
+            "model (manufacturer part number; staples.com publishes no UPC), url, image, images, "
+            "price, was_price, was_price_label, discount_percent, savings, on_promotion, "
+            "price_per_unit, price_per_unit_unit (Ream, Cost Per Page, ... as given), pack_size, "
+            "promotions [{type, name, text}] and offer_expires (Staples' own promotion texts and "
+            "expiry), coupon_codes [{code, limit}], page_yield, sheets_per_ream, number_of_reams, "
+            "total_sheets, specifications [{name, value, group}], description, bullets, rating, "
+            "review_count, question_count, rating_breakdown [{stars, count, percent}], "
+            "review_summary (Staples' own AI-generated summary), category, hierarchy, "
+            "breadcrumbs, pickup_eligible, ship_to_store_eligible, free_shipping, free_returns, "
+            "in_store_only, back_order, coming_soon, clearance, instant_savings, restriction, "
+            "supplier_type, availability {zip, store, out_of_stock, options [{mode, method, units, "
+            "earliest_date, latest_date, date_text, order_within, back_order}], pickup "
+            "{store_number, units, in_stock}} for an optional zip and store, variant_group, "
+            "variants [{item_id, name, url, price, options [{name, value}], image, selected}] "
+            "(ream / carton / size packs), currency, notes." + _STP_PRICES + " An unknown item "
+            "is a charged 404. Canada (country='ca', by item_id, handle or staples.ca link; "
+            "language 'en' or 'fr'): market, item_id, handle, language, name, brand, url, image, "
+            "images, price, was_price, discount_percent, currency (CAD), available, barcode (UPC), "
+            "rating, review_count, pickup_eligible, clearance, model, breadcrumbs, description, "
+            "variants [{sku, name, options, price, was_price, discount_percent, available, "
+            "barcode}], notes." + _STP_CHARGE
+        ),
+        params=(
+            Param(
+                "item_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=_STP_ITEM_DOC + " Send item_id, url or (country='ca') handle.",
+            ),
+            _str(
+                "url",
+                "A staples.com product link (items[].url), or with country='ca' a staples.ca "
+                "product link, instead of item_id.",
+            ),
+            _str(
+                "handle",
+                "With country='ca': a Staples Canada product handle (items[].handle of a ca "
+                "search).",
+            ),
+            _str_or_int(
+                "zip",
+                "A US ZIP code (e.g. '10001'): delivery availability and dates for it (price does "
+                "not change with it).",
+            ),
+            _str_or_int(
+                "store",
+                "A Staples store number (stores[].store_number, e.g. '1633'): that store's pickup "
+                "units.",
+            ),
+            *_STP_MARKET,
+        ),
+        one_of=(("item_id", "url", "handle"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_category",
+        namespace="staples",
+        method="category",
+        http="POST",
+        path="/api/v1/staples/category",
+        summary=(
+            "One " + _STP_NAME + " class listing by CL id or staples.com category link (us "
+            "only), sorted, filtered and paged like search()." + _STP_PRICES + " Returns "
+            "category {id, name}, " + _STP_LIST + ". An unknown class is a charged 404."
+            + _STP_CHARGE
+        ),
+        params=(
+            _req(
+                "category",
+                "A Staples class id (CL..., e.g. 'CL140691' Copy & Printer Paper: "
+                "items[].category.id or a CL entry of categories()) or a staples.com category "
+                "link (/<name>/cat_CL<id>).",
+            ),
+            *_STP_LIST_PARAMS,
+            _STP_DEAL,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_categories",
+        namespace="staples",
+        method="categories",
+        http="POST",
+        path="/api/v1/staples/categories",
+        summary=(
+            _STP_NAME + "'s top-level departments, or one department's sub-departments and "
+            "classes (us only): market, category {id, name, url}, parents [{id, type, name, url}], "
+            "count, categories [{id, type (SC, CG, DP, CL), name, url}], notes. A class id (CL) "
+            "is the input of category() and deals(). An unknown department is a charged 404."
+            + _STP_CHARGE
+        ),
+        params=(
+            _str(
+                "category",
+                "A department id (SC, CG or DP, e.g. 'SC1676' Paper, from an earlier answer or a "
+                "staples.com link): its sub-departments and classes. Without it: Staples' "
+                "top-level departments.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_deals",
+        namespace="staples",
+        method="deals",
+        http="POST",
+        path="/api/v1/staples/deals",
+        summary=(
+            _STP_NAME + "'s On Promotion (type='on_promotion', default) or Clearance products "
+            "for keywords or a class (query or category is required; us only), sorted, filtered "
+            "and paged." + _STP_PRICES + " Returns type, query or category, redirect, "
+            + _STP_LIST + "." + _STP_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("on_promotion", "clearance"),
+                "on_promotion (default) or clearance: Staples' deals filters.",
+            ),
+            _str(
+                "query",
+                "Deals matching these keywords, e.g. 'laptop' (query or category is required).",
+                wire="q",
+            ),
+            _str("category", "Deals in this class (a CL id or a staples.com category link)."),
+            *_STP_LIST_PARAMS,
+        ),
+        one_of=(("query", "category"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_coupons",
+        namespace="staples",
+        method="coupons",
+        http="POST",
+        path="/api/v1/staples/coupons",
+        summary=(
+            "The coupons on " + _STP_NAME + "'s public coupons page (us only): market, category, "
+            "count, categories, coupons [{position, code, headline, details, ends (ISO date), "
+            "ends_text (as given), channel (Online or omni), category, url, image}], notes. "
+            "Coupon text and end dates are Staples' own." + _STP_CHARGE
+        ),
+        params=(
+            _str(
+                "category",
+                "Only coupons of this category, as Staples names it (categories of an earlier "
+                "answer, e.g. 'Printers').",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_store_stock",
+        namespace="staples",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/staples/store-stock",
+        summary=(
+            "Units of one item at the " + _STP_NAME + " stores near a US ZIP that have it for "
+            "pickup today, as Staples reports them: market, item_id, name, image, location, "
+            "radius_miles, count, total_units, stores [{position, store_number, address {line1, "
+            "city, state, zip}, phone, distance_miles, units, threshold (the value Staples returns "
+            "beside the units, as given), in_stock, pickup_type, pickup_text (e.g. Ready in 30 "
+            "mins), your_store, hours [{day, open, close, closed}]}], notes. Staples lists only "
+            "stores that have the item (nearest first; 7 to 10 seen); an empty list means no "
+            "nearby store has it or it is not offered for store pickup. Price does not change by "
+            "store. An unknown item is a charged 404." + _STP_CHARGE
+        ),
+        params=(
+            _STP_ITEM,
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc="A US ZIP code (e.g. '60540'). stores() gives the ZIP codes of the stores "
+                "near a city.",
+            ),
+            _int("radius", "Miles around the ZIP (1-100, default 100)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_stores",
+        namespace="staples",
+        method="stores",
+        http="POST",
+        path="/api/v1/staples/stores",
+        summary=(
+            "The " + _STP_NAME + " stores near a US ZIP or city: market, location, radius_miles, "
+            "count, stores [{position, store_number, name, address {line1, city, state, zip, "
+            "country}, phone, fax, latitude, longitude, distance_miles, utc_offset, hours [{day, "
+            "open, close, closed}] (this week's, holiday closures included), services (Print and "
+            "Marketing Services, Shredding, Recycling, UPS, Amazon Lockers, ... as Staples lists "
+            "them)}], notes. Send zip or city." + _STP_CHARGE
+        ),
+        params=(
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A US ZIP code (e.g. '10001'). Send zip or city.",
+            ),
+            _str("city", "A US city and state, e.g. 'Chicago, IL', instead of zip."),
+            _int("radius", "Miles around the location (1-100, default 25)."),
+        ),
+        one_of=(("zip", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_store",
+        namespace="staples",
+        method="store",
+        http="POST",
+        path="/api/v1/staples/store",
+        summary=(
+            "One " + _STP_NAME + " store by store number: market, store_number, name, address, "
+            "phone, fax, latitude, longitude, utc_offset, hours, services, notes. An unknown "
+            "store number is a charged 404." + _STP_CHARGE
+        ),
+        params=(
+            Param(
+                "store",
+                "Union[str, int]",
+                required=True,
+                doc="A Staples store number (stores[].store_number, e.g. '1574').",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_reviews",
+        namespace="staples",
+        method="reviews",
+        http="POST",
+        path="/api/v1/staples/reviews",
+        summary=(
+            "Reviews of one " + _STP_NAME + " item (us only), paged (up to 100 a page), sorted "
+            "and filtered by stars or photos: market, item_id, name, rating, review_count, "
+            "rating_breakdown [{stars, count, percent}], review_summary (Staples' own "
+            "AI-generated summary), sort, rating_filter, photos_only, page, limit, total, "
+            "total_pages, count, reviews [{id, rating, title, text, date, locale, "
+            "verified_purchase, incentivized, helpful_votes, unhelpful_votes, photos [{url, "
+            "thumbnail_url}], product {item_id, name, url} (the variant reviewed: reviews are "
+            "pooled across the item's sizes and packs), syndicated_from, responses [{text, "
+            "date}]}], notes. No reviewer names. An unknown item is a charged 404." + _STP_CHARGE
+        ),
+        params=(
+            _STP_ITEM,
+            _int("page", "Page (1-based)."),
+            _int("limit", "Reviews per page (1-100, default 10)."),
+            _lit(
+                "sort",
+                (
+                    "most_relevant", "newest", "oldest", "highest_rating", "lowest_rating",
+                    "most_helpful",
+                ),
+                "most_relevant (default, Staples' order), newest, oldest, highest_rating, "
+                "lowest_rating or most_helpful.",
+            ),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this many stars (1-5)."),
+            _bool("photos_only", "Only reviews with photos."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_questions",
+        namespace="staples",
+        method="questions",
+        http="POST",
+        path="/api/v1/staples/questions",
+        summary=(
+            "Customer questions and answers on one " + _STP_NAME + " item (us only), 10 a page, "
+            "newest or most answered first: market, item_id, sort, page, total, total_pages, "
+            "count, questions [{id, text, date, locale, helpful_votes, answer_count, answers "
+            "[{id, text, date, helpful_votes, staff, badge, reply_count}]}], notes. No asker or "
+            "answerer names." + _STP_CHARGE
+        ),
+        params=(
+            _STP_ITEM,
+            _int("page", "Page (1-based; 10 questions a page)."),
+            _lit("sort", ("newest", "most_answered"), "newest (default) or most_answered."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="staples_trending",
+        namespace="staples",
+        method="trending",
+        http="POST",
+        path="/api/v1/staples/trending",
+        summary=(
+            "The trending searches " + _STP_NAME + " shows in its search box (us only): market, "
+            "count, terms, notes." + _STP_CHARGE
+        ),
+        params=(),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -25576,6 +26006,7 @@ NAMESPACES: tuple[str, ...] = (
     "tractorsupply",
     "michaels",
     "nike",
+    "staples",
 )
 
 

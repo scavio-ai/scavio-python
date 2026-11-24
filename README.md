@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 102 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 103 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -54,6 +54,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
 | Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Nike Sale Prices with Full Price and Discount, Every Size with GTIN, Release Calendar with Per-Size Levels, Same Style Code Across Markets (62 storefronts in 42 countries; 8 endpoints) | Yes | No | No | No |
+| Staples Ink and Paper Prices with Staples' Own Price per Unit and Cost per Page, Promotions with Expiry, Units at the Stores near a ZIP, Reviews and Q&A (US; Canada search and product in English or French; 12 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4811,6 +4812,97 @@ member prices, gift cards, Nike Factory store prices, Converse, checkout.
 Failed calls and refused inputs are not charged; a not-found (an unknown
 product, listing or launch) is charged.
 
+### 72. Office Supplies -- Staples ink and paper prices, price per unit, store stock near a ZIP
+
+Staples (staples.com, the US office supply retailer; Staples Canada at
+staples.ca). Namespace `staples`, 12 endpoints: `search`, `product`,
+`category`, `categories`, `deals`, `coupons`, `store_stock`, `stores`,
+`store`, `reviews`, `questions`, `trending`. 1 credit per call;
+`credits_used` in the response is what was charged. `country` is `"us"`
+(default, www.staples.com, USD) or `"ca"` (www.staples.ca, Staples Canada,
+CAD) and `language` is `"en"` (default) or `"fr"` (with `"ca"` only), on
+`search` and `product`; every other method is US only (no `country`). The
+request timeout is raised to at least 240s on every endpoint. Staples has no
+public API for its catalog, prices or store stock (Staples Business Advantage
+connects contract buyers' purchasing systems). Pair it with the `amazon`,
+`walmart`, `target` and `bestbuy` namespaces for a price check on the same
+item.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+st = client.staples
+
+# --- Search: 40 a page, Staples' own price per unit ($5.00/Ream, $0.10 Cost Per Page).
+hits = st.search("copy paper", sort="price_low")["data"]
+print(hits["total"], hits["total_pages"])
+for it in hits["items"][:5]:
+    print(it["item_id"], it["name"], it["price"], it["was_price"], it["price_per_unit_text"])
+token = hits["facets"][0]["values"][0]["filter"]
+narrowed = st.search("copy paper", filters=[token], brand="Hammermill")["data"]
+
+# --- One product: price per unit, pack size, page yield, Staples' promotion texts with their
+#     expiry, coupon codes, plus delivery dates for a ZIP and pickup units at one store.
+p = st.product("122374", zip="60540", store="1633")["data"]
+print(p["name"], p["price"], p["was_price"], p["price_per_unit"], p["price_per_unit_unit"])
+print(p["pack_size"], p["page_yield"], p["offer_expires"], [x["text"] for x in p["promotions"]])
+print(p["availability"]["pickup"], [(o["mode"], o["date_text"]) for o in p["availability"]["options"]])
+
+# --- Units of one item at the stores near a ZIP that have it for pickup, as Staples reports them.
+ss = st.store_stock("2724258", "60540")["data"]
+print(ss["name"], ss["count"], ss["total_units"])
+for s in ss["stores"]:
+    print(s["store_number"], s["address"]["city"], s["distance_miles"], s["units"], s["pickup_text"])
+
+# --- Canada: Staples Canada's top matches and its products, in English or French (CAD).
+ca = st.search("hp 67", country="ca")["data"]
+for it in ca["items"]:
+    print(it["item_id"], it["handle"], it["name"], it["price"], it["currency"])
+cp = st.product(handle=ca["items"][0]["handle"], country="ca")["data"]
+print(cp["name"], cp["price"], cp["currency"], cp["barcode"])
+
+# --- Reviews (up to 100 a page) and customer questions with their answers.
+rv = st.reviews("24430099", limit=100, sort="newest")["data"]
+print(rv["total"], rv["rating"], rv["review_summary"])
+for r in rv["reviews"][:3]:
+    print(r["rating"], r["title"], r["verified_purchase"], r["incentivized"])
+qa = st.questions("990119", sort="most_answered")["data"]
+for q in qa["questions"][:3]:
+    print(q["text"], [a["text"] for a in q["answers"][:1]])
+
+# --- Deals, coupons, stores, categories, trending.
+deals = st.deals(query="laptop")["data"]
+coupons = st.coupons()["data"]
+print([(c["code"], c["headline"], c["ends"]) for c in coupons["coupons"][:3]])
+stores = st.stores(city="Chicago, IL")["data"]
+paper = st.categories(category="SC1676")["data"]
+listing = st.category("CL140691", sort="rating")["data"]
+print(deals["total"], stores["count"], paper["count"], listing["total"], st.trending()["data"]["terms"])
+```
+
+Prices are national: the ZIP changes delivery availability and dates, the
+store changes pickup units, neither changes the price. Captured 2026-11-24:
+Hammermill Copy Plus (item 122374, 10 reams) at $49.99 next to Staples'
+Regular $83.19, at "$5.00/Ream", with "Offer Expires on 11/28/2026"; the HP
+64XL Black High Yield cartridge (item 2724258, "Prints Up to 600 Pages") at
+Staples' own "$0.10 Cost Per Page", in stock at 7 stores near ZIP 60540 with
+63 units in all (12 at store 1633, Naperville, "Ready in 30 mins"). `price`
+and `was_price` are as Staples shows them (`was_price` is Staples' Regular
+price, given only when above the price); `discount_percent` is computed by
+Scavio from the two. `store_stock` lists only the stores that have the item;
+an empty list means no nearby store has it or it is not offered for store
+pickup. Staples returns a `threshold` value beside the units; it is passed
+through as given. staples.com publishes no UPC (`model` is the manufacturer
+part number); Staples Canada products carry a `barcode`. Canada search returns
+Staples Canada's top matches (about 5, no paging, sort or filters). Reviews
+carry no reviewer names and are pooled across an item's sizes and packs. Not
+available: the weekly ad, search suggestions, print and tech service prices,
+ink recycling rewards, Rewards member prices, price match requests, Staples
+Business Advantage contract prices, price history (poll and store the
+answers), checkout. Failed calls and refused inputs are not charged; a
+not-found (an unknown item, class, department or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -4962,6 +5054,7 @@ Scavio works with popular AI/LLM frameworks:
 | Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
 | Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
 | Nike (`nike`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `release`, `reviews`; 62 storefronts in 42 countries (`country` + `language`); `releases` and `release` not on vn, cn or jp in English; `reviews` not on cn | 1 each |
+| Staples (`staples`) | `search`, `product`, `category`, `categories`, `deals`, `coupons`, `store_stock`, `stores`, `store`, `reviews`, `questions`, `trending`; us (default) on every method; ca (English or French) on `search` and `product` only | 1 each |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -4993,6 +5086,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.83.0
+
+- **New `staples` namespace** (sync and async) for Staples (staples.com, the
+  US office supply retailer; Staples Canada at staples.ca), 12 endpoints:
+  `search`, `product`, `category`, `categories`, `deals`, `coupons`,
+  `store_stock`, `stores`, `store`, `reviews`, `questions`, `trending`.
+  Staples' own price per unit and cost per page, page yield, promotions with
+  their expiry, units of one item at the stores near a ZIP, reviews with full
+  paging and customer Q&A. Canada (`country="ca"`, English or French) on
+  `search` and `product`. 1 credit per call. The request timeout is raised to
+  at least 240s on every endpoint.
 
 ### Changed in 0.82.0
 

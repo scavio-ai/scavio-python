@@ -6990,3 +6990,122 @@ def test_nike_credits_paths_and_wire(monkeypatch):
         nk.reviews()
     with pytest.raises(ScavioError):
         nk.category()
+
+
+def test_staples_credits_paths_and_wire(monkeypatch):
+    """staples (0.83.0): 12 endpoints on /api/v1/staples.
+
+    1 credit each. country us | ca + language en | fr on search and product only; the rest are
+    US only (no country there). query is sent as q.
+    """
+    _STP_NAME = "Staples (staples.com, the US office supply retailer; Staples Canada at staples.ca)"
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "staples"}
+    assert sorted(eps) == [
+        "categories", "category", "coupons", "deals", "product", "questions", "reviews", "search",
+        "store", "store_stock", "stores", "trending",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/staples/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert _STP_NAME in ep.summary, m
+        assert ep.credits == 1, m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        if m in ("search", "product"):
+            assert names["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+            assert names["language"].annotation == 'Optional[Literal["en", "fr"]]', m
+        else:
+            assert "country" not in names and "language" not in names, m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["best_match", "price_low", "price_high", "rating", "newest"]]'
+    )
+    assert search["brand"].annotation == "Optional[Union[str, list[str]]]"
+    assert search["filters"].annotation == "Optional[list[str]]"
+    assert search["deal"].annotation == 'Optional[Literal["on_promotion", "clearance"]]'
+    reviews = {p.name: p for p in eps["reviews"].params}
+    assert reviews["sort"].annotation == (
+        'Optional[Literal["most_relevant", "newest", "oldest", "highest_rating", "lowest_rating", '
+        '"most_helpful"]]'
+    )
+    assert eps["product"].one_of == (("item_id", "url", "handle"),)
+    assert eps["deals"].one_of == (("query", "category"),)
+    assert eps["stores"].one_of == (("zip", "city"),)
+    assert "ZIP and store change availability, not price" in eps["search"].summary
+    assert "staples.com publishes no UPC" in eps["product"].summary
+    assert "only stores that have the item" in eps["store_stock"].summary
+    assert "threshold" in eps["store_stock"].summary
+    assert "No reviewer names" in eps["reviews"].summary
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"checkout api|stock checker|overpriced|inflated)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    st = client.staples
+    st.search("copy paper")
+    st.search("copy paper", page=2, sort="price_low", brand=["Hammermill"],
+              filters=["Number of Reams_3A_2210-Ream_22"], deal="on_promotion")
+    st.search("hp 67", country="ca")
+    st.search("papier", country="ca", language="fr")
+    st.product("122374")
+    st.product(2724258, zip="60540", store="1633")
+    st.product(handle="24430098-en-hp-67-black-original-ink-cartridge", country="ca")
+    st.product("15332", country="ca", language="fr")
+    st.category("CL140691", sort="rating")
+    st.categories()
+    st.categories(category="SC1676")
+    st.deals(query="laptop")
+    st.deals(type="clearance", category="CL140691")
+    st.coupons(category="Printers")
+    st.store_stock("2724258", "60540", radius=50)
+    st.stores("10001")
+    st.stores(city="Chicago, IL", radius=10)
+    st.store("1574")
+    st.reviews("24430099", limit=100, sort="newest", rating=5, photos_only=True)
+    st.questions("990119", page=2, sort="most_answered")
+    st.trending()
+    base = "/api/v1/staples/"
+    assert seen == [
+        (base + "search", {"q": "copy paper"}, 240.0),
+        (base + "search", {"q": "copy paper", "page": 2, "sort": "price_low",
+                           "brand": ["Hammermill"], "filters": ["Number of Reams_3A_2210-Ream_22"],
+                           "deal": "on_promotion"}, 240.0),
+        (base + "search", {"q": "hp 67", "country": "ca"}, 240.0),
+        (base + "search", {"q": "papier", "country": "ca", "language": "fr"}, 240.0),
+        (base + "product", {"item_id": "122374"}, 240.0),
+        (base + "product", {"item_id": 2724258, "zip": "60540", "store": "1633"}, 240.0),
+        (base + "product", {"handle": "24430098-en-hp-67-black-original-ink-cartridge",
+                            "country": "ca"}, 240.0),
+        (base + "product", {"item_id": "15332", "country": "ca", "language": "fr"}, 240.0),
+        (base + "category", {"category": "CL140691", "sort": "rating"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"category": "SC1676"}, 240.0),
+        (base + "deals", {"q": "laptop"}, 240.0),
+        (base + "deals", {"type": "clearance", "category": "CL140691"}, 240.0),
+        (base + "coupons", {"category": "Printers"}, 240.0),
+        (base + "store-stock", {"item_id": "2724258", "zip": "60540", "radius": 50}, 240.0),
+        (base + "stores", {"zip": "10001"}, 240.0),
+        (base + "stores", {"city": "Chicago, IL", "radius": 10}, 240.0),
+        (base + "store", {"store": "1574"}, 240.0),
+        (base + "reviews", {"item_id": "24430099", "limit": 100, "sort": "newest", "rating": 5,
+                            "photos_only": True}, 240.0),
+        (base + "questions", {"item_id": "990119", "page": 2, "sort": "most_answered"}, 240.0),
+        (base + "trending", {}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        st.product()
+    with pytest.raises(ScavioError):
+        st.deals()
+    with pytest.raises(ScavioError):
+        st.stores()
