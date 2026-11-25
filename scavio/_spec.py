@@ -184,6 +184,45 @@ _AMAZON_DOMAIN = _str(
 )
 
 
+# Home Depot: country on the shared endpoints, and the Home Depot Canada listing
+# inputs shared by search and category.
+_HD_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The "
+    "Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.",
+)
+_HD_CREDITS = "Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'."
+_HDCA_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, "
+    "links and facets are in that language.",
+)
+_HDCA_LISTING = (
+    _str_or_int(
+        "store_id",
+        "Home Depot Canada only: the store number whose price and units to read (e.g. '7080'). "
+        "Without it the site prices at its default store 7274; data.store says which.",
+    ),
+    _int("page_size", "Home Depot Canada only: products per page, 1-40 (default 40)."),
+    Param(
+        "filters",
+        "Optional[list[Union[str, dict[str, str]]]]",
+        doc="Home Depot Canada only: up to 10 facet filters [{'facet': ..., 'value': ...}], "
+        "value = facets[].values[].value from a call with include_facets, e.g. "
+        "[{'facet': 'manufacturerName', 'value': '9wh'}].",
+    ),
+    _str_or_list(
+        "deals",
+        "Home Depot Canada only: 'special_buy', 'new_lower_price', 'savings' (one or a list): "
+        "the site's Special Offers filter. With no query, every product with that offer.",
+    ),
+    _bool("include_facets", "Home Depot Canada only: also return facets to filter on."),
+    _HDCA_LANGUAGE,
+)
+
+
 # Costco site selection. Most endpoints are costco.com / costco.ca only; search,
 # product and warehouses also take the six international sites.
 _COSTCO_NA_COUNTRY = _lit("country", ("us", "ca"), "costco.com ('us', default) or costco.ca ('ca').")
@@ -8436,6 +8475,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================= Home Depot ============================
+    # country is absent by default, so a US call posts exactly what it did before
+    # Home Depot Canada existed. With country="ca" search, product and reviews read
+    # Home Depot Canada (homedepot.ca); the five Canada-only endpoints after them
+    # default to "ca" on the backend and take no country here.
     Endpoint(
         key="home_depot_search",
         namespace="home_depot",
@@ -8444,32 +8487,52 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/homedepot/search",
         summary=(
             "Search Home Depot: price and promotions, brand and model, ratings, badges, "
-            "per-store pickup/delivery. Page size is fixed at 12 and cannot be changed."
+            "per-store pickup/delivery. US page size is fixed at 12 and cannot be changed. "
+            "With country='ca', Home Depot Canada (homedepot.ca, The Home Depot's Canadian "
+            "store: 182 stores in 10 provinces): CAD prices at a store (store_id) with exact "
+            "store_units and aisle / bay, 1-40 per page, facet filters and Special Offers deals; "
+            "pass query, category_id or deals."
         ),
         params=(
-            _req("query", "Search keyword (1-500 characters)."),
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="Search keyword (1-500 characters). Required for the US; for country='ca' "
+                "pass query, category_id or deals.",
+            ),
             _int(
                 "page",
-                "Results page, 1-based. Home Depot serves 12 products per page and offers no "
-                "way to change that, so paging is the only way to read further.",
+                "Results page, 1-based. Home Depot serves 12 products per page in the US and "
+                "offers no way to change that, so paging is the only way to read further "
+                "(Canada: page_size, pages up to 500).",
             ),
             _lit(
                 "sort_by",
                 ("best_match", "top_sellers", "top_rated", "price_low", "price_high"),
                 "Result sort order. Defaults to 'best_match'. Closed enum: Home Depot answers "
                 "an unknown sort with an empty page that is still billed. 'Newest' is absent - "
-                "it is rejected on keyword search.",
+                "it is rejected on keyword search. 'top_sellers' is US only (a 400 for 'ca').",
             ),
             _float(
                 "min_price",
-                "Minimum price, inclusive. Must be 0 or greater.",
+                "Minimum price, inclusive (USD; CAD for 'ca'). Must be 0 or greater.",
             ),
             _float(
                 "max_price",
-                "Maximum price, inclusive. Must be 0 or greater.",
+                "Maximum price, inclusive (USD; CAD for 'ca'). Must be 0 or greater.",
             ),
-        ),
+            _HD_COUNTRY,
+            _str(
+                "category_id",
+                "Home Depot Canada only: a category id from categories() (e.g. "
+                "'l4-drill-drivers'); query is then optional.",
+            ),
+        )
+        + _HDCA_LISTING,
+        one_of=(("query", "category_id", "deals"),),
         credits=2,
+        credits_note=_HD_CREDITS,
     ),
     Endpoint(
         key="home_depot_product",
@@ -8479,16 +8542,29 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/homedepot/product",
         summary=(
             "Full Home Depot item detail: pricing, images and videos, spec table, dimensions, "
-            "bullets, documents, return policy. Carries a 10-review preview only."
+            "bullets, documents, return policy. Carries a 10-review preview only. With "
+            "country='ca' and store_id, price is that Home Depot Canada store's price "
+            "(price_source 'store') and online_price the online price, which can differ, with "
+            "store_units, aisle and bay; when Home Depot Canada has no store record for an "
+            "item that exists, the online price comes back with store_price_returned false."
         ),
         params=(
             _req(
                 "item_id",
                 "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
-                "URL; tracking parameters on a pasted URL are discarded.",
+                "URL; tracking parameters on a pasted URL are discarded. For 'ca' a 10-digit "
+                "Home Depot Canada id (e.g. '1000112108') or a homedepot.ca/product/... link.",
             ),
+            _HD_COUNTRY,
+            _str_or_int(
+                "store_id",
+                "Home Depot Canada only: a store number (e.g. '7128'): price is then that "
+                "store's price, with units at the store and aisle / bay.",
+            ),
+            _HDCA_LANGUAGE,
         ),
         credits=2,
+        credits_note=_HD_CREDITS,
     ),
     Endpoint(
         key="home_depot_reviews",
@@ -8498,21 +8574,137 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/homedepot/reviews",
         summary=(
             "One page of full Home Depot review bodies, the rating distribution, per-attribute "
-            "ratings, photos and seller responses. 30 reviews per page."
+            "ratings, photos and seller responses. 30 reviews per page. With country='ca', the "
+            "first 8 Home Depot Canada reviews in the requested language and the first page of "
+            "questions (page > 1 is a 400); no reviewer names."
         ),
         params=(
             _req(
                 "item_id",
                 "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
-                "URL; tracking parameters on a pasted URL are discarded.",
+                "URL; tracking parameters on a pasted URL are discarded. For 'ca' a 10-digit "
+                "Home Depot Canada id or a homedepot.ca/product/... link.",
             ),
             _int(
                 "page",
                 "Reviews page, 1-based. 30 reviews per page; 'total_pages' in the response is "
-                "the last one that exists, and asking past it is a 404.",
+                "the last one that exists, and asking past it is a 404. US only.",
+            ),
+            _HD_COUNTRY,
+            _lit(
+                "language",
+                ("en", "fr"),
+                "Home Depot Canada only: 'en' (default) or 'fr' (a different review set).",
             ),
         ),
         credits=2,
+        credits_note=_HD_CREDITS,
+    ),
+    Endpoint(
+        key="home_depot_category",
+        namespace="home_depot",
+        method="category",
+        http="POST",
+        path="/api/v1/homedepot/category",
+        summary=(
+            "Home Depot Canada only: one category or collection page of homedepot.ca by "
+            "category_id from categories() (e.g. 'l4-drill-drivers', '661103' for Christmas "
+            "Trees), priced at a store, with the search parameters. CAD. An unknown category "
+            "or store is a charged 404."
+        ),
+        params=(
+            _req("category_id", "A category or collection id from categories(), e.g. "
+                 "'l4-drill-drivers' or '661103'."),
+            _str("query", "Optional keywords inside the category."),
+            _int("page", "Page, 1-based (1-500). Past the last page: an empty page."),
+            _lit(
+                "sort_by",
+                ("best_match", "price_low", "price_high", "top_rated"),
+                "Result sort order (default 'best_match').",
+            ),
+            _float("min_price", "Lowest price, CAD."),
+            _float("max_price", "Highest price, CAD."),
+        )
+        + _HDCA_LISTING,
+        credits=1,
+    ),
+    Endpoint(
+        key="home_depot_categories",
+        namespace="home_depot",
+        method="categories",
+        http="POST",
+        path="/api/v1/homedepot/categories",
+        summary=(
+            "Home Depot Canada only: the homedepot.ca department tree (about 1,750 nodes) and "
+            "the current event and collection pages (e.g. Black Friday). departments[].id and "
+            "events[].id are category_id inputs for category() and search()."
+        ),
+        params=(
+            _int("depth", "Levels of the tree to return, 1-4 (default 4: all)."),
+            _HDCA_LANGUAGE,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="home_depot_stock",
+        namespace="home_depot",
+        method="stock",
+        http="POST",
+        path="/api/v1/homedepot/stock",
+        summary=(
+            "Home Depot Canada only: exact units of one item at every store near a Canadian "
+            "postal code or city, in one call. No prices (product() with store_id gives a "
+            "store's price). When Home Depot Canada has no store record for an item that "
+            "exists, the answer is an unbilled 502."
+        ),
+        params=(
+            _req("item_id", "A Home Depot Canada item id (10 digits, e.g. '1001769719') or a "
+                 "homedepot.ca/product/... link."),
+            _req("location", "A Canadian postal code or a city, e.g. 'H3B 1A1' or 'Montreal'."),
+            _int("limit", "Stores per page, 1-50 (default 20)."),
+            _int("page", "Page, 1-based."),
+            _HDCA_LANGUAGE,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="home_depot_store",
+        namespace="home_depot",
+        method="store",
+        http="POST",
+        path="/api/v1/homedepot/store",
+        summary=(
+            "Home Depot Canada only: one store by number: address, phone, coordinates, "
+            "services, 7 dated days of hours and nearby stores. An unknown store is a charged "
+            "404."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc="A Home Depot Canada store number (4 digits), e.g. '7076'.",
+            ),
+            _HDCA_LANGUAGE,
+        ),
+        credits=1,
+    ),
+    Endpoint(
+        key="home_depot_suggestions",
+        namespace="home_depot",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/homedepot/suggestions",
+        summary=(
+            "Home Depot Canada only: the homedepot.ca search box suggestions for what has been "
+            "typed, plus the installation services the site suggests."
+        ),
+        params=(
+            _req("query", "What has been typed so far, e.g. 'christ'."),
+            _str_or_int("store_id", "Optional Home Depot Canada store number."),
+            _HDCA_LANGUAGE,
+        ),
+        credits=1,
     ),
     # =============================== Zillow ==============================
     Endpoint(

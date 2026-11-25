@@ -657,6 +657,9 @@ BODY_PRICED_KEYS = {
     "michaels_category",
     "michaels_deals",
     "offerup_listing",
+    "home_depot_search",
+    "home_depot_product",
+    "home_depot_reviews",
 }
 
 
@@ -1399,7 +1402,7 @@ def test_new_platform_endpoint_counts():
         "kuaishou": 14,
         "ebay": 3,
         "target": 5,
-        "home_depot": 3,
+        "home_depot": 8,
         "zillow": 3,
         "booking": 3,
         "tripadvisor": 4,
@@ -1429,7 +1432,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 135
+    assert sum(expected.values()) == 140
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
@@ -8031,3 +8034,92 @@ def test_sportchek_and_marks_credits_paths_and_wire(monkeypatch):
         k.questions()
     with pytest.raises(ScavioError):
         k.list()
+
+
+# --- Home Depot Canada --------------------------------------------------------
+
+
+def test_home_depot_us_calls_post_exactly_what_they_did(monkeypatch):
+    """country is absent by default: a US call's body is unchanged by Home Depot Canada."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.home_depot.search("cordless drill", page=2, sort_by="top_sellers")
+    assert captured["path"] == "/api/v1/homedepot/search"
+    assert captured["json"] == {"query": "cordless drill", "page": 2, "sort_by": "top_sellers"}
+    client.home_depot.product("325479354")
+    assert captured["json"] == {"item_id": "325479354"}
+    client.home_depot.reviews("325479354", page=3)
+    assert captured["json"] == {"item_id": "325479354", "page": 3}
+
+
+def test_home_depot_ca_search_takes_store_filters_and_deals(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.home_depot.search(
+        "cordless drill",
+        country="ca",
+        store_id="7080",
+        page_size=40,
+        filters=[{"facet": "manufacturerName", "value": "9wh"}],
+        deals=["special_buy", "savings"],
+        include_facets=True,
+        language="fr",
+    )
+    assert captured["json"] == {
+        "query": "cordless drill",
+        "country": "ca",
+        "store_id": "7080",
+        "page_size": 40,
+        "filters": [{"facet": "manufacturerName", "value": "9wh"}],
+        "deals": ["special_buy", "savings"],
+        "include_facets": True,
+        "language": "fr",
+    }
+    client.home_depot.search(country="ca", deals="new_lower_price")
+    assert captured["json"] == {"country": "ca", "deals": "new_lower_price"}
+    with pytest.raises(ScavioError):
+        client.home_depot.search(country="ca")
+
+
+def test_home_depot_ca_product_at_a_store(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.home_depot.product("1000112108", country="ca", store_id=7128)
+    assert captured["path"] == "/api/v1/homedepot/product"
+    assert captured["json"] == {"item_id": "1000112108", "country": "ca", "store_id": 7128}
+
+
+def test_home_depot_ca_only_endpoints(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.home_depot.category("661103", store_id="7128", sort_by="price_low")
+    assert captured["path"] == "/api/v1/homedepot/category"
+    assert captured["json"] == {"category_id": "661103", "store_id": "7128", "sort_by": "price_low"}
+    client.home_depot.categories(depth=2)
+    assert captured["path"] == "/api/v1/homedepot/categories"
+    assert captured["json"] == {"depth": 2}
+    client.home_depot.stock("1001769719", "H3B 1A1", limit=15)
+    assert captured["path"] == "/api/v1/homedepot/stock"
+    assert captured["json"] == {"item_id": "1001769719", "location": "H3B 1A1", "limit": 15}
+    client.home_depot.store("7076")
+    assert captured["path"] == "/api/v1/homedepot/store"
+    assert captured["json"] == {"store_id": "7076"}
+    client.home_depot.suggestions("christ", language="en")
+    assert captured["path"] == "/api/v1/homedepot/suggestions"
+    assert captured["json"] == {"query": "christ", "language": "en"}
+    for key in ("category", "categories", "stock", "store", "suggestions"):
+        ep = ENDPOINTS[f"home_depot_{key}"]
+        assert ep.credits == 1 and ep.credits_note is None
+        assert all(p.name != "country" for p in ep.params), key
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_home_depot_shared_docstrings_state_both_rates(module):
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_HomeDepotNamespace", None) or mod._AsyncHomeDepotNamespace
+    for method in ("search", "product", "reviews"):
+        doc = getattr(cls, method).__doc__ or ""
+        assert "Costs 2 credits." not in doc, method
+        assert "2 credits in the US" in doc and "1 credit with country='ca'" in doc, method

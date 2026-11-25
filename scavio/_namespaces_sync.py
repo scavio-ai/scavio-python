@@ -3660,67 +3660,215 @@ class _TargetNamespace:
         return self._client._call("target_availability", {"tcin": tcin, "zip": zip, "radius": radius, "store_id": store_id}, extra)
 
 class _HomeDepotNamespace:
-    """Home Depot search, product, and review endpoints."""
+    """Home Depot search, product, and review endpoints (homedepot.com by default); country='ca' reads Home Depot Canada (homedepot.ca, CAD, prices and exact units per store), which also has category, categories, stock, store and suggestions endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
 
     def search(
         self,
-        query: str,
+        query: Optional[str] = None,
         *,
         page: Optional[int] = None,
         sort_by: Optional[Literal["best_match", "top_sellers", "top_rated", "price_low", "price_high"]] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        category_id: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[list[Union[str, dict[str, str]]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Home Depot: price and promotions, brand and model, ratings, badges, per-store pickup/delivery. Page size is fixed at 12 and cannot be changed.
+        """Search Home Depot: price and promotions, brand and model, ratings, badges, per-store pickup/delivery. US page size is fixed at 12 and cannot be changed. With country='ca', Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces): CAD prices at a store (store_id) with exact store_units and aisle / bay, 1-40 per page, facet filters and Special Offers deals; pass query, category_id or deals.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
-            query: Search keyword (1-500 characters).
-            page: Results page, 1-based. Home Depot serves 12 products per page and offers no way to change that, so paging is the only way to read further.
-            sort_by: Result sort order. Defaults to 'best_match'. Closed enum: Home Depot answers an unknown sort with an empty page that is still billed. 'Newest' is absent - it is rejected on keyword search.
-            min_price: Minimum price, inclusive. Must be 0 or greater.
-            max_price: Maximum price, inclusive. Must be 0 or greater.
+            query: Search keyword (1-500 characters). Required for the US; for country='ca' pass query, category_id or deals.
+            page: Results page, 1-based. Home Depot serves 12 products per page in the US and offers no way to change that, so paging is the only way to read further (Canada: page_size, pages up to 500).
+            sort_by: Result sort order. Defaults to 'best_match'. Closed enum: Home Depot answers an unknown sort with an empty page that is still billed. 'Newest' is absent - it is rejected on keyword search. 'top_sellers' is US only (a 400 for 'ca').
+            min_price: Minimum price, inclusive (USD; CAD for 'ca'). Must be 0 or greater.
+            max_price: Maximum price, inclusive (USD; CAD for 'ca'). Must be 0 or greater.
+            country: 'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.
+            category_id: Home Depot Canada only: a category id from categories() (e.g. 'l4-drill-drivers'); query is then optional.
+            store_id: Home Depot Canada only: the store number whose price and units to read (e.g. '7080'). Without it the site prices at its default store 7274; data.store says which.
+            page_size: Home Depot Canada only: products per page, 1-40 (default 40).
+            filters: Home Depot Canada only: up to 10 facet filters [{'facet': ..., 'value': ...}], value = facets[].values[].value from a call with include_facets, e.g. [{'facet': 'manufacturerName', 'value': '9wh'}].
+            deals: Home Depot Canada only: 'special_buy', 'new_lower_price', 'savings' (one or a list): the site's Special Offers filter. With no query, every product with that offer.
+            include_facets: Home Depot Canada only: also return facets to filter on.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("home_depot_search", {"query": query, "page": page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price}, extra)
+        return self._client._call("home_depot_search", {"query": query, "page": page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "country": country, "category_id": category_id, "store_id": store_id, "page_size": page_size, "filters": filters, "deals": deals, "include_facets": include_facets, "language": language}, extra)
 
     def product(
         self,
         item_id: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full Home Depot item detail: pricing, images and videos, spec table, dimensions, bullets, documents, return policy. Carries a 10-review preview only.
+        """Full Home Depot item detail: pricing, images and videos, spec table, dimensions, bullets, documents, return policy. Carries a 10-review preview only. With country='ca' and store_id, price is that Home Depot Canada store's price (price_source 'store') and online_price the online price, which can differ, with store_units, aisle and bay; when Home Depot Canada has no store record for an item that exists, the online price comes back with store_price_returned false.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
-            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL; tracking parameters on a pasted URL are discarded.
+            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL; tracking parameters on a pasted URL are discarded. For 'ca' a 10-digit Home Depot Canada id (e.g. '1000112108') or a homedepot.ca/product/... link.
+            country: 'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.
+            store_id: Home Depot Canada only: a store number (e.g. '7128'): price is then that store's price, with units at the store and aisle / bay.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("home_depot_product", {"item_id": item_id}, extra)
+        return self._client._call("home_depot_product", {"item_id": item_id, "country": country, "store_id": store_id, "language": language}, extra)
 
     def reviews(
         self,
         item_id: str,
         *,
         page: Optional[int] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One page of full Home Depot review bodies, the rating distribution, per-attribute ratings, photos and seller responses. 30 reviews per page.
+        """One page of full Home Depot review bodies, the rating distribution, per-attribute ratings, photos and seller responses. 30 reviews per page. With country='ca', the first 8 Home Depot Canada reviews in the requested language and the first page of questions (page > 1 is a 400); no reviewer names.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
-            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL; tracking parameters on a pasted URL are discarded.
-            page: Reviews page, 1-based. 30 reviews per page; 'total_pages' in the response is the last one that exists, and asking past it is a 404.
+            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL; tracking parameters on a pasted URL are discarded. For 'ca' a 10-digit Home Depot Canada id or a homedepot.ca/product/... link.
+            page: Reviews page, 1-based. 30 reviews per page; 'total_pages' in the response is the last one that exists, and asking past it is a 404. US only.
+            country: 'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.
+            language: Home Depot Canada only: 'en' (default) or 'fr' (a different review set).
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("home_depot_reviews", {"item_id": item_id, "page": page}, extra)
+        return self._client._call("home_depot_reviews", {"item_id": item_id, "page": page, "country": country, "language": language}, extra)
+
+    def category(
+        self,
+        category_id: str,
+        *,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        sort_by: Optional[Literal["best_match", "price_low", "price_high", "top_rated"]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        store_id: Optional[Union[str, int]] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[list[Union[str, dict[str, str]]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Home Depot Canada only: one category or collection page of homedepot.ca by category_id from categories() (e.g. 'l4-drill-drivers', '661103' for Christmas Trees), priced at a store, with the search parameters. CAD. An unknown category or store is a charged 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category or collection id from categories(), e.g. 'l4-drill-drivers' or '661103'.
+            query: Optional keywords inside the category.
+            page: Page, 1-based (1-500). Past the last page: an empty page.
+            sort_by: Result sort order (default 'best_match').
+            min_price: Lowest price, CAD.
+            max_price: Highest price, CAD.
+            store_id: Home Depot Canada only: the store number whose price and units to read (e.g. '7080'). Without it the site prices at its default store 7274; data.store says which.
+            page_size: Home Depot Canada only: products per page, 1-40 (default 40).
+            filters: Home Depot Canada only: up to 10 facet filters [{'facet': ..., 'value': ...}], value = facets[].values[].value from a call with include_facets, e.g. [{'facet': 'manufacturerName', 'value': '9wh'}].
+            deals: Home Depot Canada only: 'special_buy', 'new_lower_price', 'savings' (one or a list): the site's Special Offers filter. With no query, every product with that offer.
+            include_facets: Home Depot Canada only: also return facets to filter on.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("home_depot_category", {"category_id": category_id, "query": query, "page": page, "sort_by": sort_by, "min_price": min_price, "max_price": max_price, "store_id": store_id, "page_size": page_size, "filters": filters, "deals": deals, "include_facets": include_facets, "language": language}, extra)
+
+    def categories(
+        self,
+        *,
+        depth: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Home Depot Canada only: the homedepot.ca department tree (about 1,750 nodes) and the current event and collection pages (e.g. Black Friday). departments[].id and events[].id are category_id inputs for category() and search().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            depth: Levels of the tree to return, 1-4 (default 4: all).
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("home_depot_categories", {"depth": depth, "language": language}, extra)
+
+    def stock(
+        self,
+        item_id: str,
+        location: str,
+        *,
+        limit: Optional[int] = None,
+        page: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Home Depot Canada only: exact units of one item at every store near a Canadian postal code or city, in one call. No prices (product() with store_id gives a store's price). When Home Depot Canada has no store record for an item that exists, the answer is an unbilled 502.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Home Depot Canada item id (10 digits, e.g. '1001769719') or a homedepot.ca/product/... link.
+            location: A Canadian postal code or a city, e.g. 'H3B 1A1' or 'Montreal'.
+            limit: Stores per page, 1-50 (default 20).
+            page: Page, 1-based.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("home_depot_stock", {"item_id": item_id, "location": location, "limit": limit, "page": page, "language": language}, extra)
+
+    def store(
+        self,
+        store_id: Union[str, int],
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Home Depot Canada only: one store by number: address, phone, coordinates, services, 7 dated days of hours and nearby stores. An unknown store is a charged 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Home Depot Canada store number (4 digits), e.g. '7076'.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("home_depot_store", {"store_id": store_id, "language": language}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Home Depot Canada only: the homedepot.ca search box suggestions for what has been typed, plus the installation services the site suggests.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What has been typed so far, e.g. 'christ'.
+            store_id: Optional Home Depot Canada store number.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("home_depot_suggestions", {"query": query, "store_id": store_id, "language": language}, extra)
 
 class _ZillowNamespace:
     """Zillow listing search, property detail, and agent-review endpoints."""
