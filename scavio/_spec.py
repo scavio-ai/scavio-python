@@ -4293,6 +4293,93 @@ _STP_LIST = (
     "count, selected}]}] (send filter back in filters), notes"
 )
 
+# Dollar Tree params shared across endpoints (dollartree.com, the US and Canada discount variety
+# store chain). 10 endpoints, 1 credit each except stores (5). country is us only on every
+# endpoint but store, which also takes ca (Dollar Tree Canada store pages, English, no prices):
+# so country appears on store() only. One national online price list: store and ZIP change units,
+# not price. store_stock, stores and reviews are the slow ones: 300 s floor; the rest 240 s.
+_DT_NAME = "Dollar Tree (dollartree.com, the US and Canada discount variety store chain)"
+_DT_ITEM_DOC = (
+    "A Dollar Tree item number (items[].item_id, the number at the end of a dollartree.com "
+    "product link; e.g. '221159' or 'FD1402202'). UPCs are not item numbers."
+)
+_DT_ITEM = Param(
+    "item_id",
+    "Optional[Union[str, int]]",
+    positional=True,
+    doc=_DT_ITEM_DOC + " Send item_id or url.",
+)
+_DT_URL = _str("url", "A dollartree.com product link (items[].url) instead of item_id.")
+_DT_CATEGORY_ANN = "Optional[Union[str, int]]"
+_DT_BRAND = _str(
+    "brand", "Only this brand, as Dollar Tree writes it (the Brand facet's labels, e.g. 'Dixie')."
+)
+_DT_LIST_PARAMS = (
+    _int("page", "Page (1-200)."),
+    _int("page_size", "Items per page (1-250, default 48, the site's own page size)."),
+    _lit(
+        "sort",
+        ("relevance", "price_low", "price_high", "newest", "rating"),
+        "relevance (default), price_low, price_high, newest or rating (highest average rating "
+        "first): Dollar Tree's sort menu.",
+    ),
+    _str_list(
+        "filters",
+        "Up to 10 refinement ids exactly as an earlier answer gives them in "
+        "facets[].values[].id (price point, rating, material, color, collection, dietary "
+        "needs, ...); several are combined.",
+    ),
+    Param(
+        "price_point",
+        "Optional[Union[float, str]]",
+        doc="Only items at this price point, as Dollar Tree's Price facet lists them (e.g. 1.25, "
+        "1.50, 5.00).",
+    ),
+    _ilit("rating", (1, 2, 3, 4, 5), "Only items rated this many stars and up (1-5)."),
+    _bool("in_store_only", "Only items Dollar Tree sells in stores only (not shipped)."),
+    _float("min_price", "Lowest unit price (USD)."),
+    _float("max_price", "Highest unit price (USD)."),
+)
+_DT_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_DT_SLOW = " Slow: usually 10-35 s, up to about 2.5 minutes."
+_DT_PRICES = (
+    " Prices are Dollar Tree's online unit prices (USD) from one national online price list (the "
+    "same at every store and ZIP measured); Dollar Tree notes that prices and availability may "
+    "vary between stores and online, and in-store shelf prices are not published online. Online "
+    "orders are by the case: case_price is the price of case_pack units and minimum_quantity the "
+    "order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); "
+    "stores sell single units."
+)
+_DT_NOT_AVAILABLE = (
+    " Not available: search suggestions, the weekly ad, deal validity dates, Quick Order / bulk "
+    "ordering, gift cards, Canada products and prices (Dollar Tree Canada has no shopping site), "
+    "price history (poll and store the answers), checkout."
+)
+_DT_ITEM_FIELDS = (
+    "position, item_id (the input of product(), store_stock() and reviews()), name, brand (as "
+    "Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, "
+    "case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in "
+    "listings)}, not_for_individual_sale, rating, review_count, online_availability, "
+    "in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, "
+    "categories"
+)
+_DT_LIST = (
+    "market {country, language, currency, locale}, category, page, page_size, total, "
+    "total_pages, count, sort, filters_applied [{facet, label, count}], resolved_filters [{facet, "
+    "requested, id, label, other_spellings}], price_range, items (" + _DT_ITEM_FIELDS + "), "
+    "facets [{key, name, multi_select, values [{id, label, count}]}] (send id back in filters), "
+    "notes"
+)
+_DT_STORE_HEAD = (
+    "store_number, name, location_note, address {line1, line2, city, state, zip, country}, "
+    "phone, latitude, longitude"
+)
+_DT_STORE_TAIL = (
+    "closed, timezone, hours [{day, open, close, closed}], holiday_hours [{date, open, close, "
+    "closed}], reopen_date, amenities, accepts_ebt, frozen_foods, more_choices, store_pickup, "
+    "pickup_and_delivery, payment_options, slug, url"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -18962,6 +19049,313 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================= Dollar Tree ============================
+    # 10 endpoints on /api/v1/dollartree, 1 credit each, stores 5. us only (no country) on every
+    # method but store(), which takes country us | ca. Calls can queue behind the backend's
+    # upstream limit: 240 s floor; store_stock, stores and reviews are slow pages: 300 s.
+    Endpoint(
+        key="dollartree_search",
+        namespace="dollartree",
+        method="search",
+        http="POST",
+        path="/api/v1/dollartree/search",
+        summary=(
+            "Search " + _DT_NAME + " United States by keywords or a Dollar Tree item number (an "
+            "item number answers with that item), sorted (relevance, price low or high, newest, "
+            "rating), filtered (category, brand, price point, rating, in-store only, price range, "
+            "any facet value) and paged (48 a page by default, up to 250)." + _DT_PRICES
+            + " Returns query, corrected_query, " + _DT_LIST + ". Dollar Tree's search does not "
+            "match UPCs: look items up by item number." + _DT_NOT_AVAILABLE + _DT_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Keywords ('paper plates', 'christmas ornaments') or a Dollar Tree item number. "
+                "UPCs are not matched.",
+                wire="q",
+            ),
+            Param(
+                "category",
+                _DT_CATEGORY_ANN,
+                doc="Only items in this category: categories[].dimension_id or a Category facet "
+                "value id (e.g. '4070223595').",
+            ),
+            _DT_BRAND,
+            *_DT_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_product",
+        namespace="dollartree",
+        method="product",
+        http="POST",
+        path="/api/v1/dollartree/product",
+        summary=(
+            "One " + _DT_NAME + " item in full by item number or link: market, "
+            "requested_item_id, item_id, name, brand, store_brand, url, image, images, "
+            "description, long_description, price, list_price, sale_price, on_sale, "
+            "unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, "
+            "multiple, fee}, not_for_individual_sale, varying_case_packs, assortment, "
+            "assortment_details, upcs, rating, review_count, in_store_only, "
+            "store_pickup_eligible, shippable, online_only, delivery_options (as given), "
+            "order_limit, clearance, new, deals, snap_eligible, gift_card, available_since, "
+            "online_stock {status, in_stock, units, orderable_units} (Dollar Tree's online "
+            "inventory; store_stock() gives a store's units), specifications [{name, value}], "
+            "categories [{id, name, dimension_id, url}], child_skus [{sku_id, color, size, "
+            "list_price, sale_price, sale_starts, sale_ends, active}], currency, notes."
+            + _DT_PRICES + " Item 221159 (9-in. White Paper Plates, 40-ct. Packs) was $1.50 a "
+            "unit, case_pack 30, case_price $45.00, minimum_quantity 5. An unknown item is a "
+            "charged 404." + _DT_CHARGE
+        ),
+        params=(_DT_ITEM, _DT_URL),
+        one_of=(("item_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_category",
+        namespace="dollartree",
+        method="category",
+        http="POST",
+        path="/api/v1/dollartree/category",
+        summary=(
+            "One " + _DT_NAME + " category listing by dimension_id or dollartree.com category "
+            "link (us only), sorted, filtered and paged like search()." + _DT_PRICES
+            + " Returns category_id, query, " + _DT_LIST + ". An unknown category is a charged "
+            "404." + _DT_CHARGE
+        ),
+        params=(
+            Param(
+                "category",
+                "Union[str, int]",
+                required=True,
+                doc="A Dollar Tree category: categories[].dimension_id of categories() (e.g. "
+                "'3804024826', Christmas Decor) or a dollartree.com category link.",
+            ),
+            _str("query", "Keywords inside the category.", wire="q"),
+            _DT_BRAND,
+            *_DT_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_categories",
+        namespace="dollartree",
+        method="categories",
+        http="POST",
+        path="/api/v1/dollartree/categories",
+        summary=(
+            _DT_NAME + "'s category tree (us only): market, category, parents, count, "
+            "total_categories, categories [{id, name, dimension_id, url, route, children "
+            "[...]}], notes. Without category: the departments with every sub-category; with "
+            "category: that category's sub-categories. dimension_id is the input of category(). "
+            "An unknown category is a charged 404." + _DT_CHARGE
+        ),
+        params=(
+            Param(
+                "category",
+                _DT_CATEGORY_ANN,
+                doc="One category (dimension_id, id or dollartree.com category link, e.g. "
+                "'2264625405' Holidays): its sub-categories. Without it: the departments with "
+                "every sub-category.",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_brand",
+        namespace="dollartree",
+        method="brand",
+        http="POST",
+        path="/api/v1/dollartree/brand",
+        summary=(
+            "One brand's " + _DT_NAME + " items (us only), sorted, filtered and paged like "
+            "search(): brand (as Dollar Tree writes it), brand_id, other_spellings [{id, label, "
+            "count}] (the same brand under other spellings: send an id in filters), " + _DT_LIST
+            + "." + _DT_PRICES + " A brand Dollar Tree does not list is a charged 404."
+            + _DT_CHARGE
+        ),
+        params=(
+            _req(
+                "brand",
+                "A brand as Dollar Tree writes it (search's Brand facet labels, e.g. 'Dixie'). "
+                "Matched case-insensitively.",
+            ),
+            Param(
+                "category",
+                _DT_CATEGORY_ANN,
+                doc="Only this brand's items in this category (categories[].dimension_id).",
+            ),
+            *_DT_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_deals",
+        namespace="dollartree",
+        method="deals",
+        http="POST",
+        path="/api/v1/dollartree/deals",
+        summary=(
+            _DT_NAME + "'s sale (default), clearance, New Arrivals or MORE CHOICES items (us "
+            "only; More Choices is Dollar Tree's multi-price assortment), sorted, filtered and "
+            "paged like search(): type, query, " + _DT_LIST + "." + _DT_PRICES + " Dollar Tree "
+            "publishes no validity dates and no weekly ad." + _DT_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("sale", "clearance", "new", "more_choices"),
+                "sale (default), clearance, new (New Arrivals, newest first by default) or "
+                "more_choices (MORE CHOICES, Dollar Tree's multi-price department).",
+            ),
+            _str("query", "Keywords inside the deal listing.", wire="q"),
+            Param(
+                "category",
+                _DT_CATEGORY_ANN,
+                doc="With type 'sale' or 'clearance' only: only this category "
+                "(categories[].dimension_id).",
+            ),
+            _DT_BRAND,
+            *_DT_LIST_PARAMS,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_store_stock",
+        namespace="dollartree",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/dollartree/store-stock",
+        summary=(
+            "Units of one " + _DT_NAME + " item at a store, as Dollar Tree's product page "
+            "reports them for the store chosen: market, item_id, item {name, url, price}, store "
+            "{store_number, units, status, in_stock, unit_size}, nearby_stores [{store_number, "
+            "units, status, in_stock}] (up to about 63, store numbers only: stores() and store() "
+            "give their addresses), nearby_in_stock, ship_to_home {available, units, cases, "
+            "case_size, eta, express_eta, back_order}, ship_to_store {available, units, cases, "
+            "case_size, eta}, split_case_ship_to_home, notes. Stores sell single units "
+            "(unit_size 1). Item 221159 showed 116 units at store 5126 (New York) and 63 nearby "
+            "stores, 59 with stock. store (a store number from stores()) is required: a ZIP "
+            "alone does not pick a store. Price does not change by store. An unknown item or "
+            "store is a charged 404." + _DT_SLOW + _DT_CHARGE
+        ),
+        params=(
+            _DT_ITEM,
+            Param(
+                "store",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A Dollar Tree store number (stores[].store_number of stores(), e.g. "
+                "'5126'). Required.",
+            ),
+            _DT_URL,
+            _str_or_int(
+                "zip",
+                "Optional: the store's ZIP, sent along with the store as Dollar Tree's own store "
+                "picker does.",
+            ),
+            _str("state", "Optional: the store's two-letter state (e.g. 'NY'), sent along with "
+                 "the store."),
+        ),
+        one_of=(("item_id", "url"), ("store",)),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="dollartree_stores",
+        namespace="dollartree",
+        method="stores",
+        http="POST",
+        path="/api/v1/dollartree/stores",
+        summary=(
+            "The " + _DT_NAME + " stores near a US ZIP or city, as Dollar Tree's store locator "
+            "lists them (20 per answer, in its order): market, location, total, count, stores "
+            "[{position, " + _DT_STORE_HEAD + ", distance_miles, " + _DT_STORE_TAIL + "}], "
+            "notes. Services include EBT, frozen foods and More Choices as Dollar Tree lists "
+            "them. Send zip or city." + _DT_SLOW + " Failed upstream calls and refused inputs "
+            "are not charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A US ZIP code (e.g. '60540'). Send zip or city.",
+            ),
+            _str("city", "A US city and state, e.g. 'Naperville, IL', instead of zip."),
+        ),
+        one_of=(("zip", "city"),),
+        credits=5,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="dollartree_store",
+        namespace="dollartree",
+        method="store",
+        http="POST",
+        path="/api/v1/dollartree/store",
+        summary=(
+            "One " + _DT_NAME + " store page by link or slug (United States; Canada with "
+            "country='ca'): market, " + _DT_STORE_HEAD + ", " + _DT_STORE_TAIL + ", "
+            "nearby_stores [{store_number, address, closed, slug, url}], notes. Canada store "
+            "pages are in English and carry no prices. An unknown store page is a charged 404."
+            + _DT_CHARGE
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc="A Dollar Tree store page (stores[].url, e.g. "
+                "'https://locations.dollartree.com/ny/new-york/2182-3rd-avenue'; Canada: a "
+                "locations.dollartreecanada.com page with country='ca'). Send url or slug.",
+            ),
+            _str(
+                "slug",
+                "Instead of url: the store page slug (stores[].slug, e.g. "
+                "'ny/new-york/2182-3rd-avenue'; Canada e.g. 'on/toronto/2340-eglinton-ave-west').",
+            ),
+            _lit(
+                "country",
+                ("us", "ca"),
+                "'us' (default: Dollar Tree US store pages) or 'ca' (Dollar Tree Canada store "
+                "pages, English, no prices).",
+            ),
+        ),
+        one_of=(("url", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dollartree_reviews",
+        namespace="dollartree",
+        method="reviews",
+        http="POST",
+        path="/api/v1/dollartree/reviews",
+        summary=(
+            "The newest English reviews of one " + _DT_NAME + " item (up to about 98 per call, "
+            "newest first): market, item_id, item {name, url}, rating, review_count, "
+            "rating_breakdown [{stars, count, percent}], recommended_count, "
+            "not_recommended_count, total, count, sort, reviews [{id, rating, rating_range, "
+            "title, text, date, recommended, syndicated, syndication_source, badges, "
+            "secondary_ratings [{name, value, range}], helpful_votes, unhelpful_votes, locale, "
+            "photos [{url, thumbnail_url}], responses [{text, date, department}]}], notes. Many "
+            "reviews are syndicated from brand sites (syndicated, syndication_source). No other "
+            "sort, no star filter, no questions and answers; no reviewer names. An unknown item "
+            "is a charged 404." + _DT_SLOW + _DT_CHARGE
+        ),
+        params=(_DT_ITEM, _DT_URL),
+        one_of=(("item_id", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -26007,6 +26401,7 @@ NAMESPACES: tuple[str, ...] = (
     "michaels",
     "nike",
     "staples",
+    "dollartree",
 )
 
 

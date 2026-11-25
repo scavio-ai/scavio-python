@@ -33,6 +33,7 @@ from ._namespaces_sync import (
     _DepopNamespace,
     _DicksNamespace,
     _DollarGeneralNamespace,
+    _DollarTreeNamespace,
     _EbayNamespace,
     _FanaticsNamespace,
     _FashionnovaNamespace,
@@ -275,6 +276,7 @@ class ScavioClient:
         self.michaels = _MichaelsNamespace(self)
         self.nike = _NikeNamespace(self)
         self.staples = _StaplesNamespace(self)
+        self.dollartree = _DollarTreeNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

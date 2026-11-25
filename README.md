@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 103 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 104 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -55,6 +55,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Nike Sale Prices with Full Price and Discount, Every Size with GTIN, Release Calendar with Per-Size Levels, Same Style Code Across Markets (62 storefronts in 42 countries; 8 endpoints) | Yes | No | No | No |
 | Staples Ink and Paper Prices with Staples' Own Price per Unit and Cost per Page, Promotions with Expiry, Units at the Stores near a ZIP, Reviews and Q&A (US; Canada search and product in English or French; 12 endpoints) | Yes | No | No | No |
+| Dollar Tree Case Prices next to Unit Prices, Case Packs, Minimum Order and Split Cases, Units at a Store and Its Nearby Stores, Stores and Reviews (US; Canada store pages; 10 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4903,6 +4904,87 @@ Business Advantage contract prices, price history (poll and store the
 answers), checkout. Failed calls and refused inputs are not charged; a
 not-found (an unknown item, class, department or store) is charged.
 
+### 73. Dollar Stores -- Dollar Tree case prices, unit prices, store stock
+
+Dollar Tree (dollartree.com, the US and Canada discount variety store
+chain). Namespace `dollartree`, 10 endpoints: `search`, `product`,
+`category`, `categories`, `brand`, `deals`, `store_stock`, `stores`, `store`,
+`reviews`. 1 credit per call, `stores` 5; `credits_used` in the response is
+what was charged. Every method is US only (www.dollartree.com, USD; no
+`country`) except `store`, which also takes `country="ca"` (Dollar Tree
+Canada store pages, English, no prices): Dollar Tree Canada has no shopping
+site. The request timeout is raised to at least 240s, and to 300s on
+`store_stock`, `stores` and `reviews`. Dollar Tree has no public API for its
+catalog, prices or store stock (suppliers work through its vendor portal and
+EDI). Pair it with the `dollar_general`, `walmart`, `target` and `instacart`
+namespaces for a price check on the same item.
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+dt = client.dollartree
+
+# --- Search: 48 a page, unit price next to Dollar Tree's own case price and case pack.
+hits = dt.search("paper plates", sort="price_low")["data"]
+print(hits["total"], hits["total_pages"])
+for it in hits["items"][:5]:
+    print(it["item_id"], it["name"], it["price"], it["case_price"], it["case_pack"], it["minimum_quantity"])
+facet_id = hits["facets"][0]["values"][0]["id"]
+narrowed = dt.search("paper plates", filters=[facet_id], price_point=1.25)["data"]
+
+# --- One item: unit price, case price, case pack, minimum order, split-case rules, online stock.
+p = dt.product("221159")["data"]
+print(p["name"], p["price"], p["case_price"], p["case_pack"], p["minimum_quantity"], p["split_case"])
+print(p["online_stock"], p["upcs"][:3])
+
+# --- Units at one store plus its nearby stores (store number required; slow: tens of seconds).
+near = dt.stores("60540")["data"]  # 5 credits
+store_number = near["stores"][0]["store_number"]
+ss = dt.store_stock("221159", store_number)["data"]
+print(ss["store"]["units"], ss["nearby_in_stock"], len(ss["nearby_stores"]))
+print(ss["ship_to_home"]["units"], ss["ship_to_home"]["eta"], ss["ship_to_store"]["eta"])
+
+# --- Store pages (US, or Canada with country="ca"), with hours and services.
+s = dt.store(slug="ny/new-york/2182-3rd-avenue")["data"]
+print(s["store_number"], s["address"]["city"], s["accepts_ebt"], s["more_choices"])
+ca = dt.store(slug="on/toronto/2340-eglinton-ave-west", country="ca")["data"]
+
+# --- Newest reviews (up to about 98 per call), with syndication flags.
+rv = dt.reviews("206652")["data"]
+print(rv["rating"], rv["review_count"], rv["count"])
+for r in rv["reviews"][:3]:
+    print(r["rating"], r["title"], r["syndicated"], r["syndication_source"])
+
+# --- Categories, a category listing, a brand, and the deal listings.
+tree = dt.categories()["data"]
+listing = dt.category("3804024826", sort="price_low")["data"]
+dixie = dt.brand("Dixie")["data"]
+more = dt.deals(type="more_choices")["data"]
+print(tree["total_categories"], listing["total"], dixie["total"], more["total"])
+```
+
+Prices are Dollar Tree's online unit prices from one national online price
+list (the same at every store and ZIP measured); Dollar Tree notes that prices
+and availability may vary between stores and online, and in-store shelf
+prices are not published online. Online orders are by the case. Captured
+2026-11-24: item 221159 (9-in. White Paper Plates, 40-ct. Packs) at $1.50 a
+unit, `case_pack` 30, `case_price` $45.00, `minimum_quantity` 5; item 380886
+(Heavy-Duty 10-in Ultra Paper Plates, 10-pc Pack) at $1.50 a unit, 24 to a
+case, $36.00 a case. A case pack or case price Dollar Tree gives as 0 is
+`None`, never computed; stores sell single units. `store_stock` needs a store
+number (a ZIP alone does not pick a store): item 221159 showed 116 units at
+store 5126 (New York) and 63 nearby stores, 59 of them with stock.
+`store_stock`, `stores` and `reviews` are slow (usually 10-35 s, up to about
+2.5 minutes). Search matches item numbers, not UPCs. Reviews are the newest
+only (no other sort, no star filter, no Q&A, no reviewer names); many are
+syndicated from brand sites and flagged. More Choices is Dollar Tree's
+multi-price assortment. Not available: search suggestions, the weekly ad,
+deal validity dates, Quick Order / bulk ordering, gift cards, Canada products
+and prices, price history (poll and store the answers), checkout. Failed calls
+and refused inputs are not charged; a not-found (an unknown item, category,
+brand or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -5055,6 +5137,7 @@ Scavio works with popular AI/LLM frameworks:
 | Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
 | Nike (`nike`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `release`, `reviews`; 62 storefronts in 42 countries (`country` + `language`); `releases` and `release` not on vn, cn or jp in English; `reviews` not on cn | 1 each |
 | Staples (`staples`) | `search`, `product`, `category`, `categories`, `deals`, `coupons`, `store_stock`, `stores`, `store`, `reviews`, `questions`, `trending`; us (default) on every method; ca (English or French) on `search` and `product` only | 1 each |
+| Dollar Tree (`dollartree`) | `search`, `product`, `category`, `categories`, `brand`, `deals`, `store_stock`, `stores`, `store`, `reviews`; us only (no `country`) on every method except `store`, which also takes ca (Canada store pages); `store_stock` needs a store number | 1 each; `stores` 5 |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5086,6 +5169,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.84.0
+
+- **New `dollartree` namespace** (sync and async) for Dollar Tree
+  (dollartree.com, the US and Canada discount variety store chain), 10
+  endpoints: `search`, `product`, `category`, `categories`, `brand`, `deals`,
+  `store_stock`, `stores`, `store`, `reviews`. Dollar Tree's online unit
+  price next to its case price, case pack, minimum quantity and split-case
+  rules, units of one item at a store plus its nearby stores, stores with
+  hours and services, and the newest reviews with syndication flags. Canada
+  store pages (`country="ca"`) on `store` only. 1 credit per call, `stores`
+  5. The request timeout is raised to at least 240s, and to 300s on
+  `store_stock`, `stores` and `reviews`.
 
 ### Changed in 0.83.0
 

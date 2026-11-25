@@ -7109,3 +7109,128 @@ def test_staples_credits_paths_and_wire(monkeypatch):
         st.deals()
     with pytest.raises(ScavioError):
         st.stores()
+
+
+def test_dollartree_credits_paths_and_wire(monkeypatch):
+    """dollartree (0.84.0): 10 endpoints on /api/v1/dollartree.
+
+    1 credit each, stores 5. us only (no country) on every method except store, which takes
+    country us | ca. query is sent as q. store_stock, stores and reviews get a 300 s floor, the
+    rest 240 s.
+    """
+    _DT_NAME = "Dollar Tree (dollartree.com, the US and Canada discount variety store chain)"
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "dollartree"}
+    assert sorted(eps) == [
+        "brand", "categories", "category", "deals", "product", "reviews", "search", "store",
+        "store_stock", "stores",
+    ]
+    slow = {"store_stock", "stores", "reviews"}
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/dollartree/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == (300.0 if m in slow else 240.0), ep.key
+        assert _DT_NAME in ep.summary, m
+        assert ep.credits == (5 if m == "stores" else 1), m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        if m == "store":
+            assert names["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+        else:
+            assert "country" not in names and "language" not in names, m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+        if m in slow:
+            assert "Slow:" in ep.summary, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_low", "price_high", "newest", "rating"]]'
+    )
+    assert search["filters"].annotation == "Optional[list[str]]"
+    assert search["price_point"].annotation == "Optional[Union[float, str]]"
+    assert search["rating"].annotation == "Optional[Literal[1, 2, 3, 4, 5]]"
+    deals = {p.name: p for p in eps["deals"].params}
+    assert deals["type"].annotation == (
+        'Optional[Literal["sale", "clearance", "new", "more_choices"]]'
+    )
+    assert eps["product"].one_of == (("item_id", "url"),)
+    assert eps["reviews"].one_of == (("item_id", "url"),)
+    assert eps["store_stock"].one_of == (("item_id", "url"), ("store",))
+    assert eps["stores"].one_of == (("zip", "city"),)
+    assert eps["store"].one_of == (("url", "slug"),)
+    assert "one national online price list" in eps["search"].summary
+    assert "in-store shelf prices are not published online" in eps["product"].summary
+    assert "case_price is the price of case_pack units" in eps["product"].summary
+    assert "does not match UPCs" in eps["search"].summary
+    assert "a ZIP alone does not pick a store" in eps["store_stock"].summary
+    assert "no reviewer names" in eps["reviews"].summary
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|stock checker)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    dt = client.dollartree
+    dt.search("paper plates")
+    dt.search("paper plates", category="4070223595", brand="Dixie", page=2, page_size=96,
+              sort="price_low", filters=["3543933063"], price_point=1.25, rating=4,
+              in_store_only=True, min_price=1, max_price=5)
+    dt.product("221159")
+    dt.product(url="https://www.dollartree.com/x/221159")
+    dt.category("3804024826", query="ornaments", sort="newest")
+    dt.categories()
+    dt.categories(category=2264625405)
+    dt.brand("Dixie", category="4070223595")
+    dt.deals()
+    dt.deals(type="more_choices", query="mugs")
+    dt.store_stock("221159", "5126")
+    dt.store_stock("221159", 5126, zip="10035", state="NY")
+    dt.stores("60540")
+    dt.stores(city="Naperville, IL")
+    dt.store("https://locations.dollartree.com/ny/new-york/2182-3rd-avenue")
+    dt.store(slug="on/toronto/2340-eglinton-ave-west", country="ca")
+    dt.reviews("206652")
+    base = "/api/v1/dollartree/"
+    assert seen == [
+        (base + "search", {"q": "paper plates"}, 240.0),
+        (base + "search", {"q": "paper plates", "category": "4070223595", "brand": "Dixie",
+                           "page": 2, "page_size": 96, "sort": "price_low",
+                           "filters": ["3543933063"], "price_point": 1.25, "rating": 4,
+                           "in_store_only": True, "min_price": 1, "max_price": 5}, 240.0),
+        (base + "product", {"item_id": "221159"}, 240.0),
+        (base + "product", {"url": "https://www.dollartree.com/x/221159"}, 240.0),
+        (base + "category", {"category": "3804024826", "q": "ornaments", "sort": "newest"},
+         240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"category": 2264625405}, 240.0),
+        (base + "brand", {"brand": "Dixie", "category": "4070223595"}, 240.0),
+        (base + "deals", {}, 240.0),
+        (base + "deals", {"type": "more_choices", "q": "mugs"}, 240.0),
+        (base + "store-stock", {"item_id": "221159", "store": "5126"}, 300.0),
+        (base + "store-stock", {"item_id": "221159", "store": 5126, "zip": "10035",
+                                "state": "NY"}, 300.0),
+        (base + "stores", {"zip": "60540"}, 300.0),
+        (base + "stores", {"city": "Naperville, IL"}, 300.0),
+        (base + "store", {"url": "https://locations.dollartree.com/ny/new-york/2182-3rd-avenue"},
+         240.0),
+        (base + "store", {"slug": "on/toronto/2340-eglinton-ave-west", "country": "ca"}, 240.0),
+        (base + "reviews", {"item_id": "206652"}, 300.0),
+    ]
+    with pytest.raises(ScavioError):
+        dt.product()
+    with pytest.raises(ScavioError):
+        dt.store_stock("221159")
+    with pytest.raises(ScavioError):
+        dt.store_stock(store="5126")
+    with pytest.raises(ScavioError):
+        dt.stores()
+    with pytest.raises(ScavioError):
+        dt.store()
+    with pytest.raises(ScavioError):
+        dt.reviews()

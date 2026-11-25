@@ -112,6 +112,7 @@ __all__ = [
     "_MichaelsNamespace",
     "_NikeNamespace",
     "_StaplesNamespace",
+    "_DollarTreeNamespace",
 ]
 
 class _GoogleNamespace:
@@ -20150,3 +20151,275 @@ class _StaplesNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("staples_trending", {}, extra)
+
+class _DollarTreeNamespace:
+    """Dollar Tree (dollartree.com, the US and Canada discount variety store chain) search, product (unit price, case price, case pack, minimum quantity), category, categories, brand, deals (sale, clearance, New Arrivals, More Choices), store-stock (units at a store and its nearby stores), stores, store and reviews endpoints."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        category: Optional[Union[str, int]] = None,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "newest", "rating"]] = None,
+        filters: Optional[list[str]] = None,
+        price_point: Optional[Union[float, str]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        in_store_only: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Dollar Tree (dollartree.com, the US and Canada discount variety store chain) United States by keywords or a Dollar Tree item number (an item number answers with that item), sorted (relevance, price low or high, newest, rating), filtered (category, brand, price point, rating, in-store only, price range, any facet value) and paged (48 a page by default, up to 250). Prices are Dollar Tree's online unit prices (USD) from one national online price list (the same at every store and ZIP measured); Dollar Tree notes that prices and availability may vary between stores and online, and in-store shelf prices are not published online. Online orders are by the case: case_price is the price of case_pack units and minimum_quantity the order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); stores sell single units. Returns query, corrected_query, market {country, language, currency, locale}, category, page, page_size, total, total_pages, count, sort, filters_applied [{facet, label, count}], resolved_filters [{facet, requested, id, label, other_spellings}], price_range, items (position, item_id (the input of product(), store_stock() and reviews()), name, brand (as Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in listings)}, not_for_individual_sale, rating, review_count, online_availability, in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, categories), facets [{key, name, multi_select, values [{id, label, count}]}] (send id back in filters), notes. Dollar Tree's search does not match UPCs: look items up by item number. Not available: search suggestions, the weekly ad, deal validity dates, Quick Order / bulk ordering, gift cards, Canada products and prices (Dollar Tree Canada has no shopping site), price history (poll and store the answers), checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords ('paper plates', 'christmas ornaments') or a Dollar Tree item number. UPCs are not matched.
+            category: Only items in this category: categories[].dimension_id or a Category facet value id (e.g. '4070223595').
+            brand: Only this brand, as Dollar Tree writes it (the Brand facet's labels, e.g. 'Dixie').
+            page: Page (1-200).
+            page_size: Items per page (1-250, default 48, the site's own page size).
+            sort: relevance (default), price_low, price_high, newest or rating (highest average rating first): Dollar Tree's sort menu.
+            filters: Up to 10 refinement ids exactly as an earlier answer gives them in facets[].values[].id (price point, rating, material, color, collection, dietary needs, ...); several are combined.
+            price_point: Only items at this price point, as Dollar Tree's Price facet lists them (e.g. 1.25, 1.50, 5.00).
+            rating: Only items rated this many stars and up (1-5).
+            in_store_only: Only items Dollar Tree sells in stores only (not shipped).
+            min_price: Lowest unit price (USD).
+            max_price: Highest unit price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_search", {"query": query, "category": category, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "price_point": price_point, "rating": rating, "in_store_only": in_store_only, "min_price": min_price, "max_price": max_price}, extra)
+
+    def product(
+        self,
+        item_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dollar Tree (dollartree.com, the US and Canada discount variety store chain) item in full by item number or link: market, requested_item_id, item_id, name, brand, store_brand, url, image, images, description, long_description, price, list_price, sale_price, on_sale, unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, multiple, fee}, not_for_individual_sale, varying_case_packs, assortment, assortment_details, upcs, rating, review_count, in_store_only, store_pickup_eligible, shippable, online_only, delivery_options (as given), order_limit, clearance, new, deals, snap_eligible, gift_card, available_since, online_stock {status, in_stock, units, orderable_units} (Dollar Tree's online inventory; store_stock() gives a store's units), specifications [{name, value}], categories [{id, name, dimension_id, url}], child_skus [{sku_id, color, size, list_price, sale_price, sale_starts, sale_ends, active}], currency, notes. Prices are Dollar Tree's online unit prices (USD) from one national online price list (the same at every store and ZIP measured); Dollar Tree notes that prices and availability may vary between stores and online, and in-store shelf prices are not published online. Online orders are by the case: case_price is the price of case_pack units and minimum_quantity the order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); stores sell single units. Item 221159 (9-in. White Paper Plates, 40-ct. Packs) was $1.50 a unit, case_pack 30, case_price $45.00, minimum_quantity 5. An unknown item is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Dollar Tree item number (items[].item_id, the number at the end of a dollartree.com product link; e.g. '221159' or 'FD1402202'). UPCs are not item numbers. Send item_id or url.
+            url: A dollartree.com product link (items[].url) instead of item_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_product", {"item_id": item_id, "url": url}, extra)
+
+    def category(
+        self,
+        category: Union[str, int],
+        *,
+        query: Optional[str] = None,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "newest", "rating"]] = None,
+        filters: Optional[list[str]] = None,
+        price_point: Optional[Union[float, str]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        in_store_only: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dollar Tree (dollartree.com, the US and Canada discount variety store chain) category listing by dimension_id or dollartree.com category link (us only), sorted, filtered and paged like search(). Prices are Dollar Tree's online unit prices (USD) from one national online price list (the same at every store and ZIP measured); Dollar Tree notes that prices and availability may vary between stores and online, and in-store shelf prices are not published online. Online orders are by the case: case_price is the price of case_pack units and minimum_quantity the order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); stores sell single units. Returns category_id, query, market {country, language, currency, locale}, category, page, page_size, total, total_pages, count, sort, filters_applied [{facet, label, count}], resolved_filters [{facet, requested, id, label, other_spellings}], price_range, items (position, item_id (the input of product(), store_stock() and reviews()), name, brand (as Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in listings)}, not_for_individual_sale, rating, review_count, online_availability, in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, categories), facets [{key, name, multi_select, values [{id, label, count}]}] (send id back in filters), notes. An unknown category is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A Dollar Tree category: categories[].dimension_id of categories() (e.g. '3804024826', Christmas Decor) or a dollartree.com category link.
+            query: Keywords inside the category.
+            brand: Only this brand, as Dollar Tree writes it (the Brand facet's labels, e.g. 'Dixie').
+            page: Page (1-200).
+            page_size: Items per page (1-250, default 48, the site's own page size).
+            sort: relevance (default), price_low, price_high, newest or rating (highest average rating first): Dollar Tree's sort menu.
+            filters: Up to 10 refinement ids exactly as an earlier answer gives them in facets[].values[].id (price point, rating, material, color, collection, dietary needs, ...); several are combined.
+            price_point: Only items at this price point, as Dollar Tree's Price facet lists them (e.g. 1.25, 1.50, 5.00).
+            rating: Only items rated this many stars and up (1-5).
+            in_store_only: Only items Dollar Tree sells in stores only (not shipped).
+            min_price: Lowest unit price (USD).
+            max_price: Highest unit price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_category", {"category": category, "query": query, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "price_point": price_point, "rating": rating, "in_store_only": in_store_only, "min_price": min_price, "max_price": max_price}, extra)
+
+    def categories(
+        self,
+        *,
+        category: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dollar Tree (dollartree.com, the US and Canada discount variety store chain)'s category tree (us only): market, category, parents, count, total_categories, categories [{id, name, dimension_id, url, route, children [...]}], notes. Without category: the departments with every sub-category; with category: that category's sub-categories. dimension_id is the input of category(). An unknown category is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: One category (dimension_id, id or dollartree.com category link, e.g. '2264625405' Holidays): its sub-categories. Without it: the departments with every sub-category.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_categories", {"category": category}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        category: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "newest", "rating"]] = None,
+        filters: Optional[list[str]] = None,
+        price_point: Optional[Union[float, str]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        in_store_only: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's Dollar Tree (dollartree.com, the US and Canada discount variety store chain) items (us only), sorted, filtered and paged like search(): brand (as Dollar Tree writes it), brand_id, other_spellings [{id, label, count}] (the same brand under other spellings: send an id in filters), market {country, language, currency, locale}, category, page, page_size, total, total_pages, count, sort, filters_applied [{facet, label, count}], resolved_filters [{facet, requested, id, label, other_spellings}], price_range, items (position, item_id (the input of product(), store_stock() and reviews()), name, brand (as Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in listings)}, not_for_individual_sale, rating, review_count, online_availability, in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, categories), facets [{key, name, multi_select, values [{id, label, count}]}] (send id back in filters), notes. Prices are Dollar Tree's online unit prices (USD) from one national online price list (the same at every store and ZIP measured); Dollar Tree notes that prices and availability may vary between stores and online, and in-store shelf prices are not published online. Online orders are by the case: case_price is the price of case_pack units and minimum_quantity the order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); stores sell single units. A brand Dollar Tree does not list is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as Dollar Tree writes it (search's Brand facet labels, e.g. 'Dixie'). Matched case-insensitively.
+            category: Only this brand's items in this category (categories[].dimension_id).
+            page: Page (1-200).
+            page_size: Items per page (1-250, default 48, the site's own page size).
+            sort: relevance (default), price_low, price_high, newest or rating (highest average rating first): Dollar Tree's sort menu.
+            filters: Up to 10 refinement ids exactly as an earlier answer gives them in facets[].values[].id (price point, rating, material, color, collection, dietary needs, ...); several are combined.
+            price_point: Only items at this price point, as Dollar Tree's Price facet lists them (e.g. 1.25, 1.50, 5.00).
+            rating: Only items rated this many stars and up (1-5).
+            in_store_only: Only items Dollar Tree sells in stores only (not shipped).
+            min_price: Lowest unit price (USD).
+            max_price: Highest unit price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_brand", {"brand": brand, "category": category, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "price_point": price_point, "rating": rating, "in_store_only": in_store_only, "min_price": min_price, "max_price": max_price}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["sale", "clearance", "new", "more_choices"]] = None,
+        query: Optional[str] = None,
+        category: Optional[Union[str, int]] = None,
+        brand: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "newest", "rating"]] = None,
+        filters: Optional[list[str]] = None,
+        price_point: Optional[Union[float, str]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        in_store_only: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dollar Tree (dollartree.com, the US and Canada discount variety store chain)'s sale (default), clearance, New Arrivals or MORE CHOICES items (us only; More Choices is Dollar Tree's multi-price assortment), sorted, filtered and paged like search(): type, query, market {country, language, currency, locale}, category, page, page_size, total, total_pages, count, sort, filters_applied [{facet, label, count}], resolved_filters [{facet, requested, id, label, other_spellings}], price_range, items (position, item_id (the input of product(), store_stock() and reviews()), name, brand (as Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in listings)}, not_for_individual_sale, rating, review_count, online_availability, in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, categories), facets [{key, name, multi_select, values [{id, label, count}]}] (send id back in filters), notes. Prices are Dollar Tree's online unit prices (USD) from one national online price list (the same at every store and ZIP measured); Dollar Tree notes that prices and availability may vary between stores and online, and in-store shelf prices are not published online. Online orders are by the case: case_price is the price of case_pack units and minimum_quantity the order minimum, as Dollar Tree gives them (null when Dollar Tree gives 0, never computed); stores sell single units. Dollar Tree publishes no validity dates and no weekly ad. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: sale (default), clearance, new (New Arrivals, newest first by default) or more_choices (MORE CHOICES, Dollar Tree's multi-price department).
+            query: Keywords inside the deal listing.
+            category: With type 'sale' or 'clearance' only: only this category (categories[].dimension_id).
+            brand: Only this brand, as Dollar Tree writes it (the Brand facet's labels, e.g. 'Dixie').
+            page: Page (1-200).
+            page_size: Items per page (1-250, default 48, the site's own page size).
+            sort: relevance (default), price_low, price_high, newest or rating (highest average rating first): Dollar Tree's sort menu.
+            filters: Up to 10 refinement ids exactly as an earlier answer gives them in facets[].values[].id (price point, rating, material, color, collection, dietary needs, ...); several are combined.
+            price_point: Only items at this price point, as Dollar Tree's Price facet lists them (e.g. 1.25, 1.50, 5.00).
+            rating: Only items rated this many stars and up (1-5).
+            in_store_only: Only items Dollar Tree sells in stores only (not shipped).
+            min_price: Lowest unit price (USD).
+            max_price: Highest unit price (USD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_deals", {"type": type, "query": query, "category": category, "brand": brand, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "price_point": price_point, "rating": rating, "in_store_only": in_store_only, "min_price": min_price, "max_price": max_price}, extra)
+
+    def store_stock(
+        self,
+        item_id: Optional[Union[str, int]] = None,
+        store: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        state: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units of one Dollar Tree (dollartree.com, the US and Canada discount variety store chain) item at a store, as Dollar Tree's product page reports them for the store chosen: market, item_id, item {name, url, price}, store {store_number, units, status, in_stock, unit_size}, nearby_stores [{store_number, units, status, in_stock}] (up to about 63, store numbers only: stores() and store() give their addresses), nearby_in_stock, ship_to_home {available, units, cases, case_size, eta, express_eta, back_order}, ship_to_store {available, units, cases, case_size, eta}, split_case_ship_to_home, notes. Stores sell single units (unit_size 1). Item 221159 showed 116 units at store 5126 (New York) and 63 nearby stores, 59 with stock. store (a store number from stores()) is required: a ZIP alone does not pick a store. Price does not change by store. An unknown item or store is a charged 404. Slow: usually 10-35 s, up to about 2.5 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Dollar Tree item number (items[].item_id, the number at the end of a dollartree.com product link; e.g. '221159' or 'FD1402202'). UPCs are not item numbers. Send item_id or url.
+            store: A Dollar Tree store number (stores[].store_number of stores(), e.g. '5126'). Required.
+            url: A dollartree.com product link (items[].url) instead of item_id.
+            zip: Optional: the store's ZIP, sent along with the store as Dollar Tree's own store picker does.
+            state: Optional: the store's two-letter state (e.g. 'NY'), sent along with the store.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_store_stock", {"item_id": item_id, "store": store, "url": url, "zip": zip, "state": state}, extra)
+
+    def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Dollar Tree (dollartree.com, the US and Canada discount variety store chain) stores near a US ZIP or city, as Dollar Tree's store locator lists them (20 per answer, in its order): market, location, total, count, stores [{position, store_number, name, location_note, address {line1, line2, city, state, zip, country}, phone, latitude, longitude, distance_miles, closed, timezone, hours [{day, open, close, closed}], holiday_hours [{date, open, close, closed}], reopen_date, amenities, accepts_ebt, frozen_foods, more_choices, store_pickup, pickup_and_delivery, payment_options, slug, url}], notes. Services include EBT, frozen foods and More Choices as Dollar Tree lists them. Send zip or city. Slow: usually 10-35 s, up to about 2.5 minutes. Failed upstream calls and refused inputs are not charged.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (e.g. '60540'). Send zip or city.
+            city: A US city and state, e.g. 'Naperville, IL', instead of zip.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_stores", {"zip": zip, "city": city}, extra)
+
+    def store(
+        self,
+        url: Optional[str] = None,
+        *,
+        slug: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dollar Tree (dollartree.com, the US and Canada discount variety store chain) store page by link or slug (United States; Canada with country='ca'): market, store_number, name, location_note, address {line1, line2, city, state, zip, country}, phone, latitude, longitude, closed, timezone, hours [{day, open, close, closed}], holiday_hours [{date, open, close, closed}], reopen_date, amenities, accepts_ebt, frozen_foods, more_choices, store_pickup, pickup_and_delivery, payment_options, slug, url, nearby_stores [{store_number, address, closed, slug, url}], notes. Canada store pages are in English and carry no prices. An unknown store page is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A Dollar Tree store page (stores[].url, e.g. 'https://locations.dollartree.com/ny/new-york/2182-3rd-avenue'; Canada: a locations.dollartreecanada.com page with country='ca'). Send url or slug.
+            slug: Instead of url: the store page slug (stores[].slug, e.g. 'ny/new-york/2182-3rd-avenue'; Canada e.g. 'on/toronto/2340-eglinton-ave-west').
+            country: 'us' (default: Dollar Tree US store pages) or 'ca' (Dollar Tree Canada store pages, English, no prices).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_store", {"url": url, "slug": slug, "country": country}, extra)
+
+    def reviews(
+        self,
+        item_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The newest English reviews of one Dollar Tree (dollartree.com, the US and Canada discount variety store chain) item (up to about 98 per call, newest first): market, item_id, item {name, url}, rating, review_count, rating_breakdown [{stars, count, percent}], recommended_count, not_recommended_count, total, count, sort, reviews [{id, rating, rating_range, title, text, date, recommended, syndicated, syndication_source, badges, secondary_ratings [{name, value, range}], helpful_votes, unhelpful_votes, locale, photos [{url, thumbnail_url}], responses [{text, date, department}]}], notes. Many reviews are syndicated from brand sites (syndicated, syndication_source). No other sort, no star filter, no questions and answers; no reviewer names. An unknown item is a charged 404. Slow: usually 10-35 s, up to about 2.5 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Dollar Tree item number (items[].item_id, the number at the end of a dollartree.com product link; e.g. '221159' or 'FD1402202'). UPCs are not item numbers. Send item_id or url.
+            url: A dollartree.com product link (items[].url) instead of item_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dollartree_reviews", {"item_id": item_id, "url": url}, extra)
