@@ -7415,3 +7415,137 @@ def test_discounttire_credits_paths_and_wire(monkeypatch):
         dt.wheels(store="1009")
     with pytest.raises(ScavioError):
         dt.browse(store="1009")
+
+
+def test_vevor_credits_paths_and_wire(monkeypatch):
+    """vevor (0.86.0): 11 endpoints on /api/v1/vevor.
+
+    1 credit each, prices 3. country + language on every method except prices (sku only).
+    query is sent as q. Every method gets a 240 s floor.
+    """
+    _VEV_FIRST = (
+        "VEVOR (vevor.com, the tools and equipment seller with storefronts in 13 countries)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "vevor"}
+    assert sorted(eps) == [
+        "categories", "category", "collections", "deals", "prices", "product", "questions",
+        "reviews", "search", "shipping", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/vevor/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == (3 if m == "prices" else 1), m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        if m == "prices":
+            assert list(names) == ["sku"], m
+        else:
+            assert names["country"].annotation == (
+                'Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", '
+                '"mx", "no", "eu"]]'
+            ), m
+            assert "language" in names, m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+    assert _VEV_FIRST in eps["search"].summary
+    for m in ("search", "product", "category", "collections", "deals"):
+        assert "was_price is given only while a VEVOR deal is active" in eps[m].summary, m
+        assert "price and stock do not change by ZIP or state" in eps[m].summary, m
+    assert "Coupon codes" not in eps["search"].summary
+    assert "coupon codes (VEVOR shows them only after a claim)" in eps["search"].summary
+    assert "coupon codes are not included" in eps["deals"].summary
+    assert "Country us needs state" in eps["shipping"].summary
+    assert "$130 fee" in eps["shipping"].summary
+    assert "No reviewer names" in eps["reviews"].summary
+    assert "many languages" in eps["reviews"].summary
+    assert "195.01 USD on us" in eps["prices"].summary
+    assert "721.90 PLN on pl" in eps["prices"].summary
+    assert eps["product"].one_of == (("sku", "url"),)
+    assert [p.name for p in eps["category"].required_params] == ["category"]
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["popular", "price_low", "price_high", "hot", "new"]]'
+    )
+    assert search["rating"].annotation == 'Optional[Literal["highly_rated", "best_rated"]]'
+    assert search["min_price"].annotation == "Optional[float]"
+    reviews = {p.name: p for p in eps["reviews"].params}
+    assert reviews["rating"].annotation == "Optional[Literal[1, 2, 3, 4, 5]]"
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|hurry|geocode|pool of "
+                        r"proxies|ends soon|last day|recalls?|cpsc|tariffs?|legit|scam)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    vv = client.vevor
+    vv.search("welder")
+    vv.search("schweissgeraet", country="de", language="de", category=40339, page=2,
+              sort="price_low", in_stock=True, on_sale=True, black_friday=False,
+              bulk_savings=True, min_price=50, max_price=300.5, rating="highly_rated")
+    vv.search("welder", pickup=True)
+    vv.product("DHJMIGMMAMIGLL6WNV5")
+    vv.product(url="https://www.vevor.ca/x-c_1/y-p_010752182768", country="ca", language="fr")
+    vv.shipping("DHJMIGMMAMIGLL6WNV5", state="AK", zip="99501")
+    vv.shipping("DHJMIGMMAMIGLL6WNV5", province="ON", zip="M5V 2T6", city="Toronto",
+                country="ca")
+    vv.reviews("CKKMJ3300LBSAPPKZV1", page=2, page_size=100, sort="newest", rating=5,
+               photos_only=True, this_variant_only=True)
+    vv.questions("DHJMIGMMAMIGLL6WNV5", page=3, country="gb")
+    vv.suggestions("ice")
+    vv.categories()
+    vv.categories(category="40339", country="eu", language="sv")
+    vv.category("40035")
+    vv.category(40035, page=2, sort="new", in_stock=True)
+    vv.collections()
+    vv.collections(type="promotion",
+                   url="https://www.vevor.com/promotion/commercial-kitchen-equipment-special-10018.html")
+    vv.collections(type="best_sellers", category="40035", page=2, sort="hot")
+    vv.deals()
+    vv.deals(type="clearance", category=40035, page=3, sort="price_high", country="pl")
+    vv.prices("GYQXJBMQJQYPKEO1LV0")
+    base = "/api/v1/vevor/"
+    assert seen == [
+        (base + "search", {"q": "welder"}, 240.0),
+        (base + "search", {"q": "schweissgeraet", "category": 40339, "page": 2,
+                           "sort": "price_low", "in_stock": True, "on_sale": True,
+                           "black_friday": False, "bulk_savings": True, "min_price": 50,
+                           "max_price": 300.5, "rating": "highly_rated", "country": "de",
+                           "language": "de"}, 240.0),
+        (base + "search", {"q": "welder", "pickup": True}, 240.0),
+        (base + "product", {"sku": "DHJMIGMMAMIGLL6WNV5"}, 240.0),
+        (base + "product", {"url": "https://www.vevor.ca/x-c_1/y-p_010752182768",
+                            "country": "ca", "language": "fr"}, 240.0),
+        (base + "shipping", {"sku": "DHJMIGMMAMIGLL6WNV5", "state": "AK", "zip": "99501"},
+         240.0),
+        (base + "shipping", {"sku": "DHJMIGMMAMIGLL6WNV5", "province": "ON", "zip": "M5V 2T6",
+                             "city": "Toronto", "country": "ca"}, 240.0),
+        (base + "reviews", {"sku": "CKKMJ3300LBSAPPKZV1", "page": 2, "page_size": 100,
+                            "sort": "newest", "rating": 5, "photos_only": True,
+                            "this_variant_only": True}, 240.0),
+        (base + "questions", {"sku": "DHJMIGMMAMIGLL6WNV5", "page": 3, "country": "gb"}, 240.0),
+        (base + "suggestions", {"q": "ice"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"category": "40339", "country": "eu", "language": "sv"}, 240.0),
+        (base + "category", {"category": "40035"}, 240.0),
+        (base + "category", {"category": 40035, "page": 2, "sort": "new", "in_stock": True},
+         240.0),
+        (base + "collections", {}, 240.0),
+        (base + "collections", {"type": "promotion", "url": "https://www.vevor.com/promotion/"
+                                "commercial-kitchen-equipment-special-10018.html"}, 240.0),
+        (base + "collections", {"type": "best_sellers", "category": "40035", "page": 2,
+                                "sort": "hot"}, 240.0),
+        (base + "deals", {}, 240.0),
+        (base + "deals", {"type": "clearance", "category": 40035, "page": 3,
+                          "sort": "price_high", "country": "pl"}, 240.0),
+        (base + "prices", {"sku": "GYQXJBMQJQYPKEO1LV0"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        vv.product()

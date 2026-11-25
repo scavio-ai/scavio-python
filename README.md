@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 105 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 106 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -57,6 +57,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Staples Ink and Paper Prices with Staples' Own Price per Unit and Cost per Page, Promotions with Expiry, Units at the Stores near a ZIP, Reviews and Q&A (US; Canada search and product in English or French; 12 endpoints) | Yes | No | No | No |
 | Dollar Tree Case Prices next to Unit Prices, Case Packs, Minimum Order and Split Cases, Units at a Store and Its Nearby Stores, Stores and Reviews (US; Canada store pages; 10 endpoints) | Yes | No | No | No |
 | Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
+| Vevor Prices per Storefront in 13 Countries, Was Price Only During a Deal with Deal Dates, Variants with Their Own Price and Stock, Shipping Fee by State or Province, the Same SKU on Every Storefront, Reviews (13 storefronts; 11 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -5099,6 +5100,92 @@ Tire Rack, price history (poll and store the answers), checkout and booking.
 Failed calls and refused inputs are not charged; a not-found (an unknown
 item, model, category, brand or store) is charged.
 
+### 75. Tools and equipment -- Vevor prices per storefront, deals, shipping by state
+
+VEVOR (vevor.com, the tools and equipment seller with storefronts in 13
+countries). Namespace `vevor`, 11 endpoints: `search`, `product`, `shipping`,
+`reviews`, `questions`, `suggestions`, `categories`, `category`,
+`collections`, `deals`, `prices`. 1 credit per call, `prices` 3;
+`credits_used` in the response is what was charged. Every method except
+`prices` takes `country` (default `us`) and `language` (default the
+storefront's first); `prices` takes `sku` only and asks every storefront. The
+request timeout is raised to at least 240s. VEVOR has no public product API
+(it runs an affiliate programme through Awin and other networks; the Pro
+Member, Dealer & Distributor and dropshipping programmes are sign-up forms,
+not APIs). VEVOR also sells on other marketplaces: pair it with the `amazon`,
+`walmart`, `home_depot`, `tractorsupply`, `tiktok_shop` and `ebay` namespaces
+for the same item (match on model or SKU evidence), and with `harbor_freight`
+as an alternative store, not the same item. See the
+[Vevor API page](https://scavio.dev/vevor-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+vv = client.vevor
+
+# --- Search in the storefront language: 60 items a page, price, was price during a deal, stock.
+hits = vv.search("welder")["data"]
+print(hits["market"], hits["total"], hits["has_more"])
+for it in hits["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["was_price"], it["currency"], it["deal_ends"], it["stock_units"])
+# Each storefront language has its own search index: search de in German.
+de = vv.search("schweissgeraet", country="de", sort="price_low", in_stock=True)["data"]
+
+# --- One product: deal window, variants with their own price and stock, specs.
+p = vv.product("DHJMIGMMAMIGLL6WNV5")["data"]
+print(p["price"], p["was_price"], p["deal"], p["stock_units"])
+for v in p["variants"]:
+    print(v["sku"], v["attributes"], v["price"], v["stock_units"])
+
+# --- Shipping: the state drives the fee and delivery date in the US (province in Canada).
+ship = vv.shipping("DHJMIGMMAMIGLL6WNV5", state="AK", zip="99501")["data"]
+print(ship["fee"], ship["currency"], ship["free_shipping"], ship["delivery"])
+
+# --- The same SKU on all 13 storefronts, each in its own currency (3 credits).
+pr = vv.prices("GYQXJBMQJQYPKEO1LV0")["data"]
+for s in pr["storefronts"]:
+    print(s["country"], s["status"], s["price"], s["currency"], s["was_price"], s["stock_units"])
+
+# --- Reviews (one pool shared across storefronts, many languages), questions.
+rv = vv.reviews("CKKMJ3300LBSAPPKZV1", page_size=100, sort="newest")["data"]
+print(rv["rating"], rv["review_count"], [(r["language"], r["country"]) for r in rv["reviews"][:3]])
+qa = vv.questions("DHJMIGMMAMIGLL6WNV5")["data"]
+
+# --- Category tree, one category, Best Sellers, Daily Deals, suggestions.
+tree = vv.categories()["data"]
+ice = vv.category("40035", sort="price_low")["data"]
+print(ice["title"], ice["total"], ice["total_is_lower_bound"])
+best = vv.collections(type="best_sellers")["data"]
+daily = vv.deals(type="daily_deals")["data"]
+sugg = vv.suggestions("ice")["data"]
+```
+
+Storefronts (`country`, `language`): `us` (www.vevor.com, USD; en, es), `ca`
+(www.vevor.ca, CAD; en, fr), `gb` (www.vevor.co.uk, GBP), `au`
+(www.vevor.com.au, AUD), `de`, `fr`, `es`, `it`, `nl` (EUR, each in its own
+language), `pl` (PLN), `mx` (MXN, es), `no` (www.vevor.co.no, EUR) and `eu`
+(eur.vevor.com, VEVOR's storefront for the other European countries, EUR; en,
+sv, da, fi, no, pt, cs, el, sk, hu, ro). The same SKU has its own price on each
+storefront: measured 2026-11-25, one SKU (GYQXJBMQJQYPKEO1LV0) was 195.01 USD
+on www.vevor.com, 233.90 CAD on www.vevor.ca, 175.90 GBP on www.vevor.co.uk,
+170.90 EUR on www.vevor.de, 261.99 EUR on www.vevor.co.no and 721.90 PLN on
+www.vevor.pl. Price and stock do not change by ZIP; the shipping fee and
+delivery date change by US state (`state`, required for `us`) or Canadian
+province (`province`, required for `ca`): a welder to Alaska (AK 99501) had a
+$130 fee, contiguous states were measured free. `was_price` is given only while
+a VEVOR deal is active (`deal.starts` / `deal.ends` as VEVOR gives them) or
+when VEVOR's page shows its own strikethrough price, otherwise `None`: never
+compute a discount from it. Search and listing totals are exact up to 100 and
+then read "100+" (`total_is_lower_bound`). Reviews are one pool shared across
+storefronts and a product's variants, so they come in many languages, fully
+paged up to 100 a page, with no reviewer names. Not available: coupon codes
+(VEVOR shows them only after a claim), the pickup store, Pro or bulk prices,
+financing, the ships-from warehouse, VEVOR's listings on other marketplaces
+(use those namespaces), price history (poll and store the answers), checkout.
+Failed calls and refused inputs are not charged; a not-found (an unknown SKU
+or category, or a SKU the storefront does not sell) is charged.
+
 ## Error Handling
 
 ```python
@@ -5253,6 +5340,7 @@ Scavio works with popular AI/LLM frameworks:
 | Staples (`staples`) | `search`, `product`, `category`, `categories`, `deals`, `coupons`, `store_stock`, `stores`, `store`, `reviews`, `questions`, `trending`; us (default) on every method; ca (English or French) on `search` and `product` only | 1 each |
 | Dollar Tree (`dollartree`) | `search`, `product`, `category`, `categories`, `brand`, `deals`, `store_stock`, `stores`, `store`, `reviews`; us only (no `country`) on every method except `store`, which also takes ca (Canada store pages); `store_stock` needs a store number | 1 each; `stores` 5 |
 | Discount Tire (`discounttire`) | `search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`, `stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`, `appointments`; us only (no `country`); `search`, `vehicle_tires`, `product`, `model`, `wheels` and `browse` need `store` or `zip` | 1 each |
+| Vevor (`vevor`) | `search`, `product`, `shipping`, `reviews`, `questions`, `suggestions`, `categories`, `category`, `collections`, `deals`, `prices`; 13 storefronts (`country` + `language`) on every method except `prices`, which takes `sku` only and asks every storefront; `shipping` needs `state` (us) or `province` (ca) | 1 each; `prices` 3 |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5284,6 +5372,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.86.0
+
+- **New `vevor` namespace** (sync and async) for VEVOR (vevor.com, the tools
+  and equipment seller with storefronts in 13 countries), 11 endpoints:
+  `search`, `product`, `shipping`, `reviews`, `questions`, `suggestions`,
+  `categories`, `category`, `collections`, `deals`, `prices`. VEVOR's price
+  on each storefront in its own currency (`country` + `language`), the was
+  price only during a VEVOR deal with its start and end, variants with their
+  own price and stock, the shipping fee and delivery date by US state or
+  Canadian province, and the same SKU on all 13 storefronts in one call
+  (`prices`, 3 credits). 1 credit per call otherwise. The request timeout is
+  raised to at least 240s.
 
 ### Changed in 0.85.0
 

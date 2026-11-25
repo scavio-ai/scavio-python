@@ -102,6 +102,7 @@ from ._namespaces_sync import (
     _TrustpilotNamespace,
     _UltaNamespace,
     _UniqloNamespace,
+    _VevorNamespace,
     _VintedNamespace,
     _WalgreensNamespace,
     _WalmartNamespace,
@@ -279,6 +280,7 @@ class ScavioClient:
         self.staples = _StaplesNamespace(self)
         self.dollartree = _DollarTreeNamespace(self)
         self.discounttire = _DiscountTireNamespace(self)
+        self.vevor = _VevorNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

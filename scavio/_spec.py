@@ -4510,6 +4510,101 @@ _DTR_LIST = (
     "filters), notes"
 )
 
+# Vevor params shared across endpoints (VEVOR, vevor.com, the tools and equipment seller with
+# storefronts in 13 countries). 11 endpoints, 1 credit each except prices (3: the same SKU on all
+# 13 storefronts). country (default us) + language (default the storefront's first); prices takes
+# sku only. Calls can queue behind the backend's upstream limit: 240 s floor on every method.
+_VEV_FIRST = "VEVOR (vevor.com, the tools and equipment seller with storefronts in 13 countries)"
+_VEV_NAME = "Vevor"
+_VEV_MARKETS = (
+    ("us", "www.vevor.com", "USD", ("en", "es")),
+    ("ca", "www.vevor.ca", "CAD", ("en", "fr")),
+    ("gb", "www.vevor.co.uk", "GBP", ("en",)),
+    ("au", "www.vevor.com.au", "AUD", ("en",)),
+    ("de", "www.vevor.de", "EUR", ("de",)),
+    ("fr", "www.vevor.fr", "EUR", ("fr",)),
+    ("es", "www.vevor.es", "EUR", ("es",)),
+    ("it", "www.vevor.it", "EUR", ("it",)),
+    ("nl", "www.vevor.nl", "EUR", ("nl",)),
+    ("pl", "www.vevor.pl", "PLN", ("pl",)),
+    ("mx", "www.vevor.mx", "MXN", ("es",)),
+    ("no", "www.vevor.co.no", "EUR", ("no",)),
+    ("eu", "eur.vevor.com", "EUR", ("en", "sv", "da", "fi", "no", "pt", "cs", "el", "sk", "hu", "ro")),
+)
+_VEV_MARKET_LIST = ", ".join(
+    c + " (" + host + ", " + cur + "; " + ", ".join(langs) + ")" for c, host, cur, langs in _VEV_MARKETS
+)
+_VEV_COUNTRY = _lit(
+    "country",
+    tuple(c for c, _, _, _ in _VEV_MARKETS),
+    "VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): "
+    + _VEV_MARKET_LIST + ". eu is eur.vevor.com, VEVOR's storefront for the other European "
+    "countries; uk is gb.",
+)
+_VEV_LANGUAGE = _lit(
+    "language",
+    ("en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"),
+    "The storefront language (default its first; the languages each storefront offers are listed "
+    "under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every "
+    "other storefront its own language only. A language the storefront does not offer answers "
+    "400, not charged.",
+)
+_VEV_MARKET = (_VEV_COUNTRY, _VEV_LANGUAGE)
+_VEV_SKU = _req("sku", "A VEVOR SKU (items[].sku, letters and digits, e.g. 'DHJMIGMMAMIGLL6WNV5').")
+_VEV_PAGE = _int("page", "Page (1-50, 60 items a page, VEVOR's page size).")
+_VEV_SORT = _lit(
+    "sort",
+    ("popular", "price_low", "price_high", "hot", "new"),
+    "popular (default, VEVOR's own order), price_low, price_high, hot or new: VEVOR's sort menu.",
+)
+_VEV_FILTERS = (
+    _bool("in_stock", "Only items in stock."),
+    _bool("on_sale", "Only items VEVOR lists as on sale."),
+    _bool("black_friday", "Only items in VEVOR's Black Friday filter (offered while VEVOR runs it)."),
+    _bool("bulk_savings", "Only items VEVOR lists with bulk savings."),
+    _bool("pickup", "Only items VEVOR offers for pickup (country 'us' only)."),
+    _float("min_price", "Lowest price, in the storefront's currency."),
+    _float("max_price", "Highest price, in the storefront's currency."),
+    _lit(
+        "rating",
+        ("highly_rated", "best_rated"),
+        "highly_rated (4 stars and up) or best_rated (5 stars), as VEVOR's rating filter has them.",
+    ),
+)
+_VEV_CATEGORY_DOC = "categories[].id of categories() (e.g. 40035, Ice Makers) or a VEVOR category link"
+_VEV_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_VEV_PRICES = (
+    " Prices are VEVOR's prices on that storefront for a visitor without an account, in its own "
+    "currency (no conversion). The same SKU has its own price on each storefront; price and stock "
+    "do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is "
+    "given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); "
+    "otherwise null, never computed from VEVOR's reference price."
+)
+_VEV_LANG = (
+    " Text is in the storefront language, and each storefront language has its own search index: "
+    "send search terms in that language."
+)
+_VEV_FILTERED = (
+    "filtered (in stock, on sale, Black Friday while VEVOR runs it, bulk savings, pickup in the "
+    "US, price range, highly rated or best rated)"
+)
+_VEV_NOT_AVAILABLE = (
+    " Not available: coupon codes (VEVOR shows them only after a claim), the pickup store, Pro or "
+    "bulk prices, financing, the ships-from warehouse, VEVOR's listings on other marketplaces "
+    "(use those platforms' namespaces), price history (poll and store the answers), checkout."
+)
+_VEV_ITEM_FIELDS = (
+    "position, sku (the input of product(), shipping(), reviews(), questions() and prices()), "
+    "spu, name, url, image, price, was_price, currency, stock_units, in_stock, deal, deal_ends (as "
+    "VEVOR gives it, ISO 8601 UTC), deal_progress (VEVOR's text, e.g. 88% Left), labels, rating, "
+    "review_count (VEVOR's figures for the product family)"
+)
+_VEV_LIST = (
+    "market {country, language, currency, host}, page, page_size (60), total (exact up to 100, "
+    "then a lower bound as VEVOR gives it, e.g. \"100+\"), total_is_lower_bound, last_page_shown, "
+    "has_more, count, sort, filters_applied, items (" + _VEV_ITEM_FIELDS + "), notes."
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -19983,6 +20078,315 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ================================ Vevor ================================
+    # 11 endpoints on /api/v1/vevor: country (default us, 13 storefronts) + language where a
+    # storefront has several. 1 credit each; prices (every storefront in one call) 3 and takes sku
+    # only. Calls can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="vevor_search",
+        namespace="vevor",
+        method="search",
+        http="POST",
+        path="/api/v1/vevor/search",
+        summary=(
+            "Search " + _VEV_FIRST + " by keywords in the storefront language or a VEVOR SKU, on "
+            "any of its storefronts, sorted (popular, price low or high, hot, new), "
+            + _VEV_FILTERED + ", by category and paged (60 a page). Returns query, category, "
+            + _VEV_LIST + _VEV_PRICES + _VEV_LANG + _VEV_NOT_AVAILABLE + _VEV_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "Keywords in the storefront language (each storefront language has its own search "
+                "index; e.g. 'welder' on us), or a VEVOR SKU.",
+                wire="q",
+            ),
+            _str_or_int("category", "Only items in this category: " + _VEV_CATEGORY_DOC + "."),
+            _VEV_PAGE,
+            _VEV_SORT,
+            *_VEV_FILTERS,
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_product",
+        namespace="vevor",
+        method="product",
+        http="POST",
+        path="/api/v1/vevor/product",
+        summary=(
+            "One " + _VEV_NAME + " product by SKU or link, on the storefront asked: market, "
+            "requested_sku, sku, spu, web_id, name, url, price, was_price, currency, deal {starts, "
+            "ends (ISO 8601 UTC, as VEVOR gives them), quantity, claimed, percent_left} (null "
+            "without an active deal), stock_units, in_stock, availability, labels, attributes, "
+            "variants [{sku, attributes, price, was_price, deal_ends, stock_units, sold, url}] "
+            "(each variant with its own price and stock), specs [{name, value}], images, "
+            "description, protection_plans [{years, name, price, currency}] (as VEVOR offers "
+            "them), return_policy {days, free_returns, method}, rating, review_count, "
+            "rating_breakdown [{stars, percent}], ai_review_summary and ai_questions (VEVOR's own "
+            "AI-written summary and answers, labelled as VEVOR's), categories [{id, name, url}], "
+            "notes." + _VEV_PRICES + " The same SKU on every storefront in one call is prices(). "
+            "An unknown SKU, or one this storefront does not sell, is a charged 404." + _VEV_CHARGE
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[str]",
+                positional=True,
+                doc="A VEVOR SKU (items[].sku, e.g. 'DHJMIGMMAMIGLL6WNV5'). Send sku or url.",
+            ),
+            _str(
+                "url",
+                "A VEVOR product link (items[].url) instead of sku. It must be a link of the "
+                "storefront named by country (a www.vevor.ca link needs country='ca').",
+            ),
+            *_VEV_MARKET,
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_shipping",
+        namespace="vevor",
+        method="shipping",
+        http="POST",
+        path="/api/v1/vevor/shipping",
+        summary=(
+            _VEV_NAME + "'s shipping answer for one SKU to a destination: market, sku, destination "
+            "{country, state, zip, city}, fee, currency, free_shipping, delivery {earliest, "
+            "latest} (ISO 8601 UTC, as VEVOR gives them; often one date for both), can_order, "
+            "price, stock_units, notes. Country us needs state (VEVOR's fee and delivery date "
+            "depend on it; captured 2026-11-25: a welder to Alaska (AK 99501) had a $130 fee, "
+            "contiguous states were measured free with dates varying by state); country ca needs "
+            "province; other storefronts take zip (the postcode) only. VEVOR does not name a "
+            "shipping method or the shipping warehouse. A SKU this storefront does not sell is a "
+            "charged 404." + _VEV_CHARGE
+        ),
+        params=(
+            _VEV_SKU,
+            _str(
+                "state",
+                "Required for country 'us': the two-letter US state (e.g. 'NY'). VEVOR's fee and "
+                "delivery date depend on it.",
+            ),
+            _str("province", "Required for country 'ca': the two-letter Canadian province (e.g. 'ON')."),
+            _str("zip", "Optional: the ZIP or postcode (US: 5 digits; Canada: e.g. 'M5V 2T6')."),
+            _str("city", "Optional: the city."),
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_reviews",
+        namespace="vevor",
+        method="reviews",
+        http="POST",
+        path="/api/v1/vevor/reviews",
+        summary=(
+            "Reviews of one " + _VEV_NAME + " product, paged (up to 100 a page), sorted "
+            "(recommended, newest, helpful) and filtered (stars, with photos, this exact SKU): "
+            "market, sku, rating, review_count, rating_breakdown [{stars, count, percent}], total, "
+            "page, page_size, total_pages, has_more, sort, filters_applied, count, reviews [{id, "
+            "rating, title, text, date, language, country, sku, variant_attributes [{name, "
+            "value}], photos_count, videos_count, helpful_votes, replies [{text, date}] (VEVOR's "
+            "replies)}], notes. VEVOR shares one review pool across its storefronts and a "
+            "product's variants, so reviews come in many languages (language, country per "
+            "review). No reviewer names. A SKU this storefront does not sell is a charged 404."
+            + _VEV_CHARGE
+        ),
+        params=(
+            _VEV_SKU,
+            _int("page", "Page (default 1)."),
+            _int("page_size", "Reviews per page (1-100, default 20)."),
+            _lit(
+                "sort",
+                ("recommended", "newest", "helpful"),
+                "recommended (default, VEVOR's own order), newest or helpful.",
+            ),
+            _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this many stars (1-5)."),
+            _bool("photos_only", "Only reviews with photos or videos."),
+            _bool(
+                "this_variant_only",
+                "Only reviews of this exact SKU (VEVOR shares reviews across a product's variants).",
+            ),
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_questions",
+        namespace="vevor",
+        method="questions",
+        http="POST",
+        path="/api/v1/vevor/questions",
+        summary=(
+            "Customer questions on one " + _VEV_NAME + " product with their answers, 5 a page "
+            "(VEVOR's page size): market, sku, total, page, page_size, total_pages, has_more, "
+            "count, questions [{id, question, date, votes, answers [{text, date, by_vevor, "
+            "votes}]}] (by_vevor marks VEVOR's own answers), notes. No asker or answerer names. A "
+            "SKU this storefront does not sell is a charged 404." + _VEV_CHARGE
+        ),
+        params=(_VEV_SKU, _int("page", "Page (5 questions a page)."), *_VEV_MARKET),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_suggestions",
+        namespace="vevor",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/vevor/suggestions",
+        summary=(
+            _VEV_NAME + "'s search suggestions for typed text on the storefront asked: market, "
+            "query, count, suggestions [{term, url}] (url is the matching VEVOR search page), "
+            "notes." + _VEV_LANG + _VEV_CHARGE
+        ),
+        params=(
+            _req("query", "The text typed so far, in the storefront language (e.g. 'ice').", wire="q"),
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_categories",
+        namespace="vevor",
+        method="categories",
+        http="POST",
+        path="/api/v1/vevor/categories",
+        summary=(
+            _VEV_NAME + "'s category tree on the storefront asked (its own category menu: "
+            "departments, categories, sub-categories) or one branch: market, category, parents, "
+            "count, total_categories, categories [{id, name, url, children [...]}], notes. id is "
+            "the input of category() and of search()'s category filter. A category not in the "
+            "menu is a charged 404." + _VEV_CHARGE
+        ),
+        params=(
+            _str_or_int(
+                "category",
+                "One category (categories[].id, e.g. 40339, or a VEVOR category link): its "
+                "sub-categories. Without it: every department with its categories.",
+            ),
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_category",
+        namespace="vevor",
+        method="category",
+        http="POST",
+        path="/api/v1/vevor/category",
+        summary=(
+            "One " + _VEV_NAME + " category listing (categories[].id or a category link), sorted, "
+            + _VEV_FILTERED + " and paged like search() (60 a page). Returns category_id, title, "
+            + _VEV_LIST + _VEV_PRICES + " An unknown category is a charged 404." + _VEV_CHARGE
+        ),
+        params=(
+            Param(
+                "category",
+                "Union[str, int]",
+                required=True,
+                doc="A VEVOR category: " + _VEV_CATEGORY_DOC + ".",
+            ),
+            _VEV_PAGE,
+            _VEV_SORT,
+            *_VEV_FILTERS,
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_collections",
+        namespace="vevor",
+        method="collections",
+        http="POST",
+        path="/api/v1/vevor/collections",
+        summary=(
+            _VEV_NAME + "'s Best Sellers (optionally one category), New Arrivals (items carry "
+            "first_listed, when VEVOR first listed them) or one promotion page (url, one page in "
+            "VEVOR's own order), as VEVOR lists them: type, category or url, " + _VEV_LIST
+            + _VEV_PRICES + _VEV_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("best_sellers", "new", "promotion"),
+                "best_sellers (default, VEVOR's Best Sellers), new (New Arrivals) or promotion "
+                "(one VEVOR promotion page: send url, nothing else).",
+            ),
+            _str_or_int(
+                "category",
+                "With type='best_sellers' only: only this category (categories[].id).",
+            ),
+            _str(
+                "url",
+                "With type='promotion': a VEVOR promotion page link "
+                "(https://www.vevor.com/promotion/<name>-special-<id>.html).",
+            ),
+            _VEV_PAGE,
+            _VEV_SORT,
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_deals",
+        namespace="vevor",
+        method="deals",
+        http="POST",
+        path="/api/v1/vevor/deals",
+        summary=(
+            _VEV_NAME + "'s Daily Deals, Clearance or Deals page (optionally one category), "
+            "sorted and paged: type, category, " + _VEV_LIST + " Deal end times are as VEVOR "
+            "gives them (deal_ends, ISO 8601 UTC); coupon codes are not included (VEVOR shows "
+            "them only after a claim)." + _VEV_PRICES + _VEV_CHARGE
+        ),
+        params=(
+            _lit(
+                "type",
+                ("daily_deals", "clearance", "deals"),
+                "daily_deals (default, VEVOR's Daily Deals), clearance or deals (VEVOR's Deals "
+                "page).",
+            ),
+            _str_or_int("category", "Only this category (categories[].id)."),
+            _VEV_PAGE,
+            _VEV_SORT,
+            *_VEV_MARKET,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="vevor_prices",
+        namespace="vevor",
+        method="prices",
+        http="POST",
+        path="/api/v1/vevor/prices",
+        summary=(
+            "The same " + _VEV_NAME + " SKU on all 13 storefronts in one call: sku, sold_in, "
+            "storefronts [{country, host, currency, status (sold, not_sold or unavailable), sold, "
+            "price, was_price, deal_ends, stock_units}], notes. Each storefront in its own "
+            "currency (no conversion; vevor.co.no and eur.vevor.com sell in EUR); most European "
+            "storefronts share one stock pool. Captured 2026-11-25: one SKU "
+            "(GYQXJBMQJQYPKEO1LV0) was 195.01 USD on us, 233.90 CAD on ca, 175.90 GBP on gb, "
+            "170.90 EUR on de, 261.99 EUR on no and 721.90 PLN on pl, and not sold on mx. Takes "
+            "sku only (no country or language). Billed on what the request spent (credits_used: "
+            "storefronts that did not answer are not billed). A SKU no storefront sells is a "
+            "charged 404." + _VEV_CHARGE
+        ),
+        params=(_VEV_SKU,),
+        credits=3,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -27030,6 +27434,7 @@ NAMESPACES: tuple[str, ...] = (
     "staples",
     "dollartree",
     "discounttire",
+    "vevor",
 )
 
 

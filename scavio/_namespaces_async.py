@@ -114,6 +114,7 @@ __all__ = [
     "_AsyncStaplesNamespace",
     "_AsyncDollarTreeNamespace",
     "_AsyncDiscountTireNamespace",
+    "_AsyncVevorNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -20870,3 +20871,304 @@ class _AsyncDiscountTireNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("discounttire_appointments", {"store_code": store_code, "month": month}, extra)
+
+class _AsyncVevorNamespace:
+    """VEVOR (vevor.com, the tools and equipment seller with storefronts in 13 countries) search, product, shipping (fee and delivery date by US state or Canadian province), reviews, questions, suggestions, categories, category, collections, deals and prices (the same SKU on all 13 storefronts) endpoints; prices are per storefront."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        category: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popular", "price_low", "price_high", "hot", "new"]] = None,
+        in_stock: Optional[bool] = None,
+        on_sale: Optional[bool] = None,
+        black_friday: Optional[bool] = None,
+        bulk_savings: Optional[bool] = None,
+        pickup: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        rating: Optional[Literal["highly_rated", "best_rated"]] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search VEVOR (vevor.com, the tools and equipment seller with storefronts in 13 countries) by keywords in the storefront language or a VEVOR SKU, on any of its storefronts, sorted (popular, price low or high, hot, new), filtered (in stock, on sale, Black Friday while VEVOR runs it, bulk savings, pickup in the US, price range, highly rated or best rated), by category and paged (60 a page). Returns query, category, market {country, language, currency, host}, page, page_size (60), total (exact up to 100, then a lower bound as VEVOR gives it, e.g. "100+"), total_is_lower_bound, last_page_shown, has_more, count, sort, filters_applied, items (position, sku (the input of product(), shipping(), reviews(), questions() and prices()), spu, name, url, image, price, was_price, currency, stock_units, in_stock, deal, deal_ends (as VEVOR gives it, ISO 8601 UTC), deal_progress (VEVOR's text, e.g. 88% Left), labels, rating, review_count (VEVOR's figures for the product family)), notes. Prices are VEVOR's prices on that storefront for a visitor without an account, in its own currency (no conversion). The same SKU has its own price on each storefront; price and stock do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); otherwise null, never computed from VEVOR's reference price. Text is in the storefront language, and each storefront language has its own search index: send search terms in that language. Not available: coupon codes (VEVOR shows them only after a claim), the pickup store, Pro or bulk prices, financing, the ships-from warehouse, VEVOR's listings on other marketplaces (use those platforms' namespaces), price history (poll and store the answers), checkout. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords in the storefront language (each storefront language has its own search index; e.g. 'welder' on us), or a VEVOR SKU.
+            category: Only items in this category: categories[].id of categories() (e.g. 40035, Ice Makers) or a VEVOR category link.
+            page: Page (1-50, 60 items a page, VEVOR's page size).
+            sort: popular (default, VEVOR's own order), price_low, price_high, hot or new: VEVOR's sort menu.
+            in_stock: Only items in stock.
+            on_sale: Only items VEVOR lists as on sale.
+            black_friday: Only items in VEVOR's Black Friday filter (offered while VEVOR runs it).
+            bulk_savings: Only items VEVOR lists with bulk savings.
+            pickup: Only items VEVOR offers for pickup (country 'us' only).
+            min_price: Lowest price, in the storefront's currency.
+            max_price: Highest price, in the storefront's currency.
+            rating: highly_rated (4 stars and up) or best_rated (5 stars), as VEVOR's rating filter has them.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_search", {"query": query, "category": category, "page": page, "sort": sort, "in_stock": in_stock, "on_sale": on_sale, "black_friday": black_friday, "bulk_savings": bulk_savings, "pickup": pickup, "min_price": min_price, "max_price": max_price, "rating": rating, "country": country, "language": language}, extra)
+
+    async def product(
+        self,
+        sku: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Vevor product by SKU or link, on the storefront asked: market, requested_sku, sku, spu, web_id, name, url, price, was_price, currency, deal {starts, ends (ISO 8601 UTC, as VEVOR gives them), quantity, claimed, percent_left} (null without an active deal), stock_units, in_stock, availability, labels, attributes, variants [{sku, attributes, price, was_price, deal_ends, stock_units, sold, url}] (each variant with its own price and stock), specs [{name, value}], images, description, protection_plans [{years, name, price, currency}] (as VEVOR offers them), return_policy {days, free_returns, method}, rating, review_count, rating_breakdown [{stars, percent}], ai_review_summary and ai_questions (VEVOR's own AI-written summary and answers, labelled as VEVOR's), categories [{id, name, url}], notes. Prices are VEVOR's prices on that storefront for a visitor without an account, in its own currency (no conversion). The same SKU has its own price on each storefront; price and stock do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); otherwise null, never computed from VEVOR's reference price. The same SKU on every storefront in one call is prices(). An unknown SKU, or one this storefront does not sell, is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A VEVOR SKU (items[].sku, e.g. 'DHJMIGMMAMIGLL6WNV5'). Send sku or url.
+            url: A VEVOR product link (items[].url) instead of sku. It must be a link of the storefront named by country (a www.vevor.ca link needs country='ca').
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_product", {"sku": sku, "url": url, "country": country, "language": language}, extra)
+
+    async def shipping(
+        self,
+        sku: str,
+        *,
+        state: Optional[str] = None,
+        province: Optional[str] = None,
+        zip: Optional[str] = None,
+        city: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vevor's shipping answer for one SKU to a destination: market, sku, destination {country, state, zip, city}, fee, currency, free_shipping, delivery {earliest, latest} (ISO 8601 UTC, as VEVOR gives them; often one date for both), can_order, price, stock_units, notes. Country us needs state (VEVOR's fee and delivery date depend on it; captured 2026-11-25: a welder to Alaska (AK 99501) had a $130 fee, contiguous states were measured free with dates varying by state); country ca needs province; other storefronts take zip (the postcode) only. VEVOR does not name a shipping method or the shipping warehouse. A SKU this storefront does not sell is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A VEVOR SKU (items[].sku, letters and digits, e.g. 'DHJMIGMMAMIGLL6WNV5').
+            state: Required for country 'us': the two-letter US state (e.g. 'NY'). VEVOR's fee and delivery date depend on it.
+            province: Required for country 'ca': the two-letter Canadian province (e.g. 'ON').
+            zip: Optional: the ZIP or postcode (US: 5 digits; Canada: e.g. 'M5V 2T6').
+            city: Optional: the city.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_shipping", {"sku": sku, "state": state, "province": province, "zip": zip, "city": city, "country": country, "language": language}, extra)
+
+    async def reviews(
+        self,
+        sku: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["recommended", "newest", "helpful"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        photos_only: Optional[bool] = None,
+        this_variant_only: Optional[bool] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Reviews of one Vevor product, paged (up to 100 a page), sorted (recommended, newest, helpful) and filtered (stars, with photos, this exact SKU): market, sku, rating, review_count, rating_breakdown [{stars, count, percent}], total, page, page_size, total_pages, has_more, sort, filters_applied, count, reviews [{id, rating, title, text, date, language, country, sku, variant_attributes [{name, value}], photos_count, videos_count, helpful_votes, replies [{text, date}] (VEVOR's replies)}], notes. VEVOR shares one review pool across its storefronts and a product's variants, so reviews come in many languages (language, country per review). No reviewer names. A SKU this storefront does not sell is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A VEVOR SKU (items[].sku, letters and digits, e.g. 'DHJMIGMMAMIGLL6WNV5').
+            page: Page (default 1).
+            page_size: Reviews per page (1-100, default 20).
+            sort: recommended (default, VEVOR's own order), newest or helpful.
+            rating: Only reviews with this many stars (1-5).
+            photos_only: Only reviews with photos or videos.
+            this_variant_only: Only reviews of this exact SKU (VEVOR shares reviews across a product's variants).
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_reviews", {"sku": sku, "page": page, "page_size": page_size, "sort": sort, "rating": rating, "photos_only": photos_only, "this_variant_only": this_variant_only, "country": country, "language": language}, extra)
+
+    async def questions(
+        self,
+        sku: str,
+        *,
+        page: Optional[int] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions on one Vevor product with their answers, 5 a page (VEVOR's page size): market, sku, total, page, page_size, total_pages, has_more, count, questions [{id, question, date, votes, answers [{text, date, by_vevor, votes}]}] (by_vevor marks VEVOR's own answers), notes. No asker or answerer names. A SKU this storefront does not sell is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A VEVOR SKU (items[].sku, letters and digits, e.g. 'DHJMIGMMAMIGLL6WNV5').
+            page: Page (5 questions a page).
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_questions", {"sku": sku, "page": page, "country": country, "language": language}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vevor's search suggestions for typed text on the storefront asked: market, query, count, suggestions [{term, url}] (url is the matching VEVOR search page), notes. Text is in the storefront language, and each storefront language has its own search index: send search terms in that language. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far, in the storefront language (e.g. 'ice').
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    async def categories(
+        self,
+        *,
+        category: Optional[Union[str, int]] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vevor's category tree on the storefront asked (its own category menu: departments, categories, sub-categories) or one branch: market, category, parents, count, total_categories, categories [{id, name, url, children [...]}], notes. id is the input of category() and of search()'s category filter. A category not in the menu is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: One category (categories[].id, e.g. 40339, or a VEVOR category link): its sub-categories. Without it: every department with its categories.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_categories", {"category": category, "country": country, "language": language}, extra)
+
+    async def category(
+        self,
+        category: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popular", "price_low", "price_high", "hot", "new"]] = None,
+        in_stock: Optional[bool] = None,
+        on_sale: Optional[bool] = None,
+        black_friday: Optional[bool] = None,
+        bulk_savings: Optional[bool] = None,
+        pickup: Optional[bool] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        rating: Optional[Literal["highly_rated", "best_rated"]] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Vevor category listing (categories[].id or a category link), sorted, filtered (in stock, on sale, Black Friday while VEVOR runs it, bulk savings, pickup in the US, price range, highly rated or best rated) and paged like search() (60 a page). Returns category_id, title, market {country, language, currency, host}, page, page_size (60), total (exact up to 100, then a lower bound as VEVOR gives it, e.g. "100+"), total_is_lower_bound, last_page_shown, has_more, count, sort, filters_applied, items (position, sku (the input of product(), shipping(), reviews(), questions() and prices()), spu, name, url, image, price, was_price, currency, stock_units, in_stock, deal, deal_ends (as VEVOR gives it, ISO 8601 UTC), deal_progress (VEVOR's text, e.g. 88% Left), labels, rating, review_count (VEVOR's figures for the product family)), notes. Prices are VEVOR's prices on that storefront for a visitor without an account, in its own currency (no conversion). The same SKU has its own price on each storefront; price and stock do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); otherwise null, never computed from VEVOR's reference price. An unknown category is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A VEVOR category: categories[].id of categories() (e.g. 40035, Ice Makers) or a VEVOR category link.
+            page: Page (1-50, 60 items a page, VEVOR's page size).
+            sort: popular (default, VEVOR's own order), price_low, price_high, hot or new: VEVOR's sort menu.
+            in_stock: Only items in stock.
+            on_sale: Only items VEVOR lists as on sale.
+            black_friday: Only items in VEVOR's Black Friday filter (offered while VEVOR runs it).
+            bulk_savings: Only items VEVOR lists with bulk savings.
+            pickup: Only items VEVOR offers for pickup (country 'us' only).
+            min_price: Lowest price, in the storefront's currency.
+            max_price: Highest price, in the storefront's currency.
+            rating: highly_rated (4 stars and up) or best_rated (5 stars), as VEVOR's rating filter has them.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_category", {"category": category, "page": page, "sort": sort, "in_stock": in_stock, "on_sale": on_sale, "black_friday": black_friday, "bulk_savings": bulk_savings, "pickup": pickup, "min_price": min_price, "max_price": max_price, "rating": rating, "country": country, "language": language}, extra)
+
+    async def collections(
+        self,
+        *,
+        type: Optional[Literal["best_sellers", "new", "promotion"]] = None,
+        category: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popular", "price_low", "price_high", "hot", "new"]] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vevor's Best Sellers (optionally one category), New Arrivals (items carry first_listed, when VEVOR first listed them) or one promotion page (url, one page in VEVOR's own order), as VEVOR lists them: type, category or url, market {country, language, currency, host}, page, page_size (60), total (exact up to 100, then a lower bound as VEVOR gives it, e.g. "100+"), total_is_lower_bound, last_page_shown, has_more, count, sort, filters_applied, items (position, sku (the input of product(), shipping(), reviews(), questions() and prices()), spu, name, url, image, price, was_price, currency, stock_units, in_stock, deal, deal_ends (as VEVOR gives it, ISO 8601 UTC), deal_progress (VEVOR's text, e.g. 88% Left), labels, rating, review_count (VEVOR's figures for the product family)), notes. Prices are VEVOR's prices on that storefront for a visitor without an account, in its own currency (no conversion). The same SKU has its own price on each storefront; price and stock do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); otherwise null, never computed from VEVOR's reference price. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: best_sellers (default, VEVOR's Best Sellers), new (New Arrivals) or promotion (one VEVOR promotion page: send url, nothing else).
+            category: With type='best_sellers' only: only this category (categories[].id).
+            url: With type='promotion': a VEVOR promotion page link (https://www.vevor.com/promotion/<name>-special-<id>.html).
+            page: Page (1-50, 60 items a page, VEVOR's page size).
+            sort: popular (default, VEVOR's own order), price_low, price_high, hot or new: VEVOR's sort menu.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_collections", {"type": type, "category": category, "url": url, "page": page, "sort": sort, "country": country, "language": language}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["daily_deals", "clearance", "deals"]] = None,
+        category: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["popular", "price_low", "price_high", "hot", "new"]] = None,
+        country: Optional[Literal["us", "ca", "gb", "au", "de", "fr", "es", "it", "nl", "pl", "mx", "no", "eu"]] = None,
+        language: Optional[Literal["en", "es", "fr", "de", "it", "nl", "pl", "no", "sv", "da", "fi", "pt", "cs", "el", "sk", "hu", "ro"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vevor's Daily Deals, Clearance or Deals page (optionally one category), sorted and paged: type, category, market {country, language, currency, host}, page, page_size (60), total (exact up to 100, then a lower bound as VEVOR gives it, e.g. "100+"), total_is_lower_bound, last_page_shown, has_more, count, sort, filters_applied, items (position, sku (the input of product(), shipping(), reviews(), questions() and prices()), spu, name, url, image, price, was_price, currency, stock_units, in_stock, deal, deal_ends (as VEVOR gives it, ISO 8601 UTC), deal_progress (VEVOR's text, e.g. 88% Left), labels, rating, review_count (VEVOR's figures for the product family)), notes. Deal end times are as VEVOR gives them (deal_ends, ISO 8601 UTC); coupon codes are not included (VEVOR shows them only after a claim). Prices are VEVOR's prices on that storefront for a visitor without an account, in its own currency (no conversion). The same SKU has its own price on each storefront; price and stock do not change by ZIP or state (shipping fee and delivery date do: shipping()). was_price is given only while a VEVOR deal is active (or VEVOR's page shows its own strikethrough price); otherwise null, never computed from VEVOR's reference price. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: daily_deals (default, VEVOR's Daily Deals), clearance or deals (VEVOR's Deals page).
+            category: Only this category (categories[].id).
+            page: Page (1-50, 60 items a page, VEVOR's page size).
+            sort: popular (default, VEVOR's own order), price_low, price_high, hot or new: VEVOR's sort menu.
+            country: VEVOR storefront (default 'us': www.vevor.com; language, default the first listed): us (www.vevor.com, USD; en, es), ca (www.vevor.ca, CAD; en, fr), gb (www.vevor.co.uk, GBP; en), au (www.vevor.com.au, AUD; en), de (www.vevor.de, EUR; de), fr (www.vevor.fr, EUR; fr), es (www.vevor.es, EUR; es), it (www.vevor.it, EUR; it), nl (www.vevor.nl, EUR; nl), pl (www.vevor.pl, PLN; pl), mx (www.vevor.mx, MXN; es), no (www.vevor.co.no, EUR; no), eu (eur.vevor.com, EUR; en, sv, da, fi, no, pt, cs, el, sk, hu, ro). eu is eur.vevor.com, VEVOR's storefront for the other European countries; uk is gb.
+            language: The storefront language (default its first; the languages each storefront offers are listed under country): us en, es; ca en, fr; eu en, sv, da, fi, no, pt, cs, el, sk, hu, ro; every other storefront its own language only. A language the storefront does not offer answers 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_deals", {"type": type, "category": category, "page": page, "sort": sort, "country": country, "language": language}, extra)
+
+    async def prices(
+        self,
+        sku: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The same Vevor SKU on all 13 storefronts in one call: sku, sold_in, storefronts [{country, host, currency, status (sold, not_sold or unavailable), sold, price, was_price, deal_ends, stock_units}], notes. Each storefront in its own currency (no conversion; vevor.co.no and eur.vevor.com sell in EUR); most European storefronts share one stock pool. Captured 2026-11-25: one SKU (GYQXJBMQJQYPKEO1LV0) was 195.01 USD on us, 233.90 CAD on ca, 175.90 GBP on gb, 170.90 EUR on de, 261.99 EUR on no and 721.90 PLN on pl, and not sold on mx. Takes sku only (no country or language). Billed on what the request spent (credits_used: storefronts that did not answer are not billed). A SKU no storefront sells is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 3 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A VEVOR SKU (items[].sku, letters and digits, e.g. 'DHJMIGMMAMIGLL6WNV5').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vevor_prices", {"sku": sku}, extra)
