@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 109 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 111 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -20,6 +20,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
+| SportChek and Mark's Prices in CAD with the Was Price, Sale Label and Sale End Date, Sizes and Colours with Assigned-Store Units, SportChek Reviews, Mark's Questions, L'Equipeur in French (Canada; 16 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
@@ -5377,6 +5378,87 @@ seller's listings past the first 20, messaging or offers. Failed calls and
 refused inputs are not charged; a not-found (an unknown listing, category or
 seller) is charged.
 
+### 79. Canadian sporting goods and workwear -- SportChek and Mark's prices, sale dates, stock
+
+SportChek (sportchek.ca, Canada's sporting goods retailer, a Canadian Tire
+Corporation banner) and Mark's (marks.com, the Canadian workwear, casual
+clothing and footwear retailer, a Canadian Tire Corporation banner; L'Equipeur
+in French). Namespaces `sportchek` and `marks`, 8 endpoints each:
+`search`, `list`, `product`, `suggestions`, `store`, `brands`, `categories`,
+plus `reviews` on SportChek and `questions` on Mark's. 1 credit per call on
+every endpoint; `credits_used` in the response is what was charged. Canada
+only, prices in CAD. Answers take about 10-90 seconds: the request timeout is
+raised to at least 240s, so allow up to 2 minutes per call. Mark's takes
+`language="fr"` on `search`, `list`, `product`, `brands` and `categories` to
+read L'Equipeur (lequipeur.com): the same product codes and CAD prices, French
+titles. SportChek is English only. Neither banner has a public API. Pair a
+product with the `amazon` and `walmart` namespaces for the same model at
+Amazon.ca and Walmart.ca (match on brand, model, colour and size). See the
+[SportChek API page](https://scavio.dev/sportchek-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) and the
+[Mark's API page](https://scavio.dev/marks-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+sc = client.sportchek
+
+# --- Search: price, was price, sale label and end date, with the site's own footnote.
+res = sc.search("winter jacket", include_facets=True)["data"]
+print(res["total"], res["total_pages"], res["footnote"])
+for it in res["items"][:5]:
+    print(it["code"], it["name"], it["price"], it["was_price"], it["sale_ends"], it["badges"])
+
+# --- Filters come from facets; deals pages and categories are list() paths.
+women = sc.search("winter jacket", filters=[{"facet": "sku_gender_attr", "value": "Female"}],
+                  deals="sale")["data"]
+clearance = sc.list("/en/sale-clearance/clearance.html", sort="price_low")["data"]
+
+# --- One product: each variant's price, was price, sale_ends and units.
+p = sc.product("84166659F")["data"]
+print(p["price"], p["sale_ends"], p["assigned_store"])
+for v in p["variants"][:5]:
+    print(v["colour"], v["size"], v["price"], v["units_at_store"], v["units_online"])
+
+# --- SportChek reviews: summary, then pages of 8, 30, 30, 30.
+rv = sc.reviews("84166659F")["data"]
+print(rv["summary"]["average"], rv["summary"]["count"], rv["max_page"])
+
+# --- Mark's, in English and in French (L'Equipeur), and its customer questions.
+mk = client.marks
+en = mk.product("75983776F")["data"]
+fr = mk.product("75983776F", language="fr")["data"]
+print(en["name"], en["price"], en["was_price"], "|", fr["name"], fr["price"])
+qa = mk.questions("75984589F")["data"]
+store = mk.store("589")["data"]
+print(qa["total"], store["name"], store["nearby_count"])
+```
+
+`was_price` is the site's was price as given, only where the site shows one;
+`footnote` is the site's own sentence on it ("Was price reflects the last
+national regular price this product was sold for.", English pages). A percent
+off is not returned: compute it from `price` and `was_price` and label it
+computed. `sale_ends` is the sale end date the site shows, as given;
+`price_message` is the site's promotion text. `units_at_store` are the units at
+the store the site assigns to the request's region (`assigned_store`); a caller
+cannot choose a store. In our checks prices were the same at every store
+sampled. Captured 2026-11-25: SportChek's Columbia Women's Amaze Puff Down
+Jacket (84166659F) at 206.24 CAD with the promotion "25% Off* - Discount
+Applied. See details." and `sale_ends` December 1, 2026 (29 variants;
+assigned store 237, Cornwall, ON); Mark's Dakota WorkPro Series 6114 work
+boots (75983776F) at 124.99 CAD with a was price of 199.99 and `sale_ends`
+November 25, 2026, the same price and code on L'Equipeur with a French title.
+Search and list pages are 24 products (12 on Mark's category pages),
+`page_size` says; `deals` on a deals page is a 400 (the page already is one).
+SportChek reviews: page 1 is the first 8, pages 2-4 the next 30 each (up to 98
+per sort and star filter), no reviewer names. Mark's questions: the newest 10
+with answers, no asker names. `store` returns one store by number with up to
+49 nearby stores. Not available: choosing a store for price or stock, stores
+near a postal code, Mark's reviews, SportChek questions, the flyer, Triangle
+Rewards or CT Money prices, price history (poll and store the answers), UPC or
+barcodes (the site shows none), cart or checkout. Failed calls and refused
+inputs are not charged; a not-found is charged.
+
 ## Error Handling
 
 ```python
@@ -5492,6 +5574,8 @@ Scavio works with popular AI/LLM frameworks:
 | Lowe's | `stores` (start here), `search`, `product`, `reviews` | `reviews` 1, the rest 2 each |
 | Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | `clubs` 1, the rest 2 each |
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
+| SportChek (`sportchek`) | `search`, `list`, `product`, `reviews`, `suggestions`, `store`, `brands`, `categories`; Canada, English only; `product` and `reviews` take `code` or `url`, `list` takes `path` or `url` | 1 each |
+| Mark's (`marks`) | `search`, `list`, `product`, `questions`, `suggestions`, `store`, `brands`, `categories`; Canada; `language` en or fr (L'Equipeur) on `search`, `list`, `product`, `brands`, `categories` | 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
 | Sephora | `search`, `category`, `product` | 1 each, `product` 2 |
 | Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
@@ -5566,6 +5650,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.90.0
+
+- **New `sportchek` and `marks` namespaces** (sync and async) for SportChek
+  (sportchek.ca, Canada's sporting goods retailer) and Mark's (marks.com, the
+  Canadian workwear, casual clothing and footwear retailer; L'Equipeur in
+  French), both Canadian Tire Corporation banners, 8 endpoints each: `search`,
+  `list`, `product`, `suggestions`, `store`, `brands`, `categories`, plus
+  `reviews` (SportChek) and `questions` (Mark's). Prices in CAD with the was
+  price, sale label and sale end date the site shows, variants with units at
+  the assigned store and online, filters from the site's facets; Mark's
+  `language="fr"` reads L'Equipeur. 1 credit per call. Answers take about
+  10-90 seconds: the request timeout is raised to at least 240s.
 
 ### Changed in 0.89.0
 

@@ -118,6 +118,8 @@ __all__ = [
     "_AsyncNellisNamespace",
     "_AsyncDermstoreNamespace",
     "_AsyncOfferupNamespace",
+    "_AsyncSportchekNamespace",
+    "_AsyncMarksNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -21610,3 +21612,338 @@ class _AsyncOfferupNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("offerup_seller", {"seller_id": seller_id}, extra)
+
+class _AsyncSportchekNamespace:
+    """SportChek (sportchek.ca, Canada's sporting goods retailer, a Canadian Tire Corporation banner) search, list (category and deals pages by path), product (variants with their own price, was price and sale end date, units at the assigned store and online), reviews, suggestions, store, brands and categories endpoints; English only, prices in CAD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_high", "price_low", "rating"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Union[str, list[str]]]]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search SportChek (sportchek.ca, Canada's sporting goods retailer, a Canadian Tire Corporation banner) by keywords or a product code, sorted (relevance, price high or low, rating) and filtered (brand, sale or clearance, and any of the site's filters from facets), 24 a page. SportChek is English only. Returns query, corrected_query, redirected_to, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, code (the input of product()), name, brand, url, image, price, price_max, was_price, currency, on_sale, sale_ends, price_message [{label, details}], badges (SALE, CLEARANCE, TOPRATED, BESTSELLER, NEWARRIVAL), rating, review_count, colours [{name, price, was_price, on_sale, sale_ends, units_online_max}], sponsored}], facets (with include_facets: id, label, values [{label, count, facet, value, selected}]), footnote, notes. Prices are SportChek's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: 'winter jacket' listed 664 products (28 pages); the first, a Ripzone Men's Berkley Quilted Parka Jacket, at 124.97 CAD with a was price of 249.99 and the badges BESTSELLER, TOPRATED and CLEARANCE. For the same model at Amazon.ca and Walmart.ca use the amazon and walmart namespaces (Canadian marketplace); match on brand, model, colour and size. Not available: choosing a store for price or stock, stores near a postal code, customer questions, the flyer, Triangle Rewards or CT Money prices, price history (poll and store the answers), UPC or barcodes (the site shows none), a French storefront, cart or checkout. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a product code.
+            page: Page (default 1, at most 500); 24 products a page, page_size says. total_pages says how many.
+            sort: relevance (default), price_high, price_low or rating (highest rated first): the site's sort menu.
+            brand: Brand, as the site's Brand Name filter names it (one or a list of up to 10), e.g. 'BAUER': facets[id=brand].values[].value.
+            deals: 'sale', 'clearance' or 'both' (or a list): the site's Deals filter. Not on a deals page (a 400, not charged): use it with search or a category page.
+            filters: Any of the site's filters as facets[].values[] give them: [{'facet': ..., 'value': ...}] (value: one or a list), up to 6, e.g. [{'facet': 'sku_gender_attr', 'value': 'Female'}].
+            include_facets: Also return the site's filters with counts for these results (facets). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_search", {"query": query, "page": page, "sort": sort, "brand": brand, "deals": deals, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def list(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_high", "price_low", "rating"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Union[str, list[str]]]]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of a SportChek category or deals page (sale, clearance, Black Friday) by path or link, sorted (relevance, price high or low, rating) and filtered (brand, sale or clearance, and any of the site's filters from facets). Category paths come from categories(). SportChek is English only. Returns path, url, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, code (the input of product()), name, brand, url, image, price, price_max, was_price, currency, on_sale, sale_ends, price_message [{label, details}], badges (SALE, CLEARANCE, TOPRATED, BESTSELLER, NEWARRIVAL), rating, review_count, colours [{name, price, was_price, on_sale, sale_ends, units_online_max}], sponsored}], facets (with include_facets: id, label, values [{label, count, facet, value, selected}]), footnote, notes. Prices are SportChek's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: the clearance page ('/en/sale-clearance/clearance.html') sorted price_low listed 4656 products in 195 pages. An unknown page is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A SportChek category or deals page path (categories[].path, or a sale, clearance or Black Friday page), e.g. '/en/sale-clearance/clearance.html'. Send path or url.
+            url: The page link instead of path.
+            page: Page (default 1, at most 500); 24 products a page, page_size says. total_pages says how many.
+            sort: relevance (default), price_high, price_low or rating (highest rated first): the site's sort menu.
+            brand: Brand, as the site's Brand Name filter names it (one or a list of up to 10), e.g. 'BAUER': facets[id=brand].values[].value.
+            deals: 'sale', 'clearance' or 'both' (or a list): the site's Deals filter. Not on a deals page (a 400, not charged): use it with search or a category page.
+            filters: Any of the site's filters as facets[].values[] give them: [{'facet': ..., 'value': ...}] (value: one or a list), up to 6, e.g. [{'facet': 'sku_gender_attr', 'value': 'Female'}].
+            include_facets: Also return the site's filters with counts for these results (facets). Still 1 credit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_list", {"path": path, "url": url, "page": page, "sort": sort, "brand": brand, "deals": deals, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def product(
+        self,
+        code: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One SportChek product by code or link. SportChek is English only. Returns market, requested_code, code, name, brand, url, price, price_max, was_price, currency, on_sale, sale_ends, price_message, badges, rating, review_count, description, features, specifications, images, breadcrumbs, options [{type, label, values}], style_code, variants [{sku, colour, size, width, options, style_code, price, was_price, on_sale, sale_ends, price_message, badges, units_at_store, units_online, ship_to_home, store_pickup, sellable, max_per_order}], assigned_store, footnote, notes. units_at_store are the units at the store the site assigns to the request's region (assigned_store {id, name, city, province}); a caller cannot choose a store. Prices are SportChek's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: the Columbia Women's Amaze Puff Down Jacket (84166659F) at 206.24 CAD, no was price, price_message '25% Off* - Discount Applied. See details.', sale_ends December 1, 2026, 29 variants; assigned_store 237 (SC CORNWALL - BROOKDALE SQUARE, Cornwall, ON) held 48 units across the variants, units_online 3626. The site shows no UPC or barcode. An unknown product is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            code: A SportChek product code (items[].code), e.g. '84166659F'. Send code or url.
+            url: A SportChek product link (items[].url) instead of code.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_product", {"code": code, "url": url}, extra)
+
+    async def reviews(
+        self,
+        code: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["newest", "relevance", "helpful", "rating_high", "rating_low"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one SportChek product by code or link, sorted (newest, relevance, helpful, rating high or low) and filtered by stars: code, name, url, summary {average, count, distribution, recommended}, sort, rating, page, page_size, total, total_pages, max_page, has_more, count, reviews [{id, rating, title, text, date, recommended, verified_purchaser, syndicated_from (the brand site a review was first posted on, as given), incentivized, helpful_yes, helpful_no, locale, secondary_ratings}], notes. Page 1 is the first 8 reviews, pages 2-4 the next 30 each (up to 98 per sort and star filter). No reviewer names. Captured 2026-11-25: the Columbia Women's Amaze Puff Down Jacket (84166659F) averaged 4.66 from 59 reviews (52 five-star, 40 recommend yes, 5 no). An unknown product is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            code: A SportChek product code (items[].code), e.g. '84166659F'. Send code or url.
+            url: A SportChek product link (items[].url) instead of code.
+            page: Page 1 (default, the first 8 reviews) to 4; each later page is the next 30.
+            sort: newest (default), relevance, helpful, rating_high or rating_low: the site's review sort menu.
+            rating: Only reviews with this many stars (1-5).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_reviews", {"code": code, "url": url, "page": page, "sort": sort, "rating": rating}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """SportChek's search-box suggestions for typed text: market, query, count, terms, top_hit, categories, brands, notes. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_suggestions", {"query": query}, extra)
+
+    async def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One SportChek store by store number: market, id, name, url, address, phone, latitude, longitude, timezone, hours (weekly), special_hours, curbside_pickup, services, nearby_stores [{id, name, city, province_code, distance_km}] (up to 49), nearby_count, notes. Store numbers come from a product's assigned_store.id or nearby_stores[].id. Finding stores near a postal code is not supported. Captured 2026-11-25: store 272 (SC RICHMOND CENTRE, Richmond, BC) with 11 nearby stores, the nearest SC VANCOUVER - SW MARINE DRIVE at 5.62 km. An unknown store number is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store number (assigned_store.id, nearby_stores[].id), e.g. '272'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_store", {"store_id": store_id}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """SportChek's brand pages as the site lists them: market, letter, total_brands, count, brands [{name, slug, url}], notes. name is spelled from the brand page link; to filter search() or list() by a brand, use its Brand Name value from facets (include_facets=True). SportChek is English only. Captured 2026-11-25: 164 brands. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Optional: only brands starting with this letter or digit.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_brands", {"letter": letter}, extra)
+
+    async def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """SportChek's category tree: market, total_categories, count, categories [{id, name, path, url, level, children [...]}], notes. path is the input of list(). SportChek is English only. Captured 2026-11-25: 1033 categories under 10 top-level ones. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("sportchek_categories", {}, extra)
+
+class _AsyncMarksNamespace:
+    """Mark's (marks.com, the Canadian workwear, casual clothing and footwear retailer, a Canadian Tire Corporation banner; L'Equipeur in French) search, list (category and deals pages by path), product (variants with their own price, was price and sale end date, units at the assigned store and online), questions, suggestions, store, brands and categories endpoints; language en or fr (L'Equipeur) on search, list, product, brands and categories, prices in CAD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_high", "price_low", "rating"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Union[str, list[str]]]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Mark's (marks.com, the Canadian workwear, casual clothing and footwear retailer, a Canadian Tire Corporation banner; L'Equipeur in French) by keywords or a product code, sorted (relevance, price high or low, rating) and filtered (brand, sale or clearance, and any of the site's filters from facets), 24 a page. language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product codes and Canadian dollar prices, French titles. Returns query, corrected_query, redirected_to, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, code (the input of product()), name, brand, url, image, price, price_max, was_price, currency, on_sale, sale_ends, price_message [{label, details}], badges (SALE, CLEARANCE, TOPRATED, BESTSELLER, NEWARRIVAL), rating, review_count, colours [{name, price, was_price, on_sale, sale_ends, units_online_max}], sponsored}], facets (with include_facets: id, label, values [{label, count, facet, value, selected}]), footnote, notes. Prices are Mark's's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: 'work boots' listed 1001 products (42 pages); the first, Aggressor Men's Lynx II Steel Toe Steel Plate 6 Inch Leather Work Boots, at 69.99 CAD with a was price of 99.99, sale_ends November 25, 2026. With language 'fr', 'bottes de travail' listed 707 products from L'Equipeur in French. For the same model at Amazon.ca and Walmart.ca use the amazon and walmart namespaces (Canadian marketplace); match on brand, model, colour and size. Not available: choosing a store for price or stock, stores near a postal code, customer reviews, the flyer, Triangle Rewards or CT Money prices, price history (poll and store the answers), UPC or barcodes (the site shows none), cart or checkout. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a product code.
+            page: Page (default 1, at most 500); 24 products a page (12 on Mark's category pages), page_size says. total_pages says how many.
+            sort: relevance (default), price_high, price_low or rating (highest rated first): the site's sort menu.
+            brand: Brand, as the site's Brand Name filter names it (one or a list of up to 10), e.g. 'Dakota Workpro Series': facets[id=brand].values[].value.
+            deals: 'sale', 'clearance' or 'both' (or a list): the site's Deals filter. Not on a deals page (a 400, not charged): use it with search or a category page.
+            filters: Any of the site's filters as facets[].values[] give them: [{'facet': ..., 'value': ...}] (value: one or a list), up to 6, e.g. [{'facet': 'sku_gender_attr', 'value': 'Female'}].
+            include_facets: Also return the site's filters with counts for these results (facets). Still 1 credit.
+            language: en (default, marks.com) or fr (L'Equipeur, lequipeur.com: the same product codes and Canadian dollar prices, in French).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_search", {"query": query, "page": page, "sort": sort, "brand": brand, "deals": deals, "filters": filters, "include_facets": include_facets, "language": language}, extra)
+
+    async def list(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_high", "price_low", "rating"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        deals: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Union[str, list[str]]]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of a Mark's category or deals page (sale, clearance, Black Friday) by path or link, sorted (relevance, price high or low, rating) and filtered (brand, sale or clearance, and any of the site's filters from facets). Category paths come from categories(). language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product codes and Canadian dollar prices, French titles. Returns path, url, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, code (the input of product()), name, brand, url, image, price, price_max, was_price, currency, on_sale, sale_ends, price_message [{label, details}], badges (SALE, CLEARANCE, TOPRATED, BESTSELLER, NEWARRIVAL), rating, review_count, colours [{name, price, was_price, on_sale, sale_ends, units_online_max}], sponsored}], facets (with include_facets: id, label, values [{label, count, facet, value, selected}]), footnote, notes. Prices are Mark's's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: the work boots and shoes category ('/en/cat/work-boots-shoes-DC3000008.html') listed 532 products, 12 a page (45 pages). An unknown page is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Mark's category or deals page path (categories[].path, or a sale, clearance or Black Friday page), e.g. '/en/cat/work-boots-shoes-DC3000008.html'. Send path or url.
+            url: The page link instead of path.
+            page: Page (default 1, at most 500); 24 products a page (12 on Mark's category pages), page_size says. total_pages says how many.
+            sort: relevance (default), price_high, price_low or rating (highest rated first): the site's sort menu.
+            brand: Brand, as the site's Brand Name filter names it (one or a list of up to 10), e.g. 'Dakota Workpro Series': facets[id=brand].values[].value.
+            deals: 'sale', 'clearance' or 'both' (or a list): the site's Deals filter. Not on a deals page (a 400, not charged): use it with search or a category page.
+            filters: Any of the site's filters as facets[].values[] give them: [{'facet': ..., 'value': ...}] (value: one or a list), up to 6, e.g. [{'facet': 'sku_gender_attr', 'value': 'Female'}].
+            include_facets: Also return the site's filters with counts for these results (facets). Still 1 credit.
+            language: en (default, marks.com) or fr (L'Equipeur, lequipeur.com: the same product codes and Canadian dollar prices, in French).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_list", {"path": path, "url": url, "page": page, "sort": sort, "brand": brand, "deals": deals, "filters": filters, "include_facets": include_facets, "language": language}, extra)
+
+    async def product(
+        self,
+        code: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Mark's product by code or link. language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product codes and Canadian dollar prices, French titles. Returns market, requested_code, code, name, brand, url, price, price_max, was_price, currency, on_sale, sale_ends, price_message, badges, rating, review_count, description, features, specifications, images, breadcrumbs, options [{type, label, values}], style_code, variants [{sku, colour, size, width, options, style_code, price, was_price, on_sale, sale_ends, price_message, badges, units_at_store, units_online, ship_to_home, store_pickup, sellable, max_per_order}], assigned_store, footnote, notes. units_at_store are the units at the store the site assigns to the request's region (assigned_store {id, name, city, province}); a caller cannot choose a store. Prices are Mark's's online prices in Canadian dollars for a visitor without an account. was_price is the site's was price as given, only where the site shows one (clearance and some sale items); footnote is the site's own sentence on it: "Was price reflects the last national regular price this product was sold for." (English pages). A percent off is not returned: compute it from price and was_price and label it computed. sale_ends is the site's sale end date as given; price_message [{label, details}] is the site's promotion text as given. In our checks prices were the same at every store sampled. Captured 2026-11-25: Dakota WorkPro Series 6114 work boots (75983776F) at 124.99 CAD with a was price of 199.99, sale_ends November 25, 2026, 15 variants (colour, size and width); assigned_store 114 (Marche Central, Montreal, QC). The same code with language 'fr' returned the L'Equipeur page: the same 124.99 CAD and was price, a French title, assigned_store 115 (Sherbrooke, QC). The site shows no UPC or barcode. An unknown product is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            code: A Mark's product code (items[].code), e.g. '75983776F'. Send code or url.
+            url: A Mark's product link (items[].url) instead of code.
+            language: en (default, marks.com) or fr (L'Equipeur, lequipeur.com: the same product codes and Canadian dollar prices, in French).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_product", {"code": code, "url": url, "language": language}, extra)
+
+    async def questions(
+        self,
+        code: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions and answers on one Mark's product by code or link (marks.com, English): code, name, url, total, count, questions [{id, question, details, date, answer_count, locale, answers [{text, date, brand_answer, best_answer, helpful_yes, helpful_no}]}] (the newest 10), notes. brand_answer marks an answer the site flags as the brand's. No asker or answerer names. Captured 2026-11-25: Aggressor Men's Lynx II work boots (75984589F) had 4 questions, 3 of them answered. An unknown product is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            code: A Mark's product code (items[].code), e.g. '75983776F'. Send code or url.
+            url: A Mark's product link (items[].url) instead of code.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_questions", {"code": code, "url": url}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Mark's's search-box suggestions for typed text: market, query, count, terms, top_hit, categories, brands, notes. English. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_suggestions", {"query": query}, extra)
+
+    async def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Mark's store by store number: market, id, name, url, address, phone, latitude, longitude, timezone, hours (weekly), special_hours, curbside_pickup, services, nearby_stores [{id, name, city, province_code, distance_km}] (up to 49), nearby_count, notes. Store numbers come from a product's assigned_store.id or nearby_stores[].id. Finding stores near a postal code is not supported. Captured 2026-11-25: store 589 (Leamington, ON) with 47 nearby stores, the nearest Essex at 23.19 km. An unknown store number is a charged 404. Answers take about 10-90 seconds: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store number (assigned_store.id, nearby_stores[].id), e.g. '589'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_store", {"store_id": store_id}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Mark's's brand pages as the site lists them: market, letter, total_brands, count, brands [{name, slug, url}], notes. name is spelled from the brand page link; to filter search() or list() by a brand, use its Brand Name value from facets (include_facets=True). language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product codes and Canadian dollar prices, French titles. Captured 2026-11-25: 113 brands. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Optional: only brands starting with this letter or digit.
+            language: en (default, marks.com) or fr (L'Equipeur, lequipeur.com: the same product codes and Canadian dollar prices, in French).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_brands", {"letter": letter, "language": language}, extra)
+
+    async def categories(
+        self,
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Mark's's category tree: market, total_categories, count, categories [{id, name, path, url, level, children [...]}], notes. path is the input of list(). language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product codes and Canadian dollar prices, French titles. Captured 2026-11-25: 269 categories under 11 top-level ones. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            language: en (default, marks.com) or fr (L'Equipeur, lequipeur.com: the same product codes and Canadian dollar prices, in French).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("marks_categories", {"language": language}, extra)

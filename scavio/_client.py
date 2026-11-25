@@ -64,6 +64,7 @@ from ._namespaces_sync import (
     _LowesNamespace,
     _MacysNamespace,
     _MaisonsDuMondeNamespace,
+    _MarksNamespace,
     _MediaExpertNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
@@ -92,6 +93,7 @@ from ._namespaces_sync import (
     _SECNamespace,
     _SephoraNamespace,
     _SpecsNamespace,
+    _SportchekNamespace,
     _StaplesNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
@@ -287,6 +289,8 @@ class ScavioClient:
         self.nellis = _NellisNamespace(self)
         self.dermstore = _DermstoreNamespace(self)
         self.offerup = _OfferupNamespace(self)
+        self.sportchek = _SportchekNamespace(self)
+        self.marks = _MarksNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

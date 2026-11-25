@@ -4791,6 +4791,412 @@ _OFU_FEED_PARAMS = (
     _ilit("max_mileage", _OFU_MILEAGES, "Vehicles: most miles, one of OfferUp's steps."),
 )
 
+# SportChek and Mark's (Canadian Tire Corporation banners on one shared storefront): 8 endpoints each,
+# 1 credit per call on every endpoint. SportChek: search, list, product, reviews, suggestions, store,
+# brands, categories (English only). Mark's: search, list, product, questions, suggestions, store,
+# brands, categories; language "fr" reads L'Equipeur on search, list, product, brands and
+# categories. Answers take about 10-90 s: 240 s floor on every method.
+_CTC_FOOTNOTE = "Was price reflects the last national regular price this product was sold for."
+_CTC_SLOW = " Answers take about 10-90 seconds: allow up to 2 minutes."
+_CTC_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_CTC_SORTS = ("relevance", "price_high", "price_low", "rating")
+_CTC_REVIEW_SORTS = ("newest", "relevance", "helpful", "rating_high", "rating_low")
+_CTC_ITEM = (
+    "position, code (the input of product()), name, brand, url, image, price, price_max, "
+    "was_price, currency, on_sale, sale_ends, price_message [{label, details}], badges (SALE, "
+    "CLEARANCE, TOPRATED, BESTSELLER, NEWARRIVAL), rating, review_count, colours [{name, price, "
+    "was_price, on_sale, sale_ends, units_online_max}], sponsored"
+)
+_CTC_LIST = (
+    "market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items "
+    "[{" + _CTC_ITEM + "}], facets (with include_facets: id, label, values [{label, count, facet, "
+    "value, selected}]), footnote, notes."
+)
+_CTC_FILTERS = (
+    "sorted (relevance, price high or low, rating) and filtered (brand, sale or clearance, and "
+    "any of the site's filters from facets)"
+)
+_CTC_PAIR = (
+    " For the same model at Amazon.ca and Walmart.ca use the amazon and walmart namespaces "
+    "(Canadian marketplace); match on brand, model, colour and size."
+)
+
+
+def _ctc_prices(name: str) -> str:
+    return (
+        " Prices are " + name + "'s online prices in Canadian dollars for a visitor without an "
+        "account. was_price is the site's was price as given, only where the site shows one "
+        "(clearance and some sale items); footnote is the site's own sentence on it: \""
+        + _CTC_FOOTNOTE + "\" (English pages). A percent off is not returned: compute it from "
+        "price and was_price and label it computed. sale_ends is the site's sale end date as "
+        "given; price_message [{label, details}] is the site's promotion text as given. In our "
+        "checks prices were the same at every store sampled."
+    )
+
+
+def _ctc_endpoints(
+    *,
+    ns: str,
+    name: str,
+    first: str,
+    french: bool,
+    feedback: str,
+    not_available: str,
+    example_code: str,
+    example_list: str,
+    example_store: str,
+    example_brand: str,
+    captured: Mapping[str, str],
+) -> tuple[Endpoint, ...]:
+    """The 8 endpoints one Canadian Tire Corporation banner (sportchek, marks) exposes."""
+    base = "/api/v1/" + ns + "/"
+    prices = _ctc_prices(name)
+    lang_note = (
+        " language 'fr' reads L'Equipeur (lequipeur.com, Mark's in French): the same product "
+        "codes and Canadian dollar prices, French titles."
+        if french
+        else " " + name + " is English only."
+    )
+    lang: tuple[Param, ...] = (
+        (_lit("language", ("en", "fr"), "en (default, marks.com) or fr (L'Equipeur, "
+              "lequipeur.com: the same product codes and Canadian dollar prices, in French)."),)
+        if french
+        else ()
+    )
+    page_note = " (12 on Mark's category pages)" if ns == "marks" else ""
+    list_params = (
+        _int("page", "Page (default 1, at most 500); 24 products a page" + page_note
+             + ", page_size says. total_pages says how many."),
+        _lit("sort", _CTC_SORTS, "relevance (default), price_high, price_low or rating (highest "
+             "rated first): the site's sort menu."),
+        _str_or_list("brand", "Brand, as the site's Brand Name filter names it (one or a list "
+                     "of up to 10), e.g. '" + example_brand + "': facets[id=brand].values[].value."),
+        _str_or_list("deals", "'sale', 'clearance' or 'both' (or a list): the site's Deals "
+                     "filter. Not on a deals page (a 400, not charged): use it with search or a "
+                     "category page."),
+        Param(
+            "filters",
+            "Optional[list[dict[str, Union[str, list[str]]]]]",
+            doc="Any of the site's filters as facets[].values[] give them: [{'facet': ..., "
+            "'value': ...}] (value: one or a list), up to 6, e.g. [{'facet': "
+            "'sku_gender_attr', 'value': 'Female'}].",
+        ),
+        _bool("include_facets", "Also return the site's filters with counts for these results "
+              "(facets). Still 1 credit."),
+    ) + lang
+    target = (
+        Param(
+            "code",
+            "Optional[str]",
+            positional=True,
+            doc="A " + name + " product code (items[].code), e.g. '" + example_code
+            + "'. Send code or url.",
+        ),
+        _str("url", "A " + name + " product link (items[].url) instead of code."),
+    )
+    store_note = (
+        " units_at_store are the units at the store the site assigns to the request's region "
+        "(assigned_store {id, name, city, province}); a caller cannot choose a store."
+    )
+    eps = [
+        Endpoint(
+            key=ns + "_search",
+            namespace=ns,
+            method="search",
+            http="POST",
+            path=base + "search",
+            summary=(
+                "Search " + first + " by keywords or a product code, " + _CTC_FILTERS + ", 24 a "
+                "page." + lang_note + " Returns query, corrected_query, redirected_to, "
+                + _CTC_LIST + prices + " " + captured["search"] + _CTC_PAIR + " "
+                + not_available + _CTC_SLOW + _CTC_CHARGE
+            ),
+            params=(_req("query", "Keywords or a product code.", wire="q"),) + list_params,
+            credits=1,
+            min_timeout=240.0,
+        ),
+        Endpoint(
+            key=ns + "_list",
+            namespace=ns,
+            method="list",
+            http="POST",
+            path=base + "list",
+            summary=(
+                "The products of a " + name + " category or deals page (sale, clearance, Black "
+                "Friday) by path or link, " + _CTC_FILTERS + ". Category paths come from "
+                "categories()." + lang_note + " Returns path, url, " + _CTC_LIST + prices + " "
+                + captured["list"] + " An unknown page is a charged 404." + _CTC_SLOW
+                + _CTC_CHARGE
+            ),
+            params=(
+                Param(
+                    "path",
+                    "Optional[str]",
+                    positional=True,
+                    doc="A " + name + " category or deals page path (categories[].path, or a "
+                    "sale, clearance or Black Friday page), e.g. '" + example_list
+                    + "'. Send path or url.",
+                ),
+                _str("url", "The page link instead of path."),
+            ) + list_params,
+            one_of=(("path", "url"),),
+            credits=1,
+            min_timeout=240.0,
+        ),
+        Endpoint(
+            key=ns + "_product",
+            namespace=ns,
+            method="product",
+            http="POST",
+            path=base + "product",
+            summary=(
+                "One " + name + " product by code or link." + lang_note + " Returns market, "
+                "requested_code, code, name, brand, url, price, price_max, was_price, currency, "
+                "on_sale, sale_ends, price_message, badges, rating, review_count, description, "
+                "features, specifications, images, breadcrumbs, options [{type, label, values}], "
+                "style_code, variants [{sku, colour, size, width, options, style_code, price, "
+                "was_price, on_sale, sale_ends, price_message, badges, units_at_store, "
+                "units_online, ship_to_home, store_pickup, sellable, max_per_order}], "
+                "assigned_store, footnote, notes." + store_note + prices + " "
+                + captured["product"] + " The site shows no UPC or barcode. An unknown product "
+                "is a charged 404." + _CTC_SLOW + _CTC_CHARGE
+            ),
+            params=target + lang,
+            one_of=(("code", "url"),),
+            credits=1,
+            min_timeout=240.0,
+        ),
+    ]
+    if feedback == "reviews":
+        eps.append(Endpoint(
+            key=ns + "_reviews",
+            namespace=ns,
+            method="reviews",
+            http="POST",
+            path=base + "reviews",
+            summary=(
+                "Customer reviews of one " + name + " product by code or link, sorted (newest, "
+                "relevance, helpful, rating high or low) and filtered by stars: code, name, url, "
+                "summary {average, count, distribution, recommended}, sort, rating, page, "
+                "page_size, total, total_pages, max_page, has_more, count, reviews [{id, rating, "
+                "title, text, date, recommended, verified_purchaser, syndicated_from (the brand "
+                "site a review was first posted on, as given), incentivized, helpful_yes, "
+                "helpful_no, locale, secondary_ratings}], notes. Page 1 is the first 8 reviews, "
+                "pages 2-4 the next 30 each (up to 98 per sort and star filter). No reviewer "
+                "names. " + captured["feedback"] + " An unknown product is a charged 404."
+                + _CTC_SLOW + _CTC_CHARGE
+            ),
+            params=target + (
+                _int("page", "Page 1 (default, the first 8 reviews) to 4; each later page is the "
+                     "next 30."),
+                _lit("sort", _CTC_REVIEW_SORTS, "newest (default), relevance, helpful, "
+                     "rating_high or rating_low: the site's review sort menu."),
+                _int("rating", "Only reviews with this many stars (1-5)."),
+            ),
+            one_of=(("code", "url"),),
+            credits=1,
+            min_timeout=240.0,
+        ))
+    else:
+        eps.append(Endpoint(
+            key=ns + "_questions",
+            namespace=ns,
+            method="questions",
+            http="POST",
+            path=base + "questions",
+            summary=(
+                "Customer questions and answers on one " + name + " product by code or link "
+                "(marks.com, English): code, name, url, total, count, questions [{id, question, "
+                "details, date, answer_count, locale, answers [{text, date, brand_answer, "
+                "best_answer, helpful_yes, helpful_no}]}] (the newest 10), notes. brand_answer "
+                "marks an answer the site flags as the brand's. No asker or answerer names. "
+                + captured["feedback"] + " An unknown product is a charged 404." + _CTC_SLOW
+                + _CTC_CHARGE
+            ),
+            params=target,
+            one_of=(("code", "url"),),
+            credits=1,
+            min_timeout=240.0,
+        ))
+    eps += [
+        Endpoint(
+            key=ns + "_suggestions",
+            namespace=ns,
+            method="suggestions",
+            http="POST",
+            path=base + "suggestions",
+            summary=(
+                name + "'s search-box suggestions for typed text: market, query, count, terms, "
+                "top_hit, categories, brands, notes." + (" English." if french else "")
+                + _CTC_SLOW + _CTC_CHARGE
+            ),
+            params=(_req("query", "The text typed so far.", wire="q"),),
+            credits=1,
+            min_timeout=240.0,
+        ),
+        Endpoint(
+            key=ns + "_store",
+            namespace=ns,
+            method="store",
+            http="POST",
+            path=base + "store",
+            summary=(
+                "One " + name + " store by store number: market, id, name, url, address, phone, "
+                "latitude, longitude, timezone, hours (weekly), special_hours, curbside_pickup, "
+                "services, nearby_stores [{id, name, city, province_code, distance_km}] (up to "
+                "49), nearby_count, notes. Store numbers come from a product's assigned_store.id "
+                "or nearby_stores[].id. Finding stores near a postal code is not supported. "
+                + captured["store"] + " An unknown store number is a charged 404." + _CTC_SLOW
+                + _CTC_CHARGE
+            ),
+            params=(
+                Param(
+                    "store_id",
+                    "Union[str, int]",
+                    required=True,
+                    doc="A store number (assigned_store.id, nearby_stores[].id), e.g. '"
+                    + example_store + "'.",
+                ),
+            ),
+            credits=1,
+            min_timeout=240.0,
+        ),
+        Endpoint(
+            key=ns + "_brands",
+            namespace=ns,
+            method="brands",
+            http="POST",
+            path=base + "brands",
+            summary=(
+                name + "'s brand pages as the site lists them: market, letter, total_brands, "
+                "count, brands [{name, slug, url}], notes. name is spelled from the brand page "
+                "link; to filter search() or list() by a brand, use its Brand Name value from "
+                "facets (include_facets=True)." + lang_note + " " + captured["brands"]
+                + _CTC_CHARGE
+            ),
+            params=(_str("letter", "Optional: only brands starting with this letter or digit."),)
+            + lang,
+            credits=1,
+            min_timeout=240.0,
+        ),
+        Endpoint(
+            key=ns + "_categories",
+            namespace=ns,
+            method="categories",
+            http="POST",
+            path=base + "categories",
+            summary=(
+                name + "'s category tree: market, total_categories, count, categories [{id, "
+                "name, path, url, level, children [...]}], notes. path is the input of list()."
+                + lang_note + " " + captured["categories"] + _CTC_CHARGE
+            ),
+            params=lang,
+            credits=1,
+            min_timeout=240.0,
+        ),
+    ]
+    return tuple(eps)
+
+
+_SPORTCHEK_ENDPOINTS = _ctc_endpoints(
+    ns="sportchek",
+    name="SportChek",
+    first=(
+        "SportChek (sportchek.ca, Canada's sporting goods retailer, a Canadian Tire Corporation "
+        "banner)"
+    ),
+    french=False,
+    feedback="reviews",
+    not_available=(
+        "Not available: choosing a store for price or stock, stores near a postal code, customer "
+        "questions, the flyer, Triangle Rewards or CT Money prices, price history (poll and store "
+        "the answers), UPC or barcodes (the site shows none), a French storefront, cart or "
+        "checkout."
+    ),
+    example_code="84166659F",
+    example_list="/en/sale-clearance/clearance.html",
+    example_store="272",
+    example_brand="BAUER",
+    captured={
+        "search": (
+            "Captured 2026-11-25: 'winter jacket' listed 664 products (28 pages); the first, a "
+            "Ripzone Men's Berkley Quilted Parka Jacket, at 124.97 CAD with a was price of 249.99 "
+            "and the badges BESTSELLER, TOPRATED and CLEARANCE."
+        ),
+        "list": (
+            "Captured 2026-11-25: the clearance page ('/en/sale-clearance/clearance.html') sorted "
+            "price_low listed 4656 products in 195 pages."
+        ),
+        "product": (
+            "Captured 2026-11-25: the Columbia Women's Amaze Puff Down Jacket (84166659F) at "
+            "206.24 CAD, no was price, price_message '25% Off* - Discount Applied. See details.', "
+            "sale_ends December 1, 2026, 29 variants; assigned_store 237 (SC CORNWALL - "
+            "BROOKDALE SQUARE, Cornwall, ON) held 48 units across the variants, units_online "
+            "3626."
+        ),
+        "feedback": (
+            "Captured 2026-11-25: the Columbia Women's Amaze Puff Down Jacket (84166659F) "
+            "averaged 4.66 from 59 reviews (52 five-star, 40 recommend yes, 5 no)."
+        ),
+        "store": (
+            "Captured 2026-11-25: store 272 (SC RICHMOND CENTRE, Richmond, BC) with 11 nearby "
+            "stores, the nearest SC VANCOUVER - SW MARINE DRIVE at 5.62 km."
+        ),
+        "brands": "Captured 2026-11-25: 164 brands.",
+        "categories": "Captured 2026-11-25: 1033 categories under 10 top-level ones.",
+    },
+)
+
+_MARKS_ENDPOINTS = _ctc_endpoints(
+    ns="marks",
+    name="Mark's",
+    first=(
+        "Mark's (marks.com, the Canadian workwear, casual clothing and footwear retailer, a "
+        "Canadian Tire Corporation banner; L'Equipeur in French)"
+    ),
+    french=True,
+    feedback="questions",
+    not_available=(
+        "Not available: choosing a store for price or stock, stores near a postal code, customer "
+        "reviews, the flyer, Triangle Rewards or CT Money prices, price history (poll and store "
+        "the answers), UPC or barcodes (the site shows none), cart or checkout."
+    ),
+    example_code="75983776F",
+    example_list="/en/cat/work-boots-shoes-DC3000008.html",
+    example_store="589",
+    example_brand="Dakota Workpro Series",
+    captured={
+        "search": (
+            "Captured 2026-11-25: 'work boots' listed 1001 products (42 pages); the first, "
+            "Aggressor Men's Lynx II Steel Toe Steel Plate 6 Inch Leather Work Boots, at 69.99 "
+            "CAD with a was price of 99.99, sale_ends November 25, 2026. With language 'fr', "
+            "'bottes de travail' listed 707 products from L'Equipeur in French."
+        ),
+        "list": (
+            "Captured 2026-11-25: the work boots and shoes category "
+            "('/en/cat/work-boots-shoes-DC3000008.html') listed 532 products, 12 a page (45 "
+            "pages)."
+        ),
+        "product": (
+            "Captured 2026-11-25: Dakota WorkPro Series 6114 work boots (75983776F) at 124.99 "
+            "CAD with a was price of 199.99, sale_ends November 25, 2026, 15 variants (colour, "
+            "size and width); assigned_store 114 (Marche Central, Montreal, QC). The same code "
+            "with language 'fr' returned the L'Equipeur page: the same 124.99 CAD and was price, "
+            "a French title, assigned_store 115 (Sherbrooke, QC)."
+        ),
+        "feedback": (
+            "Captured 2026-11-25: Aggressor Men's Lynx II work boots (75984589F) had 4 questions, "
+            "3 of them answered."
+        ),
+        "store": (
+            "Captured 2026-11-25: store 589 (Leamington, ON) with 47 nearby stores, the nearest "
+            "Essex at 23.19 km."
+        ),
+        "brands": "Captured 2026-11-25: 113 brands.",
+        "categories": "Captured 2026-11-25: 269 categories under 11 top-level ones.",
+    },
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -21496,6 +21902,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         credits=1,
     ),
+    # ======================= SportChek and Mark's =======================
+    # 8 endpoints each on /api/v1/sportchek and /api/v1/marks (_ctc_endpoints above).
+    *_SPORTCHEK_ENDPOINTS,
+    *_MARKS_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -28105,6 +28515,8 @@ NAMESPACES: tuple[str, ...] = (
     "nellis",
     "dermstore",
     "offerup",
+    "sportchek",
+    "marks",
 )
 
 

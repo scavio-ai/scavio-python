@@ -7871,3 +7871,163 @@ def test_offerup_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         ou.listing()
+
+
+def test_sportchek_and_marks_credits_paths_and_wire(monkeypatch):
+    """sportchek + marks (0.90.0): 8 endpoints each on /api/v1/sportchek and /api/v1/marks.
+
+    1 credit per call on every endpoint. SportChek has reviews (English only, no language);
+    Mark's has questions and language en | fr (L'Equipeur) on search, list, product, brands and
+    categories. query is sent as q; product, reviews and questions take code or url; list takes
+    path or url. Every method gets a 240 s floor (answers take about 10-90 s).
+    """
+    firsts = {
+        "sportchek": "SportChek (sportchek.ca, Canada's sporting goods retailer, a Canadian Tire "
+        "Corporation banner)",
+        "marks": "Mark's (marks.com, the Canadian workwear, casual clothing and footwear "
+        "retailer, a Canadian Tire Corporation banner; L'Equipeur in French)",
+    }
+    methods = {
+        "sportchek": ["brands", "categories", "list", "product", "reviews", "search", "store",
+                      "suggestions"],
+        "marks": ["brands", "categories", "list", "product", "questions", "search", "store",
+                  "suggestions"],
+    }
+    french = {"search", "list", "product", "brands", "categories"}
+    _CTC_FOOT = "Was price reflects the last national regular price this product was sold for."
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|headless|browser|retr(y|ies|ied)|cheapest|robots?|graphql|"
+                        r"cookies?|bazaarvoice|sitemaps?|msrp|real discount|fake|price.match|"
+                        r"ct money value|only api|only at)\b")
+    for ns in ("sportchek", "marks"):
+        eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}
+        assert sorted(eps) == methods[ns], ns
+        for m, ep in eps.items():
+            assert ep.http == "POST", ep.key
+            assert ep.path == "/api/v1/" + ns + "/" + m, ep.key
+            assert ep.key == ns + "_" + m
+            assert ep.min_timeout == 240.0, ep.key
+            assert ep.credits == 1 and ep.credits_note is None, ep.key
+            assert "not-found is charged" in ep.summary, ep.key
+            names = {p.name for p in ep.params}
+            if ns == "marks" and m in french:
+                assert "language" in names, ep.key
+                lang = {p.name: p for p in ep.params}["language"]
+                assert lang.annotation == 'Optional[Literal["en", "fr"]]'
+            else:
+                assert "language" not in names, ep.key
+            assert not banned.search(ep.summary.lower()), ep.key
+            assert "http" not in ep.summary.lower(), ep.key
+        for m in ("search", "list", "product", "reviews", "questions", "suggestions", "store"):
+            if m in eps:
+                assert "allow up to 2 minutes" in eps[m].summary, (ns, m)
+        assert firsts[ns] in eps["search"].summary
+        for m in ("search", "list", "product"):
+            s = eps[m].summary
+            assert _CTC_FOOT in s, (ns, m)
+            assert "label it computed" in s, (ns, m)
+            assert "sale_ends" in s, (ns, m)
+        assert "a caller cannot choose a store" in eps["product"].summary
+        assert "assigned_store" in eps["product"].summary
+        assert "no UPC or barcode" in eps["product"].summary
+        assert "near a postal code is not supported" in eps["store"].summary
+        assert "price history" in eps["search"].summary
+        for m in ("product", "reviews", "questions"):
+            if m in eps:
+                assert eps[m].one_of == (("code", "url"),), (ns, m)
+        assert eps["list"].one_of == (("path", "url"),)
+        search = {p.name: p for p in eps["search"].params}
+        assert search["query"].wire_field == "q" and search["query"].required is True
+        assert search["sort"].annotation == (
+            'Optional[Literal["relevance", "price_high", "price_low", "rating"]]'
+        )
+        assert search["deals"].annotation == "Optional[Union[str, list[str]]]"
+        assert search["filters"].annotation == "Optional[list[dict[str, Union[str, list[str]]]]]"
+        store = {p.name: p for p in eps["store"].params}
+        assert store["store_id"].required is True
+        assert store["store_id"].annotation == "Union[str, int]"
+    sc = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "sportchek"}
+    reviews = {p.name: p for p in sc["reviews"].params}
+    assert reviews["sort"].annotation == (
+        'Optional[Literal["newest", "relevance", "helpful", "rating_high", "rating_low"]]'
+    )
+    assert "first 8" in sc["reviews"].summary and "No reviewer names" in sc["reviews"].summary
+    mk = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "marks"}
+    assert "No asker or answerer names" in mk["questions"].summary
+    assert "L'Equipeur" in mk["product"].summary
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    s = client.sportchek
+    s.search("winter jacket")
+    s.search("winter jacket", page=2, sort="price_low", brand=["COLUMBIA", "NIKE"],
+             deals="sale", filters=[{"facet": "sku_gender_attr", "value": "Female"}],
+             include_facets=True)
+    s.list("/en/sale-clearance/clearance.html", sort="price_low")
+    s.list(url="https://www.sportchek.ca/en/cat/accessories-DC2000012.html", deals="both")
+    s.product("84166659F")
+    s.product(url="https://www.sportchek.ca/en/pdp/x-84166659f.html")
+    s.reviews("84166659F", page=2, sort="rating_low", rating=1)
+    s.suggestions("bauer")
+    s.store("272")
+    s.store(272)
+    s.brands()
+    s.brands(letter="B")
+    s.categories()
+    k = client.marks
+    k.search("bottes de travail", language="fr")
+    k.list("/en/cat/work-boots-shoes-DC3000008.html", brand="Dakota Workpro Series")
+    k.product("75983776F", language="fr")
+    k.questions("75984589F")
+    k.suggestions("dakota")
+    k.store("589")
+    k.brands(language="fr")
+    k.categories(language="en")
+    sb, mb = "/api/v1/sportchek/", "/api/v1/marks/"
+    assert seen == [
+        (sb + "search", {"q": "winter jacket"}, 240.0),
+        (sb + "search", {"q": "winter jacket", "page": 2, "sort": "price_low",
+                         "brand": ["COLUMBIA", "NIKE"], "deals": "sale",
+                         "filters": [{"facet": "sku_gender_attr", "value": "Female"}],
+                         "include_facets": True}, 240.0),
+        (sb + "list", {"path": "/en/sale-clearance/clearance.html", "sort": "price_low"}, 240.0),
+        (sb + "list", {"url": "https://www.sportchek.ca/en/cat/accessories-DC2000012.html",
+                       "deals": "both"}, 240.0),
+        (sb + "product", {"code": "84166659F"}, 240.0),
+        (sb + "product", {"url": "https://www.sportchek.ca/en/pdp/x-84166659f.html"}, 240.0),
+        (sb + "reviews", {"code": "84166659F", "page": 2, "sort": "rating_low", "rating": 1},
+         240.0),
+        (sb + "suggestions", {"q": "bauer"}, 240.0),
+        (sb + "store", {"store_id": "272"}, 240.0),
+        (sb + "store", {"store_id": 272}, 240.0),
+        (sb + "brands", {}, 240.0),
+        (sb + "brands", {"letter": "B"}, 240.0),
+        (sb + "categories", {}, 240.0),
+        (mb + "search", {"q": "bottes de travail", "language": "fr"}, 240.0),
+        (mb + "list", {"path": "/en/cat/work-boots-shoes-DC3000008.html",
+                       "brand": "Dakota Workpro Series"}, 240.0),
+        (mb + "product", {"code": "75983776F", "language": "fr"}, 240.0),
+        (mb + "questions", {"code": "75984589F"}, 240.0),
+        (mb + "suggestions", {"q": "dakota"}, 240.0),
+        (mb + "store", {"store_id": "589"}, 240.0),
+        (mb + "brands", {"language": "fr"}, 240.0),
+        (mb + "categories", {"language": "en"}, 240.0),
+    ]
+    # A client timeout above the floor is kept, never lowered.
+    seen.clear()
+    ScavioClient(api_key="sk_test", timeout=400.0).marks.store("589")
+    assert seen == [(mb + "store", {"store_id": "589"}, 400.0)]
+    with pytest.raises(ScavioError):
+        s.product()
+    with pytest.raises(ScavioError):
+        s.reviews()
+    with pytest.raises(ScavioError):
+        k.questions()
+    with pytest.raises(ScavioError):
+        k.list()

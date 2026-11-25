@@ -66,6 +66,7 @@ from ._namespaces_async import (
     _AsyncLowesNamespace,
     _AsyncMacysNamespace,
     _AsyncMaisonsDuMondeNamespace,
+    _AsyncMarksNamespace,
     _AsyncMediaExpertNamespace,
     _AsyncMenardsNamespace,
     _AsyncMercadoLibreNamespace,
@@ -94,6 +95,7 @@ from ._namespaces_async import (
     _AsyncSECNamespace,
     _AsyncSephoraNamespace,
     _AsyncSpecsNamespace,
+    _AsyncSportchekNamespace,
     _AsyncStaplesNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
@@ -282,6 +284,8 @@ class AsyncScavioClient:
         self.nellis = _AsyncNellisNamespace(self)
         self.dermstore = _AsyncDermstoreNamespace(self)
         self.offerup = _AsyncOfferupNamespace(self)
+        self.sportchek = _AsyncSportchekNamespace(self)
+        self.marks = _AsyncMarksNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
