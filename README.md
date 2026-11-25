@@ -5463,8 +5463,9 @@ inputs are not charged; a not-found is charged.
 
 Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in
 10 provinces) is on the existing `home_depot` namespace. Pass `country="ca"` to
-`search`, `product` and `reviews`; `category`, `categories`, `stock`, `store`
-and `suggestions` are Home Depot Canada only and need no country. 1 credit per
+`search`, `product`, `reviews`, `stores` and `availability`; `category`,
+`categories`, `stock`, `store` and `suggestions` are Home Depot Canada only and
+need no country. `shipping` is US only (`country="ca"` is a 400, not charged). 1 credit per
 call on every Canada call (the US stays at 2). Prices in CAD as Home Depot
 Canada gives them; `language="fr"` returns French names and links with the same
 ids and prices. Home Depot Canada has no public API. See the
@@ -5481,6 +5482,12 @@ hits = client.home_depot.search("cordless drill", country="ca", store_id="7080")
 # One item at a store: price is that store's price, online_price the online one.
 stud = client.home_depot.product("1000112108", country="ca", store_id="7128")
 print(stud["data"]["price"], stud["data"]["price_source"], stud["data"]["online_price"])
+
+# One item at one store: the store's price, exact units, aisle and bay.
+at_store = client.home_depot.availability("1001769719", store_id="7076", country="ca")
+
+# Stores near a postal code or city (or latitude / longitude).
+stores = client.home_depot.stores("M5V 2T6", country="ca")
 
 # Exact units at every store near a postal code (no prices).
 stock = client.home_depot.stock("1001769719", "H3B 1A1")
@@ -5506,7 +5513,7 @@ with `category_id` or `deals` the query is optional. `reviews` returns the
 first 8 reviews per language and the first page of questions (page 2 is a 400;
 no reviewer names). When Home Depot Canada has no store record for an item that
 exists, `product` returns the online price with `store_price_returned: false`
-and `stock` answers an unbilled 502. Not available for Canada: UPC or barcodes
+and `availability` and `stock` answer an unbilled 502. Not available for Canada: UPC or barcodes
 (Home Depot Canada shows none), structured sale end dates (the price badge and
 Home Depot's promotion text only), delivery quotes (`shipping` is a 400 for
 `ca`), the flyer, cart or checkout, price history (poll and store the answers).
@@ -5606,7 +5613,7 @@ Scavio works with popular AI/LLM frameworks:
 | Kuaishou | `profile`, `user_posts`, `user_live`, `user_resolve`, `video`, `video_comments`, `comment_replies`, `videos_batch`, `search`, `search_videos`, `search_users`, `search_live`, `tag_feed`, `trending` | priced per endpoint: `videos_batch` 40, `profile` and the four `search*` 10 each, `video` 2, the rest 1 |
 | eBay | `search` (live or sold listings), `product`, `seller` | 1 each |
 | Target | `search`, `category`, `product`, `reviews`, `availability` | 1 each |
-| Home Depot | `search`, `product`, `reviews` (`country="ca"` for Home Depot Canada); Canada only: `category`, `categories`, `stock`, `store`, `suggestions` | 2 each in the US; 1 each for Canada |
+| Home Depot | `search`, `product`, `reviews`, `stores`, `availability` (`country="ca"` for Home Depot Canada), `shipping` (US only); Canada only: `category`, `categories`, `stock`, `store`, `suggestions` | 2 each in the US, `shipping` 4; 1 each for Canada |
 | Zillow | `search`, `property`, `agent_reviews` | 1 each |
 | Redfin | `search`, `property`, `market` | 1 each |
 | Realtor.com | `search`, `property`, `locations`, `market`, `agents`, `agent` | 1 each |
@@ -5712,7 +5719,9 @@ for field-level details.
   and `reviews` take `country="ca"` for Home Depot Canada (homedepot.ca, CAD),
   plus `language` (en or fr), and `search` takes `store_id`, `category_id`,
   `page_size`, `filters`, `deals` and `include_facets`; `product` takes
-  `store_id` for that store's price next to the online price. New Canada-only
+  `store_id` for that store's price next to the online price. New methods
+  `stores`, `availability` (both US and `country="ca"`) and `shipping` (US
+  only; 2, 2 and 4 credits in the US, 1 for Canada). New Canada-only
   methods `category`, `categories`, `stock` (exact units at every store near a
   postal code or city), `store` and `suggestions`. 1 credit per Canada call.
   US calls are unchanged: `country` is not sent unless you pass it, and the US

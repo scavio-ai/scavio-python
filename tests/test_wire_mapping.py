@@ -660,6 +660,8 @@ BODY_PRICED_KEYS = {
     "home_depot_search",
     "home_depot_product",
     "home_depot_reviews",
+    "home_depot_stores",
+    "home_depot_availability",
 }
 
 
@@ -1402,7 +1404,7 @@ def test_new_platform_endpoint_counts():
         "kuaishou": 14,
         "ebay": 3,
         "target": 5,
-        "home_depot": 8,
+        "home_depot": 11,
         "zillow": 3,
         "booking": 3,
         "tripadvisor": 4,
@@ -1432,7 +1434,7 @@ def test_new_platform_endpoint_counts():
         if ep.namespace in expected:
             counts[ep.namespace] = counts.get(ep.namespace, 0) + 1
     assert counts == expected
-    assert sum(expected.values()) == 140
+    assert sum(expected.values()) == 143
 
 
 @pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
@@ -8119,7 +8121,32 @@ def test_home_depot_shared_docstrings_state_both_rates(module):
 
     mod = importlib.import_module(module)
     cls = getattr(mod, "_HomeDepotNamespace", None) or mod._AsyncHomeDepotNamespace
-    for method in ("search", "product", "reviews"):
+    for method in ("search", "product", "reviews", "stores", "availability"):
         doc = getattr(cls, method).__doc__ or ""
         assert "Costs 2 credits." not in doc, method
         assert "2 credits in the US" in doc and "1 credit with country='ca'" in doc, method
+
+
+def test_home_depot_stores_availability_shipping(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.home_depot.stores("98101", limit=5)
+    assert captured["path"] == "/api/v1/homedepot/stores"
+    assert captured["json"] == {"query": "98101", "limit": 5}
+    client.home_depot.stores(country="ca", latitude=45.5, longitude=-73.6)
+    assert captured["json"] == {"country": "ca", "latitude": 45.5, "longitude": -73.6}
+    with pytest.raises(ScavioError):
+        client.home_depot.stores()
+    client.home_depot.availability("325479354", store_id="4702", zip="98101")
+    assert captured["path"] == "/api/v1/homedepot/availability"
+    assert captured["json"] == {"item_id": "325479354", "store_id": "4702", "zip": "98101"}
+    client.home_depot.availability("1001769719", store_id="7076", country="ca")
+    assert captured["json"] == {"item_id": "1001769719", "store_id": "7076", "country": "ca"}
+    with pytest.raises(ScavioError):
+        client.home_depot.availability("325479354")
+    client.home_depot.shipping("325479354", "98101", quantity=2)
+    assert captured["path"] == "/api/v1/homedepot/shipping"
+    assert captured["json"] == {"item_id": "325479354", "zip": "98101", "quantity": 2}
+    ship = ENDPOINTS["home_depot_shipping"]
+    assert ship.credits == 4 and ship.credits_note is None
+    assert all(p.name != "country" for p in ship.params)

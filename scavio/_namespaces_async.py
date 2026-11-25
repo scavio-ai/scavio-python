@@ -3660,7 +3660,7 @@ class _AsyncTargetNamespace:
         return await self._client._call("target_availability", {"tcin": tcin, "zip": zip, "radius": radius, "store_id": store_id}, extra)
 
 class _AsyncHomeDepotNamespace:
-    """Home Depot search, product, and review endpoints (homedepot.com by default); country='ca' reads Home Depot Canada (homedepot.ca, CAD, prices and exact units per store), which also has category, categories, stock, store and suggestions endpoints."""
+    """Home Depot search, product, review, store, availability and shipping endpoints (homedepot.com by default); country='ca' reads Home Depot Canada (homedepot.ca, CAD, prices and exact units per store; no shipping), which also has category, categories, stock, store and suggestions endpoints."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -3751,6 +3751,82 @@ class _AsyncHomeDepotNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("home_depot_reviews", {"item_id": item_id, "page": page, "country": country, "language": language}, extra)
+
+    async def stores(
+        self,
+        query: Optional[str] = None,
+        *,
+        limit: Optional[int] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        page: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find Home Depot stores near a ZIP code, city or address: store number, address, coordinates, distance, phone numbers, opening hours and in-store services. Use the store number with availability() and shipping(). With country='ca', Home Depot Canada stores near a postal code or city (query) or latitude + longitude, with 7 dated days of hours.
+
+        Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
+
+        Args:
+            query: A ZIP code, city or address to find stores near (e.g. '98101'). Required for the US; for 'ca' a postal code or city (e.g. 'M5V 2T6'), or pass latitude and longitude instead.
+            limit: Stores to return, nearest first. US 1-20 (default 20); 'ca' 1-50 (default 10).
+            country: 'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.
+            latitude: Home Depot Canada only: with longitude, instead of query.
+            longitude: Home Depot Canada only: with latitude, instead of query.
+            page: Home Depot Canada only: page, 1-based.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("home_depot_stores", {"query": query, "limit": limit, "country": country, "latitude": latitude, "longitude": longitude, "page": page, "language": language}, extra)
+
+    async def availability(
+        self,
+        item_id: str,
+        *,
+        store_id: Optional[str] = None,
+        zip: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Home Depot item's price, promotions and pickup stock at a store you choose, and delivery options, dates and charges to a ZIP you choose. Store and ZIP are independent; pass either or both. With country='ca', one item at one Home Depot Canada store (store_id required; zip is a 400, no delivery quotes for Canada): the store's price, exact store_units, aisle and bay; when Home Depot Canada has no store record for an item that exists, the answer is an unbilled 502.
+
+        Costs 2 credits in the US (homedepot.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
+
+        Args:
+            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL. For 'ca' a 10-digit Home Depot Canada id (e.g. '1001769719') or a homedepot.ca/product/... link.
+            store_id: Store number from stores() (e.g. '4702'; for 'ca' e.g. '7076'), for pickup stock and the store's price. Required for 'ca'.
+            zip: US only: 5-digit ZIP to quote delivery to (e.g. '98101').
+            country: 'us' (default: homedepot.com, unchanged) or 'ca': Home Depot Canada (homedepot.ca, The Home Depot's Canadian store: 182 stores in 10 provinces), prices in CAD.
+            language: Home Depot Canada only: 'en' (default) or 'fr'. Ids and CAD prices are the same; names, links and facets are in that language.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("home_depot_availability", {"item_id": item_id, "store_id": store_id, "zip": zip, "country": country, "language": language}, extra)
+
+    async def shipping(
+        self,
+        item_id: str,
+        zip: str,
+        *,
+        quantity: Optional[int] = None,
+        store_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """US only: every delivery option Home Depot quotes for an item to a ZIP, for a given quantity: charge, free-shipping status, delivery dates, the delivery level on bulky items, and states it will not ship to. Not available for Home Depot Canada (country 'ca' is a 400, not charged).
+
+        Costs 4 credits. Returns the API response as a dict.
+
+        Args:
+            item_id: Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product URL.
+            zip: 5-digit US ZIP code (e.g. '98101').
+            quantity: Units to quote delivery for, 1-999. Default 1.
+            store_id: Optional store number from stores().
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("home_depot_shipping", {"item_id": item_id, "zip": zip, "quantity": quantity, "store_id": store_id}, extra)
 
     async def category(
         self,

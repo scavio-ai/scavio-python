@@ -69,9 +69,10 @@ _NS_META = {
     "target": ("Target", "Target search, category, product, and review endpoints."),
     "home_depot": (
         "HomeDepot",
-        "Home Depot search, product, and review endpoints (homedepot.com by default); "
-        "country='ca' reads Home Depot Canada (homedepot.ca, CAD, prices and exact units per "
-        "store), which also has category, categories, stock, store and suggestions endpoints.",
+        "Home Depot search, product, review, store, availability and shipping endpoints "
+        "(homedepot.com by default); country='ca' reads Home Depot Canada (homedepot.ca, CAD, "
+        "prices and exact units per store; no shipping), which also has category, categories, "
+        "stock, store and suggestions endpoints.",
     ),
     "zillow": ("Zillow", "Zillow listing search, property detail, and agent-review endpoints."),
     "booking": ("Booking", "Booking.com property search, hotel detail, and review endpoints."),

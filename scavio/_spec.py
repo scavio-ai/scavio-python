@@ -8601,6 +8601,100 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits_note=_HD_CREDITS,
     ),
     Endpoint(
+        key="home_depot_stores",
+        namespace="home_depot",
+        method="stores",
+        http="POST",
+        path="/api/v1/homedepot/stores",
+        summary=(
+            "Find Home Depot stores near a ZIP code, city or address: store number, address, "
+            "coordinates, distance, phone numbers, opening hours and in-store services. Use the "
+            "store number with availability() and shipping(). With country='ca', Home Depot "
+            "Canada stores near a postal code or city (query) or latitude + longitude, with 7 "
+            "dated days of hours."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc="A ZIP code, city or address to find stores near (e.g. '98101'). Required "
+                "for the US; for 'ca' a postal code or city (e.g. 'M5V 2T6'), or pass latitude "
+                "and longitude instead.",
+            ),
+            _int(
+                "limit",
+                "Stores to return, nearest first. US 1-20 (default 20); 'ca' 1-50 (default 10).",
+            ),
+            _HD_COUNTRY,
+            _float("latitude", "Home Depot Canada only: with longitude, instead of query."),
+            _float("longitude", "Home Depot Canada only: with latitude, instead of query."),
+            _int("page", "Home Depot Canada only: page, 1-based."),
+            _HDCA_LANGUAGE,
+        ),
+        one_of=(("query", "latitude"),),
+        credits=2,
+        credits_note=_HD_CREDITS,
+    ),
+    Endpoint(
+        key="home_depot_availability",
+        namespace="home_depot",
+        method="availability",
+        http="POST",
+        path="/api/v1/homedepot/availability",
+        summary=(
+            "One Home Depot item's price, promotions and pickup stock at a store you choose, and "
+            "delivery options, dates and charges to a ZIP you choose. Store and ZIP are "
+            "independent; pass either or both. With country='ca', one item at one Home Depot "
+            "Canada store (store_id required; zip is a 400, no delivery quotes for Canada): the "
+            "store's price, exact store_units, aisle and bay; when Home Depot Canada has no "
+            "store record for an item that exists, the answer is an unbilled 502."
+        ),
+        params=(
+            _req(
+                "item_id",
+                "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
+                "URL. For 'ca' a 10-digit Home Depot Canada id (e.g. '1001769719') or a "
+                "homedepot.ca/product/... link.",
+            ),
+            _str(
+                "store_id",
+                "Store number from stores() (e.g. '4702'; for 'ca' e.g. '7076'), for pickup "
+                "stock and the store's price. Required for 'ca'.",
+            ),
+            _str("zip", "US only: 5-digit ZIP to quote delivery to (e.g. '98101')."),
+            _HD_COUNTRY,
+            _HDCA_LANGUAGE,
+        ),
+        one_of=(("store_id", "zip"),),
+        credits=2,
+        credits_note=_HD_CREDITS,
+    ),
+    Endpoint(
+        key="home_depot_shipping",
+        namespace="home_depot",
+        method="shipping",
+        http="POST",
+        path="/api/v1/homedepot/shipping",
+        summary=(
+            "US only: every delivery option Home Depot quotes for an item to a ZIP, for a given "
+            "quantity: charge, free-shipping status, delivery dates, the delivery level on bulky "
+            "items, and states it will not ship to. Not available for Home Depot Canada "
+            "(country 'ca' is a 400, not charged)."
+        ),
+        params=(
+            _req(
+                "item_id",
+                "Home Depot item id (e.g. '325479354'), or a full homedepot.com/p/... product "
+                "URL.",
+            ),
+            _req("zip", "5-digit US ZIP code (e.g. '98101')."),
+            _int("quantity", "Units to quote delivery for, 1-999. Default 1."),
+            _str("store_id", "Optional store number from stores()."),
+        ),
+        credits=4,
+    ),
+    Endpoint(
         key="home_depot_category",
         namespace="home_depot",
         method="category",
