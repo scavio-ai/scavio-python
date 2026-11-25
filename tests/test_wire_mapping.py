@@ -7234,3 +7234,184 @@ def test_dollartree_credits_paths_and_wire(monkeypatch):
         dt.store()
     with pytest.raises(ScavioError):
         dt.reviews()
+
+
+def test_discounttire_credits_paths_and_wire(monkeypatch):
+    """discounttire (0.85.0): 15 endpoints on /api/v1/discounttire.
+
+    1 credit each, US only (no country on any method). query is sent as q. Every method gets a
+    240 s floor. Price methods need store or zip.
+    """
+    _DTR_NAME = (
+        "Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts "
+        "of CA, PA, NJ and NY)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "discounttire"}
+    assert sorted(eps) == [
+        "appointments", "browse", "categories", "model", "product", "reviews", "search", "store",
+        "store_reviews", "store_stock", "stores", "suggestions", "vehicle", "vehicle_tires",
+        "wheels",
+    ]
+    priced = {"search", "vehicle_tires", "product", "model", "wheels", "browse"}
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/discounttire/" + m.replace("_", "-"), ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert _DTR_NAME in ep.summary, m
+        assert ep.credits == 1, m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        assert "country" not in names and "language" not in names, m
+        if "query" in names:
+            assert names["query"].wire_field == "q", m
+        if m in priced:
+            assert ("store", "zip") in [tuple(g) for g in ep.one_of], m
+            assert "Prices, stock and promotions are per store" in ep.summary, m
+            assert "$205 at an America's Tire store in New Jersey" in ep.summary, m
+    search = {p.name: p for p in eps["search"].params}
+    assert search["sort"].annotation == (
+        'Optional[Literal["best_seller", "price_low", "price_high", "rating"]]'
+    )
+    assert search["brand"].annotation == "Optional[Union[str, list[str]]]"
+    assert search["filters"].annotation == "Optional[list[str]]"
+    vt = {p.name: p for p in eps["vehicle_tires"].params}
+    assert [p.name for p in eps["vehicle_tires"].required_params] == [
+        "vehicle_id", "trim_id", "assembly_id",
+    ]
+    assert vt["sort"].annotation == (
+        'Optional[Literal["best_seller", "price_low", "price_high", "rating", "treadwell"]]'
+    )
+    assert vt["position"].annotation == 'Optional[Literal["set", "front", "rear"]]'
+    stock = {p.name: p for p in eps["store_stock"].params}
+    assert stock["radius"].annotation == "Optional[Literal[10, 25, 50, 75, 150]]"
+    assert eps["store_stock"].one_of == (("item_number", "item_numbers"), ("zip",))
+    assert eps["stores"].one_of == (("zip", "city", "latitude"),)
+    assert eps["search"].one_of == (("size", "width"), ("store", "zip"))
+    assert eps["wheels"].one_of == (("diameter", "vehicle_id"), ("store", "zip"))
+    assert eps["browse"].one_of == (("category", "brand", "query"), ("store", "zip"))
+    assert "no set-of-four price" in eps["search"].summary
+    assert "4 x price is arithmetic" in eps["product"].summary
+    assert "Discount Tire's own estimates" in eps["vehicle_tires"].summary
+    assert "Available as soon as <date>" in eps["store_stock"].summary
+    assert "Scavio never books" in eps["appointments"].summary
+    assert "the store's local time" in eps["appointments"].summary
+    assert "UTC" not in eps["appointments"].summary
+    assert "No reviewer names" in eps["reviews"].summary
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|graphql|robots?|hurry|"
+                        r"ends soon|last day|mavis)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    dt = client.discounttire
+    dt.search("225/65R17", store="1009")
+    dt.search(width=225, aspect_ratio=65, diameter=17, zip="85251", sort="price_low",
+              brand=["Michelin"], filters=["brands:brand-MCH"], page=2, page_size=50,
+              min_price=100, max_price=300, instant_savings=True, in_stock=True,
+              category="All-Season Tires", speed_rating="H", load_range="XL",
+              three_peak=True, run_flat=False, rebates=True, mileage_warranty="60,000-70,000")
+    dt.search("245/35R19", rear_size="305/30R20", store=1009)
+    dt.vehicle()
+    dt.vehicle(year=2022, make="Ford")
+    dt.vehicle(vehicle_id="17361", trim_id="52455", assembly_id="0000E28B")
+    dt.vehicle_tires("17361", "52455", "0000E28B", store="1009")
+    dt.vehicle_tires("16990", "51166", "0000DI40", zip="85251", position="front",
+                     ranking="treadwell", sort="treadwell")
+    dt.product("108547", store="1009")
+    dt.product(108547, zip="85251", nearby_stores=["1022", 1003])
+    dt.model("michelin-defender-2", store="1009", type="tires")
+    dt.store_stock("108547", "85251")
+    dt.store_stock(item_numbers=["102019", "102020"], zip=85251, radius=50,
+                   sort="availability", page=2, quantity=2, store="1009")
+    dt.stores("85251")
+    dt.stores(city="Phoenix, AZ", radius=25, page=2)
+    dt.stores(latitude=33.47, longitude=-111.92)
+    dt.store("1009")
+    dt.reviews("108547", scope="size", sort="most_helpful", rating=5, page=3, page_size=50)
+    dt.store_reviews(1009, sort="lowest", rating=1, page=2)
+    dt.wheels(diameter=20, width=9, bolt_pattern="6-135", store="1009")
+    dt.wheels(vehicle_id="17361", trim_id="52455", assembly_id="0000E28B", zip="85251",
+              color="Black", special_offers=True)
+    dt.browse(category="all-season-tires", store="1009")
+    dt.browse(query="michelin defender", zip="85251", sort="relevance")
+    dt.categories()
+    dt.categories(type="wheels")
+    dt.suggestions("michelin")
+    dt.appointments("1009", month=12)
+    base = "/api/v1/discounttire/"
+    assert seen == [
+        (base + "search", {"size": "225/65R17", "store": "1009"}, 240.0),
+        (base + "search", {"width": 225, "aspect_ratio": 65, "diameter": 17, "zip": "85251",
+                           "page": 2, "page_size": 50, "filters": ["brands:brand-MCH"],
+                           "brand": ["Michelin"], "min_price": 100, "max_price": 300,
+                           "instant_savings": True, "in_stock": True, "sort": "price_low",
+                           "category": "All-Season Tires", "speed_rating": "H",
+                           "mileage_warranty": "60,000-70,000", "load_range": "XL",
+                           "three_peak": True, "run_flat": False, "rebates": True}, 240.0),
+        (base + "search", {"size": "245/35R19", "rear_size": "305/30R20", "store": 1009}, 240.0),
+        (base + "vehicle", {}, 240.0),
+        (base + "vehicle", {"year": 2022, "make": "Ford"}, 240.0),
+        (base + "vehicle", {"vehicle_id": "17361", "trim_id": "52455",
+                            "assembly_id": "0000E28B"}, 240.0),
+        (base + "vehicle-tires", {"vehicle_id": "17361", "trim_id": "52455",
+                                  "assembly_id": "0000E28B", "store": "1009"}, 240.0),
+        (base + "vehicle-tires", {"vehicle_id": "16990", "trim_id": "51166",
+                                  "assembly_id": "0000DI40", "position": "front",
+                                  "ranking": "treadwell", "zip": "85251",
+                                  "sort": "treadwell"}, 240.0),
+        (base + "product", {"item_number": "108547", "store": "1009"}, 240.0),
+        (base + "product", {"item_number": 108547, "nearby_stores": ["1022", 1003],
+                            "zip": "85251"}, 240.0),
+        (base + "model", {"model_id": "michelin-defender-2", "type": "tires", "store": "1009"},
+         240.0),
+        (base + "store-stock", {"item_number": "108547", "zip": "85251"}, 240.0),
+        (base + "store-stock", {"zip": 85251, "item_numbers": ["102019", "102020"],
+                                "radius": 50, "sort": "availability", "page": 2,
+                                "quantity": 2, "store": "1009"}, 240.0),
+        (base + "stores", {"zip": "85251"}, 240.0),
+        (base + "stores", {"city": "Phoenix, AZ", "radius": 25, "page": 2}, 240.0),
+        (base + "stores", {"latitude": 33.47, "longitude": -111.92}, 240.0),
+        (base + "store", {"store_code": "1009"}, 240.0),
+        (base + "reviews", {"item_number": "108547", "scope": "size", "sort": "most_helpful",
+                            "rating": 5, "page": 3, "page_size": 50}, 240.0),
+        (base + "store-reviews", {"store_code": 1009, "sort": "lowest", "rating": 1,
+                                  "page": 2}, 240.0),
+        (base + "wheels", {"diameter": 20, "width": 9, "bolt_pattern": "6-135",
+                           "store": "1009"}, 240.0),
+        (base + "wheels", {"vehicle_id": "17361", "trim_id": "52455",
+                           "assembly_id": "0000E28B", "color": "Black",
+                           "special_offers": True, "zip": "85251"}, 240.0),
+        (base + "browse", {"category": "all-season-tires", "store": "1009"}, 240.0),
+        (base + "browse", {"q": "michelin defender", "sort": "relevance", "zip": "85251"},
+         240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"type": "wheels"}, 240.0),
+        (base + "suggestions", {"q": "michelin"}, 240.0),
+        (base + "appointments", {"store_code": "1009", "month": 12}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        dt.search("225/65R17")
+    with pytest.raises(ScavioError):
+        dt.search(store="1009")
+    with pytest.raises(ScavioError):
+        dt.product("108547")
+    with pytest.raises(ScavioError):
+        dt.vehicle_tires("17361", "52455", "0000E28B")
+    with pytest.raises(ScavioError):
+        dt.store_stock("108547")
+    with pytest.raises(ScavioError):
+        dt.store_stock(zip="85251")
+    with pytest.raises(ScavioError):
+        dt.stores()
+    with pytest.raises(ScavioError):
+        dt.wheels(store="1009")
+    with pytest.raises(ScavioError):
+        dt.browse(store="1009")

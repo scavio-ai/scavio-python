@@ -4380,6 +4380,136 @@ _DT_STORE_TAIL = (
     "pickup_and_delivery, payment_options, slug, url"
 )
 
+# Discount Tire params shared across endpoints (discounttire.com, the US tire and wheel retailer,
+# America's Tire in parts of CA, PA, NJ and NY: one catalog). 15 endpoints, 1 credit each. US only:
+# no country on any method. Prices, stock and promotions are per store: search, vehicle_tires,
+# product, model, wheels and browse need store or zip (not both; the server refuses both). Calls
+# can queue behind the backend's upstream limit: 240 s floor on every method.
+_DTR_NAME = (
+    "Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of "
+    "CA, PA, NJ and NY)"
+)
+_DTR_ID = "Optional[Union[str, int]]"
+_DTR_ITEM_DOC = (
+    "A Discount Tire item number (items[].item_number, the number after /p/ in a "
+    "discounttire.com product link; e.g. '108547')."
+)
+_DTR_STORE = Param(
+    "store",
+    _DTR_ID,
+    doc="A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. "
+    "'1009'). Prices, stock and promotions are this store's. Send store or zip.",
+)
+_DTR_ZIP = Param(
+    "zip",
+    _DTR_ID,
+    doc="A US ZIP code instead of store: the nearest store in Discount Tire's store search is used "
+    "(echoed in store).",
+)
+_DTR_STORE_CODE = Param(
+    "store_code",
+    "Union[str, int]",
+    required=True,
+    doc="A store code (stores[].store_code of stores(), e.g. '1009').",
+)
+_DTR_VEHICLE_ID_DOC = "options[].vehicle_id of vehicle()'s models step (e.g. '17361', a 2022 Ford F-150)."
+_DTR_TRIM_ID_DOC = "options[].trim_id of vehicle()'s trims step (e.g. '52455', XLT Crew Cab 2WD)."
+_DTR_ASSEMBLY_DOC = (
+    "options[].assembly_id of vehicle()'s assemblies step: the tire size option (e.g. "
+    "'0000E28B', 245/70R17)."
+)
+_DTR_VEHICLE_OPT = (
+    Param("vehicle_id", _DTR_ID, doc=_DTR_VEHICLE_ID_DOC),
+    Param("trim_id", _DTR_ID, doc=_DTR_TRIM_ID_DOC),
+    _str("assembly_id", _DTR_ASSEMBLY_DOC),
+)
+_DTR_LIST_PARAMS = (
+    _int("page", "Page (1-500)."),
+    _int("page_size", "Items per page (1-100, default 20)."),
+    _str_list(
+        "filters",
+        "Up to 10 filter tokens exactly as an earlier answer gives them in "
+        "facets[].values[].filter (brand, category, speed rating, load range, sidewall, Good / "
+        "Better / Best, ...; e.g. 'brands:brand-MCH'); several are combined.",
+    ),
+    _str_or_list(
+        "brand",
+        "Brand name(s) as Discount Tire writes them (its Brands facet, e.g. 'Michelin'); "
+        "resolved against the listing's own facet (resolved_filters).",
+    ),
+    _float("min_price", "Lowest price per tire or wheel (USD) at the store."),
+    _float("max_price", "Highest price per tire or wheel (USD) at the store."),
+    _bool("instant_savings", "Only items with an instant saving (Discount Tire's Instant Savings filter)."),
+    _bool("in_stock", "Only items in stock at the store (Discount Tire's In Stock filter)."),
+)
+_DTR_TIRE_FILTERS = (
+    _str_or_list(
+        "category",
+        "Tire category as Discount Tire writes it (its Tire Category facet, e.g. 'All-Season "
+        "Tires', 'Snow/Winter Tires'; or its code, e.g. 'winterTires').",
+    ),
+    _str_or_list(
+        "speed_rating",
+        "Speed rating letter(s) (e.g. 'H', 'V'), matched to Discount Tire's Speed Rating facet.",
+    ),
+    _str_or_list(
+        "mileage_warranty",
+        "A Mileage Warranty facet label as Discount Tire writes it (e.g. '60,000-70,000').",
+    ),
+    _str("load_range", "Load range (SL, XL, C, D, E, ...)."),
+    _bool("three_peak", "Only tires with the Three-Peak Mountain Snowflake mark."),
+    _bool("run_flat", "Only run-flat tires."),
+    _bool("rebates", "Only tires with a rebate (Discount Tire's Rebates filter)."),
+)
+_DTR_SORT = _lit(
+    "sort",
+    ("best_seller", "price_low", "price_high", "rating"),
+    "best_seller (default), price_low, price_high or rating: Discount Tire's sort menu.",
+)
+_DTR_REVIEW_FILTERS = (
+    _lit(
+        "sort",
+        ("newest", "highest", "lowest", "most_helpful"),
+        "newest (default), highest, lowest or most_helpful.",
+    ),
+    _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this star rating (1-5)."),
+)
+_DTR_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_DTR_PER_STORE = (
+    " Prices, stock and promotions are per store: send store (a store code) or zip (the nearest "
+    "store is used), not both; the store used is echoed in store {store_code, brand (Discount "
+    "Tire or America's Tire), name, location_name, address, city, state, zip, phone, "
+    "distance_miles, chosen_by}. Price can differ between stores and is not different at every "
+    "store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 "
+    "stores in 8 states and $205 at an America's Tire store in New Jersey."
+)
+_DTR_NO_SET = (
+    " price is per tire or wheel: Discount Tire publishes no set-of-four price (4 x price is "
+    "arithmetic, not a Discount Tire price). Promotions are Discount Tire's own title and text "
+    "with its end date (ends, ISO 8601 UTC, and ends_text as given); no start date."
+)
+_DTR_NOT_AVAILABLE = (
+    " Not available: the deals page text, road hazard and certificate prices, financing, "
+    "installation and fee amounts, the Treadwell chat, fleet accounts, Tire Rack, price history "
+    "(poll and store the answers), checkout and booking."
+)
+_DTR_ITEM_FIELDS = (
+    "position, item_number (the input of product(), store_stock() and reviews()), type (tire, "
+    "wheel, or model: a tire or wheel model with price_range), model_id (the input of model()), "
+    "brand, model, name, description, size, price (per tire or wheel), price_text, price_range, "
+    "markdown, map_price, map_display_rule (as given), promotions [{title, text, description, "
+    "ends, ends_text, group, condition, url}], rating, review_count, recommend_count, stock "
+    "{store_code, units (exact), message, available_date, days_out}, gtin, "
+    "manufacturer_part_number, mileage_warranty, tier (Good / Better / Best), categories, "
+    "original_equipment, image, url, category_ratings"
+)
+_DTR_LIST = (
+    "market, store, page, page_size, total, total_pages, count, sort, filters_applied, "
+    "resolved_filters [{input, requested, label, filter}], items (" + _DTR_ITEM_FIELDS + "), "
+    "facets [{key, name, values [{label, count, filter, selected}]}] (send filter back in "
+    "filters), notes"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -19364,6 +19494,495 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=300.0,
     ),
+    # ============================ Discount Tire ===========================
+    # 15 endpoints on /api/v1/discounttire, 1 credit each, US only (no country). search,
+    # vehicle_tires, product, model, wheels and browse need store or zip. 240 s floor everywhere.
+    Endpoint(
+        key="discounttire_search",
+        namespace="discounttire",
+        method="search",
+        http="POST",
+        path="/api/v1/discounttire/search",
+        summary=(
+            "Tires in one size at one " + _DTR_NAME + " store: size (225/65R17, LT265/70R17, "
+            "35x12.50R20) or width + aspect_ratio + diameter, optional rear_size for staggered "
+            "front / rear pairs, sorted (best_seller, price_low, price_high, rating), filtered "
+            "(brand, category, speed rating, load range, Three-Peak snowflake, run flat, rebates, "
+            "instant savings, in stock, price, mileage warranty, any facet) and paged (20 a page "
+            "by default, up to 100). Returns size, rear_size, " + _DTR_LIST + "." + _DTR_PER_STORE
+            + _DTR_NO_SET + _DTR_NOT_AVAILABLE + _DTR_CHARGE
+        ),
+        params=(
+            Param(
+                "size",
+                "Optional[str]",
+                positional=True,
+                doc="Tire size ('225/65R17', 'LT265/70R17', '35x12.50R20'). Send size or width + "
+                "aspect_ratio + diameter.",
+            ),
+            Param("width", "Optional[Union[str, int]]", doc="Section width (e.g. 225), with "
+                  "aspect_ratio and diameter."),
+            Param("aspect_ratio", "Optional[Union[str, int]]", doc="Aspect ratio (e.g. 65)."),
+            Param("diameter", "Optional[Union[str, float]]", doc="Rim diameter in inches (e.g. 17)."),
+            _str(
+                "rear_size",
+                "Rear size for a staggered pair (front size + rear size, e.g. '305/30R20'): items "
+                "become front / rear pairs.",
+            ),
+            _DTR_STORE,
+            _DTR_ZIP,
+            *_DTR_LIST_PARAMS,
+            _DTR_SORT,
+            *_DTR_TIRE_FILTERS,
+        ),
+        one_of=(("size", "width"), ("store", "zip")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_vehicle",
+        namespace="discounttire",
+        method="vehicle",
+        http="POST",
+        path="/api/v1/discounttire/vehicle",
+        summary=(
+            _DTR_NAME + "'s vehicle selector, one step per call: market, step, count, options, "
+            "next (what to send next). No input -> years (options [{year}]); year -> makes "
+            "([{make}]); year + make -> models ([{vehicle_id, model}]); vehicle_id -> trims "
+            "([{trim_id, trim}]); vehicle_id + trim_id -> assemblies, the tire size options "
+            "([{assembly_id, description, staggered, front_size, rear_size}]); vehicle_id + "
+            "trim_id + assembly_id -> fitment {vehicle {vehicle_id, year, make, model, type, "
+            "image}, trim {trim_id, name, category}, assembly_id, front_size, rear_size, "
+            "staggered, front_wheel_diameter, rear_wheel_diameter, ride_height, drive, lug_torque "
+            "(as given, no unit), optional_sizes [{wheel_diameter, axle, sizes [{size, fit (match, "
+            "oversize or undersize)}]}], optional_staggered_sets}, notes. Captured 2026-11-25: "
+            "2022 Ford F-150 (vehicle_id 17361) XLT Crew Cab 2WD (trim_id 52455) had 3 size "
+            "options; assembly 0000E28B is 245/70R17 front and rear on 17-inch wheels. "
+            "vehicle_tires() and wheels() take the same three ids." + _DTR_CHARGE
+        ),
+        params=(
+            Param("year", "Optional[Union[int, str]]", doc="Model year (e.g. 2022): its makes "
+                  "(with make: its models)."),
+            _str("make", "A make as Discount Tire writes it (options[].make of the makes step, "
+                 "e.g. 'Ford'), with year."),
+            *_DTR_VEHICLE_OPT,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_vehicle_tires",
+        namespace="discounttire",
+        method="vehicle_tires",
+        http="POST",
+        path="/api/v1/discounttire/vehicle-tires",
+        summary=(
+            "The tires " + _DTR_NAME + " lists for one vehicle fitment (vehicle_id + trim_id + "
+            "assembly_id from vehicle()) at one store, sorted, filtered and paged like search(), "
+            "with the vehicle maker's original-equipment tire flagged (original_equipment). "
+            "Staggered vehicles (different front and rear sizes): position 'set' (default) "
+            "returns front / rear pairs [{position, pair, front, rear, url, price_note}], each "
+            "tire with its own per-tire price (a staggered set is 2 front + 2 rear); 'front' or "
+            "'rear' lists one axle. ranking='treadwell' adds treadwell {rank, mileage {min, "
+            "median, max, warranty}, miles_per_dollar, tire_life, ride_ratings, stopping, "
+            "winter}: Discount Tire's Treadwell ranking fields as given, Discount Tire's own "
+            "estimates, not measurements (sort 'treadwell' is its default there). Returns "
+            "vehicle, staggered, position, ranking, " + _DTR_LIST + ". Captured 2026-11-25: 157 "
+            "tires for the 2022 F-150 XLT (245/70R17) at store 1009; 93 front / rear sets for a "
+            "2022 Corvette Stingray (245/35R19 front, 305/30R20 rear)." + _DTR_PER_STORE
+            + _DTR_NO_SET + _DTR_CHARGE
+        ),
+        params=(
+            Param("vehicle_id", "Union[str, int]", required=True, doc=_DTR_VEHICLE_ID_DOC),
+            Param("trim_id", "Union[str, int]", required=True, doc=_DTR_TRIM_ID_DOC),
+            _req("assembly_id", _DTR_ASSEMBLY_DOC),
+            _lit(
+                "position",
+                ("set", "front", "rear"),
+                "Staggered vehicles only: 'set' (default: front / rear pairs), 'front' or 'rear'.",
+            ),
+            _lit(
+                "ranking",
+                ("all", "treadwell"),
+                "'all' (default) or 'treadwell': Discount Tire's Treadwell ranking with its own "
+                "mileage, ride and stopping estimates.",
+            ),
+            _DTR_STORE,
+            _DTR_ZIP,
+            *_DTR_LIST_PARAMS,
+            _lit(
+                "sort",
+                ("best_seller", "price_low", "price_high", "rating", "treadwell"),
+                "best_seller (default), price_low, price_high, rating; with ranking='treadwell' "
+                "also treadwell (its default: Treadwell rank).",
+            ),
+            *_DTR_TIRE_FILTERS,
+        ),
+        one_of=(("store", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_product",
+        namespace="discounttire",
+        method="product",
+        http="POST",
+        path="/api/v1/discounttire/product",
+        summary=(
+            "One " + _DTR_NAME + " tire or wheel by item number at one store: everything in "
+            "search()'s items plus tire {load_index, load_index_speed, speed_rating, load_range, "
+            "utqg {treadwear, traction, temperature}, tread_depth, max_pressure, "
+            "overall_diameter, section_width, aspect_ratio, rim_diameter, rim_width_range, "
+            "sidewall, run_flat} or wheel {diameter, width, bolt_pattern, bolts, offset, "
+            "hub_bore, finish, color, load_capacity}, weight, faqs, long_description, images, "
+            "nearby_store_stock, no_longer_available, notes (tire and wheel fields as given; "
+            "several carry no unit). Captured 2026-11-25: item 108547, Michelin Defender 2 "
+            "225/65R17 102H, $206.00 a tire at store 1009 (Scottsdale, AZ), 25 units there, GTIN "
+            "086699082183, promotion '$110 OFF a set of 4!' ending 2026-12-04T07:59:00Z."
+            + _DTR_PER_STORE + _DTR_NO_SET + " An unknown item is a charged 404." + _DTR_CHARGE
+        ),
+        params=(
+            Param("item_number", "Union[str, int]", required=True, doc=_DTR_ITEM_DOC),
+            Param(
+                "nearby_stores",
+                "Optional[list[Union[str, int]]]",
+                doc="Optional store codes Discount Tire checks for a nearby store with stock "
+                "(nearby_store_stock), up to 10.",
+            ),
+            _DTR_STORE,
+            _DTR_ZIP,
+        ),
+        one_of=(("store", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_model",
+        namespace="discounttire",
+        method="model",
+        http="POST",
+        path="/api/v1/discounttire/model",
+        summary=(
+            "Every size of one " + _DTR_NAME + " tire or wheel model at one store: market, store, "
+            "requested_model_id, product_type, model_id, brand, model, name, type, rating, "
+            "review_count, price_range {min, max}, promotions, tier, categories, item_count, "
+            "items [{item_number, price}], size_options [{key, options}], spec_ranges, "
+            "default_item, long_description, image, url, notes. Captured 2026-11-25: "
+            "michelin-defender-2 had 60 sizes at store 1009, $180 to $327 a tire."
+            + _DTR_PER_STORE + _DTR_NO_SET + " An unknown model is a charged 404." + _DTR_CHARGE
+        ),
+        params=(
+            _req(
+                "model_id",
+                "A model id (items[].model_id, e.g. 'michelin-defender-2') or a discounttire.com "
+                "/buy-tires/ or /buy-wheels/ link.",
+            ),
+            _lit(
+                "type",
+                ("tires", "wheels"),
+                "'tires' or 'wheels' (default: from the link, else tires then wheels).",
+            ),
+            _DTR_STORE,
+            _DTR_ZIP,
+        ),
+        one_of=(("store", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_store_stock",
+        namespace="discounttire",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/discounttire/store-stock",
+        summary=(
+            "Exact units of 1-4 " + _DTR_NAME + " items at the stores near a US ZIP (radius 10, "
+            "25 (default), 50, 75 or 150 miles, sorted by distance or availability, 5 stores per "
+            "page): market, item_numbers, quantity, zip, radius_miles, sort, page, page_size, "
+            "total, total_pages, count, my_store, stores [{store_code, brand, name, address, "
+            "phone, latitude, longitude, distance_miles, stock [{item_number, units, message}]}], "
+            "notes. units is the exact count Discount Tire reports; message is its availability "
+            "text as given for the quantity asked, and a store with 0 units can still say "
+            "'Available as soon as <date>'. Captured 2026-11-25: item 108547 near ZIP 85251 had "
+            "47 stores within 25 miles; store 1022 (Scottsdale, 3.81 miles) had 38 units."
+            + _DTR_CHARGE
+        ),
+        params=(
+            Param(
+                "item_number",
+                _DTR_ID,
+                positional=True,
+                doc=_DTR_ITEM_DOC + " Send item_number or item_numbers.",
+            ),
+            Param(
+                "zip",
+                _DTR_ID,
+                positional=True,
+                doc="US ZIP code (e.g. '85251'): the stores near it. Required.",
+            ),
+            Param(
+                "item_numbers",
+                "Optional[list[Union[str, int]]]",
+                doc="Up to 4 item numbers checked together (e.g. a staggered front and rear).",
+            ),
+            _ilit("radius", (10, 25, 50, 75, 150), "Miles: 10, 25 (default), 50, 75 or 150."),
+            _lit("sort", ("distance", "availability"), "'distance' (default) or 'availability'."),
+            _int("page", "Page (5 stores per page)."),
+            _int(
+                "quantity",
+                "How many of each item (1-8, default 4): Discount Tire's availability text is "
+                "written for this quantity.",
+            ),
+            _str_or_int("store", "Optional: your store; its units come back in my_store."),
+        ),
+        one_of=(("item_number", "item_numbers"), ("zip",)),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_stores",
+        namespace="discounttire",
+        method="stores",
+        http="POST",
+        path="/api/v1/discounttire/stores",
+        summary=(
+            _DTR_NAME + " stores near a US ZIP, city or point (10 per page, nearest first): "
+            "market, location, radius_miles, page, page_size, total, total_pages, count, stores "
+            "[{position, store_code (the store input of the price methods), brand (Discount Tire "
+            "or America's Tire), name, location_name, legacy_code, address {line1, line2, city, "
+            "state, zip, country}, phone, latitude, longitude, distance_miles, rating, "
+            "review_count, services}], notes. Send one of zip, city or latitude + longitude."
+            + _DTR_CHARGE
+        ),
+        params=(
+            Param("zip", _DTR_ID, positional=True, doc="A US ZIP code (e.g. '85251')."),
+            _str("city", "A US city, e.g. 'Phoenix, AZ'."),
+            _float("latitude", "Latitude, with longitude: a point in the United States."),
+            _float("longitude", "Longitude, with latitude."),
+            _int("radius", "Miles, 1-150 (Discount Tire's default when omitted)."),
+            _int("page", "Page (10 stores per page)."),
+        ),
+        one_of=(("zip", "city", "latitude"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_store",
+        namespace="discounttire",
+        method="store",
+        http="POST",
+        path="/api/v1/discounttire/store",
+        summary=(
+            "One " + _DTR_NAME + " store by store code: market, store_code, brand, name, "
+            "location_name, legacy_code, address, phone, latitude, longitude, rating, "
+            "review_count, services, cleanliness_rating, knowledge_rating, recommended_count, "
+            "recommended_percent, rating_breakdown, hours [{date, open, close, closed, note, "
+            "holiday}] (the coming week, dated), store_services, features, images, "
+            "nearby_stores, current_time, notes. No staff names. An unknown store is a charged "
+            "404." + _DTR_CHARGE
+        ),
+        params=(_DTR_STORE_CODE,),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_reviews",
+        namespace="discounttire",
+        method="reviews",
+        http="POST",
+        path="/api/v1/discounttire/reviews",
+        summary=(
+            _DTR_NAME + "'s own reviews of a tire: the whole model (scope 'model', default) or "
+            "this size (scope 'size'), sorted (newest, highest, lowest, most_helpful), one star "
+            "rating, paged (10 a page by default, up to 100): market, item_number, scope, sort, "
+            "rating_filter, rating, review_count, recommend_count, rating_breakdown, page, "
+            "page_size, total, total_pages, count, reviews [{id, rating, text, date, "
+            "recommended, helpful_votes, unhelpful_votes, category_ratings {tread_life, "
+            "wet_traction, dry_traction, cornering_steering, ride_noise, ride_comfort, "
+            "winter_weather}, pros, cons, state, vehicle}], notes. No reviewer names or cities. "
+            "Captured 2026-11-25: item 108547 (Michelin Defender 2), 4.8 stars, 11,578 reviews of "
+            "the model." + _DTR_CHARGE
+        ),
+        params=(
+            Param("item_number", "Union[str, int]", required=True, doc=_DTR_ITEM_DOC),
+            _lit(
+                "scope",
+                ("model", "size"),
+                "'model' (default: every size of the tire model) or 'size' (this item only).",
+            ),
+            *_DTR_REVIEW_FILTERS,
+            _int("page", "Page (1-5000)."),
+            _int("page_size", "Reviews per page (1-100, default 10)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_store_reviews",
+        namespace="discounttire",
+        method="store_reviews",
+        http="POST",
+        path="/api/v1/discounttire/store-reviews",
+        summary=(
+            _DTR_NAME + "'s own reviews of one store (5 per page), sorted (newest, highest, "
+            "lowest, most_helpful), one star rating: market, store_code, sort, rating_filter, "
+            "rating_breakdown, page, page_size, total, total_pages, count, reviews [{id, rating, "
+            "text, date, recommended, helpful_votes, unhelpful_votes, category_ratings {overall, "
+            "cleanliness, knowledge}}], notes. No reviewer names. An unknown store is a charged "
+            "404." + _DTR_CHARGE
+        ),
+        params=(
+            _DTR_STORE_CODE,
+            *_DTR_REVIEW_FILTERS,
+            _int("page", "Page (5 reviews per page)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_wheels",
+        namespace="discounttire",
+        method="wheels",
+        http="POST",
+        path="/api/v1/discounttire/wheels",
+        summary=(
+            _DTR_NAME + " wheels by size (diameter + width + bolt_pattern) or that fit a vehicle "
+            "(vehicle_id + trim_id + assembly_id from vehicle()), at one store, sorted "
+            "(best_seller, price_low, price_high), filtered (brand, category, color, special "
+            "offers, instant savings, in stock, price, any facet) and paged. Returns diameter, "
+            "width, bolt_pattern, " + _DTR_LIST + ". Items can be wheel models with a price_range "
+            "at the store." + _DTR_PER_STORE + _DTR_CHARGE
+        ),
+        params=(
+            Param(
+                "diameter",
+                "Optional[Union[str, float]]",
+                doc="Wheel diameter in inches (e.g. 20; with width for wheels by size; with a "
+                "vehicle: another diameter than the vehicle's).",
+            ),
+            Param("width", "Optional[Union[str, float]]", doc="Wheel width in inches (e.g. 9)."),
+            _str(
+                "bolt_pattern",
+                "Bolt pattern (required with diameter + width): lugs and bolt circle in mm "
+                "('6-135', '6x139.7') or inches ('5x4.5').",
+            ),
+            *_DTR_VEHICLE_OPT,
+            _lit(
+                "sort",
+                ("best_seller", "price_low", "price_high"),
+                "best_seller (default), price_low or price_high.",
+            ),
+            _str_or_list(
+                "category",
+                "Wheel category as Discount Tire writes it (its Wheel Category facet, e.g. "
+                "'Chrome Wheels').",
+            ),
+            _str_or_list(
+                "color",
+                "Wheel color as Discount Tire writes it (its Wheel Color facet, e.g. 'Black').",
+            ),
+            _bool("special_offers", "Only wheels with a special offer."),
+            _DTR_STORE,
+            _DTR_ZIP,
+            *_DTR_LIST_PARAMS,
+        ),
+        one_of=(("diameter", "vehicle_id"), ("store", "zip")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_browse",
+        namespace="discounttire",
+        method="browse",
+        http="POST",
+        path="/api/v1/discounttire/browse",
+        summary=(
+            _DTR_NAME + " tire models in one category (categories[].slug of categories()), of "
+            "one tire brand, or matching keywords (query), at one store: market, store, category, "
+            "brand, q, product_type, page, page_size, total, total_pages, count, sort, items "
+            "(model level: model_id, brand, model, price_range at the store, rating, "
+            "promotions), facets, notes. Send one of category, brand or query. Captured "
+            "2026-11-25: all-season-tires had 617 models at store 1009." + _DTR_PER_STORE
+            + " An unknown category or brand is a charged 404." + _DTR_CHARGE
+        ),
+        params=(
+            _str(
+                "category",
+                "A category slug from categories() (categories[].slug, e.g. 'all-season-tires').",
+            ),
+            _str("brand", "A tire brand (e.g. 'Michelin'): its models."),
+            _str("query", "Keywords (e.g. 'michelin defender').", wire="q"),
+            _lit(
+                "sort",
+                ("best_seller", "price_low", "price_high", "rating", "relevance"),
+                "best_seller (default; relevance with query), price_low, price_high, rating or "
+                "relevance.",
+            ),
+            _int("page", "Page (1-500)."),
+            _int("page_size", "Items per page (1-100, default 20)."),
+            _DTR_STORE,
+            _DTR_ZIP,
+        ),
+        one_of=(("category", "brand", "query"), ("store", "zip")),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_categories",
+        namespace="discounttire",
+        method="categories",
+        http="POST",
+        path="/api/v1/discounttire/categories",
+        summary=(
+            _DTR_NAME + "'s tire or wheel types: market, type, count, categories [{code, name "
+            "(the category filter of search(), vehicle_tires() and wheels()), slug (the category "
+            "input of browse(), tires), description, groups, url, image}], notes." + _DTR_CHARGE
+        ),
+        params=(_lit("type", ("tires", "wheels"), "'tires' (default) or 'wheels'."),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_suggestions",
+        namespace="discounttire",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/discounttire/suggestions",
+        summary=(
+            "What " + _DTR_NAME + "'s search box suggests for a few letters: market, q, products "
+            "[{model_id, item_number, brand, model, description, type, url, image}], categories "
+            "[{code, name, count}], notes. No prices." + _DTR_CHARGE
+        ),
+        params=(
+            _req(
+                "query",
+                "What a shopper types (3 characters or more, e.g. 'michelin').",
+                wire="q",
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="discounttire_appointments",
+        namespace="discounttire",
+        method="appointments",
+        http="POST",
+        path="/api/v1/discounttire/appointments",
+        summary=(
+            "The service-appointment calendar of one " + _DTR_NAME + " store as Discount Tire's "
+            "appointment page shows it, read only (Scavio never books): market, store_code, "
+            "month, count, days [{date, day_of_week, bookable, message, holiday, opens, closes, "
+            "slot_count, slots [{start, end}] (the store's local time, YYYY-MM-DDTHH:MM, no time "
+            "zone)}], notes; opens and closes are the store's hours as given." + _DTR_CHARGE
+        ),
+        params=(
+            _DTR_STORE_CODE,
+            _int("month", "Month number, 1-12 (default: the current month)."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -26410,6 +27029,7 @@ NAMESPACES: tuple[str, ...] = (
     "nike",
     "staples",
     "dollartree",
+    "discounttire",
 )
 
 

@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 104 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 105 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -56,6 +56,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nike Sale Prices with Full Price and Discount, Every Size with GTIN, Release Calendar with Per-Size Levels, Same Style Code Across Markets (62 storefronts in 42 countries; 8 endpoints) | Yes | No | No | No |
 | Staples Ink and Paper Prices with Staples' Own Price per Unit and Cost per Page, Promotions with Expiry, Units at the Stores near a ZIP, Reviews and Q&A (US; Canada search and product in English or French; 12 endpoints) | Yes | No | No | No |
 | Dollar Tree Case Prices next to Unit Prices, Case Packs, Minimum Order and Split Cases, Units at a Store and Its Nearby Stores, Stores and Reviews (US; Canada store pages; 10 endpoints) | Yes | No | No | No |
+| Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -4995,6 +4996,109 @@ and prices, price history (poll and store the answers), checkout. Failed calls
 and refused inputs are not charged; a not-found (an unknown item, category,
 brand or store) is charged.
 
+### 74. Tires -- Discount Tire tire prices by store, vehicle fitment, store stock
+
+Discount Tire (discounttire.com, the US tire and wheel retailer, America's
+Tire in parts of CA, PA, NJ and NY). Namespace `discounttire`, 15 endpoints:
+`search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`,
+`stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`,
+`categories`, `suggestions`, `appointments`. 1 credit per call;
+`credits_used` in the response is what was charged. Every method is US only
+(www.discounttire.com, USD; no `country`): Discount Tire and America's Tire
+are one catalog. The request timeout is raised to at least 240s. Discount
+Tire has no public product API (it runs an affiliate programme through CJ,
+and fleet customers use an account portal). Pair it with the `walmart`,
+`sams_club` and `amazon` namespaces for the same tire (match on
+manufacturer part number or GTIN), and with `autozone` and `oreilly` for
+parts. See the [Discount Tire API page](https://scavio.dev/discounttire-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+dt = client.discounttire
+
+# --- Tires in one size at one store: price per tire, promotions with end dates, units there.
+hits = dt.search("225/65R17", store="1009", sort="price_low")["data"]
+print(hits["store"]["name"], hits["total"])
+for it in hits["items"][:5]:
+    print(it["item_number"], it["name"], it["price"], (it["stock"] or {}).get("units"), it["promotions"])
+# No set-of-four price field: 4 x price is arithmetic, label it as such.
+print("4 tires (arithmetic):", 4 * hits["items"][0]["price"])
+
+# --- The same tire at another store, chosen by ZIP (the nearest store is used and echoed).
+p = dt.product("108547", zip="85251")["data"]
+print(p["store"]["store_code"], p["store"]["brand"], p["price"], p["gtin"], p["manufacturer_part_number"])
+print(p["tire"]["load_index_speed"], p["tire"]["utqg"], p["tire"]["tread_depth"])
+
+# --- Vehicle fitment, one step per call: years -> makes -> models -> trims -> size options -> fitment.
+makes = dt.vehicle(year=2022)["data"]["options"]
+models = dt.vehicle(year=2022, make="Ford")["data"]["options"]        # [{vehicle_id, model}]
+trims = dt.vehicle(vehicle_id="17361")["data"]["options"]             # [{trim_id, trim}]
+sizes = dt.vehicle(vehicle_id="17361", trim_id="52455")["data"]["options"]  # [{assembly_id, ...}]
+fit = dt.vehicle(vehicle_id="17361", trim_id="52455", assembly_id="0000E28B")["data"]["fitment"]
+print(fit["front_size"], fit["rear_size"], fit["staggered"], fit["optional_sizes"][:1])
+
+# --- Tires that fit the vehicle at one store, original equipment flagged.
+vt = dt.vehicle_tires("17361", "52455", "0000E28B", store="1009")["data"]
+print(vt["total"], [i["name"] for i in vt["items"] if i["original_equipment"]])
+# Staggered vehicles come back as front / rear sets, each tire with its own price.
+sets = dt.vehicle_tires("16990", "51166", "0000DI40", store="1009")["data"]
+first = sets["items"][0]
+print(first["front"]["price"], first["rear"]["price"], first["price_note"])
+# Treadwell ranking: Discount Tire's own estimates, as given.
+tw = dt.vehicle_tires("17361", "52455", "0000E28B", store="1009", ranking="treadwell")["data"]
+
+# --- Exact units at the stores near a ZIP (5 stores per page).
+ss = dt.store_stock("108547", "85251", radius=25)["data"]
+for s in ss["stores"]:
+    print(s["store_code"], s["distance_miles"], s["stock"][0]["units"], s["stock"][0]["message"])
+
+# --- Every size of a model, wheels, browse, categories, suggestions.
+m = dt.model("michelin-defender-2", store="1009")["data"]
+print(m["item_count"], m["price_range"])
+wheels = dt.wheels(diameter=20, width=9, bolt_pattern="6-135", store="1009")["data"]
+allseason = dt.browse(category="all-season-tires", store="1009")["data"]
+cats = dt.categories()["data"]
+sugg = dt.suggestions("michelin")["data"]
+
+# --- Stores, one store, reviews, and the read-only appointment calendar.
+stores = dt.stores("85251")["data"]
+store = dt.store("1009")["data"]
+print(store["brand"], store["hours"][:2])
+rv = dt.reviews("108547", sort="most_helpful")["data"]
+print(rv["rating"], rv["review_count"], rv["total_pages"])
+srv = dt.store_reviews("1009")["data"]
+cal = dt.appointments("1009")["data"]
+print([(d["date"], d["bookable"], d["slot_count"]) for d in cal["days"]])
+```
+
+Prices, stock and promotions are per store: `search`, `vehicle_tires`,
+`product`, `model`, `wheels` and `browse` take `store` (a store code from
+`stores`) or `zip` (the nearest store is used), and every answer names the
+store used in `store`. Price can differ between stores and is not different
+at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item
+108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire
+store in New Jersey; across 45 tires, the stores measured in Texas, Florida
+and Washington showed no differences, a California store 1, a Michigan store
+3 and the New Jersey store 13 of 32. `price` is per tire or wheel: Discount
+Tire publishes no set-of-four price. Promotions are Discount Tire's own title
+and text with its end date (`ends`, ISO 8601 UTC, and `ends_text` as given);
+no start date. Captured 2026-11-25: the 2022 Ford F-150 XLT Crew Cab 2WD
+(`vehicle_id` 17361, `trim_id` 52455, `assembly_id` 0000E28B) runs 245/70R17
+and had 157 tires at store 1009; the 2022 Corvette Stingray (245/35R19 front,
+305/30R20 rear) had 93 front / rear sets (a set is 2 front + 2 rear).
+Treadwell ranking fields are Discount Tire's own estimates, as given. Store
+stock is the exact unit count per store; a store with 0 units can still say
+"Available as soon as <date>". Reviews are Discount Tire's own, fully paged,
+with no reviewer names. Appointments are read only: Scavio never books; slot
+`start` and `end` are the store's local time (YYYY-MM-DDTHH:MM, no time
+zone). Not available: the deals page text, road hazard and certificate prices,
+financing, installation and fee amounts, the Treadwell chat, fleet accounts,
+Tire Rack, price history (poll and store the answers), checkout and booking.
+Failed calls and refused inputs are not charged; a not-found (an unknown
+item, model, category, brand or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -5148,6 +5252,7 @@ Scavio works with popular AI/LLM frameworks:
 | Nike (`nike`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `release`, `reviews`; 62 storefronts in 42 countries (`country` + `language`); `releases` and `release` not on vn, cn or jp in English; `reviews` not on cn | 1 each |
 | Staples (`staples`) | `search`, `product`, `category`, `categories`, `deals`, `coupons`, `store_stock`, `stores`, `store`, `reviews`, `questions`, `trending`; us (default) on every method; ca (English or French) on `search` and `product` only | 1 each |
 | Dollar Tree (`dollartree`) | `search`, `product`, `category`, `categories`, `brand`, `deals`, `store_stock`, `stores`, `store`, `reviews`; us only (no `country`) on every method except `store`, which also takes ca (Canada store pages); `store_stock` needs a store number | 1 each; `stores` 5 |
+| Discount Tire (`discounttire`) | `search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`, `stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`, `appointments`; us only (no `country`); `search`, `vehicle_tires`, `product`, `model`, `wheels` and `browse` need `store` or `zip` | 1 each |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5179,6 +5284,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.85.0
+
+- **New `discounttire` namespace** (sync and async) for Discount Tire
+  (discounttire.com, the US tire and wheel retailer, America's Tire in parts
+  of CA, PA, NJ and NY), 15 endpoints: `search`, `vehicle`, `vehicle_tires`,
+  `product`, `model`, `store_stock`, `stores`, `store`, `reviews`,
+  `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`,
+  `appointments`. The price of a tire at a named store (`store` or `zip`),
+  the vehicle fitment chain with original-equipment tires and staggered
+  front / rear sets, exact units at the stores near a ZIP, tire and store
+  reviews with full paging, and the read-only appointment calendar. 1 credit
+  per call. The request timeout is raised to at least 240s.
 
 ### Changed in 0.84.1
 

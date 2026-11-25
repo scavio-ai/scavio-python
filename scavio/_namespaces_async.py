@@ -113,6 +113,7 @@ __all__ = [
     "_AsyncNikeNamespace",
     "_AsyncStaplesNamespace",
     "_AsyncDollarTreeNamespace",
+    "_AsyncDiscountTireNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -20423,3 +20424,449 @@ class _AsyncDollarTreeNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("dollartree_reviews", {"item_id": item_id, "url": url}, extra)
+
+class _AsyncDiscountTireNamespace:
+    """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) search (tires by size), vehicle (year, make, model, trim, size option, fitment), vehicle-tires, product, model, store-stock (exact units at the stores near a ZIP), stores, store, reviews, store-reviews, wheels, browse, categories, suggestions and appointments (read only) endpoints; prices are per store."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        size: Optional[str] = None,
+        *,
+        width: Optional[Union[str, int]] = None,
+        aspect_ratio: Optional[Union[str, int]] = None,
+        diameter: Optional[Union[str, float]] = None,
+        rear_size: Optional[str] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[list[str]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        instant_savings: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        sort: Optional[Literal["best_seller", "price_low", "price_high", "rating"]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        speed_rating: Optional[Union[str, list[str]]] = None,
+        mileage_warranty: Optional[Union[str, list[str]]] = None,
+        load_range: Optional[str] = None,
+        three_peak: Optional[bool] = None,
+        run_flat: Optional[bool] = None,
+        rebates: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Tires in one size at one Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) store: size (225/65R17, LT265/70R17, 35x12.50R20) or width + aspect_ratio + diameter, optional rear_size for staggered front / rear pairs, sorted (best_seller, price_low, price_high, rating), filtered (brand, category, speed rating, load range, Three-Peak snowflake, run flat, rebates, instant savings, in stock, price, mileage warranty, any facet) and paged (20 a page by default, up to 100). Returns size, rear_size, market, store, page, page_size, total, total_pages, count, sort, filters_applied, resolved_filters [{input, requested, label, filter}], items (position, item_number (the input of product(), store_stock() and reviews()), type (tire, wheel, or model: a tire or wheel model with price_range), model_id (the input of model()), brand, model, name, description, size, price (per tire or wheel), price_text, price_range, markdown, map_price, map_display_rule (as given), promotions [{title, text, description, ends, ends_text, group, condition, url}], rating, review_count, recommend_count, stock {store_code, units (exact), message, available_date, days_out}, gtin, manufacturer_part_number, mileage_warranty, tier (Good / Better / Best), categories, original_equipment, image, url, category_ratings), facets [{key, name, values [{label, count, filter, selected}]}] (send filter back in filters), notes. Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. price is per tire or wheel: Discount Tire publishes no set-of-four price (4 x price is arithmetic, not a Discount Tire price). Promotions are Discount Tire's own title and text with its end date (ends, ISO 8601 UTC, and ends_text as given); no start date. Not available: the deals page text, road hazard and certificate prices, financing, installation and fee amounts, the Treadwell chat, fleet accounts, Tire Rack, price history (poll and store the answers), checkout and booking. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            size: Tire size ('225/65R17', 'LT265/70R17', '35x12.50R20'). Send size or width + aspect_ratio + diameter.
+            width: Section width (e.g. 225), with aspect_ratio and diameter.
+            aspect_ratio: Aspect ratio (e.g. 65).
+            diameter: Rim diameter in inches (e.g. 17).
+            rear_size: Rear size for a staggered pair (front size + rear size, e.g. '305/30R20'): items become front / rear pairs.
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            page: Page (1-500).
+            page_size: Items per page (1-100, default 20).
+            filters: Up to 10 filter tokens exactly as an earlier answer gives them in facets[].values[].filter (brand, category, speed rating, load range, sidewall, Good / Better / Best, ...; e.g. 'brands:brand-MCH'); several are combined.
+            brand: Brand name(s) as Discount Tire writes them (its Brands facet, e.g. 'Michelin'); resolved against the listing's own facet (resolved_filters).
+            min_price: Lowest price per tire or wheel (USD) at the store.
+            max_price: Highest price per tire or wheel (USD) at the store.
+            instant_savings: Only items with an instant saving (Discount Tire's Instant Savings filter).
+            in_stock: Only items in stock at the store (Discount Tire's In Stock filter).
+            sort: best_seller (default), price_low, price_high or rating: Discount Tire's sort menu.
+            category: Tire category as Discount Tire writes it (its Tire Category facet, e.g. 'All-Season Tires', 'Snow/Winter Tires'; or its code, e.g. 'winterTires').
+            speed_rating: Speed rating letter(s) (e.g. 'H', 'V'), matched to Discount Tire's Speed Rating facet.
+            mileage_warranty: A Mileage Warranty facet label as Discount Tire writes it (e.g. '60,000-70,000').
+            load_range: Load range (SL, XL, C, D, E, ...).
+            three_peak: Only tires with the Three-Peak Mountain Snowflake mark.
+            run_flat: Only run-flat tires.
+            rebates: Only tires with a rebate (Discount Tire's Rebates filter).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_search", {"size": size, "width": width, "aspect_ratio": aspect_ratio, "diameter": diameter, "rear_size": rear_size, "store": store, "zip": zip, "page": page, "page_size": page_size, "filters": filters, "brand": brand, "min_price": min_price, "max_price": max_price, "instant_savings": instant_savings, "in_stock": in_stock, "sort": sort, "category": category, "speed_rating": speed_rating, "mileage_warranty": mileage_warranty, "load_range": load_range, "three_peak": three_peak, "run_flat": run_flat, "rebates": rebates}, extra)
+
+    async def vehicle(
+        self,
+        *,
+        year: Optional[Union[int, str]] = None,
+        make: Optional[str] = None,
+        vehicle_id: Optional[Union[str, int]] = None,
+        trim_id: Optional[Union[str, int]] = None,
+        assembly_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY)'s vehicle selector, one step per call: market, step, count, options, next (what to send next). No input -> years (options [{year}]); year -> makes ([{make}]); year + make -> models ([{vehicle_id, model}]); vehicle_id -> trims ([{trim_id, trim}]); vehicle_id + trim_id -> assemblies, the tire size options ([{assembly_id, description, staggered, front_size, rear_size}]); vehicle_id + trim_id + assembly_id -> fitment {vehicle {vehicle_id, year, make, model, type, image}, trim {trim_id, name, category}, assembly_id, front_size, rear_size, staggered, front_wheel_diameter, rear_wheel_diameter, ride_height, drive, lug_torque (as given, no unit), optional_sizes [{wheel_diameter, axle, sizes [{size, fit (match, oversize or undersize)}]}], optional_staggered_sets}, notes. Captured 2026-11-25: 2022 Ford F-150 (vehicle_id 17361) XLT Crew Cab 2WD (trim_id 52455) had 3 size options; assembly 0000E28B is 245/70R17 front and rear on 17-inch wheels. vehicle_tires() and wheels() take the same three ids. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            year: Model year (e.g. 2022): its makes (with make: its models).
+            make: A make as Discount Tire writes it (options[].make of the makes step, e.g. 'Ford'), with year.
+            vehicle_id: options[].vehicle_id of vehicle()'s models step (e.g. '17361', a 2022 Ford F-150).
+            trim_id: options[].trim_id of vehicle()'s trims step (e.g. '52455', XLT Crew Cab 2WD).
+            assembly_id: options[].assembly_id of vehicle()'s assemblies step: the tire size option (e.g. '0000E28B', 245/70R17).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_vehicle", {"year": year, "make": make, "vehicle_id": vehicle_id, "trim_id": trim_id, "assembly_id": assembly_id}, extra)
+
+    async def vehicle_tires(
+        self,
+        vehicle_id: Union[str, int],
+        trim_id: Union[str, int],
+        assembly_id: str,
+        *,
+        position: Optional[Literal["set", "front", "rear"]] = None,
+        ranking: Optional[Literal["all", "treadwell"]] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[list[str]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        instant_savings: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        sort: Optional[Literal["best_seller", "price_low", "price_high", "rating", "treadwell"]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        speed_rating: Optional[Union[str, list[str]]] = None,
+        mileage_warranty: Optional[Union[str, list[str]]] = None,
+        load_range: Optional[str] = None,
+        three_peak: Optional[bool] = None,
+        run_flat: Optional[bool] = None,
+        rebates: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The tires Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) lists for one vehicle fitment (vehicle_id + trim_id + assembly_id from vehicle()) at one store, sorted, filtered and paged like search(), with the vehicle maker's original-equipment tire flagged (original_equipment). Staggered vehicles (different front and rear sizes): position 'set' (default) returns front / rear pairs [{position, pair, front, rear, url, price_note}], each tire with its own per-tire price (a staggered set is 2 front + 2 rear); 'front' or 'rear' lists one axle. ranking='treadwell' adds treadwell {rank, mileage {min, median, max, warranty}, miles_per_dollar, tire_life, ride_ratings, stopping, winter}: Discount Tire's Treadwell ranking fields as given, Discount Tire's own estimates, not measurements (sort 'treadwell' is its default there). Returns vehicle, staggered, position, ranking, market, store, page, page_size, total, total_pages, count, sort, filters_applied, resolved_filters [{input, requested, label, filter}], items (position, item_number (the input of product(), store_stock() and reviews()), type (tire, wheel, or model: a tire or wheel model with price_range), model_id (the input of model()), brand, model, name, description, size, price (per tire or wheel), price_text, price_range, markdown, map_price, map_display_rule (as given), promotions [{title, text, description, ends, ends_text, group, condition, url}], rating, review_count, recommend_count, stock {store_code, units (exact), message, available_date, days_out}, gtin, manufacturer_part_number, mileage_warranty, tier (Good / Better / Best), categories, original_equipment, image, url, category_ratings), facets [{key, name, values [{label, count, filter, selected}]}] (send filter back in filters), notes. Captured 2026-11-25: 157 tires for the 2022 F-150 XLT (245/70R17) at store 1009; 93 front / rear sets for a 2022 Corvette Stingray (245/35R19 front, 305/30R20 rear). Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. price is per tire or wheel: Discount Tire publishes no set-of-four price (4 x price is arithmetic, not a Discount Tire price). Promotions are Discount Tire's own title and text with its end date (ends, ISO 8601 UTC, and ends_text as given); no start date. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            vehicle_id: options[].vehicle_id of vehicle()'s models step (e.g. '17361', a 2022 Ford F-150).
+            trim_id: options[].trim_id of vehicle()'s trims step (e.g. '52455', XLT Crew Cab 2WD).
+            assembly_id: options[].assembly_id of vehicle()'s assemblies step: the tire size option (e.g. '0000E28B', 245/70R17).
+            position: Staggered vehicles only: 'set' (default: front / rear pairs), 'front' or 'rear'.
+            ranking: 'all' (default) or 'treadwell': Discount Tire's Treadwell ranking with its own mileage, ride and stopping estimates.
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            page: Page (1-500).
+            page_size: Items per page (1-100, default 20).
+            filters: Up to 10 filter tokens exactly as an earlier answer gives them in facets[].values[].filter (brand, category, speed rating, load range, sidewall, Good / Better / Best, ...; e.g. 'brands:brand-MCH'); several are combined.
+            brand: Brand name(s) as Discount Tire writes them (its Brands facet, e.g. 'Michelin'); resolved against the listing's own facet (resolved_filters).
+            min_price: Lowest price per tire or wheel (USD) at the store.
+            max_price: Highest price per tire or wheel (USD) at the store.
+            instant_savings: Only items with an instant saving (Discount Tire's Instant Savings filter).
+            in_stock: Only items in stock at the store (Discount Tire's In Stock filter).
+            sort: best_seller (default), price_low, price_high, rating; with ranking='treadwell' also treadwell (its default: Treadwell rank).
+            category: Tire category as Discount Tire writes it (its Tire Category facet, e.g. 'All-Season Tires', 'Snow/Winter Tires'; or its code, e.g. 'winterTires').
+            speed_rating: Speed rating letter(s) (e.g. 'H', 'V'), matched to Discount Tire's Speed Rating facet.
+            mileage_warranty: A Mileage Warranty facet label as Discount Tire writes it (e.g. '60,000-70,000').
+            load_range: Load range (SL, XL, C, D, E, ...).
+            three_peak: Only tires with the Three-Peak Mountain Snowflake mark.
+            run_flat: Only run-flat tires.
+            rebates: Only tires with a rebate (Discount Tire's Rebates filter).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_vehicle_tires", {"vehicle_id": vehicle_id, "trim_id": trim_id, "assembly_id": assembly_id, "position": position, "ranking": ranking, "store": store, "zip": zip, "page": page, "page_size": page_size, "filters": filters, "brand": brand, "min_price": min_price, "max_price": max_price, "instant_savings": instant_savings, "in_stock": in_stock, "sort": sort, "category": category, "speed_rating": speed_rating, "mileage_warranty": mileage_warranty, "load_range": load_range, "three_peak": three_peak, "run_flat": run_flat, "rebates": rebates}, extra)
+
+    async def product(
+        self,
+        item_number: Union[str, int],
+        *,
+        nearby_stores: Optional[list[Union[str, int]]] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) tire or wheel by item number at one store: everything in search()'s items plus tire {load_index, load_index_speed, speed_rating, load_range, utqg {treadwear, traction, temperature}, tread_depth, max_pressure, overall_diameter, section_width, aspect_ratio, rim_diameter, rim_width_range, sidewall, run_flat} or wheel {diameter, width, bolt_pattern, bolts, offset, hub_bore, finish, color, load_capacity}, weight, faqs, long_description, images, nearby_store_stock, no_longer_available, notes (tire and wheel fields as given; several carry no unit). Captured 2026-11-25: item 108547, Michelin Defender 2 225/65R17 102H, $206.00 a tire at store 1009 (Scottsdale, AZ), 25 units there, GTIN 086699082183, promotion '$110 OFF a set of 4!' ending 2026-12-04T07:59:00Z. Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. price is per tire or wheel: Discount Tire publishes no set-of-four price (4 x price is arithmetic, not a Discount Tire price). Promotions are Discount Tire's own title and text with its end date (ends, ISO 8601 UTC, and ends_text as given); no start date. An unknown item is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: A Discount Tire item number (items[].item_number, the number after /p/ in a discounttire.com product link; e.g. '108547').
+            nearby_stores: Optional store codes Discount Tire checks for a nearby store with stock (nearby_store_stock), up to 10.
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_product", {"item_number": item_number, "nearby_stores": nearby_stores, "store": store, "zip": zip}, extra)
+
+    async def model(
+        self,
+        model_id: str,
+        *,
+        type: Optional[Literal["tires", "wheels"]] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every size of one Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) tire or wheel model at one store: market, store, requested_model_id, product_type, model_id, brand, model, name, type, rating, review_count, price_range {min, max}, promotions, tier, categories, item_count, items [{item_number, price}], size_options [{key, options}], spec_ranges, default_item, long_description, image, url, notes. Captured 2026-11-25: michelin-defender-2 had 60 sizes at store 1009, $180 to $327 a tire. Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. price is per tire or wheel: Discount Tire publishes no set-of-four price (4 x price is arithmetic, not a Discount Tire price). Promotions are Discount Tire's own title and text with its end date (ends, ISO 8601 UTC, and ends_text as given); no start date. An unknown model is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            model_id: A model id (items[].model_id, e.g. 'michelin-defender-2') or a discounttire.com /buy-tires/ or /buy-wheels/ link.
+            type: 'tires' or 'wheels' (default: from the link, else tires then wheels).
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_model", {"model_id": model_id, "type": type, "store": store, "zip": zip}, extra)
+
+    async def store_stock(
+        self,
+        item_number: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        item_numbers: Optional[list[Union[str, int]]] = None,
+        radius: Optional[Literal[10, 25, 50, 75, 150]] = None,
+        sort: Optional[Literal["distance", "availability"]] = None,
+        page: Optional[int] = None,
+        quantity: Optional[int] = None,
+        store: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Exact units of 1-4 Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) items at the stores near a US ZIP (radius 10, 25 (default), 50, 75 or 150 miles, sorted by distance or availability, 5 stores per page): market, item_numbers, quantity, zip, radius_miles, sort, page, page_size, total, total_pages, count, my_store, stores [{store_code, brand, name, address, phone, latitude, longitude, distance_miles, stock [{item_number, units, message}]}], notes. units is the exact count Discount Tire reports; message is its availability text as given for the quantity asked, and a store with 0 units can still say 'Available as soon as <date>'. Captured 2026-11-25: item 108547 near ZIP 85251 had 47 stores within 25 miles; store 1022 (Scottsdale, 3.81 miles) had 38 units. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: A Discount Tire item number (items[].item_number, the number after /p/ in a discounttire.com product link; e.g. '108547'). Send item_number or item_numbers.
+            zip: US ZIP code (e.g. '85251'): the stores near it. Required.
+            item_numbers: Up to 4 item numbers checked together (e.g. a staggered front and rear).
+            radius: Miles: 10, 25 (default), 50, 75 or 150.
+            sort: 'distance' (default) or 'availability'.
+            page: Page (5 stores per page).
+            quantity: How many of each item (1-8, default 4): Discount Tire's availability text is written for this quantity.
+            store: Optional: your store; its units come back in my_store.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_store_stock", {"item_number": item_number, "zip": zip, "item_numbers": item_numbers, "radius": radius, "sort": sort, "page": page, "quantity": quantity, "store": store}, extra)
+
+    async def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        city: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) stores near a US ZIP, city or point (10 per page, nearest first): market, location, radius_miles, page, page_size, total, total_pages, count, stores [{position, store_code (the store input of the price methods), brand (Discount Tire or America's Tire), name, location_name, legacy_code, address {line1, line2, city, state, zip, country}, phone, latitude, longitude, distance_miles, rating, review_count, services}], notes. Send one of zip, city or latitude + longitude. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (e.g. '85251').
+            city: A US city, e.g. 'Phoenix, AZ'.
+            latitude: Latitude, with longitude: a point in the United States.
+            longitude: Longitude, with latitude.
+            radius: Miles, 1-150 (Discount Tire's default when omitted).
+            page: Page (10 stores per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_stores", {"zip": zip, "city": city, "latitude": latitude, "longitude": longitude, "radius": radius, "page": page}, extra)
+
+    async def store(
+        self,
+        store_code: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) store by store code: market, store_code, brand, name, location_name, legacy_code, address, phone, latitude, longitude, rating, review_count, services, cleanliness_rating, knowledge_rating, recommended_count, recommended_percent, rating_breakdown, hours [{date, open, close, closed, note, holiday}] (the coming week, dated), store_services, features, images, nearby_stores, current_time, notes. No staff names. An unknown store is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_code: A store code (stores[].store_code of stores(), e.g. '1009').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_store", {"store_code": store_code}, extra)
+
+    async def reviews(
+        self,
+        item_number: Union[str, int],
+        *,
+        scope: Optional[Literal["model", "size"]] = None,
+        sort: Optional[Literal["newest", "highest", "lowest", "most_helpful"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY)'s own reviews of a tire: the whole model (scope 'model', default) or this size (scope 'size'), sorted (newest, highest, lowest, most_helpful), one star rating, paged (10 a page by default, up to 100): market, item_number, scope, sort, rating_filter, rating, review_count, recommend_count, rating_breakdown, page, page_size, total, total_pages, count, reviews [{id, rating, text, date, recommended, helpful_votes, unhelpful_votes, category_ratings {tread_life, wet_traction, dry_traction, cornering_steering, ride_noise, ride_comfort, winter_weather}, pros, cons, state, vehicle}], notes. No reviewer names or cities. Captured 2026-11-25: item 108547 (Michelin Defender 2), 4.8 stars, 11,578 reviews of the model. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: A Discount Tire item number (items[].item_number, the number after /p/ in a discounttire.com product link; e.g. '108547').
+            scope: 'model' (default: every size of the tire model) or 'size' (this item only).
+            sort: newest (default), highest, lowest or most_helpful.
+            rating: Only reviews with this star rating (1-5).
+            page: Page (1-5000).
+            page_size: Reviews per page (1-100, default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_reviews", {"item_number": item_number, "scope": scope, "sort": sort, "rating": rating, "page": page, "page_size": page_size}, extra)
+
+    async def store_reviews(
+        self,
+        store_code: Union[str, int],
+        *,
+        sort: Optional[Literal["newest", "highest", "lowest", "most_helpful"]] = None,
+        rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY)'s own reviews of one store (5 per page), sorted (newest, highest, lowest, most_helpful), one star rating: market, store_code, sort, rating_filter, rating_breakdown, page, page_size, total, total_pages, count, reviews [{id, rating, text, date, recommended, helpful_votes, unhelpful_votes, category_ratings {overall, cleanliness, knowledge}}], notes. No reviewer names. An unknown store is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_code: A store code (stores[].store_code of stores(), e.g. '1009').
+            sort: newest (default), highest, lowest or most_helpful.
+            rating: Only reviews with this star rating (1-5).
+            page: Page (5 reviews per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_store_reviews", {"store_code": store_code, "sort": sort, "rating": rating, "page": page}, extra)
+
+    async def wheels(
+        self,
+        *,
+        diameter: Optional[Union[str, float]] = None,
+        width: Optional[Union[str, float]] = None,
+        bolt_pattern: Optional[str] = None,
+        vehicle_id: Optional[Union[str, int]] = None,
+        trim_id: Optional[Union[str, int]] = None,
+        assembly_id: Optional[str] = None,
+        sort: Optional[Literal["best_seller", "price_low", "price_high"]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        special_offers: Optional[bool] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[list[str]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        instant_savings: Optional[bool] = None,
+        in_stock: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) wheels by size (diameter + width + bolt_pattern) or that fit a vehicle (vehicle_id + trim_id + assembly_id from vehicle()), at one store, sorted (best_seller, price_low, price_high), filtered (brand, category, color, special offers, instant savings, in stock, price, any facet) and paged. Returns diameter, width, bolt_pattern, market, store, page, page_size, total, total_pages, count, sort, filters_applied, resolved_filters [{input, requested, label, filter}], items (position, item_number (the input of product(), store_stock() and reviews()), type (tire, wheel, or model: a tire or wheel model with price_range), model_id (the input of model()), brand, model, name, description, size, price (per tire or wheel), price_text, price_range, markdown, map_price, map_display_rule (as given), promotions [{title, text, description, ends, ends_text, group, condition, url}], rating, review_count, recommend_count, stock {store_code, units (exact), message, available_date, days_out}, gtin, manufacturer_part_number, mileage_warranty, tier (Good / Better / Best), categories, original_equipment, image, url, category_ratings), facets [{key, name, values [{label, count, filter, selected}]}] (send filter back in filters), notes. Items can be wheel models with a price_range at the store. Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            diameter: Wheel diameter in inches (e.g. 20; with width for wheels by size; with a vehicle: another diameter than the vehicle's).
+            width: Wheel width in inches (e.g. 9).
+            bolt_pattern: Bolt pattern (required with diameter + width): lugs and bolt circle in mm ('6-135', '6x139.7') or inches ('5x4.5').
+            vehicle_id: options[].vehicle_id of vehicle()'s models step (e.g. '17361', a 2022 Ford F-150).
+            trim_id: options[].trim_id of vehicle()'s trims step (e.g. '52455', XLT Crew Cab 2WD).
+            assembly_id: options[].assembly_id of vehicle()'s assemblies step: the tire size option (e.g. '0000E28B', 245/70R17).
+            sort: best_seller (default), price_low or price_high.
+            category: Wheel category as Discount Tire writes it (its Wheel Category facet, e.g. 'Chrome Wheels').
+            color: Wheel color as Discount Tire writes it (its Wheel Color facet, e.g. 'Black').
+            special_offers: Only wheels with a special offer.
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            page: Page (1-500).
+            page_size: Items per page (1-100, default 20).
+            filters: Up to 10 filter tokens exactly as an earlier answer gives them in facets[].values[].filter (brand, category, speed rating, load range, sidewall, Good / Better / Best, ...; e.g. 'brands:brand-MCH'); several are combined.
+            brand: Brand name(s) as Discount Tire writes them (its Brands facet, e.g. 'Michelin'); resolved against the listing's own facet (resolved_filters).
+            min_price: Lowest price per tire or wheel (USD) at the store.
+            max_price: Highest price per tire or wheel (USD) at the store.
+            instant_savings: Only items with an instant saving (Discount Tire's Instant Savings filter).
+            in_stock: Only items in stock at the store (Discount Tire's In Stock filter).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_wheels", {"diameter": diameter, "width": width, "bolt_pattern": bolt_pattern, "vehicle_id": vehicle_id, "trim_id": trim_id, "assembly_id": assembly_id, "sort": sort, "category": category, "color": color, "special_offers": special_offers, "store": store, "zip": zip, "page": page, "page_size": page_size, "filters": filters, "brand": brand, "min_price": min_price, "max_price": max_price, "instant_savings": instant_savings, "in_stock": in_stock}, extra)
+
+    async def browse(
+        self,
+        *,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        query: Optional[str] = None,
+        sort: Optional[Literal["best_seller", "price_low", "price_high", "rating", "relevance"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        store: Optional[Union[str, int]] = None,
+        zip: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) tire models in one category (categories[].slug of categories()), of one tire brand, or matching keywords (query), at one store: market, store, category, brand, q, product_type, page, page_size, total, total_pages, count, sort, items (model level: model_id, brand, model, price_range at the store, rating, promotions), facets, notes. Send one of category, brand or query. Captured 2026-11-25: all-season-tires had 617 models at store 1009. Prices, stock and promotions are per store: send store (a store code) or zip (the nearest store is used), not both; the store used is echoed in store {store_code, brand (Discount Tire or America's Tire), name, location_name, address, city, state, zip, phone, distance_miles, chosen_by}. Price can differ between stores and is not different at every store: measured 2026-11-25, Michelin Defender 2 225/65R17 (item 108547) was $206 a tire at 9 stores in 8 states and $205 at an America's Tire store in New Jersey. An unknown category or brand is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category slug from categories() (categories[].slug, e.g. 'all-season-tires').
+            brand: A tire brand (e.g. 'Michelin'): its models.
+            query: Keywords (e.g. 'michelin defender').
+            sort: best_seller (default; relevance with query), price_low, price_high, rating or relevance.
+            page: Page (1-500).
+            page_size: Items per page (1-100, default 20).
+            store: A Discount Tire / America's Tire store code (stores[].store_code of stores(), e.g. '1009'). Prices, stock and promotions are this store's. Send store or zip.
+            zip: A US ZIP code instead of store: the nearest store in Discount Tire's store search is used (echoed in store).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_browse", {"category": category, "brand": brand, "query": query, "sort": sort, "page": page, "page_size": page_size, "store": store, "zip": zip}, extra)
+
+    async def categories(
+        self,
+        *,
+        type: Optional[Literal["tires", "wheels"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY)'s tire or wheel types: market, type, count, categories [{code, name (the category filter of search(), vehicle_tires() and wheels()), slug (the category input of browse(), tires), description, groups, url, image}], notes. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: 'tires' (default) or 'wheels'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_categories", {"type": type}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY)'s search box suggests for a few letters: market, q, products [{model_id, item_number, brand, model, description, type, url, image}], categories [{code, name, count}], notes. No prices. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a shopper types (3 characters or more, e.g. 'michelin').
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_suggestions", {"query": query}, extra)
+
+    async def appointments(
+        self,
+        store_code: Union[str, int],
+        *,
+        month: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The service-appointment calendar of one Discount Tire (discounttire.com, the US tire and wheel retailer, America's Tire in parts of CA, PA, NJ and NY) store as Discount Tire's appointment page shows it, read only (Scavio never books): market, store_code, month, count, days [{date, day_of_week, bookable, message, holiday, opens, closes, slot_count, slots [{start, end}] (the store's local time, YYYY-MM-DDTHH:MM, no time zone)}], notes; opens and closes are the store's hours as given. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_code: A store code (stores[].store_code of stores(), e.g. '1009').
+            month: Month number, 1-12 (default: the current month).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("discounttire_appointments", {"store_code": store_code, "month": month}, extra)
