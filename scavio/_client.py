@@ -31,6 +31,7 @@ from ._namespaces_sync import (
     _CvsNamespace,
     _DecathlonNamespace,
     _DepopNamespace,
+    _DermstoreNamespace,
     _DicksNamespace,
     _DiscountTireNamespace,
     _DollarGeneralNamespace,
@@ -283,6 +284,7 @@ class ScavioClient:
         self.discounttire = _DiscountTireNamespace(self)
         self.vevor = _VevorNamespace(self)
         self.nellis = _NellisNamespace(self)
+        self.dermstore = _DermstoreNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 107 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 108 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -59,6 +59,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
 | Vevor Prices per Storefront in 13 Countries, Was Price Only During a Deal with Deal Dates, Variants with Their Own Price and Stock, Shipping Fee by State or Province, the Same SKU on Every Storefront, Reviews (13 storefronts; 11 endpoints) | Yes | No | No | No |
 | Nellis Auction Lot Prices: Current Bid, Bid Count and Nellis's Estimated Retail Price, a Sold Lot's Final Price, Bid History Without Bidder Names, Pickup Warehouses and Hours (6 US shopping locations; 4 endpoints) | Yes | No | No | No |
+| Dermstore Skincare Prices, RRP and Dermstore's Offer Text per Product and Brand, Variants with Their Own Price and Stock, UPC, Current Offers with End Times, US vs Canada Prices, the 10 Latest Reviews (US and Canada; 7 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -5246,6 +5247,68 @@ bid updates, bidding, watchlists and checkout. Failed calls and refused inputs
 are not charged; a not-found (an unknown id, or a category with no open lots)
 is charged.
 
+### 77. Skincare -- Dermstore prices, offers by brand, US vs Canada
+
+Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to
+the US and Canada). Namespace `dermstore`, 7 endpoints: `search`, `list`,
+`product`, `suggestions`, `offers`, `brands`, `categories`. 1 credit per
+call; `credits_used` in the response is what was charged. Every method takes
+`country` (`us` default, prices in USD; `ca`, Dermstore's own Canadian dollar
+prices, not converted). The request timeout is raised to at least 240s.
+Dermstore has no public API; its affiliate programme runs on Awin and offers
+product feeds to approved publishers. Pair a product with the `sephora`,
+`ulta` and `amazon` namespaces for the same product and size elsewhere (match
+on UPC, or brand + name + size). See the
+[Dermstore API page](https://scavio.dev/dermstore-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+dm = client.dermstore
+
+# --- Search: price, RRP, Dermstore's offer text per product.
+hits = dm.search("uv clear spf 46")["data"]
+print(hits["market"], hits["total"], hits["has_more"])
+for it in hits["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["rrp"], it["discount_percent"], it["offer"])
+# The same search in Canada: Dermstore's own CAD prices.
+ca = dm.search("uv clear spf 46", country="ca")["data"]
+# A mapped keyword returns the page Dermstore sends it to.
+sun = dm.search("sunscreen", sort="discount", page_size=100)["data"]
+print(sun["resolved_from"])
+
+# --- Any list page: a brand, /sale or an offer page.
+brand = dm.list("/brands/eltamd", include_facets=True)["data"]
+
+# --- One product: variants with their own price and stock, UPC, offer banner, 10 latest reviews.
+p = dm.product("13806521")["data"]
+print(p["price"], p["rrp"], p["upc"], p["offer"]["title"], p["auto_replenish"])
+for v in p["variants"]:
+    print(v["sku"], v["option"], v["price"], v["in_stock"])
+
+# --- Current offers with their end times, brands and categories.
+for o in dm.offers()["data"]["offers"]:
+    print(o["title"], o["code"], o["threshold"], o["ends"], o["list_path"])
+brands = dm.brands(letter="E")["data"]
+cats = dm.categories()["data"]
+```
+
+`rrp` is Dermstore's RRP as given; `discount_percent` is computed by Scavio
+from price and RRP, only when the RRP is above the price. `offer` is
+Dermstore's own promotion text, as given; code rates differ by brand.
+Captured 2026-11-25: EltaMD UV Clear Broad-Spectrum SPF 46 (1.7 fl. oz., SKU
+11370303) at 46 USD and 65.78 CAD; Medik8 offered "30% Off With Code JOY +
+Gift", while SkinCeuticals offered "Earn 10% Back + $25 Gift" (double points,
+as Dermstore states it). A mapped keyword (sunscreen, retinol, eltamd) returns
+the products of the page Dermstore sends it to, reported in `resolved_from`.
+Offers carry the end time Dermstore gives (`ends`); Dermstore gives no start
+date. Not available: a full review feed or review paging (only the 10 latest
+via `product`), Q&A, member (VIP) prices, cart or checkout prices, price
+history (poll and store the answers), offer start dates. Failed calls and
+refused inputs are not charged; a not-found (an unknown SKU or list path) is
+charged.
+
 ## Error Handling
 
 ```python
@@ -5402,6 +5465,7 @@ Scavio works with popular AI/LLM frameworks:
 | Discount Tire (`discounttire`) | `search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`, `stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`, `appointments`; us only (no `country`); `search`, `vehicle_tires`, `product`, `model`, `wheels` and `browse` need `store` or `zip` | 1 each |
 | Vevor (`vevor`) | `search`, `product`, `shipping`, `reviews`, `questions`, `suggestions`, `categories`, `category`, `collections`, `deals`, `prices`; 13 storefronts (`country` + `language`) on every method except `prices`, which takes `sku` only and asks every storefront; `shipping` needs `state` (us) or `province` (ca) | 1 each; `prices` 3 |
 | Nellis Auction (`nellis`) | `search`, `item`, `locations`, `categories`; `location` (6 shopping locations, default `las-vegas`) on `search`, `locations` and `categories`; `item` takes `id` or `url`; search lists open auctions only | 1 each |
+| Dermstore (`dermstore`) | `search`, `list`, `product`, `suggestions`, `offers`, `brands`, `categories`; `country` (`us` default, or `ca` in Dermstore's own CAD prices) on every method; `list` takes `path` or `url`, `product` takes `sku` or `url` | 1 each |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5433,6 +5497,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.88.0
+
+- **New `dermstore` namespace** (sync and async) for Dermstore
+  (dermstore.com, the US skincare and beauty retailer, shipping to the US and
+  Canada), 7 endpoints: `search`, `list`, `product`, `suggestions`, `offers`,
+  `brands`, `categories`. Price, RRP as Dermstore gives it and Dermstore's
+  offer text per product and brand, variants with their own price and stock,
+  UPC, auto-replenish plans, the 10 latest reviews, the current offers with
+  their end times, and `country` `us` or `ca` (Dermstore's own CAD prices). 1
+  credit per call. The request timeout is raised to at least 240s.
 
 ### Changed in 0.87.0
 

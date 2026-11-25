@@ -4648,6 +4648,80 @@ _NEL_ITEM_FIELDS = (
     "state, zip, timezone}, not_returnable, photos"
 )
 
+# Dermstore params shared across endpoints (Dermstore, dermstore.com, the US skincare and beauty
+# retailer, shipping to the US and Canada). 7 endpoints, 1 credit each. country (default us; us in
+# USD or ca in Dermstore's own CAD prices) on every method; list takes path or url, product takes
+# sku or url. 240 s floor on every method.
+_DRM_FIRST = (
+    "Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada)"
+)
+_DRM_NAME = "Dermstore"
+_DRM_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own "
+    "Canadian dollar prices, shipping to Canada; not converted).",
+)
+_DRM_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_DRM_MARKETS = (
+    " Every answer carries market {country, currency, shipping_destination}."
+)
+_DRM_PRICES = (
+    " Prices are Dermstore's for a visitor without an account, in the market's currency. rrp is "
+    "Dermstore's RRP as given; discount_percent is computed by Scavio from price and rrp, only "
+    "when the RRP is above the price. offer is Dermstore's own promotion text (code, gift, end "
+    "date inside the text), as given."
+)
+_DRM_NOT_AVAILABLE = (
+    " Not available: a full review feed or review paging (product() returns the 10 latest reviews "
+    "only), Q&A, member (VIP) prices, cart or checkout prices (code discounts apply at the cart), "
+    "price history (poll and store the answers), offer start dates. The same product at Sephora, "
+    "Ulta or Amazon comes from those namespaces (match on UPC, or brand + name + size)."
+)
+_DRM_ITEM_FIELDS = (
+    "position, sku (the input of product()), name, brand, url, image, price, rrp, "
+    "discount_percent, price_from (the lowest variant price when below price), currency, "
+    "in_stock, rating, review_count, offer {title, description, free_gift, url}, variants_count, "
+    "options"
+)
+_DRM_LIST = (
+    "market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items "
+    "[{" + _DRM_ITEM_FIELDS + "}], facets [{filter (the input it maps to), label, type, options "
+    "[{value, label, count} or {label, from, to, count}]}] (with include_facets), notes."
+)
+_DRM_FILTERS = (
+    "sorted (relevance, popularity, price low or high, name, newest, discount) and filtered "
+    "(brand, skin type, concern, SPF band, key ingredient, preference, gender, price range, "
+    "minimum rating, discount range), up to 200 a page"
+)
+_DRM_LIST_PARAMS = (
+    _int("page", "Page (default 1). At most 10,000 positions (page x page_size)."),
+    _int("page_size", "Products per page (1-200, default 60)."),
+    _lit(
+        "sort",
+        ("relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"),
+        "relevance (default), popularity, price_low, price_high, name, newest or discount "
+        "(highest percent off first): Dermstore's sort menu.",
+    ),
+    _str_or_list("brand", "Brand as Dermstore names it (one or a list of up to 10; exact, e.g. "
+                 "'EltaMD'): facets[filter=brand].options[].value."),
+    _str_or_list("skin_type", "Skin type as Dermstore lists it (one or a list), e.g. 'Dry Skin'."),
+    _str_or_list("concern", "Skin concern as Dermstore lists it (one or a list), e.g. 'Aging'."),
+    _str_or_list("spf", "SPF band as Dermstore lists it (one or a list), e.g. 'SPF 30+'."),
+    _str_or_list("key_ingredient", "Key ingredient as Dermstore lists it (one or a list), e.g. "
+                 "'Retinol'."),
+    _str_or_list("preference", "Preference as Dermstore lists it (one or a list), e.g. 'Clean'."),
+    _str_or_list("gender", "Gender as Dermstore lists it (one or a list)."),
+    _float("min_price", "Lowest price, in the market's currency."),
+    _float("max_price", "Highest price, in the market's currency."),
+    _float("min_rating", "Lowest average star rating (1-5)."),
+    _float("min_discount", "Lowest percent off Dermstore's RRP (0-100)."),
+    _float("max_discount", "Highest percent off Dermstore's RRP (0-100)."),
+    _bool("include_facets", "Also return Dermstore's filter counts for the results (facets). "
+          "Still 1 credit."),
+    _DRM_COUNTRY,
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -20591,6 +20665,180 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============================== Dermstore ==============================
+    # 7 endpoints on /api/v1/dermstore: country (us or ca) on every method. 1 credit each. Calls
+    # can queue behind the backend's upstream limit: 240 s floor.
+    Endpoint(
+        key="dermstore_search",
+        namespace="dermstore",
+        method="search",
+        http="POST",
+        path="/api/v1/dermstore/search",
+        summary=(
+            "Search the catalogue of " + _DRM_FIRST + " by keywords or a Dermstore SKU, "
+            + _DRM_FILTERS + ". A keyword Dermstore maps to one of its pages (a brand such as "
+            "eltamd, an ingredient such as retinol, a category such as sunscreen) returns that "
+            "page's products, as Dermstore's own search does, with resolved_from {type (brand, "
+            "ingredient, category, landing or product), path, listed_path, url, title, sku}; null "
+            "for a plain search. Returns query, resolved_from, corrected_query, " + _DRM_LIST
+            + _DRM_PRICES + " Captured 2026-11-25: EltaMD UV Clear Broad-Spectrum SPF 46 (1.7 fl. "
+            "oz., SKU 11370303) at 46 USD (us) and 65.78 CAD (ca), with the offer \"20% Off With "
+            "Code JOY + $22 Gift\" on EltaMD." + _DRM_MARKETS + _DRM_NOT_AVAILABLE + _DRM_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords or a Dermstore SKU (e.g. 'uv clear spf 46'). A mapped keyword "
+                 "(e.g. 'sunscreen', 'retinol', 'eltamd') returns the page Dermstore sends it to, "
+                 "reported in resolved_from.", wire="q"),
+        ) + _DRM_LIST_PARAMS,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_list",
+        namespace="dermstore",
+        method="list",
+        http="POST",
+        path="/api/v1/dermstore/list",
+        summary=(
+            "The products of any " + _DRM_NAME + " list page by path or link: a category "
+            "(/skin-care), brand (/brands/eltamd), sale (/sale), offer (/shop/black-friday/30-off), "
+            "gift sets (/gift-sets) or ingredient page (/ingredient/retinol), " + _DRM_FILTERS
+            + ". Paths come from categories(), brands() and offers() (list_path). An editorial "
+            "page without a product list is listed through its view-all page (listed_path). "
+            "Returns path, listed_path, url, " + _DRM_LIST + _DRM_PRICES
+            + " An unknown path is a charged 404." + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(
+            Param(
+                "path",
+                "Optional[str]",
+                positional=True,
+                doc="A Dermstore list page path (the part after dermstore.com/c), e.g. "
+                "'/brands/eltamd', '/skin-care', '/sale', '/shop/black-friday/30-off', "
+                "'/ingredient/retinol'. Send path or url.",
+            ),
+            _str("url", "A Dermstore list page link (https://www.dermstore.com/c/<page>/) instead "
+                 "of path."),
+        ) + _DRM_LIST_PARAMS,
+        one_of=(("path", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_product",
+        namespace="dermstore",
+        method="product",
+        http="POST",
+        path="/api/v1/dermstore/product",
+        summary=(
+            "One " + _DRM_NAME + " product by SKU or link, for the market asked: market, "
+            "requested_sku, sku, product_sku, name, product_name, brand, url, price, rrp, "
+            "discount_percent, currency, in_stock, availability_message, upc (the barcode as "
+            "Dermstore gives it; null when Dermstore lists none, as for sets), option_type and "
+            "option (shade, size or strength, as given), variants [{sku, name, option_type, option, "
+            "shade_colour, price, rrp, discount_percent, in_stock, availability_message, upc, "
+            "preorder, max_per_order, loyalty_points}] (each variant has its own price and stock), "
+            "subtitle, description, key_benefits, directions, ingredients, at_a_glance, volume, "
+            "faq, images, offer {title, description, free_gift, url} (Dermstore's promotion banner, "
+            "as given: its dates appear only inside its text), auto_replenish [{discount_first, "
+            "discount_recurring, price_first, price_recurring, frequencies}] (Dermstore's "
+            "subscribe-and-save plans, as given), loyalty_points, max_per_order, preorder, hsa_fsa "
+            "(Dermstore's HSA/FSA eligibility tag), rating, review_count, recent_reviews [{rating, "
+            "date, text}] (the 10 latest reviews the product page shows; no reviewer names), "
+            "breadcrumbs, notes." + _DRM_PRICES + " Captured 2026-11-25: Medik8 Crystal Retinal "
+            "20 30ml (SKU 13806521) at 123 USD with 6 strength variants priced on their own "
+            "(Retinal 10 at 111, Retinal 6 at 87) and the offer \"30% Off With Code JOY + Gift\"; "
+            "on ca, SkinCeuticals C E Ferulic (SKU 11289609) at 264.55 CAD with the offer \"Earn "
+            "10% Back + $25 Gift\" (double points, as Dermstore states it, instead of a code "
+            "discount). An unknown SKU is a charged 404." + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A Dermstore SKU (items[].sku or variants[].sku), e.g. '11289609'. Send sku "
+                "or url.",
+            ),
+            _str("url", "A Dermstore product link (https://www.dermstore.com/p/<name>/<sku>/) "
+                 "instead of sku."),
+            _DRM_COUNTRY,
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_suggestions",
+        namespace="dermstore",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/dermstore/suggestions",
+        summary=(
+            _DRM_FIRST + " search-box suggestions for typed text: market, query, count, terms "
+            "(suggested searches), corrections, products [{sku, name, url, image, price, rrp, "
+            "discount_percent, currency, rating, review_count}] (up to 5 each), notes."
+            + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(
+            _req("query", "The text typed so far (e.g. 'eltamd').", wire="q"),
+            _DRM_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_offers",
+        namespace="dermstore",
+        method="offers",
+        http="POST",
+        path="/api/v1/dermstore/offers",
+        summary=(
+            "The current offers of " + _DRM_FIRST + ", as its coupon-codes page lists them: "
+            "market, count, offers [{title, description, code (when the offer text names one), "
+            "gift, threshold (the spend the text states), ends (Dermstore's end time, ISO 8601 "
+            "UTC), url, list_path (send to list() for the products)}], notes. Dermstore gives no "
+            "start date. Code rates differ by brand. Captured 2026-11-25: \"Enjoy 25% off jane "
+            "iredale with code JOY\" plus a gift over $75 on the brand, ends "
+            "2026-12-01T08:00:00.000Z." + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(_DRM_COUNTRY,),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_brands",
+        namespace="dermstore",
+        method="brands",
+        http="POST",
+        path="/api/v1/dermstore/brands",
+        summary=(
+            "The A-Z brand directory of " + _DRM_FIRST + " (about 235 brands): market, letter, "
+            "total_brands, count, brands [{name, path, url, letter}], notes. path is the input of "
+            "list() for a brand's products." + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(
+            _str("letter", "Optional: only brands under this letter (A-Z, or 0-9)."),
+            _DRM_COUNTRY,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dermstore_categories",
+        namespace="dermstore",
+        method="categories",
+        http="POST",
+        path="/api/v1/dermstore/categories",
+        summary=(
+            "The category tree of " + _DRM_FIRST + ", as its site navigation shows it: market, "
+            "count, total_categories, categories [{name, path, url, children [...]}], notes. path "
+            "is the input of list()." + _DRM_MARKETS + _DRM_CHARGE
+        ),
+        params=(_DRM_COUNTRY,),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -27640,6 +27888,7 @@ NAMESPACES: tuple[str, ...] = (
     "discounttire",
     "vevor",
     "nellis",
+    "dermstore",
 )
 
 

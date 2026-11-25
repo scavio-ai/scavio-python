@@ -7651,3 +7651,113 @@ def test_nellis_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         nl.item()
+
+
+def test_dermstore_credits_paths_and_wire(monkeypatch):
+    """dermstore (0.88.0): 7 endpoints on /api/v1/dermstore.
+
+    1 credit each. country (us or ca) on every method; list takes path or url, product takes sku
+    or url. query is sent as q. Every method gets a 240 s floor.
+    """
+    _DRM_FIRST = (
+        "Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and "
+        "Canada)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "dermstore"}
+    assert sorted(eps) == [
+        "brands", "categories", "list", "offers", "product", "search", "suggestions",
+    ]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/dermstore/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1, m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        assert names["country"].annotation == 'Optional[Literal["us", "ca"]]', m
+    for m in ("search", "suggestions", "offers", "brands", "categories"):
+        assert _DRM_FIRST in eps[m].summary, m
+    for m in ("search", "list", "product"):
+        s = eps[m].summary
+        assert "rrp is Dermstore's RRP as given" in s, m
+        assert "discount_percent is computed by Scavio" in s, m
+    assert "resolved_from" in eps["search"].summary
+    assert "10 latest reviews" in eps["search"].summary
+    assert "no reviewer names" in eps["product"].summary
+    assert "Dermstore gives no start date" in eps["offers"].summary
+    assert "46 USD (us) and 65.78 CAD (ca)" in eps["search"].summary
+    assert eps["list"].one_of == (("path", "url"),)
+    assert eps["product"].one_of == (("sku", "url"),)
+    search = {p.name: p for p in eps["search"].params}
+    assert search["query"].wire_field == "q"
+    assert search["query"].required is True
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", '
+        '"newest", "discount"]]'
+    )
+    assert search["brand"].annotation == "Optional[Union[str, list[str]]]"
+    assert search["min_price"].annotation == "Optional[float]"
+    assert search["include_facets"].annotation == "Optional[bool]"
+    sugg = {p.name: p for p in eps["suggestions"].params}
+    assert sugg["query"].wire_field == "q"
+    assert sugg["query"].required is True
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|"
+                        r"counterfeit|authentic\w*|authori[sz]ed|legit|scam|fake|only api|"
+                        r"only at)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    dm = client.dermstore
+    dm.search("uv clear spf 46")
+    dm.search("sunscreen", country="ca", page=2, page_size=200, sort="discount",
+              brand=["EltaMD", "SkinCeuticals"], skin_type="Dry Skin", concern="Aging",
+              spf="SPF 30+", key_ingredient="Retinol", preference="Clean", gender="Female",
+              min_price=10, max_price=99.5, min_rating=4, min_discount=20, max_discount=50,
+              include_facets=True)
+    dm.list("/brands/eltamd")
+    dm.list(url="https://www.dermstore.com/c/sale/", sort="price_low", country="ca")
+    dm.product("11289609")
+    dm.product(13806521, country="ca")
+    dm.product(url="https://www.dermstore.com/p/medik8-crystal-retinal-20-30ml/13806521/")
+    dm.suggestions("eltamd")
+    dm.offers()
+    dm.offers(country="ca")
+    dm.brands()
+    dm.brands(letter="E", country="ca")
+    dm.categories()
+    base = "/api/v1/dermstore/"
+    assert seen == [
+        (base + "search", {"q": "uv clear spf 46"}, 240.0),
+        (base + "search", {"q": "sunscreen", "page": 2, "page_size": 200, "sort": "discount",
+                           "brand": ["EltaMD", "SkinCeuticals"], "skin_type": "Dry Skin",
+                           "concern": "Aging", "spf": "SPF 30+", "key_ingredient": "Retinol",
+                           "preference": "Clean", "gender": "Female", "min_price": 10,
+                           "max_price": 99.5, "min_rating": 4, "min_discount": 20,
+                           "max_discount": 50, "include_facets": True, "country": "ca"}, 240.0),
+        (base + "list", {"path": "/brands/eltamd"}, 240.0),
+        (base + "list", {"url": "https://www.dermstore.com/c/sale/", "sort": "price_low",
+                         "country": "ca"}, 240.0),
+        (base + "product", {"sku": "11289609"}, 240.0),
+        (base + "product", {"sku": 13806521, "country": "ca"}, 240.0),
+        (base + "product", {"url": "https://www.dermstore.com/p/medik8-crystal-retinal-20-30ml/"
+                            "13806521/"}, 240.0),
+        (base + "suggestions", {"q": "eltamd"}, 240.0),
+        (base + "offers", {}, 240.0),
+        (base + "offers", {"country": "ca"}, 240.0),
+        (base + "brands", {}, 240.0),
+        (base + "brands", {"letter": "E", "country": "ca"}, 240.0),
+        (base + "categories", {}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        dm.product()
+    with pytest.raises(ScavioError):
+        dm.list()

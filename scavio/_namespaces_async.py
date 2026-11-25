@@ -116,6 +116,7 @@ __all__ = [
     "_AsyncDiscountTireNamespace",
     "_AsyncVevorNamespace",
     "_AsyncNellisNamespace",
+    "_AsyncDermstoreNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -21277,3 +21278,199 @@ class _AsyncNellisNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("nellis_categories", {"location": location, "category": category}, extra)
+
+class _AsyncDermstoreNamespace:
+    """Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada) search, list (any list page by path), product (variants, UPC, offer banner, the 10 latest reviews), suggestions, offers (with end times), brands and categories endpoints; us or ca (Dermstore's own CAD prices)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        preference: Optional[Union[str, list[str]]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the catalogue of Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada) by keywords or a Dermstore SKU, sorted (relevance, popularity, price low or high, name, newest, discount) and filtered (brand, skin type, concern, SPF band, key ingredient, preference, gender, price range, minimum rating, discount range), up to 200 a page. A keyword Dermstore maps to one of its pages (a brand such as eltamd, an ingredient such as retinol, a category such as sunscreen) returns that page's products, as Dermstore's own search does, with resolved_from {type (brand, ingredient, category, landing or product), path, listed_path, url, title, sku}; null for a plain search. Returns query, resolved_from, corrected_query, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku (the input of product()), name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url}, variants_count, options}], facets [{filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Dermstore's for a visitor without an account, in the market's currency. rrp is Dermstore's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. offer is Dermstore's own promotion text (code, gift, end date inside the text), as given. Captured 2026-11-25: EltaMD UV Clear Broad-Spectrum SPF 46 (1.7 fl. oz., SKU 11370303) at 46 USD (us) and 65.78 CAD (ca), with the offer "20% Off With Code JOY + $22 Gift" on EltaMD. Every answer carries market {country, currency, shipping_destination}. Not available: a full review feed or review paging (product() returns the 10 latest reviews only), Q&A, member (VIP) prices, cart or checkout prices (code discounts apply at the cart), price history (poll and store the answers), offer start dates. The same product at Sephora, Ulta or Amazon comes from those namespaces (match on UPC, or brand + name + size). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a Dermstore SKU (e.g. 'uv clear spf 46'). A mapped keyword (e.g. 'sunscreen', 'retinol', 'eltamd') returns the page Dermstore sends it to, reported in resolved_from.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-200, default 60).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Dermstore's sort menu.
+            brand: Brand as Dermstore names it (one or a list of up to 10; exact, e.g. 'EltaMD'): facets[filter=brand].options[].value.
+            skin_type: Skin type as Dermstore lists it (one or a list), e.g. 'Dry Skin'.
+            concern: Skin concern as Dermstore lists it (one or a list), e.g. 'Aging'.
+            spf: SPF band as Dermstore lists it (one or a list), e.g. 'SPF 30+'.
+            key_ingredient: Key ingredient as Dermstore lists it (one or a list), e.g. 'Retinol'.
+            preference: Preference as Dermstore lists it (one or a list), e.g. 'Clean'.
+            gender: Gender as Dermstore lists it (one or a list).
+            min_price: Lowest price, in the market's currency.
+            max_price: Highest price, in the market's currency.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Dermstore's RRP (0-100).
+            max_discount: Highest percent off Dermstore's RRP (0-100).
+            include_facets: Also return Dermstore's filter counts for the results (facets). Still 1 credit.
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_search", {"query": query, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "preference": preference, "gender": gender, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "country": country}, extra)
+
+    async def list(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        preference: Optional[Union[str, list[str]]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of any Dermstore list page by path or link: a category (/skin-care), brand (/brands/eltamd), sale (/sale), offer (/shop/black-friday/30-off), gift sets (/gift-sets) or ingredient page (/ingredient/retinol), sorted (relevance, popularity, price low or high, name, newest, discount) and filtered (brand, skin type, concern, SPF band, key ingredient, preference, gender, price range, minimum rating, discount range), up to 200 a page. Paths come from categories(), brands() and offers() (list_path). An editorial page without a product list is listed through its view-all page (listed_path). Returns path, listed_path, url, market, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku (the input of product()), name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url}, variants_count, options}], facets [{filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Dermstore's for a visitor without an account, in the market's currency. rrp is Dermstore's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. offer is Dermstore's own promotion text (code, gift, end date inside the text), as given. An unknown path is a charged 404. Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Dermstore list page path (the part after dermstore.com/c), e.g. '/brands/eltamd', '/skin-care', '/sale', '/shop/black-friday/30-off', '/ingredient/retinol'. Send path or url.
+            url: A Dermstore list page link (https://www.dermstore.com/c/<page>/) instead of path.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-200, default 60).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Dermstore's sort menu.
+            brand: Brand as Dermstore names it (one or a list of up to 10; exact, e.g. 'EltaMD'): facets[filter=brand].options[].value.
+            skin_type: Skin type as Dermstore lists it (one or a list), e.g. 'Dry Skin'.
+            concern: Skin concern as Dermstore lists it (one or a list), e.g. 'Aging'.
+            spf: SPF band as Dermstore lists it (one or a list), e.g. 'SPF 30+'.
+            key_ingredient: Key ingredient as Dermstore lists it (one or a list), e.g. 'Retinol'.
+            preference: Preference as Dermstore lists it (one or a list), e.g. 'Clean'.
+            gender: Gender as Dermstore lists it (one or a list).
+            min_price: Lowest price, in the market's currency.
+            max_price: Highest price, in the market's currency.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Dermstore's RRP (0-100).
+            max_discount: Highest percent off Dermstore's RRP (0-100).
+            include_facets: Also return Dermstore's filter counts for the results (facets). Still 1 credit.
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_list", {"path": path, "url": url, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "preference": preference, "gender": gender, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "country": country}, extra)
+
+    async def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Dermstore product by SKU or link, for the market asked: market, requested_sku, sku, product_sku, name, product_name, brand, url, price, rrp, discount_percent, currency, in_stock, availability_message, upc (the barcode as Dermstore gives it; null when Dermstore lists none, as for sets), option_type and option (shade, size or strength, as given), variants [{sku, name, option_type, option, shade_colour, price, rrp, discount_percent, in_stock, availability_message, upc, preorder, max_per_order, loyalty_points}] (each variant has its own price and stock), subtitle, description, key_benefits, directions, ingredients, at_a_glance, volume, faq, images, offer {title, description, free_gift, url} (Dermstore's promotion banner, as given: its dates appear only inside its text), auto_replenish [{discount_first, discount_recurring, price_first, price_recurring, frequencies}] (Dermstore's subscribe-and-save plans, as given), loyalty_points, max_per_order, preorder, hsa_fsa (Dermstore's HSA/FSA eligibility tag), rating, review_count, recent_reviews [{rating, date, text}] (the 10 latest reviews the product page shows; no reviewer names), breadcrumbs, notes. Prices are Dermstore's for a visitor without an account, in the market's currency. rrp is Dermstore's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. offer is Dermstore's own promotion text (code, gift, end date inside the text), as given. Captured 2026-11-25: Medik8 Crystal Retinal 20 30ml (SKU 13806521) at 123 USD with 6 strength variants priced on their own (Retinal 10 at 111, Retinal 6 at 87) and the offer "30% Off With Code JOY + Gift"; on ca, SkinCeuticals C E Ferulic (SKU 11289609) at 264.55 CAD with the offer "Earn 10% Back + $25 Gift" (double points, as Dermstore states it, instead of a code discount). An unknown SKU is a charged 404. Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A Dermstore SKU (items[].sku or variants[].sku), e.g. '11289609'. Send sku or url.
+            url: A Dermstore product link (https://www.dermstore.com/p/<name>/<sku>/) instead of sku.
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_product", {"sku": sku, "url": url, "country": country}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada) search-box suggestions for typed text: market, query, count, terms (suggested searches), corrections, products [{sku, name, url, image, price, rrp, discount_percent, currency, rating, review_count}] (up to 5 each), notes. Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far (e.g. 'eltamd').
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_suggestions", {"query": query, "country": country}, extra)
+
+    async def offers(
+        self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current offers of Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada), as its coupon-codes page lists them: market, count, offers [{title, description, code (when the offer text names one), gift, threshold (the spend the text states), ends (Dermstore's end time, ISO 8601 UTC), url, list_path (send to list() for the products)}], notes. Dermstore gives no start date. Code rates differ by brand. Captured 2026-11-25: "Enjoy 25% off jane iredale with code JOY" plus a gift over $75 on the brand, ends 2026-12-01T08:00:00.000Z. Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_offers", {"country": country}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The A-Z brand directory of Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada) (about 235 brands): market, letter, total_brands, count, brands [{name, path, url, letter}], notes. path is the input of list() for a brand's products. Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Optional: only brands under this letter (A-Z, or 0-9).
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_brands", {"letter": letter, "country": country}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of Dermstore (dermstore.com, the US skincare and beauty retailer, shipping to the US and Canada), as its site navigation shows it: market, count, total_categories, categories [{name, path, url, children [...]}], notes. path is the input of list(). Every answer carries market {country, currency, shipping_destination}. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: The market (default 'us'): us (prices in USD, shipping to the US) or ca (Dermstore's own Canadian dollar prices, shipping to Canada; not converted).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("dermstore_categories", {"country": country}, extra)
