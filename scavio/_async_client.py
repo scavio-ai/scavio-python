@@ -72,6 +72,7 @@ from ._namespaces_async import (
     _AsyncMetaAdsNamespace,
     _AsyncMichaelsNamespace,
     _AsyncMicroCenterNamespace,
+    _AsyncNellisNamespace,
     _AsyncNikeNamespace,
     _AsyncNintendoNamespace,
     _AsyncNordstromNamespace,
@@ -276,6 +277,7 @@ class AsyncScavioClient:
         self.dollartree = _AsyncDollarTreeNamespace(self)
         self.discounttire = _AsyncDiscountTireNamespace(self)
         self.vevor = _AsyncVevorNamespace(self)
+        self.nellis = _AsyncNellisNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

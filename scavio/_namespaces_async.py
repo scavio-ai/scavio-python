@@ -115,6 +115,7 @@ __all__ = [
     "_AsyncDollarTreeNamespace",
     "_AsyncDiscountTireNamespace",
     "_AsyncVevorNamespace",
+    "_AsyncNellisNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -21172,3 +21173,107 @@ class _AsyncVevorNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("vevor_prices", {"sku": sku}, extra)
+
+class _AsyncNellisNamespace:
+    """Nellis Auction (nellisauction.com, the liquidation auction marketplace with pickup warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas) search (open auctions), item (open, closed or sold, with the bid history and a sold item's final price), locations and categories endpoints; per shopping location."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        location: Optional[Literal["las-vegas", "phoenix", "houston", "philadelphia", "denver", "dallas"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[48, 120, 240]] = None,
+        sort: Optional[Literal["featured", "price_low", "price_high", "ending_soon", "ending_last", "retail_low", "retail_high", "bids_low", "bids_high"]] = None,
+        category: Optional[Union[str, list[str]]] = None,
+        subcategory: Optional[Union[str, list[str]]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        pickup_location: Optional[Union[str, list[str]]] = None,
+        condition_rating: Optional[Union[Literal[1, 2, 3, 4, 5], list[Literal[1, 2, 3, 4, 5]]]] = None,
+        retail_min: Optional[float] = None,
+        retail_max: Optional[float] = None,
+        auction_event_type: Optional[Union[str, list[str]]] = None,
+        auction_event_name: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the open auctions of Nellis Auction (nellisauction.com, the liquidation auction marketplace with pickup warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas) in one shopping location, by keywords (or none: every open auction), sorted (featured, current bid low or high, ending soon or last, estimated retail low or high, bids low or high), filtered by category and subcategory, brand, pickup warehouse, condition stars, estimated retail range, auction event, color and size, and paged (48, 120 or 240 a page). Open auctions only (Nellis's own search shows no closed items): a closed or sold item is read by id with item(). Returns location {id, slug, name}, query, page, page_size, total, total_pages, has_more, count, sort, filters_applied, items [{position, id (the input of item()), title, url, inventory_number, current_bid, currency, bid_count, retail_price, buyer_premium_percent, opens, closes, initial_closes (ISO 8601 UTC), extended, market_status (Nellis's own: open, sold, relisted, closed ...), is_closed, condition {rating (1-5 stars), condition, functional, damage, missing_parts, assembly, package} (Nellis's inspection answers, as given), inspection_notes, pickup_location {id, name, address, city, state, zip, timezone}, not_returnable, photos}], facets {categories, subcategories, brands, pickup_locations, condition_ratings, auction_event_types, auction_event_names, colors, sizes} (Nellis's counts of open items), notes. current_bid is the current high bid in USD (0 before the first bid), as of the fetch: bids move live and a late bid extends the close (extended). retail_price is Nellis's own "Estimated Retail Price", as Nellis labels it (Nellis does not state its source): not an MSRP or a verified retail price. Fees as Nellis's FAQ and terms state them: a buyer's premium added to the winning bid ("typically 15% but may vary based on the auction event"; each item carries buyer_premium_percent), plus sales tax. Pickup only, no shipping. Not available: closed or sold items in search (read them by id with item()), search suggestions, shipping (pickup only), UPC or model numbers, buy-now, reserve prices, live bid updates, bidding, watchlists, checkout. The same item's new price at Amazon or Walmart, or eBay sold prices, come from those namespaces (match on title and brand: Nellis shows no UPC). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords (e.g. 'robot vacuum'). Omitted: every open auction in the location (filters and sort still apply).
+            location: The Nellis shopping location (default 'las-vegas'): las-vegas (Las Vegas, NV), phoenix (Phoenix, AZ), houston (Houston, TX), philadelphia (Philadelphia, PA; pickup in Delran, NJ), denver (Denver, CO) or dallas (Dallas, TX; run by Lots Of Auctions).
+            page: Page (default 1). Nellis pages through 30,000 positions at most (page_size x page).
+            page_size: Items per page: 48, 120 (default) or 240 (Nellis's page sizes).
+            sort: featured (default, Nellis's own order), price_low / price_high (current bid), ending_soon / ending_last, retail_low / retail_high (Nellis's Estimated Retail Price) or bids_low / bids_high. Nellis has no newest sort.
+            category: Top-level category (one or a list): categories[].name from categories(), e.g. 'Electronics'.
+            subcategory: Second-level category (one or a list): subcategories[].name from categories(), e.g. 'TVs'.
+            brand: Brand as Nellis lists it (one or a list): facets.brands[].name.
+            pickup_location: Pickup warehouse within the shopping location (one or a list): facets.pickup_locations[].name or locations[].name of locations(), e.g. 'North Las Vegas'. A warehouse of another shopping location is a 400, not charged.
+            condition_rating: Nellis's condition grade in stars, 1-5 (one or a list).
+            retail_min: Lowest Nellis Estimated Retail Price, USD.
+            retail_max: Highest Nellis Estimated Retail Price, USD.
+            auction_event_type: Auction event type (one or a list): facets.auction_event_types[].name, e.g. 'Retail Returns' or 'Consigner / Third Party'.
+            auction_event_name: Auction event (one or a list): facets.auction_event_names[].name or auction_events[].name of categories().
+            color: Color as Nellis lists it (one or a list): facets.colors[].name.
+            size: Size as Nellis lists it (one or a list): facets.sizes[].name.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nellis_search", {"query": query, "location": location, "page": page, "page_size": page_size, "sort": sort, "category": category, "subcategory": subcategory, "brand": brand, "pickup_location": pickup_location, "condition_rating": condition_rating, "retail_min": retail_min, "retail_max": retail_max, "auction_event_type": auction_event_type, "auction_event_name": auction_event_name, "color": color, "size": size}, extra)
+
+    async def item(
+        self,
+        id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Nellis Auction item by id or link, open, closed or sold: requested_id, id (the input of item()), title, url, inventory_number, current_bid, currency, bid_count, retail_price, buyer_premium_percent, opens, closes, initial_closes (ISO 8601 UTC), extended, market_status (Nellis's own: open, sold, relisted, closed ...), is_closed, condition {rating (1-5 stars), condition, functional, damage, missing_parts, assembly, package} (Nellis's inspection answers, as given), inspection_notes, pickup_location {id, name, address, city, state, zip, timezone}, not_returnable, photos, category, subcategory, brand, color, size, features, descriptions, dimensions, weight, operator (the seller running the auction as Nellis names it: Nellis Auction or a partner such as Lots Of Auctions), final_price (the winning bid of a sold item, before Nellis's buyer's premium and tax; null otherwise), bid_history [{time, amount (USD), status (Winning or Outbid)}] (Nellis's public bid list, no bidder names or ids), notes. A sold item's final price is public by id. Captured 2026-11-25: a sold lot (id 141100004, wax seal beads, Estimated Retail Price 9.99) had final_price 6 after 5 bids; an open LG 65" OLED TV (id 141281552, Estimated Retail Price 1595.75) stood at a current bid of 101 after 8 bids. current_bid is the current high bid in USD (0 before the first bid), as of the fetch: bids move live and a late bid extends the close (extended). retail_price is Nellis's own "Estimated Retail Price", as Nellis labels it (Nellis does not state its source): not an MSRP or a verified retail price. Fees as Nellis's FAQ and terms state them: a buyer's premium added to the winning bid ("typically 15% but may vary based on the auction event"; each item carries buyer_premium_percent), plus sales tax. Pickup only, no shipping. An unknown id is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: A Nellis Auction item id (items[].id of search(), the number at the end of a nellisauction.com/p/ link), e.g. '141281552'. Send id or url.
+            url: A Nellis Auction item link (https://www.nellisauction.com/p/<title>/<id>) instead of id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nellis_item", {"id": id, "url": url}, extra)
+
+    async def locations(
+        self,
+        *,
+        location: Optional[Literal["las-vegas", "phoenix", "houston", "philadelphia", "denver", "dallas"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The pickup warehouses of Nellis Auction (nellisauction.com, the liquidation auction marketplace with pickup warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas) (13 in all), or those of one shopping location: location, count, shopping_locations [{id, slug, name, warehouses}], locations [{id, name, address, city, state, coordinates {lat, lng}, operator (Nellis Auction or a partner), shopping_location {id, slug, name}, hours {monday ... sunday: {open, close} or null when closed}}] (hours as Nellis's location page gives them, local time), notes. locations[].name is the input of search()'s pickup_location. Pickup only: won items are picked up at the warehouse by appointment. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: Optional: only the warehouses of this shopping location (las-vegas, phoenix, houston, philadelphia, denver, dallas). Without it: all 13.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nellis_locations", {"location": location}, extra)
+
+    async def categories(
+        self,
+        *,
+        location: Optional[Literal["las-vegas", "phoenix", "houston", "philadelphia", "denver", "dallas"]] = None,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The live category, brand and auction-event counts of one Nellis Auction shopping location (open auctions only), or the subcategories of one category: location, category, total_open_items, count, categories [{name, count}], subcategories [{name, count}], brands [{name, count}] (Nellis's top 100), auction_events [{name, count}], auction_event_types [{name, count}], pickup_locations [{name, count}], notes. Names are the inputs of search()'s category, subcategory, brand, auction_event_name and pickup_location. A category with no open items is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: The Nellis shopping location (default 'las-vegas'): las-vegas (Las Vegas, NV), phoenix (Phoenix, AZ), houston (Houston, TX), philadelphia (Philadelphia, PA; pickup in Delran, NJ), denver (Denver, CO) or dallas (Dallas, TX; run by Lots Of Auctions).
+            category: Optional: one top-level category (categories[].name, e.g. 'Electronics'): its subcategories, brands and auction events.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("nellis_categories", {"location": location, "category": category}, extra)

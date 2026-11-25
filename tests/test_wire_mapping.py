@@ -7549,3 +7549,105 @@ def test_vevor_credits_paths_and_wire(monkeypatch):
     ]
     with pytest.raises(ScavioError):
         vv.product()
+
+
+def test_nellis_credits_paths_and_wire(monkeypatch):
+    """nellis (0.87.0): 4 endpoints on /api/v1/nellis.
+
+    1 credit each. location (6 shopping locations) on search, locations and categories; item
+    takes id or url. query is sent as q and is optional. Every method gets a 240 s floor.
+    """
+    _NEL_FIRST = (
+        "Nellis Auction (nellisauction.com, the liquidation auction marketplace with pickup "
+        "warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "nellis"}
+    assert sorted(eps) == ["categories", "item", "locations", "search"]
+    loc = 'Optional[Literal["las-vegas", "phoenix", "houston", "philadelphia", "denver", "dallas"]]'
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/nellis/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1, m
+        assert ep.credits_note is None, m
+        names = {p.name: p for p in ep.params}
+        if m == "item":
+            assert list(names) == ["id", "url"], m
+        else:
+            assert names["location"].annotation == loc, m
+    assert _NEL_FIRST in eps["search"].summary
+    assert _NEL_FIRST in eps["locations"].summary
+    for m in ("search", "item"):
+        s = eps[m].summary
+        assert '"Estimated Retail Price", as Nellis labels it' in s, m
+        assert "not an MSRP" in s, m
+        assert '"typically 15% but may vary based on the auction event"' in s, m
+    assert "Open auctions only" in eps["search"].summary
+    assert "search suggestions" in eps["search"].summary
+    assert "no bidder names or ids" in eps["item"].summary
+    assert "before Nellis's buyer's premium and tax" in eps["item"].summary
+    assert "final_price 6 after 5 bids" in eps["item"].summary
+    assert eps["item"].one_of == (("id", "url"),)
+    search = {p.name: p for p in eps["search"].params}
+    assert search["query"].wire_field == "q"
+    assert search["query"].required is False
+    assert search["page_size"].annotation == "Optional[Literal[48, 120, 240]]"
+    assert search["sort"].annotation == (
+        'Optional[Literal["featured", "price_low", "price_high", "ending_soon", "ending_last", '
+        '"retail_low", "retail_high", "bids_low", "bids_high"]]'
+    )
+    assert search["brand"].annotation == "Optional[Union[str, list[str]]]"
+    assert search["retail_min"].annotation == "Optional[float]"
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|shill\w*|rigged|"
+                        r"worth it|deals?|scam|only api|legit)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    nl = client.nellis
+    nl.search("robot vacuum")
+    nl.search()
+    nl.search("vacuum", location="phoenix", page=2, page_size=48, sort="bids_high",
+              category="Electronics", subcategory=["TVs", "Soundbars"], brand="Samsung",
+              pickup_location="Mesa", condition_rating=[4, 5], retail_min=50,
+              retail_max=999.99, auction_event_type="Retail Returns",
+              auction_event_name="Daily Auction - North Las Vegas - Nov 24th", color="Black",
+              size="Large")
+    nl.item("141281552")
+    nl.item(141100004)
+    nl.item(url="https://www.nellisauction.com/p/LG-65-OLED-evo-C6-4K-Smart-TV/141281552")
+    nl.locations()
+    nl.locations(location="dallas")
+    nl.categories()
+    nl.categories(location="houston", category="Electronics")
+    base = "/api/v1/nellis/"
+    assert seen == [
+        (base + "search", {"q": "robot vacuum"}, 240.0),
+        (base + "search", {}, 240.0),
+        (base + "search", {"q": "vacuum", "location": "phoenix", "page": 2, "page_size": 48,
+                           "sort": "bids_high", "category": "Electronics",
+                           "subcategory": ["TVs", "Soundbars"], "brand": "Samsung",
+                           "pickup_location": "Mesa", "condition_rating": [4, 5],
+                           "retail_min": 50, "retail_max": 999.99,
+                           "auction_event_type": "Retail Returns",
+                           "auction_event_name": "Daily Auction - North Las Vegas - Nov 24th",
+                           "color": "Black", "size": "Large"}, 240.0),
+        (base + "item", {"id": "141281552"}, 240.0),
+        (base + "item", {"id": 141100004}, 240.0),
+        (base + "item", {"url": "https://www.nellisauction.com/p/LG-65-OLED-evo-C6-4K-Smart-TV/"
+                         "141281552"}, 240.0),
+        (base + "locations", {}, 240.0),
+        (base + "locations", {"location": "dallas"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "categories", {"location": "houston", "category": "Electronics"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        nl.item()

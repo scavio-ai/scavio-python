@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.86.0"
-description = "Python SDK for the Scavio Search API - real-time data from 106 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.87.0"
+description = "Python SDK for the Scavio Search API - real-time data from 107 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -48,6 +48,9 @@ keywords = [
     "discount-tire-api",
     "vevor",
     "vevor-api",
+    "nellis",
+    "nellis-auction",
+    "nellis-auction-api",
     "sephora",
     "ulta",
     "aldi",

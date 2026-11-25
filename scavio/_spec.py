@@ -4605,6 +4605,49 @@ _VEV_LIST = (
     "has_more, count, sort, filters_applied, items (" + _VEV_ITEM_FIELDS + "), notes."
 )
 
+# Nellis Auction params shared across endpoints (Nellis Auction, nellisauction.com, the liquidation
+# auction marketplace with pickup warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver
+# and Dallas). 4 endpoints, 1 credit each. location (default las-vegas, 6 shopping locations) on
+# search, locations and categories; item takes id or url. 240 s floor on every method.
+_NEL_FIRST = (
+    "Nellis Auction (nellisauction.com, the liquidation auction marketplace with pickup "
+    "warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas)"
+)
+_NEL_NAME = "Nellis Auction"
+_NEL_LOCATIONS = ("las-vegas", "phoenix", "houston", "philadelphia", "denver", "dallas")
+_NEL_LOCATION_DOC = (
+    "The Nellis shopping location (default 'las-vegas'): las-vegas (Las Vegas, NV), phoenix "
+    "(Phoenix, AZ), houston (Houston, TX), philadelphia (Philadelphia, PA; pickup in Delran, NJ), "
+    "denver (Denver, CO) or dallas (Dallas, TX; run by Lots Of Auctions)."
+)
+_NEL_LOCATION = _lit("location", _NEL_LOCATIONS, _NEL_LOCATION_DOC)
+_NEL_CHARGE = " Failed upstream calls and refused inputs are not charged; a not-found is charged."
+_NEL_FEES = (
+    " Fees as Nellis's FAQ and terms state them: a buyer's premium added to the winning bid "
+    "(\"typically 15% but may vary based on the auction event\"; each item carries "
+    "buyer_premium_percent), plus sales tax. Pickup only, no shipping."
+)
+_NEL_PRICES = (
+    " current_bid is the current high bid in USD (0 before the first bid), as of the fetch: bids "
+    "move live and a late bid extends the close (extended). retail_price is Nellis's own "
+    "\"Estimated Retail Price\", as Nellis labels it (Nellis does not state its source): not an "
+    "MSRP or a verified retail price."
+)
+_NEL_NOT_AVAILABLE = (
+    " Not available: closed or sold items in search (read them by id with item()), search "
+    "suggestions, shipping (pickup only), UPC or model numbers, buy-now, reserve prices, live bid "
+    "updates, bidding, watchlists, checkout. The same item's new price at Amazon or Walmart, or "
+    "eBay sold prices, come from those namespaces (match on title and brand: Nellis shows no UPC)."
+)
+_NEL_ITEM_FIELDS = (
+    "id (the input of item()), title, url, inventory_number, current_bid, currency, bid_count, "
+    "retail_price, buyer_premium_percent, opens, closes, initial_closes (ISO 8601 UTC), extended, "
+    "market_status (Nellis's own: open, sold, relisted, closed ...), is_closed, condition {rating "
+    "(1-5 stars), condition, functional, damage, missing_parts, assembly, package} (Nellis's "
+    "inspection answers, as given), inspection_notes, pickup_location {id, name, address, city, "
+    "state, zip, timezone}, not_returnable, photos"
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -20387,6 +20430,167 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=3,
         min_timeout=240.0,
     ),
+    # =========================== Nellis Auction ===========================
+    # 4 endpoints on /api/v1/nellis: location (default las-vegas, 6 shopping locations) on search,
+    # locations and categories. 1 credit each. Calls can queue behind the backend's upstream
+    # limit: 240 s floor.
+    Endpoint(
+        key="nellis_search",
+        namespace="nellis",
+        method="search",
+        http="POST",
+        path="/api/v1/nellis/search",
+        summary=(
+            "Search the open auctions of " + _NEL_FIRST + " in one shopping location, by keywords "
+            "(or none: every open auction), sorted (featured, current bid low or high, ending soon "
+            "or last, estimated retail low or high, bids low or high), filtered by category and "
+            "subcategory, brand, pickup warehouse, condition stars, estimated retail range, "
+            "auction event, color and size, and paged (48, 120 or 240 a page). Open auctions only "
+            "(Nellis's own search shows no closed items): a closed or sold item is read by id with "
+            "item(). Returns location {id, slug, name}, query, page, page_size, total, "
+            "total_pages, has_more, count, sort, filters_applied, items [{position, "
+            + _NEL_ITEM_FIELDS + "}], facets {categories, subcategories, brands, "
+            "pickup_locations, condition_ratings, auction_event_types, auction_event_names, "
+            "colors, sizes} (Nellis's counts of open items), notes."
+            + _NEL_PRICES + _NEL_FEES + _NEL_NOT_AVAILABLE + _NEL_CHARGE
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                wire="q",
+                positional=True,
+                doc="Keywords (e.g. 'robot vacuum'). Omitted: every open auction in the location "
+                "(filters and sort still apply).",
+            ),
+            _NEL_LOCATION,
+            _int("page", "Page (default 1). Nellis pages through 30,000 positions at most "
+                 "(page_size x page)."),
+            _ilit("page_size", (48, 120, 240), "Items per page: 48, 120 (default) or 240 "
+                  "(Nellis's page sizes)."),
+            _lit(
+                "sort",
+                ("featured", "price_low", "price_high", "ending_soon", "ending_last",
+                 "retail_low", "retail_high", "bids_low", "bids_high"),
+                "featured (default, Nellis's own order), price_low / price_high (current bid), "
+                "ending_soon / ending_last, retail_low / retail_high (Nellis's Estimated Retail "
+                "Price) or bids_low / bids_high. Nellis has no newest sort.",
+            ),
+            _str_or_list("category", "Top-level category (one or a list): categories[].name "
+                         "from categories(), e.g. 'Electronics'."),
+            _str_or_list("subcategory", "Second-level category (one or a list): "
+                         "subcategories[].name from categories(), e.g. 'TVs'."),
+            _str_or_list("brand", "Brand as Nellis lists it (one or a list): "
+                         "facets.brands[].name."),
+            _str_or_list(
+                "pickup_location",
+                "Pickup warehouse within the shopping location (one or a list): "
+                "facets.pickup_locations[].name or locations[].name of locations(), e.g. "
+                "'North Las Vegas'. A warehouse of another shopping location is a 400, not charged.",
+            ),
+            Param(
+                "condition_rating",
+                "Optional[Union[Literal[1, 2, 3, 4, 5], list[Literal[1, 2, 3, 4, 5]]]]",
+                doc="Nellis's condition grade in stars, 1-5 (one or a list).",
+            ),
+            _float("retail_min", "Lowest Nellis Estimated Retail Price, USD."),
+            _float("retail_max", "Highest Nellis Estimated Retail Price, USD."),
+            _str_or_list(
+                "auction_event_type",
+                "Auction event type (one or a list): facets.auction_event_types[].name, e.g. "
+                "'Retail Returns' or 'Consigner / Third Party'.",
+            ),
+            _str_or_list(
+                "auction_event_name",
+                "Auction event (one or a list): facets.auction_event_names[].name or "
+                "auction_events[].name of categories().",
+            ),
+            _str_or_list("color", "Color as Nellis lists it (one or a list): facets.colors[].name."),
+            _str_or_list("size", "Size as Nellis lists it (one or a list): facets.sizes[].name."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nellis_item",
+        namespace="nellis",
+        method="item",
+        http="POST",
+        path="/api/v1/nellis/item",
+        summary=(
+            "One " + _NEL_NAME + " item by id or link, open, closed or sold: requested_id, "
+            + _NEL_ITEM_FIELDS + ", category, subcategory, brand, color, size, features, "
+            "descriptions, dimensions, weight, operator (the seller running the auction as Nellis "
+            "names it: Nellis Auction or a partner such as Lots Of Auctions), final_price (the "
+            "winning bid of a sold item, before Nellis's buyer's premium and tax; null otherwise), "
+            "bid_history [{time, amount (USD), status (Winning or Outbid)}] (Nellis's public bid "
+            "list, no bidder names or ids), notes. A sold item's final price is public by id. "
+            "Captured 2026-11-25: a sold lot (id 141100004, wax seal beads, Estimated Retail Price "
+            "9.99) had final_price 6 after 5 bids; an open LG 65\" OLED TV (id 141281552, "
+            "Estimated Retail Price 1595.75) stood at a current bid of 101 after 8 bids."
+            + _NEL_PRICES + _NEL_FEES + " An unknown id is a charged 404." + _NEL_CHARGE
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A Nellis Auction item id (items[].id of search(), the number at the end of a "
+                "nellisauction.com/p/ link), e.g. '141281552'. Send id or url.",
+            ),
+            _str("url", "A Nellis Auction item link (https://www.nellisauction.com/p/<title>/<id>) "
+                 "instead of id."),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nellis_locations",
+        namespace="nellis",
+        method="locations",
+        http="POST",
+        path="/api/v1/nellis/locations",
+        summary=(
+            "The pickup warehouses of " + _NEL_FIRST + " (13 in all), or those of one shopping "
+            "location: location, count, shopping_locations [{id, slug, name, warehouses}], "
+            "locations [{id, name, address, city, state, coordinates {lat, lng}, operator (Nellis "
+            "Auction or a partner), shopping_location {id, slug, name}, hours {monday ... sunday: "
+            "{open, close} or null when closed}}] (hours as Nellis's location page gives them, "
+            "local time), notes. locations[].name is the input of search()'s pickup_location. "
+            "Pickup only: won items are picked up at the warehouse by appointment." + _NEL_CHARGE
+        ),
+        params=(
+            _lit("location", _NEL_LOCATIONS, "Optional: only the warehouses of this shopping "
+                 "location (las-vegas, phoenix, houston, philadelphia, denver, dallas). Without "
+                 "it: all 13."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="nellis_categories",
+        namespace="nellis",
+        method="categories",
+        http="POST",
+        path="/api/v1/nellis/categories",
+        summary=(
+            "The live category, brand and auction-event counts of one " + _NEL_NAME + " shopping "
+            "location (open auctions only), or the subcategories of one category: location, "
+            "category, total_open_items, count, categories [{name, count}], subcategories [{name, "
+            "count}], brands [{name, count}] (Nellis's top 100), auction_events [{name, count}], "
+            "auction_event_types [{name, count}], pickup_locations [{name, count}], notes. Names "
+            "are the inputs of search()'s category, subcategory, brand, auction_event_name and "
+            "pickup_location. A category with no open items is a charged 404." + _NEL_CHARGE
+        ),
+        params=(
+            _NEL_LOCATION,
+            _str("category", "Optional: one top-level category (categories[].name, e.g. "
+                 "'Electronics'): its subcategories, brands and auction events."),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # ============================= Decathlon =============================
     # 2 endpoints, 2 credits each. Supports 7 country domains:
     # FR, ES, IT, IN, UK, PT and NET (international).
@@ -27435,6 +27639,7 @@ NAMESPACES: tuple[str, ...] = (
     "dollartree",
     "discounttire",
     "vevor",
+    "nellis",
 )
 
 

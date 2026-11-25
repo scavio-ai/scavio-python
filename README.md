@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 106 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 107 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -58,6 +58,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Dollar Tree Case Prices next to Unit Prices, Case Packs, Minimum Order and Split Cases, Units at a Store and Its Nearby Stores, Stores and Reviews (US; Canada store pages; 10 endpoints) | Yes | No | No | No |
 | Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
 | Vevor Prices per Storefront in 13 Countries, Was Price Only During a Deal with Deal Dates, Variants with Their Own Price and Stock, Shipping Fee by State or Province, the Same SKU on Every Storefront, Reviews (13 storefronts; 11 endpoints) | Yes | No | No | No |
+| Nellis Auction Lot Prices: Current Bid, Bid Count and Nellis's Estimated Retail Price, a Sold Lot's Final Price, Bid History Without Bidder Names, Pickup Warehouses and Hours (6 US shopping locations; 4 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -5186,6 +5187,65 @@ financing, the ships-from warehouse, VEVOR's listings on other marketplaces
 Failed calls and refused inputs are not charged; a not-found (an unknown SKU
 or category, or a SKU the storefront does not sell) is charged.
 
+### 76. Liquidation auctions -- Nellis Auction lot prices, bid history, sold prices
+
+Nellis Auction (nellisauction.com, the liquidation auction marketplace with
+pickup warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and
+Dallas). Namespace `nellis`, 4 endpoints: `search`, `item`, `locations`,
+`categories`. 1 credit per call; `credits_used` in the response is what was
+charged. `search`, `locations` and `categories` take `location` (default
+`las-vegas`); `item` takes an `id` or a `url`. The request timeout is raised
+to at least 240s. Nellis Auction has no public API. Pair a lot with the
+`amazon` and `walmart` namespaces for the same item's new price and with
+`ebay` for sold prices (match on title and brand: Nellis shows no UPC). See the
+[Nellis Auction API page](https://scavio.dev/nellis-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+nl = client.nellis
+
+# --- Open auctions in one shopping location: current bid, bids, Estimated Retail Price, close time.
+hits = nl.search("robot vacuum")["data"]
+print(hits["location"], hits["total"], hits["has_more"])
+for it in hits["items"][:5]:
+    print(it["id"], it["title"], it["current_bid"], it["bid_count"], it["retail_price"], it["closes"])
+# Another location, most bids first, 48 a page.
+phx = nl.search("vacuum", location="phoenix", sort="bids_high", page_size=48)["data"]
+
+# --- One lot, open or sold: final price of a sold lot (before the premium), bid history.
+lot = nl.item("141100004")["data"]
+print(lot["market_status"], lot["final_price"], lot["retail_price"], lot["buyer_premium_percent"])
+for b in lot["bid_history"]:
+    print(b["time"], b["amount"], b["status"])
+
+# --- Pickup warehouses with hours, and live category / brand / auction-event counts.
+wh = nl.locations(location="las-vegas")["data"]
+for w in wh["locations"]:
+    print(w["name"], w["city"], w["state"], w["hours"]["monday"])
+cats = nl.categories(location="houston", category="Electronics")["data"]
+print(cats["total_open_items"], cats["subcategories"][:3])
+```
+
+Shopping locations (`location`): `las-vegas`, `phoenix`, `houston`,
+`philadelphia` (pickup in Delran, NJ), `denver` and `dallas` (run by Lots Of
+Auctions), with 13 pickup warehouses in all. Search lists open auctions only,
+as Nellis's own search does; a closed or sold lot is read by id with `item`,
+and a sold lot's `final_price` is the winning bid before Nellis's buyer's
+premium and tax. `retail_price` is Nellis's own "Estimated Retail Price", as
+Nellis labels it, not an MSRP. The buyer's premium is, in Nellis's words,
+"typically 15% but may vary based on the auction event"
+(`buyer_premium_percent` per lot). Captured 2026-11-25: a sold lot (id
+141100004, Estimated Retail Price 9.99) closed at a final price of 6 after 5
+bids. Bids move live: `current_bid`, `bid_count` and `closes` are as of the
+fetch. `bid_history` gives time, amount and Winning or Outbid, with no bidder
+names. Not available: closed or sold lots in search, search suggestions,
+shipping (pickup only), UPC or model numbers, buy-now, reserve prices, live
+bid updates, bidding, watchlists and checkout. Failed calls and refused inputs
+are not charged; a not-found (an unknown id, or a category with no open lots)
+is charged.
+
 ## Error Handling
 
 ```python
@@ -5341,6 +5401,7 @@ Scavio works with popular AI/LLM frameworks:
 | Dollar Tree (`dollartree`) | `search`, `product`, `category`, `categories`, `brand`, `deals`, `store_stock`, `stores`, `store`, `reviews`; us only (no `country`) on every method except `store`, which also takes ca (Canada store pages); `store_stock` needs a store number | 1 each; `stores` 5 |
 | Discount Tire (`discounttire`) | `search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`, `stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`, `appointments`; us only (no `country`); `search`, `vehicle_tires`, `product`, `model`, `wheels` and `browse` need `store` or `zip` | 1 each |
 | Vevor (`vevor`) | `search`, `product`, `shipping`, `reviews`, `questions`, `suggestions`, `categories`, `category`, `collections`, `deals`, `prices`; 13 storefronts (`country` + `language`) on every method except `prices`, which takes `sku` only and asks every storefront; `shipping` needs `state` (us) or `province` (ca) | 1 each; `prices` 3 |
+| Nellis Auction (`nellis`) | `search`, `item`, `locations`, `categories`; `location` (6 shopping locations, default `las-vegas`) on `search`, `locations` and `categories`; `item` takes `id` or `url`; search lists open auctions only | 1 each |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5372,6 +5433,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.87.0
+
+- **New `nellis` namespace** (sync and async) for Nellis Auction
+  (nellisauction.com, the liquidation auction marketplace with pickup
+  warehouses in Las Vegas, Phoenix, Houston, Philadelphia, Denver and Dallas),
+  4 endpoints: `search`, `item`, `locations`, `categories`. Open auctions by
+  shopping location (`location`) with the current bid, bid count and Nellis's
+  own Estimated Retail Price, one lot by id (open, closed or sold) with a sold
+  lot's final price and the bid history without bidder names, the 13 pickup
+  warehouses with hours, and live category, brand and auction-event counts. 1
+  credit per call. The request timeout is raised to at least 240s.
 
 ### Changed in 0.86.0
 
