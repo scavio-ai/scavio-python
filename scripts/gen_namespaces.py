@@ -223,7 +223,9 @@ _NS_META = {
     "best_buy": (
         "BestBuy",
         "Best Buy search, product (open-box offers), reviews, category, Deal of the Day, "
-        "store locator, store pickup availability, autocomplete, and batch price endpoints.",
+        "store locator, store pickup availability, autocomplete, and batch price endpoints "
+        "(bestbuy.com by default); country='ca' reads Best Buy Canada (bestbuy.ca, CAD, exact "
+        "units per store, EHF by province), which also has a questions endpoint.",
     ),
     "tcgplayer": (
         "Tcgplayer",

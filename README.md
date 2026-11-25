@@ -25,7 +25,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
-| Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices (9 endpoints) | Yes | No | No | No |
+| Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices; Best Buy Canada Exact Units per Store, EHF by Province, Sale End Dates and Questions (10 endpoints) | Yes | No | No | No |
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
@@ -1458,7 +1458,9 @@ unknown style id, sku id, category or brand is a 404.
 
 ### 29. US Retail -- Best Buy
 
-bestbuy.com (US site only), namespace `best_buy`, 9 endpoints. Credits:
+bestbuy.com (US, the default), namespace `best_buy`, 9 endpoints; with
+`country="ca"` the same 9 read Best Buy Canada, plus the Canada-only
+`questions` (see [section 81](#81-best-buy-canada----exact-units-per-store-ehf-by-province-sale-end-dates)). US credits:
 `search`, `product`, `reviews` and `prices` 2 each (`prices` is per call, up to
 15 SKUs); `category` 2 for an `abcat` id and 3 for a `pcmcat` page; `deals` 3;
 `stores` and `suggestions` 1; `availability` 2 flat for up to 8 stores.
@@ -5521,6 +5523,70 @@ For the same item at other Canadian retailers use the `canadian_tire`, `walmart`
 (`domain="ca"`) and `amazon` (`country="ca"`) namespaces; match on brand and
 model.
 
+### 81. Best Buy Canada -- exact units per store, EHF by province, sale end dates
+
+Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada
+per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers) is on the
+existing `best_buy` namespace. Pass `country="ca"` to any of the nine methods;
+`questions` is Best Buy Canada only and needs no country. 1 credit per call on
+every Canada call (US credits are unchanged). Prices in CAD as Best Buy Canada
+gives them; `language="fr"` returns French names, specs and links with the same
+SKUs and prices. Best Buy's developer API (developer.bestbuy.com) covers
+bestbuy.com only. See the
+[Best Buy API page](https://scavio.dev/bestbuy-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bb = client.best_buy
+
+# Search: CAD price, regular price, savings, sale_ends_at and the ehf for province.
+tvs = bb.search("4k tv", country="ca", sort="price_low", province="QC")["data"]
+print(tvs["total_results"], tvs["results_capped"], tvs["products"][0]["price"])
+
+# One product: UPC, sale start / end (UTC), EHF by province, open-box SKUs.
+mac = bb.product(sku="19791103", country="ca")["data"]
+print(mac["upc"], mac["price"], mac["regular_price"], mac["sale_ends_at"])
+print(mac["ehf_by_province"], [(o["sku"], o["condition"], o["price"]) for o in mac["open_box"]])
+
+# Exact units per store near a postal code (no prices: they are national).
+avail = bb.availability(sku="19791103", country="ca", postal_code="H3B 4W8", max_stores=5)
+for store in avail["data"]["products"][0]["stores"]:
+    print(store["store_id"], store["name"], store["city"], store["units"], store["status"])
+
+# Deal collections, stores, prices for up to 20 SKUs, and questions.
+bf = bb.deals(country="ca", collection="black_friday")["data"]
+print(bf["dates_text"])
+stores = bb.stores(country="ca", postal_code="M5V 3L9")
+prices = bb.prices(["19791103", "19296507"], country="ca")
+qa = bb.questions(sku="19296507", sort="most_answered")
+```
+
+Captured 2026-11-25: the Apple MacBook Air 13.6" (2026, M5, 16GB / 512GB, SKU
+19791103) at 1589.99 CAD (regular 1789.99, `sale_ends_at` 2026-12-03T07:00:00Z),
+with 35 units in the Centreville store in Montreal (store 651). The price is
+national (the same in every province and store); only the environmental
+handling fee varies by province (`province`, default `ON`; `ehf_by_province` on
+product and prices). A store with no stock record for the SKU comes back
+`status: "unknown"` with `units: None`, never out of stock. Listings take
+`page_size` 1-100 (default 24), the sorts `best_match`, `price_low`,
+`price_high` and `rating` (`best_selling`, `best_discount` and `newest` are a
+400 for Canada) and the extra filters `rating`, `sold_by`, `seller`,
+`in_stock_online` and `facets`; results are capped at the first 2,000 of a query
+(`results_capped`). Marketplace sellers come back named as Best Buy Canada lists
+them. Product `rating` and `review_count` are null (read them from `reviews` or
+`prices`). `deals` takes a collection (`black_friday`, `top_deals`,
+`clearance`, `open_box`, `refurbished`); `dates_text` carries the collection's
+own dates when its page states them ("Sale kicking off November 19 and running
+until December 3" on the Black Friday collection). Not available for Canada:
+per-store prices (the price is national), a Deal of the Day (Best Buy Canada has
+none), results past 2,000 per query, review photos hosted off Best Buy, cart or
+checkout, price history (poll and store the answers). For the same model at
+other Canadian retailers use the `amazon` (`country="ca"`), `walmart`
+(`domain="ca"`), `costco` (`country="ca"`) and `canadian_tire` namespaces; match
+on brand and model.
+
 ## Error Handling
 
 ```python
@@ -5654,7 +5720,7 @@ Scavio works with popular AI/LLM frameworks:
 | Menards | `search`, `stores`, `product` | `search` 2; `stores` and `product` 1 each, `product` with `store_id` 2 |
 | Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
-| Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` | `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores) |
+| Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` (`country="ca"` for Best Buy Canada); Canada only: `questions` | US: `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores). 1 each for Canada |
 | TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
 | Vinted | `search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`, `suggestions`, `filters`, `categories` | 1 each |
 | Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
@@ -5712,6 +5778,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.92.0
+
+- **Best Buy Canada on `best_buy`** (sync and async): all nine methods take
+  `country="ca"` for Best Buy Canada (bestbuy.ca, CAD), plus `language` (en or
+  fr) and `province` (the environmental handling fee); listings take
+  `page_size`, `deals` takes `collection`, `stores` takes `postal_code`, `city`
+  or `latitude` / `longitude`, and `availability` takes `postal_code` and
+  `skus` (exact units per store). New Canada-only method `questions`. 1 credit
+  per Canada call. US calls are unchanged: `country` is not sent unless you pass
+  it, and US credits stay as they were. `stores`' `zip` is now optional
+  (positional as before) because Canada searches by postal code, city or
+  coordinates; one of them is required.
 
 ### Changed in 0.91.0
 

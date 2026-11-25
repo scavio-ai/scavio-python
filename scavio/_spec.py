@@ -259,29 +259,71 @@ _COSTCO_LISTING_FILTERS = (
 
 
 
-# Best Buy params shared across endpoints.
+# Best Buy params shared across endpoints. country is absent by default, so a
+# US call posts exactly what it did before Best Buy Canada existed.
 _BESTBUY_SKU = _str(
     "sku",
-    "Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).",
+    "Best Buy SKU, a search result's `sku` (e.g. '6607832'); for country='ca' a Best Buy "
+    "Canada SKU (its own 8-digit numbering, e.g. '19791103').",
 )
 _BESTBUY_URL = _str(
     "url",
-    "bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or "
-    "/site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.",
+    "Product URL that names a SKU: bestbuy.com (/product/<name>/<id>/sku/<sku> or "
+    "/site/<name>/<sku>.p?skuId=<sku>) or, for country='ca', bestbuy.ca "
+    "(/en-ca/product/<name>/<sku>). Used when sku is not given.",
 )
 _BESTBUY_FILTERS = Param(
     "filters",
     "Optional[dict[str, Any]]",
     doc="Filters, the same as the site's filter sidebar: brand (as spelled in the Brand "
     "facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, "
-    "pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the "
-    "response echoes what Best Buy applied.",
+    "pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. Best Buy Canada also takes "
+    "rating (3, 4 or 5: N stars and up), sold_by ('best_buy' or 'marketplace'), seller, "
+    "in_stock_online and facets (a list of {'facet', 'value'} from a response's facets). "
+    "The response echoes what Best Buy applied.",
 )
 _BESTBUY_INCLUDE_SPONSORED = _bool(
     "include_sponsored",
     "Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position "
     "null). Defaults to false.",
 )
+_BB_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best "
+    "Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a "
+    "marketplace of third-party sellers), prices in CAD.",
+)
+_BBCA_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, "
+    "specs and links.",
+)
+_BBCA_PROVINCE = _lit(
+    "province",
+    ("AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"),
+    "Best Buy Canada only: province or territory for the environmental handling fee (ehf), "
+    "default 'ON'. Prices are national and do not change by province.",
+)
+_BBCA_PAGE_SIZE = _int(
+    "page_size",
+    "Best Buy Canada only: products per page, 1-100 (default 24). US pages are fixed at 18.",
+)
+_BB_PAGE = _int(
+    "page",
+    "Results page, 1-based. US: up to 100, 18 products per page. Canada: page_size per "
+    "page, within the first 2,000 results of a query.",
+)
+_BBCA_LISTING_NOTE = (
+    " With country='ca', Best Buy Canada: page_size 1-100, the sorts best_match, price_low, "
+    "price_high and rating, results capped at the first 2,000 (results_capped), CAD prices "
+    "with sale_ends_at and the ehf for province; marketplace sellers as returned."
+)
+
+
+def _bb_credits(us: str) -> str:
+    return f"Costs {us} in the US (bestbuy.com); 1 credit with country='ca'."
 
 
 # TCGplayer params shared across endpoints.
@@ -24185,14 +24227,19 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         min_timeout=150.0,
     ),
     # ============================== Best Buy =============================
-    # bestbuy.com (US only), 9 endpoints. Credits: search, product, reviews and
-    # prices 2 (prices is per call, up to 15 SKUs); category 2 for an abcat id
-    # and 3 for a pcmcat page (credits_note); deals 3; stores and suggestions 1;
-    # availability 2 flat for up to 8 stores. product, reviews and availability
-    # take sku or url; category takes category_id or url; availability takes
-    # exactly one of zip or store_ids (one_of only enforces "at least one").
-    # filters is a nested object on the wire, so it is a dict here. 120 s
-    # timeout floor everywhere: availability alone typically takes 5-20 s.
+    # bestbuy.com (US, the default) and, with country="ca", Best Buy Canada
+    # (bestbuy.ca) on all 9 endpoints, plus the Canada-only questions endpoint
+    # (no country param: the backend defaults it to "ca"). US credits: search,
+    # product, reviews and prices 2 (prices is per call, up to 15 SKUs);
+    # category 2 for an abcat id and 3 for a pcmcat page; deals 3; stores and
+    # suggestions 1; availability 2 flat for up to 8 stores. Every Canada call
+    # is 1 credit, so each shared endpoint carries a credits_note and `credits`
+    # stays the US cost. product, reviews and availability take sku or url
+    # (availability for Canada also skus); category takes category_id or url;
+    # availability takes exactly one of zip (US) / postal_code (Canada) or
+    # store_ids (one_of only enforces "at least one"). filters is a nested
+    # object on the wire, so it is a dict here. 120 s timeout floor everywhere:
+    # US availability alone typically takes 5-20 s.
     Endpoint(
         key="best_buy_search",
         namespace="best_buy",
@@ -24210,11 +24257,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "sort and filters, the category, the filter sidebar (every facet with its values and "
             "product counts; category_facet values carry category ids), the sort options, "
             "related searches and any spelling correction. Sponsored tiles are left out unless "
-            "include_sponsored."
+            "include_sponsored." + _BBCA_LISTING_NOTE
         ),
         params=(
             _req("query", "Search keywords."),
-            _int("page", "Results page, 1-based, up to 100. Defaults to 1. 18 products per page."),
+            _BB_PAGE,
             _lit(
                 "sort",
                 (
@@ -24227,12 +24274,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                     "newest",
                 ),
                 "best_match (default), best_selling, best_discount, price_low, price_high, "
-                "rating or newest.",
+                "rating or newest. best_selling, best_discount and newest are US only (a 400 "
+                "for 'ca').",
             ),
             _BESTBUY_FILTERS,
             _BESTBUY_INCLUDE_SPONSORED,
+            _BB_COUNTRY,
+            _BBCA_PAGE_SIZE,
+            _BBCA_PROVINCE,
+            _BBCA_LANGUAGE,
         ),
         credits=2,
+        credits_note=_bb_credits("2 credits"),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24249,11 +24302,16 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "sellers' and conditions' SKUs of the same product, rating, review count, the AI "
             "review summary and what customers love, description, feature list, what's "
             "included, the full specification table by group, dimensions, full-size images, "
-            "manuals and badges. An unknown SKU is a 404."
+            "manuals and badges. An unknown SKU is a 404. With country='ca', Best Buy Canada: "
+            "UPC, CAD price, regular price, savings, sale_starts_at and sale_ends_at (UTC), ehf "
+            "and ehf_by_province, seller, online units, open_box (Geek Squad open-box, open-box "
+            "and refurbished SKUs with their own prices), specifications and images; rating and "
+            "review_count are null for Canada (read them from reviews() or prices())."
         ),
-        params=(_BESTBUY_SKU, _BESTBUY_URL),
+        params=(_BESTBUY_SKU, _BESTBUY_URL, _BB_COUNTRY, _BBCA_PROVINCE, _BBCA_LANGUAGE),
         one_of=(("sku", "url"),),
         credits=2,
+        credits_note=_bb_credits("2 credits"),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24271,12 +24329,19 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "review has id, title, text, rating, author, date, recommended flag, "
             "verified-purchase and incentivized flags, days of ownership, helpful and "
             "not-helpful votes, badges, photos, the site it was syndicated from and the brand's "
-            "response. An unknown SKU is a 404."
+            "response. An unknown SKU is a 404. With country='ca', Best Buy Canada: page_size "
+            "1-100, verified_only, with_photos, language ('fr': French reviews only); the summary "
+            "has the star distribution, recommended percent and Best Buy Canada's own AI "
+            "summary; no reviewer names."
         ),
         params=(
             _BESTBUY_SKU,
             _BESTBUY_URL,
-            _int("page", "Reviews page, 1-based, 20 reviews per page, up to 500. Defaults to 1."),
+            _int(
+                "page",
+                "Reviews page, 1-based. US: 20 reviews per page, up to 500. Canada: page_size per "
+                "page. Defaults to 1.",
+            ),
             _lit(
                 "sort",
                 (
@@ -24291,9 +24356,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "lowest_rated.",
             ),
             _ilit("rating", (1, 2, 3, 4, 5), "Only reviews with this many stars, 1-5."),
+            _BB_COUNTRY,
+            _int("page_size", "Best Buy Canada only: reviews per page, 1-100 (default 20)."),
+            _bool("verified_only", "Best Buy Canada only: verified purchases only."),
+            _bool("with_photos", "Best Buy Canada only: reviews with photos only."),
+            _BBCA_LANGUAGE,
         ),
         one_of=(("sku", "url"),),
         credits=2,
+        credits_note=_bb_credits("2 credits"),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24309,7 +24380,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "TVs) and merchandised pages such as All Electronics on Sale (pcmcat1674241939957), "
             "whose built-in filters are read from the page itself. Products and listing fields "
             "are the same as search(). An unknown category, or a page without a product grid, "
-            "is a 404."
+            "is a 404. With country='ca', a Best Buy Canada category by numeric id (e.g. 21344 "
+            "Televisions), slug id, or 'departments' for the top level, with its parents and "
+            "subcategories to walk the tree." + _BBCA_LISTING_NOTE
         ),
         params=(
             _str(
@@ -24317,26 +24390,43 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "Best Buy category id: abcat... (catalogue categories, e.g. abcat0101001 All "
                 "Flat-Screen TVs) or pcmcat... (merchandised pages, e.g. pcmcat1674241939957 All "
                 "Electronics on Sale). A search result's facets list category ids under "
-                "category_facet.",
+                "category_facet. For country='ca' a numeric id (e.g. '21344'), a slug id or "
+                "'departments'.",
             ),
             _str(
                 "url",
                 "A bestbuy.com category page URL (.../<id>.c?id=<id>). Filters in the URL (qp=...) "
-                "are kept; its sort is not, use sort.",
+                "are kept; its sort is not, use sort. For country='ca' a bestbuy.ca category link.",
             ),
-            _int("page", "Results page, 1-based, up to 100. Defaults to 1. 18 products per page."),
+            _BB_PAGE,
             _lit(
                 "sort",
-                ("best_selling", "best_discount", "price_low", "price_high", "rating", "newest"),
-                "best_selling (the default on most pages), best_discount, price_low, price_high, "
-                "rating or newest.",
+                (
+                    "best_match",
+                    "best_selling",
+                    "best_discount",
+                    "price_low",
+                    "price_high",
+                    "rating",
+                    "newest",
+                ),
+                "US: best_selling (the default on most pages), best_discount, price_low, "
+                "price_high, rating or newest (no best_match). Canada: best_match (default), "
+                "price_low, price_high or rating.",
             ),
             _BESTBUY_FILTERS,
             _BESTBUY_INCLUDE_SPONSORED,
+            _BB_COUNTRY,
+            _BBCA_PAGE_SIZE,
+            _BBCA_PROVINCE,
+            _BBCA_LANGUAGE,
         ),
         one_of=(("category_id", "url"),),
         credits=2,
-        credits_note="Costs 2 credits for an abcat id and 3 for a pcmcat page (the page is read first).",
+        credits_note=(
+            "Costs 2 credits in the US for an abcat id and 3 for a pcmcat page (the page is read "
+            "first); 1 credit with country='ca'."
+        ),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24346,13 +24436,36 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/bestbuy/deals",
         summary=(
-            "Today's Best Buy Deal of the Day and the more-deals row under it, with live prices: "
-            "SKU, name, URL, image, rating, review count, price, regular price, savings in "
-            "dollars and percent, on-sale flag and deal badge, plus the countdown end as the "
-            "page shows it. Up to 15 products. No parameters."
+            "US (default): today's Best Buy Deal of the Day and the more-deals row under it, "
+            "with live prices: SKU, name, URL, image, rating, review count, price, regular "
+            "price, savings in dollars and percent, on-sale flag and deal badge, plus the "
+            "countdown end as the page shows it. Up to 15 products; no other parameters. With "
+            "country='ca' (Best Buy Canada has no Deal of the Day): one deal collection "
+            "(black_friday, top_deals (default), clearance, open_box, refurbished) as a listing "
+            "with the search parameters, plus dates_text, the collection's own dates when its "
+            "page states them." + _BBCA_LISTING_NOTE
         ),
-        params=(),
+        params=(
+            _BB_COUNTRY,
+            _lit(
+                "collection",
+                ("black_friday", "top_deals", "clearance", "open_box", "refurbished"),
+                "Best Buy Canada only: the deal collection (default 'top_deals').",
+            ),
+            _int("page", "Best Buy Canada only: page, 1-based."),
+            _BBCA_PAGE_SIZE,
+            _lit(
+                "sort",
+                ("best_match", "price_low", "price_high", "rating"),
+                "Best Buy Canada only: best_match (default), price_low, price_high or rating.",
+            ),
+            _BESTBUY_FILTERS,
+            _BESTBUY_INCLUDE_SPONSORED,
+            _BBCA_PROVINCE,
+            _BBCA_LANGUAGE,
+        ),
         credits=3,
+        credits_note=_bb_credits("3 credits"),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24365,9 +24478,29 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "Best Buy stores near a US ZIP code, nearest first (up to 15): store id, name, "
             "address, city, state, ZIP, phone, open status, store type, distance in miles, and "
             "dated opening hours for the next 35 days (holiday hours and closed days included). "
-            "Use a store_id with availability()."
+            "Use a store_id with availability(). With country='ca', Best Buy Canada stores near "
+            "a postal_code (radius_km), in a city, or near latitude + longitude: store id, name, "
+            "type (BigBox, SmallFormat, Mobile, ExpressKiosk), address, province, phone, "
+            "coordinates, distance in km, 7 dated days of hours and services."
         ),
-        params=(_req("zip", "US ZIP code, e.g. '94103'."),),
+        params=(
+            Param(
+                "zip",
+                "Optional[str]",
+                positional=True,
+                doc="US ZIP code, e.g. '94103'. Required for the US; for country='ca' pass "
+                "postal_code, city or latitude + longitude.",
+            ),
+            _BB_COUNTRY,
+            _str("postal_code", "Best Buy Canada only: a Canadian postal code, e.g. 'M5V 3L9'."),
+            _str("city", "Best Buy Canada only: a city instead of postal_code, e.g. 'Winnipeg'."),
+            _float("latitude", "Best Buy Canada only: with longitude, instead of postal_code."),
+            _float("longitude", "Best Buy Canada only: with latitude."),
+            _int("radius_km", "Best Buy Canada only: 1-100 km (default 25)."),
+            _int("limit", "Best Buy Canada only: stores to return, 1-100 (default 20)."),
+            _BBCA_LANGUAGE,
+        ),
+        one_of=(("zip", "postal_code", "city", "latitude"),),
         credits=1,
         min_timeout=120.0,
     ),
@@ -24386,7 +24519,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "include this SKU; never reported as out of stock). Also the pickup date, the minimum "
             "hours until pickup, and the nearby store Best Buy suggests when this one cannot "
             "fill it. Best Buy does not publish unit counts for well-stocked items, so quantity "
-            "is null for in_stock. Takes 5-20s. Costs 2 credits flat. An unknown SKU is a 404."
+            "is null for in_stock. Takes 5-20s. An unknown SKU is a 404. With country='ca', "
+            "Best Buy Canada: exact units per store for 1-20 SKUs (skus) at the stores nearest a "
+            "postal_code (max_stores 1-50, default 10) or up to 50 store_ids, plus online units; "
+            "status in_stock, out_of_stock or unknown (units None: no stock record for that "
+            "store, never out of stock). No prices here (Canada prices are national)."
         ),
         params=(
             _BESTBUY_SKU,
@@ -24398,17 +24535,32 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             ),
             _int(
                 "max_stores",
-                "With zip: how many of the nearest stores to check, 1-8. Defaults to 5.",
+                "With zip or postal_code: how many of the nearest stores to check. US 1-8 "
+                "(default 5); Canada 1-50 (default 10).",
             ),
             _str_or_list(
                 "store_ids",
                 "Check these stores instead (store numbers, a stores() result's store_id), up to "
-                "8: a list or a comma-separated string.",
+                "8 in the US and 50 in Canada: a list or a comma-separated string.",
             ),
+            _BB_COUNTRY,
+            _str(
+                "postal_code",
+                "Best Buy Canada only: the stores nearest this postal code, e.g. 'H3B 4W8'. Pass "
+                "exactly one of postal_code or store_ids.",
+            ),
+            _str_or_list(
+                "skus",
+                "Best Buy Canada only: 1-20 SKUs in one call instead of sku, a list or a "
+                "comma-separated string.",
+            ),
+            _BBCA_LANGUAGE,
         ),
-        # sku or url, and (at least) one of zip or store_ids; the server rejects both.
-        one_of=(("sku", "url"), ("zip", "store_ids")),
+        # sku, url or skus, and (at least) one of zip / postal_code or store_ids;
+        # the server rejects both.
+        one_of=(("sku", "url", "skus"), ("zip", "postal_code", "store_ids")),
         credits=2,
+        credits_note=_bb_credits("2 credits flat"),
         min_timeout=120.0,
     ),
     Endpoint(
@@ -24420,9 +24572,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "The bestbuy.com search-box autocomplete for a partial query (e.g. \"ps5 con\"): "
             "suggested search terms, each with the categories (id and name) and SKUs Best Buy "
-            "shows for it, plus any spelling correction."
+            "shows for it, plus any spelling correction. With country='ca', Best Buy Canada's "
+            "suggested search terms only, each flagged is_brand."
         ),
-        params=(_req("query", "What the shopper has typed so far."),),
+        params=(_req("query", "What the shopper has typed so far."), _BB_COUNTRY, _BBCA_LANGUAGE),
         credits=1,
         min_timeout=120.0,
     ),
@@ -24435,19 +24588,53 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Current bestbuy.com prices for up to 15 SKUs in one call: price, regular price, "
             "savings in dollars and percent, on-sale flag, deal badge and deal end time per SKU. "
-            "A SKU Best Buy does not know comes back found: false; all unknown is a 404. Costs 2 "
-            "credits per call, whatever the number of SKUs."
+            "A SKU Best Buy does not know comes back found: false; all unknown is a 404. With "
+            "country='ca', up to 20 Best Buy Canada SKUs: CAD price, regular price, savings, "
+            "sale_ends_at, ehf for province and ehf_by_province, rating, review count and "
+            "seller type."
         ),
         params=(
             Param(
                 "skus",
                 "Union[str, list[str]]",
                 required=True,
-                doc="1-15 Best Buy SKUs, a list or a comma-separated string, e.g. "
-                "['6607832', '6673112'].",
+                doc="1-15 Best Buy SKUs (1-20 for country='ca'), a list or a comma-separated "
+                "string, e.g. ['6607832', '6673112'].",
             ),
+            _BB_COUNTRY,
+            _BBCA_PROVINCE,
+            _BBCA_LANGUAGE,
         ),
         credits=2,
+        credits_note=(
+            "Costs 2 credits per call in the US (bestbuy.com), whatever the number of SKUs; 1 "
+            "credit with country='ca'."
+        ),
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="best_buy_questions",
+        namespace="best_buy",
+        method="questions",
+        http="POST",
+        path="/api/v1/bestbuy/questions",
+        summary=(
+            "Best Buy Canada only (bestbuy.ca): customer questions about one product by SKU or "
+            "link, each with its answer count and the top answer (text, date, verified "
+            "purchase, helpful votes), most answered first or newest; total_questions, "
+            "total_pages and has_more. Questions syndicated from bestbuy.com are flagged. No "
+            "asker or answerer names. An unknown SKU is a charged 404."
+        ),
+        params=(
+            _str("sku", "A Best Buy Canada SKU (8 digits), e.g. '19296507'."),
+            _str("url", "A bestbuy.ca product link. Used when sku is not given."),
+            _int("page", "Page, 1-based."),
+            _int("page_size", "Questions per page, 1-50 (default 10)."),
+            _lit("sort", ("most_answered", "newest"), "most_answered (default) or newest."),
+            _BBCA_LANGUAGE,
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
         min_timeout=120.0,
     ),
     # ============================== TCGplayer ============================

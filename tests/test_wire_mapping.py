@@ -662,6 +662,12 @@ BODY_PRICED_KEYS = {
     "home_depot_reviews",
     "home_depot_stores",
     "home_depot_availability",
+    "best_buy_search",
+    "best_buy_product",
+    "best_buy_reviews",
+    "best_buy_deals",
+    "best_buy_availability",
+    "best_buy_prices",
 }
 
 
@@ -2035,11 +2041,12 @@ def test_nordstrom_rack_credits_paths_and_wire(monkeypatch):
 
 
 def test_best_buy_credits_paths_and_wire(monkeypatch):
-    """best_buy (0.39.0): 9 endpoints on /api/v1/bestbuy, 120 s timeout floor.
+    """best_buy (0.39.0): 9 endpoints on /api/v1/bestbuy, 120 s timeout floor;
+    0.92.0 adds the Best Buy Canada only questions endpoint.
 
-    search, product, reviews and prices 2 credits; category 2 (3 on a pcmcat
-    page, stated in credits_note); deals 3; stores and suggestions 1;
-    availability 2 flat.
+    US: search, product, reviews and prices 2 credits; category 2 (3 on a
+    pcmcat page, stated in credits_note); deals 3; stores and suggestions 1;
+    availability 2 flat. questions 1.
     """
     eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "best_buy"}
     assert {m: ep.credits for m, ep in eps.items()} == {
@@ -2052,6 +2059,7 @@ def test_best_buy_credits_paths_and_wire(monkeypatch):
         "availability": 2,
         "suggestions": 1,
         "prices": 2,
+        "questions": 1,
     }
     for m, ep in eps.items():
         assert ep.http == "POST", ep.key
@@ -8150,3 +8158,96 @@ def test_home_depot_stores_availability_shipping(monkeypatch):
     ship = ENDPOINTS["home_depot_shipping"]
     assert ship.credits == 4 and ship.credits_note is None
     assert all(p.name != "country" for p in ship.params)
+
+
+# --- Best Buy Canada ----------------------------------------------------------
+
+
+def test_best_buy_ca_calls_send_country_and_ca_params(monkeypatch):
+    """country is absent by default (US bodies are pinned above); 'ca' adds the Canada fields."""
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    bb = client.best_buy
+    bb.search(
+        "4k tv",
+        country="ca",
+        page_size=48,
+        sort="price_low",
+        filters={"sold_by": "best_buy", "rating": 4},
+        province="QC",
+        language="fr",
+    )
+    assert captured["path"] == "/api/v1/bestbuy/search"
+    assert captured["json"] == {
+        "query": "4k tv",
+        "sort": "price_low",
+        "filters": {"sold_by": "best_buy", "rating": 4},
+        "country": "ca",
+        "page_size": 48,
+        "province": "QC",
+        "language": "fr",
+    }
+    bb.product(sku="19791103", country="ca", province="BC")
+    assert captured["json"] == {"sku": "19791103", "country": "ca", "province": "BC"}
+    bb.reviews(sku="19296507", country="ca", page_size=50, verified_only=True)
+    assert captured["json"] == {
+        "sku": "19296507",
+        "country": "ca",
+        "page_size": 50,
+        "verified_only": True,
+    }
+    bb.category(category_id="21344", country="ca", sort="best_match")
+    assert captured["json"] == {"category_id": "21344", "sort": "best_match", "country": "ca"}
+    bb.deals(country="ca", collection="black_friday", page=2)
+    assert captured["path"] == "/api/v1/bestbuy/deals"
+    assert captured["json"] == {"country": "ca", "collection": "black_friday", "page": 2}
+    bb.stores(country="ca", postal_code="M5V 3L9", radius_km=10)
+    assert captured["path"] == "/api/v1/bestbuy/stores"
+    assert captured["json"] == {"country": "ca", "postal_code": "M5V 3L9", "radius_km": 10}
+    bb.stores(country="ca", city="Winnipeg")
+    assert captured["json"] == {"country": "ca", "city": "Winnipeg"}
+    bb.availability(skus=["19791103", "19296507"], country="ca", postal_code="H3B 4W8", max_stores=5)
+    assert captured["path"] == "/api/v1/bestbuy/availability"
+    assert captured["json"] == {
+        "max_stores": 5,
+        "country": "ca",
+        "postal_code": "H3B 4W8",
+        "skus": ["19791103", "19296507"],
+    }
+    bb.availability(sku="19791103", country="ca", store_ids=["651", "705"])
+    assert captured["json"] == {"sku": "19791103", "store_ids": ["651", "705"], "country": "ca"}
+    bb.suggestions("nintendo sw", country="ca", language="en")
+    assert captured["json"] == {"query": "nintendo sw", "country": "ca", "language": "en"}
+    bb.prices(["19791103", "19296507"], country="ca", province="ON")
+    assert captured["path"] == "/api/v1/bestbuy/prices"
+    assert captured["json"] == {"skus": ["19791103", "19296507"], "country": "ca", "province": "ON"}
+    with pytest.raises(ScavioError):
+        bb.stores(country="ca")
+    with pytest.raises(ScavioError):
+        bb.availability(skus=["19791103"], country="ca")
+
+
+def test_best_buy_questions_is_canada_only(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    client = ScavioClient(api_key="sk_test")
+    client.best_buy.questions(sku="19296507", sort="newest", page_size=20)
+    assert captured["path"] == "/api/v1/bestbuy/questions"
+    assert captured["json"] == {"sku": "19296507", "page_size": 20, "sort": "newest"}
+    ep = ENDPOINTS["best_buy_questions"]
+    assert ep.credits == 1 and ep.credits_note is None and ep.min_timeout == 120.0
+    assert all(p.name != "country" for p in ep.params)
+    with pytest.raises(ScavioError):
+        client.best_buy.questions()
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_best_buy_shared_docstrings_state_both_rates(module):
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_BestBuyNamespace", None) or mod._AsyncBestBuyNamespace
+    for method in ("search", "product", "reviews", "category", "deals", "availability", "prices"):
+        doc = " ".join((getattr(cls, method).__doc__ or "").split())
+        assert "in the US" in doc and "1 credit with country='ca'" in doc, method
+    for method in ("stores", "suggestions", "questions"):
+        assert "Costs 1 credit." in " ".join((getattr(cls, method).__doc__ or "").split()), method

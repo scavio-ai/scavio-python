@@ -7840,7 +7840,7 @@ class _AsyncNordstromRackNamespace:
         return await self._client._call("nordstrom_rack_reviews", {"url": url, "style_id": style_id, "sort": sort, "stars": stars, "verified_only": verified_only, "with_photos": with_photos, "search": search, "max_reviews": max_reviews}, extra)
 
 class _AsyncBestBuyNamespace:
-    """Best Buy search, product (open-box offers), reviews, category, Deal of the Day, store locator, store pickup availability, autocomplete, and batch price endpoints."""
+    """Best Buy search, product (open-box offers), reviews, category, Deal of the Day, store locator, store pickup availability, autocomplete, and batch price endpoints (bestbuy.com by default); country='ca' reads Best Buy Canada (bestbuy.ca, CAD, exact units per store, EHF by province), which also has a questions endpoint."""
 
     def __init__(self, client: "AsyncScavioClient") -> None:
         self._client = client
@@ -7853,39 +7853,55 @@ class _AsyncBestBuyNamespace:
         sort: Optional[Literal["best_match", "best_selling", "best_discount", "price_low", "price_high", "rating", "newest"]] = None,
         filters: Optional[dict[str, Any]] = None,
         include_sponsored: Optional[bool] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        page_size: Optional[int] = None,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search bestbuy.com (US), 18 products per page, sorted by best match, best selling, best discount, price, rating or newest, filtered by brand, on sale, clearance, open box or a price range. Each product has SKU, BSIN, name, brand, model number, URL, image, price, regular price, savings in dollars and percent, on-sale flag, deal badge (e.g. Clearance, Holiday Deal), condition (new, refurbished excellent...), rating, review count, seller type (best_buy or marketplace), product type, badges and release date. Also returns the total result count and page count, the applied sort and filters, the category, the filter sidebar (every facet with its values and product counts; category_facet values carry category ids), the sort options, related searches and any spelling correction. Sponsored tiles are left out unless include_sponsored.
+        """Search bestbuy.com (US), 18 products per page, sorted by best match, best selling, best discount, price, rating or newest, filtered by brand, on sale, clearance, open box or a price range. Each product has SKU, BSIN, name, brand, model number, URL, image, price, regular price, savings in dollars and percent, on-sale flag, deal badge (e.g. Clearance, Holiday Deal), condition (new, refurbished excellent...), rating, review count, seller type (best_buy or marketplace), product type, badges and release date. Also returns the total result count and page count, the applied sort and filters, the category, the filter sidebar (every facet with its values and product counts; category_facet values carry category ids), the sort options, related searches and any spelling correction. Sponsored tiles are left out unless include_sponsored. With country='ca', Best Buy Canada: page_size 1-100, the sorts best_match, price_low, price_high and rating, results capped at the first 2,000 (results_capped), CAD prices with sale_ends_at and the ehf for province; marketplace sellers as returned.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (bestbuy.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
             query: Search keywords.
-            page: Results page, 1-based, up to 100. Defaults to 1. 18 products per page.
-            sort: best_match (default), best_selling, best_discount, price_low, price_high, rating or newest.
-            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the response echoes what Best Buy applied.
+            page: Results page, 1-based. US: up to 100, 18 products per page. Canada: page_size per page, within the first 2,000 results of a query.
+            sort: best_match (default), best_selling, best_discount, price_low, price_high, rating or newest. best_selling, best_discount and newest are US only (a 400 for 'ca').
+            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. Best Buy Canada also takes rating (3, 4 or 5: N stars and up), sold_by ('best_buy' or 'marketplace'), seller, in_stock_online and facets (a list of {'facet', 'value'} from a response's facets). The response echoes what Best Buy applied.
             include_sponsored: Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position null). Defaults to false.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            page_size: Best Buy Canada only: products per page, 1-100 (default 24). US pages are fixed at 18.
+            province: Best Buy Canada only: province or territory for the environmental handling fee (ehf), default 'ON'. Prices are national and do not change by province.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_search", {"query": query, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored}, extra)
+        return await self._client._call("best_buy_search", {"query": query, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored, "country": country, "page_size": page_size, "province": province, "language": language}, extra)
 
     async def product(
         self,
         *,
         sku: Optional[str] = None,
         url: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One bestbuy.com (US) product by SKU or URL: name, brand, model, UPC, URL, status, condition, product type, category path, price, regular price, savings, on-sale flag, deal badge, financing offer, every open-box offer by condition (fair, good, excellent) with its price, savings against new and against the regular price, other sellers' and conditions' SKUs of the same product, rating, review count, the AI review summary and what customers love, description, feature list, what's included, the full specification table by group, dimensions, full-size images, manuals and badges. An unknown SKU is a 404.
+        """One bestbuy.com (US) product by SKU or URL: name, brand, model, UPC, URL, status, condition, product type, category path, price, regular price, savings, on-sale flag, deal badge, financing offer, every open-box offer by condition (fair, good, excellent) with its price, savings against new and against the regular price, other sellers' and conditions' SKUs of the same product, rating, review count, the AI review summary and what customers love, description, feature list, what's included, the full specification table by group, dimensions, full-size images, manuals and badges. An unknown SKU is a 404. With country='ca', Best Buy Canada: UPC, CAD price, regular price, savings, sale_starts_at and sale_ends_at (UTC), ehf and ehf_by_province, seller, online units, open_box (Geek Squad open-box, open-box and refurbished SKUs with their own prices), specifications and images; rating and review_count are null for Canada (read them from reviews() or prices()).
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (bestbuy.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
-            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
-            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
+            sku: Best Buy SKU, a search result's `sku` (e.g. '6607832'); for country='ca' a Best Buy Canada SKU (its own 8-digit numbering, e.g. '19791103').
+            url: Product URL that names a SKU: bestbuy.com (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>) or, for country='ca', bestbuy.ca (/en-ca/product/<name>/<sku>). Used when sku is not given.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            province: Best Buy Canada only: province or territory for the environmental handling fee (ehf), default 'ON'. Prices are national and do not change by province.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_product", {"sku": sku, "url": url}, extra)
+        return await self._client._call("best_buy_product", {"sku": sku, "url": url, "country": country, "province": province, "language": language}, extra)
 
     async def reviews(
         self,
@@ -7895,21 +7911,32 @@ class _AsyncBestBuyNamespace:
         page: Optional[int] = None,
         sort: Optional[Literal["most_relevant", "most_helpful", "newest", "oldest", "highest_rated", "lowest_rated"]] = None,
         rating: Optional[Literal[1, 2, 3, 4, 5]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        page_size: Optional[int] = None,
+        verified_only: Optional[bool] = None,
+        with_photos: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Customer reviews of one bestbuy.com (US) product by SKU or URL, 20 per page, sorted most relevant (default), most helpful, newest, oldest, highest or lowest rated, optionally only one star rating. Returns the review summary (average rating, review count, recommended percent, star histogram, the most mentioned pros and cons with mention counts), total_results for the filter, page count and has_more. Each review has id, title, text, rating, author, date, recommended flag, verified-purchase and incentivized flags, days of ownership, helpful and not-helpful votes, badges, photos, the site it was syndicated from and the brand's response. An unknown SKU is a 404.
+        """Customer reviews of one bestbuy.com (US) product by SKU or URL, 20 per page, sorted most relevant (default), most helpful, newest, oldest, highest or lowest rated, optionally only one star rating. Returns the review summary (average rating, review count, recommended percent, star histogram, the most mentioned pros and cons with mention counts), total_results for the filter, page count and has_more. Each review has id, title, text, rating, author, date, recommended flag, verified-purchase and incentivized flags, days of ownership, helpful and not-helpful votes, badges, photos, the site it was syndicated from and the brand's response. An unknown SKU is a 404. With country='ca', Best Buy Canada: page_size 1-100, verified_only, with_photos, language ('fr': French reviews only); the summary has the star distribution, recommended percent and Best Buy Canada's own AI summary; no reviewer names.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits in the US (bestbuy.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
-            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
-            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
-            page: Reviews page, 1-based, 20 reviews per page, up to 500. Defaults to 1.
+            sku: Best Buy SKU, a search result's `sku` (e.g. '6607832'); for country='ca' a Best Buy Canada SKU (its own 8-digit numbering, e.g. '19791103').
+            url: Product URL that names a SKU: bestbuy.com (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>) or, for country='ca', bestbuy.ca (/en-ca/product/<name>/<sku>). Used when sku is not given.
+            page: Reviews page, 1-based. US: 20 reviews per page, up to 500. Canada: page_size per page. Defaults to 1.
             sort: most_relevant (default), most_helpful, newest, oldest, highest_rated or lowest_rated.
             rating: Only reviews with this many stars, 1-5.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            page_size: Best Buy Canada only: reviews per page, 1-100 (default 20).
+            verified_only: Best Buy Canada only: verified purchases only.
+            with_photos: Best Buy Canada only: reviews with photos only.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_reviews", {"sku": sku, "url": url, "page": page, "sort": sort, "rating": rating}, extra)
+        return await self._client._call("best_buy_reviews", {"sku": sku, "url": url, "page": page, "sort": sort, "rating": rating, "country": country, "page_size": page_size, "verified_only": verified_only, "with_photos": with_photos, "language": language}, extra)
 
     async def category(
         self,
@@ -7917,54 +7944,99 @@ class _AsyncBestBuyNamespace:
         category_id: Optional[str] = None,
         url: Optional[str] = None,
         page: Optional[int] = None,
-        sort: Optional[Literal["best_selling", "best_discount", "price_low", "price_high", "rating", "newest"]] = None,
+        sort: Optional[Literal["best_match", "best_selling", "best_discount", "price_low", "price_high", "rating", "newest"]] = None,
         filters: Optional[dict[str, Any]] = None,
         include_sponsored: Optional[bool] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        page_size: Optional[int] = None,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Browse a bestbuy.com (US) category or deals page by category id or URL, 18 products per page, sorted by best selling, best discount, price, rating or newest, with the same filters as search. Works on catalogue categories (abcat0101001 All Flat-Screen TVs) and merchandised pages such as All Electronics on Sale (pcmcat1674241939957), whose built-in filters are read from the page itself. Products and listing fields are the same as search(). An unknown category, or a page without a product grid, is a 404.
+        """Browse a bestbuy.com (US) category or deals page by category id or URL, 18 products per page, sorted by best selling, best discount, price, rating or newest, with the same filters as search. Works on catalogue categories (abcat0101001 All Flat-Screen TVs) and merchandised pages such as All Electronics on Sale (pcmcat1674241939957), whose built-in filters are read from the page itself. Products and listing fields are the same as search(). An unknown category, or a page without a product grid, is a 404. With country='ca', a Best Buy Canada category by numeric id (e.g. 21344 Televisions), slug id, or 'departments' for the top level, with its parents and subcategories to walk the tree. With country='ca', Best Buy Canada: page_size 1-100, the sorts best_match, price_low, price_high and rating, results capped at the first 2,000 (results_capped), CAD prices with sale_ends_at and the ehf for province; marketplace sellers as returned.
 
-        Costs 2 credits for an abcat id and 3 for a pcmcat page (the page is read first).
-        Returns the API response as a dict.
+        Costs 2 credits in the US for an abcat id and 3 for a pcmcat page (the page is read
+        first); 1 credit with country='ca'. Returns the API response as a dict.
 
         Args:
-            category_id: Best Buy category id: abcat... (catalogue categories, e.g. abcat0101001 All Flat-Screen TVs) or pcmcat... (merchandised pages, e.g. pcmcat1674241939957 All Electronics on Sale). A search result's facets list category ids under category_facet.
-            url: A bestbuy.com category page URL (.../<id>.c?id=<id>). Filters in the URL (qp=...) are kept; its sort is not, use sort.
-            page: Results page, 1-based, up to 100. Defaults to 1. 18 products per page.
-            sort: best_selling (the default on most pages), best_discount, price_low, price_high, rating or newest.
-            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. applied_filters in the response echoes what Best Buy applied.
+            category_id: Best Buy category id: abcat... (catalogue categories, e.g. abcat0101001 All Flat-Screen TVs) or pcmcat... (merchandised pages, e.g. pcmcat1674241939957 All Electronics on Sale). A search result's facets list category ids under category_facet. For country='ca' a numeric id (e.g. '21344'), a slug id or 'departments'.
+            url: A bestbuy.com category page URL (.../<id>.c?id=<id>). Filters in the URL (qp=...) are kept; its sort is not, use sort. For country='ca' a bestbuy.ca category link.
+            page: Results page, 1-based. US: up to 100, 18 products per page. Canada: page_size per page, within the first 2,000 results of a query.
+            sort: US: best_selling (the default on most pages), best_discount, price_low, price_high, rating or newest (no best_match). Canada: best_match (default), price_low, price_high or rating.
+            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. Best Buy Canada also takes rating (3, 4 or 5: N stars and up), sold_by ('best_buy' or 'marketplace'), seller, in_stock_online and facets (a list of {'facet', 'value'} from a response's facets). The response echoes what Best Buy applied.
             include_sponsored: Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position null). Defaults to false.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            page_size: Best Buy Canada only: products per page, 1-100 (default 24). US pages are fixed at 18.
+            province: Best Buy Canada only: province or territory for the environmental handling fee (ehf), default 'ON'. Prices are national and do not change by province.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_category", {"category_id": category_id, "url": url, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored}, extra)
+        return await self._client._call("best_buy_category", {"category_id": category_id, "url": url, "page": page, "sort": sort, "filters": filters, "include_sponsored": include_sponsored, "country": country, "page_size": page_size, "province": province, "language": language}, extra)
 
     async def deals(
         self,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        collection: Optional[Literal["black_friday", "top_deals", "clearance", "open_box", "refurbished"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "rating"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_sponsored: Optional[bool] = None,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Today's Best Buy Deal of the Day and the more-deals row under it, with live prices: SKU, name, URL, image, rating, review count, price, regular price, savings in dollars and percent, on-sale flag and deal badge, plus the countdown end as the page shows it. Up to 15 products. No parameters.
+        """US (default): today's Best Buy Deal of the Day and the more-deals row under it, with live prices: SKU, name, URL, image, rating, review count, price, regular price, savings in dollars and percent, on-sale flag and deal badge, plus the countdown end as the page shows it. Up to 15 products; no other parameters. With country='ca' (Best Buy Canada has no Deal of the Day): one deal collection (black_friday, top_deals (default), clearance, open_box, refurbished) as a listing with the search parameters, plus dates_text, the collection's own dates when its page states them. With country='ca', Best Buy Canada: page_size 1-100, the sorts best_match, price_low, price_high and rating, results capped at the first 2,000 (results_capped), CAD prices with sale_ends_at and the ehf for province; marketplace sellers as returned.
 
-        Costs 3 credits. Returns the API response as a dict.
+        Costs 3 credits in the US (bestbuy.com); 1 credit with country='ca'. Returns the API
+        response as a dict.
 
         Args:
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            collection: Best Buy Canada only: the deal collection (default 'top_deals').
+            page: Best Buy Canada only: page, 1-based.
+            page_size: Best Buy Canada only: products per page, 1-100 (default 24). US pages are fixed at 18.
+            sort: Best Buy Canada only: best_match (default), price_low, price_high or rating.
+            filters: Filters, the same as the site's filter sidebar: brand (as spelled in the Brand facet), on_sale, clearance, open_box (booleans), min_price and max_price (dollars, pass both), e.g. {'brand': 'Samsung', 'on_sale': True}. Best Buy Canada also takes rating (3, 4 or 5: N stars and up), sold_by ('best_buy' or 'marketplace'), seller, in_stock_online and facets (a list of {'facet', 'value'} from a response's facets). The response echoes what Best Buy applied.
+            include_sponsored: Include the sponsored tiles Best Buy mixes into the grid (sponsored: true, position null). Defaults to false.
+            province: Best Buy Canada only: province or territory for the environmental handling fee (ehf), default 'ON'. Prices are national and do not change by province.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_deals", {}, extra)
+        return await self._client._call("best_buy_deals", {"country": country, "collection": collection, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "include_sponsored": include_sponsored, "province": province, "language": language}, extra)
 
     async def stores(
         self,
-        zip: str,
+        zip: Optional[str] = None,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        postal_code: Optional[str] = None,
+        city: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius_km: Optional[int] = None,
+        limit: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Best Buy stores near a US ZIP code, nearest first (up to 15): store id, name, address, city, state, ZIP, phone, open status, store type, distance in miles, and dated opening hours for the next 35 days (holiday hours and closed days included). Use a store_id with availability().
+        """Best Buy stores near a US ZIP code, nearest first (up to 15): store id, name, address, city, state, ZIP, phone, open status, store type, distance in miles, and dated opening hours for the next 35 days (holiday hours and closed days included). Use a store_id with availability(). With country='ca', Best Buy Canada stores near a postal_code (radius_km), in a city, or near latitude + longitude: store id, name, type (BigBox, SmallFormat, Mobile, ExpressKiosk), address, province, phone, coordinates, distance in km, 7 dated days of hours and services.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            zip: US ZIP code, e.g. '94103'.
+            zip: US ZIP code, e.g. '94103'. Required for the US; for country='ca' pass postal_code, city or latitude + longitude.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            postal_code: Best Buy Canada only: a Canadian postal code, e.g. 'M5V 3L9'.
+            city: Best Buy Canada only: a city instead of postal_code, e.g. 'Winnipeg'.
+            latitude: Best Buy Canada only: with longitude, instead of postal_code.
+            longitude: Best Buy Canada only: with latitude.
+            radius_km: Best Buy Canada only: 1-100 km (default 25).
+            limit: Best Buy Canada only: stores to return, 1-100 (default 20).
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_stores", {"zip": zip}, extra)
+        return await self._client._call("best_buy_stores", {"zip": zip, "country": country, "postal_code": postal_code, "city": city, "latitude": latitude, "longitude": longitude, "radius_km": radius_km, "limit": limit, "language": language}, extra)
 
     async def availability(
         self,
@@ -7974,51 +8046,99 @@ class _AsyncBestBuyNamespace:
         zip: Optional[str] = None,
         max_stores: Optional[int] = None,
         store_ids: Optional[Union[str, list[str]]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        postal_code: Optional[str] = None,
+        skus: Optional[Union[str, list[str]]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Store pickup availability of one bestbuy.com SKU at up to 8 stores: the stores nearest a ZIP code or the store ids you pass. Each store has a status: in_stock, limited (with the real quantity when Best Buy shows "only N left"), ship_to_store (not on the shelf; can be shipped there for pickup by pickup_date), out_of_stock, not_available_for_pickup, or unknown (with a reason, when the store's answer did not include this SKU; never reported as out of stock). Also the pickup date, the minimum hours until pickup, and the nearby store Best Buy suggests when this one cannot fill it. Best Buy does not publish unit counts for well-stocked items, so quantity is null for in_stock. Takes 5-20s. Costs 2 credits flat. An unknown SKU is a 404.
+        """Store pickup availability of one bestbuy.com SKU at up to 8 stores: the stores nearest a ZIP code or the store ids you pass. Each store has a status: in_stock, limited (with the real quantity when Best Buy shows "only N left"), ship_to_store (not on the shelf; can be shipped there for pickup by pickup_date), out_of_stock, not_available_for_pickup, or unknown (with a reason, when the store's answer did not include this SKU; never reported as out of stock). Also the pickup date, the minimum hours until pickup, and the nearby store Best Buy suggests when this one cannot fill it. Best Buy does not publish unit counts for well-stocked items, so quantity is null for in_stock. Takes 5-20s. An unknown SKU is a 404. With country='ca', Best Buy Canada: exact units per store for 1-20 SKUs (skus) at the stores nearest a postal_code (max_stores 1-50, default 10) or up to 50 store_ids, plus online units; status in_stock, out_of_stock or unknown (units None: no stock record for that store, never out of stock). No prices here (Canada prices are national).
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits flat in the US (bestbuy.com); 1 credit with country='ca'. Returns the
+        API response as a dict.
 
         Args:
-            sku: Best Buy SKU, the number after /sku/ in a product URL (a search result's `sku`).
-            url: bestbuy.com product URL that names a SKU (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>). Used when sku is not given.
+            sku: Best Buy SKU, a search result's `sku` (e.g. '6607832'); for country='ca' a Best Buy Canada SKU (its own 8-digit numbering, e.g. '19791103').
+            url: Product URL that names a SKU: bestbuy.com (/product/<name>/<id>/sku/<sku> or /site/<name>/<sku>.p?skuId=<sku>) or, for country='ca', bestbuy.ca (/en-ca/product/<name>/<sku>). Used when sku is not given.
             zip: Check the stores nearest this US ZIP code (max_stores of them). Pass exactly one of zip or store_ids.
-            max_stores: With zip: how many of the nearest stores to check, 1-8. Defaults to 5.
-            store_ids: Check these stores instead (store numbers, a stores() result's store_id), up to 8: a list or a comma-separated string.
+            max_stores: With zip or postal_code: how many of the nearest stores to check. US 1-8 (default 5); Canada 1-50 (default 10).
+            store_ids: Check these stores instead (store numbers, a stores() result's store_id), up to 8 in the US and 50 in Canada: a list or a comma-separated string.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            postal_code: Best Buy Canada only: the stores nearest this postal code, e.g. 'H3B 4W8'. Pass exactly one of postal_code or store_ids.
+            skus: Best Buy Canada only: 1-20 SKUs in one call instead of sku, a list or a comma-separated string.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_availability", {"sku": sku, "url": url, "zip": zip, "max_stores": max_stores, "store_ids": store_ids}, extra)
+        return await self._client._call("best_buy_availability", {"sku": sku, "url": url, "zip": zip, "max_stores": max_stores, "store_ids": store_ids, "country": country, "postal_code": postal_code, "skus": skus, "language": language}, extra)
 
     async def suggestions(
         self,
         query: str,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """The bestbuy.com search-box autocomplete for a partial query (e.g. "ps5 con"): suggested search terms, each with the categories (id and name) and SKUs Best Buy shows for it, plus any spelling correction.
+        """The bestbuy.com search-box autocomplete for a partial query (e.g. "ps5 con"): suggested search terms, each with the categories (id and name) and SKUs Best Buy shows for it, plus any spelling correction. With country='ca', Best Buy Canada's suggested search terms only, each flagged is_brand.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             query: What the shopper has typed so far.
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_suggestions", {"query": query}, extra)
+        return await self._client._call("best_buy_suggestions", {"query": query, "country": country, "language": language}, extra)
 
     async def prices(
         self,
         skus: Union[str, list[str]],
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Current bestbuy.com prices for up to 15 SKUs in one call: price, regular price, savings in dollars and percent, on-sale flag, deal badge and deal end time per SKU. A SKU Best Buy does not know comes back found: false; all unknown is a 404. Costs 2 credits per call, whatever the number of SKUs.
+        """Current bestbuy.com prices for up to 15 SKUs in one call: price, regular price, savings in dollars and percent, on-sale flag, deal badge and deal end time per SKU. A SKU Best Buy does not know comes back found: false; all unknown is a 404. With country='ca', up to 20 Best Buy Canada SKUs: CAD price, regular price, savings, sale_ends_at, ehf for province and ehf_by_province, rating, review count and seller type.
 
-        Costs 2 credits. Returns the API response as a dict.
+        Costs 2 credits per call in the US (bestbuy.com), whatever the number of SKUs; 1 credit
+        with country='ca'. Returns the API response as a dict.
 
         Args:
-            skus: 1-15 Best Buy SKUs, a list or a comma-separated string, e.g. ['6607832', '6673112'].
+            skus: 1-15 Best Buy SKUs (1-20 for country='ca'), a list or a comma-separated string, e.g. ['6607832', '6673112'].
+            country: 'us' (default: bestbuy.com, unchanged) or 'ca': Best Buy Canada (bestbuy.ca, Best Buy's Canadian store: 142 stores across Canada per Best Buy's FY2026 10-K, plus a marketplace of third-party sellers), prices in CAD.
+            province: Best Buy Canada only: province or territory for the environmental handling fee (ehf), default 'ON'. Prices are national and do not change by province.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
             extra: Additional wire parameters passed through verbatim.
         """
-        return await self._client._call("best_buy_prices", {"skus": skus}, extra)
+        return await self._client._call("best_buy_prices", {"skus": skus, "country": country, "province": province, "language": language}, extra)
+
+    async def questions(
+        self,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["most_answered", "newest"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Best Buy Canada only (bestbuy.ca): customer questions about one product by SKU or link, each with its answer count and the top answer (text, date, verified purchase, helpful votes), most answered first or newest; total_questions, total_pages and has_more. Questions syndicated from bestbuy.com are flagged. No asker or answerer names. An unknown SKU is a charged 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A Best Buy Canada SKU (8 digits), e.g. '19296507'.
+            url: A bestbuy.ca product link. Used when sku is not given.
+            page: Page, 1-based.
+            page_size: Questions per page, 1-50 (default 10).
+            sort: most_answered (default) or newest.
+            language: Best Buy Canada only: 'en' (default) or 'fr'. Same SKUs and prices; French names, specs and links.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("best_buy_questions", {"sku": sku, "url": url, "page": page, "page_size": page_size, "sort": sort, "language": language}, extra)
 
 class _AsyncTcgplayerNamespace:
     """TCGplayer card and sealed product search, product (per-SKU market price), live listings, price history, recent sales, games, sets, set price guide, autocomplete, trending, and seller endpoints."""
