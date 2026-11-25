@@ -4936,6 +4936,7 @@ narrowed = dt.search("paper plates", filters=[facet_id], price_point=1.25)["data
 # --- One item: unit price, case price, case pack, minimum order, split-case rules, online stock.
 p = dt.product("221159")["data"]
 print(p["name"], p["price"], p["case_price"], p["case_pack"], p["minimum_quantity"], p["split_case"])
+print(p["banner_code"], p["split_case_fee"])  # raw Dollar Tree fields, as given
 print(p["online_stock"], p["upcs"][:3])
 
 # --- Units at one store plus its nearby stores (store number required; slow: tens of seconds).
@@ -4943,7 +4944,8 @@ near = dt.stores("60540")["data"]  # 5 credits
 store_number = near["stores"][0]["store_number"]
 ss = dt.store_stock("221159", store_number)["data"]
 print(ss["store"]["units"], ss["nearby_in_stock"], len(ss["nearby_stores"]))
-print(ss["ship_to_home"]["units"], ss["ship_to_home"]["eta"], ss["ship_to_store"]["eta"])
+home = ss["ship_to_home"]  # max_order_units: the most units orderable for delivery, not cases x case_size
+print(home["dc_number"], home["cases"], home["max_order_units"], home["eta"], ss["ship_to_store"]["eta"])
 
 # --- Store pages (US, or Canada with country="ca"), with hours and services.
 s = dt.store(slug="ny/new-york/2182-3rd-avenue")["data"]
@@ -4972,9 +4974,17 @@ prices are not published online. Online orders are by the case. Captured
 unit, `case_pack` 30, `case_price` $45.00, `minimum_quantity` 5; item 380886
 (Heavy-Duty 10-in Ultra Paper Plates, 10-pc Pack) at $1.50 a unit, 24 to a
 case, $36.00 a case. A case pack or case price Dollar Tree gives as 0 is
-`None`, never computed; stores sell single units. `store_stock` needs a store
-number (a ZIP alone does not pick a store): item 221159 showed 116 units at
-store 5126 (New York) and 63 nearby stores, 59 of them with stock.
+`None`, never computed; stores sell single units. `split_case.available` is
+computed by Scavio as `minimum_quantity < case_pack` (Dollar Tree's own flag
+reads N on every item); on `product`, `split_case_fee` is Dollar Tree's raw
+field as given (its meaning is not published, so it is not a fee) and
+`banner_code` is Dollar Tree's banner code (DT or FD), not a store-brand flag.
+`store_stock` needs a store number (a ZIP alone does not pick a store): item
+221159 showed 116 units at store 5126 (New York) and 63 nearby stores, 59 of
+them with stock; `ship_to_home` came from distribution centre 99006 with 2,374
+cases of 30 and `max_order_units` 75,570 (the most units orderable for
+delivery, the same at every store). `store.status` can be `None`, and some
+rural stores list no nearby stores.
 `store_stock`, `stores` and `reviews` are slow (usually 10-35 s, up to about
 2.5 minutes). Search matches item numbers, not UPCs. Reviews are the newest
 only (no other sort, no star filter, no Q&A, no reviewer names); many are
@@ -5169,6 +5179,13 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.84.1
+
+- **`dollartree` docs follow the new response shape**: `split_case` is
+  `{available, multiple}` (`fee` and `store_brand` removed), `product` adds
+  `split_case_fee` and `banner_code`, and `store_stock` replaces
+  `ship_to_home.units` with `max_order_units` and adds `dc_number`.
 
 ### Changed in 0.84.0
 

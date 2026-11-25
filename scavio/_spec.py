@@ -4358,10 +4358,10 @@ _DT_NOT_AVAILABLE = (
 _DT_ITEM_FIELDS = (
     "position, item_id (the input of product(), store_stock() and reviews()), name, brand (as "
     "Dollar Tree writes it), url, image, price (unit), list_price, on_sale, unit_price_text, "
-    "case_price, case_pack, minimum_quantity, split_case {available, multiple, fee (null in "
-    "listings)}, not_for_individual_sale, rating, review_count, online_availability, "
-    "in_stock_online, in_store_only, clearance, new, snap_eligible, upcs (as given), store_brand, "
-    "categories"
+    "case_price, case_pack, minimum_quantity, split_case {available (minimum_quantity < "
+    "case_pack, computed by Scavio), multiple}, not_for_individual_sale, rating, review_count, "
+    "online_availability, in_stock_online, in_store_only, clearance, new, snap_eligible, upcs "
+    "(as given), categories"
 )
 _DT_LIST = (
     "market {country, language, currency, locale}, category, page, page_size, total, "
@@ -19094,10 +19094,13 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/dollartree/product",
         summary=(
             "One " + _DT_NAME + " item in full by item number or link: market, "
-            "requested_item_id, item_id, name, brand, store_brand, url, image, images, "
-            "description, long_description, price, list_price, sale_price, on_sale, "
-            "unit_price_text, case_price, case_pack, minimum_quantity, split_case {available, "
-            "multiple, fee}, not_for_individual_sale, varying_case_packs, assortment, "
+            "requested_item_id, item_id, name, brand, banner_code (Dollar Tree's banner code "
+            "as given: DT or FD, not a store-brand flag), url, image, images, description, "
+            "long_description, price, list_price, sale_price, on_sale, unit_price_text, "
+            "case_price, case_pack, minimum_quantity, split_case {available (minimum_quantity < "
+            "case_pack, computed by Scavio), multiple}, split_case_fee (Dollar Tree's field as "
+            "given; it does not publish what it means or its unit, so it is not a fee), "
+            "not_for_individual_sale, varying_case_packs, assortment, "
             "assortment_details, upcs, rating, review_count, in_store_only, "
             "store_pickup_eligible, shippable, online_only, delivery_options (as given), "
             "order_limit, clearance, new, deals, snap_eligible, gift_card, available_since, "
@@ -19106,8 +19109,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "categories [{id, name, dimension_id, url}], child_skus [{sku_id, color, size, "
             "list_price, sale_price, sale_starts, sale_ends, active}], currency, notes."
             + _DT_PRICES + " Item 221159 (9-in. White Paper Plates, 40-ct. Packs) was $1.50 a "
-            "unit, case_pack 30, case_price $45.00, minimum_quantity 5. An unknown item is a "
-            "charged 404." + _DT_CHARGE
+            "unit, case_pack 30, case_price $45.00, minimum_quantity 5, split_case {available "
+            "True, multiple 5}, split_case_fee 0, banner_code DT. An unknown item is a charged "
+            "404." + _DT_CHARGE
         ),
         params=(_DT_ITEM, _DT_URL),
         one_of=(("item_id", "url"),),
@@ -19236,13 +19240,17 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Units of one " + _DT_NAME + " item at a store, as Dollar Tree's product page "
             "reports them for the store chosen: market, item_id, item {name, url, price}, store "
-            "{store_number, units, status, in_stock, unit_size}, nearby_stores [{store_number, "
-            "units, status, in_stock}] (up to about 63, store numbers only: stores() and store() "
-            "give their addresses), nearby_in_stock, ship_to_home {available, units, cases, "
-            "case_size, eta, express_eta, back_order}, ship_to_store {available, units, cases, "
+            "{store_number, units, status (None when Dollar Tree gives none), in_stock, "
+            "unit_size}, nearby_stores [{store_number, units, status, in_stock}] (up to about "
+            "63, none at some rural stores; store numbers only: stores() and store() give their "
+            "addresses), nearby_in_stock, ship_to_home {available, dc_number, cases (whole cases "
+            "at that distribution centre), case_size, max_order_units (the most units Dollar "
+            "Tree lets you order for delivery, the same at every store; not cases x case_size), "
+            "eta, express_eta, back_order}, ship_to_store {available, dc_number, units, cases, "
             "case_size, eta}, split_case_ship_to_home, notes. Stores sell single units "
             "(unit_size 1). Item 221159 showed 116 units at store 5126 (New York) and 63 nearby "
-            "stores, 59 with stock. store (a store number from stores()) is required: a ZIP "
+            "stores, 59 with stock; ship_to_home from dc_number 99006, 2,374 cases of 30, "
+            "max_order_units 75,570. store (a store number from stores()) is required: a ZIP "
             "alone does not pick a store. Price does not change by store. An unknown item or "
             "store is a charged 404." + _DT_SLOW + _DT_CHARGE
         ),
