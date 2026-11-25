@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 108 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 109 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -36,6 +36,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Mercari Sold Prices, Listings, Items, Brands, Trending and Japan Sellers (US and Japan; 11 endpoints) | Yes | No | No | No |
 | Depop Listings by Buyer Market, Shop Sold Prices, Shop Profiles and Reviews (9 markets; 14 endpoints) | Yes | No | No | No |
 | Poshmark Sold Prices, Listings, Closets and Love Notes (US and Canada; 15 endpoints) | Yes | No | No | No |
+| OfferUp Asking Prices Around Any US ZIP, the Same Item in Different Metros, Cars and Trucks by Dealer or Private Seller, Make, Year and Mileage, Listings with Condition and Vehicle Details, Seller Profiles (US; 5 endpoints) | Yes | No | No | No |
 | thredUP Prices, Estimated Retail, Sold Listings and Deals (US store; 12 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
@@ -5309,6 +5310,73 @@ history (poll and store the answers), offer start dates. Failed calls and
 refused inputs are not charged; a not-found (an unknown SKU or list path) is
 charged.
 
+### 78. Local marketplace -- OfferUp asking prices by city, cars and trucks, sellers
+
+OfferUp (offerup.com, the US local marketplace for buying and selling used
+items, cars and trucks). Namespace `offerup`, 5 endpoints: `search`,
+`listing`, `category`, `categories`, `seller`. 1 credit per call; `listing`
+is 1, or 2 when the listing needs a second, costlier fetch. `credits_used` in
+the response is what was charged. US only (no `country`), prices in USD.
+`search` and `category` take a US ZIP (required). The request timeout is
+raised to at least 240s. OfferUp has no public API for reading listings;
+OfferUp for Business (OfferUp Motors, Storefronts) is seller-side tooling
+that syncs a dealer's own inventory into OfferUp. Pair a listing with the
+`amazon` and `walmart` namespaces for the same item's new price and with
+`mercari` sold search for sold prices (match on model and title). See the
+[OfferUp API page](https://scavio.dev/offerup-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ou = client.offerup
+
+# --- The same keyword in two US metros: asking prices around each ZIP.
+for zip_code in ("98101", "60601"):
+    feed = ou.search("iphone 15", zip_code)["data"]
+    print(feed["location"]["resolved"], feed["location"]["radius_miles"], feed["count"], feed["has_more"])
+    for it in feed["items"][:5]:
+        print(it["listing_id"], it["title"], it["price"], it["city"], it["state"], it["sponsored"])
+    print(feed["filters_not_applied"])
+
+# --- Cars and trucks: dealer listings, model year, mileage.
+trucks = ou.search("toyota tacoma", "75201", seller_type="dealer", year_min=2018,
+                   max_mileage=100000, sort="lowest_mileage")["data"]
+for it in trucks["items"][:5]:
+    print(it["title"], it["price"], it["vehicle_miles"])
+
+# --- One listing: condition, posted date, vehicle details (no VIN), seller numbers.
+li = ou.listing("7a392126-fb9d-34c2-a6d8-1b94698428df")["data"]
+print(li["price"], li["condition"], li["posted_at"], li["vehicle"], li["seller"]["seller_type"])
+
+# --- A category around a ZIP, the category tree and a seller's public profile.
+furniture = ou.category("furniture", "90012")["data"]
+tree = ou.categories()["data"]
+dealer = ou.seller("8668343")["data"]
+print(dealer["rating"], dealer["rating_count"], dealer["items_sold"], dealer["count"])
+```
+
+`location.resolved` is the area OfferUp named for the ZIP and
+`location.radius_miles` the radius it applied (captured 2026-11-25: 98101
+resolved to Seattle, 60601 to Chicago, both 30 miles). Captured 2026-11-25:
+"toyota tacoma" around 75201 (Dallas, 80 miles) with `seller_type="dealer"`,
+`year_min=2018`, `max_mileage=100000` and `sort="lowest_mileage"` listed a 2025
+Toyota Tacoma 2WD at 35495 USD with 10017 miles. `filters_not_applied` lists
+any filter OfferUp did not apply to the feed; `seller_type` applies in Cars &
+Trucks only (on search it limits the results to category 5.1). Promoted
+OfferUp listings are marked `sponsored`. About 48 listings a page up to page
+50, no total count (`has_more`). Search tiles carry no posted date or
+condition (`listing` does). Prices are asking prices, not sold prices.
+Private sellers: no seller names (a dealer or business account's name only),
+usernames, avatars, phone numbers, emails, street addresses, coordinates or
+VINs; phone numbers, emails and VIN-like codes in titles and descriptions read
+`[removed]`. Not available: sold listings or sold prices (OfferUp does not
+show them publicly), shipping (OfferUp ended nationwide shipping in 2025;
+listings are local pickup), search suggestions, a total result count, a
+seller's listings past the first 20, messaging or offers. Failed calls and
+refused inputs are not charged; a not-found (an unknown listing, category or
+seller) is charged.
+
 ## Error Handling
 
 ```python
@@ -5479,6 +5547,7 @@ Scavio works with popular AI/LLM frameworks:
 | Mercari (`mercari`) | `search`, `item`, `category`, `categories`, `brands`, `brand`, `deals`, `trending`, `seller`, `seller_reviews`, `shop`; `country` us or jp (`deals` and `trending` us only; `seller`, `seller_reviews` and `shop` jp only) | 1 each |
 | Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
 | Poshmark (`poshmark`) | `search`, `sold`, `product`, `category`, `brand`, `closet`, `closet_listings`, `love_notes`, `closets_search`, `categories`, `brands`, `suggestions`, `parties`, `party_listings`, `similar`; `country` us or ca (`product`, closet endpoints and `categories` global) | 1 each |
+| OfferUp (`offerup`) | `search`, `listing`, `category`, `categories`, `seller`; us only (no `country`); `search` and `category` take `zip` (required); `listing` takes `listing_id` or `url` | 1 each; `listing` 1, or 2 when it needs a second, costlier fetch |
 | thredUP (`thredup`) | `search`, `sold`, `product`, `category`, `brand`, `deals`, `rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`, `similar`; thredUP's US store (no `country`) | 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
@@ -5497,6 +5566,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.89.0
+
+- **New `offerup` namespace** (sync and async) for OfferUp (offerup.com,
+  the US local marketplace for buying and selling used items, cars and
+  trucks), 5 endpoints: `search`, `listing`, `category`, `categories`,
+  `seller`. Asking prices around any US ZIP with the area OfferUp resolved,
+  cars and trucks by dealer or private seller, make, model year and mileage,
+  a listing's condition, posted date and vehicle details (no VIN), the
+  category tree and a seller's public profile numbers. 1 credit per call;
+  `listing` 1, or 2 when it needs a second, costlier fetch. The request
+  timeout is raised to at least 240s.
 
 ### Changed in 0.88.0
 

@@ -76,6 +76,7 @@ from ._namespaces_sync import (
     _NintendoNamespace,
     _NordstromNamespace,
     _NordstromRackNamespace,
+    _OfferupNamespace,
     _OlxNamespace,
     _OreillyNamespace,
     _PetcoNamespace,
@@ -285,6 +286,7 @@ class ScavioClient:
         self.vevor = _VevorNamespace(self)
         self.nellis = _NellisNamespace(self)
         self.dermstore = _DermstoreNamespace(self)
+        self.offerup = _OfferupNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

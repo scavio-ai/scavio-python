@@ -656,6 +656,7 @@ BODY_PRICED_KEYS = {
     "tractorsupply_store_prices",
     "michaels_category",
     "michaels_deals",
+    "offerup_listing",
 }
 
 
@@ -7761,3 +7762,112 @@ def test_dermstore_credits_paths_and_wire(monkeypatch):
         dm.product()
     with pytest.raises(ScavioError):
         dm.list()
+
+
+def test_offerup_credits_paths_and_wire(monkeypatch):
+    """offerup (0.89.0): 5 endpoints on /api/v1/offerup.
+
+    1 credit each; listing is 1, or 2 when it needs a second, costlier fetch (credits_note). US
+    only (no country). search and category need zip; listing takes listing_id or url; query is
+    sent as q. Every method gets a 240 s floor.
+    """
+    _OFU_FIRST = (
+        "OfferUp (offerup.com, the US local marketplace for buying and selling used items, cars "
+        "and trucks)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "offerup"}
+    assert sorted(eps) == ["categories", "category", "listing", "search", "seller"]
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/offerup/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == 1, m
+        assert "country" not in {p.name for p in ep.params}, m
+        if m == "listing":
+            assert ep.credits_note is not None and "or 2 when" in ep.credits_note
+        else:
+            assert ep.credits_note is None, m
+    for m in ("search", "category", "categories", "seller"):
+        assert _OFU_FIRST in eps[m].summary, m
+    for m in ("search", "listing", "category", "seller"):
+        s = eps[m].summary
+        assert "no seller names" in s, m
+        assert "asking prices" in s, m
+    assert "sold listings or sold prices" in eps["search"].summary
+    assert "ended nationwide shipping in 2025" in eps["search"].summary
+    assert "no total count" in eps["search"].summary
+    assert "filters_not_applied" in eps["category"].summary
+    assert "no VIN" in eps["listing"].summary
+    assert "first 20" in eps["seller"].summary
+    assert eps["listing"].one_of == (("listing_id", "url"),)
+    search = {p.name: p for p in eps["search"].params}
+    assert search["query"].wire_field == "q"
+    assert search["query"].required is True
+    assert search["zip"].required is True
+    assert search["zip"].annotation == "Union[str, int]"
+    assert search["sort"].annotation == (
+        'Optional[Literal["best_match", "newest", "distance", "price_low", "price_high", '
+        '"newest_year", "lowest_mileage"]]'
+    )
+    assert search["radius"].annotation == (
+        "Optional[Literal[5, 10, 20, 25, 30, 50, 80, 100, 200, 1500]]"
+    )
+    assert search["condition"].annotation == "Optional[Union[str, list[str]]]"
+    assert search["seller_type"].annotation == 'Optional[Literal["dealer", "private"]]'
+    category = {p.name: p for p in eps["category"].params}
+    assert category["category"].required is True
+    assert category["zip"].required is True
+    assert "category_id" not in category
+    assert '"best_match"' not in category["sort"].annotation
+    seller = {p.name: p for p in eps["seller"].params}
+    assert seller["seller_id"].required is True
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|"
+                        r"cloudflare|firewall|pool|deals?|underpriced|worth it|market value|"
+                        r"scam|fraud|fake|only api|only at)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+        assert not banned.search((ep.credits_note or "").lower()), ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    ou = client.offerup
+    ou.search("iphone 15", "98101")
+    ou.search("toyota tacoma", 75201, radius=80, page=2, sort="lowest_mileage",
+              category_id="5.1", min_price=5000, max_price=60000, condition=["used"],
+              seller_type="dealer", make="Toyota", year_min=2018, year_max=2026,
+              max_mileage=100000)
+    ou.listing("7a392126-fb9d-34c2-a6d8-1b94698428df")
+    ou.listing(url="https://offerup.com/item/detail/7a392126-fb9d-34c2-a6d8-1b94698428df")
+    ou.category("furniture", "90012")
+    ou.category("cars-and-trucks", "75201", sort="newest_year", condition="used,refurbished",
+                radius=100)
+    ou.categories()
+    ou.seller("8668343")
+    ou.seller(8668343)
+    base = "/api/v1/offerup/"
+    assert seen == [
+        (base + "search", {"q": "iphone 15", "zip": "98101"}, 240.0),
+        (base + "search", {"q": "toyota tacoma", "zip": 75201, "radius": 80, "page": 2,
+                           "min_price": 5000, "max_price": 60000, "condition": ["used"],
+                           "seller_type": "dealer", "make": "Toyota", "year_min": 2018,
+                           "year_max": 2026, "max_mileage": 100000, "sort": "lowest_mileage",
+                           "category_id": "5.1"}, 240.0),
+        (base + "listing", {"listing_id": "7a392126-fb9d-34c2-a6d8-1b94698428df"}, 240.0),
+        (base + "listing", {"url": "https://offerup.com/item/detail/"
+                            "7a392126-fb9d-34c2-a6d8-1b94698428df"}, 240.0),
+        (base + "category", {"category": "furniture", "zip": "90012"}, 240.0),
+        (base + "category", {"category": "cars-and-trucks", "zip": "75201", "radius": 100,
+                             "condition": "used,refurbished", "sort": "newest_year"}, 240.0),
+        (base + "categories", {}, 240.0),
+        (base + "seller", {"seller_id": "8668343"}, 240.0),
+        (base + "seller", {"seller_id": 8668343}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        ou.listing()
