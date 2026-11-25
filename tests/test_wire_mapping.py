@@ -8206,7 +8206,9 @@ def test_best_buy_ca_calls_send_country_and_ca_params(monkeypatch):
     assert captured["json"] == {"country": "ca", "postal_code": "M5V 3L9", "radius_km": 10}
     bb.stores(country="ca", city="Winnipeg")
     assert captured["json"] == {"country": "ca", "city": "Winnipeg"}
-    bb.availability(skus=["19791103", "19296507"], country="ca", postal_code="H3B 4W8", max_stores=5)
+    bb.availability(
+        skus=["19791103", "19296507"], country="ca", postal_code="H3B 4W8", max_stores=5
+    )
     assert captured["path"] == "/api/v1/bestbuy/availability"
     assert captured["json"] == {
         "max_stores": 5,
