@@ -82,6 +82,7 @@ from ._namespaces_async import (
     _AsyncOfferupNamespace,
     _AsyncOlxNamespace,
     _AsyncOreillyNamespace,
+    _AsyncPcexpressNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
     _AsyncPoshmarkNamespace,
@@ -288,6 +289,7 @@ class AsyncScavioClient:
         self.sportchek = _AsyncSportchekNamespace(self)
         self.marks = _AsyncMarksNamespace(self)
         self.rona = _AsyncRonaNamespace(self)
+        self.pcexpress = _AsyncPcexpressNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

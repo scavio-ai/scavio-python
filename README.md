@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 112 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 113 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -22,6 +22,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | SportChek and Mark's Prices in CAD with the Was Price, Sale Label and Sale End Date, Sizes and Colours with Assigned-Store Units, SportChek Reviews, Mark's Questions, L'Equipeur in French (Canada; 16 endpoints) | Yes | No | No | No |
 | RONA Store Prices in CAD for Up to 60 Articles at One Store with Exact Units, Search, Category and Weekly Deals Priced at a Chosen Store, Sale End Text, 403 Stores, Stock Near a Store (Canada; 9 endpoints) | Yes | No | No | No |
+| PC Express Grocery Prices in CAD at Each Banner's Default Store (Real Canadian Superstore, No Frills, Loblaws, Maxi and 6 more), Deal End Dates, PC Optimum Offers, Unit Prices, Product Nutrition, Pickup Stores (Canada; 7 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; Sephora Canada CAD Prices, Sale Prices, Dated Offers and Stores; 26 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
@@ -5725,6 +5726,77 @@ longitude, or a city or province), the printed flyer, cart or checkout, price
 history (poll and store the answers). Failed calls and refused inputs are not
 charged; a not-found (an unknown article, category or store) is charged.
 
+### 84. Canadian grocery -- PC Express prices by banner, deals, stores
+
+PC Express (Loblaw's online grocery for Real Canadian Superstore, No Frills,
+Loblaws, Zehrs, Fortinos, Valu-mart, Your Independent Grocer, Wholesale Club,
+Provigo and Maxi; Loblaw operates 2,504 stores per its 2025 annual report).
+Namespace `pcexpress`, 7 endpoints: `search`, `category`, `collection`,
+`product`, `stores`, `store`, `suggestions`. The job: what each Loblaw banner
+charges for the same product code at its default store on one date, with the
+deal end date and the PC Optimum offer as shown. Credits: `search`,
+`category`, `collection`, `stores` and `suggestions` 1; `product` 5 (1 when it
+answers from the search listing, `source` "search"); `store` 5.
+`credits_used` in the response is what was charged. Canada only, prices in
+CAD. Answers can take up to about a minute; allow up to 2 minutes for
+`product`, `store`, `stores` and `suggestions`: the request timeout is raised
+to at least 240s. PC Express has no public API. Pair a national-brand item with the
+`walmart` namespace and `domain="ca"` for Walmart.ca, and see the `costco`,
+`instacart` and `amazon` namespaces.
+See the [PC Express API page](https://scavio.dev/pcexpress-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+pcx = client.pcexpress
+
+# --- The same product code on three banners (each banner's default store).
+for banner, query, language in (("superstore", "eggs", "en"), ("nofrills", "eggs", "en"),
+                                ("maxi", "oeufs", "fr")):
+    res = pcx.search(query, banner=banner, language=language)["data"]
+    for it in res["items"]:
+        if it["code"] == "20812144001_EA":
+            print(banner, res["store"]["store_id"], it["name"], it["price"], it["unit_price"])
+
+# --- Deals with their end date and PC Optimum offer as shown.
+deals = pcx.collection("deals-centre", banner="nofrills")["data"]
+for it in deals["items"][:5]:
+    print(it["name"], it["price"], it["was_price"], it["deal"], it["pc_optimum_points"])
+
+# --- One product: GTIN, nutrition, comparison prices.
+p = pcx.product("20812144001_EA")["data"]
+print(p["source"], p["gtin"], p["price"], p["comparison_prices"], p["stock_status"])
+
+# --- Pickup stores and one store's hours.
+stores = pcx.stores(city="Winnipeg")["data"]
+store = pcx.store("1517")["data"]
+print(stores["matched"], store["name"], store["store_hours"][0])
+```
+
+`banner`: `superstore` (Real Canadian Superstore, default), `nofrills`,
+`loblaw` (Loblaws), `zehrs`, `fortinos`, `valumart` (Valu-mart),
+`independent` (Your Independent Grocer), `wholesaleclub` (Real Canadian
+Wholesale Club), `provigo`, `maxi`. `language` is `en`, or `fr` on `provigo`
+(French only) and `maxi` (French by default, English too). Prices are each
+banner's default online store's; choosing a store is not offered (a `store_id`
+on a priced method is a 400, not charged), and every answer says which store
+priced it in `store` (`requested` false). The same product code is priced per
+banner: captured 2026-11-26, No Name Large Size Eggs 12 Pack (20812144001_EA)
+was 3.93 CAD at Real Canadian Superstore's default store 1033 and 4.17 at
+Maxi's default store 8976. `deal` carries the end date PC Express shows
+(`expiry_date`), no start date; `pc_optimum_points` is the PC Optimum offer as
+shown; `member_only_price` is the price the site shows publicly on the item,
+not a price behind a login. `product` adds GTIN, ingredients, nutrition,
+comparison prices and stock status as given. `stores` lists a banner's pickup
+stores (city, postal code start, province, or nearest a point); `store` gives
+7 dated days of store, pharmacy, clinic and optical hours. Not available:
+choosing a store, review text (rating and count only), the printed flyer,
+Shoppers Drug Mart, Atlantic Superstore, City Market and T&T, cart or
+checkout, PC Optimum prices behind a login, price history (poll and store the
+answers). Failed calls and refused inputs are not charged; a not-found (an
+unknown code, category, collection or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -5843,6 +5915,7 @@ Scavio works with popular AI/LLM frameworks:
 | SportChek (`sportchek`) | `search`, `list`, `product`, `reviews`, `suggestions`, `store`, `brands`, `categories`; Canada, English only; `product` and `reviews` take `code` or `url`, `list` takes `path` or `url` | 1 each |
 | Mark's (`marks`) | `search`, `list`, `product`, `questions`, `suggestions`, `store`, `brands`, `categories`; Canada; `language` en or fr (L'Equipeur) on `search`, `list`, `product`, `brands`, `categories` | 1 each |
 | RONA (`rona`) | `search`, `product`, `prices`, `category`, `categories`, `stores`, `store`, `stock`, `deals`; Canada; `language` en or fr on every method; `prices` takes up to 60 `skus` and a `store_id` (required) | `prices`, `categories`, `stores`, `store` 1; `search` and `deals` 2 (3 with `store_id`); `product` and `stock` 3; `category` 1-3 |
+| PC Express (`pcexpress`) | `search`, `category`, `collection`, `product`, `stores`, `store`, `suggestions`; Canada; `banner` (10, default superstore) and `language` en or fr (fr on provigo and maxi); prices are each banner's default store's | `product` and `store` 5 (`product` 1 when it answers from the search listing); the rest 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
 | Sephora | `search`, `category`, `product` (`country="ca"` for Sephora Canada); Canada only: `brand`, `brands`, `suggestions`, `offers`, `stores`, `store` | 1 each; `product` and `offers` 2 (the same in both countries) |
 | Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
@@ -5917,6 +5990,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.95.0
+
+- **New `pcexpress` namespace** (sync and async) for PC Express (Loblaw's
+  online grocery for Real Canadian Superstore, No Frills, Loblaws, Zehrs,
+  Fortinos, Valu-mart, Your Independent Grocer, Wholesale Club, Provigo and
+  Maxi), 7 endpoints: `search`, `category`, `collection`, `product`,
+  `stores`, `store`, `suggestions`. Prices in CAD at each banner's default
+  store, deals with their end date and PC Optimum offer as shown, product
+  GTIN and nutrition, pickup stores and store hours; `banner` (10) and
+  `language` en or fr. Credits: `product` and `store` 5 (`product` 1 when it
+  answers from the search listing), the rest 1. The request timeout is
+  raised to at least 240s.
 
 ### Changed in 0.94.0
 

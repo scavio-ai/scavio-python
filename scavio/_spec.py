@@ -5388,6 +5388,100 @@ _RONA_PAGE_SIZE = _ilit("page_size", (24, 48, 96), "Products per page (default 4
 _RONA_SORT = _lit("sort", _RONA_SORTS, "relevance (default), price_low_to_high, "
                   "price_high_to_low, highest_rated, newest, best_sellers.")
 
+# PC Express params shared across endpoints (Loblaw's online grocery for ten banners). 7 endpoints
+# on /api/v1/pcexpress, Canada only, prices in CAD. banner picks the banner (default superstore);
+# language en | fr (fr on provigo and maxi only). Prices are each banner's default store's: a
+# store_id on a priced endpoint is a 400. search, category, collection, stores and suggestions 1
+# credit; product 5 (1 when it answers from the search listing, source 'search'); store 5. 240 s
+# floor on every method.
+_PCX_FIRST = (
+    "PC Express (Loblaw's online grocery for Real Canadian Superstore, No Frills, Loblaws, "
+    "Zehrs, Fortinos, Valu-mart, Your Independent Grocer, Wholesale Club, Provigo and Maxi; "
+    "Loblaw operates 2,504 stores per its 2025 annual report)"
+)
+_PCX_CHARGE = (
+    " Failed upstream calls and refused inputs are not charged; a not-found is charged "
+    "(credits_used is what was charged)."
+)
+_PCX_SLOW = " Answers can take up to about a minute."
+_PCX_SLOWER = " Answers can take longer than a minute: allow up to 2 minutes."
+_PCX_STORE = (
+    " Prices are for the banner's default online store; choosing a store is not offered (a "
+    "store_id is a 400). store {store_id, banner, requested false} says which store priced the "
+    "answer. The same product code is priced per banner: captured 2026-11-26, No Name Large "
+    "Size Eggs 12 Pack (20812144001_EA) was 3.93 CAD at Real Canadian Superstore's default "
+    "store '1033' and 4.17 at Maxi's default store '8976'."
+)
+_PCX_DEAL = (
+    " deal {type (sale, limit, multi), name, text, deal_price, points, expiry_date} is as PC "
+    "Express shows it: an end date, no start date. pc_optimum_points is the PC Optimum offer as "
+    "shown. member_only_price is the member price PC Express shows publicly on the item, not a "
+    "price behind a login."
+)
+_PCX_TILE = (
+    "code (e.g. 20812144001_EA, the input of product()), article_number, unit_of_measure, name, "
+    "brand, size, unit_price, package_sizing, url, image, price, was_price, price_text, "
+    "member_only_price, tax_note, sold_by, weighted, min_quantity, max_quantity, deal, "
+    "pc_optimum_points, badges, stock_status, stock_text, rating, review_count, sponsored, "
+    "section"
+)
+_PCX_LIST = (
+    "banner {id, name}, language, page, page_size, sort, sort_applied, filters_applied, total, "
+    "total_pages, has_more, count, sponsored_count, items [{" + _PCX_TILE + "}], sections, "
+    "store, facets and sorts (include_facets), market {country, currency, language}, notes."
+)
+_PCX_NOT_AVAILABLE = (
+    " Not available: choosing a store, review text (rating and count only), the printed flyer, "
+    "Shoppers Drug Mart, Atlantic Superstore, City Market and T&T, cart or checkout, PC Optimum "
+    "prices behind a login, price history (poll and store the answers). For national brands at "
+    "Walmart.ca use the walmart namespace with domain 'ca'."
+)
+_PCX_BANNERS = (
+    "superstore", "nofrills", "loblaw", "zehrs", "fortinos", "valumart", "independent",
+    "wholesaleclub", "provigo", "maxi",
+)
+_PCX_SORTS = ("relevance", "price_low_to_high", "price_high_to_low", "name_a_to_z", "newest")
+_PCX_DEALS = ("price_reduction", "pc_points", "multi_buy", "member_only_price", "dollar_deals")
+_PCX_BANNER = _lit(
+    "banner", _PCX_BANNERS, "superstore (Real Canadian Superstore, default), nofrills (No "
+    "Frills), loblaw (Loblaws), zehrs, fortinos, valumart (Valu-mart), independent (Your "
+    "Independent Grocer), wholesaleclub (Real Canadian Wholesale Club), provigo, maxi. The same "
+    "product codes on every banner; prices differ by banner."
+)
+_PCX_LANGUAGE = _lit(
+    "language", ("en", "fr"), "en, or fr on provigo (French only) and maxi (French by default, "
+    "English too). Other banners serve English only: fr there is a 400."
+)
+_PCX_LISTING = (
+    _int("page", "Page, 1-based (48 products a page; default 1)."),
+    _lit("sort", _PCX_SORTS, "relevance (default), price_low_to_high, price_high_to_low, "
+         "name_a_to_z, newest."),
+    _str_or_list("brand", "Brand codes from facets (productBrand), e.g. 'N' No Name, 'P' "
+                 "President's Choice, 'PO' PC Organics, 'PCB' PC Blue Menu."),
+    Param(
+        "deals",
+        "Optional[Union[Literal[" + ", ".join(f'"{d}"' for d in _PCX_DEALS) + "], list[Literal["
+        + ", ".join(f'"{d}"' for d in _PCX_DEALS) + "]]]]",
+        doc="price_reduction, pc_points (PC Optimum points offers), multi_buy, "
+        "member_only_price, dollar_deals ($1-$5); one or a list.",
+    ),
+    _str_or_list("price_range", "Price bands from facets (e.g. '$5-$10')."),
+    _bool("prepared_in_canada", "Only products marked Prepared in Canada."),
+    _str_or_list("dietary", "Dietary codes from facets (e.g. 'gluten_free', 'organic', "
+                 "'vegan', 'lactose_free')."),
+    _str_or_list("aisle", "Aisle (category) ids from facets."),
+    Param(
+        "filters",
+        "Optional[list[dict[str, Union[str, list[str]]]]]",
+        doc="Any other facet: [{'facet': ..., 'value': ...}] from facets[].facet and "
+        "facets[].values[].value (value: one or a list). At most 10 filter values in all.",
+    ),
+    _bool("include_facets", "Also return facets [{facet, name, multi_select, values [{value, "
+          "name, count, selected}]}] and sorts."),
+    _PCX_BANNER,
+    _PCX_LANGUAGE,
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -22637,6 +22731,208 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         ),
         min_timeout=240.0,
     ),
+    # ============================= PC Express =============================
+    # 7 endpoints on /api/v1/pcexpress: Canada only, CAD, banner (10) and language en | fr.
+    # Prices are each banner's default store's. product credits_note (5, or 1 from the search
+    # listing). 240 s floor.
+    Endpoint(
+        key="pcexpress_search",
+        namespace="pcexpress",
+        method="search",
+        http="POST",
+        path="/api/v1/pcexpress/search",
+        summary=(
+            "Search the products of " + _PCX_FIRST + " on one banner, by keywords or an article "
+            "number, with paging (48 a page), five sorts and the site's filters (brand incl. the "
+            "store brands No Name and President's Choice; deals: price reduction, PC Optimum "
+            "points, multi-buy, member-only price, $1-$5; price band, Prepared in Canada, "
+            "dietary, aisle). A term PC Express sends to a collection or category is answered "
+            "from that page (redirected_to says which). Returns query, corrected_query, "
+            "redirected_to, " + _PCX_LIST + _PCX_STORE + _PCX_DEAL + " Captured 2026-11-26: "
+            "'eggs' on superstore listed 125 products (3 pages)." + _PCX_NOT_AVAILABLE
+            + _PCX_SLOW + _PCX_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords or an article number (e.g. 'eggs')."),
+        ) + _PCX_LISTING,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_category",
+        namespace="pcexpress",
+        method="category",
+        http="POST",
+        path="/api/v1/pcexpress/category",
+        summary=(
+            "Browse one category of " + _PCX_FIRST + " by category id or link, with paging, "
+            "sorts and filters on a product list; a department (top-level category) page lists "
+            "its products in carousels (sections, no paging) and its sub-categories in "
+            "category.children. Returns category {category_id, name, type (list or department), "
+            "url, breadcrumbs, children}, " + _PCX_LIST + _PCX_STORE + _PCX_DEAL + " Captured "
+            "2026-11-26: category '28224' (Milk & Cream) on superstore listed 227 products. An "
+            "unknown category is a charged 404." + _PCX_SLOW + _PCX_CHARGE
+        ),
+        params=(
+            Param(
+                "category",
+                "Union[str, int]",
+                required=True,
+                doc="A category id (e.g. '28224' Milk & Cream, from category.children, "
+                "breadcrumbs or a link's /c/<id>) or a category link or path.",
+            ),
+        ) + _PCX_LISTING,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_collection",
+        namespace="pcexpress",
+        method="collection",
+        http="POST",
+        path="/api/v1/pcexpress/collection",
+        summary=(
+            "One collection page of " + _PCX_FIRST + ": the deals and themed pages the site "
+            "links (deals-centre, black-friday, no-name, pc-value, new-arrivals ...), their "
+            "products with prices and deals, in sections, and a paged list when the page has "
+            "one. Returns collection {name, title, url}, " + _PCX_LIST + _PCX_STORE + _PCX_DEAL
+            + " Captured 2026-11-26: deals-centre on nofrills listed 329 products; President's "
+            "Choice The Decadent Milk Chocolate Chips 270 g at 5.00 CAD, was 5.50, deal 'SAVE "
+            "$0.50' with expiry_date 2026-12-02. An unknown collection is a charged 404."
+            + _PCX_SLOW + _PCX_CHARGE
+        ),
+        params=(
+            _req("collection", "A collection name from the site's links ('deals-centre', "
+                 "'black-friday', 'no-name', 'pc-value', 'new-arrivals' ...) or a collection "
+                 "link."),
+        ) + _PCX_LISTING,
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_product",
+        namespace="pcexpress",
+        method="product",
+        http="POST",
+        path="/api/v1/pcexpress/product",
+        summary=(
+            "One product of " + _PCX_FIRST + " by code or link: source (page or search), code, "
+            "article_number, unit_of_measure, gtin, name, brand, description, size, url, images, "
+            "breadcrumbs, price, price_unit, was_price, member_only_price, comparison_prices, "
+            "unit_price, price_type, price_expiry_date, deal_price, deal, promotions, deposit, "
+            "stock_status, shoppable, sold_by, weighted, min_quantity, max_quantity, badges, "
+            "ingredients, nutrition {serving_size, nutrients, micronutrients}, variants, store, "
+            "market, notes." + _PCX_STORE + _PCX_DEAL + " Stock status is as PC Express gives "
+            "it. When the product page does not answer, the item is answered from the search "
+            "listing for its article number (source 'search': price, deal, unit price, badges; "
+            "no gtin, ingredients or nutrition) at 1 credit. Captured 2026-11-26: "
+            "20812144001_EA on superstore, Large Size Eggs 12 Pack, gtin 00060383664145, 3.93 "
+            "CAD, unit price $0.33/1ea, stock_status ok. No review text. An unknown code is a "
+            "charged 404." + _PCX_SLOWER + _PCX_CHARGE
+        ),
+        params=(
+            Param(
+                "code",
+                "Optional[str]",
+                positional=True,
+                doc="A product code (items[].code: article number and unit, e.g. "
+                "'20812144001_EA'). Send code or url.",
+            ),
+            _str("url", "A product link on any of the ten banner sites instead of code (its "
+                 "site sets the banner)."),
+            _PCX_BANNER,
+            _PCX_LANGUAGE,
+        ),
+        one_of=(("code", "url"),),
+        credits=5,
+        credits_note=(
+            "Costs 5 credits; 1 when it answers from the search listing (source 'search'). "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_stores",
+        namespace="pcexpress",
+        method="stores",
+        http="POST",
+        path="/api/v1/pcexpress/stores",
+        summary=(
+            "The pickup stores one banner of " + _PCX_FIRST + " lists, filtered by city, postal "
+            "code start or province, or nearest a latitude and longitude. Returns banner, "
+            "language, location, filters_applied, total, matched, count, stores [{store_id, "
+            "name, banner, banner_name, location_type, pickup_type, shoppable, address, city, "
+            "province, postal_code, latitude, longitude, phone, time_zone, today {date, hours, "
+            "open_now}, minimum_order, departments, url, distance_km}], market, notes. store_id "
+            "is the input of store() (store ids do not change prices: priced methods use the "
+            "banner's default store). Owner names some franchised stores carry are left out. "
+            "Captured 2026-11-26: superstore in Winnipeg, 8 of 120 stores." + _PCX_SLOWER
+            + _PCX_CHARGE
+        ),
+        params=(
+            _PCX_BANNER,
+            _str("city", "Stores whose city contains this (accents and case ignored), e.g. "
+                 "'Winnipeg'."),
+            _str("postal_code", "Stores whose postal code starts with this ('T5', 'M5V', 'M5V "
+                 "3L9')."),
+            _str("province", "A province code or name (e.g. 'BC')."),
+            _float("latitude", "With longitude: stores nearest this point, with distance_km."),
+            _float("longitude", "With latitude."),
+            _bool("shoppable_only", "Only stores that take PC Express orders."),
+            _int("limit", "Stores to return, 1-400 (default 20 near a point, else all)."),
+            _PCX_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_store",
+        namespace="pcexpress",
+        method="store",
+        http="POST",
+        path="/api/v1/pcexpress/store",
+        summary=(
+            "One store of " + _PCX_FIRST + " by store id: every stores() field plus store_phone, "
+            "pharmacy_phone, store_hours, pharmacy_hours, medical_clinic_hours, optical_hours, "
+            "holiday_hours (7 dated days each, as PC Express lists them; clinic hours by "
+            "weekday) and services [{name, phone}]. Owner and manager names are left out. "
+            "Captured 2026-11-26: store '1517', Real Canadian Superstore Marine Drive, "
+            "Vancouver BC. An unknown store is a charged 404." + _PCX_SLOWER + _PCX_CHARGE
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc="A store id from stores(), sent as a string: leading zeros count (e.g. "
+                "'1517', '0559').",
+            ),
+            _PCX_BANNER,
+            _PCX_LANGUAGE,
+        ),
+        credits=5,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pcexpress_suggestions",
+        namespace="pcexpress",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/pcexpress/suggestions",
+        summary=(
+            "The search terms " + _PCX_FIRST + " suggests for what a shopper has typed, in its "
+            "order. Returns banner, language, query, count, suggestions, market, notes. "
+            "Captured 2026-11-26: 'egg' on superstore: Eggs, Egg Noodles, Egg Whites, Eggo, Egg "
+            "Nog, Eggplant." + _PCX_SLOWER + _PCX_CHARGE
+        ),
+        params=(
+            _req("query", "What a shopper has typed (e.g. 'egg')."),
+            _PCX_BANNER,
+            _PCX_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -29563,6 +29859,7 @@ NAMESPACES: tuple[str, ...] = (
     "sportchek",
     "marks",
     "rona",
+    "pcexpress",
 )
 
 

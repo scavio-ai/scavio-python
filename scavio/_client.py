@@ -80,6 +80,7 @@ from ._namespaces_sync import (
     _OfferupNamespace,
     _OlxNamespace,
     _OreillyNamespace,
+    _PcexpressNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
     _PoshmarkNamespace,
@@ -293,6 +294,7 @@ class ScavioClient:
         self.sportchek = _SportchekNamespace(self)
         self.marks = _MarksNamespace(self)
         self.rona = _RonaNamespace(self)
+        self.pcexpress = _PcexpressNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

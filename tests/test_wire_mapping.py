@@ -660,6 +660,7 @@ BODY_PRICED_KEYS = {
     "rona_search",
     "rona_category",
     "rona_deals",
+    "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
     "home_depot_reviews",
@@ -8506,3 +8507,140 @@ def test_rona_credits_paths_and_wire(monkeypatch):
         rn.store()
     with pytest.raises(ScavioError):
         rn.stock("00277649")
+
+
+def test_pcexpress_credits_paths_and_wire(monkeypatch):
+    """pcexpress (0.95.0): 7 endpoints on /api/v1/pcexpress.
+
+    search, category, collection, stores and suggestions 1 credit; product 5 (1 when it answers
+    from the search listing); store 5. Canada only, banner (10) and language en | fr. Prices are
+    each banner's default store's (no store_id on priced endpoints). Every method gets a 240 s
+    floor.
+    """
+    first = (
+        "PC Express (Loblaw's online grocery for Real Canadian Superstore, No Frills, Loblaws, "
+        "Zehrs, Fortinos, Valu-mart, Your Independent Grocer, Wholesale Club, Provigo and Maxi; "
+        "Loblaw operates 2,504 stores per its 2025 annual report)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "pcexpress"}
+    assert sorted(eps) == [
+        "category", "collection", "product", "search", "store", "stores", "suggestions",
+    ]
+    credits = {"search": 1, "category": 1, "collection": 1, "product": 5, "stores": 1,
+               "store": 5, "suggestions": 1}
+    banners = (
+        'Optional[Literal["superstore", "nofrills", "loblaw", "zehrs", "fortinos", "valumart", '
+        '"independent", "wholesaleclub", "provigo", "maxi"]]'
+    )
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/pcexpress/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == credits[m], m
+        assert first in ep.summary, m
+        params = {p.name: p for p in ep.params}
+        assert params["banner"].annotation == banners, m
+        assert params["language"].annotation == 'Optional[Literal["en", "fr"]]', m
+        assert "country" not in params, m
+        if m == "product":
+            assert ep.credits_note is not None
+            assert "1 when it answers from the search listing" in ep.credits_note
+        else:
+            assert ep.credits_note is None, m
+        if m != "store":
+            assert "store_id" not in params, m
+    for m in ("search", "category", "collection", "product"):
+        assert "default online store" in eps[m].summary, m
+        assert "requested false" in eps[m].summary, m
+        assert "no start date" in eps[m].summary, m
+        assert "not a price behind a login" in eps[m].summary, m
+        assert "3.93 CAD at Real Canadian Superstore's default store '1033'" in eps[m].summary
+        assert "4.17 at Maxi's default store '8976'" in eps[m].summary
+    for m in ("product", "store", "stores", "suggestions"):
+        assert "allow up to 2 minutes" in eps[m].summary, m
+    assert "expiry_date 2026-12-02" in eps["collection"].summary
+    assert "gtin 00060383664145" in eps["product"].summary
+    assert "Shoppers Drug Mart" in eps["search"].summary
+    assert "review text" in eps["search"].summary
+    assert eps["product"].one_of == (("code", "url"),)
+    search = {p.name: p for p in eps["search"].params}
+    assert search["query"].required is True
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", '
+        '"name_a_to_z", "newest"]]'
+    )
+    assert search["brand"].annotation == "Optional[Union[str, list[str]]]"
+    assert {p.name: p for p in eps["category"].params}["category"].required is True
+    assert {p.name: p for p in eps["collection"].params}["collection"].required is True
+    store = {p.name: p for p in eps["store"].params}
+    assert store["store_id"].required is True
+    assert store["store_id"].annotation == "Union[str, int]"
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|"
+                        r"cloudflare|firewall|pool|affiliates?|class action|only api|"
+                        r"only at|first api|akamai|next\.js|settlement|boycott)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+        assert not banned.search((ep.credits_note or "").lower()), ep.key
+        assert "https://" not in ep.summary, ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    pcx = client.pcexpress
+    pcx.search("eggs")
+    pcx.search("oeufs", banner="maxi", language="fr", page=2, sort="price_low_to_high",
+               brand=["N", "P"], deals="pc_points", prepared_in_canada=True,
+               filters=[{"facet": "dietaryCallouts", "value": "organic"}], include_facets=True)
+    pcx.category("28224")
+    pcx.category(28224, banner="nofrills", deals=["price_reduction", "multi_buy"])
+    pcx.collection("deals-centre", banner="nofrills")
+    pcx.product("20812144001_EA")
+    pcx.product(url="https://example.com/p/20812144001_EA", banner="maxi")
+    pcx.stores(city="Winnipeg")
+    pcx.stores(latitude=49.2827, longitude=-123.1207, limit=5, shoppable_only=True)
+    pcx.store("1517")
+    pcx.store("0559", banner="zehrs")
+    pcx.suggestions("egg")
+    base = "/api/v1/pcexpress/"
+    assert seen == [
+        (base + "search", {"query": "eggs"}, 240.0),
+        (base + "search", {"query": "oeufs", "page": 2, "sort": "price_low_to_high",
+                           "brand": ["N", "P"], "deals": "pc_points",
+                           "prepared_in_canada": True,
+                           "filters": [{"facet": "dietaryCallouts", "value": "organic"}],
+                           "include_facets": True, "banner": "maxi", "language": "fr"}, 240.0),
+        (base + "category", {"category": "28224"}, 240.0),
+        (base + "category", {"category": 28224, "deals": ["price_reduction", "multi_buy"],
+                             "banner": "nofrills"}, 240.0),
+        (base + "collection", {"collection": "deals-centre", "banner": "nofrills"}, 240.0),
+        (base + "product", {"code": "20812144001_EA"}, 240.0),
+        (base + "product", {"url": "https://example.com/p/20812144001_EA", "banner": "maxi"},
+         240.0),
+        (base + "stores", {"city": "Winnipeg"}, 240.0),
+        (base + "stores", {"latitude": 49.2827, "longitude": -123.1207,
+                           "shoppable_only": True, "limit": 5}, 240.0),
+        (base + "store", {"store_id": "1517"}, 240.0),
+        (base + "store", {"store_id": "0559", "banner": "zehrs"}, 240.0),
+        (base + "suggestions", {"query": "egg"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        pcx.product()
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_pcexpress_docstrings_state_credits(module):
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_PcexpressNamespace", None) or mod._AsyncPcexpressNamespace
+    for method in ("search", "category", "collection", "stores", "suggestions"):
+        assert "Costs 1 credit." in " ".join((getattr(cls, method).__doc__ or "").split()), method
+    assert "Costs 5 credits." in " ".join((cls.store.__doc__ or "").split())
+    doc = " ".join((cls.product.__doc__ or "").split())
+    assert "Costs 5 credits; 1 when it answers from the search listing" in doc
