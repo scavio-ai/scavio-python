@@ -660,6 +660,30 @@ BODY_PRICED_KEYS = {
     "rona_search",
     "rona_category",
     "rona_deals",
+    "boots_product",
+    "boots_store",
+    "boots_store_stock",
+    "boots_stores",
+    "douglas_brand",
+    "douglas_brands",
+    "douglas_category",
+    "douglas_deals",
+    "douglas_product",
+    "douglas_review_summary",
+    "douglas_search",
+    "douglas_suggestions",
+    "notino_brand",
+    "notino_brands",
+    "notino_category",
+    "notino_product",
+    "notino_promo",
+    "notino_reviews",
+    "notino_search",
+    "notino_suggestions",
+    "spacenk_brand",
+    "spacenk_category",
+    "spacenk_search",
+    "yesstyle_product",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -8644,3 +8668,428 @@ def test_pcexpress_docstrings_state_credits(module):
     assert "Costs 5 credits." in " ".join((cls.store.__doc__ or "").split())
     doc = " ".join((cls.product.__doc__ or "").split())
     assert "Costs 5 credits; 1 when it answers from the search listing" in doc
+
+
+# --- batch 2026-11-26: 14 namespaces (beauty + cars), generated from the backend routes ---
+
+BATCH_1126 = {
+    "spacenk": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+    },
+    "lookfantastic": {
+        "search": ("search", 1, 240.0),
+        "list": ("list", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+    },
+    "cultbeauty": {
+        "search": ("search", 1, 240.0),
+        "list": ("list", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+    },
+    "yesstyle": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "brand": ("brand", 2, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "deals": ("deals", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "markets": ("markets", 1, 240.0),
+    },
+    "notino": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "reviews": ("reviews", 1, 250.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "promo": ("promo", 1, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+    },
+    "douglas": {
+        "search": ("search", 1, 250.0),
+        "category": ("category", 1, 250.0),
+        "brand": ("brand", 1, 250.0),
+        "deals": ("deals", 1, 250.0),
+        "product": ("product", 1, 250.0),
+        "stores": ("stores", 1, 250.0),
+        "store": ("store", 1, 250.0),
+        "review_summary": ("review-summary", 1, 250.0),
+        "suggestions": ("suggestions", 1, 250.0),
+        "brands": ("brands", 1, 250.0),
+    },
+    "boots": {
+        "product": ("product", 1, 240.0),
+        "store_stock": ("store-stock", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+    },
+    "rockauto": {
+        "vehicles": ("vehicles", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "parts": ("parts", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "brands": ("brands", 1, 240.0),
+        "part": ("part", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "resolve": ("resolve", 1, 240.0),
+        "tools": ("tools", 1, 240.0),
+        "promotions": ("promotions", 1, 240.0),
+    },
+    "carscom": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "dealer": ("dealer", 1, 240.0),
+        "dealer_inventory": ("dealer-inventory", 1, 240.0),
+        "dealer_reviews": ("dealer-reviews", 1, 240.0),
+        "model_reviews": ("model-reviews", 1, 240.0),
+        "dealers": ("dealers", 1, 240.0),
+        "research": ("research", 1, 240.0),
+    },
+    "autotrader": {
+        "search": ("search", 2, 240.0),
+        "listing": ("listing", 2, 240.0),
+        "dealers": ("dealers", 2, 240.0),
+        "dealer": ("dealer", 2, 240.0),
+        "makes": ("makes", 2, 240.0),
+    },
+    "cargurus": {
+        "search": ("search", 1, 240.0),
+        "dealer": ("dealer", 1, 240.0),
+        "dealers": ("dealers", 1, 240.0),
+        "price_trends": ("price-trends", 1, 240.0),
+        "research": ("research", 1, 240.0),
+        "expert_reviews": ("expert-reviews", 1, 240.0),
+        "makes": ("makes", 1, 240.0),
+        "models": ("models", 1, 240.0),
+    },
+    "carmax": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "photos": ("photos", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "store_inventory": ("store-inventory", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "review_summary": ("review-summary", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "makes": ("makes", 1, 240.0),
+        "models": ("models", 1, 240.0),
+        "car_value": ("car-value", 1, 240.0),
+    },
+    "carvana": {
+        "search": ("search", 1, 240.0),
+        "vehicle": ("vehicle", 1, 240.0),
+        "model_guide": ("model-guide", 1, 240.0),
+        "trims": ("trims", 1, 240.0),
+        "make": ("make", 1, 240.0),
+        "makes": ("makes", 1, 240.0),
+    },
+    "bringatrailer": {
+        "results": ("results", 1, 240.0),
+        "price_history": ("price-history", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "live": ("live", 1, 240.0),
+        "make": ("make", 1, 240.0),
+        "model": ("model", 1, 240.0),
+        "location": ("location", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+}
+BATCH_1126_ONE_OF = {
+    "spacenk_stores": ("postcode", "latitude"),
+    "lookfantastic_list": ("path", "url"),
+    "lookfantastic_product": ("sku", "url"),
+    "cultbeauty_list": ("path", "url"),
+    "cultbeauty_product": ("sku", "url"),
+    "yesstyle_product": ("product_id", "url"),
+    "yesstyle_reviews": ("product_id", "url"),
+    "notino_product": ("url", "order_code"),
+    "notino_reviews": ("url", "order_code"),
+    "douglas_product": ("code", "url"),
+    "boots_product": ("url", "product_id"),
+    "boots_store_stock": ("postcode", "latitude"),
+    "boots_stores": ("postcode", "city"),
+    "boots_store": ("store", "store_number", "name"),
+    "carscom_listing": ("listing_id", "url"),
+    "carscom_dealer": ("dealer_id", "url"),
+    "carscom_dealer_inventory": ("dealer_id", "url"),
+    "carscom_dealer_reviews": ("dealer_id", "url"),
+    "autotrader_listing": ("listing_id", "url"),
+    "autotrader_dealer": ("dealer_id", "url"),
+    "cargurus_dealer": ("dealer_id", "url"),
+    "cargurus_research": ("research_id", "url", "year"),
+    "carmax_listing": ("stock_number", "url"),
+    "carmax_photos": ("stock_number", "url"),
+    "carmax_stores": ("zip", "state", "city"),
+    "carvana_vehicle": ("vehicle_id", "url"),
+    "bringatrailer_listing": ("slug", "url"),
+    "bringatrailer_price_history": ("model_id", "make"),
+}
+BATCH_1126_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|pool|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super pool|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH_1126))
+def test_batch_1126_credits_paths_timeouts(namespace):
+    """Every endpoint of the 14 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH_1126[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(ep.one_of) == ((BATCH_1126_ONE_OF[ep.key],) if ep.key in
+                                    BATCH_1126_ONE_OF else ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        # "Click & Collect" is the retailer's own service name, not a description of Scavio.
+        text = text.lower().replace("click & collect", "click-and-pickup")
+        assert not BATCH_1126_BANNED.search(text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH_1126_WIRE = [
+    ("spacenk", "search", {"query": "vitamin c serum"}, "search"),
+    ("spacenk", "category", {"category_id": "black-friday"}, "category"),
+    ("spacenk", "brand", {"brand_id": "medik8"}, "brand"),
+    ("spacenk", "brands", {}, "brands"),
+    ("spacenk", "product", {"product_id": "MUK200057800"}, "product"),
+    ("spacenk", "reviews", {"product_id": "MUK200057800"}, "reviews"),
+    ("spacenk", "suggestions", {"query": "charlotte"}, "suggestions"),
+    ("spacenk", "stores", {"product_id": "MUK200057800", "postcode": "W1D 1BS"}, "stores"),
+    ("spacenk", "offers", {}, "offers"),
+    ("lookfantastic", "search", {"query": "glow tonic"}, "search"),
+    ("lookfantastic", "list", {"path": "/black-friday"}, "list"),
+    ("lookfantastic", "product", {"sku": "11200055"}, "product"),
+    ("lookfantastic", "suggestions", {"query": "cerave"}, "suggestions"),
+    ("lookfantastic", "offers", {}, "offers"),
+    ("lookfantastic", "brands", {}, "brands"),
+    ("lookfantastic", "categories", {}, "categories"),
+    ("cultbeauty", "search", {"query": "glow tonic"}, "search"),
+    ("cultbeauty", "list", {"path": "/black-friday-cyber-monday"}, "list"),
+    ("cultbeauty", "product", {"sku": "11200055"}, "product"),
+    ("cultbeauty", "suggestions", {"query": "olaplex"}, "suggestions"),
+    ("cultbeauty", "offers", {}, "offers"),
+    ("cultbeauty", "brands", {}, "brands"),
+    ("cultbeauty", "categories", {}, "categories"),
+    ("yesstyle", "search", {"query": "snail mucin"}, "search"),
+    ("yesstyle", "category", {"category": "15556"}, "category"),
+    ("yesstyle", "brand", {"brand": "317041"}, "brand"),
+    ("yesstyle", "brands", {}, "brands"),
+    ("yesstyle", "deals", {}, "deals"),
+    ("yesstyle", "product", {"product_id": "1052684695"}, "product"),
+    ("yesstyle", "reviews", {"product_id": "1052684695"}, "reviews"),
+    ("yesstyle", "suggestions", {"query": "cosrx"}, "suggestions"),
+    ("yesstyle", "markets", {}, "markets"),
+    ("notino", "search", {"query": "vitamin c serum"}, "search"),
+    (
+        "notino", "product",
+        {
+            "url": "https://www.notino.de/dior/sauvage-eau-de-parfum-fuer-herren/",
+        },
+        "product",
+    ),
+    (
+        "notino", "reviews",
+        {
+            "url": "https://www.notino.de/dior/sauvage-eau-de-parfum-fuer-herren/",
+        },
+        "reviews",
+    ),
+    ("notino", "category", {"category": "/hautseren/"}, "category"),
+    ("notino", "brand", {"brand": "cerave"}, "brand"),
+    ("notino", "promo", {}, "promo"),
+    ("notino", "brands", {}, "brands"),
+    ("notino", "suggestions", {"query": "dior sa"}, "suggestions"),
+    ("notino", "stores", {}, "stores"),
+    ("notino", "store", {"store": "florentinum-praha"}, "store"),
+    ("douglas", "search", {"query": "mascara"}, "search"),
+    ("douglas", "category", {"category": "parfum/01"}, "category"),
+    ("douglas", "brand", {"brand": "dior/b0690"}, "brand"),
+    ("douglas", "deals", {}, "deals"),
+    ("douglas", "product", {"code": "5000005003"}, "product"),
+    ("douglas", "stores", {"query": "Berlin"}, "stores"),
+    ("douglas", "store", {"store_id": "00020475"}, "store"),
+    ("douglas", "review_summary", {"code": "5000005003"}, "review-summary"),
+    ("douglas", "suggestions", {"query": "dior"}, "suggestions"),
+    ("douglas", "brands", {}, "brands"),
+    (
+        "boots", "product",
+        {
+            "url": ("https://www.boots.com/no7-protect-and-per"
+                "fect-intense-advanced-serum-30ml-10288490"),
+        },
+        "product",
+    ),
+    (
+        "boots", "store_stock",
+        {
+            "item_code": "10213975001",
+            "catentry_id": "1838584",
+            "postcode": "NG2 3AA",
+        },
+        "store-stock",
+    ),
+    ("boots", "stores", {"postcode": "M1 1AE"}, "stores"),
+    ("boots", "store", {"store": "868-london-battersea-sw11-1qn"}, "store"),
+    ("rockauto", "vehicles", {}, "vehicles"),
+    (
+        "rockauto", "categories",
+        {
+            "make": "HONDA",
+            "year": 2010,
+            "model": "ACCORD",
+            "engine": "2.4L L4",
+            "carcode": "1444945",
+        },
+        "categories",
+    ),
+    (
+        "rockauto", "parts",
+        {
+            "make": "HONDA",
+            "year": 2010,
+            "model": "ACCORD",
+            "engine": "2.4L L4",
+            "carcode": "1444945",
+            "category": "Brake & Wheel Hub",
+            "part_type_id": "1684",
+        },
+        "parts",
+    ),
+    ("rockauto", "search", {"part_number": "BP1084"}, "search"),
+    ("rockauto", "brand", {"brand": "BOSCH", "part_type_id": "1684"}, "brand"),
+    ("rockauto", "brands", {}, "brands"),
+    ("rockauto", "part", {"part_key": "6129207", "part_type_id": "1684"}, "part"),
+    ("rockauto", "suggestions", {"query": "2015 ford f-150"}, "suggestions"),
+    ("rockauto", "resolve", {"query": "2010 honda accord brake pads"}, "resolve"),
+    ("rockauto", "tools", {}, "tools"),
+    ("rockauto", "promotions", {}, "promotions"),
+    ("carscom", "search", {"zip": "10001"}, "search"),
+    ("carscom", "listing", {"listing_id": "90e3df05-5f5e-4f4d-a474-79eb2077c99a"}, "listing"),
+    ("carscom", "dealer", {"dealer_id": "97701"}, "dealer"),
+    ("carscom", "dealer_inventory", {"dealer_id": "97701"}, "dealer-inventory"),
+    ("carscom", "dealer_reviews", {"dealer_id": "97701"}, "dealer-reviews"),
+    (
+        "carscom", "model_reviews",
+        {
+            "make": "Toyota",
+            "model": "RAV4",
+            "year": 2019,
+        },
+        "model-reviews",
+    ),
+    ("carscom", "dealers", {"zip": "10001"}, "dealers"),
+    ("carscom", "research", {"make": "Toyota"}, "research"),
+    ("autotrader", "search", {"zip": "90012"}, "search"),
+    ("autotrader", "listing", {"listing_id": "795241382"}, "listing"),
+    ("autotrader", "dealers", {"zip": "90012"}, "dealers"),
+    ("autotrader", "dealer", {"dealer_id": "87788"}, "dealer"),
+    ("autotrader", "makes", {"make": "Honda"}, "makes"),
+    ("cargurus", "search", {"zip": "10001"}, "search"),
+    ("cargurus", "dealer", {"dealer_id": "440818"}, "dealer"),
+    ("cargurus", "dealers", {"zip": "10001"}, "dealers"),
+    ("cargurus", "price_trends", {}, "price-trends"),
+    ("cargurus", "research", {"research_id": "c31935"}, "research"),
+    ("cargurus", "expert_reviews", {}, "expert-reviews"),
+    ("cargurus", "makes", {}, "makes"),
+    ("cargurus", "models", {"make": "Toyota"}, "models"),
+    ("carmax", "search", {"zip": "75201"}, "search"),
+    ("carmax", "listing", {"stock_number": "28466923"}, "listing"),
+    ("carmax", "photos", {"stock_number": "28466923"}, "photos"),
+    ("carmax", "stores", {"zip": "75201"}, "stores"),
+    ("carmax", "store", {"store_id": "7115"}, "store"),
+    ("carmax", "store_inventory", {"store_id": "7115", "zip": "75201"}, "store-inventory"),
+    ("carmax", "reviews", {"make": "Toyota", "model": "RAV4", "year": 2022}, "reviews"),
+    (
+        "carmax", "review_summary",
+        {
+            "make": "Toyota",
+            "model": "RAV4",
+            "year": 2022,
+        },
+        "review-summary",
+    ),
+    ("carmax", "suggestions", {"query": "rav"}, "suggestions"),
+    ("carmax", "makes", {}, "makes"),
+    ("carmax", "models", {"make": "toyota"}, "models"),
+    ("carmax", "car_value", {"make": "Ford", "model": "F-150", "year": 2019}, "car-value"),
+    ("carvana", "search", {}, "search"),
+    ("carvana", "vehicle", {"vehicle_id": "4850967"}, "vehicle"),
+    ("carvana", "model_guide", {"year": 2021, "make": "Toyota", "model": "RAV4"}, "model-guide"),
+    ("carvana", "trims", {"make": "Toyota", "model": "RAV4"}, "trims"),
+    ("carvana", "make", {"make": "Toyota"}, "make"),
+    ("carvana", "makes", {}, "makes"),
+    ("bringatrailer", "results", {}, "results"),
+    ("bringatrailer", "price_history", {"model_id": 1833018}, "price-history"),
+    ("bringatrailer", "listing", {"slug": "1988-bmw-m3-272-2"}, "listing"),
+    ("bringatrailer", "live", {}, "live"),
+    ("bringatrailer", "make", {"make": "bmw"}, "make"),
+    ("bringatrailer", "model", {"model": "bmw/e30-m3"}, "model"),
+    ("bringatrailer", "location", {"country": "germany"}, "location"),
+    ("bringatrailer", "suggestions", {"query": "land cruiser"}, "suggestions"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH_1126_WIRE)
+def test_batch_1126_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH_1126[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH_1126_ONE_OF))
+def test_batch_1126_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch_1126_boots_has_no_search_and_carvana_no_zip():
+    names = {ep.method for ep in ENDPOINTS.values() if ep.namespace == "boots"}
+    assert "search" not in names
+    carvana = {p.name for p in ENDPOINTS["carvana_search"].params}
+    assert not {"zip", "postal_code", "query"} & carvana
+    assert {p.wire_field for p in ENDPOINTS["lookfantastic_search"].params} >= {"q"}
+    assert ENDPOINTS["notino_reviews"].min_timeout == 250.0
+    assert ENDPOINTS["douglas_search"].min_timeout == 250.0

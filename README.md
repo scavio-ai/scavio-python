@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 113 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 127 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -54,6 +54,12 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | HEMA Store Stock by City or Postcode, Dated Promotions, Prices by Market and Reviews (Netherlands, Belgium, France, Germany; stores also Luxembourg and Austria; 13 endpoints) | Yes | No | No | No |
 | AutoZone Parts Prices by Vehicle, Core Charges, Warranty, Part-Number Cross-Reference, Reviews and Stores (US; Brazil search, product and store stock; 12 endpoints) | Yes | No | No | No |
 | O'Reilly Auto Parts Part-Number Cross-Reference with Prices, Core Charges, Rebates, Store Stock near a ZIP and VIN Decode (US; Mexico store directory; 14 endpoints) | Yes | No | No | No |
+| RockAuto Parts Prices by Vehicle (Make, Year, Model, Engine), Every Brand and Tier, Core Charges, Part-Number Search, 15 Display Currencies (11 endpoints) | Yes | No | No | No |
+| Cars.com New and Used Listings near a ZIP, Deal Labels, Dealers, Dealer Inventory and Reviews, Model Reviews, Research (US; 8 endpoints) | Yes | No | No | No |
+| Autotrader Listings near a ZIP, Deal Labels, KBB Fair Price Range, Price History, Dealers and Makes (US; 5 endpoints) | Yes | No | No | No |
+| CarGurus Listings with Expected Price and Deal Rating, Dealer Inventory, Price Trends, Research and Expert Reviews (US, Canada, UK; 8 endpoints) | Yes | No | No | No |
+| CarMax No-Haggle Prices near a ZIP, Price Drops, Shipping Fees, 263 Stores and Store Inventory, Owner Reviews, Recent CarMax Offers per Model Year (12 endpoints) | Yes | No | No | No |
+| Carvana Used-Car Prices, KBB Values, Shipping Costs and Labels by Make and Model, Inspection and Imperfections, Model-Year Guides and Trims (US; 6 endpoints) | Yes | No | No | No |
 | Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
 | Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
 | Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
@@ -63,7 +69,15 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
 | Vevor Prices per Storefront in 13 Countries, Was Price Only During a Deal with Deal Dates, Variants with Their Own Price and Stock, Shipping Fee by State or Province, the Same SKU on Every Storefront, Reviews (13 storefronts; 11 endpoints) | Yes | No | No | No |
 | Nellis Auction Lot Prices: Current Bid, Bid Count and Nellis's Estimated Retail Price, a Sold Lot's Final Price, Bid History Without Bidder Names, Pickup Warehouses and Hours (6 US shopping locations; 4 endpoints) | Yes | No | No | No |
+| Bring a Trailer Auction Results, Sale Prices and High Bids, Model Price History with Sell-Through Rate, Listings with Bids and Comments, Live Auctions (8 endpoints) | Yes | No | No | No |
 | Dermstore Skincare Prices, RRP and Dermstore's Offer Text per Product and Brand, Variants with Their Own Price and Stock, UPC, Current Offers with End Times, US vs Canada Prices, the 10 Latest Reviews (US and Canada; 7 endpoints) | Yes | No | No | No |
+| Space NK Luxury Beauty Prices in GBP, EUR and AUD, Discount and Promo Badges, Online Stock per Shade, Reviews, UK Store Availability and Gifts with Purchase (4 markets; 9 endpoints) | Yes | No | No | No |
+| Lookfantastic Beauty Prices, RRP and Offer Text on 10 Country Sites in 22 Currencies, Variants with Their Own Price and Stock, Barcodes, Voucher Codes with End Times (7 endpoints) | Yes | No | No | No |
+| Cult Beauty Prices, RRP and Offer Text in 12 Currencies, Variants with Their Own Price and Stock, Barcodes, Voucher Codes with End Times (7 endpoints) | Yes | No | No | No |
+| YesStyle Asian Beauty Prices per Shipping Country (39 Countries), Deal Lists, Sale End Dates, Shades and Sizes, Reviews with Star Summary (9 endpoints) | Yes | No | No | No |
+| Notino Perfume and Cosmetics Prices on 27 Storefronts in Their Own Currencies, 30-Day Lowest Price, EAN per Variant, Reviews, Stores (10 endpoints) | Yes | No | No | No |
+| Douglas Beauty Prices, Was Price, RRP and 30-Day Lowest Price on 15 Storefronts, Deals, Stores with Hours, Review Summary (10 endpoints) | Yes | No | No | No |
+| Boots Prices, Was Price, Saving, Unit Price and Offers, Store Availability near a UK Postcode, Stores and Store Hours (UK and Ireland; 4 endpoints) | Yes | No | No | No |
 | Instacart Prices by Store at a ZIP, Price Compare Across Every Store, Delivery vs In-Store Prices, Deals and Reviews (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
 | Carrefour Grocery Prices by Store, Promotions, Nutri-Score, Stores and Fuel Prices (France, Argentina, Romania, Belgium; 9 endpoints) | Yes | No | No | No |
 | Allegro Offers, Every Seller's Price, Sellers, Sold Counts and Auctions (Poland, Czechia, Slovakia, Hungary; 7 endpoints) | Yes | No | No | No |
@@ -5797,6 +5811,489 @@ checkout, PC Optimum prices behind a login, price history (poll and store the
 answers). Failed calls and refused inputs are not charged; a not-found (an
 unknown code, category, collection or store) is charged.
 
+### 85. Luxury beauty -- Space NK prices in four markets, reviews, UK store availability
+
+Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta
+Beauty): search, category and brand listings with the price, the
+struck-through price, discount and promo badges and online stock of the shade
+or size shown; one product with every shade or size, EAN, promotions and
+ingredients; customer reviews (no reviewer names); search-box suggestions; the
+UK stores near a postcode for one product (in-store flag and Click & Collect,
+not unit counts); and the gifts with purchase on the offers page. Markets uk
+(GBP, default), ie (EUR), nl (EUR, Dutch copy) and au (AUD), each priced in
+its own currency; the US market is not offered (Space NK's US path shows UK
+prices). Brand ids are Space NK's own (from `brands`); `stores` is UK only and
+takes a `product_id`; reviews are kept per master product id (starting with
+M); `offers` is uk or ie. Namespace `spacenk`, 9 endpoints: `search`,
+`category`, `brand`, `brands`, `product`, `reviews`, `suggestions`, `stores`,
+`offers`. Credits: 1 credit each; `search`, `category` and `brand` with
+`full=True` up to 5 (one more call per product filled). `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+Space NK has no public API.
+See the [Space NK API
+page](https://scavio.dev/spacenk-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/spacenk-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+sn = client.spacenk
+hits = sn.search("vitamin c serum", market="uk")["data"]
+for it in hits["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["list_price"], it["currency"])
+p = sn.product("MUK200057800", market="ie")["data"]
+print(p["price"], p["currency"], p["stock_count"], len(p["variants"]))
+near = sn.stores("MUK200057800", postcode="W1D 1BS")["data"]
+for s in near["stores"][:3]:
+    print(s["name"], s["distance_miles"], s["in_store_available"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 86. Beauty on 10 country sites -- Lookfantastic prices, variants, barcodes, voucher codes
+
+Lookfantastic (lookfantastic.com, THG's beauty retailer with 10 country
+sites): keyword or SKU search and any list page (category, brand, sale, Black
+Friday) with the price, RRP, discount, offer text and filters (brand, skin
+type, concern, SPF, key ingredient, formulation, price, rating, discount); one
+product with every variant's own price and stock and its barcode (EAN-13 or
+UPC, as given); search suggestions; the voucher-codes page with end times; the
+A-Z brand directory and the category tree. `market` picks the site (gb for
+lookfantastic.com with 22 currencies, de, fr, es, it, nl, pl, at, ie, eu) and
+`currency` one of that site's own currencies. The search keyword is `query` in
+Python and `q` on the wire (and in the TypeScript options). Namespace
+`lookfantastic`, 7 endpoints: `search`, `list`, `product`, `suggestions`,
+`offers`, `brands`, `categories`. Credits: 1 credit each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s. Lookfantastic has no public API.
+See the [Lookfantastic API
+page](https://scavio.dev/lookfantastic-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/lookfantastic-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+lf = client.lookfantastic
+hits = lf.search("glow tonic", market="gb", currency="EUR")["data"]
+for it in hits["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["rrp"], it["discount_percent"], it["currency"])
+p = lf.product("11200055", market="de")["data"]
+print(p["price"], p["barcode"], [(v["option"], v["price"]) for v in p["variants"]])
+offers = lf.offers(market="gb")["data"]["offers"]
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 87. Beauty in 12 currencies -- Cult Beauty prices, variants, barcodes, voucher codes
+
+Cult Beauty (cultbeauty.co.uk, THG's beauty retailer): keyword or SKU search
+and any list page with the price, RRP, discount, offer text and filters
+(brand, skin type, concern, SPF, key ingredient, formulation, range, price,
+rating, discount); one product with every variant's own price and stock and
+its barcode; search suggestions; the voucher-codes page with end times; the
+A-Z brand directory and the category tree. `market` is gb (cultbeauty.co.uk)
+or intl (cultbeauty.com), each in 12 currencies; `offers` is not available on
+intl (a 400, not charged). Namespace `cultbeauty`, 7 endpoints: `search`,
+`list`, `product`, `suggestions`, `offers`, `brands`, `categories`. Credits: 1
+credit each. `credits_used` in the response is what was charged. The request
+timeout is raised to at least 240s. Cult Beauty has no public API.
+See the [Cult Beauty API
+page](https://scavio.dev/cultbeauty-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/cultbeauty-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cb = client.cultbeauty
+hits = cb.search("glow tonic", market="gb")["data"]
+p = cb.product(hits["items"][0]["sku"], market="intl", currency="USD")["data"]
+print(p["name"], p["price"], p["rrp"], p["currency"], p["in_stock"], p["barcode"])
+for v in p["variants"]:
+    print(v["option"], v["price"], v["in_stock"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 88. Asian beauty -- YesStyle prices per shipping country, deals, reviews
+
+YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and
+fashion): keyword search, category, brand and deal lists (Black Friday, flash
+sales, clearance, price drops) up to 100 a page with the price, list price,
+discount and YesStyle's labels; one product with its sale end date,
+ingredients and (with `include_variants`) every shade or size; reviews with
+the star summary; suggestions; the brand list and the shipping countries.
+YesStyle sets prices per shipping country: `country` (39 countries; 153 on
+reviews and suggestions) and the country is checked on every answer. Namespace
+`yesstyle`, 9 endpoints: `search`, `category`, `brand`, `brands`, `deals`,
+`product`, `reviews`, `suggestions`, `markets`. Credits: `search`, `category`,
+`brand`, `deals` and `product` 2 (`product` 3 with `include_variants`);
+`brands`, `reviews`, `suggestions`, `markets` 1. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+YesStyle has no public API.
+See the [YesStyle API
+page](https://scavio.dev/yesstyle-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/yesstyle-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ys = client.yesstyle
+hits = ys.search("snail mucin", country="us")["data"]
+for it in hits["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["list_price"], it["currency"])
+p = ys.product("1052684695", country="gb", include_variants=True)["data"]
+print(p["price"], p["currency"], p["sale_end_date"], p["availability"])
+deals = ys.deals(deal="flash_sales", country="au")["data"]
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 89. Perfume and cosmetics -- Notino on 27 storefronts, 30-day lowest price, EAN
+
+Notino (notino.com, the Brno-based online perfume and cosmetics store with 27
+country shops): keyword search, category, brand and promo lists (24 a page)
+with the price, RRP where shown and stock level; one product with every
+variant's price, EAN and the lowest price of the last 30 days; reviews; the
+brand directory; search suggestions; and Notino's stores in the 8 markets that
+have them. `market` is one of 27 storefronts, each in its own language and
+currency; gb (notino.co.uk) costs 2 credits per call. Namespace `notino`, 10
+endpoints: `search`, `product`, `reviews`, `category`, `brand`, `promo`,
+`brands`, `suggestions`, `stores`, `store`. Credits: 1 credit each (2 on gb);
+`category`, `brand` and `promo` 3 (4 on gb) for any page after the first, a
+sort or a filter; a `search` Notino answers with a brand or category page read
+with the page, sort or filters 3 (4 on gb); `reviews` beyond the newest 8 1 on
+every storefront. `credits_used` in the response is what was charged. The
+request timeout is raised to at least 240s (`reviews` 250s). Notino has no
+public API.
+See the [Notino API
+page](https://scavio.dev/notino-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/notino-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+nt = client.notino
+hits = nt.search("vitamin c serum", market="de")["data"]
+for it in hits["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["currency"], it["stock_level"])
+p = nt.product("https://www.notino.de/dior/sauvage-eau-de-parfum-fuer-herren/")["data"]
+for v in p["variants"]:
+    print(v["variant_name"], v["ean"], v["price"], v["lowest_price_30d"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 90. European beauty -- Douglas prices, was price, RRP and 30-day low on 15 storefronts
+
+Douglas (douglas.de, the Dusseldorf-based beauty retailer): keyword search,
+category, brand and deal lists (sale, Beauty / Black Friday) with the price,
+the was price, the RRP and the lowest price of the last 30 days; one product
+by base or variant code (optionally each variant's EAN); stores and one
+store's hours; the review summary (review texts are not available);
+suggestions and the brand directory. 15 storefronts in 13 countries (`market`;
+it costs 2 credits). Store stock is not available; listings can be slow (the
+request timeout is raised to at least 250s). Namespace `douglas`, 10
+endpoints: `search`, `category`, `brand`, `deals`, `product`, `stores`,
+`store`, `review_summary`, `suggestions`, `brands`. Credits: 1 credit each (2
+on it; `stores` and `store` 1 on it too); `product` with `variants_ean` 1 more
+per variant looked up (2 on it), up to 10. `credits_used` in the response is
+what was charged. The request timeout is raised to at least 250s. Douglas has
+no public API.
+See the [Douglas API
+page](https://scavio.dev/douglas-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/douglas-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+dg = client.douglas
+hits = dg.search("mascara", market="at")["data"]
+for it in hits["items"][:5]:
+    print(it["base_code"], it["name"], it["price"], it["was_price"], it["lowest_price_30d"])
+p = dg.product("5000005003", market="de")["data"]
+print(p["price"], p["currency"], p["rrp"], p["lowest_price_30d"], p["ean"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 91. UK health and beauty -- Boots prices, offers and store availability
+
+Boots (boots.com, the UK health and beauty retailer, and boots.ie in Ireland):
+one product by link or 8-digit id with the price, the was price, the saving,
+the unit price, its shades or sizes and the offers Boots names; whether the
+Boots stores near a postcode or a point have it (in stock or out of stock per
+store, no unit counts); stores near a postcode or a town; and one store's page
+with its hours. Markets uk (GBP) and ie (EUR). Search is not available yet:
+start from a product link. Namespace `boots`, 4 endpoints: `product`,
+`store_stock`, `stores`, `store`. Credits: 1 credit each; 2 when the answer
+comes on a second attempt (3 for two-step lookups). `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+Boots has no public API.
+See the [Boots API
+page](https://scavio.dev/boots-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/boots-product?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bt = client.boots
+p = bt.product("https://www.boots.com/no7-protect-and-perfect-intense-advanced-serum-30ml-10288490")
+p = p["data"]
+print(p["price"], p["was_price"], p["saving"], p["unit_price_text"], p["catentry_id"])
+st = bt.store_stock(p["product_id"], p["catentry_id"], postcode="NG2 3AA")["data"]
+for s in st["stores"][:5]:
+    print(s["name"], s["distance_miles"], s["availability"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 92. Auto parts by vehicle -- RockAuto prices for every brand and tier
+
+RockAuto (rockauto.com, the online auto parts catalog): the vehicle chain
+(make, year, model, engine with its `carcode`), a vehicle's part categories
+and the parts of one part type with every brand's price, tier, core charge and
+pack options; part-number search (OE and interchange numbers too); a brand's
+parts; one part's detail; suggestions and a free-text resolver; tools; and
+RockAuto's promotions. The US catalog, priced in 15 display currencies
+(`currency`), with `language` en, es, fr or de (part detail is English only).
+Take `carcode` from the vehicle chain. Namespace `rockauto`, 11 endpoints:
+`vehicles`, `categories`, `parts`, `search`, `brand`, `brands`, `part`,
+`suggestions`, `resolve`, `tools`, `promotions`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s. RockAuto has no public API.
+See the [RockAuto API
+page](https://scavio.dev/rockauto-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rockauto-vehicles?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ra = client.rockauto
+engines = ra.vehicles(make="HONDA", year=2010, model="ACCORD")["data"]["engines"]
+car = engines[0]  # make, year, model, engine and carcode
+parts = ra.parts(car["make"], car["year"], car["model"], car["engine"], car["carcode"],
+                 "Brake & Wheel Hub", "1684", currency="CAD")["data"]
+for it in parts["items"][:5]:
+    print(it["brand"], it["part_number"], it["tier"], it["price"], it["currency"])
+hits = ra.search("BP1084")["data"]
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 93. Car listings and dealers -- Cars.com listings, dealer reviews, model reviews
+
+Cars.com (cars.com, the US car marketplace): new, used and certified listings
+around a ZIP with the price, mileage, Cars.com's deal labels and the seller;
+one listing; a dealer, its inventory and its reviews; model reviews by make,
+model and year; dealers near a ZIP; and the research pages. Reviews come
+without reviewer names. US only, prices in USD. Namespace `carscom`, 8
+endpoints: `search`, `listing`, `dealer`, `dealer_inventory`,
+`dealer_reviews`, `model_reviews`, `dealers`, `research`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 240s. Cars.com has no public API for reading listings.
+See the [Cars.com API
+page](https://scavio.dev/carscom-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/carscom-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cc = client.carscom
+res = cc.search("10001", make="Toyota", model="RAV4", stock_type="used")["data"]
+for it in res["items"][:5]:
+    print(it["listing_id"], it["title"], it["price"], it["mileage"], it["seller"]["city"])
+rev = cc.dealer_reviews(dealer_id="97701")["data"]
+print(rev["rating"], rev["total"], [r["rating"] for r in rev["reviews"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 94. Car listings -- Autotrader listings, KBB fair price range, price history
+
+Autotrader (autotrader.com, the US car marketplace): listings around a ZIP
+with the price, mileage and deal label, filtered by make, model, trim, year,
+price, mileage, body style, drivetrain, colors, fuel, history and more; one
+listing with features, warranties, the Kelley Blue Book fair price range as
+given and price history; dealers near a ZIP; one dealer; and a make's models.
+Private sellers come as city and state only. US only, prices in USD; 2 credits
+per call. Namespace `autotrader`, 5 endpoints: `search`, `listing`, `dealers`,
+`dealer`, `makes`. Credits: 2 credits each. `credits_used` in the response is
+what was charged. The request timeout is raised to at least 240s. Autotrader
+has no public API.
+See the [Autotrader API
+page](https://scavio.dev/autotrader-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/autotrader-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+at = client.autotrader
+res = at.search("90012", make="Honda", model="Civic")["data"]
+for it in res["listings"][:5]:
+    print(it["listing_id"], it["title"], it["price"], it["mileage"], it["listing_type"])
+car = at.listing(res["listings"][0]["listing_id"], zip="90012")["data"]
+print(car["deal_label"], car["deal_basis"], car["price_history"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 95. Car deals -- CarGurus expected price, deal rating and price trends
+
+CarGurus (cargurus.com, the car marketplace in the US, Canada and the UK):
+listings around a ZIP or postcode with the price, CarGurus' expected price and
+deal rating (the search carries them; there is no listing-detail endpoint); a
+dealer's inventory; dealers near a ZIP; price trends for the market, a make or
+a model; model-year research pages; expert reviews; makes and models. `market`
+is us, us-es, ca, ca-fr or uk. Namespace `cargurus`, 8 endpoints: `search`,
+`dealer`, `dealers`, `price_trends`, `research`, `expert_reviews`, `makes`,
+`models`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 240s. CarGurus has no
+public API for reading listings.
+See the [CarGurus API
+page](https://scavio.dev/cargurus-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/cargurus-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cg = client.cargurus
+res = cg.search("10001", make="Toyota", model="RAV4", sort="best_deal")["data"]
+for it in res["listings"][:5]:
+    print(it["title"], it["price"], it["expected_price"], it["deal_rating"])
+trends = cg.price_trends(make="Toyota", model="RAV4")["data"]
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 96. Used cars -- CarMax no-haggle prices, stores, car value from recent offers
+
+CarMax (carmax.com, the US used-car retailer): inventory near a ZIP with
+CarMax's no-haggle price, price drops and shipping fee; one car and its
+photos; the 263 stores, one store and a store's inventory; owner reviews and
+their summary; suggestions, makes and models; and the car value page (recent
+CarMax offers for a model year as shown, not an appraisal of any one car). US
+only, prices in USD. Namespace `carmax`, 12 endpoints: `search`, `listing`,
+`photos`, `stores`, `store`, `store_inventory`, `reviews`, `review_summary`,
+`suggestions`, `makes`, `models`, `car_value`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s. CarMax has no public API.
+See the [CarMax API
+page](https://scavio.dev/carmax-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/carmax-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cm = client.carmax
+res = cm.search("75201", make="Ford", model="F-150", price_max=30000)["data"]
+for car in res["cars"][:5]:
+    print(car["stock_number"], car["year"], car["model"], car["price"], car["mileage"])
+value = cm.car_value("Ford", "F-150", 2019)["data"]
+print(value["aggregate"], value["count"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 97. Used cars online -- Carvana prices, KBB values, shipping costs, model guides
+
+Carvana (carvana.com, the US online used-car retailer): used-car listings by
+make and model (24 a page) with the price, the KBB value, shipping cost and
+Carvana's labels; one vehicle with its inspection, imperfections and
+highlights (no VIN); a model-year guide with owner reviews (no names); a
+model's trim guide; a make's lineup and every make in stock. US only, prices
+in USD. There is no ZIP targeting: `city` takes one of Carvana's own city
+pages (e.g. new-york-ny). Namespace `carvana`, 6 endpoints: `search`,
+`vehicle`, `model_guide`, `trims`, `make`, `makes`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s. Carvana has no public API.
+See the [Carvana API
+page](https://scavio.dev/carvana-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/carvana-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cv = client.carvana
+res = cv.search(make="Toyota", model="RAV4", city="new-york-ny")["data"]
+for it in res["items"][:5]:
+    print(it["vehicle_id"], it["year"], it["trim"], it["price"], it["kbb_value"], it["shipping_cost"])
+car = cv.vehicle(res["items"][0]["vehicle_id"])["data"]
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 98. Collector-car auctions -- Bring a Trailer results and price history
+
+Bring a Trailer (bringatrailer.com, the online collector-car auction site):
+completed auction results by keyword, make, model or location (up to 60 a
+page, through the first 10,000 results of a query) with the sale price or high
+bid; the price history of a model or make in one call with sell-through rate
+and per-currency stats; one listing with its bids and comments (no usernames);
+live auctions; make, model and location pages; and suggestions. Each lot's
+amount is in its own currency, as given. Namespace `bringatrailer`, 8
+endpoints: `results`, `price_history`, `listing`, `live`, `make`, `model`,
+`location`, `suggestions`. Credits: 1 credit each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+Bring a Trailer has no public API.
+See the [Bring a Trailer API
+page](https://scavio.dev/bringatrailer-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/bringatrailer-results?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bat = client.bringatrailer
+hist = bat.price_history(model_id=1833018)["data"]
+print(hist["total"], hist["sold_count"], hist["sell_through_rate"], hist["stats_by_currency"])
+res = bat.results(query="e30 m3", status="sold")["data"]
+for lot in res["lots"][:5]:
+    print(lot["title"], lot["amount"], lot["currency"], lot["ended_at"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -5948,6 +6445,12 @@ Scavio works with popular AI/LLM frameworks:
 | HEMA (`hema`) | `search`, `product`, `category`, `categories`, `new_arrivals`, `sale`, `offers`, `campaign`, `suggestions`, `store_stock`, `stores`, `store`, `reviews`; webshops nl, be (`language` nl or fr), fr, de; `store_stock` and `stores` also lu and at; `sale` nl, be, de; `offers` nl, be | 1 each |
 | AutoZone (`autozone`) | `search`, `product`, `category`, `brand`, `vehicles`, `reviews`, `stores`, `store`, `categories`, `clearance`, `rebates`, `store_stock`; us (default); br on `search`, `product`, `vehicles`, `stores`, `store`, `categories`, `store_stock` (Brazil only); mx on `vehicles`, `stores`, `store`, `categories` | 1 each; `search` and `product` with `country="br"` and `store_stock` 2 |
 | O'Reilly Auto Parts (`oreilly`) | `search`, `cross_reference`, `product`, `vehicles`, `compatibility`, `category`, `categories`, `brand`, `store_stock`, `stores`, `store`, `suggestions`, `rebates`, `deals`; us (default) on every method; mx on `stores` and `store` only (the Mexican store directory, in Spanish) | 2 each; `product` by `line_code` + `part_number` 4; `cross_reference` 2 / 4 / 6 by inputs; `brand` index 4; `store_stock` and `stores` by `zip` 4; `deals` 4 |
+| RockAuto (`rockauto`) | `vehicles`, `categories`, `parts`, `search`, `brand`, `brands`, `part`, `suggestions`, `resolve`, `tools`, `promotions`; start with `vehicles` (make, year, model, engine, `carcode`); `currency` (15) and `language` en, es, fr, de | 1 each |
+| Cars.com (`carscom`) | `search`, `listing`, `dealer`, `dealer_inventory`, `dealer_reviews`, `model_reviews`, `dealers`, `research`; US; `search` and `dealers` take a `zip` | 1 each |
+| Autotrader (`autotrader`) | `search`, `listing`, `dealers`, `dealer`, `makes`; US; `search` and `dealers` take a `zip` | 2 each |
+| CarGurus (`cargurus`) | `search`, `dealer`, `dealers`, `price_trends`, `research`, `expert_reviews`, `makes`, `models`; `market` us (default), us-es, ca, ca-fr, uk; no listing detail | 1 each |
+| CarMax (`carmax`) | `search`, `listing`, `photos`, `stores`, `store`, `store_inventory`, `reviews`, `review_summary`, `suggestions`, `makes`, `models`, `car_value`; US; `search` takes a `zip`; `stores` one of `zip`, `state`, `city` | 1 each |
+| Carvana (`carvana`) | `search`, `vehicle`, `model_guide`, `trims`, `make`, `makes`; US; by make and model, `city` (Carvana's city pages), no ZIP | 1 each |
 | Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
 | Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
 | Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
@@ -5957,7 +6460,15 @@ Scavio works with popular AI/LLM frameworks:
 | Discount Tire (`discounttire`) | `search`, `vehicle`, `vehicle_tires`, `product`, `model`, `store_stock`, `stores`, `store`, `reviews`, `store_reviews`, `wheels`, `browse`, `categories`, `suggestions`, `appointments`; us only (no `country`); `search`, `vehicle_tires`, `product`, `model`, `wheels` and `browse` need `store` or `zip` | 1 each |
 | Vevor (`vevor`) | `search`, `product`, `shipping`, `reviews`, `questions`, `suggestions`, `categories`, `category`, `collections`, `deals`, `prices`; 13 storefronts (`country` + `language`) on every method except `prices`, which takes `sku` only and asks every storefront; `shipping` needs `state` (us) or `province` (ca) | 1 each; `prices` 3 |
 | Nellis Auction (`nellis`) | `search`, `item`, `locations`, `categories`; `location` (6 shopping locations, default `las-vegas`) on `search`, `locations` and `categories`; `item` takes `id` or `url`; search lists open auctions only | 1 each |
+| Bring a Trailer (`bringatrailer`) | `results`, `price_history`, `listing`, `live`, `make`, `model`, `location`, `suggestions`; one site; amounts in each lot's own currency | 1 each |
 | Dermstore (`dermstore`) | `search`, `list`, `product`, `suggestions`, `offers`, `brands`, `categories`; `country` (`us` default, or `ca` in Dermstore's own CAD prices) on every method; `list` takes `path` or `url`, `product` takes `sku` or `url` | 1 each |
+| Space NK (`spacenk`) | `search`, `category`, `brand`, `brands`, `product`, `reviews`, `suggestions`, `stores`, `offers`; markets uk (default), ie, nl, au; `stores` UK only, by `product_id`; `offers` uk or ie | 1 each; a listing with `full=True` up to 5 |
+| Lookfantastic (`lookfantastic`) | `search`, `list`, `product`, `suggestions`, `offers`, `brands`, `categories`; `market` (gb default, de, fr, es, it, nl, pl, at, ie, eu) and `currency` on every method; `list` takes `path` or `url`, `product` `sku` or `url` | 1 each |
+| Cult Beauty (`cultbeauty`) | `search`, `list`, `product`, `suggestions`, `offers`, `brands`, `categories`; `market` gb (default) or intl and `currency` (12) on every method; no `offers` on intl | 1 each |
+| YesStyle (`yesstyle`) | `search`, `category`, `brand`, `brands`, `deals`, `product`, `reviews`, `suggestions`, `markets`; `country` (39; 153 on `reviews` and `suggestions`) and `language`; `product` and `reviews` take `product_id` or `url` | listings and `product` 2 (`product` 3 with variants); the rest 1 |
+| Notino (`notino`) | `search`, `product`, `reviews`, `category`, `brand`, `promo`, `brands`, `suggestions`, `stores`, `store`; `market` (27 storefronts, default de); `product` and `reviews` take `url` or `order_code` | 1 each (gb 2); a paged, sorted or filtered list 3 (gb 4) |
+| Douglas (`douglas`) | `search`, `category`, `brand`, `deals`, `product`, `stores`, `store`, `review_summary`, `suggestions`, `brands`; `market` (15 storefronts, default de); `product` takes `code` or `url` | 1 each (2 on it) |
+| Boots (`boots`) | `product`, `store_stock`, `stores`, `store`; `market` uk (default) or ie; no search: start from a product link | 1 each (2 on a second attempt) |
 | Instacart (`instacart`) | `retailers` (start here), `search`, `cross_search`, `product`, `price_compare`, `categories`, `category`, `deals`, `stores`, `suggestions`, `reviews`; us (default) on every method; ca on every method except `cross_search` and `reviews`; `language="fr"` on ca (not `suggestions`) | 1 each; `search` 3 (2 when the page fits in the first answer); `cross_search` 3 up to 5 stores, 4 for 6 to 10 |
 | Carrefour (`carrefour`) | `search`, `product`, `reviews`, `category`, `promotions`, `suggestions`, `stores`, `store_availability`, `store` | 1 each; `search` and `product` with `country="be"` 2 |
 | Allegro (`allegro`) | `search`, `offer`, `product`, `product_offers`, `seller`, `seller_feedback`, `category` | 2 each |
@@ -5990,6 +6501,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.96.0
+
+- **14 new namespaces** (sync and async), 114 endpoints. Beauty: `spacenk` (Space NK, 9),
+  `lookfantastic` (7), `cultbeauty` (Cult Beauty, 7), `yesstyle` (YesStyle, 9), `notino`
+  (10), `douglas` (10), `boots` (4). Cars and parts: `rockauto` (RockAuto, 11), `carscom`
+  (Cars.com, 8), `autotrader` (5), `cargurus` (CarGurus, 8), `carmax` (CarMax, 12),
+  `carvana` (6), `bringatrailer` (Bring a Trailer, 8). Credits: 1 per call except
+  `autotrader` (2), YesStyle listings and product (2; 3 with variants), Notino gb and
+  paged lists, Douglas Italy and a Space NK `full=True` listing (up to 5). The request
+  timeout is raised to at least 240s (Douglas and Notino `reviews` 250s).
 
 ### Changed in 0.95.0
 

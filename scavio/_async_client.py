@@ -18,18 +18,26 @@ from ._namespaces_async import (
     _AsyncArgosNamespace,
     _AsyncAshleyNamespace,
     _AsyncAsosNamespace,
+    _AsyncAutotraderNamespace,
     _AsyncAutozoneNamespace,
     _AsyncBestBuyNamespace,
     _AsyncBolcomNamespace,
     _AsyncBookingNamespace,
+    _AsyncBootsNamespace,
+    _AsyncBringatrailerNamespace,
     _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
+    _AsyncCargurusNamespace,
+    _AsyncCarmaxNamespace,
     _AsyncCarrefourNamespace,
+    _AsyncCarscomNamespace,
+    _AsyncCarvanaNamespace,
     _AsyncChatGPTNamespace,
     _AsyncChewyNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCompanyNamespace,
     _AsyncCostcoNamespace,
+    _AsyncCultbeautyNamespace,
     _AsyncCvsNamespace,
     _AsyncDecathlonNamespace,
     _AsyncDepopNamespace,
@@ -38,6 +46,7 @@ from ._namespaces_async import (
     _AsyncDiscountTireNamespace,
     _AsyncDollarGeneralNamespace,
     _AsyncDollarTreeNamespace,
+    _AsyncDouglasNamespace,
     _AsyncEbayNamespace,
     _AsyncFanaticsNamespace,
     _AsyncFashionnovaNamespace,
@@ -63,6 +72,7 @@ from ._namespaces_async import (
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncLookfantasticNamespace,
     _AsyncLowesNamespace,
     _AsyncMacysNamespace,
     _AsyncMaisonsDuMondeNamespace,
@@ -79,6 +89,7 @@ from ._namespaces_async import (
     _AsyncNintendoNamespace,
     _AsyncNordstromNamespace,
     _AsyncNordstromRackNamespace,
+    _AsyncNotinoNamespace,
     _AsyncOfferupNamespace,
     _AsyncOlxNamespace,
     _AsyncOreillyNamespace,
@@ -91,11 +102,13 @@ from ._namespaces_async import (
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncRightmoveNamespace,
+    _AsyncRockautoNamespace,
     _AsyncRonaNamespace,
     _AsyncSaksNamespace,
     _AsyncSamsClubNamespace,
     _AsyncSECNamespace,
     _AsyncSephoraNamespace,
+    _AsyncSpacenkNamespace,
     _AsyncSpecsNamespace,
     _AsyncSportchekNamespace,
     _AsyncStaplesNamespace,
@@ -119,6 +132,7 @@ from ._namespaces_async import (
     _AsyncWholeFoodsNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
+    _AsyncYesstyleNamespace,
     _AsyncYouTubeNamespace,
     _AsyncZaraNamespace,
     _AsyncZillowNamespace,
@@ -290,6 +304,20 @@ class AsyncScavioClient:
         self.marks = _AsyncMarksNamespace(self)
         self.rona = _AsyncRonaNamespace(self)
         self.pcexpress = _AsyncPcexpressNamespace(self)
+        self.spacenk = _AsyncSpacenkNamespace(self)
+        self.lookfantastic = _AsyncLookfantasticNamespace(self)
+        self.cultbeauty = _AsyncCultbeautyNamespace(self)
+        self.yesstyle = _AsyncYesstyleNamespace(self)
+        self.notino = _AsyncNotinoNamespace(self)
+        self.douglas = _AsyncDouglasNamespace(self)
+        self.boots = _AsyncBootsNamespace(self)
+        self.rockauto = _AsyncRockautoNamespace(self)
+        self.carscom = _AsyncCarscomNamespace(self)
+        self.autotrader = _AsyncAutotraderNamespace(self)
+        self.cargurus = _AsyncCargurusNamespace(self)
+        self.carmax = _AsyncCarmaxNamespace(self)
+        self.carvana = _AsyncCarvanaNamespace(self)
+        self.bringatrailer = _AsyncBringatrailerNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

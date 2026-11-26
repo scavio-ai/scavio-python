@@ -5482,6 +5482,8705 @@ _PCX_LISTING = (
     _PCX_LANGUAGE,
 )
 
+# ================= batch 2026-11-26: 14 platforms (beauty + cars) =================
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc); a param the backend only accepts to refuse (a 400 that says
+# 'not offered') is left out. 240 s floor on every method (Douglas and Notino reviews
+# 250 s).
+
+# Space NK: 9 endpoints on /api/v1/spacenk.
+_SPACENK_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="spacenk_search",
+        namespace="spacenk",
+        method="search",
+        http="POST",
+        path="/api/v1/spacenk/search",
+        summary=(
+            "Search the products of Space NK (spacenk.com, the London-based luxury beauty "
+            "retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space "
+            "NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), "
+            "each in its own currency as Space NK prices it. Keywords with paging (36 a page), "
+            "Space NK's ten sorts and a brand filter. Returns query, market, page, page_size "
+            "(36), sort, full, total, total_pages, has_more, count, items [{product_id, sku "
+            "(the shade / size the tile shows), name, brand, url, image, price, list_price "
+            "(struck-through price), currency, on_sale, discount_badge (e.g. 25% OFF), "
+            "promo_badges (e.g. FREE GIFT), badges (e.g. 351 sold today, Trending this week, "
+            "new shade), rating, review_count, in_stock, availability, stock_count (online "
+            "stock of the shade / size shown)}], more_product_ids (the page's other products "
+            "when full is false), notes. 1 credit; full: true up to 5 (one call per product "
+            "filled). Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged. Not offered: the US market (Space NK's US path shows UK prices), a price "
+            "filter (the site ignores it), store stock counts, price history, cart or checkout."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords or a brand (required)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands, by name as Space NK shows it (items[].brand or "
+                    "brands[].name, e.g. Medik8, Drunk Elephant); up to 10."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (36 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]]',
+                doc=(
+                    "relevance (default), best_sellers, new, our_favourites, "
+                    "price_high_to_low, price_low_to_high, rating (highly reviewed), "
+                    "most_viewed, discount, brand: Space NK's own sorts."
+                ),
+            ),
+            Param(
+                "full",
+                "Optional[bool]",
+                doc=(
+                    "Fill all 36 products of the page in full (default false: the first 12 in "
+                    "full, the other 24 as ids in more_product_ids). Up to 5 credits."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; with full=True up to 5 (one more call per product filled). "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_category",
+        namespace="spacenk",
+        method="category",
+        http="POST",
+        path="/api/v1/spacenk/category",
+        summary=(
+            "One category of Space NK (spacenk.com, the London-based luxury beauty retailer, "
+            "owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no "
+            "public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in "
+            "its own currency as Space NK prices it. By category id (black-friday is the Black "
+            "Friday list), with paging, sorts and the brand filter. Returns category_id, "
+            "market, page, page_size (36), sort, full, total, total_pages, has_more, count, "
+            "items [{product_id, sku (the shade / size the tile shows), name, brand, url, "
+            "image, price, list_price (struck-through price), currency, on_sale, "
+            "discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 "
+            "sold today, Trending this week, new shade), rating, review_count, in_stock, "
+            "availability, stock_count (online stock of the shade / size shown)}], "
+            "more_product_ids (the page's other products when full is false), notes. 1 credit; "
+            "full: true up to 5 (one call per product filled). An unknown category id is a "
+            "charged 404. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "category_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Space NK category id (black-friday, skincare-treatment-serum, "
+                    "makeup-complexion-foundation ...)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands, by name as Space NK shows it (items[].brand or "
+                    "brands[].name, e.g. Medik8, Drunk Elephant); up to 10."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (36 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]]',
+                doc=(
+                    "relevance (default), best_sellers, new, our_favourites, "
+                    "price_high_to_low, price_low_to_high, rating (highly reviewed), "
+                    "most_viewed, discount, brand: Space NK's own sorts."
+                ),
+            ),
+            Param(
+                "full",
+                "Optional[bool]",
+                doc=(
+                    "Fill all 36 products of the page in full (default false: the first 12 in "
+                    "full, the other 24 as ids in more_product_ids). Up to 5 credits."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; with full=True up to 5 (one more call per product filled). "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_brand",
+        namespace="spacenk",
+        method="brand",
+        http="POST",
+        path="/api/v1/spacenk/brand",
+        summary=(
+            "One brand's products on Space NK (spacenk.com, the London-based luxury beauty "
+            "retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space "
+            "NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), "
+            "each in its own currency as Space NK prices it. By brand id (brands[].id), with "
+            "paging and sorts. Returns brand_id, market, page, page_size (36), sort, full, "
+            "total, total_pages, has_more, count, items [{product_id, sku (the shade / size "
+            "the tile shows), name, brand, url, image, price, list_price (struck-through "
+            "price), currency, on_sale, discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE "
+            "GIFT), badges (e.g. 351 sold today, Trending this week, new shade), rating, "
+            "review_count, in_stock, availability, stock_count (online stock of the shade / "
+            "size shown)}], more_product_ids (the page's other products when full is false), "
+            "notes. 1 credit; full: true up to 5 (one call per product filled). An unknown "
+            "brand id is a charged 404. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "brand_id",
+                "str",
+                required=True,
+                doc=(
+                    "A brand id from brands (brands[].id, e.g. medik8, Charlotte Tilbury)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (36 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]]',
+                doc=(
+                    "relevance (default), best_sellers, new, our_favourites, "
+                    "price_high_to_low, price_low_to_high, rating (highly reviewed), "
+                    "most_viewed, discount, brand: Space NK's own sorts."
+                ),
+            ),
+            Param(
+                "full",
+                "Optional[bool]",
+                doc=(
+                    "Fill all 36 products of the page in full (default false: the first 12 in "
+                    "full, the other 24 as ids in more_product_ids). Up to 5 credits."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; with full=True up to 5 (one more call per product filled). "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_brands",
+        namespace="spacenk",
+        method="brands",
+        http="POST",
+        path="/api/v1/spacenk/brands",
+        summary=(
+            "Every brand Space NK (spacenk.com, the London-based luxury beauty retailer, owned "
+            "by Ulta Beauty). Scavio fetches the public page on request; Space NK has no "
+            "public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in "
+            "its own currency as Space NK prices it. lists A-Z. Returns market, letter, total, "
+            "count, brands [{id (for the brand endpoint), name (for the brand filter), url, "
+            "letter}], notes. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "letter",
+                "Optional[str]",
+                doc=(
+                    "Only brands under this letter (A-Z or #)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_product",
+        namespace="spacenk",
+        method="product",
+        http="POST",
+        path="/api/v1/spacenk/product",
+        summary=(
+            "One product of Space NK (spacenk.com, the London-based luxury beauty retailer, "
+            "owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no "
+            "public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in "
+            "its own currency as Space NK prices it. By product id or shade / size id: "
+            "product_id, master_id, type (master or variant), ean, name, brand, url, price, "
+            "list_price, currency, price_text, in_stock, availability, availability_message, "
+            "stock_count (online stock of one shade / size), orderable, button (ADD_TO_BAG or "
+            "NOTIFY_ME), size {quantity, unit}, short_description, description, key_benefits, "
+            "how_to_use, kit_contents, ingredients, rating, review_count, images, "
+            "variant_attribute (color or size), variant_counts, variants [{id, attribute, "
+            "name, in_stock, availability, in_stock_date, selectable, selected, "
+            "swatch_colour}], promotions [{id, name, callout, details, type, "
+            "gift_product_id}], badges {offers, gift, trade}, category_path, skin_suitability, "
+            "restricted_shipping, hazmat, coming_soon, notes. An id Space NK does not answer "
+            "for is an uncharged 502. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Space NK product id (items[].product_id, e.g. MUK200057800) or one "
+                    "shade / size (variants[].id, e.g. UK200057805)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_reviews",
+        namespace="spacenk",
+        method="reviews",
+        http="POST",
+        path="/api/v1/spacenk/reviews",
+        summary=(
+            "Customer reviews of one product on Space NK (spacenk.com, the London-based luxury "
+            "beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on "
+            "request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch "
+            "copy), au (AUD), each in its own currency as Space NK prices it. One English "
+            "review list shown on every market. Paging up to 100 a page, four sorts, star "
+            "filter and text search. Returns product_id, page, page_size, sort, total, "
+            "total_pages, has_more, count, rating_distribution, reviews [{id, rating, title, "
+            "text, submitted_at, recommended, syndicated, syndication_source {name, url}, "
+            "helpful_votes, unhelpful_votes, context {skin_type, skin_tone, best_use, "
+            "sensitive_skin}, tags}], notes. Reviewer names, locations and photos are not "
+            "returned. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "str",
+                required=True,
+                doc=(
+                    "The product id (items[].product_id or product's master_id, starting with "
+                    "M): reviews are kept per product."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews a page, 1-100 (default 20)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["newest", "most_helpful", "highest_rating", "lowest_rating"]]',
+                doc=(
+                    "newest (default), most_helpful, highest_rating, lowest_rating."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[Union[int, list[int]]]",
+                doc=(
+                    "Only reviews with these star ratings."
+                ),
+            ),
+            Param(
+                "search",
+                "Optional[str]",
+                doc=(
+                    "Only reviews containing this text."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_suggestions",
+        namespace="spacenk",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/spacenk/suggestions",
+        summary=(
+            "What Space NK (spacenk.com, the London-based luxury beauty retailer, owned by "
+            "Ulta Beauty). Scavio fetches the public page on request; Space NK has no public "
+            "API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own "
+            "currency as Space NK prices it. suggests for what a shopper has typed: brands "
+            "[{name, url}], categories [{name, url}], articles (ids of editorial articles), "
+            "products [{product_id, sku (the shade / size the tile shows), name, brand, url, "
+            "image, price, list_price (struck-through price), currency, on_sale, "
+            "discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 "
+            "sold today, Trending this week, new shade), rating, review_count, in_stock, "
+            "availability, stock_count (online stock of the shade / size shown)}]. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper has typed (required)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, "
+                    "EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered "
+                    "(400): us (Space NK's US path shows UK prices), de, ca."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_stores",
+        namespace="spacenk",
+        method="stores",
+        http="POST",
+        path="/api/v1/spacenk/stores",
+        summary=(
+            "Space NK's UK stores nearest a postcode or point, for one product, from Space NK "
+            "(spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). "
+            "Scavio fetches the public page on request; Space NK has no public API. Markets uk "
+            "(GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as "
+            "Space NK prices it. Returns product_id, location, count, stores [{store_id, name, "
+            "address, city, region, postcode, country, latitude, longitude, phone, "
+            "opening_hours [{day, hours}], distance_miles, in_store_available (Space NK's "
+            "in-store flag for the product, not a count), click_collect_available, "
+            "click_collect_label (e.g. Click & Collect from Monday 7th December), "
+            "express_available}], notes. UK only. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Space NK product id (items[].product_id, e.g. MUK200057800) or one "
+                    "shade / size (variants[].id, e.g. UK200057805)."
+                ),
+            ),
+            Param(
+                "postcode",
+                "Optional[str]",
+                doc=(
+                    "A full UK postcode."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "With longitude instead of postcode: a point in the UK."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "With latitude."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Stores to return, nearest first, 1-20 (default 10)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "uk only: Space NK's stores are in the UK."
+                ),
+            ),
+        ),
+        one_of=(("postcode", "latitude"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="spacenk_offers",
+        namespace="spacenk",
+        method="offers",
+        http="POST",
+        path="/api/v1/spacenk/offers",
+        summary=(
+            "The gifts with purchase on the offers page of Space NK (spacenk.com, the "
+            "London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the "
+            "public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), "
+            "nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. "
+            "uk or ie. Returns market, title, validity (the page's own line, e.g. Ends 30th "
+            "November at 11.45pm (GMT)), terms_url, count, offers [{brand, gift, condition, "
+            "spend_threshold {amount, currency}, brand_url, image}], notes. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "uk (default) or ie: the nl and au offers pages show the UK offers in GBP."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Lookfantastic: 7 endpoints on /api/v1/lookfantastic.
+_LOOKFANTASTIC_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="lookfantastic_search",
+        namespace="lookfantastic",
+        method="search",
+        http="POST",
+        path="/api/v1/lookfantastic/search",
+        summary=(
+            "Search the catalogue of Lookfantastic (lookfantastic.com, THG's beauty retailer "
+            "with 10 country sites). Scavio fetches the public Lookfantastic page on request, "
+            "for the site and currency asked (10 sites: www.lookfantastic.com, "
+            "www.lookfantastic.de, www.lookfantastic.fr, www.lookfantastic.es, "
+            "www.lookfantastic.it, www.lookfantastic.nl, www.lookfantastic.pl, "
+            "www.lookfantastic.at, www.lookfantastic.ie, eu.lookfantastic.com); Lookfantastic "
+            "has no public API (its product feeds are for approved affiliate publishers only). "
+            "Keywords or a SKU, sorted (relevance, popularity, price, name, newest, discount) "
+            "and filtered (brand, skin type, concern, spf, key ingredient, formulation, price "
+            "range, minimum rating, discount range, and any of the site's filters), up to 40 a "
+            "page. A keyword Lookfantastic maps to one of its pages returns that page's "
+            "products, as Lookfantastic's own search does, with resolved_from {type (brand, "
+            "category, landing or product), path, listed_path, url, title, sku}. Returns "
+            "query, resolved_from, corrected_query, market {market, site, language, currency, "
+            "shipping_destination}, total, total_pages, page, page_size, has_more, count, "
+            "sort, filters_applied, items [{position, sku, name, brand, url, image, price, "
+            "rrp, discount_percent, price_from (the lowest variant price when below price), "
+            "currency, in_stock, rating, review_count, offer {title, description, free_gift, "
+            "url} (the site's promotion text, as given), variants_count, options}], facets "
+            "[{facet (the site's facet name, the input of filters[].facet), filter (the input "
+            "it maps to), label, type, options [{value, label, count} or {label, from, to, "
+            "count}]}] (with include_facets), notes. Prices are Lookfantastic's for a visitor "
+            "without an account, in the currency asked (each site and currency has its own "
+            "price list; nothing converted by Scavio). rrp is Lookfantastic's RRP as given; "
+            "discount_percent is computed by Scavio from price and rrp, only when the RRP is "
+            "above the price. Cart-only code discounts are not included. 1 credit. Billed on "
+            "what the request spent (credits_used); failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "Keywords (in the site's language) or a Lookfantastic SKU. A keyword "
+                    "Lookfantastic maps to a page (a brand, a category, many generic terms) "
+                    "returns that page's products, with resolved_from."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1). At most 10,000 positions (page x page_size)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page (1-40, default 40)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]]',
+                doc=(
+                    "relevance (default), popularity, price_low, price_high, name, newest or "
+                    "discount (highest percent off first): Lookfantastic's sort menu."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand, as the site names it (one or a list; exact, e.g. CeraVe): "
+                    "facets[filter=brand].options[].value."
+                ),
+            ),
+            Param(
+                "skin_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin type as the site lists it (one or a list), e.g. Dry, Oily, Sensitive "
+                    "(in the site's language)."
+                ),
+            ),
+            Param(
+                "concern",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skincare concern as the site lists it (one or a list), e.g. Anti-Ageing, "
+                    "Dehydration."
+                ),
+            ),
+            Param(
+                "spf",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "SPF band as the site lists it (one or a list), e.g. SPF 30+, SPF 50+."
+                ),
+            ),
+            Param(
+                "key_ingredient",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Key ingredient as the site lists it (one or a list), e.g. Retinol, "
+                    "Hyaluronic Acid, Niacinamide."
+                ),
+            ),
+            Param(
+                "formulation",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Formulation as the site lists it (one or a list), e.g. Vegan, Fragrance "
+                    "Free, Alcohol Free."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other of the site's filters, as facets[] give them (with "
+                    "include_facets): {facet (facets[].facet), value (options[].value; one or "
+                    "a list)}, up to 10. Facet names carry the site's language (de_ on "
+                    "lookfantastic.de)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[float]",
+                doc=(
+                    "Lowest average star rating (1-5)."
+                ),
+            ),
+            Param(
+                "min_discount",
+                "Optional[float]",
+                doc=(
+                    "Lowest percent off Lookfantastic's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "max_discount",
+                "Optional[float]",
+                doc=(
+                    "Highest percent off Lookfantastic's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return Lookfantastic's filter counts for the results (facets). Still "
+                    "1 credit."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_list",
+        namespace="lookfantastic",
+        method="list",
+        http="POST",
+        path="/api/v1/lookfantastic/list",
+        summary=(
+            "The products of any Lookfantastic list page by path or link: a category, brand "
+            "(/brands/cerave), sale or offer page (Black Friday: /black-friday), sorted "
+            "(relevance, popularity, price, name, newest, discount) and filtered (brand, skin "
+            "type, concern, spf, key ingredient, formulation, price range, minimum rating, "
+            "discount range, and any of the site's filters), up to 200 a page. An editorial "
+            "page without a product list is listed through its view-all page (listed_path). "
+            "Returns path, listed_path, url, market {market, site, language, currency, "
+            "shipping_destination}, total, total_pages, page, page_size, has_more, count, "
+            "sort, filters_applied, items [{position, sku, name, brand, url, image, price, "
+            "rrp, discount_percent, price_from (the lowest variant price when below price), "
+            "currency, in_stock, rating, review_count, offer {title, description, free_gift, "
+            "url} (the site's promotion text, as given), variants_count, options}], facets "
+            "[{facet (the site's facet name, the input of filters[].facet), filter (the input "
+            "it maps to), label, type, options [{value, label, count} or {label, from, to, "
+            "count}]}] (with include_facets), notes. Prices are Lookfantastic's for a visitor "
+            "without an account, in the currency asked (each site and currency has its own "
+            "price list; nothing converted by Scavio). rrp is Lookfantastic's RRP as given; "
+            "discount_percent is computed by Scavio from price and rrp, only when the RRP is "
+            "above the price. Cart-only code discounts are not included. An unknown path is a "
+            "charged 404. 1 credit. Billed on what the request spent (credits_used); failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "path",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Lookfantastic list page: a category, brand (/brands/cerave), sale or "
+                    "offer page (Black Friday), the path of its /c/ link. Paths come from "
+                    "categories, brands and offers (list_path)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Lookfantastic list page link (https://www.lookfantastic.com/c/<page>/) "
+                    "instead of path."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1). At most 10,000 positions (page x page_size)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page (1-200, default 60)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]]',
+                doc=(
+                    "relevance (default), popularity, price_low, price_high, name, newest or "
+                    "discount (highest percent off first): Lookfantastic's sort menu."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand, as the site names it (one or a list; exact, e.g. CeraVe): "
+                    "facets[filter=brand].options[].value."
+                ),
+            ),
+            Param(
+                "skin_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin type as the site lists it (one or a list), e.g. Dry, Oily, Sensitive "
+                    "(in the site's language)."
+                ),
+            ),
+            Param(
+                "concern",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skincare concern as the site lists it (one or a list), e.g. Anti-Ageing, "
+                    "Dehydration."
+                ),
+            ),
+            Param(
+                "spf",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "SPF band as the site lists it (one or a list), e.g. SPF 30+, SPF 50+."
+                ),
+            ),
+            Param(
+                "key_ingredient",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Key ingredient as the site lists it (one or a list), e.g. Retinol, "
+                    "Hyaluronic Acid, Niacinamide."
+                ),
+            ),
+            Param(
+                "formulation",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Formulation as the site lists it (one or a list), e.g. Vegan, Fragrance "
+                    "Free, Alcohol Free."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other of the site's filters, as facets[] give them (with "
+                    "include_facets): {facet (facets[].facet), value (options[].value; one or "
+                    "a list)}, up to 10. Facet names carry the site's language (de_ on "
+                    "lookfantastic.de)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[float]",
+                doc=(
+                    "Lowest average star rating (1-5)."
+                ),
+            ),
+            Param(
+                "min_discount",
+                "Optional[float]",
+                doc=(
+                    "Lowest percent off Lookfantastic's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "max_discount",
+                "Optional[float]",
+                doc=(
+                    "Highest percent off Lookfantastic's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return Lookfantastic's filter counts for the results (facets). Still "
+                    "1 credit."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        one_of=(("path", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_product",
+        namespace="lookfantastic",
+        method="product",
+        http="POST",
+        path="/api/v1/lookfantastic/product",
+        summary=(
+            "One Lookfantastic product by SKU or link, for the site and currency asked: "
+            "market, requested_sku, sku, product_sku, name, product_name, brand, url, price, "
+            "rrp, discount_percent, currency, in_stock, availability_message, barcode (EAN-13 "
+            "or UPC, as given; null when none is listed, as for sets), option_type and option "
+            "(shade or size, as given), variants [{sku, name, option_type, option, "
+            "shade_colour, price, rrp, discount_percent, in_stock, availability_message, "
+            "barcode, preorder, max_per_order, loyalty_points}], subtitle, description, "
+            "key_benefits, directions, ingredients, at_a_glance, volume, faq, images, "
+            "loyalty_points, max_per_order, preorder, offer {title, description, free_gift, "
+            "url} (the site's promotion banner, as given), rating, review_count, "
+            "recent_reviews [{rating, date, text}] (the 10 latest reviews the product page "
+            "shows; no reviewer names), breadcrumbs, notes. Text is in the site's language. "
+            "Prices are Lookfantastic's for a visitor without an account, in the currency "
+            "asked (each site and currency has its own price list; nothing converted by "
+            "Scavio). rrp is Lookfantastic's RRP as given; discount_percent is computed by "
+            "Scavio from price and rrp, only when the RRP is above the price. Cart-only code "
+            "discounts are not included. An unknown SKU is a charged 404. Full review paging "
+            "is not offered. 1 credit. Billed on what the request spent (credits_used); failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Lookfantastic SKU (items[].sku or variants[].sku; SKUs are the same on "
+                    "every Lookfantastic site)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Lookfantastic product link "
+                    "(https://www.lookfantastic.com/p/<name>/<sku>/) instead of sku. The "
+                    "market still comes from market."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_suggestions",
+        namespace="lookfantastic",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/lookfantastic/suggestions",
+        summary=(
+            "Lookfantastic's search-box suggestions for typed text, in the site's language: "
+            "market, query, count, terms (suggested searches), corrections, products [{sku, "
+            "name, url, image, price, rrp, discount_percent, currency, rating, review_count}] "
+            "(up to 5 each), notes. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "The text typed so far."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_offers",
+        namespace="lookfantastic",
+        method="offers",
+        http="POST",
+        path="/api/v1/lookfantastic/offers",
+        summary=(
+            "Lookfantastic's current offers as its voucher-codes page lists them: market, "
+            "count, offers [{title, description, code (when the offer text names one), gift, "
+            "threshold (the spend the text states), ends (the end time Lookfantastic gives, "
+            "ISO 8601 UTC), url, list_path (send to list for the products)}], notes. "
+            "Lookfantastic gives no start date. 1 credit. Billed on what the request spent "
+            "(credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_brands",
+        namespace="lookfantastic",
+        method="brands",
+        http="POST",
+        path="/api/v1/lookfantastic/brands",
+        summary=(
+            "Lookfantastic's A-Z brand directory for the site asked: market, letter, "
+            "total_brands, count, brands [{name, path, url, letter}], notes. path is the input "
+            "of list for a brand's products. 1 credit. Billed on what the request spent "
+            "(credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "letter",
+                "Optional[str]",
+                doc=(
+                    "Optional: only brands under this letter (A-Z, or 0-9)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lookfantastic_categories",
+        namespace="lookfantastic",
+        method="categories",
+        http="POST",
+        path="/api/v1/lookfantastic/categories",
+        summary=(
+            "Lookfantastic's category tree as the site navigation shows it, in the site's "
+            "language: market, count, total_categories, categories [{name, path, url, children "
+            "[...]}], notes. path is the input of list. 1 credit. Billed on what the request "
+            "spent (credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Lookfantastic's site to read (default gb): gb (UK and international site "
+                    "(lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, "
+                    "CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, "
+                    "TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr "
+                    "(France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it "
+                    "(Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); "
+                    "EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); "
+                    "at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); "
+                    "EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its "
+                    "own); EUR). The site's host name works too. Anything else is a 400, not "
+                    "charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Cult Beauty: 7 endpoints on /api/v1/cultbeauty.
+_CULTBEAUTY_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="cultbeauty_search",
+        namespace="cultbeauty",
+        method="search",
+        http="POST",
+        path="/api/v1/cultbeauty/search",
+        summary=(
+            "Search the catalogue of Cult Beauty (cultbeauty.co.uk, THG's beauty retailer). "
+            "Scavio fetches the public Cult Beauty page on request, for the site and currency "
+            "asked (2 sites: www.cultbeauty.co.uk, www.cultbeauty.com); Cult Beauty has no "
+            "public API (its product feeds are for approved affiliate publishers only). "
+            "Keywords or a SKU, sorted (relevance, popularity, price, name, newest, discount) "
+            "and filtered (brand, skin type, concern, spf, key ingredient, formulation, range, "
+            "price range, minimum rating, discount range, and any of the site's filters), up "
+            "to 40 a page. A keyword Cult Beauty maps to one of its pages returns that page's "
+            "products, as Cult Beauty's own search does, with resolved_from {type (brand, "
+            "category, landing or product), path, listed_path, url, title, sku}. Returns "
+            "query, resolved_from, corrected_query, market {market, site, language, currency, "
+            "shipping_destination}, total, total_pages, page, page_size, has_more, count, "
+            "sort, filters_applied, items [{position, sku, name, brand, url, image, price, "
+            "rrp, discount_percent, price_from (the lowest variant price when below price), "
+            "currency, in_stock, rating, review_count, offer {title, description, free_gift, "
+            "url} (the site's promotion text, as given), variants_count, options}], facets "
+            "[{facet (the site's facet name, the input of filters[].facet), filter (the input "
+            "it maps to), label, type, options [{value, label, count} or {label, from, to, "
+            "count}]}] (with include_facets), notes. Prices are Cult Beauty's for a visitor "
+            "without an account, in the currency asked (each site and currency has its own "
+            "price list; nothing converted by Scavio). rrp is Cult Beauty's RRP as given; "
+            "discount_percent is computed by Scavio from price and rrp, only when the RRP is "
+            "above the price. Cart-only code discounts are not included. 1 credit. Billed on "
+            "what the request spent (credits_used); failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "Keywords (in the site's language) or a Cult Beauty SKU. A keyword Cult "
+                    "Beauty maps to a page (a brand, a category, many generic terms) returns "
+                    "that page's products, with resolved_from."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1). At most 10,000 positions (page x page_size)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page (1-40, default 40)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]]',
+                doc=(
+                    "relevance (default), popularity, price_low, price_high, name, newest or "
+                    "discount (highest percent off first): Cult Beauty's sort menu."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand, as Cult Beauty names it (one or a list; exact, e.g. CeraVe): "
+                    "facets[filter=brand].options[].value."
+                ),
+            ),
+            Param(
+                "skin_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin type as Cult Beauty lists it (one or a list), e.g. Dry, Oily, "
+                    "Sensitive."
+                ),
+            ),
+            Param(
+                "concern",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin concern as Cult Beauty lists it (one or a list), e.g. Anti-Ageing, "
+                    "Dry, Dullness."
+                ),
+            ),
+            Param(
+                "spf",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "SPF content as Cult Beauty lists it (one or a list), e.g. No SPF, SPF "
+                    "15+, SPF 30+."
+                ),
+            ),
+            Param(
+                "key_ingredient",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Key ingredient as Cult Beauty lists it (one or a list), e.g. Retinol, "
+                    "Hyaluronic Acid."
+                ),
+            ),
+            Param(
+                "formulation",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Formulation as Cult Beauty lists it (one or a list), e.g. Vegan, Alcohol "
+                    "Free."
+                ),
+            ),
+            Param(
+                "range",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "A brand's product range as Cult Beauty lists it (one or a list)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other of the site's filters, as facets[] give them (with "
+                    "include_facets): {facet (facets[].facet), value (options[].value; one or "
+                    "a list)}, up to 10. Facet names carry the site's language (de_ on "
+                    "lookfantastic.de)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[float]",
+                doc=(
+                    "Lowest average star rating (1-5)."
+                ),
+            ),
+            Param(
+                "min_discount",
+                "Optional[float]",
+                doc=(
+                    "Lowest percent off Cult Beauty's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "max_discount",
+                "Optional[float]",
+                doc=(
+                    "Highest percent off Cult Beauty's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return Cult Beauty's filter counts for the results (facets). Still 1 "
+                    "credit."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_list",
+        namespace="cultbeauty",
+        method="list",
+        http="POST",
+        path="/api/v1/cultbeauty/list",
+        summary=(
+            "The products of any Cult Beauty list page by path or link: a category, brand "
+            "(/brands/cerave), sale or offer page (Black Friday: /black-friday-cyber-monday), "
+            "sorted (relevance, popularity, price, name, newest, discount) and filtered "
+            "(brand, skin type, concern, spf, key ingredient, formulation, range, price range, "
+            "minimum rating, discount range, and any of the site's filters), up to 200 a page. "
+            "An editorial page without a product list is listed through its shop-all page "
+            "(listed_path). Returns path, listed_path, url, market {market, site, language, "
+            "currency, shipping_destination}, total, total_pages, page, page_size, has_more, "
+            "count, sort, filters_applied, items [{position, sku, name, brand, url, image, "
+            "price, rrp, discount_percent, price_from (the lowest variant price when below "
+            "price), currency, in_stock, rating, review_count, offer {title, description, "
+            "free_gift, url} (the site's promotion text, as given), variants_count, options}], "
+            "facets [{facet (the site's facet name, the input of filters[].facet), filter (the "
+            "input it maps to), label, type, options [{value, label, count} or {label, from, "
+            "to, count}]}] (with include_facets), notes. Prices are Cult Beauty's for a "
+            "visitor without an account, in the currency asked (each site and currency has its "
+            "own price list; nothing converted by Scavio). rrp is Cult Beauty's RRP as given; "
+            "discount_percent is computed by Scavio from price and rrp, only when the RRP is "
+            "above the price. Cart-only code discounts are not included. An unknown path is a "
+            "charged 404. 1 credit. Billed on what the request spent (credits_used); failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "path",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Cult Beauty list page: a category, brand (/brands/cerave), sale or "
+                    "offer page (Black Friday), the path of its /c/ link. Paths come from "
+                    "categories, brands and offers (list_path)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cult Beauty list page link (https://www.cultbeauty.co.uk/c/<page>/) "
+                    "instead of path."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1). At most 10,000 positions (page x page_size)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page (1-200, default 60)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]]',
+                doc=(
+                    "relevance (default), popularity, price_low, price_high, name, newest or "
+                    "discount (highest percent off first): Cult Beauty's sort menu."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand, as Cult Beauty names it (one or a list; exact, e.g. CeraVe): "
+                    "facets[filter=brand].options[].value."
+                ),
+            ),
+            Param(
+                "skin_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin type as Cult Beauty lists it (one or a list), e.g. Dry, Oily, "
+                    "Sensitive."
+                ),
+            ),
+            Param(
+                "concern",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Skin concern as Cult Beauty lists it (one or a list), e.g. Anti-Ageing, "
+                    "Dry, Dullness."
+                ),
+            ),
+            Param(
+                "spf",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "SPF content as Cult Beauty lists it (one or a list), e.g. No SPF, SPF "
+                    "15+, SPF 30+."
+                ),
+            ),
+            Param(
+                "key_ingredient",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Key ingredient as Cult Beauty lists it (one or a list), e.g. Retinol, "
+                    "Hyaluronic Acid."
+                ),
+            ),
+            Param(
+                "formulation",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Formulation as Cult Beauty lists it (one or a list), e.g. Vegan, Alcohol "
+                    "Free."
+                ),
+            ),
+            Param(
+                "range",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "A brand's product range as Cult Beauty lists it (one or a list)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other of the site's filters, as facets[] give them (with "
+                    "include_facets): {facet (facets[].facet), value (options[].value; one or "
+                    "a list)}, up to 10. Facet names carry the site's language (de_ on "
+                    "lookfantastic.de)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, in the currency asked."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[float]",
+                doc=(
+                    "Lowest average star rating (1-5)."
+                ),
+            ),
+            Param(
+                "min_discount",
+                "Optional[float]",
+                doc=(
+                    "Lowest percent off Cult Beauty's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "max_discount",
+                "Optional[float]",
+                doc=(
+                    "Highest percent off Cult Beauty's RRP (0-100)."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return Cult Beauty's filter counts for the results (facets). Still 1 "
+                    "credit."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        one_of=(("path", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_product",
+        namespace="cultbeauty",
+        method="product",
+        http="POST",
+        path="/api/v1/cultbeauty/product",
+        summary=(
+            "One Cult Beauty product by SKU or link, for the site and currency asked: market, "
+            "requested_sku, sku, product_sku, name, product_name, brand, url, price, rrp, "
+            "discount_percent, currency, in_stock, availability_message, barcode (EAN-13 or "
+            "UPC, as given; null when none is listed, as for sets), option_type and option "
+            "(shade or size, as given), variants [{sku, name, option_type, option, "
+            "shade_colour, price, rrp, discount_percent, in_stock, availability_message, "
+            "barcode, preorder, max_per_order, loyalty_points}], subtitle, description, "
+            "key_benefits, directions, ingredients, at_a_glance, volume, faq, images, "
+            "loyalty_points, max_per_order, preorder, offer {title, description, free_gift, "
+            "url} (the site's promotion banner, as given), rating, review_count, "
+            "recent_reviews [{rating, date, text}] (the 10 latest reviews the product page "
+            "shows; no reviewer names), breadcrumbs, notes. Text is in the site's language. "
+            "Prices are Cult Beauty's for a visitor without an account, in the currency asked "
+            "(each site and currency has its own price list; nothing converted by Scavio). rrp "
+            "is Cult Beauty's RRP as given; discount_percent is computed by Scavio from price "
+            "and rrp, only when the RRP is above the price. Cart-only code discounts are not "
+            "included. An unknown SKU is a charged 404. Full review paging is not offered. 1 "
+            "credit. Billed on what the request spent (credits_used); failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Cult Beauty SKU (items[].sku or variants[].sku; SKUs are the same on "
+                    "every Cult Beauty site)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cult Beauty product link (https://www.cultbeauty.co.uk/p/<name>/<sku>/) "
+                    "instead of sku. The market still comes from market."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_suggestions",
+        namespace="cultbeauty",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/cultbeauty/suggestions",
+        summary=(
+            "Cult Beauty's search-box suggestions for typed text, in the site's language: "
+            "market, query, count, terms (suggested searches), corrections, products [{sku, "
+            "name, url, image, price, rrp, discount_percent, currency, rating, review_count}] "
+            "(up to 5 each), notes. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "The text typed so far."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_offers",
+        namespace="cultbeauty",
+        method="offers",
+        http="POST",
+        path="/api/v1/cultbeauty/offers",
+        summary=(
+            "Cult Beauty's current offers as its voucher-codes page lists them: market, count, "
+            "offers [{title, description, code (when the offer text names one), gift, "
+            "threshold (the spend the text states), ends (the end time Cult Beauty gives, ISO "
+            "8601 UTC), url, list_path (send to list for the products)}], notes. Cult Beauty "
+            "gives no start date. Not available on www.cultbeauty.com (no voucher-codes page): "
+            "a 400, not charged. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_brands",
+        namespace="cultbeauty",
+        method="brands",
+        http="POST",
+        path="/api/v1/cultbeauty/brands",
+        summary=(
+            "Cult Beauty's A-Z brand directory for the site asked: market, letter, "
+            "total_brands, count, brands [{name, path, url, letter}], notes. path is the input "
+            "of list for a brand's products. 1 credit. Billed on what the request spent "
+            "(credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "letter",
+                "Optional[str]",
+                doc=(
+                    "Optional: only brands under this letter (A-Z, or 0-9)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cultbeauty_categories",
+        namespace="cultbeauty",
+        method="categories",
+        http="POST",
+        path="/api/v1/cultbeauty/categories",
+        summary=(
+            "Cult Beauty's category tree as the site navigation shows it, in the site's "
+            "language: market, count, total_categories, categories [{name, path, url, children "
+            "[...]}], notes. path is the input of list. 1 credit. Billed on what the request "
+            "spent (credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); "
+                    "currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, "
+                    "default GBP); intl (International site (cultbeauty.com); currencies EUR, "
+                    "GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The "
+                    "site's host name works too. Anything else is a 400, not charged."
+                ),
+            ),
+            Param(
+                "currency",
+                "Optional[str]",
+                doc=(
+                    "The currency, as the site's own currency selector offers it for that site "
+                    "(default: the site's own). A currency the site does not offer is a 400, "
+                    "not charged (the site would answer in its default currency)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# YesStyle: 9 endpoints on /api/v1/yesstyle.
+_YESSTYLE_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="yesstyle_search",
+        namespace="yesstyle",
+        method="search",
+        http="POST",
+        path="/api/v1/yesstyle/search",
+        summary=(
+            "Search the catalog of YesStyle (yesstyle.com, the Hong Kong-based online store "
+            "for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia "
+            "Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no "
+            "public API. Keywords with paging (100 a page), seven sorts (bestsellers, newest, "
+            "price both ways, best value, availability, discount) and YesStyle's filters: "
+            "Featured (in stock, flash sales, Black Friday, clearance, rock-bottom prices, "
+            "value & gift sets, twin packs, mini sizes, Korean / Japanese brands, "
+            "cruelty-free, vegan, YesStyle Awards ...), price band and department. Prices are "
+            "YesStyle's own for the shipping country, in that country's currency (regional "
+            "price lists: the same product can be US$16.09 in the US and US$14.86 in South "
+            "Africa); which products ship differs by country. Every answer is checked for its "
+            "country; market {country, country_name, currency, language} says which. Returns "
+            "query, department, page, page_size (100), sort, sort_applied, filters_applied, "
+            "total, total_pages, has_more, count, items [{product_id, name, brand, brand_id, "
+            "url, image, price, list_price, discount_percent, currency, price_text, "
+            "list_price_text (as YesStyle shows them), rating (0-5), review_count, size, "
+            "status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, "
+            "black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 "
+            "...), brand_region, pack_label, child_product_ids, has_videos}], heading, "
+            "description, breadcrumbs, category (tree), facets / price_range / sorts "
+            "(include_facets), coupon (YesStyle's site code: code, tiers, expires_at), market, "
+            "notes. 2 credits. Failed upstream calls, a page that came back for another "
+            "country, and refused inputs are not charged; a not-found is charged. Not offered: "
+            "stores (YesStyle has none to look up), choosing a currency other than the "
+            "country's, cart or checkout, price history, EAN / UPC (YesStyle shows none)."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords or a brand name (required)."
+                ),
+            ),
+            Param(
+                "department",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A department id (category ids from breadcrumbs or category, e.g. 15478 "
+                    "Beauty, 15544 Skin Care)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us; uk is read as gb). "
+                    "YesStyle prices and stocks by shipping country: 39 countries are served "
+                    "here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, "
+                    "il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, "
+                    "th, tw, us, za. Brazil is held back. Others answer 400 before anything is "
+                    "charged."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (100 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]]',
+                doc=(
+                    "bestsellers (default), newest, price_low_to_high, price_high_to_low, "
+                    "best_value, availability, discount."
+                ),
+            ),
+            Param(
+                "featured",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "YesStyle's Featured filters: in_stock, just_arrived, new_this_week, "
+                    "trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, "
+                    "price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, "
+                    "mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, "
+                    "chinese_cosmetics, southeast_asian_beauty, western_beauty, "
+                    "korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured "
+                    "ids from facets (key oc)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other facet: {key, value} from facets[].key and "
+                    "facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, "
+                    "cf color family). At most 12 filter values in all."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets [{name, type, key, values [{value, name, selected}]}], "
+                    "price_range and sorts."
+                ),
+            ),
+            Param(
+                "type",
+                "Optional[str]",
+                doc=(
+                    "A category filter: YesStyle's search does not apply it, so it is refused "
+                    "here (400). Use category, brand or deals."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[str]",
+                doc=(
+                    "A category filter: YesStyle's search does not apply it, so it is refused "
+                    "here (400). Use category, brand or deals."
+                ),
+            ),
+            Param(
+                "ingredients",
+                "Optional[str]",
+                doc=(
+                    "A category filter: YesStyle's search does not apply it, so it is refused "
+                    "here (400). Use category, brand or deals."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_category",
+        namespace="yesstyle",
+        method="category",
+        http="POST",
+        path="/api/v1/yesstyle/category",
+        summary=(
+            "Browse one category of YesStyle (yesstyle.com, the Hong Kong-based online store "
+            "for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia "
+            "Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no "
+            "public API. By category id or link, with paging, sorts and the Featured, price, "
+            "Type, Region (brand country) and Ingredients filters plus any facet (skin type, "
+            "skin concern ...). Prices are YesStyle's own for the shipping country, in that "
+            "country's currency (regional price lists: the same product can be US$16.09 in the "
+            "US and US$14.86 in South Africa); which products ship differs by country. Every "
+            "answer is checked for its country; market {country, country_name, currency, "
+            "language} says which. Returns category_id, page, page_size (100), sort, "
+            "sort_applied, filters_applied, total, total_pages, has_more, count, items "
+            "[{product_id, name, brand, brand_id, url, image, price, list_price, "
+            "discount_percent, currency, price_text, list_price_text (as YesStyle shows them), "
+            "rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, "
+            "Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, "
+            "trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, "
+            "child_product_ids, has_videos}], heading, description, breadcrumbs, category "
+            "(tree), facets / price_range / sorts (include_facets), coupon (YesStyle's site "
+            "code: code, tiers, expires_at), market, notes. 2 credits. Failed upstream calls, "
+            "a page that came back for another country, and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "category",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A category id (e.g. 15556 Face Serums, from breadcrumbs, category or a "
+                    "link's bcc.<id>_bpt.46) or a category link."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us; uk is read as gb). "
+                    "YesStyle prices and stocks by shipping country: 39 countries are served "
+                    "here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, "
+                    "il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, "
+                    "th, tw, us, za. Brazil is held back. Others answer 400 before anything is "
+                    "charged."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (100 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]]',
+                doc=(
+                    "bestsellers (default), newest, price_low_to_high, price_high_to_low, "
+                    "best_value, availability, discount."
+                ),
+            ),
+            Param(
+                "featured",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "YesStyle's Featured filters: in_stock, just_arrived, new_this_week, "
+                    "trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, "
+                    "price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, "
+                    "mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, "
+                    "chinese_cosmetics, southeast_asian_beauty, western_beauty, "
+                    "korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured "
+                    "ids from facets (key oc)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other facet: {key, value} from facets[].key and "
+                    "facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, "
+                    "cf color family). At most 12 filter values in all."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets [{name, type, key, values [{value, name, selected}]}], "
+                    "price_range and sorts."
+                ),
+            ),
+            Param(
+                "type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Type ids from facets (key t)."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand Region ids from facets (key bcs, e.g. 1 South Korea)."
+                ),
+            ),
+            Param(
+                "ingredients",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Ingredient ids from facets (key inp)."
+                ),
+            ),
+            Param(
+                "department",
+                "Optional[str]",
+                doc=(
+                    "Not used here: the category is the department (send that category id "
+                    "instead). Refused (400)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_brand",
+        namespace="yesstyle",
+        method="brand",
+        http="POST",
+        path="/api/v1/yesstyle/brand",
+        summary=(
+            "One brand's products on YesStyle (yesstyle.com, the Hong Kong-based online store "
+            "for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia "
+            "Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no "
+            "public API. By brand id or link, with paging, sorts, department and filters, plus "
+            "the brand's name, region and customer satisfaction (brand {name, region, "
+            "satisfaction_percent, total_reviews, star_counts}). Prices are YesStyle's own for "
+            "the shipping country, in that country's currency (regional price lists: the same "
+            "product can be US$16.09 in the US and US$14.86 in South Africa); which products "
+            "ship differs by country. Every answer is checked for its country; market "
+            "{country, country_name, currency, language} says which. Returns brand_id, brand, "
+            "page, page_size (100), sort, sort_applied, filters_applied, total, total_pages, "
+            "has_more, count, items [{product_id, name, brand, brand_id, url, image, price, "
+            "list_price, discount_percent, currency, price_text, list_price_text (as YesStyle "
+            "shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. "
+            "FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, "
+            "buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, "
+            "pack_label, child_product_ids, has_videos}], heading, description, breadcrumbs, "
+            "category (tree), facets / price_range / sorts (include_facets), coupon "
+            "(YesStyle's site code: code, tiers, expires_at), market, notes. 2 credits. Failed "
+            "upstream calls, a page that came back for another country, and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "brand",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A brand id (e.g. 317041 COSRX, from brands or items[].brand_id) or a "
+                    "brand link (/en/cosrx/list.html/bpt.299_bid.317041)."
+                ),
+            ),
+            Param(
+                "department",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A department id (category ids from breadcrumbs or category, e.g. 15478 "
+                    "Beauty, 15544 Skin Care)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us; uk is read as gb). "
+                    "YesStyle prices and stocks by shipping country: 39 countries are served "
+                    "here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, "
+                    "il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, "
+                    "th, tw, us, za. Brazil is held back. Others answer 400 before anything is "
+                    "charged."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (100 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]]',
+                doc=(
+                    "bestsellers (default), newest, price_low_to_high, price_high_to_low, "
+                    "best_value, availability, discount."
+                ),
+            ),
+            Param(
+                "featured",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "YesStyle's Featured filters: in_stock, just_arrived, new_this_week, "
+                    "trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, "
+                    "price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, "
+                    "mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, "
+                    "chinese_cosmetics, southeast_asian_beauty, western_beauty, "
+                    "korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured "
+                    "ids from facets (key oc)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other facet: {key, value} from facets[].key and "
+                    "facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, "
+                    "cf color family). At most 12 filter values in all."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets [{name, type, key, values [{value, name, selected}]}], "
+                    "price_range and sorts."
+                ),
+            ),
+            Param(
+                "type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Type ids from facets (key t)."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand Region ids from facets (key bcs, e.g. 1 South Korea)."
+                ),
+            ),
+            Param(
+                "ingredients",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Ingredient ids from facets (key inp)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_brands",
+        namespace="yesstyle",
+        method="brands",
+        http="POST",
+        path="/api/v1/yesstyle/brands",
+        summary=(
+            "Every brand of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian "
+            "beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX "
+            "2209). Scavio fetches the public page on request; YesStyle has no public API. "
+            "(about 4,300): brand_id, slug (the brand's link name), url, last_modified, "
+            "filtered by query and paged. Returns query, total, matched, page, page_size, "
+            "has_more, count, brands, notes. 1 credit. Failed upstream calls, a page that came "
+            "back for another country, and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Brands whose link name contains this (accents, case and punctuation "
+                    "ignored)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Brands a page (default 500, at most 5000)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_deals",
+        namespace="yesstyle",
+        method="deals",
+        http="POST",
+        path="/api/v1/yesstyle/deals",
+        summary=(
+            "The deal lists of YesStyle (yesstyle.com, the Hong Kong-based online store for "
+            "Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, "
+            "HKEX 2209). Scavio fetches the public page on request; YesStyle has no public "
+            "API.: Black Friday, flash sales, clearance, rock-bottom prices, price drops, new "
+            "items 24-hour sale, value & gift sets, twin packs, on a department (default "
+            "Beauty), with the listing's paging, sorts and filters. Prices are YesStyle's own "
+            "for the shipping country, in that country's currency (regional price lists: the "
+            "same product can be US$16.09 in the US and US$14.86 in South Africa); which "
+            "products ship differs by country. Every answer is checked for its country; market "
+            "{country, country_name, currency, language} says which. Returns deal, "
+            "department_id, page, page_size (100), sort, sort_applied, filters_applied, total, "
+            "total_pages, has_more, count, items [{product_id, name, brand, brand_id, url, "
+            "image, price, list_price, discount_percent, currency, price_text, list_price_text "
+            "(as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's "
+            "label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, "
+            "clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), "
+            "brand_region, pack_label, child_product_ids, has_videos}], heading, description, "
+            "breadcrumbs, category (tree), facets / price_range / sorts (include_facets), "
+            "coupon (YesStyle's site code: code, tiers, expires_at), market, notes. The "
+            "product endpoint adds sale_end_date and the deal's claimed share. 2 credits. "
+            "Failed upstream calls, a page that came back for another country, and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "deal",
+                'Optional[Literal["black_friday", "flash_sales", "clearance", "rock_bottom_prices", "price_drop", "new_items_24hr_sale", "value_gift_sets", "twin_packs_bundles"]]',
+                doc=(
+                    "black_friday, flash_sales, clearance, rock_bottom_prices, price_drop, "
+                    "new_items_24hr_sale, value_gift_sets, twin_packs_bundles (default "
+                    "black_friday, while YesStyle runs it)."
+                ),
+            ),
+            Param(
+                "department",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The department (a category id or link; default 15478 Beauty)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us; uk is read as gb). "
+                    "YesStyle prices and stocks by shipping country: 39 countries are served "
+                    "here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, "
+                    "il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, "
+                    "th, tw, us, za. Brazil is held back. Others answer 400 before anything is "
+                    "charged."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (100 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]]',
+                doc=(
+                    "bestsellers (default), newest, price_low_to_high, price_high_to_low, "
+                    "best_value, availability, discount."
+                ),
+            ),
+            Param(
+                "featured",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "YesStyle's Featured filters: in_stock, just_arrived, new_this_week, "
+                    "trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, "
+                    "price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, "
+                    "mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, "
+                    "chinese_cosmetics, southeast_asian_beauty, western_beauty, "
+                    "korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured "
+                    "ids from facets (key oc)."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Highest price, whole units of the country's currency."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[dict[str, Any]]]",
+                doc=(
+                    "Any other facet: {key, value} from facets[].key and "
+                    "facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, "
+                    "cf color family). At most 12 filter values in all."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets [{name, type, key, values [{value, name, selected}]}], "
+                    "price_range and sorts."
+                ),
+            ),
+            Param(
+                "type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Type ids from facets (key t)."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand Region ids from facets (key bcs, e.g. 1 South Korea)."
+                ),
+            ),
+            Param(
+                "ingredients",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Ingredient ids from facets (key inp)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_product",
+        namespace="yesstyle",
+        method="product",
+        http="POST",
+        path="/api/v1/yesstyle/product",
+        summary=(
+            "One product of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian "
+            "beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX "
+            "2209). Scavio fetches the public page on request; YesStyle has no public API. By "
+            "product id or link: requested_product_id, product_id (the option the page "
+            "prices), parent_product_id, name, option, brand {name, brand_id, url, region}, "
+            "url, canonical_url, description, about_brand, breadcrumbs, images, videos, price, "
+            "list_price, discount_percent, currency, price_text, list_price_text, "
+            "sale_end_date, deal_claimed_percent, deal_claimed_text, badges, availability "
+            "(In-Stock, Temporarily Out of Stock, Not available for your shipping "
+            "destination), sellable, child_product_ids, rating, review_count, star_counts, "
+            "brand_satisfaction, ingredients, ingredient_notes, bestseller_ranks, packs "
+            "(minis, twin packs and bundles with price), product_information (Cruelty-free, "
+            "Imported from, Catalog No. ...), shipping {to, free_shipping_offer, "
+            "delivery_days}, returns_days, coupon, market, notes. include_variants adds "
+            "variants [{product_id, name, availability, sellable, price, price_text, currency, "
+            "flash_sale}] for every shade / size and variants_status (ok, or unavailable: then "
+            "that part is not charged). Prices are YesStyle's own for the shipping country, in "
+            "that country's currency (regional price lists: the same product can be US$16.09 "
+            "in the US and US$14.86 in South Africa); which products ship differs by country. "
+            "Every answer is checked for its country; market {country, country_name, currency, "
+            "language} says which. An unknown product is a charged 404. 2 credits; 3 with "
+            "variants. Failed upstream calls, a page that came back for another country, and "
+            "refused inputs are not charged; a not-found is charged. Not offered: stores "
+            "(YesStyle has none to look up), choosing a currency other than the country's, "
+            "cart or checkout, price history, EAN / UPC (YesStyle shows none)."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A YesStyle product id (items[].product_id; every shade and size has its "
+                    "own)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link "
+                    "(https://www.yesstyle.com/<lang>/<name>/info.html/pid.<id>) instead of "
+                    "product_id."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us; uk is read as gb). "
+                    "YesStyle prices and stocks by shipping country: 39 countries are served "
+                    "here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, "
+                    "il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, "
+                    "th, tw, us, za. Brazil is held back. Others answer 400 before anything is "
+                    "charged."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+            Param(
+                "include_variants",
+                "Optional[bool]",
+                doc=(
+                    "Also return every shade / size: product_id, name, availability, sellable, "
+                    "price (+1 credit)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits; 3 with include_variants. credits_used in the response is the "
+            "exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_reviews",
+        namespace="yesstyle",
+        method="reviews",
+        http="POST",
+        path="/api/v1/yesstyle/reviews",
+        summary=(
+            "Customer reviews of one product family on YesStyle (yesstyle.com, the Hong "
+            "Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; "
+            "owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; "
+            "YesStyle has no public API. 15 reviewers a page, four sorts (relevant, highest "
+            "rating, newest, helpful) and filters (1-5 stars, positive, negative, photo, "
+            "video); YesStyle answers up to 67 pages (about 1,000 reviews) per sort and "
+            "filter. Returns product_id, page, page_size, sort, filter, sort_applied, "
+            "has_more, count, summary {total_reviews, star_counts, satisfaction_percent} (page "
+            "1, or include_summary), reviews [{review_id, product_id, rating (1-5), title, "
+            "text, date (as YesStyle shows it, in the page language), helpful_count, "
+            "helpful_text, images [{url, thumbnail}], skin_type, skin_tone, reviewer_country, "
+            "translatable, reviewer_group}], market, notes. Reviewer names, gender and age are "
+            "left out. Any country YesStyle ships to; the language sets the labels and date "
+            "format. 1 credit. Failed upstream calls, a page that came back for another "
+            "country, and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A product id (any shade or size of the family) or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link instead of product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (15 reviewers a page; YesStyle answers up to 67 pages per "
+                    "sort and filter)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevant", "highest_rating", "newest", "helpful"]]',
+                doc=(
+                    "relevant (default), highest_rating, newest, helpful."
+                ),
+            ),
+            Param(
+                "filter",
+                'Optional[Union[Literal["1", "2", "3", "4", "5", "all", "positive", "negative", "photo", "video"], int]]',
+                doc=(
+                    "all (default), 5, 4, 3, 2, 1 (stars), positive, negative, photo, video."
+                ),
+            ),
+            Param(
+                "include_summary",
+                "Optional[bool]",
+                doc=(
+                    "Also return the summary (total, star counts, satisfaction) on pages after "
+                    "the first."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us): any of the 153 countries "
+                    "YesStyle ships to (see markets)."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_suggestions",
+        namespace="yesstyle",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/yesstyle/suggestions",
+        summary=(
+            "The search terms and products YesStyle (yesstyle.com, the Hong Kong-based online "
+            "store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia "
+            "Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no "
+            "public API. suggests for what a shopper has typed, priced for the shipping "
+            "country (any of the 153 countries YesStyle ships to). Returns query, count, "
+            "suggestions, products [{product_id, name, brand, brand_id, url, image, price, "
+            "list_price, discount_percent, currency, price_text, list_price_text (as YesStyle "
+            "shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. "
+            "FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, "
+            "buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, "
+            "pack_label, child_product_ids, has_videos}], market, notes. 1 credit. Failed "
+            "upstream calls, a page that came back for another country, and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper has typed (at least 2 characters)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Shipping country, ISO-2 lower case (default us): any of the 153 countries "
+                    "YesStyle ships to (see markets)."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: "
+                    "the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, "
+                    "zh_TW for Taiwan and Hong Kong, en for most)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="yesstyle_markets",
+        namespace="yesstyle",
+        method="markets",
+        http="POST",
+        path="/api/v1/yesstyle/markets",
+        summary=(
+            "The shipping countries, currencies and languages of YesStyle (yesstyle.com, the "
+            "Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ "
+            "countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page "
+            "on request; YesStyle has no public API. Returns count, page_endpoint_countries, "
+            "countries [{country (ISO-2), name, country_id, currency (the country's default), "
+            "language, page_endpoints (served by search, category, brand, deals and product), "
+            "held_back}], currencies [{code, name}], languages [{code, name, lang_id}], notes. "
+            "1 credit. Failed upstream calls, a page that came back for another country, and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Names in this language (en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW; "
+                    "default en)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Notino: 10 endpoints on /api/v1/notino.
+_NOTINO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="notino_search",
+        namespace="notino",
+        method="search",
+        http="POST",
+        path="/api/v1/notino/search",
+        summary=(
+            "Search Notino (notino.com, the Brno-based online perfume and cosmetics store with "
+            "27 country shops). Scavio fetches the public Notino page on request. Names, "
+            "labels and review texts are in the storefront's language, as Notino writes them; "
+            "field names are English. market, shop, language, currency, query, redirected_to "
+            "{page_type, path, url} (Notino sends brand names and some category words to that "
+            "page; the list is then that page's), page_type (Category, Brand, Promo), title, "
+            "breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, "
+            "has_more, count, currency, items (product_id, master_id, url, name, sub_name, "
+            "brand, annotation, image, price, currency, rrp (as shown; listings rarely carry "
+            "one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: "
+            "more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, "
+            "product_code, master_product_code, rating, review_count, is_new, sponsored (a "
+            "paid placement Notino mixes into the list, kept in place), free_delivery, deal "
+            "{reason (on_sale, clearance), voucher_code (e.g. black), discount_value, "
+            "discount_type, discount_percent, discounted_price (the price with the code), "
+            "basket_condition {name, condition, condition_type, discount} (a discount that "
+            "needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), "
+            "campaign_ids} or null, variant_count, variants [{variant_id, label (size or "
+            "shade), colors (hex)}], category {category, subcategory, type, kind}), facets "
+            "[{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send "
+            "values[].id in filters), price_range {min, max}, selected_filters, note, "
+            "total_capped. Sorted by relevance Notino stops the list near 500 products "
+            "(total_capped true); any other sort lists the full set. 1 credit (2 on gb) with "
+            "any page, sort or filter; a search Notino answers with a brand or category page "
+            "that does not keep the page, sort or filters reads that page with them: 3 credits "
+            "(4 on gb). Billed on what the request actually costs: credits_used reports it. "
+            "Failed upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search text (any language; the storefront's own language matches best)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 24 (1 to 500; total_pages says how deep a list goes)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]]',
+                doc=(
+                    "relevance (default), bestseller, price_asc, price_desc, top_rated, "
+                    "newest: Notino's own sort options."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[int], str]]",
+                doc=(
+                    "Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, "
+                    "category, type of goods, skin type, gender, offers, free delivery, new, "
+                    "rating). Ids of one group widen, of different groups narrow, as on the "
+                    "site."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit (2 on gb); 3 (4 on gb) when Notino answers the search with a brand "
+            "or category page that is then read with the page, sort or filters. credits_used "
+            "in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_product",
+        namespace="notino",
+        method="product",
+        http="POST",
+        path="/api/v1/notino/product",
+        summary=(
+            "One Notino product with every variant (size, shade) by link or order code: "
+            "market, shop, language, currency, requested, selected_variant_id (the variant of "
+            "a /p-<id>/ link or of the order code), master_id, catalog_master_id, "
+            "master_product_code, name, brand {brand_id, name, url, manufacturer}, annotation, "
+            "sub_name, collection, url, gender, is_perfume, description (plain text), "
+            "fragrance_notes [{note, values}], breadcrumbs, category {kind, category, "
+            "subcategory, type}, rating {average, count, text_reviews, translated_reviews}, "
+            "variant_count, variants [{variant_id, catalog_id, name, variant_name, label, "
+            "order_code, product_code, ean, url, price, currency, vat_percent, rrp (the "
+            "recommended retail price where the storefront shows one, e.g. es), rrp_type, "
+            "anchor_price, lowest_price_30d (the lowest price of the last 30 days Notino shows "
+            "under EU price rules), unit_price {value, unit, per_amount}, amount {value, "
+            "unit}, availability {state (CanBeBought, ShowWatchdog), can_buy, stock_level "
+            "(more_than_20, less_than_5, out_of_stock), in_stock, max_order_quantity, "
+            "pickup_store_count (how many Notino stores hold it; per-store stock is not "
+            "offered)}, colors (shade hex), images, characteristics [{name, values}], "
+            "ingredients, instructions, warnings, manufacturer_importer, gift_campaign_ids}], "
+            "gift_campaigns [{campaign_id, type (special, try_it_first), text (as Notino words "
+            "it, e.g. the basket threshold), image, variant_ids}], deliveries [{name, type, "
+            "price, free_shipping, date, date_from, date_to, order_by_time}], alternate_sites "
+            "[{market, locale, url}] (the same product on other storefronts), "
+            "related_product_ids, reviews_url. Voucher codes show on listings (search, "
+            "category, brand, promo: items[].deal). A product the storefront does not sell is "
+            "a charged 404. 1 credit (2 on gb). Billed on what the request actually costs: "
+            "credits_used reports it. Failed upstream calls are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Notino product link or path (/<brand>/<product>/, or "
+                    "/<brand>/<product>/p-<variant id>/ for one size or shade)."
+                ),
+            ),
+            Param(
+                "order_code",
+                "Optional[str]",
+                doc=(
+                    "A Notino order code: variants[].order_code (one size or shade)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+        ),
+        one_of=(("url", "order_code"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact "
+            "charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_reviews",
+        namespace="notino",
+        method="reviews",
+        http="POST",
+        path="/api/v1/notino/reviews",
+        summary=(
+            "Customer reviews of one Notino product, 8 per page: market, shop, language, "
+            "currency, sort, rating, page, page_size, product_url, reviews_url, "
+            "master_product_id, average_rating, rating_count, total, total_pages, has_more, "
+            "count, reviews [{review_id, rating, title, text, created_at, likes, dislikes, "
+            "verified_purchase, author_type, variant_id, from_shop (the storefront it was "
+            "written on), translated, source_language, original_title, original_text, "
+            "partner_domain, image_count}], rating_buckets {5..1}, content_counts, shops "
+            "[{shop, market, count}], variants [{variant_catalog_id, count}], aspects "
+            "[{aspect, average}] (the per-aspect ratings, on review-tab views), view "
+            "(review_page or review_tab). No reviewer name or any reviewer identity is "
+            "returned. The newest 8 (page 1, no star filter) come from the product's review "
+            "page: 1 credit (2 on gb; by order_code the product page is read before: 1, 4 on "
+            "gb). Any other page, sort or star filter opens the product's review tab and reads "
+            "what it shows: 1 credit on every storefront, slower (typically 10-45 s, up to "
+            "about 4 minutes: set a client timeout of at least 250 s). Up to page 8 per view. "
+            "Billed on what the request actually costs: credits_used reports it. Failed "
+            "upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Notino product link or path (/<brand>/<product>/, or "
+                    "/<brand>/<product>/p-<variant id>/ for one size or shade)."
+                ),
+            ),
+            Param(
+                "order_code",
+                "Optional[str]",
+                doc=(
+                    "A Notino order code: variants[].order_code (one size or shade)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"]]',
+                doc=(
+                    "newest (default), oldest, highest_rating, lowest_rating, most_helpful: "
+                    "the review tab's own five orders."
+                ),
+            ),
+            Param(
+                "rating",
+                "Optional[int]",
+                doc=(
+                    "Reviews with this many stars (1-5)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 8 (1 to 8)."
+                ),
+            ),
+        ),
+        one_of=(("url", "order_code"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; the newest 8 on gb 2 (4 by order_code); any other page, sort or "
+            "star filter 1 on every storefront. credits_used in the response is the exact "
+            "charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="notino_category",
+        namespace="notino",
+        method="category",
+        http="POST",
+        path="/api/v1/notino/category",
+        summary=(
+            "One Notino category's products by path, with page, sort and filters: market, "
+            "shop, language, currency, path, url, page_type (Category, Brand, Promo), title, "
+            "breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, "
+            "has_more, count, currency, items (product_id, master_id, url, name, sub_name, "
+            "brand, annotation, image, price, currency, rrp (as shown; listings rarely carry "
+            "one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: "
+            "more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, "
+            "product_code, master_product_code, rating, review_count, is_new, sponsored (a "
+            "paid placement Notino mixes into the list, kept in place), free_delivery, deal "
+            "{reason (on_sale, clearance), voucher_code (e.g. black), discount_value, "
+            "discount_type, discount_percent, discounted_price (the price with the code), "
+            "basket_condition {name, condition, condition_type, discount} (a discount that "
+            "needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), "
+            "campaign_ids} or null, variant_count, variants [{variant_id, label (size or "
+            "shade), colors (hex)}], category {category, subcategory, type, kind}), facets "
+            "[{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send "
+            "values[].id in filters), price_range {min, max}, selected_filters, note. Page 1 "
+            "unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 "
+            "credits (4 on gb): Notino's page 1 is read for the list's own ids, then the "
+            "wanted page; both are billed (no answer is cached). Billed on what the request "
+            "actually costs: credits_used reports it. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A Notino category path (breadcrumbs[].url, facets of type Category) or "
+                    "its link."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 24 (1 to 500; total_pages says how deep a list goes)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]]',
+                doc=(
+                    "relevance (default), bestseller, price_asc, price_desc, top_rated, "
+                    "newest: Notino's own sort options."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[int], str]]",
+                doc=(
+                    "Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, "
+                    "category, type of goods, skin type, gender, offers, free delivery, new, "
+                    "rating). Ids of one group widen, of different groups narrow, as on the "
+                    "site."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any "
+            "other page, sort or filter. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_brand",
+        namespace="notino",
+        method="brand",
+        http="POST",
+        path="/api/v1/notino/brand",
+        summary=(
+            "One brand's products on a Notino storefront, with page, sort and filters: market, "
+            "shop, language, currency, path, url, page_type (Category, Brand, Promo), title, "
+            "breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, "
+            "has_more, count, currency, items (product_id, master_id, url, name, sub_name, "
+            "brand, annotation, image, price, currency, rrp (as shown; listings rarely carry "
+            "one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: "
+            "more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, "
+            "product_code, master_product_code, rating, review_count, is_new, sponsored (a "
+            "paid placement Notino mixes into the list, kept in place), free_delivery, deal "
+            "{reason (on_sale, clearance), voucher_code (e.g. black), discount_value, "
+            "discount_type, discount_percent, discounted_price (the price with the code), "
+            "basket_condition {name, condition, condition_type, discount} (a discount that "
+            "needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), "
+            "campaign_ids} or null, variant_count, variants [{variant_id, label (size or "
+            "shade), colors (hex)}], category {category, subcategory, type, kind}), facets "
+            "[{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send "
+            "values[].id in filters), price_range {min, max}, selected_filters, note. Page 1 "
+            "unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 "
+            "credits (4 on gb): Notino's page 1 is read for the list's own ids, then the "
+            "wanted page; both are billed (no answer is cached). Billed on what the request "
+            "actually costs: credits_used reports it. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand: brands[].slug (e.g. dior, cerave) or its link."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 24 (1 to 500; total_pages says how deep a list goes)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]]',
+                doc=(
+                    "relevance (default), bestseller, price_asc, price_desc, top_rated, "
+                    "newest: Notino's own sort options."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[int], str]]",
+                doc=(
+                    "Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, "
+                    "category, type of goods, skin type, gender, offers, free delivery, new, "
+                    "rating). Ids of one group widen, of different groups narrow, as on the "
+                    "site."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any "
+            "other page, sort or filter. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_promo",
+        namespace="notino",
+        method="promo",
+        http="POST",
+        path="/api/v1/notino/promo",
+        summary=(
+            "A Notino promo list (default Black Friday) with its products and the terms its "
+            "banner gives: market, shop, language, currency, path, url, terms (as Notino "
+            "writes them, e.g. the code and dates of a Black Friday discount), page_type "
+            "(Category, Brand, Promo), title, breadcrumbs [{name, url}], sort, page, page_size "
+            "(24), total, total_pages, has_more, count, currency, items (product_id, "
+            "master_id, url, name, sub_name, brand, annotation, image, price, currency, rrp "
+            "(as shown; listings rarely carry one), unit_price {value, unit, per_amount}, "
+            "stock_level (Notino's stock word: more_than_20, more_than_5, last_1 ... last_5, "
+            "out_of_stock), in_stock, product_code, master_product_code, rating, review_count, "
+            "is_new, sponsored (a paid placement Notino mixes into the list, kept in place), "
+            "free_delivery, deal {reason (on_sale, clearance), voucher_code (e.g. black), "
+            "discount_value, discount_type, discount_percent, discounted_price (the price with "
+            "the code), basket_condition {name, condition, condition_type, discount} (a "
+            "discount that needs a basket of a brand or category), free_delivery, tags (e.g. "
+            "blackfriday), campaign_ids} or null, variant_count, variants [{variant_id, label "
+            "(size or shade), colors (hex)}], category {category, subcategory, type, kind}), "
+            "facets [{group, type, multi_choice, values [{id, name, count, selected, color}]}] "
+            "(send values[].id in filters), price_range {min, max}, selected_filters, note. "
+            "Every item carries its own deal (voucher code, discount, discounted price). Page "
+            "1 unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 "
+            "credits (4 on gb): Notino's page 1 is read for the list's own ids, then the "
+            "wanted page; both are billed (no answer is cached). Billed on what the request "
+            "actually costs: credits_used reports it. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "promo",
+                "Optional[str]",
+                doc=(
+                    "A promo page path or link (default black-friday, live on every storefront "
+                    "in November 2026)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 24 (1 to 500; total_pages says how deep a list goes)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]]',
+                doc=(
+                    "relevance (default), bestseller, price_asc, price_desc, top_rated, "
+                    "newest: Notino's own sort options."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[int], str]]",
+                doc=(
+                    "Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, "
+                    "category, type of goods, skin type, gender, offers, free delivery, new, "
+                    "rating). Ids of one group widen, of different groups narrow, as on the "
+                    "site."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any "
+            "other page, sort or filter. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_brands",
+        namespace="notino",
+        method="brands",
+        http="POST",
+        path="/api/v1/notino/brands",
+        summary=(
+            "A Notino storefront's brand directory (about 1,800 brands on notino.de): market, "
+            "shop, language, currency, query, letter, featured_only, total_brands, matches, "
+            "page, limit, has_more, count, brands [{name, slug (the input of brand), url, "
+            "featured, letter}]. 1 credit (2 on gb). Billed on what the request actually "
+            "costs: credits_used reports it. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Brands whose name contains this text."
+                ),
+            ),
+            Param(
+                "letter",
+                "Optional[str]",
+                doc=(
+                    "Brands starting with this letter or digit."
+                ),
+            ),
+            Param(
+                "featured_only",
+                "Optional[bool]",
+                doc=(
+                    "The brands Notino's directory highlights (in bold)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "page."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Brands per page, 1 to 2000 (default 500)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact "
+            "charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_suggestions",
+        namespace="notino",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/notino/suggestions",
+        summary=(
+            "Notino's search suggestions for a partial query: market, shop, language, "
+            "currency, query, count, sections [{section, items [{text, kind (collection, brand "
+            "...), url}]}], products [{name, description, product_code, url, image}]. 1 credit "
+            "(2 on gb). Billed on what the request actually costs: credits_used reports it. "
+            "Failed upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What the shopper has typed so far."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]]',
+                doc=(
+                    "The storefront (default de; a product or listing link picks its own): de "
+                    "at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt "
+                    "lv ee. One language each (be is French, ch German), its own currency "
+                    "(EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb "
+                    "(notino.co.uk) costs 2 credits per call."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact "
+            "charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_stores",
+        namespace="notino",
+        method="stores",
+        http="POST",
+        path="/api/v1/notino/stores",
+        summary=(
+            "Notino's stores and pickup points in one storefront (cz, sk, pl, at, hu, ro, bg, "
+            "hr): market, shop, language, currency, city, cities, total_stores, count, stores "
+            "[{store (the input of store), url, name, place, city_group, address {street, "
+            "city, postcode, country}, latitude, longitude, opening_hours [{days, opens, "
+            "closes}], open_now, status_changes_at, image}]. Stores are listed by city; there "
+            "is no postcode search. 1 credit. Billed on what the request actually costs: "
+            "credits_used reports it. Failed upstream calls are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "market",
+                'Optional[Literal["cz", "sk", "pl", "at", "hu", "ro", "bg", "hr"]]',
+                doc=(
+                    "A storefront with Notino stores and pickup points: cz, sk, pl, at, hu, "
+                    "ro, bg, hr (default cz)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "The stores in this city (accents and case do not matter)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="notino_store",
+        namespace="notino",
+        method="store",
+        http="POST",
+        path="/api/v1/notino/store",
+        summary=(
+            "One Notino store's page: market, shop, language, currency, store, url, name, "
+            "description, open_now, status_changes_at, services {card_payment, complaints, "
+            "direct_sale, order_pickup, dermo_shop}, opening_hours (7 days from today: [{day, "
+            "open, today, public_holiday, times [{start, end}]}]), address, latitude, "
+            "longitude, map_url, phone, email, images. 1 credit. Billed on what the request "
+            "actually costs: credits_used reports it. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "store",
+                "str",
+                required=True,
+                doc=(
+                    "stores[].store of a stores answer, or the store's link."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["cz", "sk", "pl", "at", "hu", "ro", "bg", "hr"]]',
+                doc=(
+                    "A storefront with Notino stores and pickup points: cz, sk, pl, at, hu, "
+                    "ro, bg, hr (default cz)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Douglas: 10 endpoints on /api/v1/douglas.
+_DOUGLAS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="douglas_search",
+        namespace="douglas",
+        method="search",
+        http="POST",
+        path="/api/v1/douglas/search",
+        summary=(
+            "Search the products of Douglas (douglas.de, the Dusseldorf-based beauty retailer "
+            "with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). "
+            "Scavio fetches the public page on request; Douglas has no public API. Names and "
+            "texts come in the storefront's language; prices are numbers in its currency. "
+            "Keywords with paging (48 a page), sorts (relevance, price, newest, top rated) and "
+            "the page's filters (brand, SALE flag, product type, gender ... from facets). A "
+            "keyword Douglas sends to a category or brand page is answered from that page "
+            "(redirected_to says which). Returns query, market, country, language, currency, "
+            "redirected_to, list_type (search, category, brand), url, title, category_code, "
+            "sort, sort_applied, filters, filters_applied, page, page_size, total (the count "
+            "the page shows), total_pages, has_more, count, items [{code (the variant), "
+            "base_code (the input of product), name, base_name, brand, brand_line, "
+            "product_family, url, image, price, currency, price_text, was_price (Douglas' "
+            "struck-through price), discount_percent (as Douglas shows it), lowest_price_30d "
+            "(the lowest price of the last 30 days Douglas shows beside a reduction), rrp (the "
+            "RRP / UVP Douglas shows), price_type, unit_price {price, per}, content {amount, "
+            "unit}, sizes, colors_count, availability (AVAILABLE, SOLD_OUT, "
+            "AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, NEW, "
+            "webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not show is "
+            "null.}], facets [{facet, name, multi_select, values [{value, name, count, "
+            "selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. Slow: "
+            "a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged. Not offered: review "
+            "texts, review paging or star filters, per-store stock, store reservation, price "
+            "history, cart or checkout."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords, in the storefront's language (required). Some keywords lead to "
+                    "a category or brand page: redirected_to names it."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (48 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, top_rated, discount "
+                    "(where the storefront offers it). sorts lists what the page offers; "
+                    "sort_applied says what it answered."
+                ),
+            ),
+            Param(
+                "brand_filter",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand "
+                    "link)."
+                ),
+            ),
+            Param(
+                "sale_only",
+                "Optional[bool]",
+                doc=(
+                    "Only products with Douglas' own sale badge (SALE on de, the discount "
+                    "badge elsewhere). Not every reduced price carries it: was_price shows "
+                    "every reduction. Not offered on ch-de / ch-fr (no such badge there): a "
+                    "400, not charged."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[dict[str, Any]], dict[str, Any]]]",
+                doc=(
+                    "Any facet: {facet, value} from facets[].facet and facets[].values[].value "
+                    "(e.g. classificationClassName, genderName, flagName). At most 10 values "
+                    "in all."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_category",
+        namespace="douglas",
+        method="category",
+        http="POST",
+        path="/api/v1/douglas/category",
+        summary=(
+            "One category of Douglas (douglas.de, the Dusseldorf-based beauty retailer with "
+            "about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio "
+            "fetches the public page on request; Douglas has no public API. Names and texts "
+            "come in the storefront's language; prices are numbers in its currency. By path, "
+            "code or link, with paging, sorts and filters. Returns category, market, country, "
+            "language, currency, redirected_to, list_type (search, category, brand), url, "
+            "title, category_code, sort, sort_applied, filters, filters_applied, page, "
+            "page_size, total (the count the page shows), total_pages, has_more, count, items "
+            "[{code (the variant), base_code (the input of product), name, base_name, brand, "
+            "brand_line, product_family, url, image, price, currency, price_text, was_price "
+            "(Douglas' struck-through price), discount_percent (as Douglas shows it), "
+            "lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a "
+            "reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, "
+            "per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, "
+            "SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, "
+            "NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not "
+            "show is null.}], facets [{facet, name, multi_select, values [{value, name, count, "
+            "selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. An "
+            "unknown category is a charged 404. Slow: a listing page takes 5 to 210 seconds. 1 "
+            "credit (2 on it). Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path ending in its code (parfum/01, "
+                    "make-up/lippen/lippenstift/030503), the code alone (01) or a category "
+                    "link."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (48 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, top_rated, discount "
+                    "(where the storefront offers it). sorts lists what the page offers; "
+                    "sort_applied says what it answered."
+                ),
+            ),
+            Param(
+                "brand_filter",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand "
+                    "link)."
+                ),
+            ),
+            Param(
+                "sale_only",
+                "Optional[bool]",
+                doc=(
+                    "Only products with Douglas' own sale badge (SALE on de, the discount "
+                    "badge elsewhere). Not every reduced price carries it: was_price shows "
+                    "every reduction. Not offered on ch-de / ch-fr (no such badge there): a "
+                    "400, not charged."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[dict[str, Any]], dict[str, Any]]]",
+                doc=(
+                    "Any facet: {facet, value} from facets[].facet and facets[].values[].value "
+                    "(e.g. classificationClassName, genderName, flagName). At most 10 values "
+                    "in all."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_brand",
+        namespace="douglas",
+        method="brand",
+        http="POST",
+        path="/api/v1/douglas/brand",
+        summary=(
+            "One brand's products on Douglas (douglas.de, the Dusseldorf-based beauty retailer "
+            "with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). "
+            "Scavio fetches the public page on request; Douglas has no public API. Names and "
+            "texts come in the storefront's language; prices are numbers in its currency. By "
+            "brand code, path or link (brands lists them), with paging, sorts and filters. "
+            "Returns brand, market, country, language, currency, redirected_to, list_type "
+            "(search, category, brand), url, title, category_code, sort, sort_applied, "
+            "filters, filters_applied, page, page_size, total (the count the page shows), "
+            "total_pages, has_more, count, items [{code (the variant), base_code (the input of "
+            "product), name, base_name, brand, brand_line, product_family, url, image, price, "
+            "currency, price_text, was_price (Douglas' struck-through price), discount_percent "
+            "(as Douglas shows it), lowest_price_30d (the lowest price of the last 30 days "
+            "Douglas shows beside a reduction), rrp (the RRP / UVP Douglas shows), price_type, "
+            "unit_price {price, per}, content {amount, unit}, sizes, colors_count, "
+            "availability (AVAILABLE, SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, "
+            "rating_stars, flags (e.g. SALE, NEW, webPrice), marketplace {is_marketplace, "
+            "vendor}. A price Douglas does not show is null.}], facets [{facet, name, "
+            "multi_select, values [{value, name, count, selected}]}], sorts, breadcrumbs, "
+            "notes. Sponsored placements are left out. An unknown brand is a charged 404. "
+            "Slow: a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand code (b0690, from brands), its path (dior/b0690) or a brand link."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (48 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, top_rated, discount "
+                    "(where the storefront offers it). sorts lists what the page offers; "
+                    "sort_applied says what it answered."
+                ),
+            ),
+            Param(
+                "brand_filter",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand "
+                    "link)."
+                ),
+            ),
+            Param(
+                "sale_only",
+                "Optional[bool]",
+                doc=(
+                    "Only products with Douglas' own sale badge (SALE on de, the discount "
+                    "badge elsewhere). Not every reduced price carries it: was_price shows "
+                    "every reduction. Not offered on ch-de / ch-fr (no such badge there): a "
+                    "400, not charged."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[dict[str, Any]], dict[str, Any]]]",
+                doc=(
+                    "Any facet: {facet, value} from facets[].facet and facets[].values[].value "
+                    "(e.g. classificationClassName, genderName, flagName). At most 10 values "
+                    "in all."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_deals",
+        namespace="douglas",
+        method="deals",
+        http="POST",
+        path="/api/v1/douglas/deals",
+        summary=(
+            "The deal lists of Douglas (douglas.de, the Dusseldorf-based beauty retailer with "
+            "about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio "
+            "fetches the public page on request; Douglas has no public API. Names and texts "
+            "come in the storefront's language; prices are numbers in its currency. The sale "
+            "department (collection sale; on de its SALE-badged products), the Beauty / Black "
+            "Friday list (collection beauty_friday, while Douglas runs it) or any category's "
+            "sale-badged products, with paging, sorts and filters; per item the price, "
+            "Douglas' struck-through price, discount, 30-day lowest price and RRP as shown. "
+            "With include_promotions (default) also the storefront's offers page: promotions "
+            "[{kind, headline, text, link_text, url, image, legal_text (validity dates and "
+            "codes as Douglas words them), labels, updated_at}] (de, at, ch-de, ch-fr, pl; "
+            "elsewhere null). Returns collection, category, offers_page, promotions, market, "
+            "country, language, currency, redirected_to, list_type (search, category, brand), "
+            "url, title, category_code, sort, sort_applied, filters, filters_applied, page, "
+            "page_size, total (the count the page shows), total_pages, has_more, count, items "
+            "[{code (the variant), base_code (the input of product), name, base_name, brand, "
+            "brand_line, product_family, url, image, price, currency, price_text, was_price "
+            "(Douglas' struck-through price), discount_percent (as Douglas shows it), "
+            "lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a "
+            "reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, "
+            "per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, "
+            "SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, "
+            "NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not "
+            "show is null.}], facets [{facet, name, multi_select, values [{value, name, count, "
+            "selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. Slow: "
+            "a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "collection",
+                'Optional[Literal["sale", "beauty_friday"]]',
+                doc=(
+                    "sale (default: the sale department) or beauty_friday (the Beauty / Black "
+                    "Friday list, while Douglas runs it)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "Or any category (path, code or link): its products with Douglas' sale "
+                    "badge (not on ch-de / ch-fr). Not with collection."
+                ),
+            ),
+            Param(
+                "include_promotions",
+                "Optional[bool]",
+                doc=(
+                    "Also read the storefront's offers page (default true; de, at, ch-de, "
+                    "ch-fr and pl link one)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (48 products a page; default 1)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, top_rated, discount "
+                    "(where the storefront offers it). sorts lists what the page offers; "
+                    "sort_applied says what it answered."
+                ),
+            ),
+            Param(
+                "brand_filter",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand "
+                    "link)."
+                ),
+            ),
+            Param(
+                "sale_only",
+                "Optional[bool]",
+                doc=(
+                    "Only products with Douglas' own sale badge (SALE on de, the discount "
+                    "badge elsewhere). Not every reduced price carries it: was_price shows "
+                    "every reduction. Not offered on ch-de / ch-fr (no such badge there): a "
+                    "400, not charged."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[list[dict[str, Any]], dict[str, Any]]]",
+                doc=(
+                    "Any facet: {facet, value} from facets[].facet and facets[].values[].value "
+                    "(e.g. classificationClassName, genderName, flagName). At most 10 values "
+                    "in all."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_product",
+        namespace="douglas",
+        method="product",
+        http="POST",
+        path="/api/v1/douglas/product",
+        summary=(
+            "One product of Douglas (douglas.de, the Dusseldorf-based beauty retailer with "
+            "about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio "
+            "fetches the public page on request; Douglas has no public API. Names and texts "
+            "come in the storefront's language; prices are numbers in its currency. By base or "
+            "variant code or link: requested, source (api, or page when only the product page "
+            "lists the code: slower), market, code (the variant answered), base_code, name, "
+            "brand {code, name, url}, brand_line, product_family, gender, url, ean (of code), "
+            "description, bullets, application, ingredients, price, currency, price_text, "
+            "was_price, discount_percent, lowest_price_30d, rrp, price_type, unit_price, "
+            "content, stock_level, availability, availability_text, in_stock, "
+            "max_order_quantity, rating, rating_stars, review_count, images, videos, "
+            "categories, attributes [{code, name, values}], scent_notes {top, heart, base}, "
+            "flags, marketplace, variant_type (SIZE, COLOR, STYLE), variant_count, variants "
+            "[{code, name, url, price data, unit_price, content, stock_level, availability, "
+            "availability_text, in_stock, flags, image, ean (with variants_ean)}], "
+            "variants_ean, notes. An unknown code is a charged 404. 1 credit (2 on it). "
+            "variants_ean: +1 credit per variant looked up (2 on it), up to 10. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged. Not "
+            "offered: review texts, review paging or star filters, per-store stock, store "
+            "reservation, price history, cart or checkout."
+        ),
+        params=(
+            Param(
+                "code",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Douglas product code: base (base_code, e.g. 5000005003) or variant "
+                    "(items[].code, e.g. 289690)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or a Douglas product link (its storefront sets the market)."
+                ),
+            ),
+            Param(
+                "variants_ean",
+                "Optional[bool]",
+                doc=(
+                    "Also look up each variant's EAN (one more call per variant, 1 credit "
+                    "each, 2 on it; up to 10)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        one_of=(("code", "url"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). variants_ean adds 1 credit per variant looked up "
+            "(2 on it), up to 10. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_stores",
+        namespace="douglas",
+        method="stores",
+        http="POST",
+        path="/api/v1/douglas/stores",
+        summary=(
+            "The Douglas stores near a city or postcode on one storefront (Douglas "
+            "(douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in "
+            "Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public "
+            "page on request; Douglas has no public API. Names and texts come in the "
+            "storefront's language; prices are numbers in its currency.): market, query, "
+            "location {text, latitude, longitude}, page, page_size, total, total_pages, "
+            "has_more, count, stores [{store_id, name, url, operator, address {street, "
+            "house_number, postal_code, city, country_code, formatted}, phone, latitude, "
+            "longitude, distance_km, hours [{day, day_of_week, closed, open, close}], "
+            "special_hours [{date, closed, open, close}] (dated holiday hours), features, "
+            "images, temporarily_closed}], notes. A place the store finder cannot place is a "
+            "charged 404. 1 credit (also on it). Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "A city or postcode (required): Douglas' own store finder places it."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Stores a page, 1-50 (default 10)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_store",
+        namespace="douglas",
+        method="store",
+        http="POST",
+        path="/api/v1/douglas/store",
+        summary=(
+            "One Douglas store by id (Douglas (douglas.de, the Dusseldorf-based beauty "
+            "retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries "
+            "(market). Scavio fetches the public page on request; Douglas has no public API. "
+            "Names and texts come in the storefront's language; prices are numbers in its "
+            "currency.): every stores field plus parking, public_transport, top_brands [{code, "
+            "name, url}], events, service_booking. An unknown store is a charged 404. 1 credit "
+            "(also on it). Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Douglas store id (stores[].store_id; send it as a string, leading zeros "
+                    "count)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_review_summary",
+        namespace="douglas",
+        method="review_summary",
+        http="POST",
+        path="/api/v1/douglas/review-summary",
+        summary=(
+            "Douglas' own AI-generated summary of a product's customer reviews (Douglas "
+            "(douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in "
+            "Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public "
+            "page on request; Douglas has no public API. Names and texts come in the "
+            "storefront's language; prices are numbers in its currency.): market, code, "
+            "summary (Douglas' text in the storefront's language, null when it shows none), "
+            "summary_type (ai_generated), notes. Use the product's base code. 1 credit (2 on "
+            "it). Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged. Review texts and review paging are not offered."
+        ),
+        params=(
+            Param(
+                "code",
+                "str",
+                required=True,
+                doc=(
+                    "A base product code (product base_code or items[].base_code)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_suggestions",
+        namespace="douglas",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/douglas/suggestions",
+        summary=(
+            "Douglas' search suggestions for what a shopper has typed (Douglas (douglas.de, "
+            "the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 "
+            "storefronts in 13 countries (market). Scavio fetches the public page on request; "
+            "Douglas has no public API. Names and texts come in the storefront's language; "
+            "prices are numbers in its currency.): market, query, count, products [{base_code, "
+            "code, name, brand, brand_line, product_family, url, image}], trending_terms (the "
+            "storefront's trending searches, the same for every query, not matches), notes. 1 "
+            "credit (2 on it). Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper has typed (required)."
+                ),
+            ),
+            Param(
+                "max",
+                "Optional[int]",
+                doc=(
+                    "Product suggestions, 1-10 (default 10)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="douglas_brands",
+        namespace="douglas",
+        method="brands",
+        http="POST",
+        path="/api/v1/douglas/brands",
+        summary=(
+            "Every brand on one Douglas storefront (about 1,890 on de; Douglas (douglas.de, "
+            "the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 "
+            "storefronts in 13 countries (market). Scavio fetches the public page on request; "
+            "Douglas has no public API. Names and texts come in the storefront's language; "
+            "prices are numbers in its currency.): market, query, letter, total, count, brands "
+            "[{code (the input of brand), name, url, letter, logo}], notes. Very slow: the "
+            "brand index page is about 4 MB and takes up to about 200 seconds. 1 credit (2 on "
+            "it). Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Only brands whose name contains this (accents and case ignored)."
+                ),
+            ),
+            Param(
+                "letter",
+                "Optional[str]",
+                doc=(
+                    "Only brands under this letter (A-Z or #)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]]',
+                doc=(
+                    "The Douglas storefront: de (Germany, default), at (Austria), ch-de / "
+                    "ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr "
+                    "(Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, "
+                    "PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, "
+                    "RON), lt (Lithuania). Prices and assortment differ per storefront. pt, "
+                    "hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not "
+                    "offered: a 400, not charged."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+)
+
+# Boots: 4 endpoints on /api/v1/boots.
+_BOOTS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="boots_product",
+        namespace="boots",
+        method="product",
+        http="POST",
+        path="/api/v1/boots/product",
+        summary=(
+            "One product of Boots (boots.com, the UK health and beauty retailer with over "
+            "1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on "
+            "request. By link or 8-digit product id: market, product_id, requested_id, url, "
+            "name, brand, price, currency (GBP on uk, EUR on ie), was_price (Boots' was price, "
+            "when shown), saving (Boots' Save amount), size, unit_price, unit_price_per, "
+            "unit_price_text (as Boots shows it, e.g. 52 ML | £223.46 per 1L), item_number "
+            "(the item number on the page), part_number, catentry_id (for store-stock), "
+            "online_in_stock, image, has_variants, variants [{name (shade or size), item_code "
+            "(for store-stock), catentry_id, online_in_stock}], offers [{text, code (a promo "
+            "code the offer names, e.g. SAVE20)}], advantage_card_offers (the Advantage Card "
+            "offers Boots names on the page; members add them to their card), description, "
+            "sections [{title, text}] (Suitable for, How to use, Hazards and cautions, "
+            "Important info, Ingredients), ingredients. Not on the page: EAN, a price per "
+            "shade or size, rating and reviews. A product not sold on the market's site is a "
+            "charged 404. 1 credit. Boots search is not available yet: start from a Boots "
+            "product link. Not offered: category, brand and deal lists, reviews, ratings, "
+            "type-ahead, stock counts and price history. Failed upstream calls are not "
+            "charged; a not-found is charged. A request answered on its second attempt costs 2 "
+            "credits (3 for two-step lookups)."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Boots product link (www.boots.com or www.boots.ie; the market follows "
+                    "the link)."
+                ),
+            ),
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The 8 digits a Boots product link ends with. Looked up in Boots' product "
+                    "list first (one more call, usually 5 to 20 seconds)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["uk", "ie"]]',
+                doc=(
+                    "uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and "
+                    "some UK products are not sold there)."
+                ),
+            ),
+        ),
+        one_of=(("url", "product_id"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step "
+            "lookups). credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boots_store_stock",
+        namespace="boots",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/boots/store-stock",
+        summary=(
+            "Whether the Boots stores near a UK postcode or a point have one product (or one "
+            "shade or size) of Boots (boots.com, the UK health and beauty retailer with over "
+            "1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on "
+            "request. Returns market, item_code, catentry_id, postcode or latitude / "
+            "longitude, count, in_stock_count, stores_searched, message, stores [{name, "
+            "address {lines, town, county, postcode}, phone, phone_international, latitude, "
+            "longitude, distance_miles, availability (in_stock, out_of_stock), "
+            "availability_text (Boots' words), in_stock, stockist (the store carries the "
+            "line), hours [{day, open, close, closed}] (monday to sunday), pharmacy_hours, "
+            "special_hours [{date, reason, open, close, closed, pharmacy_open, "
+            "pharmacy_close}]}] nearest first. When no store near the place has it, Boots says "
+            "so: stores is empty, stores_searched says how many it checked, and the answer is "
+            "charged (Boots answers an item code it does not know the same way, so take "
+            "item_code from product). A place Boots cannot pin down answers towns [{name, "
+            "county, latitude, longitude}] to try instead. In stock or out of stock per store: "
+            "Boots shows no unit counts. boots.ie takes latitude and longitude (stores returns "
+            "them for a town). 1 credit. Boots search is not available yet: start from a Boots "
+            "product link. Not offered: category, brand and deal lists, reviews, ratings, "
+            "type-ahead, stock counts and price history. Failed upstream calls are not "
+            "charged; a not-found is charged. A request answered on its second attempt costs 2 "
+            "credits (3 for two-step lookups)."
+        ),
+        params=(
+            Param(
+                "item_code",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "product's variants[].item_code (a shade or size, 11 digits), or the "
+                    "product's own 8-digit id when it has no shades or sizes."
+                ),
+            ),
+            Param(
+                "catentry_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "product's catentry_id."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["uk", "ie"]]',
+                doc=(
+                    "uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and "
+                    "some UK products are not sold there)."
+                ),
+            ),
+            Param(
+                "postcode",
+                "Optional[str]",
+                doc=(
+                    "A full UK postcode (uk only)."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "With longitude: stores near a point. Required on ie (stores returns the "
+                    "point for a town)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "With latitude."
+                ),
+            ),
+        ),
+        one_of=(("postcode", "latitude"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step "
+            "lookups). credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boots_stores",
+        namespace="boots",
+        method="stores",
+        http="POST",
+        path="/api/v1/boots/stores",
+        summary=(
+            "Boots stores near a UK postcode or a town (uk and ie) of Boots (boots.com, the UK "
+            "health and beauty retailer with over 1,800 stores, and boots.ie in Ireland). "
+            "Scavio fetches the public Boots page on request. Returns market, postcode or "
+            "city, latitude and longitude (the place searched: use them for store-stock on "
+            "ie), count, message, stores [{store_number, store_id, name, address {lines, town, "
+            "county, postcode}, latitude, longitude, distance_miles, services [{id, name, "
+            "category}]}] nearest first. Boots' internal staff-only sites are left out. 1 "
+            "credit. Boots search is not available yet: start from a Boots product link. Not "
+            "offered: category, brand and deal lists, reviews, ratings, type-ahead, stock "
+            "counts and price history. Failed upstream calls are not charged; a not-found is "
+            "charged. A request answered on its second attempt costs 2 credits (3 for two-step "
+            "lookups)."
+        ),
+        params=(
+            Param(
+                "postcode",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A full UK postcode (uk)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["uk", "ie"]]',
+                doc=(
+                    "uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and "
+                    "some UK products are not sold there)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A town or city (uk and ie)."
+                ),
+            ),
+        ),
+        one_of=(("postcode", "city"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step "
+            "lookups). credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boots_store",
+        namespace="boots",
+        method="store",
+        http="POST",
+        path="/api/v1/boots/store",
+        summary=(
+            "One store page of Boots (boots.com, the UK health and beauty retailer with over "
+            "1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on "
+            "request. By store page slug or link, store_number (boots.com) or exact name: "
+            "market, store (the page slug), store_number, url, name, address {lines, town, "
+            "county, postcode}, phone, phone_international, latitude, longitude, hours [{day, "
+            "open, close, closed}] (monday to sunday), pharmacy_hours, services [{category, "
+            "name}]. Staff names are left out. 1 credit. Boots search is not available yet: "
+            "start from a Boots product link. Not offered: category, brand and deal lists, "
+            "reviews, ratings, type-ahead, stock counts and price history. Failed upstream "
+            "calls are not charged; a not-found is charged. A request answered on its second "
+            "attempt costs 2 credits (3 for two-step lookups)."
+        ),
+        params=(
+            Param(
+                "store",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Boots store page slug or link (boots.com "
+                    "/stores/868-london-battersea-sw11-1qn, boots.ie "
+                    "/stores/cork-boots-patrick-street)."
+                ),
+            ),
+            Param(
+                "store_number",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "stores[].store_number (boots.com): found on Boots' store A-Z list (one "
+                    "more call)."
+                ),
+            ),
+            Param(
+                "name",
+                "Optional[str]",
+                doc=(
+                    "stores[].name, exactly (for boots.ie, whose store pages are not "
+                    "numbered): found on Boots' store A-Z list (one more call)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["uk", "ie"]]',
+                doc=(
+                    "uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and "
+                    "some UK products are not sold there)."
+                ),
+            ),
+        ),
+        one_of=(("store", "store_number", "name"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step "
+            "lookups). credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+)
+
+# RockAuto: 11 endpoints on /api/v1/rockauto.
+_ROCKAUTO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="rockauto_vehicles",
+        namespace="rockauto",
+        method="vehicles",
+        http="POST",
+        path="/api/v1/rockauto/vehicles",
+        summary=(
+            "RockAuto's vehicle catalog, one level at a time (RockAuto (rockauto.com, the "
+            "online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public "
+            "RockAuto page on request.): no input = makes [{make, name, markets, url}]; make = "
+            "years [{year, markets, url}]; make + year = models [{model, markets, url}]; make "
+            "+ year + model = engines [{make, year, model, engine, carcode, markets, url}]. "
+            "markets are the vehicle markets RockAuto lists (us, ca, mx). make, year, model, "
+            "engine and carcode of an engine are the vehicle inputs of categories and parts. "
+            "An unknown make, year or model is a charged 404. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "No make: every make. A make: its years."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "With make: that year's models."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "With make and year: the model's engines, each with its carcode."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_categories",
+        namespace="rockauto",
+        method="categories",
+        http="POST",
+        path="/api/v1/rockauto/categories",
+        summary=(
+            "One vehicle's part categories on RockAuto (rockauto.com, the online auto parts "
+            "catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on "
+            "request. Without category: categories [{category (the input), name (in the page "
+            "language), url}]; with category: part_types [{part_type_id (the input of parts), "
+            "name, category, url}]. Returns language, vehicle {make, year, model, engine, "
+            "carcode} (as RockAuto answered it), count. The vehicle is checked against "
+            "carcode: a carcode that answers another vehicle is a 400, not charged; an unknown "
+            "category is a charged 404. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Make as vehicles answers it (engines[].make)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "year."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Model as vehicles answers it (engines[].model)."
+                ),
+            ),
+            Param(
+                "engine",
+                "str",
+                required=True,
+                doc=(
+                    "Engine as vehicles answers it (engines[].engine)."
+                ),
+            ),
+            Param(
+                "carcode",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "RockAuto's vehicle code (engines[].carcode, or a suggestions / resolve "
+                    "vehicle). RockAuto picks the vehicle by carcode: one that answers another "
+                    "vehicle than make / year / model / engine is a 400, not charged."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A category from categories[].category: its part types. Without it: the "
+                    "vehicle's categories."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_parts",
+        namespace="rockauto",
+        method="parts",
+        http="POST",
+        path="/api/v1/rockauto/parts",
+        summary=(
+            "Every brand's listing for one part type on one vehicle (RockAuto (rockauto.com, "
+            "the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the "
+            "public RockAuto page on request.): language, currency, vehicle, category, "
+            "category_name, part_type {part_type_id, name}, count, items [position, brand, "
+            "part_number, description, part_type (search, brand), part_type_id, notes "
+            "(RockAuto's fitment notes), tier (RockAuto's tier label, e.g. Economy, Daily "
+            "Driver, Premium), price, price_text (as printed), price_per (e.g. Each), "
+            "core_charge, pack_size, total, pack_options [{pack_size, price_each, total, "
+            "selected}], currency, out_of_stock, closeout, closeout_text (e.g. Wholesaler "
+            "Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, remaining, "
+            "remaining_text, popular (RockAuto's most-popular mark), fits_markets (us, ca, "
+            "mx), alternate_numbers (OE / alternate numbers it replaces), image, info_url, "
+            "part {part_key, carcode, part_type_id} (the input of part)], notes. RockAuto "
+            "offers no sort and no paging on these lists: items are in RockAuto's own order. "
+            "Prices are RockAuto's, in the requested currency as RockAuto converts them for "
+            "display (currency is echoed); shipping is not included (RockAuto prices it per "
+            "warehouse in the cart). Large part types (brake pads) can take 80-100 s. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Make as vehicles answers it (engines[].make)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "year."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Model as vehicles answers it (engines[].model)."
+                ),
+            ),
+            Param(
+                "engine",
+                "str",
+                required=True,
+                doc=(
+                    "Engine as vehicles answers it (engines[].engine)."
+                ),
+            ),
+            Param(
+                "carcode",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "RockAuto's vehicle code (engines[].carcode, or a suggestions / resolve "
+                    "vehicle). RockAuto picks the vehicle by carcode: one that answers another "
+                    "vehicle than make / year / model / engine is a 400, not charged."
+                ),
+            ),
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "categories[].category."
+                ),
+            ),
+            Param(
+                "part_type_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "part_types[].part_type_id (1684 = Brake Pad)."
+                ),
+            ),
+            Param(
+                "part_type",
+                "Optional[str]",
+                doc=(
+                    "Optional part type name (part_types[].name); RockAuto reads the part type "
+                    "by its id."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+            Param(
+                "currency",
+                'Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]]',
+                doc=(
+                    "USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, "
+                    "PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices "
+                    "converted by RockAuto)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_search",
+        namespace="rockauto",
+        method="search",
+        http="POST",
+        path="/api/v1/rockauto/search",
+        summary=(
+            "Part number and interchange search on RockAuto (rockauto.com, the online auto "
+            "parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto "
+            "page on request. Matches across brands, including OE and interchange numbers "
+            "RockAuto maps to its listings: language, currency, part_number, brand, "
+            "part_type_id, search_label, limited and limited_notice (RockAuto's \"Results may "
+            "be limited\" notice), count, items [position, brand, part_number, description, "
+            "part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier "
+            "(RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text "
+            "(as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options "
+            "[{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, "
+            "closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, "
+            "shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular "
+            "mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it "
+            "replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of "
+            "part)], notes. RockAuto offers no sort and no paging on these lists: items are in "
+            "RockAuto's own order. No match is an empty list. Prices are RockAuto's, in the "
+            "requested currency as RockAuto converts them for display (currency is echoed); "
+            "shipping is not included (RockAuto prices it per warehouse in the cart). 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "part_number",
+                "str",
+                required=True,
+                doc=(
+                    "A part number: RockAuto's brands' numbers and the OE / interchange "
+                    "numbers RockAuto maps to them (e.g. 41-110, PH7317, 0986494104)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "Only this brand (brands[] value)."
+                ),
+            ),
+            Param(
+                "part_type_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Only this part type (an id from part_types, brands with "
+                    "include_part_types, or an item's part_type_id)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+            Param(
+                "currency",
+                'Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]]',
+                doc=(
+                    "USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, "
+                    "PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices "
+                    "converted by RockAuto)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_brand",
+        namespace="rockauto",
+        method="brand",
+        http="POST",
+        path="/api/v1/rockauto/brand",
+        summary=(
+            "One brand's parts of one part type on RockAuto (rockauto.com, the online auto "
+            "parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto "
+            "page on request. language, currency, brand, part_type_id, search_label, limited, "
+            "limited_notice, count, items [position, brand, part_number, description, "
+            "part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier "
+            "(RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text "
+            "(as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options "
+            "[{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, "
+            "closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, "
+            "shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular "
+            "mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it "
+            "replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of "
+            "part)], notes. RockAuto lists at most 50 rows here, with no paging or sort. "
+            "Prices are RockAuto's, in the requested currency as RockAuto converts them for "
+            "display (currency is echoed); shipping is not included (RockAuto prices it per "
+            "warehouse in the cart). 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand from brands (RockAuto's brand name)."
+                ),
+            ),
+            Param(
+                "part_type_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A part type id (brands with include_part_types, or part_types from "
+                    "categories)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+            Param(
+                "currency",
+                'Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]]',
+                doc=(
+                    "USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, "
+                    "PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices "
+                    "converted by RockAuto)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_brands",
+        namespace="rockauto",
+        method="brands",
+        http="POST",
+        path="/api/v1/rockauto/brands",
+        summary=(
+            "RockAuto's brand list and part groups (RockAuto (rockauto.com, the online auto "
+            "parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto "
+            "page on request.): language, count, brands (about 570 names, the input of brand "
+            "and search), part_groups, part_type_count and, with include_part_types, "
+            "part_types [{part_type_id, name}]. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "include_part_types",
+                "Optional[bool]",
+                doc=(
+                    "true adds RockAuto's part type list (about 5,500 ids and names)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_part",
+        namespace="rockauto",
+        method="part",
+        http="POST",
+        path="/api/v1/rockauto/part",
+        summary=(
+            "One part's detail page on RockAuto (rockauto.com, the online auto parts catalog "
+            "based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request. "
+            "by the part keys from an item: brand, part_number, title, part {part_key, "
+            "carcode, part_type_id}, price, price_text, price_per, core_charge, pack_size, "
+            "total, pack_options, currency, out_of_stock, description, specifications [{name, "
+            "value}], oe_numbers (OEM / interchange numbers), alternate_numbers, warranty (as "
+            "given), warranty_url, disclaimer, more_information (the manufacturer's text), "
+            "images. RockAuto's part detail page is in English in every language; the price is "
+            "in the requested currency. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "part_key",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "items[].part.part_key."
+                ),
+            ),
+            Param(
+                "part_type_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "items[].part.part_type_id."
+                ),
+            ),
+            Param(
+                "carcode",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "items[].part.carcode (0 from search, brand and tools)."
+                ),
+            ),
+            Param(
+                "currency",
+                'Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]]',
+                doc=(
+                    "USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, "
+                    "PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices "
+                    "converted by RockAuto)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_suggestions",
+        namespace="rockauto",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/rockauto/suggestions",
+        summary=(
+            "RockAuto's search box suggestions for typed text (RockAuto (rockauto.com, the "
+            "online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public "
+            "RockAuto page on request.): query, count, vehicles [{year, make, model, engine, "
+            "carcode, markets, part_type_id, part_type, category, text}], part_types "
+            "[{part_type_id, name, category}] (need a vehicle), tools [{part_type_id, name, "
+            "category, subcategory}] (tools and universal parts), help [{question, "
+            "answer_preview, url}]. Part numbers are not suggested (use search). 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Typed text: a vehicle (2015 ford f-150), a part type (brake pad) or a "
+                    "tool."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_resolve",
+        namespace="rockauto",
+        method="resolve",
+        http="POST",
+        path="/api/v1/rockauto/resolve",
+        summary=(
+            "Free text to a RockAuto vehicle (RockAuto (rockauto.com, the online auto parts "
+            "catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on "
+            "request.): how RockAuto's search box reads \"2010 honda accord brake pads\". "
+            "Returns query, count, matches [{year, make, model, engine, carcode, markets, "
+            "part_type_id, part_type, category, text, leftover (the words RockAuto did not "
+            "interpret)}]. A match without carcode needs vehicles (make, year, model) for its "
+            "engines. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Free text naming a vehicle and, optionally, a part."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_tools",
+        namespace="rockauto",
+        method="tools",
+        http="POST",
+        path="/api/v1/rockauto/tools",
+        summary=(
+            "RockAuto's tools and universal parts catalog (RockAuto (rockauto.com, the online "
+            "auto parts catalog based in Madison, Wisconsin). Scavio fetches the public "
+            "RockAuto page on request.), one level at a time: no input = categories "
+            "[{category, name, url}]; category = subcategories [{category, subcategory, name, "
+            "url}]; category + subcategory = part_types [{part_type_id, name, url}]; "
+            "part_type_id = that part type's listing: category, subcategory, part_type, items "
+            "[position, brand, part_number, description, part_type (search, brand), "
+            "part_type_id, notes (RockAuto's fitment notes), tier (RockAuto's tier label, e.g. "
+            "Economy, Daily Driver, Premium), price, price_text (as printed), price_per (e.g. "
+            "Each), core_charge, pack_size, total, pack_options [{pack_size, price_each, "
+            "total, selected}], currency, out_of_stock, closeout, closeout_text (e.g. "
+            "Wholesaler Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, "
+            "remaining, remaining_text, popular (RockAuto's most-popular mark), fits_markets "
+            "(us, ca, mx), alternate_numbers (OE / alternate numbers it replaces), image, "
+            "info_url, part {part_key, carcode, part_type_id} (the input of part)]. Returns "
+            "level, language, currency, count, notes. RockAuto offers no sort and no paging on "
+            "these lists: items are in RockAuto's own order. Prices are RockAuto's, in the "
+            "requested currency as RockAuto converts them for display (currency is echoed); "
+            "shipping is not included (RockAuto prices it per warehouse in the cart). 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A tools category (categories[].category): its subcategories."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[str]",
+                doc=(
+                    "With category: a subcategory (subcategories[].subcategory): its part "
+                    "types."
+                ),
+            ),
+            Param(
+                "part_type_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A tools / universal part type id (part_types[].part_type_id, or "
+                    "suggestions tools[]): its listing."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+            Param(
+                "currency",
+                'Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]]',
+                doc=(
+                    "USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, "
+                    "PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices "
+                    "converted by RockAuto)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rockauto_promotions",
+        namespace="rockauto",
+        method="promotions",
+        http="POST",
+        path="/api/v1/rockauto/promotions",
+        summary=(
+            "RockAuto's promotions and manufacturer rebates page (RockAuto (rockauto.com, the "
+            "online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public "
+            "RockAuto page on request.): language, currency (USD: amounts as printed), "
+            "read_date, count, promotions [{name, badge, title, offer, expires_text (as "
+            "printed, e.g. Offer expires 12/31/26), expires (that date, YYYY-MM-DD), shown "
+            "(false when the page hides the offer), link_text, link_url (the rebate form)}], "
+            "recently_expired (RockAuto's list), notes. The page can still carry offers whose "
+            "printed date has passed: dates are as given, with the read date. RockAuto "
+            "publishes no coupon codes. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "language",
+                'Optional[Literal["en", "es", "fr", "de"]]',
+                doc=(
+                    "en (default), es, fr or de: RockAuto's page language (names, notes, tiers "
+                    "and labels; part numbers and prices do not change)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Cars.com: 8 endpoints on /api/v1/carscom.
+_CARSCOM_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="carscom_search",
+        namespace="carscom",
+        method="search",
+        http="POST",
+        path="/api/v1/carscom/search",
+        summary=(
+            "Search the car listings of Cars.com (cars.com, the US car marketplace run by Cars "
+            "Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no "
+            "public API for reading listings. US only, prices in USD. New, used and certified "
+            "cars around a ZIP code with a radius, by make and model, sorted (Cars.com's 11 "
+            "sorts) and filtered by year, price, mileage, trims, drivetrain, color, Cars.com "
+            "deal rating, body style, seller type and keyword; 24 a page. Returns "
+            "search_title, location, stock_type, sort, page, total (Cars.com's count, capped "
+            "at 10,000: total_capped), total_pages, has_more, filters_applied, "
+            "filters_not_applied, count, items [{listing_id, url, title, year, make, model, "
+            "trim, stock_type, certified, dealer_verified_condition, price, msrp (new only), "
+            "mileage, body_style, drivetrain, exterior_color, fuel_type, price_stack, "
+            "price_drop (as the card shows it), photo_count, image, badges [{label, "
+            "description}] (Cars.com's deal and demand labels with its explanation), delivery, "
+            "seller {seller_type, name (dealers only), city, state, zip, rating, "
+            "distance_miles}, sponsored (a paid placement), placement, position}], facets "
+            "(include_facets), market, notes. No VINs, stock numbers, private-seller names or "
+            "contact details, reviewer names or towns, or dealer employee names are returned; "
+            "dealer business name, address, phone, website and hours are kept. 1 credit. "
+            "Billed on what the request spent (credits_used); failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: Cars.com searches around it (an unknown "
+                    "ZIP is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "stock_type",
+                'Optional[Literal["all", "new", "used", "cpo", "new_cpo"]]',
+                doc=(
+                    "all (default: new, used and certified), new, used, cpo (certified "
+                    "pre-owned), new_cpo (new and certified)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) "
+                    "or its slug (land_rover)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, "
+                    "f_150, cr_v; toyota-rav4 also accepted)."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500, "
+                    "750, 1000 (default 50)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); 24 listings a page."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_low", "price_high", "mileage_low", "mileage_high", "distance", "best_deal", "year_newest", "year_oldest", "listed_newest", "listed_oldest"]]',
+                doc=(
+                    "best_match (default), price_low, price_high, mileage_low, mileage_high, "
+                    "distance, best_deal, year_newest, year_oldest, listed_newest, "
+                    "listed_oldest (Cars.com's 11 sorts)."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest list price, whole USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest list price, whole USD."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Most miles, one of Cars.com's steps: 10000, 20000, 30000, 40000, 50000, "
+                    "60000, 70000, 80000, 90000, 100000, 150000, 200000, 250000."
+                ),
+            ),
+            Param(
+                "trims",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Trims of make + model (names or slugs; one, a list, or comma-separated), "
+                    "e.g. XLE, XLE Premium. Needs make and model."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "all_wheel_drive, four_wheel_drive, front_wheel_drive, rear_wheel_drive "
+                    "(or awd, 4wd, fwd, rwd); one or a list."
+                ),
+            ),
+            Param(
+                "exterior_color",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Exterior colors (black, white, gray, silver, blue, red ...); one or a "
+                    "list."
+                ),
+            ),
+            Param(
+                "deal_rating",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Cars.com deal ratings: great, good, fair; one or a list."
+                ),
+            ),
+            Param(
+                "body_style",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Body styles (suv, sedan, truck, coupe, hatchback, minivan, wagon, "
+                    "convertible ...); one or a list."
+                ),
+            ),
+            Param(
+                "seller_type",
+                'Optional[Literal["dealership", "private"]]',
+                doc=(
+                    "dealership or private (private sellers)."
+                ),
+            ),
+            Param(
+                "keyword",
+                "Optional[str]",
+                doc=(
+                    "Cars.com's keyword filter (words in the listing)."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets: the site's filter options with result counts for this "
+                    "search."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_listing",
+        namespace="carscom",
+        method="listing",
+        http="POST",
+        path="/api/v1/carscom/listing",
+        summary=(
+            "One car listing on Cars.com (cars.com, the US car marketplace run by Cars "
+            "Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no "
+            "public API for reading listings. US only, prices in USD. By listing id or link: "
+            "listing_id, url, title, year, make, model, trim, stock_type, certified, price, "
+            "msrp (new only), mileage, body_style, category, colors, fuel_type, drivetrain, "
+            "engine, transmission, mpg, photo_count, badges [{label, description}], "
+            "price_stack, price_breakdown {disclosed, vehicle_price, fees [{label, amount}], "
+            "all_in_price}, deal {rating, summary, good_deal_range_low, good_deal_range_high, "
+            "market_position} (Cars.com's price analysis as stated), price_history {summary, "
+            "entries [{date, change (listed, drop, increase), change_amount, price}]}, "
+            "features [{group, items}], history {source, title, accidents, owners, prior_use, "
+            "recalls and flags} (used), cpo {package, program, certified_by, terms}, "
+            "seller_notes, seller_type (dealership or private), dealer {dealer_id, name, "
+            "rating, review_count, address, website, hours, url} (dealers only), market, "
+            "notes. A listing that is no longer available is a charged 404. No VINs, stock "
+            "numbers, private-seller names or contact details, reviewer names or towns, or "
+            "dealer employee names are returned; dealer business name, address, phone, website "
+            "and hours are kept. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "listing_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Cars.com listing id (search items[].listing_id) or a "
+                    "cars.com/vehicledetail/<id>/ link."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A cars.com/vehicledetail/<id>/ link instead of listing_id."
+                ),
+            ),
+        ),
+        one_of=(("listing_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_dealer",
+        namespace="carscom",
+        method="dealer",
+        http="POST",
+        path="/api/v1/carscom/dealer",
+        summary=(
+            "A car dealer's public profile on Cars.com (cars.com, the US car marketplace run "
+            "by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com "
+            "has no public API for reading listings. US only, prices in USD. By dealer id: "
+            "dealer_id, name, url, rating, review_count, phone, website, address, latitude, "
+            "longitude, description, opening_hours, hours [{day, sales, service}], service "
+            "{name, phone, opening_hours}, inventory_count, awards, award_count, "
+            "on_cars_com_since, image, market, notes. An unknown id is a charged 404. No VINs, "
+            "stock numbers, private-seller names or contact details, reviewer names or towns, "
+            "or dealer employee names are returned; dealer business name, address, phone, "
+            "website and hours are kept. 1 credit. Billed on what the request spent "
+            "(credits_used); failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers "
+                    "items[].dealer_id) or a cars.com/dealers/<id>/ link."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A cars.com/dealers/<id>/ link instead of dealer_id."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_dealer_inventory",
+        namespace="carscom",
+        method="dealer_inventory",
+        http="POST",
+        path="/api/v1/carscom/dealer-inventory",
+        summary=(
+            "A dealer's vehicles for sale on Cars.com (cars.com, the US car marketplace run by "
+            "Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has "
+            "no public API for reading listings. US only, prices in USD. 24 a page: dealer "
+            "{dealer_id, name, url, rating, review_count}, page, total, total_pages, has_more, "
+            "count, items [{listing_id, url, year, make, model, trim, stock_type, certified, "
+            "price, msrp (new only), mileage, body_style, drivetrain, colors, fuel_type, "
+            "photo_count, deal_badge, cpo_package, sponsored}], market, notes. An unknown id "
+            "is a charged 404. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers "
+                    "items[].dealer_id) or a cars.com/dealers/<id>/ link."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A cars.com/dealers/<id>/ link instead of dealer_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); 24 vehicles a page."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_dealer_reviews",
+        namespace="carscom",
+        method="dealer_reviews",
+        http="POST",
+        path="/api/v1/carscom/dealer-reviews",
+        summary=(
+            "A dealer's customer reviews on Cars.com (cars.com, the US car marketplace run by "
+            "Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has "
+            "no public API for reading listings. US only, prices in USD. Paged (10-40 a page), "
+            "sorted most_recent, lowest_rated, most_helpful or highest_rated: dealer, rating, "
+            "total, sort, page, page_size, total_pages, has_more, count, reviews [{rating, "
+            "title, date, text, category_ratings, recommends, shopped_for, made_purchase, "
+            "helpful_votes, total_votes}], market, notes. No star filter exists on the site. "
+            "Reviewer names and towns and \"worked with\" employees are not returned. An unknown "
+            "id is a charged 404. 1 credit. Billed on what the request spent (credits_used); "
+            "failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers "
+                    "items[].dealer_id) or a cars.com/dealers/<id>/ link."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A cars.com/dealers/<id>/ link instead of dealer_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); page_size reviews a page."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews a page: 10, 20, 30, 40 (default 20)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_recent", "lowest_rated", "most_helpful", "highest_rated"]]',
+                doc=(
+                    "most_recent (default), lowest_rated, most_helpful, highest_rated."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_model_reviews",
+        namespace="carscom",
+        method="model_reviews",
+        http="POST",
+        path="/api/v1/carscom/model-reviews",
+        summary=(
+            "Owner (consumer) reviews of one model year on Cars.com (cars.com, the US car "
+            "marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on "
+            "request; Cars.com has no public API for reading listings. US only, prices in USD. "
+            "By make, model and year, paged (10-200 a page), sorted most_recent, lowest_rated, "
+            "most_helpful or highest_rated: vehicle, msrp_range, rating, total, "
+            "recommend_percent, category_ratings, model_slug, sort, page, page_size, "
+            "total_pages, has_more, count, reviews [{rating, title, date, text, "
+            "category_ratings, recommends, owns_this_car, purchased, used_for, helpful_votes, "
+            "total_votes}], market, notes. No star filter exists on the site. Reviewer names "
+            "and towns are not returned. An unknown model year is a charged 404. 1 credit. "
+            "Billed on what the request spent (credits_used); failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) "
+                    "or its slug (land_rover)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, "
+                    "f_150, cr_v; toyota-rav4 also accepted)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Required. The model year."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); page_size reviews a page."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews a page: 10, 20, 30, 50, 100, 200 (default 20)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_recent", "lowest_rated", "most_helpful", "highest_rated"]]',
+                doc=(
+                    "most_recent (default), lowest_rated, most_helpful, highest_rated."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_dealers",
+        namespace="carscom",
+        method="dealers",
+        http="POST",
+        path="/api/v1/carscom/dealers",
+        summary=(
+            "Find car dealers on Cars.com (cars.com, the US car marketplace run by Cars "
+            "Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no "
+            "public API for reading listings. US only, prices in USD. Around a ZIP code with a "
+            "radius, by make, minimum rating and dealer name, sorted by rating, name or "
+            "distance: location, filters, sort, page, total, has_more, count, items "
+            "[{dealer_id, name, url, rating, review_count, address, distance_miles, "
+            "inventory_count, phones [{label, number}]}], market, notes. 1 credit. Billed on "
+            "what the request spent (credits_used); failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: Cars.com searches around it (an unknown "
+                    "ZIP is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500 "
+                    "(default 30)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "Only dealers that sell this make (Cars.com's make filter)."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[int]",
+                doc=(
+                    "Lowest dealer rating: 1, 2, 3, 4 (& up)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["rating", "name", "distance"]]',
+                doc=(
+                    "rating (default), name, distance."
+                ),
+            ),
+            Param(
+                "dealer_name",
+                "Optional[str]",
+                doc=(
+                    "Words in the dealer's name."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); about 20 dealers a page."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carscom_research",
+        namespace="carscom",
+        method="research",
+        http="POST",
+        path="/api/v1/carscom/research",
+        summary=(
+            "Car research pages on Cars.com (cars.com, the US car marketplace run by Cars "
+            "Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no "
+            "public API for reading listings. US only, prices in USD. level make (description, "
+            "lineup, models), model (generations, competitors, model years with price range "
+            "and rating), model_year (average listing price on used years or starting price on "
+            "new ones, MPG, ratings, NHTSA score, notable features, the good and the bad, "
+            "warranty, trims with price) or trims (starting MSRP, combined MPG, engine, "
+            "drivetrain, transmission, seating), as Cars.com publishes them. Returns level, "
+            "slug and the level's fields, market, notes. An unknown make, model or year is a "
+            "charged 404. 1 credit. Billed on what the request spent (credits_used); failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) "
+                    "or its slug (land_rover)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, "
+                    "f_150, cr_v; toyota-rav4 also accepted)."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "A model year (with model)."
+                ),
+            ),
+            Param(
+                "level",
+                'Optional[Literal["make", "model", "model_year", "trims"]]',
+                doc=(
+                    "make, model, model_year or trims. Default: make without model, model "
+                    "without year, model_year with year."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Autotrader: 5 endpoints on /api/v1/autotrader.
+_AUTOTRADER_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="autotrader_search",
+        namespace="autotrader",
+        method="search",
+        http="POST",
+        path="/api/v1/autotrader/search",
+        summary=(
+            "Search the cars for sale on Autotrader (autotrader.com, the US car marketplace "
+            "run by Cox Automotive). Scavio fetches the public Autotrader page on request; "
+            "Autotrader has no public API for reading listings. Around a US ZIP code with a "
+            "radius, by make, model and trim, sorted by relevance, price, mileage, model year "
+            "or distance, filtered by model year, price, mileage, body style, drivetrain, "
+            "colours, dealer or private seller, new / used / certified, fuel, transmission, "
+            "vehicle history, Good or Great deal, a feature, doors and seats; 25 or 100 a "
+            "page. Returns search, location {zip, place, radius_miles}, filters_applied (as "
+            "Autotrader applied them), filters_not_applied, sort, page, page_size, total, "
+            "total_pages, has_more, count, listings [{listing_id, url, title, year, make, "
+            "make_code, model, model_code, trim, trim_code, listing_type (new, used, "
+            "certified, third_party_certified), mileage, exterior_color, interior_color, "
+            "body_style, drivetrain, engine, fuel, transmission, mpg_city, mpg_highway, doors, "
+            "days_on_site, newly_listed, reduced_price, price (USD; null when the dealer asks "
+            "you to call: price_label), display_price, msrp, price_label, deal_label, "
+            "kbb_fair_purchase_price, dealer_fees {total, items [{name, amount}]}, "
+            "price_history [{date, price, current}], history_preview (Autotrader's history "
+            "flags as given, e.g. NO_ACCIDENTS_REPORTED, ONE_OWNER), warranties, image, "
+            "sponsored, seller ({type: dealer, dealer_id, name, rating, rating_count, city, "
+            "state, distance_miles, url} or a private seller)}], spotlights (Autotrader's paid "
+            "Spotlight placements, sponsored: true), stats {price, mileage, year: {min, avg, "
+            "max}} for the whole result set, market {country, currency}, notes. deal_label is "
+            "Autotrader's own label (Great, Good) as Autotrader gives it, based on the Kelley "
+            "Blue Book Fair Purchase Price range: kbb_fair_purchase_price {amount, low, high, "
+            "delta (that price minus the listing price; negative = above it)}. Private "
+            "sellers: seller is {type: private, city, state, distance_miles} only (no name, "
+            "phone or street address). VINs and stock numbers are never returned; phone "
+            "numbers, emails, stock numbers and VIN-like codes inside descriptions read "
+            "\"[removed]\". 2 credits. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged. Answers can take up to 4 minutes: allow a client timeout "
+            "of at least 240 s."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: Autotrader lists cars around it (an "
+                    "unknown ZIP is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make. By name or Autotrader code (Toyota, Ford, Mercedes-Benz, Land "
+                    "Rover, or MB, ROV ...; 72 makes)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model as Autotrader names it (Civic, F150, RAV4, C-Class) or its model "
+                    "code (listings[].model_code, makes models[].code). Needs make. A "
+                    "different spelling (F-150) is matched to Autotrader's name; a model "
+                    "Autotrader does not list for the make is a charged 404 that lists the "
+                    "make's models."
+                ),
+            ),
+            Param(
+                "trim_code",
+                "Optional[str]",
+                doc=(
+                    "A trim as listings[].trim_code gives it (MODEL|Trim). Needs make and "
+                    "model."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 400, 500, 0 (0 = "
+                    "nationwide). Autotrader's default otherwise (location.radius_miles says "
+                    "which)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1, at most 100)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Listings a page: 25 (default) or 100."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "mileage_asc", "year_desc", "distance_asc"]]',
+                doc=(
+                    "relevance (default), price_asc, mileage_asc, year_desc (newest model "
+                    "year), distance_asc."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, whole USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, whole USD."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest miles."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Most miles."
+                ),
+            ),
+            Param(
+                "body_style",
+                "Optional[str]",
+                doc=(
+                    "Body style, code or label: CONVERT (Convertible), COUPE (Coupe), HATCH "
+                    "(Hatchback), SEDAN (Sedan), SUVCROSS (SUV / Crossover), TRUCKS (Truck), "
+                    "VANMV (Van / Minivan), WAGON (Wagon)."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[str]",
+                doc=(
+                    "Drivetrain: AWD4WD (AWD/4WD), FWD (Front Wheel Drive), RWD (Rear Wheel "
+                    "Drive)."
+                ),
+            ),
+            Param(
+                "exterior_color",
+                "Optional[str]",
+                doc=(
+                    "Exterior colour: BEIGE (Beige), BLACK (Black), BLUE (Blue), BROWN "
+                    "(Brown), BURGUNDY (Burgundy), CHARCOAL (Charcoal), GOLD (Gold), GRAY "
+                    "(Gray), GREEN (Green), OFFWHITE (Off White), ORANGE (Orange), PINK "
+                    "(Pink), PURPLE (Purple), RED (Red), SILVER (Silver), TAN (Tan), TURQUOISE "
+                    "(Turquoise), WHITE (White), YELLOW (Yellow)."
+                ),
+            ),
+            Param(
+                "interior_color",
+                "Optional[str]",
+                doc=(
+                    "Interior colour (same values as exterior_color)."
+                ),
+            ),
+            Param(
+                "seller_type",
+                'Optional[Literal["dealer", "private"]]',
+                doc=(
+                    "dealer or private (private sellers)."
+                ),
+            ),
+            Param(
+                "listing_type",
+                'Optional[Literal["new", "used", "certified", "third_party_certified"]]',
+                doc=(
+                    "new, used, certified (manufacturer certified pre-owned) or "
+                    "third_party_certified."
+                ),
+            ),
+            Param(
+                "fuel",
+                "Optional[str]",
+                doc=(
+                    "Fuel type: GSL (Gasoline), DSL (Diesel), HYB (Hybrid), ELE (Electric), "
+                    "HYD (Hydrogen), PIH (Plug-in Hybrid)."
+                ),
+            ),
+            Param(
+                "transmission",
+                "Optional[str]",
+                doc=(
+                    "Transmission: AUT (Automatic), MAN (Manual)."
+                ),
+            ),
+            Param(
+                "history",
+                "Optional[str]",
+                doc=(
+                    "Vehicle history as Autotrader filters it: NO_ACCIDENTS (No Accidents), "
+                    "ONE_OWNER (Single Owner), CLEAN_TITLE (Clean Title), NO_FRAME_DAMAGE (No "
+                    "Frame Damage), FREE_REPORT (Free Report)."
+                ),
+            ),
+            Param(
+                "deal",
+                'Optional[Literal["good", "great"]]',
+                doc=(
+                    "Only listings Autotrader labels a Good Price or Great Price deal (based "
+                    "on the Kelley Blue Book Fair Purchase Price range)."
+                ),
+            ),
+            Param(
+                "feature",
+                "Optional[str]",
+                doc=(
+                    "One feature, code or label: 1062 (Keyless Entry), 1317 (Premium Wheels), "
+                    "1172 (Roof Rack), 1199 (Trailer Hitch), AT0001 (Dual Rear Wheels), 1318 "
+                    "(Disability Equipped), 1327 (Android Auto), 1326 (Apple CarPlay), 1211 "
+                    "(Bluetooth, Hands-Free), 1033 (Cruise Control), 1297 (DVD Player), 1066 "
+                    "(Navigation), 1230 (Portable Audio Connection), 1136 (Premium Audio), "
+                    "1149 (Satellite Radio), 1161 (Steering Wheel Controls), 1221 (Remote "
+                    "Engine Start), 1313 (Adaptive Cruise Control), 1298 (Heads Up Display), "
+                    "1160 (Rain Sensing Wipers), 1229 (Keyless Start), 1180 (Parking Assist), "
+                    "1331 (WiFi Hotspot), 1306 (3rd Row Seats), 1319 (Heated Seats), 1078 "
+                    "(Leather Seats), 1132 (Sunroof), 1224 (Backup Camera), 1142 (Night "
+                    "Vision), 1310 (Lane Departure Warning), 1309 (Blind Spot Monitor), 1330 "
+                    "(Cross Traffic Alert), 1228 (Brake Assist), 1013 (Security System)."
+                ),
+            ),
+            Param(
+                "doors",
+                "Optional[str]",
+                doc=(
+                    "Doors: 2 (Two Door), 3 (Three Door), 4 (Four Door), 5 (Five Door)."
+                ),
+            ),
+            Param(
+                "seating",
+                "Optional[str]",
+                doc=(
+                    "Seats: 2, 3, 4, 5, 6, 7, 8+."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autotrader_listing",
+        namespace="autotrader",
+        method="listing",
+        http="POST",
+        path="/api/v1/autotrader/listing",
+        summary=(
+            "One car listing on Autotrader (autotrader.com, the US car marketplace run by Cox "
+            "Automotive). Scavio fetches the public Autotrader page on request; Autotrader has "
+            "no public API for reading listings. By listing id or link: the search tile fields "
+            "plus description, images, features {group: [...]}, ranked_features, "
+            "specifications {name: value}, warranties [{group, type, label, details, years, "
+            "miles, unlimited_miles, remaining_years, remaining_miles}], kbb_consumer_rating, "
+            "kbb_consumer_review_count (Kelley Blue Book owner ratings for the model), "
+            "price_history, deal_label + deal_basis, dealer {dealer_id, name, rating, "
+            "rating_count, address {street, street2, city, state, zip}, phone, website, hours "
+            "[{day, open, close}], home_services, is_open, url} (null for a private seller), "
+            "zip, market, notes. deal_label is Autotrader's own label (Great, Good) as "
+            "Autotrader gives it, based on the Kelley Blue Book Fair Purchase Price range: "
+            "kbb_fair_purchase_price {amount, low, high, delta (that price minus the listing "
+            "price; negative = above it)}. Private sellers: seller is {type: private, city, "
+            "state, distance_miles} only (no name, phone or street address). VINs and stock "
+            "numbers are never returned; phone numbers, emails, stock numbers and VIN-like "
+            "codes inside descriptions read \"[removed]\". A sold or removed listing is a "
+            "charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged. Answers can take up to 4 minutes: allow a client timeout "
+            "of at least 240 s."
+        ),
+        params=(
+            Param(
+                "listing_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An Autotrader listing id (listings[].listing_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An Autotrader listing link "
+                    "(https://www.autotrader.com/cars-for-sale/vehicle/<id>) instead of "
+                    "listing_id."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Optional: the distance (seller.distance_miles) is measured from this US "
+                    "ZIP code; without it distance_miles is null."
+                ),
+            ),
+        ),
+        one_of=(("listing_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autotrader_dealers",
+        namespace="autotrader",
+        method="dealers",
+        http="POST",
+        path="/api/v1/autotrader/dealers",
+        summary=(
+            "Car dealers near a US ZIP code on Autotrader (autotrader.com, the US car "
+            "marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on "
+            "request; Autotrader has no public API for reading listings. Optionally of one "
+            "make, within a radius, and with cars in a price or model-year range: search, "
+            "location {zip, place, radius_miles}, count, dealers [{dealer_id, name, "
+            "franchise_name, make, rating, rating_count, distance_miles, address {street, "
+            "street2, city, state, zip}, phone, website, url}] (the first 50, nearest first as "
+            "Autotrader orders them; the dealer finder does not page, so narrow with radius or "
+            "make), market, notes. Dealer details are the dealer's public business details. 2 "
+            "credits. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: Autotrader lists cars around it (an "
+                    "unknown ZIP is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "Only dealers of this make (Autotrader's franchise filter). By name or "
+                    "Autotrader code (Toyota, Ford, Mercedes-Benz, Land Rover, or MB, ROV ...; "
+                    "72 makes)."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 500, 0 (0 = any). "
+                    "Autotrader's default otherwise."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Dealers with cars from this price, whole USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Dealers with cars up to this price, whole USD."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Dealers with cars from this model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Dealers with cars up to this model year."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autotrader_dealer",
+        namespace="autotrader",
+        method="dealer",
+        http="POST",
+        path="/api/v1/autotrader/dealer",
+        summary=(
+            "One dealer on Autotrader (autotrader.com, the US car marketplace run by Cox "
+            "Automotive). Scavio fetches the public Autotrader page on request; Autotrader has "
+            "no public API for reading listings. By dealer id or link: dealer_id, name, "
+            "rating, rating_count, address, phone, website, hours, home_services {buy_online, "
+            "test_drive, vehicle_delivery, virtual_tour}, is_open, url, inventory_count (the "
+            "dealer's listings on Autotrader), makes [{make, make_code, count}], "
+            "inventory_sort, inventory [{the search tile fields}] (the first page as the "
+            "dealer page shows it, lowest price first), market, notes. Dealer reviews are not "
+            "included (rating and rating_count only). An unknown id is a charged 404. 2 "
+            "credits. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An Autotrader dealer id (dealers[].dealer_id, "
+                    "listings[].seller.dealer_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An Autotrader dealer link "
+                    "(https://www.autotrader.com/car-dealers/<city-st>/<id>/<name>) instead of "
+                    "dealer_id."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="autotrader_makes",
+        namespace="autotrader",
+        method="makes",
+        http="POST",
+        path="/api/v1/autotrader/makes",
+        summary=(
+            "One make's models on Autotrader (autotrader.com, the US car marketplace run by "
+            "Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader "
+            "has no public API for reading listings. By make: make {code, name}, years, "
+            "popular_models (model codes), count, models [{code, name, years, price_by_year "
+            "{year: price range label as the page gives it}, mpg_by_year {year: {city, "
+            "highway}}, body_style, image, search_model (the model name to pass to search)}], "
+            "market, notes. 2 credits. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged. Answers can take up to 4 minutes: allow a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. By name or Autotrader code (Toyota, Ford, Mercedes-Benz, Land "
+                    "Rover, or MB, ROV ...; 72 makes)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+)
+
+# CarGurus: 8 endpoints on /api/v1/cargurus.
+_CARGURUS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="cargurus_search",
+        namespace="cargurus",
+        method="search",
+        http="POST",
+        path="/api/v1/cargurus/search",
+        summary=(
+            "Search the car listings of CarGurus (cargurus.com, the car marketplace run by "
+            "CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus "
+            "page on request; CarGurus has no public API for reading listings. Around a ZIP / "
+            "postal code / postcode with a radius, by make, model and trim (names or ids), "
+            "sorted by any of CarGurus' 11 sorts, filtered by year, price, mileage, "
+            "drivetrain, colour, body type, condition, seller type, CarGurus deal rating, "
+            "fuel, transmission, single owner, no accidents and recent price drops. Returns "
+            "market, location {zip, resolved, distance, distance_unit, nationwide}, make, "
+            "model, trim, make_model_trim_path, sort, applied_filters (as CarGurus applied "
+            "them), total, page, page_count, has_more, count, listings [{listing_id, title, "
+            "name, year, make, make_id, model, model_id, trim, trim_id, body_type, condition, "
+            "price (null when the listing shows no price), price_text, currency, "
+            "original_price, msrp (new cars), price_with_fees, fee_disclosure, expected_price, "
+            "expected_price_difference, deal_rating, deal_rating_label, deal_score, price_drop "
+            "{previous_price, amount, dropped_at}, days_on_market, mileage, mileage_unit, "
+            "exterior_color, interior_color, transmission, drivetrain, engine, fuel_type, mpg "
+            "{city, highway, combined, unit}, ev, doors, options, highlights (e.g. No "
+            "accidents, 1 owner), safety_rating, ulez_compliant (uk), photo, photo_count, "
+            "placement, sponsored, buying_option, distance, seller_type, dealer {dealer_id, "
+            "name, city, region, postal_code, phone, franchise_dealer, franchise_make, rating, "
+            "url}, url}], trims (with a model), facets (include_facets), notes. Sponsored "
+            "placements (priority, featured) are inserted by CarGurus out of the requested "
+            "order and flagged. deal_rating (GREAT_PRICE, GOOD_PRICE, FAIR_PRICE, POOR_PRICE, "
+            "OVERPRICED, OUTLIER, NA) with deal_rating_label and deal_score, and "
+            "expected_price with expected_price_difference (expected minus asking), are "
+            "CarGurus' own price analysis as CarGurus labels it. No VINs, stock numbers or "
+            "private-seller details are returned; dealer names, addresses, phones and ratings "
+            "are CarGurus' public dealer details. There is no listing detail endpoint: "
+            "CarGurus does not serve its listing pages to us, and each listing already carries "
+            "the price, expected price, deal rating and specs. 1 credit per request (a name "
+            "resolved with a first page is still 1). Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged. Pages can take up to two minutes: use a "
+            "client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. Where to search around: a 5-digit US ZIP code (us, us-es), a "
+                    "Canadian postal code (ca, ca-fr, e.g. M5V 2T6) or a UK postcode (uk, e.g. "
+                    "M1 1AE). A malformed code is a 400, not charged."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), "
+                    "us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French "
+                    "pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's "
+                    "language and currency."
+                ),
+            ),
+            Param(
+                "distance",
+                "Optional[Union[int, str]]",
+                doc=(
+                    "Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), "
+                    "75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "
+                    "\"nationwide\"."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its "
+                    "make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and "
+                    "Canadian sites, m273 on the UK site): names resolve to the market's id."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from "
+                    "models). Needs make. A model name is resolved from the make's models on a "
+                    "first CarGurus page (same 1 credit; send model_id to save that step)."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "A trim as CarGurus names it (search's trims list, e.g. XLE, XLT SuperCrew "
+                    "4WD). Needs model."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1, at most 500); 24 tiles a page."
+                ),
+            ),
+            Param(
+                "sort",
+                "Optional[str]",
+                doc=(
+                    "best_match, best_deal, price_low, price_high, mileage_low, mileage_high, "
+                    "closest, year_newest, year_oldest, listed_newest, listed_oldest "
+                    "(CarGurus' 11 sorts; default best_match). best_deal is CarGurus' \"Best "
+                    "deals first\" (used cars)."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, whole units of the market's currency."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest mileage (miles; km in ca / ca-fr)."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Highest mileage."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "One or a list: awd, 4wd, fwd, rwd, 4x2."
+                ),
+            ),
+            Param(
+                "color",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Exterior colour group(s): black, blue, brown, gold, gray (grey), green, "
+                    "orange, pink, purple, red, silver, teal, white, yellow."
+                ),
+            ),
+            Param(
+                "body_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "coupe, convertible, hatchback, minivan (mpv), pickup, sedan (saloon), "
+                    "suv, van, wagon (estate)."
+                ),
+            ),
+            Param(
+                "condition",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "us / ca: used, certified (manufacturer certified), third_party_certified; "
+                    "uk: approved_used."
+                ),
+            ),
+            Param(
+                "seller_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "franchise_dealer or cargurus_partner (CarGurus Partners)."
+                ),
+            ),
+            Param(
+                "deal_rating",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "CarGurus deal rating(s) by name: great, good, fair, high, overpriced, "
+                    "uncertain, no_analysis (or CarGurus' own names GREAT_PRICE, GOOD_PRICE, "
+                    "FAIR_PRICE, POOR_PRICE, OVERPRICED, OUTLIER, NA)."
+                ),
+            ),
+            Param(
+                "fuel_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "gasoline (petrol), diesel, electric, hybrid, flex_fuel, cng, biodiesel, "
+                    "hydrogen, dual_fuel."
+                ),
+            ),
+            Param(
+                "transmission",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "automatic or manual."
+                ),
+            ),
+            Param(
+                "single_owner",
+                "Optional[bool]",
+                doc=(
+                    "Only cars CarGurus reports as single-owner."
+                ),
+            ),
+            Param(
+                "no_accidents",
+                "Optional[bool]",
+                doc=(
+                    "Only cars with no accidents reported."
+                ),
+            ),
+            Param(
+                "price_drops_only",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with a recent price drop."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Other CarGurus filters by the site's own key (facets[].key from "
+                    "include_facets) to a value or list: daysOnMarketMin, daysOnMarketMax, "
+                    "minMpg, maxMpg, hideWithoutPhotos, hideFrameDamaged, hideTheft, "
+                    "interiorColors, hideFleet, hideLemon, hideSalvage, doors, "
+                    "installedOptionIds, safetyRatings, averageDealerRatings, "
+                    "minEVBatteryChargingTime, maxEVBatteryChargingTime, minEVBatteryRange, "
+                    "maxEVBatteryRange, hideEvOrPhev, numberOfSeats, enginePaths, "
+                    "vehicleHistoryOptions, dealerFeesIncluded, ulezCompliant, hideScrapped, "
+                    "seatingCapacity."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets [{facet, label, key, min_key, max_key, values [{name, "
+                    "value, label, count}], range}]: CarGurus' filters with counts for this "
+                    "search (a filters entry takes key with the value; deal ratings go by name "
+                    "through deal_rating)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_dealer",
+        namespace="cargurus",
+        method="dealer",
+        http="POST",
+        path="/api/v1/cargurus/dealer",
+        summary=(
+            "One dealer on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., "
+            "in the US, Canada and the UK). Scavio fetches the public CarGurus page on "
+            "request; CarGurus has no public API for reading listings. By dealer id or link: "
+            "dealer {dealer_id, name, address {street, city, region, postal_code}, "
+            "sales_phone, service_phone, website, maps_url, location, logo, hours [{day, open, "
+            "close, is_open}] (7 days), current_day, rating, review_count, social, url}, "
+            "reviews [{review_id, rating, date, content, purchase_status, delivery, helpful, "
+            "dealer_response {text, date}}] (every review CarGurus embeds in the page; "
+            "CarGurus has no review paging, sort or star filter, so filter them on your side; "
+            "no reviewer names), inventory {total, page, page_count, has_more, count, "
+            "listings} (the dealer's listings, paged, sorted and filtered like search), "
+            "nearby_dealers, notes. An unknown dealer is a charged 404. 1 credit per request "
+            "(a name resolved with a first page is still 1). Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged. Pages can take up to two minutes: "
+            "use a client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A CarGurus dealer id (listings[].dealer.dealer_id, dealers[].dealer_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A CarGurus dealer link (https://www.cargurus.com/Cars/m-<dealer "
+                    "name>-sp<id>, or the .ca / .co.uk site) instead of dealer_id; its site "
+                    "sets the market."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), "
+                    "us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French "
+                    "pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's "
+                    "language and currency."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its "
+                    "make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and "
+                    "Canadian sites, m273 on the UK site): names resolve to the market's id."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from "
+                    "models). Needs make. A model name is resolved from the make's models on a "
+                    "first CarGurus page (same 1 credit; send model_id to save that step)."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "A trim as CarGurus names it (search's trims list, e.g. XLE, XLT SuperCrew "
+                    "4WD). Needs model."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1, at most 500); 24 tiles a page."
+                ),
+            ),
+            Param(
+                "sort",
+                "Optional[str]",
+                doc=(
+                    "best_match, best_deal, price_low, price_high, mileage_low, mileage_high, "
+                    "closest, year_newest, year_oldest, listed_newest, listed_oldest "
+                    "(CarGurus' 11 sorts; default best_match). best_deal is CarGurus' \"Best "
+                    "deals first\" (used cars)."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, whole units of the market's currency."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest mileage (miles; km in ca / ca-fr)."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Highest mileage."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "One or a list: awd, 4wd, fwd, rwd, 4x2."
+                ),
+            ),
+            Param(
+                "color",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Exterior colour group(s): black, blue, brown, gold, gray (grey), green, "
+                    "orange, pink, purple, red, silver, teal, white, yellow."
+                ),
+            ),
+            Param(
+                "body_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "coupe, convertible, hatchback, minivan (mpv), pickup, sedan (saloon), "
+                    "suv, van, wagon (estate)."
+                ),
+            ),
+            Param(
+                "condition",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "us / ca: used, certified (manufacturer certified), third_party_certified; "
+                    "uk: approved_used."
+                ),
+            ),
+            Param(
+                "seller_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "franchise_dealer or cargurus_partner (CarGurus Partners)."
+                ),
+            ),
+            Param(
+                "deal_rating",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "CarGurus deal rating(s) by name: great, good, fair, high, overpriced, "
+                    "uncertain, no_analysis (or CarGurus' own names GREAT_PRICE, GOOD_PRICE, "
+                    "FAIR_PRICE, POOR_PRICE, OVERPRICED, OUTLIER, NA)."
+                ),
+            ),
+            Param(
+                "fuel_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "gasoline (petrol), diesel, electric, hybrid, flex_fuel, cng, biodiesel, "
+                    "hydrogen, dual_fuel."
+                ),
+            ),
+            Param(
+                "transmission",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "automatic or manual."
+                ),
+            ),
+            Param(
+                "single_owner",
+                "Optional[bool]",
+                doc=(
+                    "Only cars CarGurus reports as single-owner."
+                ),
+            ),
+            Param(
+                "no_accidents",
+                "Optional[bool]",
+                doc=(
+                    "Only cars with no accidents reported."
+                ),
+            ),
+            Param(
+                "price_drops_only",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with a recent price drop."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Other CarGurus filters by the site's own key (facets[].key from "
+                    "include_facets) to a value or list: daysOnMarketMin, daysOnMarketMax, "
+                    "minMpg, maxMpg, hideWithoutPhotos, hideFrameDamaged, hideTheft, "
+                    "interiorColors, hideFleet, hideLemon, hideSalvage, doors, "
+                    "installedOptionIds, safetyRatings, averageDealerRatings, "
+                    "minEVBatteryChargingTime, maxEVBatteryChargingTime, minEVBatteryRange, "
+                    "maxEVBatteryRange, hideEvOrPhev, numberOfSeats, enginePaths, "
+                    "vehicleHistoryOptions, dealerFeesIncluded, ulezCompliant, hideScrapped, "
+                    "seatingCapacity."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_dealers",
+        namespace="cargurus",
+        method="dealers",
+        http="POST",
+        path="/api/v1/cargurus/dealers",
+        summary=(
+            "The dealers with listings around a US ZIP code on CarGurus (cargurus.com, the car "
+            "marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches "
+            "the public CarGurus page on request; CarGurus has no public API for reading "
+            "listings. (optionally for one make / model): count, total_listings, dealers "
+            "[{dealer_id, name, rating, distance, city, region, listing_count, url}] (up to "
+            "150, as CarGurus' own dealer filter lists them), location, notes. US site only "
+            "(us, us-es): the Canadian and UK search pages carry no dealer list. 1 credit per "
+            "request (a name resolved with a first page is still 1). Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged. Pages can take up to two "
+            "minutes: use a client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. Where to search around: a 5-digit US ZIP code (us, us-es), a "
+                    "Canadian postal code (ca, ca-fr, e.g. M5V 2T6) or a UK postcode (uk, e.g. "
+                    "M1 1AE). A malformed code is a 400, not charged."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, us-es (default us). us = cargurus.com (USD, miles), us-es = its "
+                    "Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = "
+                    "cargurus.co.uk (GBP, miles). Data comes in the market's language and "
+                    "currency. The Canadian and UK search pages carry no dealer list."
+                ),
+            ),
+            Param(
+                "distance",
+                "Optional[Union[int, str]]",
+                doc=(
+                    "Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), "
+                    "75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "
+                    "\"nationwide\"."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its "
+                    "make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and "
+                    "Canadian sites, m273 on the UK site): names resolve to the market's id."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from "
+                    "models). Needs make. A model name is resolved from the make's models on a "
+                    "first CarGurus page (same 1 credit; send model_id to save that step)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_price_trends",
+        namespace="cargurus",
+        method="price_trends",
+        http="POST",
+        path="/api/v1/cargurus/price-trends",
+        summary=(
+            "CarGurus' used-car price trends on CarGurus (cargurus.com, the car marketplace "
+            "run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public "
+            "CarGurus page on request; CarGurus has no public API for reading listings. For "
+            "the market (the CarGurus Index, makes, body styles, market movers), a make or a "
+            "model: scope, make, model, currency, groups {index, makes, models, model_years, "
+            "body_styles: [{id, name, parent, average_price, average_price_with_fees, history "
+            "[{days_ago (30, 90, 365), average_price, average_price_with_fees, "
+            "change_to_today_pct, change_with_fees_to_today_pct}], research_id "
+            "(model_years)}]}, series [{id, name, points [{date, price, price_with_fees}]}] "
+            "(CarGurus' daily averages), market_movers {decrease, increase}, faqs (CarGurus' "
+            "text), date_range, listings_url, notes. Markets us, ca, uk. 1 credit per request "
+            "(a name resolved with a first page is still 1). Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged. Pages can take up to two minutes: "
+            "use a client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, ca, uk (default us). us = cargurus.com (USD, miles), us-es = its "
+                    "Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = "
+                    "cargurus.co.uk (GBP, miles). Data comes in the market's language and "
+                    "currency."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "Optional: a make (name or make_id): its price trends and its models. "
+                    "Without make: the market's CarGurus Index, makes and body styles."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "Optional, with make: a model (name or model_id): its price trends and "
+                    "each model year (model_years, with research_id)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_research",
+        namespace="cargurus",
+        method="research",
+        http="POST",
+        path="/api/v1/cargurus/research",
+        summary=(
+            "A model-year research page on CarGurus (cargurus.com, the car marketplace run by "
+            "CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus "
+            "page on request; CarGurus has no public API for reading listings. (US site). By "
+            "research_id / link, or by year with make and model: research_id, name, make, "
+            "model, year, currency, trims [{trim_id, name, msrp, engine, horsepower, "
+            "drivetrain, fuel_economy_city, fuel_economy_highway, seating_capacity, "
+            "cargo_space}], pricing {original_msrp_min/max, price_range_min/max, "
+            "average_listing_price, today_price, one_month_ago_price, one_year_ago_price, "
+            "average_listing_change_pct, cargurus_index_average_price, "
+            "cargurus_index_change_pct, price_trends_url}, price_series, test_drive_review "
+            "{title, blurb, summary, scores, pros, cons, author: CarGurus editors, published, "
+            "updated, url}, owner_reviews {average_rating, total_ratings, count_by_rating, "
+            "ai_summary (CarGurus' own AI summary, as given), count, reviews [{review_id, "
+            "rating, title, content, date}]} (no reviewer names), listings_url, url, notes. An "
+            "unknown id is a charged 404. 1 credit per request (a name resolved with a first "
+            "page is still 1). Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged. Pages can take up to two minutes: use a client timeout of "
+            "at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "research_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A CarGurus model-year id (c<digits>; expert_reviews[].research_id, "
+                    "price_trends groups.model_years[].research_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A CarGurus research link "
+                    "(https://www.cargurus.com/research/<year>-<make>-<model>-c<id>) instead "
+                    "of research_id."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "With make and model instead of research_id: the model year, found through "
+                    "CarGurus' price trends (same 1 credit)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "With year and model."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "With year and make."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us (default us). us = cargurus.com (USD, miles), us-es = its Spanish "
+                    "pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = "
+                    "cargurus.co.uk (GBP, miles). Data comes in the market's language and "
+                    "currency. Research pages are read on the US site."
+                ),
+            ),
+        ),
+        one_of=(("research_id", "url", "year"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_expert_reviews",
+        namespace="cargurus",
+        method="expert_reviews",
+        http="POST",
+        path="/api/v1/cargurus/expert-reviews",
+        summary=(
+            "CarGurus' expert (editorial) car reviews on CarGurus (cargurus.com, the car "
+            "marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches "
+            "the public CarGurus page on request; CarGurus has no public API for reading "
+            "listings. 24 a page: page, page_size, total, page_count, has_more, count, reviews "
+            "[{title, vehicle, rating, updated_at, summary, image, author: CarGurus editors, "
+            "research_id, url}], notes. Markets us, ca, uk. 1 credit per request (a name "
+            "resolved with a first page is still 1). Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged. Pages can take up to two minutes: use a "
+            "client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, ca, uk (default us). us = cargurus.com (USD, miles), us-es = its "
+                    "Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = "
+                    "cargurus.co.uk (GBP, miles). Data comes in the market's language and "
+                    "currency."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); 24 reviews a page."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_makes",
+        namespace="cargurus",
+        method="makes",
+        http="POST",
+        path="/api/v1/cargurus/makes",
+        summary=(
+            "Every make the market's site of CarGurus (cargurus.com, the car marketplace run "
+            "by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public "
+            "CarGurus page on request; CarGurus has no public API for reading listings. lists "
+            "in its search: count, makes [{make_id, name, popular}], notes. Ids are per site "
+            "(the UK site's differ). 1 credit per request (a name resolved with a first page "
+            "is still 1). Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged. Pages can take up to two minutes: use a client timeout of "
+            "at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), "
+                    "us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French "
+                    "pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's "
+                    "language and currency."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cargurus_models",
+        namespace="cargurus",
+        method="models",
+        http="POST",
+        path="/api/v1/cargurus/models",
+        summary=(
+            "The models of one make on CarGurus (cargurus.com, the car marketplace run by "
+            "CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus "
+            "page on request; CarGurus has no public API for reading listings. with CarGurus' "
+            "listing counts nationwide (or around a zip): make {id, name}, location, count, "
+            "models [{model_id, name, count, popular}], notes. An unknown make id is a charged "
+            "404. 1 credit per request (a name resolved with a first page is still 1). Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged. Pages "
+            "can take up to two minutes: use a client timeout of at least 150 seconds."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make (name or make_id)."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), "
+                    "us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French "
+                    "pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's "
+                    "language and currency."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Optional: count listings around this place instead of nationwide."
+                ),
+            ),
+            Param(
+                "distance",
+                "Optional[Union[int, str]]",
+                doc=(
+                    "Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), "
+                    "75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "
+                    "\"nationwide\"."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# CarMax: 12 endpoints on /api/v1/carmax.
+_CARMAX_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="carmax_search",
+        namespace="carmax",
+        method="search",
+        http="POST",
+        path="/api/v1/carmax/search",
+        summary=(
+            "Search CarMax's used-car inventory: CarMax (carmax.com, the largest US used-car "
+            "retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the "
+            "public CarMax page on request. By make and model (F-150 and F150 both work), body "
+            "type, keyword, facet filters, year / price / mileage ranges and max shipping fee, "
+            "within a radius of a ZIP (or nationwide), sorted 8 ways, up to 100 cars a page. "
+            "Returns query (the filters as read), radius, total (as CarMax reports it), count, "
+            "page, page_size, has_more, sort, zip, applied [{category, value, label}] (the "
+            "filters CarMax applied), nearest_store {id, name, city, state, zip, "
+            "distance_miles}, cars [stock_number (the input of listing and photos), url, year, "
+            "make, model, trim, body, price (CarMax's no-haggle price, USD), original_price "
+            "and price_drop (as CarMax gives them), currency, mileage, exterior_color, "
+            "interior_color, transmission, drivetrain, engine_type, engine_size, cylinders, "
+            "horsepower, mpg_city, mpg_highway, battery_range_miles, vehicle_size, "
+            "vehicle_types, features, highlighted_features, packages, feature_score, "
+            "prior_uses, store {id, name, city, state}, distance_miles (from zip), shipping "
+            "{fee (USD, to zip), text (e.g. Test drive today, $249 shipping), type, "
+            "transferable, arrival, min_days, max_days}, model_rating {average, count} (owner "
+            "reviews of that model-year), badge, new_arrival, coming_soon, reserved, saleable, "
+            "made_saleable_at, photo], facets (with include_facets) [{name, type values: "
+            "values [{value, url_segment (the input of body_type or filters), count, selected, "
+            "children (models of a make)}]} | {name, label, type range: min, max, "
+            "selected_min, selected_max, buckets [{min, max, count}]}], notes. No VIN is "
+            "returned. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "str",
+                required=True,
+                doc=(
+                    "A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to "
+                    "it, and the radius is measured from it."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make by name or slug (Ford, land-rover; makes lists them)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "With make: a model by name or slug (F-150 and F150 both work, RAV4, CX-5, "
+                    "Model 3; models lists a make's models)."
+                ),
+            ),
+            Param(
+                "keyword",
+                "Optional[str]",
+                doc=(
+                    "Free text CarMax searches across every make (e.g. rav4 hybrid). Not "
+                    "combined with make / model."
+                ),
+            ),
+            Param(
+                "body_type",
+                "Optional[str]",
+                doc=(
+                    "A body type as CarMax writes it: the url_segment of a VehicleType facet "
+                    "value (suvs, sedans, trucks, coupes, hatchbacks, minivans-and-vans, "
+                    "convertibles, wagons)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[str]]",
+                doc=(
+                    "Up to 8 facet values by url_segment (facets[].values[].url_segment with "
+                    "include_facets): drivetrain, colour, engine type, features, packages, "
+                    "cylinders, size, doors."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "year_min."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "year_max."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, USD."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "mileage_min."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "mileage_max."
+                ),
+            ),
+            Param(
+                "max_shipping_fee",
+                "Optional[Literal[0, 99, 199, 299, 399, 499, 999]]",
+                doc=(
+                    "CarMax's \"Max shipping fee\" filter, USD: 0, 99, 199, 299, 399, 499, 999 "
+                    "(0 = free to home or store). No limit by default."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "distance", "price_asc", "price_desc", "mileage_asc", "mileage_desc", "year_desc", "year_asc"]]',
+                doc=(
+                    "best_match (default), distance (nearest first), price_asc, price_desc, "
+                    "mileage_asc, mileage_desc, year_desc (newest), year_asc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1; has_more says whether another page exists."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Cars per page, 1 to 100 (default 24). 100 cars can take CarMax 80 seconds."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Add facets: every filter value with its url_segment and count (makes "
+                    "carry their models), and the year / price / mileage ranges with counts."
+                ),
+            ),
+            Param(
+                "radius",
+                'Optional[Union[Literal["5", "25", "50", "75", "100", "250", "500", "nationwide"], int]]',
+                doc=(
+                    "Miles from zip: 5, 25, 50, 75, 100, 250, 500 or nationwide (default: "
+                    "every CarMax car, with the shipping fee to zip)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_listing",
+        namespace="carmax",
+        method="listing",
+        http="POST",
+        path="/api/v1/carmax/listing",
+        summary=(
+            "One CarMax car in full by stock number or link: stock_number, url, status, year, "
+            "make, model, trim, body, engine, transmission, drivetrain, fuel_type, "
+            "fuel_capacity_gallons, mpg {city, highway, combined, equivalent}, "
+            "battery_range_miles, mileage, exterior_color, interior_color, passenger_capacity, "
+            "vehicle_types, generation {name, start_year, end_year}, price, currency, "
+            "price_reduced, previous_price, price_drop_date, price_drop_expires, "
+            "price_drop_text (as CarMax words it), badge (e.g. Price drop, Popular), history "
+            "{accident_count, owner_count, prior_uses}, car_life [{group, title, subtitle}] "
+            "(CarMax's callouts as given, e.g. Only 1 owner / Reported by AutoCheck), "
+            "highlights [{title, description}], warranties [{type, years, miles}], "
+            "feature_score, feature_score_description, installed_packages, features [{name, "
+            "category, installed_option}], oem_standard_features, specifications [{name, "
+            "value, category}], reconditioning [{type, description}], store {id, name, state, "
+            "latitude, longitude, remote_lot, url}, saleable, available_to_transact, "
+            "transferable, reserved, sold, new_arrival, coming_soon, first_made_saleable_at, "
+            "last_made_saleable_at, save_count, model_review_summary, pros, cons, "
+            "new_this_year, notes. Shipping depends on the buyer's ZIP and is not part of this "
+            "answer: use search with a zip. A stock number CarMax does not have (or a sold "
+            "car) is a charged 404. No VIN is returned. CarMax (carmax.com, the largest US "
+            "used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio "
+            "fetches the public CarMax page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "stock_number",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A CarMax stock number (cars[].stock_number)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the car's link (https://www.carmax.com/car/<stock number>)."
+                ),
+            ),
+        ),
+        one_of=(("stock_number", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_photos",
+        namespace="carmax",
+        method="photos",
+        http="POST",
+        path="/api/v1/carmax/photos",
+        summary=(
+            "Every photo of one CarMax car by stock number or link: stock_number, count, "
+            "photos [{type (image or 360-exterior), name, category (Exterior, Interior), shot, "
+            "thumbnail_url, url (1600x1200), url_16x9}]. CarMax (carmax.com, the largest US "
+            "used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio "
+            "fetches the public CarMax page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "stock_number",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A CarMax stock number (cars[].stock_number)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the car's link (https://www.carmax.com/car/<stock number>)."
+                ),
+            ),
+        ),
+        one_of=(("stock_number", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_stores",
+        namespace="carmax",
+        method="stores",
+        http="POST",
+        path="/api/v1/carmax/stores",
+        summary=(
+            "CarMax stores near a ZIP (nearest first, with distance_miles) or in a state or "
+            "city: count, stores [{id (the input of store and store-inventory), name, url, "
+            "address {line1, line2, city, market, state, zip}, phone, toll_free_phone, "
+            "latitude, longitude, distance_miles, status, is_microstore, is_car_buying_center, "
+            "hours [{day, open, close, closed}], service_hours, holiday_hours [{date, open, "
+            "close, closed}] (from today)}]. CarMax (carmax.com, the largest US used-car "
+            "retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the "
+            "public CarMax page on request. 1 credit. Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to "
+                    "it, and the radius is measured from it."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Or a US state (TX or Texas): CarMax's stores in it."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (e.g. Atlanta)."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Most stores to return (default 25)."
+                ),
+            ),
+        ),
+        one_of=(("zip", "state", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_store",
+        namespace="carmax",
+        method="store",
+        http="POST",
+        path="/api/v1/carmax/store",
+        summary=(
+            "One CarMax store by id: id, name, url, address, phone, toll_free_phone, latitude, "
+            "longitude, status, is_microstore, is_car_buying_center, hours, service_hours, "
+            "holiday_hours, is_open_now, todays_hours_label, alert, fee_disclaimer (CarMax's "
+            "price and fee terms for that store's state). An unknown id is a charged 404. "
+            "CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 "
+            "states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A CarMax store id (stores[].id)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_store_inventory",
+        namespace="carmax",
+        method="store_inventory",
+        http="POST",
+        path="/api/v1/carmax/store-inventory",
+        summary=(
+            "The cars on one CarMax store's lot, with the same filters, sorts and paging as "
+            "search: store_id, store_name, query, total (as CarMax reports it), count, page, "
+            "page_size, has_more, sort, zip, applied [{category, value, label}] (the filters "
+            "CarMax applied), nearest_store {id, name, city, state, zip, distance_miles}, cars "
+            "[stock_number (the input of listing and photos), url, year, make, model, trim, "
+            "body, price (CarMax's no-haggle price, USD), original_price and price_drop (as "
+            "CarMax gives them), currency, mileage, exterior_color, interior_color, "
+            "transmission, drivetrain, engine_type, engine_size, cylinders, horsepower, "
+            "mpg_city, mpg_highway, battery_range_miles, vehicle_size, vehicle_types, "
+            "features, highlighted_features, packages, feature_score, prior_uses, store {id, "
+            "name, city, state}, distance_miles (from zip), shipping {fee (USD, to zip), text "
+            "(e.g. Test drive today, $249 shipping), type, transferable, arrival, min_days, "
+            "max_days}, model_rating {average, count} (owner reviews of that model-year), "
+            "badge, new_arrival, coming_soon, reserved, saleable, made_saleable_at, photo], "
+            "facets (with include_facets) [{name, type values: values [{value, url_segment "
+            "(the input of body_type or filters), count, selected, children (models of a "
+            "make)}]} | {name, label, type range: min, max, selected_min, selected_max, "
+            "buckets [{min, max, count}]}], notes. total is that store's lot count for the "
+            "filters. zip prices shipping. No VIN is returned. CarMax (carmax.com, the largest "
+            "US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio "
+            "fetches the public CarMax page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A CarMax store id (stores[].id)."
+                ),
+            ),
+            Param(
+                "zip",
+                "str",
+                required=True,
+                doc=(
+                    "A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to "
+                    "it, and the radius is measured from it."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make by name or slug (Ford, land-rover; makes lists them)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "With make: a model by name or slug (F-150 and F150 both work, RAV4, CX-5, "
+                    "Model 3; models lists a make's models)."
+                ),
+            ),
+            Param(
+                "body_type",
+                "Optional[str]",
+                doc=(
+                    "A body type as CarMax writes it: the url_segment of a VehicleType facet "
+                    "value (suvs, sedans, trucks, coupes, hatchbacks, minivans-and-vans, "
+                    "convertibles, wagons)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[str]]",
+                doc=(
+                    "Up to 8 facet values by url_segment (facets[].values[].url_segment with "
+                    "include_facets): drivetrain, colour, engine type, features, packages, "
+                    "cylinders, size, doors."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "year_min."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "year_max."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, USD."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "mileage_min."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "mileage_max."
+                ),
+            ),
+            Param(
+                "max_shipping_fee",
+                "Optional[Literal[0, 99, 199, 299, 399, 499, 999]]",
+                doc=(
+                    "CarMax's \"Max shipping fee\" filter, USD: 0, 99, 199, 299, 399, 499, 999 "
+                    "(0 = free to home or store). No limit by default."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "distance", "price_asc", "price_desc", "mileage_asc", "mileage_desc", "year_desc", "year_asc"]]',
+                doc=(
+                    "best_match (default), distance (nearest first), price_asc, price_desc, "
+                    "mileage_asc, mileage_desc, year_desc (newest), year_asc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1; has_more says whether another page exists."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Cars per page, 1 to 100 (default 24). 100 cars can take CarMax 80 seconds."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Add facets: every filter value with its url_segment and count (makes "
+                    "carry their models), and the year / price / mileage ranges with counts."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_reviews",
+        namespace="carmax",
+        method="reviews",
+        http="POST",
+        path="/api/v1/carmax/reviews",
+        summary=(
+            "Owner reviews of one model-year on CarMax (e.g. 2022 Toyota RAV4), 10 a page, "
+            "full depth, 5 sorts and an exact star filter: make, model, year, sort, rating, "
+            "page, page_size, total_reviews, total_matching, total_pages, has_more, "
+            "average_rating, distribution [{stars, count}], top_likes, top_dislikes, count, "
+            "reviews [{id, rating, title, recommends, pros [{aspect, comment}], cons [{aspect, "
+            "comment}], submitted_at, helpful_votes, not_helpful_votes, ratings_only, "
+            "syndicated, vehicle {year, make, model, mileage, time_owned}}]. Review text is "
+            "the title plus the pros and cons comments, as CarMax shows them. No reviewer name "
+            "or any reviewer identity is returned. A model-year with no reviews is a charged "
+            "404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 "
+            "states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "The make as CarMax names it (makes[].name)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "The model as CarMax names it (models[].name; F-150 is read as F150)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "The model year."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (10 reviews a page); total_pages says how deep they go."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_helpful", "newest", "oldest", "highest_rating", "lowest_rating"]]',
+                doc=(
+                    "most_helpful (default), newest, oldest, highest_rating or lowest_rating."
+                ),
+            ),
+            Param(
+                "rating",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with exactly this many stars."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_review_summary",
+        namespace="carmax",
+        method="review_summary",
+        http="POST",
+        path="/api/v1/carmax/review-summary",
+        summary=(
+            "The owner-review summary of one model-year on CarMax: make, model, year, count, "
+            "average, rounded_average, top_likes, top_dislikes, distribution [{stars, count}]. "
+            "A model-year with no reviews is a charged 404. CarMax (carmax.com, the largest US "
+            "used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio "
+            "fetches the public CarMax page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "The make as CarMax names it (makes[].name)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "The model as CarMax names it (models[].name; F-150 is read as F150)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "The model year."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_suggestions",
+        namespace="carmax",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/carmax/suggestions",
+        summary=(
+            "CarMax's make and model suggestions for the start of a name: query, count, "
+            "suggestions [{name, type (make or model), slug (the make or model input of "
+            "search)}]. CarMax (carmax.com, the largest US used-car retailer, with 263 stores "
+            "in 42 states and no-haggle prices). Scavio fetches the public CarMax page on "
+            "request. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a make or model name."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_makes",
+        namespace="carmax",
+        method="makes",
+        http="POST",
+        path="/api/v1/carmax/makes",
+        summary=(
+            "Every make CarMax lists: count, makes [{name, slug}]. CarMax (carmax.com, the "
+            "largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). "
+            "Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_models",
+        namespace="carmax",
+        method="models",
+        http="POST",
+        path="/api/v1/carmax/models",
+        summary=(
+            "One make's models on CarMax: make, make_slug, count, models [{name, slug (the "
+            "model input of search and car-value)}]. An unknown make is a charged 404. CarMax "
+            "(carmax.com, the largest US used-car retailer, with 263 stores in 42 states and "
+            "no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make by name or slug (makes[].slug)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carmax_car_value",
+        namespace="carmax",
+        method="car_value",
+        http="POST",
+        path="/api/v1/carmax/car-value",
+        summary=(
+            "Recent CarMax instant offers for one model-year (e.g. 2019 Ford F-150), as CarMax "
+            "shows them: make, model, year, currency, offer_range {low, high} (CarMax's range "
+            "across recent offers), headline_range {text, low, high} (the range CarMax's page "
+            "headline states, which can differ), aggregate {low, high, offer_count}, "
+            "offers_from, offers_to, count, recent_offers [{mileage, offer, offered_at, trim, "
+            "trim_code}], trim_ranges [{trim, trim_code, low, high}], median_offer_history "
+            "[{year, median_offer}], median_offer_change, other_years, url, notes. This is "
+            "what CarMax offered for cars of that model-year, not an appraisal of any one car. "
+            "An unknown make, model or year is a charged 404. CarMax (carmax.com, the largest "
+            "US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio "
+            "fetches the public CarMax page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make by name or slug."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model by name or slug (models[].slug; F-150 is read as f150, the slug "
+                    "CarMax uses)."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "The model year."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Carvana: 6 endpoints on /api/v1/carvana.
+_CARVANA_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="carvana_search",
+        namespace="carvana",
+        method="search",
+        http="POST",
+        path="/api/v1/carvana/search",
+        summary=(
+            "Search the used-car inventory of Carvana (carvana.com, the US online used-car "
+            "retailer). Scavio fetches the public carvana.com page on request; Carvana has no "
+            "public API. US only, prices in USD. By make and model (names as Carvana writes "
+            "them), 24 vehicles a page, with six sorts (most popular, lowest and highest "
+            "price, lowest mileage, newest model year, newest listed) and Carvana's filters: "
+            "model year, price, maximum mileage, trims, drive types, colors, body styles, fuel "
+            "types, Carvana's tags (Great Deal, New Price, No Reported Accidents, Single "
+            "Owner, Recently Added, Low Miles Per Year) and free shipping. Inventory is "
+            "national; the location (Carvana's own city pages via city, else the one Carvana "
+            "sets for the visit) changes shipping costs and delivery flags. Returns make, "
+            "model, city, sort, page, page_size, total, total_pages, has_more, count, "
+            "filters_applied, items [{vehicle_id, stock_number, url, year, make, model, "
+            "model_variant, trim, kbb_trim, exterior_color, interior_color, body_style, "
+            "mileage, mpg, fuel_type, seats, horsepower, price, kbb_value, msrp, "
+            "market_adjustment, previous_price, price_updated_at, shipping_cost, tags "
+            "(Carvana's labels such as Great Deal and New Price), purchase_pending, "
+            "purchase_type, offering, remaining_warranty_months, remaining_warranty_miles, "
+            "image, currency}], location {source, city, state, zip, delivery_available, "
+            "pickup_available, out_of_market, miles_to_pickup, earliest_delivery_date, "
+            "pickup_city, pickup_state}, facets (include_facets), market, notes. An unknown "
+            "make or model is a charged 404 that lists Carvana's names. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged. No ZIP "
+            "targeting, no keyword search."
+        ),
+        params=(
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make as Carvana writes it (makes lists them; case ignored): Toyota, "
+                    "Ford, Mercedes-Benz."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "Needs make. A model as Carvana writes it (make lists them; case ignored, "
+                    "hyphens count): RAV4, F-150, CR-V."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "One of Carvana's city pages (new-york-ny, los-angeles-ca, or \"New York, "
+                    "NY\"): the location shipping and delivery are shown for. Only with make, "
+                    "model and page: a filter or a sort with city is a 400 (Carvana uses the "
+                    "visit's own location on filtered pages)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1); 24 vehicles a page."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_popular", "lowest_price", "highest_price", "lowest_mileage", "newest_year", "newest_listed"]]',
+                doc=(
+                    "most_popular (Carvana's default; recomputed per visit, not stable between "
+                    "pages), lowest_price, highest_price, lowest_mileage, newest_year, "
+                    "newest_listed."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Model year from."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Model year to."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Price from, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Price to, USD."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Mileage up to."
+                ),
+            ),
+            Param(
+                "trims",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Needs make and model. Trim names as Carvana writes them (include_facets "
+                    "lists them under facets.models[].trims)."
+                ),
+            ),
+            Param(
+                "drive_types",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: 4wd, awd, fwd, rwd (a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "colors",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: beige, black, blue, brown, gold, gray, green, orange, pink, "
+                    "purple, red, silver, white, yellow (a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "body_styles",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: suv, sedan, truck, coupe, minivan, convertible, wagon, hatchback "
+                    "(a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "fuel_types",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: gas, diesel, electric, hybrid, plug_in_hybrid (a list or "
+                    "comma-separated)."
+                ),
+            ),
+            Param(
+                "tags",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: great_deal, new_price, no_reported_accidents, single_owner, "
+                    "recently_added, low_miles_per_year (Carvana's own labels) (a list or "
+                    "comma-separated)."
+                ),
+            ),
+            Param(
+                "free_shipping",
+                "Optional[bool]",
+                doc=(
+                    "Only vehicles Carvana ships free to the location the page uses."
+                ),
+            ),
+            Param(
+                "include_facets",
+                "Optional[bool]",
+                doc=(
+                    "Also return facets: counts per filter value, the makes, and the make's "
+                    "models with their trims."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carvana_vehicle",
+        namespace="carvana",
+        method="vehicle",
+        http="POST",
+        path="/api/v1/carvana/vehicle",
+        summary=(
+            "One vehicle of Carvana (carvana.com, the US online used-car retailer). Scavio "
+            "fetches the public carvana.com page on request; Carvana has no public API. US "
+            "only, prices in USD. By vehicle id or link: vehicle_id, stock_number, url, year, "
+            "make, model, model_variant, trim, body_type, doors, colors, mileage, seats, "
+            "price, previous_price, price_updated_at, kbb_value, fair_market_value, msrp, "
+            "market_adjustment, powertrain {engine, transmission, drivetrain, fuel, "
+            "horsepower, mpg}, dimensions, warranty (factory terms and what remains), "
+            "in_service_date, in_service_miles, keys, prior_use, recalls, "
+            "autocheck_accident_reported, highlights [{key, name, description}] (Carvana's "
+            "labels with their CARFAX / AutoCheck basis text as given), inspection "
+            "{inspected_on, categories [{name, points [{name, status}]}]}, imperfections "
+            "[{title, description, zone, location, image}], features, packages, options, "
+            "ai_summary (Carvana's AI-written text, labelled), hub {city, state, zip}, "
+            "sale_status, purchase_type, image, images, market, notes. Monthly payments, "
+            "shipping, taxes, fees and delivery dates are not included. No VIN. An unknown or "
+            "sold vehicle is a charged 404. 1 credit. Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "vehicle_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Carvana vehicle id (items[].vehicle_id from search; the number in a "
+                    "vehicle link)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A carvana.com vehicle link instead of vehicle_id."
+                ),
+            ),
+        ),
+        one_of=(("vehicle_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carvana_model_guide",
+        namespace="carvana",
+        method="model_guide",
+        http="POST",
+        path="/api/v1/carvana/model-guide",
+        summary=(
+            "Carvana's research page for one model year, from Carvana (carvana.com, the US "
+            "online used-car retailer). Scavio fetches the public carvana.com page on request; "
+            "Carvana has no public API. US only, prices in USD. Returns year, make, model, "
+            "name, url, summary, generation, in_stock, rating, rating_count, star_counts "
+            "{5..1}, changes [{area, text}] (what changed that year), engine_by_trim, "
+            "transmission_by_trim, drivetrain_by_trim [{trim, values}], other_specs, "
+            "trims_in_stock [{trim, in_stock}], owner_reviews [{text, rating, date, vehicle}] "
+            "(the reviews the page shows; no names), next_year, faq [{question, answer}], "
+            "sources, market, notes. Carvana says its owner ratings come from Strategic Vision "
+            "owner surveys. An unknown year, make or model is a charged 404. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Model year."
+                ),
+            ),
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make as Carvana writes it (makes lists them; case ignored): Toyota, "
+                    "Ford, Mercedes-Benz."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model as Carvana writes it (make lists them; case ignored, hyphens "
+                    "count): RAV4, F-150, CR-V."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carvana_trims",
+        namespace="carvana",
+        method="trims",
+        http="POST",
+        path="/api/v1/carvana/trims",
+        summary=(
+            "Carvana's trim guide for one model, from Carvana (carvana.com, the US online "
+            "used-car retailer). Scavio fetches the public carvana.com page on request; "
+            "Carvana has no public API. US only, prices in USD. Returns make, model, name, "
+            "url, summary, count, groups [{group, name, trims, description, best_for, "
+            "highlights, attributes [{name, value}], in_stock, image}], faq [{question, "
+            "answer}], sources, market, notes. An unknown make or model is a charged 404. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make as Carvana writes it (makes lists them; case ignored): Toyota, "
+                    "Ford, Mercedes-Benz."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model as Carvana writes it (make lists them; case ignored, hyphens "
+                    "count): RAV4, F-150, CR-V."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carvana_make",
+        namespace="carvana",
+        method="make",
+        http="POST",
+        path="/api/v1/carvana/make",
+        summary=(
+            "One make's model lineup on Carvana (carvana.com, the US online used-car "
+            "retailer). Scavio fetches the public carvana.com page on request; Carvana has no "
+            "public API. US only, prices in USD. Returns make, name, url, summary, count, "
+            "models [{model (the name search takes), make, slug, url, tagline, in_stock, "
+            "body_types, image}], market, notes. An unknown make is a charged 404. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make as Carvana writes it (makes lists them; case ignored): Toyota, "
+                    "Ford, Mercedes-Benz."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carvana_makes",
+        namespace="carvana",
+        method="makes",
+        http="POST",
+        path="/api/v1/carvana/makes",
+        summary=(
+            "Every make in the inventory of Carvana (carvana.com, the US online used-car "
+            "retailer). Scavio fetches the public carvana.com page on request; Carvana has no "
+            "public API. US only, prices in USD. with its in-stock count. Returns count, "
+            "total_in_stock, makes [{make (the name search takes), in_stock}], location, "
+            "market, notes. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Bring a Trailer: 8 endpoints on /api/v1/bringatrailer.
+_BRINGATRAILER_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="bringatrailer_results",
+        namespace="bringatrailer",
+        method="results",
+        http="POST",
+        path="/api/v1/bringatrailer/results",
+        summary=(
+            "Search the completed auctions of Bring a Trailer (bringatrailer.com, the online "
+            "collector-car auction site owned by Hearst). Scavio fetches the public Bring a "
+            "Trailer page on request; Bring a Trailer has no public API. Keywords (or none), "
+            "with Bring a Trailer's sorts (recently closed, popular, highest bid, oldest) and "
+            "filters: sold or reserve not met, recency, model years, max bid, category, "
+            "origin, era, no reserve, Premium, and one make, model (model_id) or location "
+            "(location_id) from suggestions, make or model. Up to 60 a page, through the first "
+            "10,000 results of a query. Returns query, sort, status, filters_applied, page, "
+            "page_size, total, total_pages, reachable_pages, has_more, count, lots [{id, "
+            "title, url, slug, year (from the title), status (sold, reserve_not_met, "
+            "withdrawn, ended), sold, amount (the sale price of a sold lot from the site's "
+            "\"Sold for\" result, the high bid of a lot that ended under its reserve), currency, "
+            "ended_at, no_reserve, premium, bat_alumni, country_code, thumbnail, excerpt}], "
+            "notes. View, watcher and comment counts are on listing. Amounts are in each lot's "
+            "own currency (USD, EUR, GBP and others, as the site shows it). 1 credit. A "
+            "not-found is charged; refused inputs and failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                wire="q",
+                doc=(
+                    "Keywords. Omitted: every completed result (filters and sort still apply)."
+                ),
+            ),
+            Param(
+                "exclude",
+                "Optional[str]",
+                doc=(
+                    "Leave out results matching these words."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recently_closed", "popular", "highest_bid", "oldest"]]',
+                doc=(
+                    "recently_closed (default), popular, highest_bid or oldest (Bring a "
+                    "Trailer's own sorts)."
+                ),
+            ),
+            Param(
+                "status",
+                'Optional[Literal["all", "sold", "reserve_not_met"]]',
+                doc=(
+                    "all (default), sold, or reserve_not_met (ended under the reserve)."
+                ),
+            ),
+            Param(
+                "recency",
+                'Optional[Literal["7d", "30d", "1y", "2y", "5y"]]',
+                doc=(
+                    "Only results that ended in the last 7 days (7d), 30 days, 1, 2 or 5 "
+                    "years. Default all time."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "max_bid",
+                "Optional[int]",
+                doc=(
+                    "Only results below this amount, one of Bring a Trailer's steps: 10000, "
+                    "25000, 50000, 100000, 250000, 500000, 750000, 1000000."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A category name or id: Aircraft (543), All-Terrain Vehicles (431), Boats "
+                    "(383), Charity & Non-Profit (415), Convertibles (434), Diesels (560), "
+                    "Electric Vehicles (426), Go-Karts (428), Hot Rods (429), Kei Vehicles "
+                    "(556), Military Vehicles (447), Minibikes & Scooters (430), Motorcycles "
+                    "(70), Parts (379), Projects (10), Race Cars (11), Right-Hand Drive (557), "
+                    "RVs & Campers (436), Service Vehicles (479), Side-by-Sides (553), Station "
+                    "Wagons (433), Tractors (432), Trains (544), Truck & 4x4 (21), Vans (418), "
+                    "Wheels (380)."
+                ),
+            ),
+            Param(
+                "origin",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "An origin name or id: American (3), Brazilian (499), British (4), "
+                    "Canadian (498), Czech (542), Dutch (497), French (6), German (7), Italian "
+                    "(8), Japanese (9), Korean (496), Prewar (441), Spanish (82), Swedish (18)."
+                ),
+            ),
+            Param(
+                "era",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A decade: 2020, 2010, 2000, 1990, 1980, 1970, 1960, 1950, 1940, 1930, "
+                    "1920, 1910, 1900, pre-1900."
+                ),
+            ),
+            Param(
+                "no_reserve",
+                "Optional[bool]",
+                doc=(
+                    "Only no-reserve auctions (not together with premium: the site applies the "
+                    "two as either-or)."
+                ),
+            ),
+            Param(
+                "premium",
+                "Optional[bool]",
+                doc=(
+                    "Only Premium listings (not together with no_reserve)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make name as Bring a Trailer lists it (BMW, Porsche, Land Rover): "
+                    "make's filter.make. Use one of make, model_id or location_id."
+                ),
+            ),
+            Param(
+                "model_id",
+                "Optional[Union[int, str, list[Union[int, str]]]]",
+                doc=(
+                    "A model page id (suggestions id or make models[].id, e.g. 1833018 = BMW "
+                    "E30 M3), or a list of up to 200 ids (model filter_ids for a model family "
+                    "such as Porsche 911)."
+                ),
+            ),
+            Param(
+                "location_id",
+                "Optional[Union[int, str]]",
+                doc=(
+                    "A location page id (location's location_id or a location suggestion id, "
+                    "e.g. 89009067 = Germany): only lots located there."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1). The site pages through the first 10,000 results of a "
+                    "query: page x page_size at most 10,000."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Results per page, 1-60 (default 36)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_price_history",
+        namespace="bringatrailer",
+        method="price_history",
+        http="POST",
+        path="/api/v1/bringatrailer/price-history",
+        summary=(
+            "Every completed result of one model (model_id, or a list of ids for a model "
+            "family) or make on Bring a Trailer (bringatrailer.com, the online collector-car "
+            "auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on "
+            "request; Bring a Trailer has no public API. In one call: total, sold_count, "
+            "reserve_not_met_count, sell_through_rate, first_date, last_date, "
+            "stats_by_currency {<currency>: {sold {count, min, max, median, average}, "
+            "reserve_not_met {...}}}, capped (the site returns at most 10,000 results), "
+            "results [{id, title, url, slug, date, amount (sale price or high bid), currency, "
+            "sold, status}] newest to oldest, notes. Optional recency and model-year range. "
+            "Amounts are in each lot's own currency (USD, EUR, GBP and others, as the site "
+            "shows it). 1 credit. A not-found is charged; refused inputs and failed upstream "
+            "calls are not."
+        ),
+        params=(
+            Param(
+                "model_id",
+                "Optional[Union[int, str, list[Union[int, str]]]]",
+                positional=True,
+                doc=(
+                    "A model page id (suggestions id or make models[].id, e.g. 1833018 = BMW "
+                    "E30 M3), or a list of up to 200 ids (model filter_ids for a model family "
+                    "such as Porsche 911)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make name (instead of model_id): its results, at most the 10,000 most "
+                    "recent."
+                ),
+            ),
+            Param(
+                "recency",
+                'Optional[Literal["7d", "30d", "1y", "2y", "5y"]]',
+                doc=(
+                    "Only results that ended in the last 7 days (7d), 30 days, 1, 2 or 5 "
+                    "years. Default all time."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+        ),
+        one_of=(("model_id", "make"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_listing",
+        namespace="bringatrailer",
+        method="listing",
+        http="POST",
+        path="/api/v1/bringatrailer/listing",
+        summary=(
+            "One auction on Bring a Trailer (bringatrailer.com, the online collector-car "
+            "auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on "
+            "request; Bring a Trailer has no public API. by slug or link, live or ended: id, "
+            "lot_number, title, url, status (live, sold, reserve_not_met, withdrawn, ended), "
+            "sold, reserve_not_met, no_reserve, premium, bat_alumni, currency, current_bid "
+            "(live), sold_price (the site's \"Sold for\" figure, never the bid field when they "
+            "differ), high_bid (ended under the reserve), ends_at / ended_at, bid_count, "
+            "comment_count, views, watchers, location {text, city, region, country, "
+            "country_code} (no ZIP), seller_type (private_party or dealer) and "
+            "seller_type_label as given, details (the Listing Details bullets, without the "
+            "chassis number), categories, description, photo_count, photos, bat_history "
+            "(earlier Bring a Trailer results of the same vehicle: result, amount, currency, "
+            "date), bids [{amount, currency, time}] (the full bid history), comments {page, "
+            "page_size, total, total_pages, has_more, items [{time, text, is_seller, likes}]}, "
+            "notes. No usernames, member profile links, chassis numbers / VINs or seller ZIP "
+            "codes are returned. An unknown slug is a charged 404. 1 credit. A not-found is "
+            "charged; refused inputs and failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A listing slug (lots[].slug), the part after /listing/ in a "
+                    "bringatrailer.com link."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A bringatrailer.com/listing/<slug>/ link instead of slug."
+                ),
+            ),
+            Param(
+                "comments_page",
+                "Optional[int]",
+                doc=(
+                    "Comments page (default 1)."
+                ),
+            ),
+            Param(
+                "comments_page_size",
+                "Optional[int]",
+                doc=(
+                    "Comments per page, 1-500 (default 100)."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_live",
+        namespace="bringatrailer",
+        method="live",
+        http="POST",
+        path="/api/v1/bringatrailer/live",
+        summary=(
+            "Every live auction on Bring a Trailer (bringatrailer.com, the online "
+            "collector-car auction site owned by Hearst). Scavio fetches the public Bring a "
+            "Trailer page on request; Bring a Trailer has no public API. (about 1,000 lots, "
+            "read from one page, so a call takes 20 seconds to 3 minutes: allow 200 seconds), "
+            "filtered by Scavio by keyword, make, country, ending within N hours, no reserve "
+            "and Premium, sorted by ending time or current bid, paged. Returns total_live, "
+            "total, sort, filters_applied, page, limit, has_more, count, lots [{id, title, "
+            "url, slug, year, current_bid (null before any bid), currency, ends_at, "
+            "no_reserve, premium, bat_alumni, country, country_code, thumbnail, excerpt, "
+            "era}], notes. Amounts are in each lot's own currency (USD, EUR, GBP and others, "
+            "as the site shows it). 1 credit. A not-found is charged; refused inputs and "
+            "failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                wire="q",
+                doc=(
+                    "Words in the lot title or excerpt."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make, matched in the lot title."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Country of the lot: a two-letter code (US, DE, GB) or a country name as "
+                    "listed (United Kingdom)."
+                ),
+            ),
+            Param(
+                "ending_within_hours",
+                "Optional[int]",
+                doc=(
+                    "Only auctions scheduled to end within this many hours."
+                ),
+            ),
+            Param(
+                "no_reserve",
+                "Optional[bool]",
+                doc=(
+                    "Only no-reserve auctions."
+                ),
+            ),
+            Param(
+                "premium",
+                "Optional[bool]",
+                doc=(
+                    "Only Premium listings."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["ending_soon", "ending_latest", "bid_high", "bid_low"]]',
+                doc=(
+                    "ending_soon (default), ending_latest, bid_high or bid_low."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Lots per page, 1-2000 (default 100)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of the filtered list (default 1)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_make",
+        namespace="bringatrailer",
+        method="make",
+        http="POST",
+        path="/api/v1/bringatrailer/make",
+        summary=(
+            "One make page of Bring a Trailer (bringatrailer.com, the online collector-car "
+            "auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on "
+            "request; Bring a Trailer has no public API. Returns make, title, description, "
+            "url, filter {make} (for results and price_history), model_count, models [{id, "
+            "title, url, path, year_min, year_max, image}], live_count, live [{id, title, url, "
+            "slug, year, current_bid (null before any bid), currency, ends_at, no_reserve, "
+            "premium, bat_alumni, country, country_code, thumbnail, excerpt}], "
+            "completed_total, recent_results [{id, title, url, slug, year (from the title), "
+            "status (sold, reserve_not_met, withdrawn, ended), sold, amount (the sale price of "
+            "a sold lot from the site's \"Sold for\" result, the high bid of a lot that ended "
+            "under its reserve), currency, ended_at, no_reserve, premium, bat_alumni, "
+            "country_code, thumbnail, excerpt}], notes. A make page can take up to a minute. "
+            "An unknown make is a charged 404. 1 credit. A not-found is charged; refused "
+            "inputs and failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make slug or name (bmw, porsche, land-rover, Land Rover) or its "
+                    "bringatrailer.com link."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_model",
+        namespace="bringatrailer",
+        method="model",
+        http="POST",
+        path="/api/v1/bringatrailer/model",
+        summary=(
+            "One model page of Bring a Trailer (bringatrailer.com, the online collector-car "
+            "auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on "
+            "request; Bring a Trailer has no public API. (e.g. bmw/e30-m3, or a family such as "
+            "porsche/911): title, description, url, filter_ids (the model_id list for results "
+            "and price_history), sub_models, live_count, live [{id, title, url, slug, year, "
+            "current_bid (null before any bid), currency, ends_at, no_reserve, premium, "
+            "bat_alumni, country, country_code, thumbnail, excerpt}], completed_total, "
+            "recent_results [{id, title, url, slug, year (from the title), status (sold, "
+            "reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot "
+            "from the site's \"Sold for\" result, the high bid of a lot that ended under its "
+            "reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, "
+            "thumbnail, excerpt}], notes. An unknown model is a charged 404. 1 credit. A "
+            "not-found is charged; refused inputs and failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A make and model path (make models[].path, e.g. bmw/e30-m3 or "
+                    "porsche/911) or its bringatrailer.com link."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_location",
+        namespace="bringatrailer",
+        method="location",
+        http="POST",
+        path="/api/v1/bringatrailer/location",
+        summary=(
+            "The lots of Bring a Trailer (bringatrailer.com, the online collector-car auction "
+            "site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; "
+            "Bring a Trailer has no public API. located in one country: title, url, "
+            "location_id (for results), live_count, live [{id, title, url, slug, year, "
+            "current_bid (null before any bid), currency, ends_at, no_reserve, premium, "
+            "bat_alumni, country, country_code, thumbnail, excerpt}], completed_total, "
+            "recent_results [{id, title, url, slug, year (from the title), status (sold, "
+            "reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot "
+            "from the site's \"Sold for\" result, the high bid of a lot that ended under its "
+            "reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, "
+            "thumbnail, excerpt}], notes. An unknown country is a charged 404. 1 credit. A "
+            "not-found is charged; refused inputs and failed upstream calls are not."
+        ),
+        params=(
+            Param(
+                "country",
+                "str",
+                required=True,
+                doc=(
+                    "A country name or slug (germany, united-kingdom, Italy) or its "
+                    "bringatrailer.com/location/ link."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="bringatrailer_suggestions",
+        namespace="bringatrailer",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/bringatrailer/suggestions",
+        summary=(
+            "The search-box suggestions of Bring a Trailer (bringatrailer.com, the online "
+            "collector-car auction site owned by Hearst). Scavio fetches the public Bring a "
+            "Trailer page on request; Bring a Trailer has no public API. for a partial make, "
+            "model or place: query, count, suggestions [{id (the page id results take as "
+            "model_id or location_id), title, type (make, model, location, other), url, "
+            "path}], notes. 1 credit. A not-found is charged; refused inputs and failed "
+            "upstream calls are not."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "A partial make, model or place."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -22933,6 +31632,21 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
         min_timeout=240.0,
     ),
+    # ============== batch 2026-11-26: 14 platforms (beauty + cars) ===============
+    *_SPACENK_ENDPOINTS,
+    *_LOOKFANTASTIC_ENDPOINTS,
+    *_CULTBEAUTY_ENDPOINTS,
+    *_YESSTYLE_ENDPOINTS,
+    *_NOTINO_ENDPOINTS,
+    *_DOUGLAS_ENDPOINTS,
+    *_BOOTS_ENDPOINTS,
+    *_ROCKAUTO_ENDPOINTS,
+    *_CARSCOM_ENDPOINTS,
+    *_AUTOTRADER_ENDPOINTS,
+    *_CARGURUS_ENDPOINTS,
+    *_CARMAX_ENDPOINTS,
+    *_CARVANA_ENDPOINTS,
+    *_BRINGATRAILER_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -29860,6 +38574,20 @@ NAMESPACES: tuple[str, ...] = (
     "marks",
     "rona",
     "pcexpress",
+    "spacenk",
+    "lookfantastic",
+    "cultbeauty",
+    "yesstyle",
+    "notino",
+    "douglas",
+    "boots",
+    "rockauto",
+    "carscom",
+    "autotrader",
+    "cargurus",
+    "carmax",
+    "carvana",
+    "bringatrailer",
 )
 
 

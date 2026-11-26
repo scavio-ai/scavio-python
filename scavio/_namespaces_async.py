@@ -122,6 +122,20 @@ __all__ = [
     "_AsyncMarksNamespace",
     "_AsyncRonaNamespace",
     "_AsyncPcexpressNamespace",
+    "_AsyncSpacenkNamespace",
+    "_AsyncLookfantasticNamespace",
+    "_AsyncCultbeautyNamespace",
+    "_AsyncYesstyleNamespace",
+    "_AsyncNotinoNamespace",
+    "_AsyncDouglasNamespace",
+    "_AsyncBootsNamespace",
+    "_AsyncRockautoNamespace",
+    "_AsyncCarscomNamespace",
+    "_AsyncAutotraderNamespace",
+    "_AsyncCargurusNamespace",
+    "_AsyncCarmaxNamespace",
+    "_AsyncCarvanaNamespace",
+    "_AsyncBringatrailerNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -22892,3 +22906,3010 @@ class _AsyncPcexpressNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("pcexpress_suggestions", {"query": query, "banner": banner, "language": language}, extra)
+
+class _AsyncSpacenkNamespace:
+    """Space NK (spacenk.com, the London-based luxury beauty retailer) search, category, brand, brands, product, reviews, suggestions, stores (UK) and offers endpoints; markets uk, ie, nl, au, each in its own currency; 1 credit each (a full listing up to 5)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]] = None,
+        full: Optional[bool] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the products of Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. Keywords with paging (36 a page), Space NK's ten sorts and a brand filter. Returns query, market, page, page_size (36), sort, full, total, total_pages, has_more, count, items [{product_id, sku (the shade / size the tile shows), name, brand, url, image, price, list_price (struck-through price), currency, on_sale, discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 sold today, Trending this week, new shade), rating, review_count, in_stock, availability, stock_count (online stock of the shade / size shown)}], more_product_ids (the page's other products when full is false), notes. 1 credit; full: true up to 5 (one call per product filled). Failed upstream calls and refused inputs are not charged; a not-found is charged. Not offered: the US market (Space NK's US path shows UK prices), a price filter (the site ignores it), store stock counts, price history, cart or checkout.
+
+        Costs 1 credit; with full=True up to 5 (one more call per product filled). credits_used
+        in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a brand (required).
+            brand: Only these brands, by name as Space NK shows it (items[].brand or brands[].name, e.g. Medik8, Drunk Elephant); up to 10.
+            page: Page, 1-based (36 products a page; default 1).
+            sort: relevance (default), best_sellers, new, our_favourites, price_high_to_low, price_low_to_high, rating (highly reviewed), most_viewed, discount, brand: Space NK's own sorts.
+            full: Fill all 36 products of the page in full (default false: the first 12 in full, the other 24 as ids in more_product_ids). Up to 5 credits.
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_search", {"query": query, "brand": brand, "page": page, "sort": sort, "full": full, "market": market}, extra)
+
+    async def category(
+        self,
+        category_id: str,
+        *,
+        brand: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]] = None,
+        full: Optional[bool] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. By category id (black-friday is the Black Friday list), with paging, sorts and the brand filter. Returns category_id, market, page, page_size (36), sort, full, total, total_pages, has_more, count, items [{product_id, sku (the shade / size the tile shows), name, brand, url, image, price, list_price (struck-through price), currency, on_sale, discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 sold today, Trending this week, new shade), rating, review_count, in_stock, availability, stock_count (online stock of the shade / size shown)}], more_product_ids (the page's other products when full is false), notes. 1 credit; full: true up to 5 (one call per product filled). An unknown category id is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; with full=True up to 5 (one more call per product filled). credits_used
+        in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            category_id: A Space NK category id (black-friday, skincare-treatment-serum, makeup-complexion-foundation ...).
+            brand: Only these brands, by name as Space NK shows it (items[].brand or brands[].name, e.g. Medik8, Drunk Elephant); up to 10.
+            page: Page, 1-based (36 products a page; default 1).
+            sort: relevance (default), best_sellers, new, our_favourites, price_high_to_low, price_low_to_high, rating (highly reviewed), most_viewed, discount, brand: Space NK's own sorts.
+            full: Fill all 36 products of the page in full (default false: the first 12 in full, the other 24 as ids in more_product_ids). Up to 5 credits.
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_category", {"category_id": category_id, "brand": brand, "page": page, "sort": sort, "full": full, "market": market}, extra)
+
+    async def brand(
+        self,
+        brand_id: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "new", "our_favourites", "price_high_to_low", "price_low_to_high", "rating", "most_viewed", "discount", "brand"]] = None,
+        full: Optional[bool] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. By brand id (brands[].id), with paging and sorts. Returns brand_id, market, page, page_size (36), sort, full, total, total_pages, has_more, count, items [{product_id, sku (the shade / size the tile shows), name, brand, url, image, price, list_price (struck-through price), currency, on_sale, discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 sold today, Trending this week, new shade), rating, review_count, in_stock, availability, stock_count (online stock of the shade / size shown)}], more_product_ids (the page's other products when full is false), notes. 1 credit; full: true up to 5 (one call per product filled). An unknown brand id is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; with full=True up to 5 (one more call per product filled). credits_used
+        in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            brand_id: A brand id from brands (brands[].id, e.g. medik8, Charlotte Tilbury).
+            page: Page, 1-based (36 products a page; default 1).
+            sort: relevance (default), best_sellers, new, our_favourites, price_high_to_low, price_low_to_high, rating (highly reviewed), most_viewed, discount, brand: Space NK's own sorts.
+            full: Fill all 36 products of the page in full (default false: the first 12 in full, the other 24 as ids in more_product_ids). Up to 5 credits.
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_brand", {"brand_id": brand_id, "page": page, "sort": sort, "full": full, "market": market}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every brand Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. lists A-Z. Returns market, letter, total, count, brands [{id (for the brand endpoint), name (for the brand filter), url, letter}], notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Only brands under this letter (A-Z or #).
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_brands", {"letter": letter, "market": market}, extra)
+
+    async def product(
+        self,
+        product_id: str,
+        *,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. By product id or shade / size id: product_id, master_id, type (master or variant), ean, name, brand, url, price, list_price, currency, price_text, in_stock, availability, availability_message, stock_count (online stock of one shade / size), orderable, button (ADD_TO_BAG or NOTIFY_ME), size {quantity, unit}, short_description, description, key_benefits, how_to_use, kit_contents, ingredients, rating, review_count, images, variant_attribute (color or size), variant_counts, variants [{id, attribute, name, in_stock, availability, in_stock_date, selectable, selected, swatch_colour}], promotions [{id, name, callout, details, type, gift_product_id}], badges {offers, gift, trade}, category_path, skin_suitability, restricted_shipping, hazmat, coming_soon, notes. An id Space NK does not answer for is an uncharged 502. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Space NK product id (items[].product_id, e.g. MUK200057800) or one shade / size (variants[].id, e.g. UK200057805).
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_product", {"product_id": product_id, "market": market}, extra)
+
+    async def reviews(
+        self,
+        product_id: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["newest", "most_helpful", "highest_rating", "lowest_rating"]] = None,
+        stars: Optional[Union[int, list[int]]] = None,
+        search: Optional[str] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product on Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. One English review list shown on every market. Paging up to 100 a page, four sorts, star filter and text search. Returns product_id, page, page_size, sort, total, total_pages, has_more, count, rating_distribution, reviews [{id, rating, title, text, submitted_at, recommended, syndicated, syndication_source {name, url}, helpful_votes, unhelpful_votes, context {skin_type, skin_tone, best_use, sensitive_skin}, tags}], notes. Reviewer names, locations and photos are not returned. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id (items[].product_id or product's master_id, starting with M): reviews are kept per product.
+            page: Page, 1-based (default 1).
+            page_size: Reviews a page, 1-100 (default 20).
+            sort: newest (default), most_helpful, highest_rating, lowest_rating.
+            stars: Only reviews with these star ratings.
+            search: Only reviews containing this text.
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_reviews", {"product_id": product_id, "page": page, "page_size": page_size, "sort": sort, "stars": stars, "search": search, "market": market}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. suggests for what a shopper has typed: brands [{name, url}], categories [{name, url}], articles (ids of editorial articles), products [{product_id, sku (the shade / size the tile shows), name, brand, url, image, price, list_price (struck-through price), currency, on_sale, discount_badge (e.g. 25% OFF), promo_badges (e.g. FREE GIFT), badges (e.g. 351 sold today, Trending this week, new shade), rating, review_count, in_stock, availability, stock_count (online stock of the shade / size shown)}]. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a shopper has typed (required).
+            market: One of uk, ie, nl, au: uk (United Kingdom, GBP, default), ie (Ireland, EUR), nl (Netherlands, EUR, Dutch copy), au (Australia, AUD). Not offered (400): us (Space NK's US path shows UK prices), de, ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_suggestions", {"query": query, "market": market}, extra)
+
+    async def stores(
+        self,
+        product_id: str,
+        *,
+        postcode: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        limit: Optional[int] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Space NK's UK stores nearest a postcode or point, for one product, from Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. Returns product_id, location, count, stores [{store_id, name, address, city, region, postcode, country, latitude, longitude, phone, opening_hours [{day, hours}], distance_miles, in_store_available (Space NK's in-store flag for the product, not a count), click_collect_available, click_collect_label (e.g. Click & Collect from Monday 7th December), express_available}], notes. UK only. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Space NK product id (items[].product_id, e.g. MUK200057800) or one shade / size (variants[].id, e.g. UK200057805).
+            postcode: A full UK postcode.
+            latitude: With longitude instead of postcode: a point in the UK.
+            longitude: With latitude.
+            limit: Stores to return, nearest first, 1-20 (default 10).
+            market: uk only: Space NK's stores are in the UK.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_stores", {"product_id": product_id, "postcode": postcode, "latitude": latitude, "longitude": longitude, "limit": limit, "market": market}, extra)
+
+    async def offers(
+        self,
+        *,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The gifts with purchase on the offers page of Space NK (spacenk.com, the London-based luxury beauty retailer, owned by Ulta Beauty). Scavio fetches the public page on request; Space NK has no public API. Markets uk (GBP), ie (EUR), nl (EUR, Dutch copy), au (AUD), each in its own currency as Space NK prices it. uk or ie. Returns market, title, validity (the page's own line, e.g. Ends 30th November at 11.45pm (GMT)), terms_url, count, offers [{brand, gift, condition, spend_threshold {amount, currency}, brand_url, image}], notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: uk (default) or ie: the nl and au offers pages show the UK offers in GBP.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("spacenk_offers", {"market": market}, extra)
+
+class _AsyncLookfantasticNamespace:
+    """Lookfantastic (lookfantastic.com, THG's beauty retailer with 10 country sites) search, list, product, suggestions, offers, brands and categories endpoints; market (10 sites) and currency on every method, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        formulation: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the catalogue of Lookfantastic (lookfantastic.com, THG's beauty retailer with 10 country sites). Scavio fetches the public Lookfantastic page on request, for the site and currency asked (10 sites: www.lookfantastic.com, www.lookfantastic.de, www.lookfantastic.fr, www.lookfantastic.es, www.lookfantastic.it, www.lookfantastic.nl, www.lookfantastic.pl, www.lookfantastic.at, www.lookfantastic.ie, eu.lookfantastic.com); Lookfantastic has no public API (its product feeds are for approved affiliate publishers only). Keywords or a SKU, sorted (relevance, popularity, price, name, newest, discount) and filtered (brand, skin type, concern, spf, key ingredient, formulation, price range, minimum rating, discount range, and any of the site's filters), up to 40 a page. A keyword Lookfantastic maps to one of its pages returns that page's products, as Lookfantastic's own search does, with resolved_from {type (brand, category, landing or product), path, listed_path, url, title, sku}. Returns query, resolved_from, corrected_query, market {market, site, language, currency, shipping_destination}, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku, name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url} (the site's promotion text, as given), variants_count, options}], facets [{facet (the site's facet name, the input of filters[].facet), filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Lookfantastic's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Lookfantastic's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords (in the site's language) or a Lookfantastic SKU. A keyword Lookfantastic maps to a page (a brand, a category, many generic terms) returns that page's products, with resolved_from.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-40, default 40).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Lookfantastic's sort menu.
+            brand: Brand, as the site names it (one or a list; exact, e.g. CeraVe): facets[filter=brand].options[].value.
+            skin_type: Skin type as the site lists it (one or a list), e.g. Dry, Oily, Sensitive (in the site's language).
+            concern: Skincare concern as the site lists it (one or a list), e.g. Anti-Ageing, Dehydration.
+            spf: SPF band as the site lists it (one or a list), e.g. SPF 30+, SPF 50+.
+            key_ingredient: Key ingredient as the site lists it (one or a list), e.g. Retinol, Hyaluronic Acid, Niacinamide.
+            formulation: Formulation as the site lists it (one or a list), e.g. Vegan, Fragrance Free, Alcohol Free.
+            filters: Any other of the site's filters, as facets[] give them (with include_facets): {facet (facets[].facet), value (options[].value; one or a list)}, up to 10. Facet names carry the site's language (de_ on lookfantastic.de).
+            min_price: Lowest price, in the currency asked.
+            max_price: Highest price, in the currency asked.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Lookfantastic's RRP (0-100).
+            max_discount: Highest percent off Lookfantastic's RRP (0-100).
+            include_facets: Also return Lookfantastic's filter counts for the results (facets). Still 1 credit.
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_search", {"query": query, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "formulation": formulation, "filters": filters, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "market": market, "currency": currency}, extra)
+
+    async def list(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        formulation: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of any Lookfantastic list page by path or link: a category, brand (/brands/cerave), sale or offer page (Black Friday: /black-friday), sorted (relevance, popularity, price, name, newest, discount) and filtered (brand, skin type, concern, spf, key ingredient, formulation, price range, minimum rating, discount range, and any of the site's filters), up to 200 a page. An editorial page without a product list is listed through its view-all page (listed_path). Returns path, listed_path, url, market {market, site, language, currency, shipping_destination}, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku, name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url} (the site's promotion text, as given), variants_count, options}], facets [{facet (the site's facet name, the input of filters[].facet), filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Lookfantastic's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Lookfantastic's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. An unknown path is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Lookfantastic list page: a category, brand (/brands/cerave), sale or offer page (Black Friday), the path of its /c/ link. Paths come from categories, brands and offers (list_path).
+            url: A Lookfantastic list page link (https://www.lookfantastic.com/c/<page>/) instead of path.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-200, default 60).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Lookfantastic's sort menu.
+            brand: Brand, as the site names it (one or a list; exact, e.g. CeraVe): facets[filter=brand].options[].value.
+            skin_type: Skin type as the site lists it (one or a list), e.g. Dry, Oily, Sensitive (in the site's language).
+            concern: Skincare concern as the site lists it (one or a list), e.g. Anti-Ageing, Dehydration.
+            spf: SPF band as the site lists it (one or a list), e.g. SPF 30+, SPF 50+.
+            key_ingredient: Key ingredient as the site lists it (one or a list), e.g. Retinol, Hyaluronic Acid, Niacinamide.
+            formulation: Formulation as the site lists it (one or a list), e.g. Vegan, Fragrance Free, Alcohol Free.
+            filters: Any other of the site's filters, as facets[] give them (with include_facets): {facet (facets[].facet), value (options[].value; one or a list)}, up to 10. Facet names carry the site's language (de_ on lookfantastic.de).
+            min_price: Lowest price, in the currency asked.
+            max_price: Highest price, in the currency asked.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Lookfantastic's RRP (0-100).
+            max_discount: Highest percent off Lookfantastic's RRP (0-100).
+            include_facets: Also return Lookfantastic's filter counts for the results (facets). Still 1 credit.
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_list", {"path": path, "url": url, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "formulation": formulation, "filters": filters, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "market": market, "currency": currency}, extra)
+
+    async def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Lookfantastic product by SKU or link, for the site and currency asked: market, requested_sku, sku, product_sku, name, product_name, brand, url, price, rrp, discount_percent, currency, in_stock, availability_message, barcode (EAN-13 or UPC, as given; null when none is listed, as for sets), option_type and option (shade or size, as given), variants [{sku, name, option_type, option, shade_colour, price, rrp, discount_percent, in_stock, availability_message, barcode, preorder, max_per_order, loyalty_points}], subtitle, description, key_benefits, directions, ingredients, at_a_glance, volume, faq, images, loyalty_points, max_per_order, preorder, offer {title, description, free_gift, url} (the site's promotion banner, as given), rating, review_count, recent_reviews [{rating, date, text}] (the 10 latest reviews the product page shows; no reviewer names), breadcrumbs, notes. Text is in the site's language. Prices are Lookfantastic's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Lookfantastic's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. An unknown SKU is a charged 404. Full review paging is not offered. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A Lookfantastic SKU (items[].sku or variants[].sku; SKUs are the same on every Lookfantastic site).
+            url: A Lookfantastic product link (https://www.lookfantastic.com/p/<name>/<sku>/) instead of sku. The market still comes from market.
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_product", {"sku": sku, "url": url, "market": market, "currency": currency}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Lookfantastic's search-box suggestions for typed text, in the site's language: market, query, count, terms (suggested searches), corrections, products [{sku, name, url, image, price, rrp, discount_percent, currency, rating, review_count}] (up to 5 each), notes. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far.
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_suggestions", {"query": query, "market": market, "currency": currency}, extra)
+
+    async def offers(
+        self,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Lookfantastic's current offers as its voucher-codes page lists them: market, count, offers [{title, description, code (when the offer text names one), gift, threshold (the spend the text states), ends (the end time Lookfantastic gives, ISO 8601 UTC), url, list_path (send to list for the products)}], notes. Lookfantastic gives no start date. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_offers", {"market": market, "currency": currency}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Lookfantastic's A-Z brand directory for the site asked: market, letter, total_brands, count, brands [{name, path, url, letter}], notes. path is the input of list for a brand's products. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Optional: only brands under this letter (A-Z, or 0-9).
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_brands", {"letter": letter, "market": market, "currency": currency}, extra)
+
+    async def categories(
+        self,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Lookfantastic's category tree as the site navigation shows it, in the site's language: market, count, total_categories, categories [{name, path, url, children [...]}], notes. path is the input of list. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: Lookfantastic's site to read (default gb): gb (UK and international site (lookfantastic.com, 22 currencies); currencies GBP, USD, EUR, AUD, CAD, CHF, SEK, DKK, NOK, JPY, KRW, HKD, SGD, AED, SAR, ILS, NZD, CNY, MYR, TWD, THB, IDR, default GBP); de (Germany (lookfantastic.de); EUR); fr (France (lookfantastic.fr); EUR); es (Spain (lookfantastic.es); EUR); it (Italy (lookfantastic.it); EUR); nl (Netherlands (lookfantastic.nl); EUR); pl (Poland (lookfantastic.pl); currencies PLN, EUR, default PLN); at (Austria (lookfantastic.at); EUR); ie (Ireland (lookfantastic.ie); EUR); eu (EU site (eu.lookfantastic.com, English, euro prices of its own); EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("lookfantastic_categories", {"market": market, "currency": currency}, extra)
+
+class _AsyncCultbeautyNamespace:
+    """Cult Beauty (cultbeauty.co.uk, THG's beauty retailer) search, list, product, suggestions, offers, brands and categories endpoints; market gb or intl and currency (12) on every method, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        formulation: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the catalogue of Cult Beauty (cultbeauty.co.uk, THG's beauty retailer). Scavio fetches the public Cult Beauty page on request, for the site and currency asked (2 sites: www.cultbeauty.co.uk, www.cultbeauty.com); Cult Beauty has no public API (its product feeds are for approved affiliate publishers only). Keywords or a SKU, sorted (relevance, popularity, price, name, newest, discount) and filtered (brand, skin type, concern, spf, key ingredient, formulation, range, price range, minimum rating, discount range, and any of the site's filters), up to 40 a page. A keyword Cult Beauty maps to one of its pages returns that page's products, as Cult Beauty's own search does, with resolved_from {type (brand, category, landing or product), path, listed_path, url, title, sku}. Returns query, resolved_from, corrected_query, market {market, site, language, currency, shipping_destination}, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku, name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url} (the site's promotion text, as given), variants_count, options}], facets [{facet (the site's facet name, the input of filters[].facet), filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Cult Beauty's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Cult Beauty's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords (in the site's language) or a Cult Beauty SKU. A keyword Cult Beauty maps to a page (a brand, a category, many generic terms) returns that page's products, with resolved_from.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-40, default 40).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Cult Beauty's sort menu.
+            brand: Brand, as Cult Beauty names it (one or a list; exact, e.g. CeraVe): facets[filter=brand].options[].value.
+            skin_type: Skin type as Cult Beauty lists it (one or a list), e.g. Dry, Oily, Sensitive.
+            concern: Skin concern as Cult Beauty lists it (one or a list), e.g. Anti-Ageing, Dry, Dullness.
+            spf: SPF content as Cult Beauty lists it (one or a list), e.g. No SPF, SPF 15+, SPF 30+.
+            key_ingredient: Key ingredient as Cult Beauty lists it (one or a list), e.g. Retinol, Hyaluronic Acid.
+            formulation: Formulation as Cult Beauty lists it (one or a list), e.g. Vegan, Alcohol Free.
+            range: A brand's product range as Cult Beauty lists it (one or a list).
+            filters: Any other of the site's filters, as facets[] give them (with include_facets): {facet (facets[].facet), value (options[].value; one or a list)}, up to 10. Facet names carry the site's language (de_ on lookfantastic.de).
+            min_price: Lowest price, in the currency asked.
+            max_price: Highest price, in the currency asked.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Cult Beauty's RRP (0-100).
+            max_discount: Highest percent off Cult Beauty's RRP (0-100).
+            include_facets: Also return Cult Beauty's filter counts for the results (facets). Still 1 credit.
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_search", {"query": query, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "formulation": formulation, "range": range, "filters": filters, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "market": market, "currency": currency}, extra)
+
+    async def list(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_low", "price_high", "name", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        skin_type: Optional[Union[str, list[str]]] = None,
+        concern: Optional[Union[str, list[str]]] = None,
+        spf: Optional[Union[str, list[str]]] = None,
+        key_ingredient: Optional[Union[str, list[str]]] = None,
+        formulation: Optional[Union[str, list[str]]] = None,
+        range: Optional[Union[str, list[str]]] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[float] = None,
+        min_discount: Optional[float] = None,
+        max_discount: Optional[float] = None,
+        include_facets: Optional[bool] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of any Cult Beauty list page by path or link: a category, brand (/brands/cerave), sale or offer page (Black Friday: /black-friday-cyber-monday), sorted (relevance, popularity, price, name, newest, discount) and filtered (brand, skin type, concern, spf, key ingredient, formulation, range, price range, minimum rating, discount range, and any of the site's filters), up to 200 a page. An editorial page without a product list is listed through its shop-all page (listed_path). Returns path, listed_path, url, market {market, site, language, currency, shipping_destination}, total, total_pages, page, page_size, has_more, count, sort, filters_applied, items [{position, sku, name, brand, url, image, price, rrp, discount_percent, price_from (the lowest variant price when below price), currency, in_stock, rating, review_count, offer {title, description, free_gift, url} (the site's promotion text, as given), variants_count, options}], facets [{facet (the site's facet name, the input of filters[].facet), filter (the input it maps to), label, type, options [{value, label, count} or {label, from, to, count}]}] (with include_facets), notes. Prices are Cult Beauty's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Cult Beauty's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. An unknown path is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A Cult Beauty list page: a category, brand (/brands/cerave), sale or offer page (Black Friday), the path of its /c/ link. Paths come from categories, brands and offers (list_path).
+            url: A Cult Beauty list page link (https://www.cultbeauty.co.uk/c/<page>/) instead of path.
+            page: Page (default 1). At most 10,000 positions (page x page_size).
+            page_size: Products per page (1-200, default 60).
+            sort: relevance (default), popularity, price_low, price_high, name, newest or discount (highest percent off first): Cult Beauty's sort menu.
+            brand: Brand, as Cult Beauty names it (one or a list; exact, e.g. CeraVe): facets[filter=brand].options[].value.
+            skin_type: Skin type as Cult Beauty lists it (one or a list), e.g. Dry, Oily, Sensitive.
+            concern: Skin concern as Cult Beauty lists it (one or a list), e.g. Anti-Ageing, Dry, Dullness.
+            spf: SPF content as Cult Beauty lists it (one or a list), e.g. No SPF, SPF 15+, SPF 30+.
+            key_ingredient: Key ingredient as Cult Beauty lists it (one or a list), e.g. Retinol, Hyaluronic Acid.
+            formulation: Formulation as Cult Beauty lists it (one or a list), e.g. Vegan, Alcohol Free.
+            range: A brand's product range as Cult Beauty lists it (one or a list).
+            filters: Any other of the site's filters, as facets[] give them (with include_facets): {facet (facets[].facet), value (options[].value; one or a list)}, up to 10. Facet names carry the site's language (de_ on lookfantastic.de).
+            min_price: Lowest price, in the currency asked.
+            max_price: Highest price, in the currency asked.
+            min_rating: Lowest average star rating (1-5).
+            min_discount: Lowest percent off Cult Beauty's RRP (0-100).
+            max_discount: Highest percent off Cult Beauty's RRP (0-100).
+            include_facets: Also return Cult Beauty's filter counts for the results (facets). Still 1 credit.
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_list", {"path": path, "url": url, "page": page, "page_size": page_size, "sort": sort, "brand": brand, "skin_type": skin_type, "concern": concern, "spf": spf, "key_ingredient": key_ingredient, "formulation": formulation, "range": range, "filters": filters, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "min_discount": min_discount, "max_discount": max_discount, "include_facets": include_facets, "market": market, "currency": currency}, extra)
+
+    async def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Cult Beauty product by SKU or link, for the site and currency asked: market, requested_sku, sku, product_sku, name, product_name, brand, url, price, rrp, discount_percent, currency, in_stock, availability_message, barcode (EAN-13 or UPC, as given; null when none is listed, as for sets), option_type and option (shade or size, as given), variants [{sku, name, option_type, option, shade_colour, price, rrp, discount_percent, in_stock, availability_message, barcode, preorder, max_per_order, loyalty_points}], subtitle, description, key_benefits, directions, ingredients, at_a_glance, volume, faq, images, loyalty_points, max_per_order, preorder, offer {title, description, free_gift, url} (the site's promotion banner, as given), rating, review_count, recent_reviews [{rating, date, text}] (the 10 latest reviews the product page shows; no reviewer names), breadcrumbs, notes. Text is in the site's language. Prices are Cult Beauty's for a visitor without an account, in the currency asked (each site and currency has its own price list; nothing converted by Scavio). rrp is Cult Beauty's RRP as given; discount_percent is computed by Scavio from price and rrp, only when the RRP is above the price. Cart-only code discounts are not included. An unknown SKU is a charged 404. Full review paging is not offered. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A Cult Beauty SKU (items[].sku or variants[].sku; SKUs are the same on every Cult Beauty site).
+            url: A Cult Beauty product link (https://www.cultbeauty.co.uk/p/<name>/<sku>/) instead of sku. The market still comes from market.
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_product", {"sku": sku, "url": url, "market": market, "currency": currency}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Cult Beauty's search-box suggestions for typed text, in the site's language: market, query, count, terms (suggested searches), corrections, products [{sku, name, url, image, price, rrp, discount_percent, currency, rating, review_count}] (up to 5 each), notes. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The text typed so far.
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_suggestions", {"query": query, "market": market, "currency": currency}, extra)
+
+    async def offers(
+        self,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Cult Beauty's current offers as its voucher-codes page lists them: market, count, offers [{title, description, code (when the offer text names one), gift, threshold (the spend the text states), ends (the end time Cult Beauty gives, ISO 8601 UTC), url, list_path (send to list for the products)}], notes. Cult Beauty gives no start date. Not available on www.cultbeauty.com (no voucher-codes page): a 400, not charged. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_offers", {"market": market, "currency": currency}, extra)
+
+    async def brands(
+        self,
+        *,
+        letter: Optional[str] = None,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Cult Beauty's A-Z brand directory for the site asked: market, letter, total_brands, count, brands [{name, path, url, letter}], notes. path is the input of list for a brand's products. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            letter: Optional: only brands under this letter (A-Z, or 0-9).
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_brands", {"letter": letter, "market": market, "currency": currency}, extra)
+
+    async def categories(
+        self,
+        *,
+        market: Optional[str] = None,
+        currency: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Cult Beauty's category tree as the site navigation shows it, in the site's language: market, count, total_categories, categories [{name, path, url, children [...]}], notes. path is the input of list. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: Cult Beauty's site to read (default gb): gb (UK site (cultbeauty.co.uk); currencies GBP, EUR, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default GBP); intl (International site (cultbeauty.com); currencies EUR, GBP, USD, AUD, CHF, AED, SAR, ILS, HKD, SGD, JPY, CNY, default EUR). The site's host name works too. Anything else is a 400, not charged.
+            currency: The currency, as the site's own currency selector offers it for that site (default: the site's own). A currency the site does not offer is a 400, not charged (the site would answer in its default currency).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cultbeauty_categories", {"market": market, "currency": currency}, extra)
+
+class _AsyncYesstyleNamespace:
+    """YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion) search, category, brand, brands, deals, product, reviews, suggestions and markets endpoints; prices set per shipping country (39 countries); listings and product 2 credits, product with variants 3, the rest 1."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        department: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]] = None,
+        featured: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        include_facets: Optional[bool] = None,
+        type: Optional[str] = None,
+        region: Optional[str] = None,
+        ingredients: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the catalog of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. Keywords with paging (100 a page), seven sorts (bestsellers, newest, price both ways, best value, availability, discount) and YesStyle's filters: Featured (in stock, flash sales, Black Friday, clearance, rock-bottom prices, value & gift sets, twin packs, mini sizes, Korean / Japanese brands, cruelty-free, vegan, YesStyle Awards ...), price band and department. Prices are YesStyle's own for the shipping country, in that country's currency (regional price lists: the same product can be US$16.09 in the US and US$14.86 in South Africa); which products ship differs by country. Every answer is checked for its country; market {country, country_name, currency, language} says which. Returns query, department, page, page_size (100), sort, sort_applied, filters_applied, total, total_pages, has_more, count, items [{product_id, name, brand, brand_id, url, image, price, list_price, discount_percent, currency, price_text, list_price_text (as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, child_product_ids, has_videos}], heading, description, breadcrumbs, category (tree), facets / price_range / sorts (include_facets), coupon (YesStyle's site code: code, tiers, expires_at), market, notes. 2 credits. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged. Not offered: stores (YesStyle has none to look up), choosing a currency other than the country's, cart or checkout, price history, EAN / UPC (YesStyle shows none).
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a brand name (required).
+            department: A department id (category ids from breadcrumbs or category, e.g. 15478 Beauty, 15544 Skin Care).
+            country: Shipping country, ISO-2 lower case (default us; uk is read as gb). YesStyle prices and stocks by shipping country: 39 countries are served here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, th, tw, us, za. Brazil is held back. Others answer 400 before anything is charged.
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            page: Page, 1-based (100 products a page; default 1).
+            sort: bestsellers (default), newest, price_low_to_high, price_high_to_low, best_value, availability, discount.
+            featured: YesStyle's Featured filters: in_stock, just_arrived, new_this_week, trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, chinese_cosmetics, southeast_asian_beauty, western_beauty, korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured ids from facets (key oc).
+            min_price: Lowest price, whole units of the country's currency.
+            max_price: Highest price, whole units of the country's currency.
+            filters: Any other facet: {key, value} from facets[].key and facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, cf color family). At most 12 filter values in all.
+            include_facets: Also return facets [{name, type, key, values [{value, name, selected}]}], price_range and sorts.
+            type: A category filter: YesStyle's search does not apply it, so it is refused here (400). Use category, brand or deals.
+            region: A category filter: YesStyle's search does not apply it, so it is refused here (400). Use category, brand or deals.
+            ingredients: A category filter: YesStyle's search does not apply it, so it is refused here (400). Use category, brand or deals.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_search", {"query": query, "department": department, "country": country, "language": language, "page": page, "sort": sort, "featured": featured, "min_price": min_price, "max_price": max_price, "filters": filters, "include_facets": include_facets, "type": type, "region": region, "ingredients": ingredients}, extra)
+
+    async def category(
+        self,
+        category: Union[str, int],
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]] = None,
+        featured: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        include_facets: Optional[bool] = None,
+        type: Optional[Union[str, list[str]]] = None,
+        region: Optional[Union[str, list[str]]] = None,
+        ingredients: Optional[Union[str, list[str]]] = None,
+        department: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one category of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. By category id or link, with paging, sorts and the Featured, price, Type, Region (brand country) and Ingredients filters plus any facet (skin type, skin concern ...). Prices are YesStyle's own for the shipping country, in that country's currency (regional price lists: the same product can be US$16.09 in the US and US$14.86 in South Africa); which products ship differs by country. Every answer is checked for its country; market {country, country_name, currency, language} says which. Returns category_id, page, page_size (100), sort, sort_applied, filters_applied, total, total_pages, has_more, count, items [{product_id, name, brand, brand_id, url, image, price, list_price, discount_percent, currency, price_text, list_price_text (as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, child_product_ids, has_videos}], heading, description, breadcrumbs, category (tree), facets / price_range / sorts (include_facets), coupon (YesStyle's site code: code, tiers, expires_at), market, notes. 2 credits. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category: A category id (e.g. 15556 Face Serums, from breadcrumbs, category or a link's bcc.<id>_bpt.46) or a category link.
+            country: Shipping country, ISO-2 lower case (default us; uk is read as gb). YesStyle prices and stocks by shipping country: 39 countries are served here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, th, tw, us, za. Brazil is held back. Others answer 400 before anything is charged.
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            page: Page, 1-based (100 products a page; default 1).
+            sort: bestsellers (default), newest, price_low_to_high, price_high_to_low, best_value, availability, discount.
+            featured: YesStyle's Featured filters: in_stock, just_arrived, new_this_week, trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, chinese_cosmetics, southeast_asian_beauty, western_beauty, korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured ids from facets (key oc).
+            min_price: Lowest price, whole units of the country's currency.
+            max_price: Highest price, whole units of the country's currency.
+            filters: Any other facet: {key, value} from facets[].key and facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, cf color family). At most 12 filter values in all.
+            include_facets: Also return facets [{name, type, key, values [{value, name, selected}]}], price_range and sorts.
+            type: Type ids from facets (key t).
+            region: Brand Region ids from facets (key bcs, e.g. 1 South Korea).
+            ingredients: Ingredient ids from facets (key inp).
+            department: Not used here: the category is the department (send that category id instead). Refused (400).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_category", {"category": category, "country": country, "language": language, "page": page, "sort": sort, "featured": featured, "min_price": min_price, "max_price": max_price, "filters": filters, "include_facets": include_facets, "type": type, "region": region, "ingredients": ingredients, "department": department}, extra)
+
+    async def brand(
+        self,
+        brand: Union[str, int],
+        *,
+        department: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]] = None,
+        featured: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        include_facets: Optional[bool] = None,
+        type: Optional[Union[str, list[str]]] = None,
+        region: Optional[Union[str, list[str]]] = None,
+        ingredients: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. By brand id or link, with paging, sorts, department and filters, plus the brand's name, region and customer satisfaction (brand {name, region, satisfaction_percent, total_reviews, star_counts}). Prices are YesStyle's own for the shipping country, in that country's currency (regional price lists: the same product can be US$16.09 in the US and US$14.86 in South Africa); which products ship differs by country. Every answer is checked for its country; market {country, country_name, currency, language} says which. Returns brand_id, brand, page, page_size (100), sort, sort_applied, filters_applied, total, total_pages, has_more, count, items [{product_id, name, brand, brand_id, url, image, price, list_price, discount_percent, currency, price_text, list_price_text (as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, child_product_ids, has_videos}], heading, description, breadcrumbs, category (tree), facets / price_range / sorts (include_facets), coupon (YesStyle's site code: code, tiers, expires_at), market, notes. 2 credits. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A brand id (e.g. 317041 COSRX, from brands or items[].brand_id) or a brand link (/en/cosrx/list.html/bpt.299_bid.317041).
+            department: A department id (category ids from breadcrumbs or category, e.g. 15478 Beauty, 15544 Skin Care).
+            country: Shipping country, ISO-2 lower case (default us; uk is read as gb). YesStyle prices and stocks by shipping country: 39 countries are served here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, th, tw, us, za. Brazil is held back. Others answer 400 before anything is charged.
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            page: Page, 1-based (100 products a page; default 1).
+            sort: bestsellers (default), newest, price_low_to_high, price_high_to_low, best_value, availability, discount.
+            featured: YesStyle's Featured filters: in_stock, just_arrived, new_this_week, trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, chinese_cosmetics, southeast_asian_beauty, western_beauty, korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured ids from facets (key oc).
+            min_price: Lowest price, whole units of the country's currency.
+            max_price: Highest price, whole units of the country's currency.
+            filters: Any other facet: {key, value} from facets[].key and facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, cf color family). At most 12 filter values in all.
+            include_facets: Also return facets [{name, type, key, values [{value, name, selected}]}], price_range and sorts.
+            type: Type ids from facets (key t).
+            region: Brand Region ids from facets (key bcs, e.g. 1 South Korea).
+            ingredients: Ingredient ids from facets (key inp).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_brand", {"brand": brand, "department": department, "country": country, "language": language, "page": page, "sort": sort, "featured": featured, "min_price": min_price, "max_price": max_price, "filters": filters, "include_facets": include_facets, "type": type, "region": region, "ingredients": ingredients}, extra)
+
+    async def brands(
+        self,
+        *,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every brand of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. (about 4,300): brand_id, slug (the brand's link name), url, last_modified, filtered by query and paged. Returns query, total, matched, page, page_size, has_more, count, brands, notes. 1 credit. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Brands whose link name contains this (accents, case and punctuation ignored).
+            page: Page, 1-based.
+            page_size: Brands a page (default 500, at most 5000).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_brands", {"query": query, "page": page, "page_size": page_size}, extra)
+
+    async def deals(
+        self,
+        *,
+        deal: Optional[Literal["black_friday", "flash_sales", "clearance", "rock_bottom_prices", "price_drop", "new_items_24hr_sale", "value_gift_sets", "twin_packs_bundles"]] = None,
+        department: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["bestsellers", "newest", "price_low_to_high", "price_high_to_low", "best_value", "availability", "discount"]] = None,
+        featured: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[list[dict[str, Any]]] = None,
+        include_facets: Optional[bool] = None,
+        type: Optional[Union[str, list[str]]] = None,
+        region: Optional[Union[str, list[str]]] = None,
+        ingredients: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal lists of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API.: Black Friday, flash sales, clearance, rock-bottom prices, price drops, new items 24-hour sale, value & gift sets, twin packs, on a department (default Beauty), with the listing's paging, sorts and filters. Prices are YesStyle's own for the shipping country, in that country's currency (regional price lists: the same product can be US$16.09 in the US and US$14.86 in South Africa); which products ship differs by country. Every answer is checked for its country; market {country, country_name, currency, language} says which. Returns deal, department_id, page, page_size (100), sort, sort_applied, filters_applied, total, total_pages, has_more, count, items [{product_id, name, brand, brand_id, url, image, price, list_price, discount_percent, currency, price_text, list_price_text (as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, child_product_ids, has_videos}], heading, description, breadcrumbs, category (tree), facets / price_range / sorts (include_facets), coupon (YesStyle's site code: code, tiers, expires_at), market, notes. The product endpoint adds sale_end_date and the deal's claimed share. 2 credits. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            deal: black_friday, flash_sales, clearance, rock_bottom_prices, price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles (default black_friday, while YesStyle runs it).
+            department: The department (a category id or link; default 15478 Beauty).
+            country: Shipping country, ISO-2 lower case (default us; uk is read as gb). YesStyle prices and stocks by shipping country: 39 countries are served here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, th, tw, us, za. Brazil is held back. Others answer 400 before anything is charged.
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            page: Page, 1-based (100 products a page; default 1).
+            sort: bestsellers (default), newest, price_low_to_high, price_high_to_low, best_value, availability, discount.
+            featured: YesStyle's Featured filters: in_stock, just_arrived, new_this_week, trending_new, flash_sales, black_friday, clearance, rock_bottom_prices, price_drop, new_items_24hr_sale, value_gift_sets, twin_packs_bundles, mini_travel_sizes, mini_size_exclusives, korean_brands, japanese_brands, chinese_cosmetics, southeast_asian_beauty, western_beauty, korean_pharmacy, cruelty_free, vegan, yesstyle_awards_2026, or Featured ids from facets (key oc).
+            min_price: Lowest price, whole units of the country's currency.
+            max_price: Highest price, whole units of the country's currency.
+            filters: Any other facet: {key, value} from facets[].key and facets[].values[].value (e.g. stp skin type, scrn skin concern, si size, cf color family). At most 12 filter values in all.
+            include_facets: Also return facets [{name, type, key, values [{value, name, selected}]}], price_range and sorts.
+            type: Type ids from facets (key t).
+            region: Brand Region ids from facets (key bcs, e.g. 1 South Korea).
+            ingredients: Ingredient ids from facets (key inp).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_deals", {"deal": deal, "department": department, "country": country, "language": language, "page": page, "sort": sort, "featured": featured, "min_price": min_price, "max_price": max_price, "filters": filters, "include_facets": include_facets, "type": type, "region": region, "ingredients": ingredients}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        include_variants: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. By product id or link: requested_product_id, product_id (the option the page prices), parent_product_id, name, option, brand {name, brand_id, url, region}, url, canonical_url, description, about_brand, breadcrumbs, images, videos, price, list_price, discount_percent, currency, price_text, list_price_text, sale_end_date, deal_claimed_percent, deal_claimed_text, badges, availability (In-Stock, Temporarily Out of Stock, Not available for your shipping destination), sellable, child_product_ids, rating, review_count, star_counts, brand_satisfaction, ingredients, ingredient_notes, bestseller_ranks, packs (minis, twin packs and bundles with price), product_information (Cruelty-free, Imported from, Catalog No. ...), shipping {to, free_shipping_offer, delivery_days}, returns_days, coupon, market, notes. include_variants adds variants [{product_id, name, availability, sellable, price, price_text, currency, flash_sale}] for every shade / size and variants_status (ok, or unavailable: then that part is not charged). Prices are YesStyle's own for the shipping country, in that country's currency (regional price lists: the same product can be US$16.09 in the US and US$14.86 in South Africa); which products ship differs by country. Every answer is checked for its country; market {country, country_name, currency, language} says which. An unknown product is a charged 404. 2 credits; 3 with variants. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged. Not offered: stores (YesStyle has none to look up), choosing a currency other than the country's, cart or checkout, price history, EAN / UPC (YesStyle shows none).
+
+        Costs 2 credits; 3 with include_variants. credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            product_id: A YesStyle product id (items[].product_id; every shade and size has its own).
+            url: A product link (https://www.yesstyle.com/<lang>/<name>/info.html/pid.<id>) instead of product_id.
+            country: Shipping country, ISO-2 lower case (default us; uk is read as gb). YesStyle prices and stocks by shipping country: 39 countries are served here: ae, at, au, be, ca, ch, cl, cz, de, dk, es, fr, gb, gr, hk, hu, ie, il, in, it, jp, kr, kz, mx, my, nl, no, nz, ph, pl, pt, ro, sa, se, sg, th, tw, us, za. Brazil is held back. Others answer 400 before anything is charged.
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            include_variants: Also return every shade / size: product_id, name, availability, sellable, price (+1 credit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_product", {"product_id": product_id, "url": url, "country": country, "language": language, "include_variants": include_variants}, extra)
+
+    async def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevant", "highest_rating", "newest", "helpful"]] = None,
+        filter: Optional[Union[Literal["1", "2", "3", "4", "5", "all", "positive", "negative", "photo", "video"], int]] = None,
+        include_summary: Optional[bool] = None,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product family on YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. 15 reviewers a page, four sorts (relevant, highest rating, newest, helpful) and filters (1-5 stars, positive, negative, photo, video); YesStyle answers up to 67 pages (about 1,000 reviews) per sort and filter. Returns product_id, page, page_size, sort, filter, sort_applied, has_more, count, summary {total_reviews, star_counts, satisfaction_percent} (page 1, or include_summary), reviews [{review_id, product_id, rating (1-5), title, text, date (as YesStyle shows it, in the page language), helpful_count, helpful_text, images [{url, thumbnail}], skin_type, skin_tone, reviewer_country, translatable, reviewer_group}], market, notes. Reviewer names, gender and age are left out. Any country YesStyle ships to; the language sets the labels and date format. 1 credit. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A product id (any shade or size of the family) or url.
+            url: A product link instead of product_id.
+            page: Page, 1-based (15 reviewers a page; YesStyle answers up to 67 pages per sort and filter).
+            sort: relevant (default), highest_rating, newest, helpful.
+            filter: all (default), 5, 4, 3, 2, 1 (stars), positive, negative, photo, video.
+            include_summary: Also return the summary (total, star counts, satisfaction) on pages after the first.
+            country: Shipping country, ISO-2 lower case (default us): any of the 153 countries YesStyle ships to (see markets).
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_reviews", {"product_id": product_id, "url": url, "page": page, "sort": sort, "filter": filter, "include_summary": include_summary, "country": country, "language": language}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search terms and products YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. suggests for what a shopper has typed, priced for the shipping country (any of the 153 countries YesStyle ships to). Returns query, count, suggestions, products [{product_id, name, brand, brand_id, url, image, price, list_price, discount_percent, currency, price_text, list_price_text (as YesStyle shows them), rating (0-5), review_count, size, status (YesStyle's label, e.g. FLASH SALE, Black Friday), badges (flash_sale, black_friday, clearance, buy_one_get_one, trending_new, yesstyle_awards_2026 ...), brand_region, pack_label, child_product_ids, has_videos}], market, notes. 1 credit. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a shopper has typed (at least 2 characters).
+            country: Shipping country, ISO-2 lower case (default us): any of the 153 countries YesStyle ships to (see markets).
+            language: Page language: en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW (default: the country's own on YesStyle, e.g. de for Germany, ar for Saudi Arabia, zh_TW for Taiwan and Hong Kong, en for most).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_suggestions", {"query": query, "country": country, "language": language}, extra)
+
+    async def markets(
+        self,
+        *,
+        language: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The shipping countries, currencies and languages of YesStyle (yesstyle.com, the Hong Kong-based online store for Asian beauty and fashion, shipping to 150+ countries; owned by YesAsia Holdings, HKEX 2209). Scavio fetches the public page on request; YesStyle has no public API. Returns count, page_endpoint_countries, countries [{country (ISO-2), name, country_id, currency (the country's default), language, page_endpoints (served by search, category, brand, deals and product), held_back}], currencies [{code, name}], languages [{code, name, lang_id}], notes. 1 credit. Failed upstream calls, a page that came back for another country, and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            language: Names in this language (en, fr, de, es, it, nl, pl, pt, ru, ar, zh_TW; default en).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("yesstyle_markets", {"language": language}, extra)
+
+class _AsyncNotinoNamespace:
+    """Notino (notino.com, the Brno-based online perfume and cosmetics store) search, product, reviews, category, brand, promo, brands, suggestions, stores and store endpoints; 27 storefronts in their own language and currency; 1 credit (gb 2), a paged, sorted or filtered list 3 (gb 4)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]] = None,
+        filters: Optional[Union[list[int], str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Notino (notino.com, the Brno-based online perfume and cosmetics store with 27 country shops). Scavio fetches the public Notino page on request. Names, labels and review texts are in the storefront's language, as Notino writes them; field names are English. market, shop, language, currency, query, redirected_to {page_type, path, url} (Notino sends brand names and some category words to that page; the list is then that page's), page_type (Category, Brand, Promo), title, breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, has_more, count, currency, items (product_id, master_id, url, name, sub_name, brand, annotation, image, price, currency, rrp (as shown; listings rarely carry one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, product_code, master_product_code, rating, review_count, is_new, sponsored (a paid placement Notino mixes into the list, kept in place), free_delivery, deal {reason (on_sale, clearance), voucher_code (e.g. black), discount_value, discount_type, discount_percent, discounted_price (the price with the code), basket_condition {name, condition, condition_type, discount} (a discount that needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), campaign_ids} or null, variant_count, variants [{variant_id, label (size or shade), colors (hex)}], category {category, subcategory, type, kind}), facets [{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send values[].id in filters), price_range {min, max}, selected_filters, note, total_capped. Sorted by relevance Notino stops the list near 500 products (total_capped true); any other sort lists the full set. 1 credit (2 on gb) with any page, sort or filter; a search Notino answers with a brand or category page that does not keep the page, sort or filters reads that page with them: 3 credits (4 on gb). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit (2 on gb); 3 (4 on gb) when Notino answers the search with a brand or
+        category page that is then read with the page, sort or filters. credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            query: Search text (any language; the storefront's own language matches best).
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            page: Page of 24 (1 to 500; total_pages says how deep a list goes).
+            sort: relevance (default), bestseller, price_asc, price_desc, top_rated, newest: Notino's own sort options.
+            filters: Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, category, type of goods, skin type, gender, offers, free delivery, new, rating). Ids of one group widen, of different groups narrow, as on the site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_search", {"query": query, "market": market, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def product(
+        self,
+        url: Optional[str] = None,
+        *,
+        order_code: Optional[str] = None,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Notino product with every variant (size, shade) by link or order code: market, shop, language, currency, requested, selected_variant_id (the variant of a /p-<id>/ link or of the order code), master_id, catalog_master_id, master_product_code, name, brand {brand_id, name, url, manufacturer}, annotation, sub_name, collection, url, gender, is_perfume, description (plain text), fragrance_notes [{note, values}], breadcrumbs, category {kind, category, subcategory, type}, rating {average, count, text_reviews, translated_reviews}, variant_count, variants [{variant_id, catalog_id, name, variant_name, label, order_code, product_code, ean, url, price, currency, vat_percent, rrp (the recommended retail price where the storefront shows one, e.g. es), rrp_type, anchor_price, lowest_price_30d (the lowest price of the last 30 days Notino shows under EU price rules), unit_price {value, unit, per_amount}, amount {value, unit}, availability {state (CanBeBought, ShowWatchdog), can_buy, stock_level (more_than_20, less_than_5, out_of_stock), in_stock, max_order_quantity, pickup_store_count (how many Notino stores hold it; per-store stock is not offered)}, colors (shade hex), images, characteristics [{name, values}], ingredients, instructions, warnings, manufacturer_importer, gift_campaign_ids}], gift_campaigns [{campaign_id, type (special, try_it_first), text (as Notino words it, e.g. the basket threshold), image, variant_ids}], deliveries [{name, type, price, free_shipping, date, date_from, date_to, order_by_time}], alternate_sites [{market, locale, url}] (the same product on other storefronts), related_product_ids, reviews_url. Voucher codes show on listings (search, category, brand, promo: items[].deal). A product the storefront does not sell is a charged 404. 1 credit (2 on gb). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            url: A Notino product link or path (/<brand>/<product>/, or /<brand>/<product>/p-<variant id>/ for one size or shade).
+            order_code: A Notino order code: variants[].order_code (one size or shade).
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_product", {"url": url, "order_code": order_code, "market": market}, extra)
+
+    async def reviews(
+        self,
+        url: Optional[str] = None,
+        *,
+        order_code: Optional[str] = None,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        sort: Optional[Literal["newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"]] = None,
+        rating: Optional[int] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Notino product, 8 per page: market, shop, language, currency, sort, rating, page, page_size, product_url, reviews_url, master_product_id, average_rating, rating_count, total, total_pages, has_more, count, reviews [{review_id, rating, title, text, created_at, likes, dislikes, verified_purchase, author_type, variant_id, from_shop (the storefront it was written on), translated, source_language, original_title, original_text, partner_domain, image_count}], rating_buckets {5..1}, content_counts, shops [{shop, market, count}], variants [{variant_catalog_id, count}], aspects [{aspect, average}] (the per-aspect ratings, on review-tab views), view (review_page or review_tab). No reviewer name or any reviewer identity is returned. The newest 8 (page 1, no star filter) come from the product's review page: 1 credit (2 on gb; by order_code the product page is read before: 1, 4 on gb). Any other page, sort or star filter opens the product's review tab and reads what it shows: 1 credit on every storefront, slower (typically 10-45 s, up to about 4 minutes: set a client timeout of at least 250 s). Up to page 8 per view. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit; the newest 8 on gb 2 (4 by order_code); any other page, sort or star
+        filter 1 on every storefront. credits_used in the response is the exact charge. Returns
+        the API response as a dict.
+
+        Args:
+            url: A Notino product link or path (/<brand>/<product>/, or /<brand>/<product>/p-<variant id>/ for one size or shade).
+            order_code: A Notino order code: variants[].order_code (one size or shade).
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            sort: newest (default), oldest, highest_rating, lowest_rating, most_helpful: the review tab's own five orders.
+            rating: Reviews with this many stars (1-5).
+            page: Page of 8 (1 to 8).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_reviews", {"url": url, "order_code": order_code, "market": market, "sort": sort, "rating": rating, "page": page}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]] = None,
+        filters: Optional[Union[list[int], str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Notino category's products by path, with page, sort and filters: market, shop, language, currency, path, url, page_type (Category, Brand, Promo), title, breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, has_more, count, currency, items (product_id, master_id, url, name, sub_name, brand, annotation, image, price, currency, rrp (as shown; listings rarely carry one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, product_code, master_product_code, rating, review_count, is_new, sponsored (a paid placement Notino mixes into the list, kept in place), free_delivery, deal {reason (on_sale, clearance), voucher_code (e.g. black), discount_value, discount_type, discount_percent, discounted_price (the price with the code), basket_condition {name, condition, condition_type, discount} (a discount that needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), campaign_ids} or null, variant_count, variants [{variant_id, label (size or shade), colors (hex)}], category {category, subcategory, type, kind}), facets [{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send values[].id in filters), price_range {min, max}, selected_filters, note. Page 1 unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 credits (4 on gb): Notino's page 1 is read for the list's own ids, then the wanted page; both are billed (no answer is cached). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any other
+        page, sort or filter. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            category: A Notino category path (breadcrumbs[].url, facets of type Category) or its link.
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            page: Page of 24 (1 to 500; total_pages says how deep a list goes).
+            sort: relevance (default), bestseller, price_asc, price_desc, top_rated, newest: Notino's own sort options.
+            filters: Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, category, type of goods, skin type, gender, offers, free delivery, new, rating). Ids of one group widen, of different groups narrow, as on the site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_category", {"category": category, "market": market, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]] = None,
+        filters: Optional[Union[list[int], str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on a Notino storefront, with page, sort and filters: market, shop, language, currency, path, url, page_type (Category, Brand, Promo), title, breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, has_more, count, currency, items (product_id, master_id, url, name, sub_name, brand, annotation, image, price, currency, rrp (as shown; listings rarely carry one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, product_code, master_product_code, rating, review_count, is_new, sponsored (a paid placement Notino mixes into the list, kept in place), free_delivery, deal {reason (on_sale, clearance), voucher_code (e.g. black), discount_value, discount_type, discount_percent, discounted_price (the price with the code), basket_condition {name, condition, condition_type, discount} (a discount that needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), campaign_ids} or null, variant_count, variants [{variant_id, label (size or shade), colors (hex)}], category {category, subcategory, type, kind}), facets [{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send values[].id in filters), price_range {min, max}, selected_filters, note. Page 1 unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 credits (4 on gb): Notino's page 1 is read for the list's own ids, then the wanted page; both are billed (no answer is cached). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any other
+        page, sort or filter. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            brand: A brand: brands[].slug (e.g. dior, cerave) or its link.
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            page: Page of 24 (1 to 500; total_pages says how deep a list goes).
+            sort: relevance (default), bestseller, price_asc, price_desc, top_rated, newest: Notino's own sort options.
+            filters: Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, category, type of goods, skin type, gender, offers, free delivery, new, rating). Ids of one group widen, of different groups narrow, as on the site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_brand", {"brand": brand, "market": market, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def promo(
+        self,
+        *,
+        promo: Optional[str] = None,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "bestseller", "price_asc", "price_desc", "top_rated", "newest"]] = None,
+        filters: Optional[Union[list[int], str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Notino promo list (default Black Friday) with its products and the terms its banner gives: market, shop, language, currency, path, url, terms (as Notino writes them, e.g. the code and dates of a Black Friday discount), page_type (Category, Brand, Promo), title, breadcrumbs [{name, url}], sort, page, page_size (24), total, total_pages, has_more, count, currency, items (product_id, master_id, url, name, sub_name, brand, annotation, image, price, currency, rrp (as shown; listings rarely carry one), unit_price {value, unit, per_amount}, stock_level (Notino's stock word: more_than_20, more_than_5, last_1 ... last_5, out_of_stock), in_stock, product_code, master_product_code, rating, review_count, is_new, sponsored (a paid placement Notino mixes into the list, kept in place), free_delivery, deal {reason (on_sale, clearance), voucher_code (e.g. black), discount_value, discount_type, discount_percent, discounted_price (the price with the code), basket_condition {name, condition, condition_type, discount} (a discount that needs a basket of a brand or category), free_delivery, tags (e.g. blackfriday), campaign_ids} or null, variant_count, variants [{variant_id, label (size or shade), colors (hex)}], category {category, subcategory, type, kind}), facets [{group, type, multi_choice, values [{id, name, count, selected, color}]}] (send values[].id in filters), price_range {min, max}, selected_filters, note. Every item carries its own deal (voucher code, discount, discounted price). Page 1 unsorted and unfiltered: 1 credit (2 on gb). Any other page, sort or filter: 3 credits (4 on gb): Notino's page 1 is read for the list's own ids, then the wanted page; both are billed (no answer is cached). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit (2 on gb) for page 1 unsorted and unfiltered; 3 (4 on gb) for any other
+        page, sort or filter. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            promo: A promo page path or link (default black-friday, live on every storefront in November 2026).
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            page: Page of 24 (1 to 500; total_pages says how deep a list goes).
+            sort: relevance (default), bestseller, price_asc, price_desc, top_rated, newest: Notino's own sort options.
+            filters: Up to 10 filter ids: facets[].values[].id of an earlier answer (brand, category, type of goods, skin type, gender, offers, free delivery, new, rating). Ids of one group widen, of different groups narrow, as on the site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_promo", {"promo": promo, "market": market, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def brands(
+        self,
+        *,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        query: Optional[str] = None,
+        letter: Optional[str] = None,
+        featured_only: Optional[bool] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A Notino storefront's brand directory (about 1,800 brands on notino.de): market, shop, language, currency, query, letter, featured_only, total_brands, matches, page, limit, has_more, count, brands [{name, slug (the input of brand), url, featured, letter}]. 1 credit (2 on gb). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            query: Brands whose name contains this text.
+            letter: Brands starting with this letter or digit.
+            featured_only: The brands Notino's directory highlights (in bold).
+            page: page.
+            limit: Brands per page, 1 to 2000 (default 500).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_brands", {"market": market, "query": query, "letter": letter, "featured_only": featured_only, "page": page, "limit": limit}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[Literal["de", "at", "ch", "cz", "sk", "pl", "hu", "ro", "bg", "hr", "si", "ua", "fr", "be", "nl", "it", "es", "pt", "gr", "gb", "ie", "dk", "se", "fi", "lt", "lv", "ee"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Notino's search suggestions for a partial query: market, shop, language, currency, query, count, sections [{section, items [{text, kind (collection, brand ...), url}]}], products [{name, description, product_code, url, image}]. 1 credit (2 on gb). Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on gb (notino.co.uk). credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            market: The storefront (default de; a product or listing link picks its own): de at ch cz sk pl hu ro bg hr si ua fr be nl it es pt gr gb ie dk se fi lt lv ee. One language each (be is French, ch German), its own currency (EUR, GBP, CZK, HUF, PLN, RON, UAH, DKK, SEK, CHF) and its own prices. gb (notino.co.uk) costs 2 credits per call.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_suggestions", {"query": query, "market": market}, extra)
+
+    async def stores(
+        self,
+        *,
+        market: Optional[Literal["cz", "sk", "pl", "at", "hu", "ro", "bg", "hr"]] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Notino's stores and pickup points in one storefront (cz, sk, pl, at, hu, ro, bg, hr): market, shop, language, currency, city, cities, total_stores, count, stores [{store (the input of store), url, name, place, city_group, address {street, city, postcode, country}, latitude, longitude, opening_hours [{days, opens, closes}], open_now, status_changes_at, image}]. Stores are listed by city; there is no postcode search. 1 credit. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: A storefront with Notino stores and pickup points: cz, sk, pl, at, hu, ro, bg, hr (default cz).
+            city: The stores in this city (accents and case do not matter).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_stores", {"market": market, "city": city}, extra)
+
+    async def store(
+        self,
+        store: str,
+        *,
+        market: Optional[Literal["cz", "sk", "pl", "at", "hu", "ro", "bg", "hr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Notino store's page: market, shop, language, currency, store, url, name, description, open_now, status_changes_at, services {card_payment, complaints, direct_sale, order_pickup, dermo_shop}, opening_hours (7 days from today: [{day, open, today, public_holiday, times [{start, end}]}]), address, latitude, longitude, map_url, phone, email, images. 1 credit. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: stores[].store of a stores answer, or the store's link.
+            market: A storefront with Notino stores and pickup points: cz, sk, pl, at, hu, ro, bg, hr (default cz).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("notino_store", {"store": store, "market": market}, extra)
+
+class _AsyncDouglasNamespace:
+    """Douglas (douglas.de, the Dusseldorf-based beauty retailer) search, category, brand, deals, product, stores, store, review_summary, suggestions and brands endpoints; 15 storefronts in 13 countries; 1 credit each (2 on it)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]] = None,
+        brand_filter: Optional[Union[str, list[str]]] = None,
+        sale_only: Optional[bool] = None,
+        filters: Optional[Union[list[dict[str, Any]], dict[str, Any]]] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the products of Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency. Keywords with paging (48 a page), sorts (relevance, price, newest, top rated) and the page's filters (brand, SALE flag, product type, gender ... from facets). A keyword Douglas sends to a category or brand page is answered from that page (redirected_to says which). Returns query, market, country, language, currency, redirected_to, list_type (search, category, brand), url, title, category_code, sort, sort_applied, filters, filters_applied, page, page_size, total (the count the page shows), total_pages, has_more, count, items [{code (the variant), base_code (the input of product), name, base_name, brand, brand_line, product_family, url, image, price, currency, price_text, was_price (Douglas' struck-through price), discount_percent (as Douglas shows it), lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not show is null.}], facets [{facet, name, multi_select, values [{value, name, count, selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. Slow: a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged. Not offered: review texts, review paging or star filters, per-store stock, store reservation, price history, cart or checkout.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            query: Keywords, in the storefront's language (required). Some keywords lead to a category or brand page: redirected_to names it.
+            page: Page, 1-based (48 products a page; default 1).
+            sort: relevance (default), price_asc, price_desc, newest, top_rated, discount (where the storefront offers it). sorts lists what the page offers; sort_applied says what it answered.
+            brand_filter: Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand link).
+            sale_only: Only products with Douglas' own sale badge (SALE on de, the discount badge elsewhere). Not every reduced price carries it: was_price shows every reduction. Not offered on ch-de / ch-fr (no such badge there): a 400, not charged.
+            filters: Any facet: {facet, value} from facets[].facet and facets[].values[].value (e.g. classificationClassName, genderName, flagName). At most 10 values in all.
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_search", {"query": query, "page": page, "sort": sort, "brand_filter": brand_filter, "sale_only": sale_only, "filters": filters, "market": market}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]] = None,
+        brand_filter: Optional[Union[str, list[str]]] = None,
+        sale_only: Optional[bool] = None,
+        filters: Optional[Union[list[dict[str, Any]], dict[str, Any]]] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency. By path, code or link, with paging, sorts and filters. Returns category, market, country, language, currency, redirected_to, list_type (search, category, brand), url, title, category_code, sort, sort_applied, filters, filters_applied, page, page_size, total (the count the page shows), total_pages, has_more, count, items [{code (the variant), base_code (the input of product), name, base_name, brand, brand_line, product_family, url, image, price, currency, price_text, was_price (Douglas' struck-through price), discount_percent (as Douglas shows it), lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not show is null.}], facets [{facet, name, multi_select, values [{value, name, count, selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. An unknown category is a charged 404. Slow: a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            category: A category path ending in its code (parfum/01, make-up/lippen/lippenstift/030503), the code alone (01) or a category link.
+            page: Page, 1-based (48 products a page; default 1).
+            sort: relevance (default), price_asc, price_desc, newest, top_rated, discount (where the storefront offers it). sorts lists what the page offers; sort_applied says what it answered.
+            brand_filter: Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand link).
+            sale_only: Only products with Douglas' own sale badge (SALE on de, the discount badge elsewhere). Not every reduced price carries it: was_price shows every reduction. Not offered on ch-de / ch-fr (no such badge there): a 400, not charged.
+            filters: Any facet: {facet, value} from facets[].facet and facets[].values[].value (e.g. classificationClassName, genderName, flagName). At most 10 values in all.
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_category", {"category": category, "page": page, "sort": sort, "brand_filter": brand_filter, "sale_only": sale_only, "filters": filters, "market": market}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]] = None,
+        brand_filter: Optional[Union[str, list[str]]] = None,
+        sale_only: Optional[bool] = None,
+        filters: Optional[Union[list[dict[str, Any]], dict[str, Any]]] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency. By brand code, path or link (brands lists them), with paging, sorts and filters. Returns brand, market, country, language, currency, redirected_to, list_type (search, category, brand), url, title, category_code, sort, sort_applied, filters, filters_applied, page, page_size, total (the count the page shows), total_pages, has_more, count, items [{code (the variant), base_code (the input of product), name, base_name, brand, brand_line, product_family, url, image, price, currency, price_text, was_price (Douglas' struck-through price), discount_percent (as Douglas shows it), lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not show is null.}], facets [{facet, name, multi_select, values [{value, name, count, selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. An unknown brand is a charged 404. Slow: a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            brand: A brand code (b0690, from brands), its path (dior/b0690) or a brand link.
+            page: Page, 1-based (48 products a page; default 1).
+            sort: relevance (default), price_asc, price_desc, newest, top_rated, discount (where the storefront offers it). sorts lists what the page offers; sort_applied says what it answered.
+            brand_filter: Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand link).
+            sale_only: Only products with Douglas' own sale badge (SALE on de, the discount badge elsewhere). Not every reduced price carries it: was_price shows every reduction. Not offered on ch-de / ch-fr (no such badge there): a 400, not charged.
+            filters: Any facet: {facet, value} from facets[].facet and facets[].values[].value (e.g. classificationClassName, genderName, flagName). At most 10 values in all.
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_brand", {"brand": brand, "page": page, "sort": sort, "brand_filter": brand_filter, "sale_only": sale_only, "filters": filters, "market": market}, extra)
+
+    async def deals(
+        self,
+        *,
+        collection: Optional[Literal["sale", "beauty_friday"]] = None,
+        category: Optional[str] = None,
+        include_promotions: Optional[bool] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "top_rated", "discount"]] = None,
+        brand_filter: Optional[Union[str, list[str]]] = None,
+        sale_only: Optional[bool] = None,
+        filters: Optional[Union[list[dict[str, Any]], dict[str, Any]]] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal lists of Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency. The sale department (collection sale; on de its SALE-badged products), the Beauty / Black Friday list (collection beauty_friday, while Douglas runs it) or any category's sale-badged products, with paging, sorts and filters; per item the price, Douglas' struck-through price, discount, 30-day lowest price and RRP as shown. With include_promotions (default) also the storefront's offers page: promotions [{kind, headline, text, link_text, url, image, legal_text (validity dates and codes as Douglas words them), labels, updated_at}] (de, at, ch-de, ch-fr, pl; elsewhere null). Returns collection, category, offers_page, promotions, market, country, language, currency, redirected_to, list_type (search, category, brand), url, title, category_code, sort, sort_applied, filters, filters_applied, page, page_size, total (the count the page shows), total_pages, has_more, count, items [{code (the variant), base_code (the input of product), name, base_name, brand, brand_line, product_family, url, image, price, currency, price_text, was_price (Douglas' struck-through price), discount_percent (as Douglas shows it), lowest_price_30d (the lowest price of the last 30 days Douglas shows beside a reduction), rrp (the RRP / UVP Douglas shows), price_type, unit_price {price, per}, content {amount, unit}, sizes, colors_count, availability (AVAILABLE, SOLD_OUT, AVAILABLE_IN_FUTURE), in_stock, rating, rating_stars, flags (e.g. SALE, NEW, webPrice), marketplace {is_marketplace, vendor}. A price Douglas does not show is null.}], facets [{facet, name, multi_select, values [{value, name, count, selected}]}], sorts, breadcrumbs, notes. Sponsored placements are left out. Slow: a listing page takes 5 to 210 seconds. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            collection: sale (default: the sale department) or beauty_friday (the Beauty / Black Friday list, while Douglas runs it).
+            category: Or any category (path, code or link): its products with Douglas' sale badge (not on ch-de / ch-fr). Not with collection.
+            include_promotions: Also read the storefront's offers page (default true; de, at, ch-de, ch-fr and pl link one).
+            page: Page, 1-based (48 products a page; default 1).
+            sort: relevance (default), price_asc, price_desc, newest, top_rated, discount (where the storefront offers it). sorts lists what the page offers; sort_applied says what it answered.
+            brand_filter: Only these brands: brand codes (e.g. b0690 DIOR, from brands or a brand link).
+            sale_only: Only products with Douglas' own sale badge (SALE on de, the discount badge elsewhere). Not every reduced price carries it: was_price shows every reduction. Not offered on ch-de / ch-fr (no such badge there): a 400, not charged.
+            filters: Any facet: {facet, value} from facets[].facet and facets[].values[].value (e.g. classificationClassName, genderName, flagName). At most 10 values in all.
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_deals", {"collection": collection, "category": category, "include_promotions": include_promotions, "page": page, "sort": sort, "brand_filter": brand_filter, "sale_only": sale_only, "filters": filters, "market": market}, extra)
+
+    async def product(
+        self,
+        code: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        variants_ean: Optional[bool] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency. By base or variant code or link: requested, source (api, or page when only the product page lists the code: slower), market, code (the variant answered), base_code, name, brand {code, name, url}, brand_line, product_family, gender, url, ean (of code), description, bullets, application, ingredients, price, currency, price_text, was_price, discount_percent, lowest_price_30d, rrp, price_type, unit_price, content, stock_level, availability, availability_text, in_stock, max_order_quantity, rating, rating_stars, review_count, images, videos, categories, attributes [{code, name, values}], scent_notes {top, heart, base}, flags, marketplace, variant_type (SIZE, COLOR, STYLE), variant_count, variants [{code, name, url, price data, unit_price, content, stock_level, availability, availability_text, in_stock, flags, image, ean (with variants_ean)}], variants_ean, notes. An unknown code is a charged 404. 1 credit (2 on it). variants_ean: +1 credit per variant looked up (2 on it), up to 10. Failed upstream calls and refused inputs are not charged; a not-found is charged. Not offered: review texts, review paging or star filters, per-store stock, store reservation, price history, cart or checkout.
+
+        Costs 1 credit; 2 on it (Italy). variants_ean adds 1 credit per variant looked up (2 on
+        it), up to 10. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            code: A Douglas product code: base (base_code, e.g. 5000005003) or variant (items[].code, e.g. 289690).
+            url: Or a Douglas product link (its storefront sets the market).
+            variants_ean: Also look up each variant's EAN (one more call per variant, 1 credit each, 2 on it; up to 10).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_product", {"code": code, "url": url, "variants_ean": variants_ean, "market": market}, extra)
+
+    async def stores(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Douglas stores near a city or postcode on one storefront (Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency.): market, query, location {text, latitude, longitude}, page, page_size, total, total_pages, has_more, count, stores [{store_id, name, url, operator, address {street, house_number, postal_code, city, country_code, formatted}, phone, latitude, longitude, distance_km, hours [{day, day_of_week, closed, open, close}], special_hours [{date, closed, open, close}] (dated holiday hours), features, images, temporarily_closed}], notes. A place the store finder cannot place is a charged 404. 1 credit (also on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A city or postcode (required): Douglas' own store finder places it.
+            page: Page, 1-based (default 1).
+            page_size: Stores a page, 1-50 (default 10).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_stores", {"query": query, "page": page, "page_size": page_size, "market": market}, extra)
+
+    async def store(
+        self,
+        store_id: str,
+        *,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Douglas store by id (Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency.): every stores field plus parking, public_transport, top_brands [{code, name, url}], events, service_booking. An unknown store is a charged 404. 1 credit (also on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Douglas store id (stores[].store_id; send it as a string, leading zeros count).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_store", {"store_id": store_id, "market": market}, extra)
+
+    async def review_summary(
+        self,
+        code: str,
+        *,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Douglas' own AI-generated summary of a product's customer reviews (Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency.): market, code, summary (Douglas' text in the storefront's language, null when it shows none), summary_type (ai_generated), notes. Use the product's base code. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged. Review texts and review paging are not offered.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            code: A base product code (product base_code or items[].base_code).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_review_summary", {"code": code, "market": market}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        max: Optional[int] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Douglas' search suggestions for what a shopper has typed (Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency.): market, query, count, products [{base_code, code, name, brand, brand_line, product_family, url, image}], trending_terms (the storefront's trending searches, the same for every query, not matches), notes. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            query: What a shopper has typed (required).
+            max: Product suggestions, 1-10 (default 10).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_suggestions", {"query": query, "max": max, "market": market}, extra)
+
+    async def brands(
+        self,
+        *,
+        query: Optional[str] = None,
+        letter: Optional[str] = None,
+        market: Optional[Literal["de", "at", "ch-de", "ch-fr", "nl", "be-nl", "be-fr", "es", "it", "pl", "cz", "sk", "hu", "ro", "lt"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every brand on one Douglas storefront (about 1,890 on de; Douglas (douglas.de, the Dusseldorf-based beauty retailer with about 1,960 stores in Europe), on 15 storefronts in 13 countries (market). Scavio fetches the public page on request; Douglas has no public API. Names and texts come in the storefront's language; prices are numbers in its currency.): market, query, letter, total, count, brands [{code (the input of brand), name, url, letter, logo}], notes. Very slow: the brand index page is about 4 MB and takes up to about 200 seconds. 1 credit (2 on it). Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit; 2 on it (Italy). credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            query: Only brands whose name contains this (accents and case ignored).
+            letter: Only brands under this letter (A-Z or #).
+            market: The Douglas storefront: de (Germany, default), at (Austria), ch-de / ch-fr (Switzerland, German / French), nl (Netherlands), be-nl / be-fr (Belgium, Dutch / French), es (Spain), it (Italy, 2 credits), pl (Poland, PLN), cz (Czechia, CZK), sk (Slovakia), hu (Hungary, HUF), ro (Romania, RON), lt (Lithuania). Prices and assortment differ per storefront. pt, hr, si, lv, ee, bg (other shop platforms) and fr (Nocibe) are not offered: a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("douglas_brands", {"query": query, "letter": letter, "market": market}, extra)
+
+class _AsyncBootsNamespace:
+    """Boots (boots.com, the UK health and beauty retailer, and boots.ie) product, store_stock, stores and store endpoints; markets uk and ie; 1 credit each (2 when the answer comes on a second attempt). No search endpoint: start from a product link."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def product(
+        self,
+        url: Optional[str] = None,
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        market: Optional[Literal["uk", "ie"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Boots (boots.com, the UK health and beauty retailer with over 1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on request. By link or 8-digit product id: market, product_id, requested_id, url, name, brand, price, currency (GBP on uk, EUR on ie), was_price (Boots' was price, when shown), saving (Boots' Save amount), size, unit_price, unit_price_per, unit_price_text (as Boots shows it, e.g. 52 ML | £223.46 per 1L), item_number (the item number on the page), part_number, catentry_id (for store-stock), online_in_stock, image, has_variants, variants [{name (shade or size), item_code (for store-stock), catentry_id, online_in_stock}], offers [{text, code (a promo code the offer names, e.g. SAVE20)}], advantage_card_offers (the Advantage Card offers Boots names on the page; members add them to their card), description, sections [{title, text}] (Suitable for, How to use, Hazards and cautions, Important info, Ingredients), ingredients. Not on the page: EAN, a price per shade or size, rating and reviews. A product not sold on the market's site is a charged 404. 1 credit. Boots search is not available yet: start from a Boots product link. Not offered: category, brand and deal lists, reviews, ratings, type-ahead, stock counts and price history. Failed upstream calls are not charged; a not-found is charged. A request answered on its second attempt costs 2 credits (3 for two-step lookups).
+
+        Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step lookups).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            url: A Boots product link (www.boots.com or www.boots.ie; the market follows the link).
+            product_id: The 8 digits a Boots product link ends with. Looked up in Boots' product list first (one more call, usually 5 to 20 seconds).
+            market: uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and some UK products are not sold there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("boots_product", {"url": url, "product_id": product_id, "market": market}, extra)
+
+    async def store_stock(
+        self,
+        item_code: Union[str, int],
+        catentry_id: Union[str, int],
+        *,
+        market: Optional[Literal["uk", "ie"]] = None,
+        postcode: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Whether the Boots stores near a UK postcode or a point have one product (or one shade or size) of Boots (boots.com, the UK health and beauty retailer with over 1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on request. Returns market, item_code, catentry_id, postcode or latitude / longitude, count, in_stock_count, stores_searched, message, stores [{name, address {lines, town, county, postcode}, phone, phone_international, latitude, longitude, distance_miles, availability (in_stock, out_of_stock), availability_text (Boots' words), in_stock, stockist (the store carries the line), hours [{day, open, close, closed}] (monday to sunday), pharmacy_hours, special_hours [{date, reason, open, close, closed, pharmacy_open, pharmacy_close}]}] nearest first. When no store near the place has it, Boots says so: stores is empty, stores_searched says how many it checked, and the answer is charged (Boots answers an item code it does not know the same way, so take item_code from product). A place Boots cannot pin down answers towns [{name, county, latitude, longitude}] to try instead. In stock or out of stock per store: Boots shows no unit counts. boots.ie takes latitude and longitude (stores returns them for a town). 1 credit. Boots search is not available yet: start from a Boots product link. Not offered: category, brand and deal lists, reviews, ratings, type-ahead, stock counts and price history. Failed upstream calls are not charged; a not-found is charged. A request answered on its second attempt costs 2 credits (3 for two-step lookups).
+
+        Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step lookups).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            item_code: product's variants[].item_code (a shade or size, 11 digits), or the product's own 8-digit id when it has no shades or sizes.
+            catentry_id: product's catentry_id.
+            market: uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and some UK products are not sold there).
+            postcode: A full UK postcode (uk only).
+            latitude: With longitude: stores near a point. Required on ie (stores returns the point for a town).
+            longitude: With latitude.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("boots_store_stock", {"item_code": item_code, "catentry_id": catentry_id, "market": market, "postcode": postcode, "latitude": latitude, "longitude": longitude}, extra)
+
+    async def stores(
+        self,
+        postcode: Optional[str] = None,
+        *,
+        market: Optional[Literal["uk", "ie"]] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Boots stores near a UK postcode or a town (uk and ie) of Boots (boots.com, the UK health and beauty retailer with over 1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on request. Returns market, postcode or city, latitude and longitude (the place searched: use them for store-stock on ie), count, message, stores [{store_number, store_id, name, address {lines, town, county, postcode}, latitude, longitude, distance_miles, services [{id, name, category}]}] nearest first. Boots' internal staff-only sites are left out. 1 credit. Boots search is not available yet: start from a Boots product link. Not offered: category, brand and deal lists, reviews, ratings, type-ahead, stock counts and price history. Failed upstream calls are not charged; a not-found is charged. A request answered on its second attempt costs 2 credits (3 for two-step lookups).
+
+        Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step lookups).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            postcode: A full UK postcode (uk).
+            market: uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and some UK products are not sold there).
+            city: A town or city (uk and ie).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("boots_stores", {"postcode": postcode, "market": market, "city": city}, extra)
+
+    async def store(
+        self,
+        store: Optional[str] = None,
+        *,
+        store_number: Optional[Union[str, int]] = None,
+        name: Optional[str] = None,
+        market: Optional[Literal["uk", "ie"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store page of Boots (boots.com, the UK health and beauty retailer with over 1,800 stores, and boots.ie in Ireland). Scavio fetches the public Boots page on request. By store page slug or link, store_number (boots.com) or exact name: market, store (the page slug), store_number, url, name, address {lines, town, county, postcode}, phone, phone_international, latitude, longitude, hours [{day, open, close, closed}] (monday to sunday), pharmacy_hours, services [{category, name}]. Staff names are left out. 1 credit. Boots search is not available yet: start from a Boots product link. Not offered: category, brand and deal lists, reviews, ratings, type-ahead, stock counts and price history. Failed upstream calls are not charged; a not-found is charged. A request answered on its second attempt costs 2 credits (3 for two-step lookups).
+
+        Costs 1 credit; 2 when the answer comes on a second attempt (3 for two-step lookups).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            store: A Boots store page slug or link (boots.com /stores/868-london-battersea-sw11-1qn, boots.ie /stores/cork-boots-patrick-street).
+            store_number: stores[].store_number (boots.com): found on Boots' store A-Z list (one more call).
+            name: stores[].name, exactly (for boots.ie, whose store pages are not numbered): found on Boots' store A-Z list (one more call).
+            market: uk (boots.com, GBP, default) or ie (boots.ie, EUR; its own prices, and some UK products are not sold there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("boots_store", {"store": store, "store_number": store_number, "name": name, "market": market}, extra)
+
+class _AsyncRockautoNamespace:
+    """RockAuto (rockauto.com, the online auto parts catalog) vehicles, categories, parts, search, brand, brands, part, suggestions, resolve, tools and promotions endpoints; the US catalog in 15 display currencies, language en, es, fr or de; 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def vehicles(
+        self,
+        *,
+        make: Optional[str] = None,
+        year: Optional[int] = None,
+        model: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RockAuto's vehicle catalog, one level at a time (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): no input = makes [{make, name, markets, url}]; make = years [{year, markets, url}]; make + year = models [{model, markets, url}]; make + year + model = engines [{make, year, model, engine, carcode, markets, url}]. markets are the vehicle markets RockAuto lists (us, ca, mx). make, year, model, engine and carcode of an engine are the vehicle inputs of categories and parts. An unknown make, year or model is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: No make: every make. A make: its years.
+            year: With make: that year's models.
+            model: With make and year: the model's engines, each with its carcode.
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_vehicles", {"make": make, "year": year, "model": model, "language": language}, extra)
+
+    async def categories(
+        self,
+        make: str,
+        year: int,
+        model: str,
+        engine: str,
+        carcode: Union[str, int],
+        *,
+        category: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One vehicle's part categories on RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request. Without category: categories [{category (the input), name (in the page language), url}]; with category: part_types [{part_type_id (the input of parts), name, category, url}]. Returns language, vehicle {make, year, model, engine, carcode} (as RockAuto answered it), count. The vehicle is checked against carcode: a carcode that answers another vehicle is a 400, not charged; an unknown category is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: Make as vehicles answers it (engines[].make).
+            year: year.
+            model: Model as vehicles answers it (engines[].model).
+            engine: Engine as vehicles answers it (engines[].engine).
+            carcode: RockAuto's vehicle code (engines[].carcode, or a suggestions / resolve vehicle). RockAuto picks the vehicle by carcode: one that answers another vehicle than make / year / model / engine is a 400, not charged.
+            category: A category from categories[].category: its part types. Without it: the vehicle's categories.
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_categories", {"make": make, "year": year, "model": model, "engine": engine, "carcode": carcode, "category": category, "language": language}, extra)
+
+    async def parts(
+        self,
+        make: str,
+        year: int,
+        model: str,
+        engine: str,
+        carcode: Union[str, int],
+        category: str,
+        part_type_id: Union[str, int],
+        *,
+        part_type: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        currency: Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every brand's listing for one part type on one vehicle (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): language, currency, vehicle, category, category_name, part_type {part_type_id, name}, count, items [position, brand, part_number, description, part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier (RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text (as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options [{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of part)], notes. RockAuto offers no sort and no paging on these lists: items are in RockAuto's own order. Prices are RockAuto's, in the requested currency as RockAuto converts them for display (currency is echoed); shipping is not included (RockAuto prices it per warehouse in the cart). Large part types (brake pads) can take 80-100 s. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: Make as vehicles answers it (engines[].make).
+            year: year.
+            model: Model as vehicles answers it (engines[].model).
+            engine: Engine as vehicles answers it (engines[].engine).
+            carcode: RockAuto's vehicle code (engines[].carcode, or a suggestions / resolve vehicle). RockAuto picks the vehicle by carcode: one that answers another vehicle than make / year / model / engine is a 400, not charged.
+            category: categories[].category.
+            part_type_id: part_types[].part_type_id (1684 = Brake Pad).
+            part_type: Optional part type name (part_types[].name); RockAuto reads the part type by its id.
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            currency: USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices converted by RockAuto).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_parts", {"make": make, "year": year, "model": model, "engine": engine, "carcode": carcode, "category": category, "part_type_id": part_type_id, "part_type": part_type, "language": language, "currency": currency}, extra)
+
+    async def search(
+        self,
+        part_number: str,
+        *,
+        brand: Optional[str] = None,
+        part_type_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        currency: Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Part number and interchange search on RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request. Matches across brands, including OE and interchange numbers RockAuto maps to its listings: language, currency, part_number, brand, part_type_id, search_label, limited and limited_notice (RockAuto's "Results may be limited" notice), count, items [position, brand, part_number, description, part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier (RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text (as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options [{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of part)], notes. RockAuto offers no sort and no paging on these lists: items are in RockAuto's own order. No match is an empty list. Prices are RockAuto's, in the requested currency as RockAuto converts them for display (currency is echoed); shipping is not included (RockAuto prices it per warehouse in the cart). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            part_number: A part number: RockAuto's brands' numbers and the OE / interchange numbers RockAuto maps to them (e.g. 41-110, PH7317, 0986494104).
+            brand: Only this brand (brands[] value).
+            part_type_id: Only this part type (an id from part_types, brands with include_part_types, or an item's part_type_id).
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            currency: USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices converted by RockAuto).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_search", {"part_number": part_number, "brand": brand, "part_type_id": part_type_id, "language": language, "currency": currency}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        part_type_id: Union[str, int],
+        *,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        currency: Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's parts of one part type on RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request. language, currency, brand, part_type_id, search_label, limited, limited_notice, count, items [position, brand, part_number, description, part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier (RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text (as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options [{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of part)], notes. RockAuto lists at most 50 rows here, with no paging or sort. Prices are RockAuto's, in the requested currency as RockAuto converts them for display (currency is echoed); shipping is not included (RockAuto prices it per warehouse in the cart). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand from brands (RockAuto's brand name).
+            part_type_id: A part type id (brands with include_part_types, or part_types from categories).
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            currency: USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices converted by RockAuto).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_brand", {"brand": brand, "part_type_id": part_type_id, "language": language, "currency": currency}, extra)
+
+    async def brands(
+        self,
+        *,
+        include_part_types: Optional[bool] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RockAuto's brand list and part groups (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): language, count, brands (about 570 names, the input of brand and search), part_groups, part_type_count and, with include_part_types, part_types [{part_type_id, name}]. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            include_part_types: true adds RockAuto's part type list (about 5,500 ids and names).
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_brands", {"include_part_types": include_part_types, "language": language}, extra)
+
+    async def part(
+        self,
+        part_key: Union[str, int],
+        part_type_id: Union[str, int],
+        *,
+        carcode: Optional[Union[str, int]] = None,
+        currency: Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One part's detail page on RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request. by the part keys from an item: brand, part_number, title, part {part_key, carcode, part_type_id}, price, price_text, price_per, core_charge, pack_size, total, pack_options, currency, out_of_stock, description, specifications [{name, value}], oe_numbers (OEM / interchange numbers), alternate_numbers, warranty (as given), warranty_url, disclaimer, more_information (the manufacturer's text), images. RockAuto's part detail page is in English in every language; the price is in the requested currency. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            part_key: items[].part.part_key.
+            part_type_id: items[].part.part_type_id.
+            carcode: items[].part.carcode (0 from search, brand and tools).
+            currency: USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices converted by RockAuto).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_part", {"part_key": part_key, "part_type_id": part_type_id, "carcode": carcode, "currency": currency}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RockAuto's search box suggestions for typed text (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): query, count, vehicles [{year, make, model, engine, carcode, markets, part_type_id, part_type, category, text}], part_types [{part_type_id, name, category}] (need a vehicle), tools [{part_type_id, name, category, subcategory}] (tools and universal parts), help [{question, answer_preview, url}]. Part numbers are not suggested (use search). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Typed text: a vehicle (2015 ford f-150), a part type (brake pad) or a tool.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_suggestions", {"query": query}, extra)
+
+    async def resolve(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Free text to a RockAuto vehicle (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): how RockAuto's search box reads "2010 honda accord brake pads". Returns query, count, matches [{year, make, model, engine, carcode, markets, part_type_id, part_type, category, text, leftover (the words RockAuto did not interpret)}]. A match without carcode needs vehicles (make, year, model) for its engines. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Free text naming a vehicle and, optionally, a part.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_resolve", {"query": query}, extra)
+
+    async def tools(
+        self,
+        *,
+        category: Optional[str] = None,
+        subcategory: Optional[str] = None,
+        part_type_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        currency: Optional[Literal["USD", "AUD", "BRL", "GBP", "CAD", "CLP", "EUR", "HUF", "JPY", "MXN", "NZD", "NOK", "PLN", "SEK", "CHF"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RockAuto's tools and universal parts catalog (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.), one level at a time: no input = categories [{category, name, url}]; category = subcategories [{category, subcategory, name, url}]; category + subcategory = part_types [{part_type_id, name, url}]; part_type_id = that part type's listing: category, subcategory, part_type, items [position, brand, part_number, description, part_type (search, brand), part_type_id, notes (RockAuto's fitment notes), tier (RockAuto's tier label, e.g. Economy, Daily Driver, Premium), price, price_text (as printed), price_per (e.g. Each), core_charge, pack_size, total, pack_options [{pack_size, price_each, total, selected}], currency, out_of_stock, closeout, closeout_text (e.g. Wholesaler Closeout -- 30 Day Warranty), non_stock_text, shipping_delay_days, remaining, remaining_text, popular (RockAuto's most-popular mark), fits_markets (us, ca, mx), alternate_numbers (OE / alternate numbers it replaces), image, info_url, part {part_key, carcode, part_type_id} (the input of part)]. Returns level, language, currency, count, notes. RockAuto offers no sort and no paging on these lists: items are in RockAuto's own order. Prices are RockAuto's, in the requested currency as RockAuto converts them for display (currency is echoed); shipping is not included (RockAuto prices it per warehouse in the cart). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A tools category (categories[].category): its subcategories.
+            subcategory: With category: a subcategory (subcategories[].subcategory): its part types.
+            part_type_id: A tools / universal part type id (part_types[].part_type_id, or suggestions tools[]): its listing.
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            currency: USD (default), AUD, BRL, GBP, CAD, CLP, EUR, HUF, JPY, MXN, NZD, NOK, PLN, SEK or CHF: RockAuto's display currency (one US catalog, prices converted by RockAuto).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_tools", {"category": category, "subcategory": subcategory, "part_type_id": part_type_id, "language": language, "currency": currency}, extra)
+
+    async def promotions(
+        self,
+        *,
+        language: Optional[Literal["en", "es", "fr", "de"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RockAuto's promotions and manufacturer rebates page (RockAuto (rockauto.com, the online auto parts catalog based in Madison, Wisconsin). Scavio fetches the public RockAuto page on request.): language, currency (USD: amounts as printed), read_date, count, promotions [{name, badge, title, offer, expires_text (as printed, e.g. Offer expires 12/31/26), expires (that date, YYYY-MM-DD), shown (false when the page hides the offer), link_text, link_url (the rebate form)}], recently_expired (RockAuto's list), notes. The page can still carry offers whose printed date has passed: dates are as given, with the read date. RockAuto publishes no coupon codes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            language: en (default), es, fr or de: RockAuto's page language (names, notes, tiers and labels; part numbers and prices do not change).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rockauto_promotions", {"language": language}, extra)
+
+class _AsyncCarscomNamespace:
+    """Cars.com (cars.com, the US car marketplace) search, listing, dealer, dealer_inventory, dealer_reviews, model_reviews, dealers and research endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        zip: Union[str, int],
+        *,
+        stock_type: Optional[Literal["all", "new", "used", "cpo", "new_cpo"]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "mileage_low", "mileage_high", "distance", "best_deal", "year_newest", "year_oldest", "listed_newest", "listed_oldest"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        trims: Optional[Union[str, list[str]]] = None,
+        drivetrain: Optional[Union[str, list[str]]] = None,
+        exterior_color: Optional[Union[str, list[str]]] = None,
+        deal_rating: Optional[Union[str, list[str]]] = None,
+        body_style: Optional[Union[str, list[str]]] = None,
+        seller_type: Optional[Literal["dealership", "private"]] = None,
+        keyword: Optional[str] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the car listings of Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. New, used and certified cars around a ZIP code with a radius, by make and model, sorted (Cars.com's 11 sorts) and filtered by year, price, mileage, trims, drivetrain, color, Cars.com deal rating, body style, seller type and keyword; 24 a page. Returns search_title, location, stock_type, sort, page, total (Cars.com's count, capped at 10,000: total_capped), total_pages, has_more, filters_applied, filters_not_applied, count, items [{listing_id, url, title, year, make, model, trim, stock_type, certified, dealer_verified_condition, price, msrp (new only), mileage, body_style, drivetrain, exterior_color, fuel_type, price_stack, price_drop (as the card shows it), photo_count, image, badges [{label, description}] (Cars.com's deal and demand labels with its explanation), delivery, seller {seller_type, name (dealers only), city, state, zip, rating, distance_miles}, sponsored (a paid placement), placement, position}], facets (include_facets), market, notes. No VINs, stock numbers, private-seller names or contact details, reviewer names or towns, or dealer employee names are returned; dealer business name, address, phone, website and hours are kept. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: Cars.com searches around it (an unknown ZIP is a 400, not charged).
+            stock_type: all (default: new, used and certified), new, used, cpo (certified pre-owned), new_cpo (new and certified).
+            make: A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land_rover).
+            model: A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, f_150, cr_v; toyota-rav4 also accepted).
+            radius: Miles around the ZIP: 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500, 750, 1000 (default 50).
+            page: Page (default 1); 24 listings a page.
+            sort: best_match (default), price_low, price_high, mileage_low, mileage_high, distance, best_deal, year_newest, year_oldest, listed_newest, listed_oldest (Cars.com's 11 sorts).
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest list price, whole USD.
+            price_max: Highest list price, whole USD.
+            mileage_max: Most miles, one of Cars.com's steps: 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 150000, 200000, 250000.
+            trims: Trims of make + model (names or slugs; one, a list, or comma-separated), e.g. XLE, XLE Premium. Needs make and model.
+            drivetrain: all_wheel_drive, four_wheel_drive, front_wheel_drive, rear_wheel_drive (or awd, 4wd, fwd, rwd); one or a list.
+            exterior_color: Exterior colors (black, white, gray, silver, blue, red ...); one or a list.
+            deal_rating: Cars.com deal ratings: great, good, fair; one or a list.
+            body_style: Body styles (suv, sedan, truck, coupe, hatchback, minivan, wagon, convertible ...); one or a list.
+            seller_type: dealership or private (private sellers).
+            keyword: Cars.com's keyword filter (words in the listing).
+            include_facets: Also return facets: the site's filter options with result counts for this search.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_search", {"zip": zip, "stock_type": stock_type, "make": make, "model": model, "radius": radius, "page": page, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_max": mileage_max, "trims": trims, "drivetrain": drivetrain, "exterior_color": exterior_color, "deal_rating": deal_rating, "body_style": body_style, "seller_type": seller_type, "keyword": keyword, "include_facets": include_facets}, extra)
+
+    async def listing(
+        self,
+        listing_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One car listing on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. By listing id or link: listing_id, url, title, year, make, model, trim, stock_type, certified, price, msrp (new only), mileage, body_style, category, colors, fuel_type, drivetrain, engine, transmission, mpg, photo_count, badges [{label, description}], price_stack, price_breakdown {disclosed, vehicle_price, fees [{label, amount}], all_in_price}, deal {rating, summary, good_deal_range_low, good_deal_range_high, market_position} (Cars.com's price analysis as stated), price_history {summary, entries [{date, change (listed, drop, increase), change_amount, price}]}, features [{group, items}], history {source, title, accidents, owners, prior_use, recalls and flags} (used), cpo {package, program, certified_by, terms}, seller_notes, seller_type (dealership or private), dealer {dealer_id, name, rating, review_count, address, website, hours, url} (dealers only), market, notes. A listing that is no longer available is a charged 404. No VINs, stock numbers, private-seller names or contact details, reviewer names or towns, or dealer employee names are returned; dealer business name, address, phone, website and hours are kept. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            listing_id: A Cars.com listing id (search items[].listing_id) or a cars.com/vehicledetail/<id>/ link.
+            url: A cars.com/vehicledetail/<id>/ link instead of listing_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_listing", {"listing_id": listing_id, "url": url}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A car dealer's public profile on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. By dealer id: dealer_id, name, url, rating, review_count, phone, website, address, latitude, longitude, description, opening_hours, hours [{day, sales, service}], service {name, phone, opening_hours}, inventory_count, awards, award_count, on_cars_com_since, image, market, notes. An unknown id is a charged 404. No VINs, stock numbers, private-seller names or contact details, reviewer names or towns, or dealer employee names are returned; dealer business name, address, phone, website and hours are kept. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers items[].dealer_id) or a cars.com/dealers/<id>/ link.
+            url: A cars.com/dealers/<id>/ link instead of dealer_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_dealer", {"dealer_id": dealer_id, "url": url}, extra)
+
+    async def dealer_inventory(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A dealer's vehicles for sale on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. 24 a page: dealer {dealer_id, name, url, rating, review_count}, page, total, total_pages, has_more, count, items [{listing_id, url, year, make, model, trim, stock_type, certified, price, msrp (new only), mileage, body_style, drivetrain, colors, fuel_type, photo_count, deal_badge, cpo_package, sponsored}], market, notes. An unknown id is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers items[].dealer_id) or a cars.com/dealers/<id>/ link.
+            url: A cars.com/dealers/<id>/ link instead of dealer_id.
+            page: Page (default 1); 24 vehicles a page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_dealer_inventory", {"dealer_id": dealer_id, "url": url, "page": page}, extra)
+
+    async def dealer_reviews(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["most_recent", "lowest_rated", "most_helpful", "highest_rated"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A dealer's customer reviews on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. Paged (10-40 a page), sorted most_recent, lowest_rated, most_helpful or highest_rated: dealer, rating, total, sort, page, page_size, total_pages, has_more, count, reviews [{rating, title, date, text, category_ratings, recommends, shopped_for, made_purchase, helpful_votes, total_votes}], market, notes. No star filter exists on the site. Reviewer names and towns and "worked with" employees are not returned. An unknown id is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: Required. A Cars.com dealer id (digits: listing dealer.dealer_id, dealers items[].dealer_id) or a cars.com/dealers/<id>/ link.
+            url: A cars.com/dealers/<id>/ link instead of dealer_id.
+            page: Page (default 1); page_size reviews a page.
+            page_size: Reviews a page: 10, 20, 30, 40 (default 20).
+            sort: most_recent (default), lowest_rated, most_helpful, highest_rated.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_dealer_reviews", {"dealer_id": dealer_id, "url": url, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    async def model_reviews(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["most_recent", "lowest_rated", "most_helpful", "highest_rated"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Owner (consumer) reviews of one model year on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. By make, model and year, paged (10-200 a page), sorted most_recent, lowest_rated, most_helpful or highest_rated: vehicle, msrp_range, rating, total, recommend_percent, category_ratings, model_slug, sort, page, page_size, total_pages, has_more, count, reviews [{rating, title, date, text, category_ratings, recommends, owns_this_car, purchased, used_for, helpful_votes, total_votes}], market, notes. No star filter exists on the site. Reviewer names and towns are not returned. An unknown model year is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land_rover).
+            model: A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, f_150, cr_v; toyota-rav4 also accepted).
+            year: Required. The model year.
+            page: Page (default 1); page_size reviews a page.
+            page_size: Reviews a page: 10, 20, 30, 50, 100, 200 (default 20).
+            sort: most_recent (default), lowest_rated, most_helpful, highest_rated.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_model_reviews", {"make": make, "model": model, "year": year, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    async def dealers(
+        self,
+        zip: Union[str, int],
+        *,
+        radius: Optional[int] = None,
+        make: Optional[str] = None,
+        min_rating: Optional[int] = None,
+        sort: Optional[Literal["rating", "name", "distance"]] = None,
+        dealer_name: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find car dealers on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. Around a ZIP code with a radius, by make, minimum rating and dealer name, sorted by rating, name or distance: location, filters, sort, page, total, has_more, count, items [{dealer_id, name, url, rating, review_count, address, distance_miles, inventory_count, phones [{label, number}]}], market, notes. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: Cars.com searches around it (an unknown ZIP is a 400, not charged).
+            radius: Miles around the ZIP: 10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 500 (default 30).
+            make: Only dealers that sell this make (Cars.com's make filter).
+            min_rating: Lowest dealer rating: 1, 2, 3, 4 (& up).
+            sort: rating (default), name, distance.
+            dealer_name: Words in the dealer's name.
+            page: Page (default 1); about 20 dealers a page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_dealers", {"zip": zip, "radius": radius, "make": make, "min_rating": min_rating, "sort": sort, "dealer_name": dealer_name, "page": page}, extra)
+
+    async def research(
+        self,
+        make: str,
+        *,
+        model: Optional[str] = None,
+        year: Optional[int] = None,
+        level: Optional[Literal["make", "model", "model_year", "trims"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Car research pages on Cars.com (cars.com, the US car marketplace run by Cars Commerce). Scavio fetches the public Cars.com page on request; Cars.com has no public API for reading listings. US only, prices in USD. level make (description, lineup, models), model (generations, competitors, model years with price range and rating), model_year (average listing price on used years or starting price on new ones, MPG, ratings, NHTSA score, notable features, the good and the bad, warranty, trims with price) or trims (starting MSRP, combined MPG, engine, drivetrain, transmission, seating), as Cars.com publishes them. Returns level, slug and the level's fields, market, notes. An unknown make, model or year is a charged 404. 1 credit. Billed on what the request spent (credits_used); failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make as Cars.com lists it (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land_rover).
+            model: A model of make: the name (RAV4, F-150, CR-V) or Cars.com's slug (rav4, f_150, cr_v; toyota-rav4 also accepted).
+            year: A model year (with model).
+            level: make, model, model_year or trims. Default: make without model, model without year, model_year with year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carscom_research", {"make": make, "model": model, "year": year, "level": level}, extra)
+
+class _AsyncAutotraderNamespace:
+    """Autotrader (autotrader.com, the US car marketplace) search, listing, dealers, dealer and makes endpoints; US only, prices in USD, KBB price ranges as given, 2 credits each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        zip: Union[str, int],
+        *,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        trim_code: Optional[str] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "mileage_asc", "year_desc", "distance_asc"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        body_style: Optional[str] = None,
+        drivetrain: Optional[str] = None,
+        exterior_color: Optional[str] = None,
+        interior_color: Optional[str] = None,
+        seller_type: Optional[Literal["dealer", "private"]] = None,
+        listing_type: Optional[Literal["new", "used", "certified", "third_party_certified"]] = None,
+        fuel: Optional[str] = None,
+        transmission: Optional[str] = None,
+        history: Optional[str] = None,
+        deal: Optional[Literal["good", "great"]] = None,
+        feature: Optional[str] = None,
+        doors: Optional[str] = None,
+        seating: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the cars for sale on Autotrader (autotrader.com, the US car marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader has no public API for reading listings. Around a US ZIP code with a radius, by make, model and trim, sorted by relevance, price, mileage, model year or distance, filtered by model year, price, mileage, body style, drivetrain, colours, dealer or private seller, new / used / certified, fuel, transmission, vehicle history, Good or Great deal, a feature, doors and seats; 25 or 100 a page. Returns search, location {zip, place, radius_miles}, filters_applied (as Autotrader applied them), filters_not_applied, sort, page, page_size, total, total_pages, has_more, count, listings [{listing_id, url, title, year, make, make_code, model, model_code, trim, trim_code, listing_type (new, used, certified, third_party_certified), mileage, exterior_color, interior_color, body_style, drivetrain, engine, fuel, transmission, mpg_city, mpg_highway, doors, days_on_site, newly_listed, reduced_price, price (USD; null when the dealer asks you to call: price_label), display_price, msrp, price_label, deal_label, kbb_fair_purchase_price, dealer_fees {total, items [{name, amount}]}, price_history [{date, price, current}], history_preview (Autotrader's history flags as given, e.g. NO_ACCIDENTS_REPORTED, ONE_OWNER), warranties, image, sponsored, seller ({type: dealer, dealer_id, name, rating, rating_count, city, state, distance_miles, url} or a private seller)}], spotlights (Autotrader's paid Spotlight placements, sponsored: true), stats {price, mileage, year: {min, avg, max}} for the whole result set, market {country, currency}, notes. deal_label is Autotrader's own label (Great, Good) as Autotrader gives it, based on the Kelley Blue Book Fair Purchase Price range: kbb_fair_purchase_price {amount, low, high, delta (that price minus the listing price; negative = above it)}. Private sellers: seller is {type: private, city, state, distance_miles} only (no name, phone or street address). VINs and stock numbers are never returned; phone numbers, emails, stock numbers and VIN-like codes inside descriptions read "[removed]". 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: Autotrader lists cars around it (an unknown ZIP is a 400, not charged).
+            make: A make. By name or Autotrader code (Toyota, Ford, Mercedes-Benz, Land Rover, or MB, ROV ...; 72 makes).
+            model: A model as Autotrader names it (Civic, F150, RAV4, C-Class) or its model code (listings[].model_code, makes models[].code). Needs make. A different spelling (F-150) is matched to Autotrader's name; a model Autotrader does not list for the make is a charged 404 that lists the make's models.
+            trim_code: A trim as listings[].trim_code gives it (MODEL|Trim). Needs make and model.
+            radius: Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 400, 500, 0 (0 = nationwide). Autotrader's default otherwise (location.radius_miles says which).
+            page: Page (default 1, at most 100).
+            page_size: Listings a page: 25 (default) or 100.
+            sort: relevance (default), price_asc, mileage_asc, year_desc (newest model year), distance_asc.
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest price, whole USD.
+            price_max: Highest price, whole USD.
+            mileage_min: Fewest miles.
+            mileage_max: Most miles.
+            body_style: Body style, code or label: CONVERT (Convertible), COUPE (Coupe), HATCH (Hatchback), SEDAN (Sedan), SUVCROSS (SUV / Crossover), TRUCKS (Truck), VANMV (Van / Minivan), WAGON (Wagon).
+            drivetrain: Drivetrain: AWD4WD (AWD/4WD), FWD (Front Wheel Drive), RWD (Rear Wheel Drive).
+            exterior_color: Exterior colour: BEIGE (Beige), BLACK (Black), BLUE (Blue), BROWN (Brown), BURGUNDY (Burgundy), CHARCOAL (Charcoal), GOLD (Gold), GRAY (Gray), GREEN (Green), OFFWHITE (Off White), ORANGE (Orange), PINK (Pink), PURPLE (Purple), RED (Red), SILVER (Silver), TAN (Tan), TURQUOISE (Turquoise), WHITE (White), YELLOW (Yellow).
+            interior_color: Interior colour (same values as exterior_color).
+            seller_type: dealer or private (private sellers).
+            listing_type: new, used, certified (manufacturer certified pre-owned) or third_party_certified.
+            fuel: Fuel type: GSL (Gasoline), DSL (Diesel), HYB (Hybrid), ELE (Electric), HYD (Hydrogen), PIH (Plug-in Hybrid).
+            transmission: Transmission: AUT (Automatic), MAN (Manual).
+            history: Vehicle history as Autotrader filters it: NO_ACCIDENTS (No Accidents), ONE_OWNER (Single Owner), CLEAN_TITLE (Clean Title), NO_FRAME_DAMAGE (No Frame Damage), FREE_REPORT (Free Report).
+            deal: Only listings Autotrader labels a Good Price or Great Price deal (based on the Kelley Blue Book Fair Purchase Price range).
+            feature: One feature, code or label: 1062 (Keyless Entry), 1317 (Premium Wheels), 1172 (Roof Rack), 1199 (Trailer Hitch), AT0001 (Dual Rear Wheels), 1318 (Disability Equipped), 1327 (Android Auto), 1326 (Apple CarPlay), 1211 (Bluetooth, Hands-Free), 1033 (Cruise Control), 1297 (DVD Player), 1066 (Navigation), 1230 (Portable Audio Connection), 1136 (Premium Audio), 1149 (Satellite Radio), 1161 (Steering Wheel Controls), 1221 (Remote Engine Start), 1313 (Adaptive Cruise Control), 1298 (Heads Up Display), 1160 (Rain Sensing Wipers), 1229 (Keyless Start), 1180 (Parking Assist), 1331 (WiFi Hotspot), 1306 (3rd Row Seats), 1319 (Heated Seats), 1078 (Leather Seats), 1132 (Sunroof), 1224 (Backup Camera), 1142 (Night Vision), 1310 (Lane Departure Warning), 1309 (Blind Spot Monitor), 1330 (Cross Traffic Alert), 1228 (Brake Assist), 1013 (Security System).
+            doors: Doors: 2 (Two Door), 3 (Three Door), 4 (Four Door), 5 (Five Door).
+            seating: Seats: 2, 3, 4, 5, 6, 7, 8+.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autotrader_search", {"zip": zip, "make": make, "model": model, "trim_code": trim_code, "radius": radius, "page": page, "page_size": page_size, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "body_style": body_style, "drivetrain": drivetrain, "exterior_color": exterior_color, "interior_color": interior_color, "seller_type": seller_type, "listing_type": listing_type, "fuel": fuel, "transmission": transmission, "history": history, "deal": deal, "feature": feature, "doors": doors, "seating": seating}, extra)
+
+    async def listing(
+        self,
+        listing_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One car listing on Autotrader (autotrader.com, the US car marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader has no public API for reading listings. By listing id or link: the search tile fields plus description, images, features {group: [...]}, ranked_features, specifications {name: value}, warranties [{group, type, label, details, years, miles, unlimited_miles, remaining_years, remaining_miles}], kbb_consumer_rating, kbb_consumer_review_count (Kelley Blue Book owner ratings for the model), price_history, deal_label + deal_basis, dealer {dealer_id, name, rating, rating_count, address {street, street2, city, state, zip}, phone, website, hours [{day, open, close}], home_services, is_open, url} (null for a private seller), zip, market, notes. deal_label is Autotrader's own label (Great, Good) as Autotrader gives it, based on the Kelley Blue Book Fair Purchase Price range: kbb_fair_purchase_price {amount, low, high, delta (that price minus the listing price; negative = above it)}. Private sellers: seller is {type: private, city, state, distance_miles} only (no name, phone or street address). VINs and stock numbers are never returned; phone numbers, emails, stock numbers and VIN-like codes inside descriptions read "[removed]". A sold or removed listing is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            listing_id: An Autotrader listing id (listings[].listing_id).
+            url: An Autotrader listing link (https://www.autotrader.com/cars-for-sale/vehicle/<id>) instead of listing_id.
+            zip: Optional: the distance (seller.distance_miles) is measured from this US ZIP code; without it distance_miles is null.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autotrader_listing", {"listing_id": listing_id, "url": url, "zip": zip}, extra)
+
+    async def dealers(
+        self,
+        zip: Union[str, int],
+        *,
+        make: Optional[str] = None,
+        radius: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Car dealers near a US ZIP code on Autotrader (autotrader.com, the US car marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader has no public API for reading listings. Optionally of one make, within a radius, and with cars in a price or model-year range: search, location {zip, place, radius_miles}, count, dealers [{dealer_id, name, franchise_name, make, rating, rating_count, distance_miles, address {street, street2, city, state, zip}, phone, website, url}] (the first 50, nearest first as Autotrader orders them; the dealer finder does not page, so narrow with radius or make), market, notes. Dealer details are the dealer's public business details. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: Autotrader lists cars around it (an unknown ZIP is a 400, not charged).
+            make: Only dealers of this make (Autotrader's franchise filter). By name or Autotrader code (Toyota, Ford, Mercedes-Benz, Land Rover, or MB, ROV ...; 72 makes).
+            radius: Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 500, 0 (0 = any). Autotrader's default otherwise.
+            price_min: Dealers with cars from this price, whole USD.
+            price_max: Dealers with cars up to this price, whole USD.
+            year_min: Dealers with cars from this model year.
+            year_max: Dealers with cars up to this model year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autotrader_dealers", {"zip": zip, "make": make, "radius": radius, "price_min": price_min, "price_max": price_max, "year_min": year_min, "year_max": year_max}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One dealer on Autotrader (autotrader.com, the US car marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader has no public API for reading listings. By dealer id or link: dealer_id, name, rating, rating_count, address, phone, website, hours, home_services {buy_online, test_drive, vehicle_delivery, virtual_tour}, is_open, url, inventory_count (the dealer's listings on Autotrader), makes [{make, make_code, count}], inventory_sort, inventory [{the search tile fields}] (the first page as the dealer page shows it, lowest price first), market, notes. Dealer reviews are not included (rating and rating_count only). An unknown id is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            dealer_id: An Autotrader dealer id (dealers[].dealer_id, listings[].seller.dealer_id).
+            url: An Autotrader dealer link (https://www.autotrader.com/car-dealers/<city-st>/<id>/<name>) instead of dealer_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autotrader_dealer", {"dealer_id": dealer_id, "url": url}, extra)
+
+    async def makes(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One make's models on Autotrader (autotrader.com, the US car marketplace run by Cox Automotive). Scavio fetches the public Autotrader page on request; Autotrader has no public API for reading listings. By make: make {code, name}, years, popular_models (model codes), count, models [{code, name, years, price_by_year {year: price range label as the page gives it}, mpg_by_year {year: {city, highway}}, body_style, image, search_model (the model name to pass to search)}], market, notes. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. By name or Autotrader code (Toyota, Ford, Mercedes-Benz, Land Rover, or MB, ROV ...; 72 makes).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("autotrader_makes", {"make": make}, extra)
+
+class _AsyncCargurusNamespace:
+    """CarGurus (cargurus.com, the car marketplace in the US, Canada and the UK) search, dealer, dealers, price_trends, research, expert_reviews, makes and models endpoints; markets us, us-es, ca, ca-fr, uk; 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        zip: Union[str, int],
+        *,
+        market: Optional[str] = None,
+        distance: Optional[Union[int, str]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        trim: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[str] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        drivetrain: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        body_type: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        deal_rating: Optional[Union[str, list[str]]] = None,
+        fuel_type: Optional[Union[str, list[str]]] = None,
+        transmission: Optional[Union[str, list[str]]] = None,
+        single_owner: Optional[bool] = None,
+        no_accidents: Optional[bool] = None,
+        price_drops_only: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the car listings of CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. Around a ZIP / postal code / postcode with a radius, by make, model and trim (names or ids), sorted by any of CarGurus' 11 sorts, filtered by year, price, mileage, drivetrain, colour, body type, condition, seller type, CarGurus deal rating, fuel, transmission, single owner, no accidents and recent price drops. Returns market, location {zip, resolved, distance, distance_unit, nationwide}, make, model, trim, make_model_trim_path, sort, applied_filters (as CarGurus applied them), total, page, page_count, has_more, count, listings [{listing_id, title, name, year, make, make_id, model, model_id, trim, trim_id, body_type, condition, price (null when the listing shows no price), price_text, currency, original_price, msrp (new cars), price_with_fees, fee_disclosure, expected_price, expected_price_difference, deal_rating, deal_rating_label, deal_score, price_drop {previous_price, amount, dropped_at}, days_on_market, mileage, mileage_unit, exterior_color, interior_color, transmission, drivetrain, engine, fuel_type, mpg {city, highway, combined, unit}, ev, doors, options, highlights (e.g. No accidents, 1 owner), safety_rating, ulez_compliant (uk), photo, photo_count, placement, sponsored, buying_option, distance, seller_type, dealer {dealer_id, name, city, region, postal_code, phone, franchise_dealer, franchise_make, rating, url}, url}], trims (with a model), facets (include_facets), notes. Sponsored placements (priority, featured) are inserted by CarGurus out of the requested order and flagged. deal_rating (GREAT_PRICE, GOOD_PRICE, FAIR_PRICE, POOR_PRICE, OVERPRICED, OUTLIER, NA) with deal_rating_label and deal_score, and expected_price with expected_price_difference (expected minus asking), are CarGurus' own price analysis as CarGurus labels it. No VINs, stock numbers or private-seller details are returned; dealer names, addresses, phones and ratings are CarGurus' public dealer details. There is no listing detail endpoint: CarGurus does not serve its listing pages to us, and each listing already carries the price, expected price, deal rating and specs. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. Where to search around: a 5-digit US ZIP code (us, us-es), a Canadian postal code (ca, ca-fr, e.g. M5V 2T6) or a UK postcode (uk, e.g. M1 1AE). A malformed code is a 400, not charged.
+            market: us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            distance: Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), 75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "nationwide".
+            make: A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and Canadian sites, m273 on the UK site): names resolve to the market's id.
+            model: A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from models). Needs make. A model name is resolved from the make's models on a first CarGurus page (same 1 credit; send model_id to save that step).
+            trim: A trim as CarGurus names it (search's trims list, e.g. XLE, XLT SuperCrew 4WD). Needs model.
+            page: Page (default 1, at most 500); 24 tiles a page.
+            sort: best_match, best_deal, price_low, price_high, mileage_low, mileage_high, closest, year_newest, year_oldest, listed_newest, listed_oldest (CarGurus' 11 sorts; default best_match). best_deal is CarGurus' "Best deals first" (used cars).
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price.
+            mileage_min: Lowest mileage (miles; km in ca / ca-fr).
+            mileage_max: Highest mileage.
+            drivetrain: One or a list: awd, 4wd, fwd, rwd, 4x2.
+            color: Exterior colour group(s): black, blue, brown, gold, gray (grey), green, orange, pink, purple, red, silver, teal, white, yellow.
+            body_type: coupe, convertible, hatchback, minivan (mpv), pickup, sedan (saloon), suv, van, wagon (estate).
+            condition: us / ca: used, certified (manufacturer certified), third_party_certified; uk: approved_used.
+            seller_type: franchise_dealer or cargurus_partner (CarGurus Partners).
+            deal_rating: CarGurus deal rating(s) by name: great, good, fair, high, overpriced, uncertain, no_analysis (or CarGurus' own names GREAT_PRICE, GOOD_PRICE, FAIR_PRICE, POOR_PRICE, OVERPRICED, OUTLIER, NA).
+            fuel_type: gasoline (petrol), diesel, electric, hybrid, flex_fuel, cng, biodiesel, hydrogen, dual_fuel.
+            transmission: automatic or manual.
+            single_owner: Only cars CarGurus reports as single-owner.
+            no_accidents: Only cars with no accidents reported.
+            price_drops_only: Only listings with a recent price drop.
+            filters: Other CarGurus filters by the site's own key (facets[].key from include_facets) to a value or list: daysOnMarketMin, daysOnMarketMax, minMpg, maxMpg, hideWithoutPhotos, hideFrameDamaged, hideTheft, interiorColors, hideFleet, hideLemon, hideSalvage, doors, installedOptionIds, safetyRatings, averageDealerRatings, minEVBatteryChargingTime, maxEVBatteryChargingTime, minEVBatteryRange, maxEVBatteryRange, hideEvOrPhev, numberOfSeats, enginePaths, vehicleHistoryOptions, dealerFeesIncluded, ulezCompliant, hideScrapped, seatingCapacity.
+            include_facets: Also return facets [{facet, label, key, min_key, max_key, values [{name, value, label, count}], range}]: CarGurus' filters with counts for this search (a filters entry takes key with the value; deal ratings go by name through deal_rating).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_search", {"zip": zip, "market": market, "distance": distance, "make": make, "model": model, "trim": trim, "page": page, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "drivetrain": drivetrain, "color": color, "body_type": body_type, "condition": condition, "seller_type": seller_type, "deal_rating": deal_rating, "fuel_type": fuel_type, "transmission": transmission, "single_owner": single_owner, "no_accidents": no_accidents, "price_drops_only": price_drops_only, "filters": filters, "include_facets": include_facets}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        market: Optional[str] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        trim: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[str] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        drivetrain: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        body_type: Optional[Union[str, list[str]]] = None,
+        condition: Optional[Union[str, list[str]]] = None,
+        seller_type: Optional[Union[str, list[str]]] = None,
+        deal_rating: Optional[Union[str, list[str]]] = None,
+        fuel_type: Optional[Union[str, list[str]]] = None,
+        transmission: Optional[Union[str, list[str]]] = None,
+        single_owner: Optional[bool] = None,
+        no_accidents: Optional[bool] = None,
+        price_drops_only: Optional[bool] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One dealer on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. By dealer id or link: dealer {dealer_id, name, address {street, city, region, postal_code}, sales_phone, service_phone, website, maps_url, location, logo, hours [{day, open, close, is_open}] (7 days), current_day, rating, review_count, social, url}, reviews [{review_id, rating, date, content, purchase_status, delivery, helpful, dealer_response {text, date}}] (every review CarGurus embeds in the page; CarGurus has no review paging, sort or star filter, so filter them on your side; no reviewer names), inventory {total, page, page_count, has_more, count, listings} (the dealer's listings, paged, sorted and filtered like search), nearby_dealers, notes. An unknown dealer is a charged 404. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: A CarGurus dealer id (listings[].dealer.dealer_id, dealers[].dealer_id).
+            url: A CarGurus dealer link (https://www.cargurus.com/Cars/m-<dealer name>-sp<id>, or the .ca / .co.uk site) instead of dealer_id; its site sets the market.
+            market: us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            make: A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and Canadian sites, m273 on the UK site): names resolve to the market's id.
+            model: A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from models). Needs make. A model name is resolved from the make's models on a first CarGurus page (same 1 credit; send model_id to save that step).
+            trim: A trim as CarGurus names it (search's trims list, e.g. XLE, XLT SuperCrew 4WD). Needs model.
+            page: Page (default 1, at most 500); 24 tiles a page.
+            sort: best_match, best_deal, price_low, price_high, mileage_low, mileage_high, closest, year_newest, year_oldest, listed_newest, listed_oldest (CarGurus' 11 sorts; default best_match). best_deal is CarGurus' "Best deals first" (used cars).
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest price, whole units of the market's currency.
+            price_max: Highest price.
+            mileage_min: Lowest mileage (miles; km in ca / ca-fr).
+            mileage_max: Highest mileage.
+            drivetrain: One or a list: awd, 4wd, fwd, rwd, 4x2.
+            color: Exterior colour group(s): black, blue, brown, gold, gray (grey), green, orange, pink, purple, red, silver, teal, white, yellow.
+            body_type: coupe, convertible, hatchback, minivan (mpv), pickup, sedan (saloon), suv, van, wagon (estate).
+            condition: us / ca: used, certified (manufacturer certified), third_party_certified; uk: approved_used.
+            seller_type: franchise_dealer or cargurus_partner (CarGurus Partners).
+            deal_rating: CarGurus deal rating(s) by name: great, good, fair, high, overpriced, uncertain, no_analysis (or CarGurus' own names GREAT_PRICE, GOOD_PRICE, FAIR_PRICE, POOR_PRICE, OVERPRICED, OUTLIER, NA).
+            fuel_type: gasoline (petrol), diesel, electric, hybrid, flex_fuel, cng, biodiesel, hydrogen, dual_fuel.
+            transmission: automatic or manual.
+            single_owner: Only cars CarGurus reports as single-owner.
+            no_accidents: Only cars with no accidents reported.
+            price_drops_only: Only listings with a recent price drop.
+            filters: Other CarGurus filters by the site's own key (facets[].key from include_facets) to a value or list: daysOnMarketMin, daysOnMarketMax, minMpg, maxMpg, hideWithoutPhotos, hideFrameDamaged, hideTheft, interiorColors, hideFleet, hideLemon, hideSalvage, doors, installedOptionIds, safetyRatings, averageDealerRatings, minEVBatteryChargingTime, maxEVBatteryChargingTime, minEVBatteryRange, maxEVBatteryRange, hideEvOrPhev, numberOfSeats, enginePaths, vehicleHistoryOptions, dealerFeesIncluded, ulezCompliant, hideScrapped, seatingCapacity.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_dealer", {"dealer_id": dealer_id, "url": url, "market": market, "make": make, "model": model, "trim": trim, "page": page, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "drivetrain": drivetrain, "color": color, "body_type": body_type, "condition": condition, "seller_type": seller_type, "deal_rating": deal_rating, "fuel_type": fuel_type, "transmission": transmission, "single_owner": single_owner, "no_accidents": no_accidents, "price_drops_only": price_drops_only, "filters": filters}, extra)
+
+    async def dealers(
+        self,
+        zip: Union[str, int],
+        *,
+        market: Optional[str] = None,
+        distance: Optional[Union[int, str]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The dealers with listings around a US ZIP code on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. (optionally for one make / model): count, total_listings, dealers [{dealer_id, name, rating, distance, city, region, listing_count, url}] (up to 150, as CarGurus' own dealer filter lists them), location, notes. US site only (us, us-es): the Canadian and UK search pages carry no dealer list. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. Where to search around: a 5-digit US ZIP code (us, us-es), a Canadian postal code (ca, ca-fr, e.g. M5V 2T6) or a UK postcode (uk, e.g. M1 1AE). A malformed code is a 400, not charged.
+            market: us, us-es (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency. The Canadian and UK search pages carry no dealer list.
+            distance: Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), 75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "nationwide".
+            make: A make as CarGurus names it (Toyota, Ford, Mercedes-Benz ...) or its make_id (m7; from makes). Ids differ per site (Ford is m2 on the US and Canadian sites, m273 on the UK site): names resolve to the market's id.
+            model: A model as CarGurus names it (RAV4, F-150) or its model_id (d306; from models). Needs make. A model name is resolved from the make's models on a first CarGurus page (same 1 credit; send model_id to save that step).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_dealers", {"zip": zip, "market": market, "distance": distance, "make": make, "model": model}, extra)
+
+    async def price_trends(
+        self,
+        *,
+        market: Optional[str] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """CarGurus' used-car price trends on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. For the market (the CarGurus Index, makes, body styles, market movers), a make or a model: scope, make, model, currency, groups {index, makes, models, model_years, body_styles: [{id, name, parent, average_price, average_price_with_fees, history [{days_ago (30, 90, 365), average_price, average_price_with_fees, change_to_today_pct, change_with_fees_to_today_pct}], research_id (model_years)}]}, series [{id, name, points [{date, price, price_with_fees}]}] (CarGurus' daily averages), market_movers {decrease, increase}, faqs (CarGurus' text), date_range, listings_url, notes. Markets us, ca, uk. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: us, ca, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            make: Optional: a make (name or make_id): its price trends and its models. Without make: the market's CarGurus Index, makes and body styles.
+            model: Optional, with make: a model (name or model_id): its price trends and each model year (model_years, with research_id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_price_trends", {"market": market, "make": make, "model": model}, extra)
+
+    async def research(
+        self,
+        research_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        year: Optional[int] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A model-year research page on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. (US site). By research_id / link, or by year with make and model: research_id, name, make, model, year, currency, trims [{trim_id, name, msrp, engine, horsepower, drivetrain, fuel_economy_city, fuel_economy_highway, seating_capacity, cargo_space}], pricing {original_msrp_min/max, price_range_min/max, average_listing_price, today_price, one_month_ago_price, one_year_ago_price, average_listing_change_pct, cargurus_index_average_price, cargurus_index_change_pct, price_trends_url}, price_series, test_drive_review {title, blurb, summary, scores, pros, cons, author: CarGurus editors, published, updated, url}, owner_reviews {average_rating, total_ratings, count_by_rating, ai_summary (CarGurus' own AI summary, as given), count, reviews [{review_id, rating, title, content, date}]} (no reviewer names), listings_url, url, notes. An unknown id is a charged 404. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            research_id: A CarGurus model-year id (c<digits>; expert_reviews[].research_id, price_trends groups.model_years[].research_id).
+            url: A CarGurus research link (https://www.cargurus.com/research/<year>-<make>-<model>-c<id>) instead of research_id.
+            year: With make and model instead of research_id: the model year, found through CarGurus' price trends (same 1 credit).
+            make: With year and model.
+            model: With year and make.
+            market: us (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency. Research pages are read on the US site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_research", {"research_id": research_id, "url": url, "year": year, "make": make, "model": model, "market": market}, extra)
+
+    async def expert_reviews(
+        self,
+        *,
+        market: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """CarGurus' expert (editorial) car reviews on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. 24 a page: page, page_size, total, page_count, has_more, count, reviews [{title, vehicle, rating, updated_at, summary, image, author: CarGurus editors, research_id, url}], notes. Markets us, ca, uk. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: us, ca, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            page: Page (default 1); 24 reviews a page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_expert_reviews", {"market": market, "page": page}, extra)
+
+    async def makes(
+        self,
+        *,
+        market: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every make the market's site of CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. lists in its search: count, makes [{make_id, name, popular}], notes. Ids are per site (the UK site's differ). 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_makes", {"market": market}, extra)
+
+    async def models(
+        self,
+        make: str,
+        *,
+        market: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        distance: Optional[Union[int, str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The models of one make on CarGurus (cargurus.com, the car marketplace run by CarGurus, Inc., in the US, Canada and the UK). Scavio fetches the public CarGurus page on request; CarGurus has no public API for reading listings. with CarGurus' listing counts nationwide (or around a zip): make {id, name}, location, count, models [{model_id, name, count, popular}], notes. An unknown make id is a charged 404. 1 credit per request (a name resolved with a first page is still 1). Failed upstream calls and refused inputs are not charged; a not-found is charged. Pages can take up to two minutes: use a client timeout of at least 150 seconds.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make (name or make_id).
+            market: us, us-es, ca, ca-fr, uk (default us). us = cargurus.com (USD, miles), us-es = its Spanish pages, ca = cargurus.ca (CAD, km), ca-fr = its French pages, uk = cargurus.co.uk (GBP, miles). Data comes in the market's language and currency.
+            zip: Optional: count listings around this place instead of nationwide.
+            distance: Radius around zip, as the site offers it: us / uk 10, 25, 50 (default), 75, 100, 150, 200, 500 miles; ca 25, 50, 75, 100, 250, 500 km; or "nationwide".
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("cargurus_models", {"make": make, "market": market, "zip": zip, "distance": distance}, extra)
+
+class _AsyncCarmaxNamespace:
+    """CarMax (carmax.com, the US used-car retailer) search, listing, photos, stores, store, store_inventory, reviews, review_summary, suggestions, makes, models and car_value endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        zip: str,
+        *,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        keyword: Optional[str] = None,
+        body_type: Optional[str] = None,
+        filters: Optional[list[str]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        max_shipping_fee: Optional[Literal[0, 99, 199, 299, 399, 499, 999]] = None,
+        sort: Optional[Literal["best_match", "distance", "price_asc", "price_desc", "mileage_asc", "mileage_desc", "year_desc", "year_asc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        include_facets: Optional[bool] = None,
+        radius: Optional[Union[Literal["5", "25", "50", "75", "100", "250", "500", "nationwide"], int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search CarMax's used-car inventory: CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. By make and model (F-150 and F150 both work), body type, keyword, facet filters, year / price / mileage ranges and max shipping fee, within a radius of a ZIP (or nationwide), sorted 8 ways, up to 100 cars a page. Returns query (the filters as read), radius, total (as CarMax reports it), count, page, page_size, has_more, sort, zip, applied [{category, value, label}] (the filters CarMax applied), nearest_store {id, name, city, state, zip, distance_miles}, cars [stock_number (the input of listing and photos), url, year, make, model, trim, body, price (CarMax's no-haggle price, USD), original_price and price_drop (as CarMax gives them), currency, mileage, exterior_color, interior_color, transmission, drivetrain, engine_type, engine_size, cylinders, horsepower, mpg_city, mpg_highway, battery_range_miles, vehicle_size, vehicle_types, features, highlighted_features, packages, feature_score, prior_uses, store {id, name, city, state}, distance_miles (from zip), shipping {fee (USD, to zip), text (e.g. Test drive today, $249 shipping), type, transferable, arrival, min_days, max_days}, model_rating {average, count} (owner reviews of that model-year), badge, new_arrival, coming_soon, reserved, saleable, made_saleable_at, photo], facets (with include_facets) [{name, type values: values [{value, url_segment (the input of body_type or filters), count, selected, children (models of a make)}]} | {name, label, type range: min, max, selected_min, selected_max, buckets [{min, max, count}]}], notes. No VIN is returned. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to it, and the radius is measured from it.
+            make: A make by name or slug (Ford, land-rover; makes lists them).
+            model: With make: a model by name or slug (F-150 and F150 both work, RAV4, CX-5, Model 3; models lists a make's models).
+            keyword: Free text CarMax searches across every make (e.g. rav4 hybrid). Not combined with make / model.
+            body_type: A body type as CarMax writes it: the url_segment of a VehicleType facet value (suvs, sedans, trucks, coupes, hatchbacks, minivans-and-vans, convertibles, wagons).
+            filters: Up to 8 facet values by url_segment (facets[].values[].url_segment with include_facets): drivetrain, colour, engine type, features, packages, cylinders, size, doors.
+            year_min: year_min.
+            year_max: year_max.
+            price_min: Lowest price, USD.
+            price_max: Highest price, USD.
+            mileage_min: mileage_min.
+            mileage_max: mileage_max.
+            max_shipping_fee: CarMax's "Max shipping fee" filter, USD: 0, 99, 199, 299, 399, 499, 999 (0 = free to home or store). No limit by default.
+            sort: best_match (default), distance (nearest first), price_asc, price_desc, mileage_asc, mileage_desc, year_desc (newest), year_asc.
+            page: Page, from 1; has_more says whether another page exists.
+            page_size: Cars per page, 1 to 100 (default 24). 100 cars can take CarMax 80 seconds.
+            include_facets: Add facets: every filter value with its url_segment and count (makes carry their models), and the year / price / mileage ranges with counts.
+            radius: Miles from zip: 5, 25, 50, 75, 100, 250, 500 or nationwide (default: every CarMax car, with the shipping fee to zip).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_search", {"zip": zip, "make": make, "model": model, "keyword": keyword, "body_type": body_type, "filters": filters, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "max_shipping_fee": max_shipping_fee, "sort": sort, "page": page, "page_size": page_size, "include_facets": include_facets, "radius": radius}, extra)
+
+    async def listing(
+        self,
+        stock_number: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One CarMax car in full by stock number or link: stock_number, url, status, year, make, model, trim, body, engine, transmission, drivetrain, fuel_type, fuel_capacity_gallons, mpg {city, highway, combined, equivalent}, battery_range_miles, mileage, exterior_color, interior_color, passenger_capacity, vehicle_types, generation {name, start_year, end_year}, price, currency, price_reduced, previous_price, price_drop_date, price_drop_expires, price_drop_text (as CarMax words it), badge (e.g. Price drop, Popular), history {accident_count, owner_count, prior_uses}, car_life [{group, title, subtitle}] (CarMax's callouts as given, e.g. Only 1 owner / Reported by AutoCheck), highlights [{title, description}], warranties [{type, years, miles}], feature_score, feature_score_description, installed_packages, features [{name, category, installed_option}], oem_standard_features, specifications [{name, value, category}], reconditioning [{type, description}], store {id, name, state, latitude, longitude, remote_lot, url}, saleable, available_to_transact, transferable, reserved, sold, new_arrival, coming_soon, first_made_saleable_at, last_made_saleable_at, save_count, model_review_summary, pros, cons, new_this_year, notes. Shipping depends on the buyer's ZIP and is not part of this answer: use search with a zip. A stock number CarMax does not have (or a sold car) is a charged 404. No VIN is returned. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            stock_number: A CarMax stock number (cars[].stock_number).
+            url: Or the car's link (https://www.carmax.com/car/<stock number>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_listing", {"stock_number": stock_number, "url": url}, extra)
+
+    async def photos(
+        self,
+        stock_number: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every photo of one CarMax car by stock number or link: stock_number, count, photos [{type (image or 360-exterior), name, category (Exterior, Interior), shot, thumbnail_url, url (1600x1200), url_16x9}]. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            stock_number: A CarMax stock number (cars[].stock_number).
+            url: Or the car's link (https://www.carmax.com/car/<stock number>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_photos", {"stock_number": stock_number, "url": url}, extra)
+
+    async def stores(
+        self,
+        zip: Optional[str] = None,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """CarMax stores near a ZIP (nearest first, with distance_miles) or in a state or city: count, stores [{id (the input of store and store-inventory), name, url, address {line1, line2, city, market, state, zip}, phone, toll_free_phone, latitude, longitude, distance_miles, status, is_microstore, is_car_buying_center, hours [{day, open, close, closed}], service_hours, holiday_hours [{date, open, close, closed}] (from today)}]. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to it, and the radius is measured from it.
+            state: Or a US state (TX or Texas): CarMax's stores in it.
+            city: Or a city name (e.g. Atlanta).
+            limit: Most stores to return (default 25).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_stores", {"zip": zip, "state": state, "city": city, "limit": limit}, extra)
+
+    async def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One CarMax store by id: id, name, url, address, phone, toll_free_phone, latitude, longitude, status, is_microstore, is_car_buying_center, hours, service_hours, holiday_hours, is_open_now, todays_hours_label, alert, fee_disclaimer (CarMax's price and fee terms for that store's state). An unknown id is a charged 404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A CarMax store id (stores[].id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_store", {"store_id": store_id}, extra)
+
+    async def store_inventory(
+        self,
+        store_id: Union[str, int],
+        zip: str,
+        *,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        body_type: Optional[str] = None,
+        filters: Optional[list[str]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        max_shipping_fee: Optional[Literal[0, 99, 199, 299, 399, 499, 999]] = None,
+        sort: Optional[Literal["best_match", "distance", "price_asc", "price_desc", "mileage_asc", "mileage_desc", "year_desc", "year_asc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The cars on one CarMax store's lot, with the same filters, sorts and paging as search: store_id, store_name, query, total (as CarMax reports it), count, page, page_size, has_more, sort, zip, applied [{category, value, label}] (the filters CarMax applied), nearest_store {id, name, city, state, zip, distance_miles}, cars [stock_number (the input of listing and photos), url, year, make, model, trim, body, price (CarMax's no-haggle price, USD), original_price and price_drop (as CarMax gives them), currency, mileage, exterior_color, interior_color, transmission, drivetrain, engine_type, engine_size, cylinders, horsepower, mpg_city, mpg_highway, battery_range_miles, vehicle_size, vehicle_types, features, highlighted_features, packages, feature_score, prior_uses, store {id, name, city, state}, distance_miles (from zip), shipping {fee (USD, to zip), text (e.g. Test drive today, $249 shipping), type, transferable, arrival, min_days, max_days}, model_rating {average, count} (owner reviews of that model-year), badge, new_arrival, coming_soon, reserved, saleable, made_saleable_at, photo], facets (with include_facets) [{name, type values: values [{value, url_segment (the input of body_type or filters), count, selected, children (models of a make)}]} | {name, label, type range: min, max, selected_min, selected_max, buckets [{min, max, count}]}], notes. total is that store's lot count for the filters. zip prices shipping. No VIN is returned. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A CarMax store id (stores[].id).
+            zip: A 5-digit US ZIP code. CarMax prices each car's shipping fee and dates to it, and the radius is measured from it.
+            make: A make by name or slug (Ford, land-rover; makes lists them).
+            model: With make: a model by name or slug (F-150 and F150 both work, RAV4, CX-5, Model 3; models lists a make's models).
+            body_type: A body type as CarMax writes it: the url_segment of a VehicleType facet value (suvs, sedans, trucks, coupes, hatchbacks, minivans-and-vans, convertibles, wagons).
+            filters: Up to 8 facet values by url_segment (facets[].values[].url_segment with include_facets): drivetrain, colour, engine type, features, packages, cylinders, size, doors.
+            year_min: year_min.
+            year_max: year_max.
+            price_min: Lowest price, USD.
+            price_max: Highest price, USD.
+            mileage_min: mileage_min.
+            mileage_max: mileage_max.
+            max_shipping_fee: CarMax's "Max shipping fee" filter, USD: 0, 99, 199, 299, 399, 499, 999 (0 = free to home or store). No limit by default.
+            sort: best_match (default), distance (nearest first), price_asc, price_desc, mileage_asc, mileage_desc, year_desc (newest), year_asc.
+            page: Page, from 1; has_more says whether another page exists.
+            page_size: Cars per page, 1 to 100 (default 24). 100 cars can take CarMax 80 seconds.
+            include_facets: Add facets: every filter value with its url_segment and count (makes carry their models), and the year / price / mileage ranges with counts.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_store_inventory", {"store_id": store_id, "zip": zip, "make": make, "model": model, "body_type": body_type, "filters": filters, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "max_shipping_fee": max_shipping_fee, "sort": sort, "page": page, "page_size": page_size, "include_facets": include_facets}, extra)
+
+    async def reviews(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["most_helpful", "newest", "oldest", "highest_rating", "lowest_rating"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Owner reviews of one model-year on CarMax (e.g. 2022 Toyota RAV4), 10 a page, full depth, 5 sorts and an exact star filter: make, model, year, sort, rating, page, page_size, total_reviews, total_matching, total_pages, has_more, average_rating, distribution [{stars, count}], top_likes, top_dislikes, count, reviews [{id, rating, title, recommends, pros [{aspect, comment}], cons [{aspect, comment}], submitted_at, helpful_votes, not_helpful_votes, ratings_only, syndicated, vehicle {year, make, model, mileage, time_owned}}]. Review text is the title plus the pros and cons comments, as CarMax shows them. No reviewer name or any reviewer identity is returned. A model-year with no reviews is a charged 404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: The make as CarMax names it (makes[].name).
+            model: The model as CarMax names it (models[].name; F-150 is read as F150).
+            year: The model year.
+            page: Page (10 reviews a page); total_pages says how deep they go.
+            sort: most_helpful (default), newest, oldest, highest_rating or lowest_rating.
+            rating: Only reviews with exactly this many stars.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_reviews", {"make": make, "model": model, "year": year, "page": page, "sort": sort, "rating": rating}, extra)
+
+    async def review_summary(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The owner-review summary of one model-year on CarMax: make, model, year, count, average, rounded_average, top_likes, top_dislikes, distribution [{stars, count}]. A model-year with no reviews is a charged 404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: The make as CarMax names it (makes[].name).
+            model: The model as CarMax names it (models[].name; F-150 is read as F150).
+            year: The model year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_review_summary", {"make": make, "model": model, "year": year}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """CarMax's make and model suggestions for the start of a name: query, count, suggestions [{name, type (make or model), slug (the make or model input of search)}]. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a make or model name.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_suggestions", {"query": query}, extra)
+
+    async def makes(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every make CarMax lists: count, makes [{name, slug}]. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_makes", {}, extra)
+
+    async def models(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One make's models on CarMax: make, make_slug, count, models [{name, slug (the model input of search and car-value)}]. An unknown make is a charged 404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make by name or slug (makes[].slug).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_models", {"make": make}, extra)
+
+    async def car_value(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Recent CarMax instant offers for one model-year (e.g. 2019 Ford F-150), as CarMax shows them: make, model, year, currency, offer_range {low, high} (CarMax's range across recent offers), headline_range {text, low, high} (the range CarMax's page headline states, which can differ), aggregate {low, high, offer_count}, offers_from, offers_to, count, recent_offers [{mileage, offer, offered_at, trim, trim_code}], trim_ranges [{trim, trim_code, low, high}], median_offer_history [{year, median_offer}], median_offer_change, other_years, url, notes. This is what CarMax offered for cars of that model-year, not an appraisal of any one car. An unknown make, model or year is a charged 404. CarMax (carmax.com, the largest US used-car retailer, with 263 stores in 42 states and no-haggle prices). Scavio fetches the public CarMax page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make by name or slug.
+            model: A model by name or slug (models[].slug; F-150 is read as f150, the slug CarMax uses).
+            year: The model year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carmax_car_value", {"make": make, "model": model, "year": year}, extra)
+
+class _AsyncCarvanaNamespace:
+    """Carvana (the US online used-car retailer) search, vehicle, model_guide, trims, make and makes endpoints; US only, prices in USD, Carvana's own city pages for the location (no ZIP targeting), 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        city: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["most_popular", "lowest_price", "highest_price", "lowest_mileage", "newest_year", "newest_listed"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        trims: Optional[Union[list[str], str]] = None,
+        drive_types: Optional[Union[list[str], str]] = None,
+        colors: Optional[Union[list[str], str]] = None,
+        body_styles: Optional[Union[list[str], str]] = None,
+        fuel_types: Optional[Union[list[str], str]] = None,
+        tags: Optional[Union[list[str], str]] = None,
+        free_shipping: Optional[bool] = None,
+        include_facets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the used-car inventory of Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. By make and model (names as Carvana writes them), 24 vehicles a page, with six sorts (most popular, lowest and highest price, lowest mileage, newest model year, newest listed) and Carvana's filters: model year, price, maximum mileage, trims, drive types, colors, body styles, fuel types, Carvana's tags (Great Deal, New Price, No Reported Accidents, Single Owner, Recently Added, Low Miles Per Year) and free shipping. Inventory is national; the location (Carvana's own city pages via city, else the one Carvana sets for the visit) changes shipping costs and delivery flags. Returns make, model, city, sort, page, page_size, total, total_pages, has_more, count, filters_applied, items [{vehicle_id, stock_number, url, year, make, model, model_variant, trim, kbb_trim, exterior_color, interior_color, body_style, mileage, mpg, fuel_type, seats, horsepower, price, kbb_value, msrp, market_adjustment, previous_price, price_updated_at, shipping_cost, tags (Carvana's labels such as Great Deal and New Price), purchase_pending, purchase_type, offering, remaining_warranty_months, remaining_warranty_miles, image, currency}], location {source, city, state, zip, delivery_available, pickup_available, out_of_market, miles_to_pickup, earliest_delivery_date, pickup_city, pickup_state}, facets (include_facets), market, notes. An unknown make or model is a charged 404 that lists Carvana's names. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. No ZIP targeting, no keyword search.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make as Carvana writes it (makes lists them; case ignored): Toyota, Ford, Mercedes-Benz.
+            model: Needs make. A model as Carvana writes it (make lists them; case ignored, hyphens count): RAV4, F-150, CR-V.
+            city: One of Carvana's city pages (new-york-ny, los-angeles-ca, or "New York, NY"): the location shipping and delivery are shown for. Only with make, model and page: a filter or a sort with city is a 400 (Carvana uses the visit's own location on filtered pages).
+            page: Page, 1-based (default 1); 24 vehicles a page.
+            sort: most_popular (Carvana's default; recomputed per visit, not stable between pages), lowest_price, highest_price, lowest_mileage, newest_year, newest_listed.
+            year_min: Model year from.
+            year_max: Model year to.
+            price_min: Price from, USD.
+            price_max: Price to, USD.
+            mileage_max: Mileage up to.
+            trims: Needs make and model. Trim names as Carvana writes them (include_facets lists them under facets.models[].trims).
+            drive_types: Any of: 4wd, awd, fwd, rwd (a list or comma-separated).
+            colors: Any of: beige, black, blue, brown, gold, gray, green, orange, pink, purple, red, silver, white, yellow (a list or comma-separated).
+            body_styles: Any of: suv, sedan, truck, coupe, minivan, convertible, wagon, hatchback (a list or comma-separated).
+            fuel_types: Any of: gas, diesel, electric, hybrid, plug_in_hybrid (a list or comma-separated).
+            tags: Any of: great_deal, new_price, no_reported_accidents, single_owner, recently_added, low_miles_per_year (Carvana's own labels) (a list or comma-separated).
+            free_shipping: Only vehicles Carvana ships free to the location the page uses.
+            include_facets: Also return facets: counts per filter value, the makes, and the make's models with their trims.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_search", {"make": make, "model": model, "city": city, "page": page, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_max": mileage_max, "trims": trims, "drive_types": drive_types, "colors": colors, "body_styles": body_styles, "fuel_types": fuel_types, "tags": tags, "free_shipping": free_shipping, "include_facets": include_facets}, extra)
+
+    async def vehicle(
+        self,
+        vehicle_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One vehicle of Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. By vehicle id or link: vehicle_id, stock_number, url, year, make, model, model_variant, trim, body_type, doors, colors, mileage, seats, price, previous_price, price_updated_at, kbb_value, fair_market_value, msrp, market_adjustment, powertrain {engine, transmission, drivetrain, fuel, horsepower, mpg}, dimensions, warranty (factory terms and what remains), in_service_date, in_service_miles, keys, prior_use, recalls, autocheck_accident_reported, highlights [{key, name, description}] (Carvana's labels with their CARFAX / AutoCheck basis text as given), inspection {inspected_on, categories [{name, points [{name, status}]}]}, imperfections [{title, description, zone, location, image}], features, packages, options, ai_summary (Carvana's AI-written text, labelled), hub {city, state, zip}, sale_status, purchase_type, image, images, market, notes. Monthly payments, shipping, taxes, fees and delivery dates are not included. No VIN. An unknown or sold vehicle is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            vehicle_id: A Carvana vehicle id (items[].vehicle_id from search; the number in a vehicle link).
+            url: A carvana.com vehicle link instead of vehicle_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_vehicle", {"vehicle_id": vehicle_id, "url": url}, extra)
+
+    async def model_guide(
+        self,
+        year: int,
+        make: str,
+        model: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Carvana's research page for one model year, from Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. Returns year, make, model, name, url, summary, generation, in_stock, rating, rating_count, star_counts {5..1}, changes [{area, text}] (what changed that year), engine_by_trim, transmission_by_trim, drivetrain_by_trim [{trim, values}], other_specs, trims_in_stock [{trim, in_stock}], owner_reviews [{text, rating, date, vehicle}] (the reviews the page shows; no names), next_year, faq [{question, answer}], sources, market, notes. Carvana says its owner ratings come from Strategic Vision owner surveys. An unknown year, make or model is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            year: Model year.
+            make: A make as Carvana writes it (makes lists them; case ignored): Toyota, Ford, Mercedes-Benz.
+            model: A model as Carvana writes it (make lists them; case ignored, hyphens count): RAV4, F-150, CR-V.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_model_guide", {"year": year, "make": make, "model": model}, extra)
+
+    async def trims(
+        self,
+        make: str,
+        model: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Carvana's trim guide for one model, from Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. Returns make, model, name, url, summary, count, groups [{group, name, trims, description, best_for, highlights, attributes [{name, value}], in_stock, image}], faq [{question, answer}], sources, market, notes. An unknown make or model is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make as Carvana writes it (makes lists them; case ignored): Toyota, Ford, Mercedes-Benz.
+            model: A model as Carvana writes it (make lists them; case ignored, hyphens count): RAV4, F-150, CR-V.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_trims", {"make": make, "model": model}, extra)
+
+    async def make(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One make's model lineup on Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. Returns make, name, url, summary, count, models [{model (the name search takes), make, slug, url, tagline, in_stock, body_types, image}], market, notes. An unknown make is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make as Carvana writes it (makes lists them; case ignored): Toyota, Ford, Mercedes-Benz.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_make", {"make": make}, extra)
+
+    async def makes(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every make in the inventory of Carvana (carvana.com, the US online used-car retailer). Scavio fetches the public carvana.com page on request; Carvana has no public API. US only, prices in USD. with its in-stock count. Returns count, total_in_stock, makes [{make (the name search takes), in_stock}], location, market, notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("carvana_makes", {}, extra)
+
+class _AsyncBringatrailerNamespace:
+    """Bring a Trailer (bringatrailer.com, the online collector-car auction site) results, price_history, listing, live, make, model, location and suggestions endpoints; one site, each lot in its own currency, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def results(
+        self,
+        *,
+        query: Optional[str] = None,
+        exclude: Optional[str] = None,
+        sort: Optional[Literal["recently_closed", "popular", "highest_bid", "oldest"]] = None,
+        status: Optional[Literal["all", "sold", "reserve_not_met"]] = None,
+        recency: Optional[Literal["7d", "30d", "1y", "2y", "5y"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        max_bid: Optional[int] = None,
+        category: Optional[Union[str, int]] = None,
+        origin: Optional[Union[str, int]] = None,
+        era: Optional[Union[str, int]] = None,
+        no_reserve: Optional[bool] = None,
+        premium: Optional[bool] = None,
+        make: Optional[str] = None,
+        model_id: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        location_id: Optional[Union[int, str]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the completed auctions of Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. Keywords (or none), with Bring a Trailer's sorts (recently closed, popular, highest bid, oldest) and filters: sold or reserve not met, recency, model years, max bid, category, origin, era, no reserve, Premium, and one make, model (model_id) or location (location_id) from suggestions, make or model. Up to 60 a page, through the first 10,000 results of a query. Returns query, sort, status, filters_applied, page, page_size, total, total_pages, reachable_pages, has_more, count, lots [{id, title, url, slug, year (from the title), status (sold, reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot from the site's "Sold for" result, the high bid of a lot that ended under its reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, thumbnail, excerpt}], notes. View, watcher and comment counts are on listing. Amounts are in each lot's own currency (USD, EUR, GBP and others, as the site shows it). 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords. Omitted: every completed result (filters and sort still apply).
+            exclude: Leave out results matching these words.
+            sort: recently_closed (default), popular, highest_bid or oldest (Bring a Trailer's own sorts).
+            status: all (default), sold, or reserve_not_met (ended under the reserve).
+            recency: Only results that ended in the last 7 days (7d), 30 days, 1, 2 or 5 years. Default all time.
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            max_bid: Only results below this amount, one of Bring a Trailer's steps: 10000, 25000, 50000, 100000, 250000, 500000, 750000, 1000000.
+            category: A category name or id: Aircraft (543), All-Terrain Vehicles (431), Boats (383), Charity & Non-Profit (415), Convertibles (434), Diesels (560), Electric Vehicles (426), Go-Karts (428), Hot Rods (429), Kei Vehicles (556), Military Vehicles (447), Minibikes & Scooters (430), Motorcycles (70), Parts (379), Projects (10), Race Cars (11), Right-Hand Drive (557), RVs & Campers (436), Service Vehicles (479), Side-by-Sides (553), Station Wagons (433), Tractors (432), Trains (544), Truck & 4x4 (21), Vans (418), Wheels (380).
+            origin: An origin name or id: American (3), Brazilian (499), British (4), Canadian (498), Czech (542), Dutch (497), French (6), German (7), Italian (8), Japanese (9), Korean (496), Prewar (441), Spanish (82), Swedish (18).
+            era: A decade: 2020, 2010, 2000, 1990, 1980, 1970, 1960, 1950, 1940, 1930, 1920, 1910, 1900, pre-1900.
+            no_reserve: Only no-reserve auctions (not together with premium: the site applies the two as either-or).
+            premium: Only Premium listings (not together with no_reserve).
+            make: A make name as Bring a Trailer lists it (BMW, Porsche, Land Rover): make's filter.make. Use one of make, model_id or location_id.
+            model_id: A model page id (suggestions id or make models[].id, e.g. 1833018 = BMW E30 M3), or a list of up to 200 ids (model filter_ids for a model family such as Porsche 911).
+            location_id: A location page id (location's location_id or a location suggestion id, e.g. 89009067 = Germany): only lots located there.
+            page: Page (default 1). The site pages through the first 10,000 results of a query: page x page_size at most 10,000.
+            page_size: Results per page, 1-60 (default 36).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_results", {"query": query, "exclude": exclude, "sort": sort, "status": status, "recency": recency, "year_min": year_min, "year_max": year_max, "max_bid": max_bid, "category": category, "origin": origin, "era": era, "no_reserve": no_reserve, "premium": premium, "make": make, "model_id": model_id, "location_id": location_id, "page": page, "page_size": page_size}, extra)
+
+    async def price_history(
+        self,
+        model_id: Optional[Union[int, str, list[Union[int, str]]]] = None,
+        *,
+        make: Optional[str] = None,
+        recency: Optional[Literal["7d", "30d", "1y", "2y", "5y"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every completed result of one model (model_id, or a list of ids for a model family) or make on Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. In one call: total, sold_count, reserve_not_met_count, sell_through_rate, first_date, last_date, stats_by_currency {<currency>: {sold {count, min, max, median, average}, reserve_not_met {...}}}, capped (the site returns at most 10,000 results), results [{id, title, url, slug, date, amount (sale price or high bid), currency, sold, status}] newest to oldest, notes. Optional recency and model-year range. Amounts are in each lot's own currency (USD, EUR, GBP and others, as the site shows it). 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            model_id: A model page id (suggestions id or make models[].id, e.g. 1833018 = BMW E30 M3), or a list of up to 200 ids (model filter_ids for a model family such as Porsche 911).
+            make: A make name (instead of model_id): its results, at most the 10,000 most recent.
+            recency: Only results that ended in the last 7 days (7d), 30 days, 1, 2 or 5 years. Default all time.
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_price_history", {"model_id": model_id, "make": make, "recency": recency, "year_min": year_min, "year_max": year_max}, extra)
+
+    async def listing(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        comments_page: Optional[int] = None,
+        comments_page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One auction on Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. by slug or link, live or ended: id, lot_number, title, url, status (live, sold, reserve_not_met, withdrawn, ended), sold, reserve_not_met, no_reserve, premium, bat_alumni, currency, current_bid (live), sold_price (the site's "Sold for" figure, never the bid field when they differ), high_bid (ended under the reserve), ends_at / ended_at, bid_count, comment_count, views, watchers, location {text, city, region, country, country_code} (no ZIP), seller_type (private_party or dealer) and seller_type_label as given, details (the Listing Details bullets, without the chassis number), categories, description, photo_count, photos, bat_history (earlier Bring a Trailer results of the same vehicle: result, amount, currency, date), bids [{amount, currency, time}] (the full bid history), comments {page, page_size, total, total_pages, has_more, items [{time, text, is_seller, likes}]}, notes. No usernames, member profile links, chassis numbers / VINs or seller ZIP codes are returned. An unknown slug is a charged 404. 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A listing slug (lots[].slug), the part after /listing/ in a bringatrailer.com link.
+            url: A bringatrailer.com/listing/<slug>/ link instead of slug.
+            comments_page: Comments page (default 1).
+            comments_page_size: Comments per page, 1-500 (default 100).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_listing", {"slug": slug, "url": url, "comments_page": comments_page, "comments_page_size": comments_page_size}, extra)
+
+    async def live(
+        self,
+        *,
+        query: Optional[str] = None,
+        make: Optional[str] = None,
+        country: Optional[str] = None,
+        ending_within_hours: Optional[int] = None,
+        no_reserve: Optional[bool] = None,
+        premium: Optional[bool] = None,
+        sort: Optional[Literal["ending_soon", "ending_latest", "bid_high", "bid_low"]] = None,
+        limit: Optional[int] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every live auction on Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. (about 1,000 lots, read from one page, so a call takes 20 seconds to 3 minutes: allow 200 seconds), filtered by Scavio by keyword, make, country, ending within N hours, no reserve and Premium, sorted by ending time or current bid, paged. Returns total_live, total, sort, filters_applied, page, limit, has_more, count, lots [{id, title, url, slug, year, current_bid (null before any bid), currency, ends_at, no_reserve, premium, bat_alumni, country, country_code, thumbnail, excerpt, era}], notes. Amounts are in each lot's own currency (USD, EUR, GBP and others, as the site shows it). 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Words in the lot title or excerpt.
+            make: A make, matched in the lot title.
+            country: Country of the lot: a two-letter code (US, DE, GB) or a country name as listed (United Kingdom).
+            ending_within_hours: Only auctions scheduled to end within this many hours.
+            no_reserve: Only no-reserve auctions.
+            premium: Only Premium listings.
+            sort: ending_soon (default), ending_latest, bid_high or bid_low.
+            limit: Lots per page, 1-2000 (default 100).
+            page: Page of the filtered list (default 1).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_live", {"query": query, "make": make, "country": country, "ending_within_hours": ending_within_hours, "no_reserve": no_reserve, "premium": premium, "sort": sort, "limit": limit, "page": page}, extra)
+
+    async def make(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One make page of Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. Returns make, title, description, url, filter {make} (for results and price_history), model_count, models [{id, title, url, path, year_min, year_max, image}], live_count, live [{id, title, url, slug, year, current_bid (null before any bid), currency, ends_at, no_reserve, premium, bat_alumni, country, country_code, thumbnail, excerpt}], completed_total, recent_results [{id, title, url, slug, year (from the title), status (sold, reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot from the site's "Sold for" result, the high bid of a lot that ended under its reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, thumbnail, excerpt}], notes. A make page can take up to a minute. An unknown make is a charged 404. 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make slug or name (bmw, porsche, land-rover, Land Rover) or its bringatrailer.com link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_make", {"make": make}, extra)
+
+    async def model(
+        self,
+        model: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One model page of Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. (e.g. bmw/e30-m3, or a family such as porsche/911): title, description, url, filter_ids (the model_id list for results and price_history), sub_models, live_count, live [{id, title, url, slug, year, current_bid (null before any bid), currency, ends_at, no_reserve, premium, bat_alumni, country, country_code, thumbnail, excerpt}], completed_total, recent_results [{id, title, url, slug, year (from the title), status (sold, reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot from the site's "Sold for" result, the high bid of a lot that ended under its reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, thumbnail, excerpt}], notes. An unknown model is a charged 404. 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            model: A make and model path (make models[].path, e.g. bmw/e30-m3 or porsche/911) or its bringatrailer.com link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_model", {"model": model}, extra)
+
+    async def location(
+        self,
+        country: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The lots of Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. located in one country: title, url, location_id (for results), live_count, live [{id, title, url, slug, year, current_bid (null before any bid), currency, ends_at, no_reserve, premium, bat_alumni, country, country_code, thumbnail, excerpt}], completed_total, recent_results [{id, title, url, slug, year (from the title), status (sold, reserve_not_met, withdrawn, ended), sold, amount (the sale price of a sold lot from the site's "Sold for" result, the high bid of a lot that ended under its reserve), currency, ended_at, no_reserve, premium, bat_alumni, country_code, thumbnail, excerpt}], notes. An unknown country is a charged 404. 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: A country name or slug (germany, united-kingdom, Italy) or its bringatrailer.com/location/ link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_location", {"country": country}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of Bring a Trailer (bringatrailer.com, the online collector-car auction site owned by Hearst). Scavio fetches the public Bring a Trailer page on request; Bring a Trailer has no public API. for a partial make, model or place: query, count, suggestions [{id (the page id results take as model_id or location_id), title, type (make, model, location, other), url, path}], notes. 1 credit. A not-found is charged; refused inputs and failed upstream calls are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A partial make, model or place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("bringatrailer_suggestions", {"query": query}, extra)

@@ -16,18 +16,26 @@ from ._namespaces_sync import (
     _ArgosNamespace,
     _AshleyNamespace,
     _AsosNamespace,
+    _AutotraderNamespace,
     _AutozoneNamespace,
     _BestBuyNamespace,
     _BolcomNamespace,
     _BookingNamespace,
+    _BootsNamespace,
+    _BringatrailerNamespace,
     _CanadianTireNamespace,
     _CapterraNamespace,
+    _CargurusNamespace,
+    _CarmaxNamespace,
     _CarrefourNamespace,
+    _CarscomNamespace,
+    _CarvanaNamespace,
     _ChatGPTNamespace,
     _ChewyNamespace,
     _CompaniesHouseNamespace,
     _CompanyNamespace,
     _CostcoNamespace,
+    _CultbeautyNamespace,
     _CvsNamespace,
     _DecathlonNamespace,
     _DepopNamespace,
@@ -36,6 +44,7 @@ from ._namespaces_sync import (
     _DiscountTireNamespace,
     _DollarGeneralNamespace,
     _DollarTreeNamespace,
+    _DouglasNamespace,
     _EbayNamespace,
     _FanaticsNamespace,
     _FashionnovaNamespace,
@@ -61,6 +70,7 @@ from ._namespaces_sync import (
     _KrogerNamespace,
     _KuaishouNamespace,
     _LinkedInNamespace,
+    _LookfantasticNamespace,
     _LowesNamespace,
     _MacysNamespace,
     _MaisonsDuMondeNamespace,
@@ -77,6 +87,7 @@ from ._namespaces_sync import (
     _NintendoNamespace,
     _NordstromNamespace,
     _NordstromRackNamespace,
+    _NotinoNamespace,
     _OfferupNamespace,
     _OlxNamespace,
     _OreillyNamespace,
@@ -89,11 +100,13 @@ from ._namespaces_sync import (
     _RedditNamespace,
     _RedfinNamespace,
     _RightmoveNamespace,
+    _RockautoNamespace,
     _RonaNamespace,
     _SaksNamespace,
     _SamsClubNamespace,
     _SECNamespace,
     _SephoraNamespace,
+    _SpacenkNamespace,
     _SpecsNamespace,
     _SportchekNamespace,
     _StaplesNamespace,
@@ -117,6 +130,7 @@ from ._namespaces_sync import (
     _WholeFoodsNamespace,
     _XNamespace,
     _YelpNamespace,
+    _YesstyleNamespace,
     _YouTubeNamespace,
     _ZaraNamespace,
     _ZillowNamespace,
@@ -295,6 +309,20 @@ class ScavioClient:
         self.marks = _MarksNamespace(self)
         self.rona = _RonaNamespace(self)
         self.pcexpress = _PcexpressNamespace(self)
+        self.spacenk = _SpacenkNamespace(self)
+        self.lookfantastic = _LookfantasticNamespace(self)
+        self.cultbeauty = _CultbeautyNamespace(self)
+        self.yesstyle = _YesstyleNamespace(self)
+        self.notino = _NotinoNamespace(self)
+        self.douglas = _DouglasNamespace(self)
+        self.boots = _BootsNamespace(self)
+        self.rockauto = _RockautoNamespace(self)
+        self.carscom = _CarscomNamespace(self)
+        self.autotrader = _AutotraderNamespace(self)
+        self.cargurus = _CargurusNamespace(self)
+        self.carmax = _CarmaxNamespace(self)
+        self.carvana = _CarvanaNamespace(self)
+        self.bringatrailer = _BringatrailerNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
