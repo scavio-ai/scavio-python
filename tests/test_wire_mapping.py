@@ -1646,9 +1646,22 @@ def test_ai_chat_async(monkeypatch):
 
 
 def test_us_retail_batch_1_credits_and_paths():
-    """sephora/ulta/aldi/micro_center/walgreens/cvs (0.32.0): 20 endpoints, priced per method."""
+    """sephora/ulta/aldi/micro_center/walgreens/cvs (0.32.0): 20 endpoints, priced per method.
+
+    0.93.0 adds the six Sephora Canada only endpoints (26 in all).
+    """
     expected = {
-        "sephora": {"search": 1, "category": 1, "product": 2},  # product 2 since 0.50.1
+        "sephora": {  # product 2 since 0.50.1
+            "search": 1,
+            "category": 1,
+            "product": 2,
+            "brand": 1,
+            "brands": 1,
+            "suggestions": 1,
+            "offers": 2,
+            "stores": 1,
+            "store": 1,
+        },
         "ulta": {"search": 1, "category": 1, "product": 1, "stores": 1},
         "aldi": {"search": 1, "product": 1, "stores": 1},
         "micro_center": {"search": 2, "product": 2, "stores": 1},
@@ -1661,7 +1674,7 @@ def test_us_retail_batch_1_credits_and_paths():
         wire_ns = ns.replace("_", "")
         for m, ep in eps.items():
             assert ep.path == f"/api/v1/{wire_ns}/{m}", ep.key
-    assert sum(len(m) for m in expected.values()) == 20
+    assert sum(len(m) for m in expected.values()) == 26
 
 
 def test_cvs_product_raises_the_timeout(monkeypatch):
@@ -8253,3 +8266,99 @@ def test_best_buy_shared_docstrings_state_both_rates(module):
         assert "in the US" in doc and "1 credit with country='ca'" in doc, method
     for method in ("stores", "suggestions", "questions"):
         assert "Costs 1 credit." in " ".join((getattr(cls, method).__doc__ or "").split()), method
+
+
+# --- Sephora Canada -----------------------------------------------------------
+
+
+def test_sephora_us_calls_send_no_country(monkeypatch):
+    """A US call posts exactly the body it did before Sephora Canada existed."""
+    captured = patch_sync(monkeypatch)
+    sephora = ScavioClient(api_key="sk_test").sephora
+    sephora.search("lipstick", sort="best_selling", zip="10001")
+    assert captured["json"] == {"query": "lipstick", "sort": "best_selling", "zip": "10001"}
+    sephora.category("lipstick", page=2)
+    assert captured["json"] == {"category": "lipstick", "page": 2}
+    sephora.product(product_id="P510799")
+    assert captured["json"] == {"product_id": "P510799"}
+
+
+def test_sephora_ca_calls_send_country_and_ca_params(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    sephora = ScavioClient(api_key="sk_test").sephora
+    sephora.search(
+        "lip oil",
+        country="ca",
+        sort="price_low",
+        filters={"brand": "The Ordinary", "on_sale": True, "rating": 4},
+        include_facets=True,
+        language="fr",
+    )
+    assert captured["path"] == "/api/v1/sephora/search"
+    assert captured["json"] == {
+        "query": "lip oil",
+        "sort": "price_low",
+        "country": "ca",
+        "filters": {"brand": "The Ordinary", "on_sale": True, "rating": 4},
+        "include_facets": True,
+        "language": "fr",
+    }
+    sephora.category("lipstick", country="ca", sort="newest", filters=[{"value": "x"}])
+    assert captured["path"] == "/api/v1/sephora/category"
+    assert captured["json"] == {
+        "category": "lipstick",
+        "country": "ca",
+        "sort": "newest",
+        "filters": [{"value": "x"}],
+    }
+    sephora.product(product_id="P428500", country="ca", language="en")
+    assert captured["path"] == "/api/v1/sephora/product"
+    assert captured["json"] == {"product_id": "P428500", "country": "ca", "language": "en"}
+
+
+def test_sephora_ca_only_endpoints(monkeypatch):
+    captured = patch_sync(monkeypatch)
+    sephora = ScavioClient(api_key="sk_test").sephora
+    sephora.brand("the-ordinary", page=2, sort="rating", filters={"new": True})
+    assert captured["path"] == "/api/v1/sephora/brand"
+    assert captured["json"] == {
+        "brand": "the-ordinary",
+        "page": 2,
+        "sort": "rating",
+        "filters": {"new": True},
+    }
+    sephora.brands(language="fr")
+    assert captured["path"] == "/api/v1/sephora/brands"
+    assert captured["json"] == {"language": "fr"}
+    sephora.suggestions("lip")
+    assert captured["path"] == "/api/v1/sephora/suggestions"
+    assert captured["json"] == {"query": "lip"}
+    sephora.offers()
+    assert captured["path"] == "/api/v1/sephora/offers"
+    assert captured["json"] == {}
+    sephora.stores(province="QC")
+    assert captured["path"] == "/api/v1/sephora/stores"
+    assert captured["json"] == {"province": "QC"}
+    sephora.store("toronto-eaton-centre")
+    assert captured["path"] == "/api/v1/sephora/store"
+    assert captured["json"] == {"store": "toronto-eaton-centre"}
+    for m in ("brand", "brands", "suggestions", "offers", "stores", "store"):
+        ep = ENDPOINTS[f"sephora_{m}"]
+        assert all(p.name != "country" for p in ep.params), m
+        assert ep.credits_note is None and ep.min_timeout == 120.0, m
+    for m in ("search", "category", "product"):
+        ep = ENDPOINTS[f"sephora_{m}"]
+        assert any(p.name == "country" for p in ep.params), m
+        assert ep.credits_note is None and ep.min_timeout == 120.0, m
+
+
+@pytest.mark.parametrize("module", ["scavio._namespaces_sync", "scavio._namespaces_async"])
+def test_sephora_docstrings_state_credits(module):
+    import importlib
+
+    mod = importlib.import_module(module)
+    cls = getattr(mod, "_SephoraNamespace", None) or mod._AsyncSephoraNamespace
+    for method in ("search", "category", "brand", "brands", "suggestions", "stores", "store"):
+        assert "Costs 1 credit." in " ".join((getattr(cls, method).__doc__ or "").split()), method
+    for method in ("product", "offers"):
+        assert "Costs 2 credits." in " ".join((getattr(cls, method).__doc__ or "").split()), method

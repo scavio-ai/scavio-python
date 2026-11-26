@@ -21,7 +21,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | SportChek and Mark's Prices in CAD with the Was Price, Sale Label and Sale End Date, Sizes and Colours with Assigned-Store Units, SportChek Reviews, Mark's Questions, L'Equipeur in French (Canada; 16 endpoints) | Yes | No | No | No |
-| Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; 20 endpoints) | Yes | No | No | No |
+| Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; Sephora Canada CAD Prices, Sale Prices, Dated Offers and Stores; 26 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
@@ -1114,7 +1114,8 @@ text. Sam's Club's search, savings and category results reflect the club in
 
 ### 25. US Retail -- Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens and CVS
 
-Six US retailers. Sephora and Ulta Beauty carry per-shade prices and stock;
+Six US retailers (Sephora also reads Sephora Canada with `country="ca"`, see
+[section 82](#82-sephora-canada----cad-prices-sale-prices-dated-offers-stores)). Sephora and Ulta Beauty carry per-shade prices and stock;
 ALDI prices are per store and per shopping mode; Micro Center stock is per
 store; Walgreens and CVS prices are national while stock is per store. Every
 method costs 1 credit except Micro Center `search` and `product` (2), Walgreens
@@ -5587,6 +5588,74 @@ other Canadian retailers use the `amazon` (`country="ca"`), `walmart`
 (`domain="ca"`), `costco` (`country="ca"`) and `canadian_tire` namespaces; match
 on brand and model.
 
+### 82. Sephora Canada -- CAD prices, sale prices, dated offers, stores
+
+Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its
+store list on Nov 25, 2026) is on the existing `sephora` namespace. Pass
+`country="ca"` to `search`, `category` and `product`; `brand`, `brands`,
+`suggestions`, `offers`, `stores` and `store` are Sephora Canada only and need no
+country. Canadian beauty prices in CAD (The Ordinary, Dior, Rare Beauty,
+Supergoop and the rest of the catalogue) with sale prices and dated offers.
+Credits: `search`, `category`, `brand`, `brands`, `suggestions`, `stores` and
+`store` 1 each; `product` and `offers` 2 (US credits are the same and
+unchanged). Product and SKU ids are the same as on sephora.com, with CAD prices
+as Sephora Canada gives them (French prices such as `33,00 $` are read as
+33.00); `language="fr"` returns French names, descriptions and facet values with
+the same ids and prices. Sephora publishes no public product or store API. See
+the
+[Sephora API page](https://scavio.dev/sephora-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+seph = client.sephora
+
+# Search: CAD price, list and sale price, sale scope, filters and facets.
+oils = seph.search("lip oil", country="ca", filters={"on_sale": True}, include_facets=True)["data"]
+for p in oils["products"]:
+    print(p["product_id"], p["brand"], p["price"], p["list_price"], p["sale_price"], p["name"])
+
+# One product: every SKU with price, sale price, in_stock and only_few_left.
+item = seph.product(product_id="P428500", country="ca")["data"]
+for sku in item["skus"]:
+    print(sku["sku_id"], sku["size"], sku["price"], sku["in_stock"], sku["only_few_left"])
+print(item["review_summary"]["source"])          # Sephora's own AI summary, labelled
+print(len(item["latest_reviews"]))               # the 10 latest, no reviewer names
+
+# Brands, a brand's products, suggestions, dated offers and stores.
+brands = seph.brands()["data"]["brands"]
+ordinary = seph.brand("the-ordinary", sort="best_selling")["data"]
+terms = seph.suggestions("lip")["data"]["terms"]
+for o in seph.offers()["data"]["offers"]:
+    print(o["title"], o["eligibility"], o["promo_code"], o["end_date"], o["app_only"])
+quebec = seph.stores(province="QC")["data"]
+store = seph.store("toronto-eaton-centre")["data"]["store"]
+print(store["address"], store["phone"], store["hours"])
+```
+
+Captured 2026-11-26: Dior Sauvage Eau de Parfum (`P428500`) at 128 to 300 CAD,
+the 3.4 oz / 100 ml SKU 2038131 at 200 CAD with `in_stock: True` and
+`only_few_left: False`; the Sephora Collection Oil Infusion Hydrating Lip Oil
+(`P518068`) at a sale price of 10.50 CAD (list 15.00) in a `lip oil` search;
+26 offers, among them 30% off Sephora Collection with `end_date`
+2026-11-30T23:59:00.000-08:00; and 152 stores on the store list (ON 64, QC 26,
+AB 22, BC 22). Listings take `sort`, `filters` (`brand`, `on_sale`, `new`,
+`clean`, `rating` 1-4, `min_price`, `max_price`, `facets`, or a list of
+`{"facet", "value"}`) and `include_facets`; a brand keyword such as
+`the ordinary` answers that brand's products with a `redirect`. `zip` is US
+only (a 400 with `country="ca"`). `review_summary` is Sephora's own
+AI-generated summary of customer reviews and is labelled as Sephora's; read it
+as Sephora's summary, not as a fact. Offers carry `end_date` as given and no
+start date; app-only offers are flagged `app_only`. Store address and phone are
+public business data, returned as captured. Not available for Canada: stock per
+store, a store finder by postal code, the full review list with its sorts or a
+star filter, UPC (`upc` is always `None`: the pages show none), Beauty Insider
+prices, cart or checkout, price history (poll and store the answers). For the
+same product at other Canadian retailers use the `dermstore`
+(`country="ca"`), `amazon` (`country="ca"`) and `walmart` (`domain="ca"`)
+namespaces; match on brand, name and size.
+
 ## Error Handling
 
 ```python
@@ -5705,7 +5774,7 @@ Scavio works with popular AI/LLM frameworks:
 | SportChek (`sportchek`) | `search`, `list`, `product`, `reviews`, `suggestions`, `store`, `brands`, `categories`; Canada, English only; `product` and `reviews` take `code` or `url`, `list` takes `path` or `url` | 1 each |
 | Mark's (`marks`) | `search`, `list`, `product`, `questions`, `suggestions`, `store`, `brands`, `categories`; Canada; `language` en or fr (L'Equipeur) on `search`, `list`, `product`, `brands`, `categories` | 1 each |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
-| Sephora | `search`, `category`, `product` | 1 each, `product` 2 |
+| Sephora | `search`, `category`, `product` (`country="ca"` for Sephora Canada); Canada only: `brand`, `brands`, `suggestions`, `offers`, `stores`, `store` | 1 each; `product` and `offers` 2 (the same in both countries) |
 | Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
 | ALDI | `stores` (start here), `search`, `product` | 1 each |
 | Micro Center | `stores` (start here), `search`, `product` | `stores` 1, the rest 2 each |
@@ -5778,6 +5847,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.93.0
+
+- **Sephora Canada on `sephora`** (sync and async): `search`, `category` and
+  `product` take `country="ca"` for Sephora Canada (sephora.com/ca, CAD), plus
+  `language` (en or fr); `search` and `category` take `filters` and
+  `include_facets`, and `category` takes `sort` for Canada. New Canada-only
+  methods `brand`, `brands`, `suggestions`, `offers`, `stores` and `store`.
+  Credits: 1 each, `product` and `offers` 2. US calls are unchanged: `country`
+  is not sent unless you pass it, and US credits stay as they were. Every
+  `sephora` call now raises the request timeout to at least 120 s (it never
+  lowers a longer one), since Sephora Canada pages can take up to about 50 s.
 
 ### Changed in 0.92.0
 

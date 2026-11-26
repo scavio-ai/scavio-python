@@ -6295,7 +6295,7 @@ class _DollarGeneralNamespace:
         return self._client._call("dollar_general_coupons", {"page": page}, extra)
 
 class _SephoraNamespace:
-    """Sephora search, category, and product detail endpoints with per-shade stock and review sentiment."""
+    """Sephora search, category, and product detail endpoints with per-shade stock and review sentiment (sephora.com by default); country='ca' reads Sephora Canada (sephora.com/ca, CAD), which also has brand, brands, suggestions, offers, stores and store endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -6307,9 +6307,13 @@ class _SephoraNamespace:
         page: Optional[int] = None,
         sort: Optional[Literal["relevance", "best_selling", "rating", "price_low", "price_high", "newest"]] = None,
         zip: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        filters: Optional[Union[dict[str, Any], list[dict[str, str]]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search sephora.com (US), 60 products per page: product and sku id, brand, name, URL, price, list and sale price (price_range when sizes differ), value price for sets, rating, review count, extra colors, and bestseller, new, exclusive, online-only, limited-edition and sponsored flags, plus category facets and related searches. Pass zip for same-day delivery eligibility.
+        """Search sephora.com (US), 60 products per page: product and sku id, brand, name, URL, price, list and sale price (price_range when sizes differ), value price for sets, rating, review count, extra colors, and bestseller, new, exclusive, online-only, limited-edition and sponsored flags, plus category facets and related searches. Pass zip for same-day delivery eligibility (US only: a 400 with country='ca'). With country='ca', Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026): CAD prices as Sephora Canada gives them (French prices such as '33,00 $' are read as 33.00), the same product and sku ids as sephora.com, sale_scope and an app-exclusive flag per product, total_results, total_pages, has_more, filters_applied, facets (include_facets) and market. A brand keyword (e.g. 'the ordinary') answers that brand's products with redirect.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -6318,45 +6322,175 @@ class _SephoraNamespace:
             page: Results page, 1-based (1-100). 60 products per page.
             sort: relevance (default), best_selling, rating, price_low, price_high or newest.
             zip: US ZIP code. Each product then carries same_day_eligible for that ZIP.
+            country: 'us' (default: sephora.com, unchanged) or 'ca': Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026), prices in CAD.
+            filters: Sephora Canada only: named filters {'brand' (as the Brand facet shows it, e.g. 'The Ordinary'), 'on_sale', 'new', 'clean' (Clean at Sephora), 'rating' (1-4: that many stars and up), 'min_price', 'max_price' (CAD), 'facets'} or up to 10 facet values [{'facet', 'value'}] from a response's facets (include_facets). Several filters all apply; an unknown filter is a 400.
+            include_facets: Sephora Canada only: also return facets [{facet, type, values}] to filter on.
+            language: Sephora Canada only: 'en' (default) or 'fr'. Same product and sku ids and CAD prices; French names, descriptions and facet values.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("sephora_search", {"query": query, "page": page, "sort": sort, "zip": zip}, extra)
+        return self._client._call("sephora_search", {"query": query, "page": page, "sort": sort, "zip": zip, "country": country, "filters": filters, "include_facets": include_facets, "language": language}, extra)
 
     def category(
         self,
         category: str,
         *,
         page: Optional[int] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        sort: Optional[Literal["relevance", "best_selling", "rating", "price_low", "price_high", "newest"]] = None,
+        filters: Optional[Union[dict[str, Any], list[dict[str, str]]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Products in a sephora.com (US) category, 60 per page, in the same shape as search(), plus the category's id, name and URL, total product count, parent category, subcategories with product counts and breadcrumbs. An unknown category is a 404.
+        """Products in a sephora.com (US) category, 60 per page, in the same shape as search(), plus the category's id, name and URL, total product count, parent category, subcategories with product counts and breadcrumbs. An unknown category is a 404 (charged for country='ca'). With country='ca', Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026): CAD prices as Sephora Canada gives them (French prices such as '33,00 $' are read as 33.00), the same product and sku ids as sephora.com, sale_scope and an app-exclusive flag per product, total_results, total_pages, has_more, filters_applied, facets (include_facets) and market.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            category: Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or the full URL.
+            category: Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or the full URL (a sephora.com/ca link for country='ca').
             page: Results page, 1-based (1-100). 60 products per page.
+            country: 'us' (default: sephora.com, unchanged) or 'ca': Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026), prices in CAD.
+            sort: Sephora Canada only: relevance (default), best_selling, rating, price_low, price_high or newest.
+            filters: Sephora Canada only: named filters {'brand' (as the Brand facet shows it, e.g. 'The Ordinary'), 'on_sale', 'new', 'clean' (Clean at Sephora), 'rating' (1-4: that many stars and up), 'min_price', 'max_price' (CAD), 'facets'} or up to 10 facet values [{'facet', 'value'}] from a response's facets (include_facets). Several filters all apply; an unknown filter is a 400.
+            include_facets: Sephora Canada only: also return facets [{facet, type, values}] to filter on.
+            language: Sephora Canada only: 'en' (default) or 'fr'. Same product and sku ids and CAD prices; French names, descriptions and facet values.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("sephora_category", {"category": category, "page": page}, extra)
+        return self._client._call("sephora_category", {"category": category, "page": page, "country": country, "sort": sort, "filters": filters, "include_facets": include_facets, "language": language}, extra)
 
     def product(
         self,
         *,
         url: Optional[str] = None,
         product_id: Optional[str] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One sephora.com (US) product: name, brand, rating, review count, loves count, price range, description, usage, category and breadcrumbs, a summary of what reviews say with pro and con sentiment counts (no review text), and every shade or size as a sku with price, list and sale price, in_stock, only_few_left, ingredients, images and pickup and same-day eligibility. An unknown product is a 404.
+        """One sephora.com (US) product: name, brand, rating, review count, loves count, price range, description, usage, category and breadcrumbs, a summary of what reviews say with pro and con sentiment counts (no review text), and every shade or size as a sku with price, list and sale price, in_stock, only_few_left, ingredients, images and pickup and same-day eligibility. An unknown product is a 404. With country='ca', the Sephora Canada product (the same product and sku ids): CAD price_min / price_max, every sku with price, list and sale price, on_sale, in_stock and only_few_left, review_summary (Sephora's own AI-generated summary of customer reviews, labelled as Sephora's), review_sentiments and latest_reviews (the 10 latest reviews the page shows, without reviewer names); upc is always None (the pages show none). Not available for Canada: stock per store, the full review list with sorts or a star filter. An unknown Canada product is a charged 404.
 
         Costs 2 credits. Returns the API response as a dict.
 
         Args:
             url: sephora.com product URL (the `url` of a search result). Preferred: it answers faster.
-            product_id: Sephora product id, e.g. 'P510799'. Used when url is not given.
+            product_id: Sephora product id, e.g. 'P510799' (the same ids in Canada, e.g. 'P428500'). Used when url is not given.
+            country: 'us' (default: sephora.com, unchanged) or 'ca': Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026), prices in CAD.
+            language: Sephora Canada only: 'en' (default) or 'fr'. Same product and sku ids and CAD prices; French names, descriptions and facet values.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("sephora_product", {"url": url, "product_id": product_id}, extra)
+        return self._client._call("sephora_product", {"url": url, "product_id": product_id, "country": country, "language": language}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "rating", "price_low", "price_high", "newest"]] = None,
+        filters: Optional[Union[dict[str, Any], list[dict[str, str]]]] = None,
+        include_facets: Optional[bool] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). One brand's products, 60 per page: brand {brand_id, name, seo_name, url, description}, the brand's categories with product counts, and the search() listing fields, with sort, filters and facets. CAD prices as Sephora Canada gives them. An unknown brand is a charged 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: Brand name as in a sephora.com/ca/en/brand/<name> link (e.g. 'the-ordinary', 'dior'; see brands()), or the link itself.
+            page: Results page, 1-based (1-100). 60 products per page.
+            sort: relevance (default), best_selling, rating, price_low, price_high or newest.
+            filters: Sephora Canada only: named filters {'brand' (as the Brand facet shows it, e.g. 'The Ordinary'), 'on_sale', 'new', 'clean' (Clean at Sephora), 'rating' (1-4: that many stars and up), 'min_price', 'max_price' (CAD), 'facets'} or up to 10 facet values [{'facet', 'value'}] from a response's facets (include_facets). Several filters all apply; an unknown filter is a 400.
+            include_facets: Sephora Canada only: also return facets [{facet, type, values}] to filter on.
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_brand", {"brand": brand, "page": page, "sort": sort, "filters": filters, "include_facets": include_facets, "language": language}, extra)
+
+    def brands(
+        self,
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). Every brand in Sephora Canada's A-Z brand directory: language, count, brands [{brand_id, name, seo_name, url, letter}]. Pass a seo_name to brand().
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_brands", {"language": language}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). Sephora Canada's search-box suggestions for a partial query: query, language, count, terms (suggested searches) and products [{product_id, sku_id, name, brand, rating, review_count, image, url}], as the site gives them.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far (1-100 characters).
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_suggestions", {"query": query, "language": language}, extra)
+
+    def offers(
+        self,
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). The current offers on Sephora Canada's beauty offers page: language, count, offers [{id, section, title, description, eligibility (as given: Online, In Store, Apps, Rouge, VIB, Insider), app_only, threshold, promo_code, promo_id, end_date (ISO with offset, as given; None when the offer states none), legal_copy, action_label, url}], note. Offers carry no start date; a start stated in an offer's text appears only in its description. No prices or member pricing.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_offers", {"language": language}, extra)
+
+    def stores(
+        self,
+        *,
+        province: Optional[Literal["AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). The Canadian stores on Sephora Canada's store list, optionally one province: language, province, total_stores, province_counts, count, stores [{name, city, location (the mall), province, province_name, slug, url}]. Pass a slug to store(). No store finder by postal code.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            province: Only stores in this province or territory, e.g. 'QC'.
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_stores", {"province": province, "language": language}, extra)
+
+    def store(
+        self,
+        store: str,
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Sephora Canada only (Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store list on Nov 25, 2026); no country needed). One store by slug or link: store {store_id, slug, name, type, address {line1, line2, city, province, postal_code, country}, phone, latitude, longitude, time_zone, hours (monday..sunday as the page shows them), holiday_hours, curbside_hours, services, message, url}, language. No stock per store. An unknown store is a charged 404.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: A store slug from stores() (e.g. 'toronto-eaton-centre'), or the store's link.
+            language: 'en' (default) or 'fr'.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sephora_store", {"store": store, "language": language}, extra)
 
 class _UltaNamespace:
     """Ulta Beauty search, category, product detail, and nearby-store availability endpoints."""

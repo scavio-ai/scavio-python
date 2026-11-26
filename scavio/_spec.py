@@ -326,6 +326,48 @@ def _bb_credits(us: str) -> str:
     return f"Costs {us} in the US (bestbuy.com); 1 credit with country='ca'."
 
 
+# Sephora params shared across endpoints. country is absent by default, so a
+# US call posts exactly what it did before Sephora Canada existed.
+_SEPHORA_CA = (
+    "Sephora Canada (sephora.com/ca, Sephora's Canadian store: 152 stores per its store "
+    "list on Nov 25, 2026)"
+)
+_SEPHORA_SORTS = ("relevance", "best_selling", "rating", "price_low", "price_high", "newest")
+_SEPHORA_COUNTRY = _lit(
+    "country",
+    ("us", "ca"),
+    "'us' (default: sephora.com, unchanged) or 'ca': " + _SEPHORA_CA + ", prices in CAD.",
+)
+_SEPHORA_CA_LANGUAGE = _lit(
+    "language",
+    ("en", "fr"),
+    "Sephora Canada only: 'en' (default) or 'fr'. Same product and sku ids and CAD prices; "
+    "French names, descriptions and facet values.",
+)
+_SEPHORA_LANGUAGE = _lit("language", ("en", "fr"), "'en' (default) or 'fr'.")
+_SEPHORA_FILTERS = Param(
+    "filters",
+    "Optional[Union[dict[str, Any], list[dict[str, str]]]]",
+    doc="Sephora Canada only: named filters {'brand' (as the Brand facet shows it, e.g. "
+    "'The Ordinary'), 'on_sale', 'new', 'clean' (Clean at Sephora), 'rating' (1-4: that "
+    "many stars and up), 'min_price', 'max_price' (CAD), 'facets'} or up to 10 facet values "
+    "[{'facet', 'value'}] from a response's facets (include_facets). Several filters all "
+    "apply; an unknown filter is a 400.",
+)
+_SEPHORA_INCLUDE_FACETS = _bool(
+    "include_facets",
+    "Sephora Canada only: also return facets [{facet, type, values}] to filter on.",
+)
+_SEPHORA_PAGE = _int("page", "Results page, 1-based (1-100). 60 products per page.")
+_SEPHORA_CA_LISTING_NOTE = (
+    " With country='ca', " + _SEPHORA_CA + ": CAD prices as Sephora Canada gives them "
+    "(French prices such as '33,00 $' are read as 33.00), the same product and sku ids as "
+    "sephora.com, sale_scope and an app-exclusive flag per product, total_results, "
+    "total_pages, has_more, filters_applied, facets (include_facets) and market."
+)
+_SEPHORA_CA_ONLY = "Sephora Canada only (" + _SEPHORA_CA + "; no country needed). "
+
+
 # TCGplayer params shared across endpoints.
 _TCG_PRODUCT_ID = _str_or_int(
     "product_id",
@@ -22345,10 +22387,14 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=1,
     ),
     # ============================== Sephora ==============================
-    # 3 endpoints: search and category 1 credit, product 2 (since 2026-11-12).
-    # sephora.com (US). Prices are national.
-    # product() carries a summary of what reviews say plus pro/con sentiment
-    # counts, but no review text.
+    # sephora.com (US, the default) and, with country="ca", Sephora Canada
+    # (sephora.com/ca) on search, category and product, plus 6 Canada-only
+    # endpoints (no country param: the backend defaults it to "ca"). Credits
+    # are the same in both countries: search, category, brand, brands,
+    # suggestions, stores and store 1; product and offers 2. US product()
+    # carries a summary of what reviews say plus pro/con sentiment counts, but
+    # no review text. 120 s timeout floor: Sephora Canada pages can take up to
+    # ~50 s, with one retry.
     Endpoint(
         key="sephora_search",
         namespace="sephora",
@@ -22360,19 +22406,27 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "price, list and sale price (price_range when sizes differ), value price for sets, "
             "rating, review count, extra colors, and bestseller, new, exclusive, online-only, "
             "limited-edition and sponsored flags, plus category facets and related searches. "
-            "Pass zip for same-day delivery eligibility."
+            "Pass zip for same-day delivery eligibility (US only: a 400 with country='ca')."
+            + _SEPHORA_CA_LISTING_NOTE
+            + " A brand keyword (e.g. 'the ordinary') answers that brand's products with "
+            "redirect."
         ),
         params=(
             _req("query", "Search keywords (1-200 characters)."),
-            _int("page", "Results page, 1-based (1-100). 60 products per page."),
+            _SEPHORA_PAGE,
             _lit(
                 "sort",
-                ("relevance", "best_selling", "rating", "price_low", "price_high", "newest"),
+                _SEPHORA_SORTS,
                 "relevance (default), best_selling, rating, price_low, price_high or newest.",
             ),
             _str("zip", "US ZIP code. Each product then carries same_day_eligible for that ZIP."),
+            _SEPHORA_COUNTRY,
+            _SEPHORA_FILTERS,
+            _SEPHORA_INCLUDE_FACETS,
+            _SEPHORA_CA_LANGUAGE,
         ),
         credits=1,
+        min_timeout=120.0,
     ),
     Endpoint(
         key="sephora_category",
@@ -22383,16 +22437,29 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Products in a sephora.com (US) category, 60 per page, in the same shape as search(), "
             "plus the category's id, name and URL, total product count, parent category, "
-            "subcategories with product counts and breadcrumbs. An unknown category is a 404."
+            "subcategories with product counts and breadcrumbs. An unknown category is a 404 "
+            "(charged for country='ca')." + _SEPHORA_CA_LISTING_NOTE
         ),
         params=(
             _req(
                 "category",
-                "Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or the full URL.",
+                "Category name as in a sephora.com/shop/ URL (e.g. 'lipstick', 'face-serum') or "
+                "the full URL (a sephora.com/ca link for country='ca').",
             ),
-            _int("page", "Results page, 1-based (1-100). 60 products per page."),
+            _SEPHORA_PAGE,
+            _SEPHORA_COUNTRY,
+            _lit(
+                "sort",
+                _SEPHORA_SORTS,
+                "Sephora Canada only: relevance (default), best_selling, rating, price_low, "
+                "price_high or newest.",
+            ),
+            _SEPHORA_FILTERS,
+            _SEPHORA_INCLUDE_FACETS,
+            _SEPHORA_CA_LANGUAGE,
         ),
         credits=1,
+        min_timeout=120.0,
     ),
     Endpoint(
         key="sephora_product",
@@ -22405,14 +22472,158 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             "range, description, usage, category and breadcrumbs, a summary of what reviews say "
             "with pro and con sentiment counts (no review text), and every shade or size as a sku "
             "with price, list and sale price, in_stock, only_few_left, ingredients, images and "
-            "pickup and same-day eligibility. An unknown product is a 404."
+            "pickup and same-day eligibility. An unknown product is a 404. With country='ca', "
+            "the Sephora Canada product (the same product and sku ids): CAD price_min / "
+            "price_max, every sku with price, list and sale price, on_sale, in_stock and "
+            "only_few_left, review_summary (Sephora's own AI-generated summary of customer "
+            "reviews, labelled as Sephora's), review_sentiments and latest_reviews (the 10 latest "
+            "reviews the page shows, without reviewer names); upc is always None (the pages show "
+            "none). Not available for Canada: stock per store, the full review list with sorts "
+            "or a star filter. An unknown Canada product is a charged 404."
         ),
         params=(
             _str("url", "sephora.com product URL (the `url` of a search result). Preferred: it answers faster."),
-            _str("product_id", "Sephora product id, e.g. 'P510799'. Used when url is not given."),
+            _str(
+                "product_id",
+                "Sephora product id, e.g. 'P510799' (the same ids in Canada, e.g. 'P428500'). "
+                "Used when url is not given.",
+            ),
+            _SEPHORA_COUNTRY,
+            _SEPHORA_CA_LANGUAGE,
         ),
         one_of=(("url", "product_id"),),
         credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_brand",
+        namespace="sephora",
+        method="brand",
+        http="POST",
+        path="/api/v1/sephora/brand",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "One brand's products, 60 per page: brand {brand_id, name, seo_name, url, "
+            "description}, the brand's categories with product counts, and the search() listing "
+            "fields, with sort, filters and facets. CAD prices as Sephora Canada gives them. An "
+            "unknown brand is a charged 404."
+        ),
+        params=(
+            _req(
+                "brand",
+                "Brand name as in a sephora.com/ca/en/brand/<name> link (e.g. 'the-ordinary', "
+                "'dior'; see brands()), or the link itself.",
+            ),
+            _SEPHORA_PAGE,
+            _lit(
+                "sort",
+                _SEPHORA_SORTS,
+                "relevance (default), best_selling, rating, price_low, price_high or newest.",
+            ),
+            _SEPHORA_FILTERS,
+            _SEPHORA_INCLUDE_FACETS,
+            _SEPHORA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_brands",
+        namespace="sephora",
+        method="brands",
+        http="POST",
+        path="/api/v1/sephora/brands",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "Every brand in Sephora Canada's A-Z brand directory: language, count, brands "
+            "[{brand_id, name, seo_name, url, letter}]. Pass a seo_name to brand()."
+        ),
+        params=(_SEPHORA_LANGUAGE,),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_suggestions",
+        namespace="sephora",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/sephora/suggestions",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "Sephora Canada's search-box suggestions for a partial query: query, language, "
+            "count, terms (suggested searches) and products [{product_id, sku_id, name, brand, "
+            "rating, review_count, image, url}], as the site gives them."
+        ),
+        params=(_req("query", "What the shopper has typed so far (1-100 characters)."), _SEPHORA_LANGUAGE),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_offers",
+        namespace="sephora",
+        method="offers",
+        http="POST",
+        path="/api/v1/sephora/offers",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "The current offers on Sephora Canada's beauty offers page: language, count, "
+            "offers [{id, section, title, description, eligibility (as given: Online, In Store, "
+            "Apps, Rouge, VIB, Insider), app_only, threshold, promo_code, promo_id, end_date (ISO "
+            "with offset, as given; None when the offer states none), legal_copy, action_label, "
+            "url}], note. Offers carry no start date; a start stated in an offer's text appears "
+            "only in its description. No prices or member pricing."
+        ),
+        params=(_SEPHORA_LANGUAGE,),
+        credits=2,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_stores",
+        namespace="sephora",
+        method="stores",
+        http="POST",
+        path="/api/v1/sephora/stores",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "The Canadian stores on Sephora Canada's store list, optionally one province: "
+            "language, province, total_stores, province_counts, count, stores [{name, city, "
+            "location (the mall), province, province_name, slug, url}]. Pass a slug to store(). "
+            "No store finder by postal code."
+        ),
+        params=(
+            _lit(
+                "province",
+                ("AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT"),
+                "Only stores in this province or territory, e.g. 'QC'.",
+            ),
+            _SEPHORA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
+    ),
+    Endpoint(
+        key="sephora_store",
+        namespace="sephora",
+        method="store",
+        http="POST",
+        path="/api/v1/sephora/store",
+        summary=(
+            _SEPHORA_CA_ONLY
+            + "One store by slug or link: store {store_id, slug, name, type, address {line1, "
+            "line2, city, province, postal_code, country}, phone, latitude, longitude, "
+            "time_zone, hours (monday..sunday as the page shows them), holiday_hours, "
+            "curbside_hours, services, message, url}, language. No stock per store. An unknown "
+            "store is a charged 404."
+        ),
+        params=(
+            _req(
+                "store",
+                "A store slug from stores() (e.g. 'toronto-eaton-centre'), or the store's link.",
+            ),
+            _SEPHORA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=120.0,
     ),
     # ============================ Ulta Beauty ============================
     # 4 endpoints, 1 credit each. stores() reports in stock / out of stock for

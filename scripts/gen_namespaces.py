@@ -162,7 +162,9 @@ _NS_META = {
     ),
     "sephora": (
         "Sephora",
-        "Sephora search, category, and product detail endpoints with per-shade stock and review sentiment.",
+        "Sephora search, category, and product detail endpoints with per-shade stock and review "
+        "sentiment (sephora.com by default); country='ca' reads Sephora Canada (sephora.com/ca, "
+        "CAD), which also has brand, brands, suggestions, offers, stores and store endpoints.",
     ),
     "ulta": (
         "Ulta",
