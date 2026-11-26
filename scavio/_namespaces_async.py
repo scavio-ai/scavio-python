@@ -120,6 +120,7 @@ __all__ = [
     "_AsyncOfferupNamespace",
     "_AsyncSportchekNamespace",
     "_AsyncMarksNamespace",
+    "_AsyncRonaNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -22425,3 +22426,247 @@ class _AsyncMarksNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("marks_categories", {"language": language}, extra)
+
+class _AsyncRonaNamespace:
+    """RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores) search, product, prices (up to 60 articles at one store), category, categories, stores, store, stock (stores near a store with units) and deals endpoints; Canada only, prices in CAD, language en or fr."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[24, 48, 96]] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "highest_rated", "newest", "best_sellers"]] = None,
+        filters: Optional[list[str]] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        include_facets: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the products of RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.) by keywords, with paging (24, 48 or 96 a page), six sorts and RONA's filters (brand, price band, rating, on sale, clearance, Buy in Bulk, in-store or online-only products, category). For terms RONA sends to a category or a filtered search, that page is read and redirected_to says where. Without store_id the prices and units are for the store RONA's site picks for the visit (store.requested false); with store_id every item is priced at that store (store.requested true). Returns query, redirected_to, page, page_size, sort, filters_applied, total, total_pages, has_more, count, items [{sku (RONA's Article #, the id), name, brand, model, url, image, price, regular_price, on_sale, unit, rating, review_count, units, availability, price_shown}], store {store_id, name, requested}, facets (include_facets), market {country, currency, language}, notes. units are exact store units; null means RONA showed no count, not zero. Captured 2026-11-26: '2x4' at store '41460' listed 2440 products (102 pages); the first, 2-in x 4-in x 8-ft SPF Select Lumber (0971073), at 4.35 CAD. Not available: review text (rating and review count only), search suggestions, postal-code store lookup, the printed flyer, cart or checkout, price history (poll and store the answers). For the same item at Home Depot Canada use the home_depot namespace with country 'ca'; match the same grade and length, or the same model. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 2 credits; 3 with store_id; 2 more when RONA redirects the term to a category or a
+        filtered search. credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            query: Keywords (e.g. '2x4').
+            page: Page, 1-based (default 1).
+            page_size: Products per page (default 48).
+            sort: relevance (default), price_low_to_high, price_high_to_low, highest_rated, newest, best_sellers.
+            filters: Up to 10 facet values (facets[].values[].value from include_facets): brand, price band, rating, offer (on sale, clearance, Buy in Bulk), in-store or online-only products, category.
+            on_sale: Only products on sale.
+            clearance: Only clearance products.
+            include_facets: Also return facets [{facet, name, values [{value, name, count}]}] to filter on.
+            store_id: A RONA store number (5 digits, from stores(); e.g. '55130' RONA+ Toronto Stockyards, '41460' RONA+ Brossard Dix/30, '62860' RONA+ Calgary NE). Prices and units are that store's.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_search", {"query": query, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "on_sale": on_sale, "clearance": clearance, "include_facets": include_facets, "store_id": store_id, "language": language}, extra)
+
+    async def product(
+        self,
+        sku: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.) by article number or link: sku, item_number, name, brand, model, upc, format, unit, url, images, description, bullets, specs [{name, value}], breadcrumb, rating, review_count, price, regular_price, rebate, on_sale, sale_ends_text (the sale end as RONA shows it), sale_ends (ISO date only when unambiguous), price_shown, store {store_id, name, requested}, units, availability, aisle, dc_units, parcel_units, parcel_units_on_hand, back_in_stock, pickup_message, nearby_stores [{store_id, name, distance_km, units}], buyable, market, notes. Without store_id the prices and units are for the store RONA's site picks for the visit (store.requested false); with store_id every item is priced at that store (store.requested true). units are exact store units; null means RONA showed no count, not zero. Captured 2026-11-26: the DEWALT 20 V MAX Brushless Compact Drill/Driver Kit (00277649) at store '55130' at 118 CAD (regular 219, rebate 101), sale_ends_text 'until Dec 10th, 2026', 12 units in aisle F20T1, rated 4.6 from 50 reviews. No review text. An unknown article is a charged 404. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 3 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A RONA article number (Article #, items[].sku) as a string: leading zeros count (e.g. '00277649'). Send sku or url.
+            url: A rona.ca product link instead of sku.
+            store_id: A RONA store number (5 digits, from stores(); e.g. '55130' RONA+ Toronto Stockyards, '41460' RONA+ Brossard Dix/30, '62860' RONA+ Calgary NE). Prices and units are that store's.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_product", {"sku": sku, "url": url, "store_id": store_id, "language": language}, extra)
+
+    async def prices(
+        self,
+        skus: Union[list[str], str],
+        store_id: Union[str, int],
+        *,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Prices and exact stock for up to 60 articles at one RONA store, from RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.): the per-store price check. RONA prices some goods per store: lumber and panels can differ between stores and provinces. Returns store, requested, count, items [{sku, found, sold_at_store, name, brand, model, upc, format, unit, price, regular_price, rebate, on_sale, units, dc_units, parcel_units, parcel_units_on_hand, aisle, availability, price_shown, buyable, rating, review_count, url, image}], not_found, market, notes. units are exact store units; null means RONA showed no count, not zero. Captured 2026-11-26: 2-in x 4-in x 8-ft SPF Select Lumber (0971073) at 4.35 CAD at store '41460' (Quebec), 4.22 at '55130' (Ontario), 4.19 at '62860' (Alberta); the DEWALT drill kit on sale (00277649) at 118 at all three. Run the same article list at several stores to compare them. An unknown store or no known article is a charged 404. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1-60 RONA article numbers as strings (a list or comma-separated), e.g. ['0971073', '0938002', '00277649'].
+            store_id: A RONA store number (5 digits, from stores(), e.g. '55130').
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_prices", {"skus": skus, "store_id": store_id, "language": language}, extra)
+
+    async def category(
+        self,
+        category: Optional[str] = None,
+        *,
+        family_id: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", "highest_rated", "newest", "best_sellers"]] = None,
+        filters: Optional[list[str]] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        include_facets: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Browse one category of RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.) by path (from categories()) with paging, sorts, filters and facets. With family_id (from a category answer) and store_id and no sort, filters or facets, the products come from RONA's product list for the category at that store. Without store_id the prices and units are for the store RONA's site picks for the visit (store.requested false); with store_id every item is priced at that store (store.requested true). Returns category {path, name, category_id, family_id, url}, source (page or family), page, page_size, sort, filters_applied, total, total_pages, has_more, count, items [{sku (RONA's Article #, the id), name, brand, model, url, image, price, regular_price, on_sale, unit, rating, review_count, units, availability, price_shown}], store {store_id, name, requested}, facets (include_facets), market {country, currency, language}, notes. units are exact store units; null means RONA showed no count, not zero. Captured 2026-11-26: Cordless Drills and Drivers ('/en/tools/power-tools-158001/cordless-drills-and-drivers-158003', family_id 318485) at store '55130' listed 233 products. An unknown path is a charged 404. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 2 credits (3 with store_id); 1 credit with family_id and store_id. credits_used in
+        the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            category: A category path from categories() (e.g. '/en/tools/power-tools-158001/cordless-drills-and-drivers-158003') or a rona.ca category link. Its language (/en or /fr) is the answer's language. Send category or family_id.
+            family_id: A category answer's family_id: with store_id and no sort, filters or facets, the category's products at that store for 1 credit.
+            page: Page, 1-based (default 1).
+            page_size: Products per page: 24, 48 or 96 (default 48); with family_id 1-100.
+            sort: relevance (default), price_low_to_high, price_high_to_low, highest_rated, newest, best_sellers.
+            filters: Up to 10 facet values (facets[].values[].value from include_facets): brand, price band, rating, offer (on sale, clearance, Buy in Bulk), in-store or online-only products, category.
+            on_sale: Only products on sale.
+            clearance: Only clearance products.
+            include_facets: Also return facets [{facet, name, values [{value, name, count}]}] to filter on.
+            store_id: A RONA store number (5 digits, from stores(); e.g. '55130' RONA+ Toronto Stockyards, '41460' RONA+ Brossard Dix/30, '62860' RONA+ Calgary NE). Prices and units are that store's.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_category", {"category": category, "family_id": family_id, "page": page, "page_size": page_size, "sort": sort, "filters": filters, "on_sale": on_sale, "clearance": clearance, "include_facets": include_facets, "store_id": store_id, "language": language}, extra)
+
+    async def categories(
+        self,
+        *,
+        depth: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department tree of RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.): language, depth, count, total, departments [{name, path, url, category_id, children [...]}], market, notes. Paths are category()'s category. Captured 2026-11-26: 22 departments, 232 categories at depth 2. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            depth: Levels to return, 1-3 (default 3: departments, categories, sub-categories).
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_categories", {"depth": depth, "language": language}, extra)
+
+    async def stores(
+        self,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        province: Optional[str] = None,
+        city: Optional[str] = None,
+        banner: Optional[Literal["rona", "rona_plus"]] = None,
+        limit: Optional[int] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every store on RONA's store locator (RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.)): RONA+ and RONA stores, corporate and dealer, filtered by province, city and banner, or nearest a latitude and longitude. Returns language, location, filters_applied, total, count, stores [{store_id, name, banner (RONA+ or RONA), format (big_box or proximity), relationship (corporate, dealer, franchisee), city, province, address, postal_code, phone, latitude, longitude, distance_km, services {click_and_collect, installation, truck_delivery, parcel_shipping, appliances}, url}], market, notes. store_id is the input of every per-store method. Captured 2026-11-26: 403 stores; the nearest to 43.6426, -79.3871 (downtown Toronto) RONA+ Toronto Stockyards ('55130', corporate) at 7.29 km. Postal code lookup is not supported: pass latitude and longitude, or a city or province. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            latitude: With longitude: stores nearest this point, with distance_km.
+            longitude: With latitude.
+            province: A province code ('qc', 'on', 'ab', 'bc' ...) or name.
+            city: Stores whose city contains this (accents and case ignored).
+            banner: rona (RONA stores) or rona_plus (RONA+ stores).
+            limit: Stores to return, 1-403 (default 20 with latitude and longitude, else all).
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_stores", {"latitude": latitude, "longitude": longitude, "province": province, "city": city, "banner": banner, "limit": limit, "language": language}, extra)
+
+    async def store(
+        self,
+        store_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One RONA store of RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.) by store number or link: store_id, name, banner, address {street, city, province, postal_code, country}, phone, latitude, longitude, hours [{day, opens, closes}], special_hours, departments [{name, hours}], url, relationship, services, market, notes. Hours are local store time. Captured 2026-11-26: store '55130', RONA+ Toronto Stockyards, 110 West Toronto Street, corporate. An unknown store is a charged 404. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A RONA store number (5 digits, from stores(), e.g. '55130'). Send store_id or url.
+            url: A rona.ca store link instead of store_id.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_store", {"store_id": store_id, "url": url, "language": language}, extra)
+
+    async def stock(
+        self,
+        sku: str,
+        store_id: Optional[Union[str, int]] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Which RONA stores near a store (or a latitude and longitude) have one article, from RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.): sku, name, model, center, count, in_stock_count, stores [{store_id, name, distance_km, address, city, province, postal_code, units (exact), in_stock, stock_message, pickup_message, latitude, longitude, url}] (RONA's list, nearest first), market, notes. RONA offers no nearby-store list for some articles (lumber), and the list can come back empty now and then: call once more. Captured 2026-11-26: the DEWALT drill kit (00277649) near store '62860' (Calgary NE): 12 stores, 10 in stock, 21 units at '62860'. Postal code lookup is not supported: pass latitude and longitude, or a city or province. An unknown article or store is a charged 404. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 3 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A RONA article number (items[].sku) as a string (e.g. '00277649').
+            store_id: The stores near this store (5 digits, from stores(), e.g. '62860'). Send store_id or latitude and longitude.
+            latitude: Instead of store_id, with longitude: the stores near this point.
+            longitude: With latitude.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_stock", {"sku": sku, "store_id": store_id, "latitude": latitude, "longitude": longitude, "language": language}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["weekly", "clearance"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[24, 48, 96]] = None,
+        filters: Optional[list[str]] = None,
+        on_sale: Optional[bool] = None,
+        clearance: Optional[bool] = None,
+        include_facets: Optional[bool] = None,
+        store_id: Optional[Union[str, int]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RONA's weekly deals (or clearance) listing on RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 corporate and affiliated dealer stores per RONA inc.): every promoted product with its sale price and regular price, paged and filtered like search(), in RONA's own order (the listing has no sort). Without store_id the prices and units are for the store RONA's site picks for the visit (store.requested false); with store_id every item is priced at that store (store.requested true). Returns type, page, page_size, sort, filters_applied, total, total_pages, has_more, count, items [{sku (RONA's Article #, the id), name, brand, model, url, image, price, regular_price, on_sale, unit, rating, review_count, units, availability, price_shown}], store {store_id, name, requested}, facets (include_facets), market {country, currency, language}, notes. units are exact store units; null means RONA showed no count, not zero. A product's sale end is on product() (sale_ends_text). Not the printed flyer. Captured 2026-11-26: weekly deals at store '55130', the first a DEWALT 20 V MAX Impact Driver Kit (00277645) at 118 CAD, regular 219. Answers can take up to about a minute: allow up to 2 minutes. Failed upstream calls and refused inputs are not charged; a not-found is charged (credits_used is what was charged).
+
+        Costs 2 credits; 3 with store_id. credits_used in the response is the exact charge.
+        Returns the API response as a dict.
+
+        Args:
+            type: weekly (default: RONA's weekly deals) or clearance.
+            page: Page, 1-based (default 1).
+            page_size: Products per page (default 48).
+            filters: Up to 10 facet values (facets[].values[].value from include_facets): brand, price band, rating, offer (on sale, clearance, Buy in Bulk), in-store or online-only products, category.
+            on_sale: Only products on sale.
+            clearance: Only clearance products.
+            include_facets: Also return facets [{facet, name, values [{value, name, count}]}] to filter on.
+            store_id: A RONA store number (5 digits, from stores(); e.g. '55130' RONA+ Toronto Stockyards, '41460' RONA+ Brossard Dix/30, '62860' RONA+ Calgary NE). Prices and units are that store's.
+            language: en (default) or fr: RONA's French names, links and labels. Article numbers and CAD prices are the same in both.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rona_deals", {"type": type, "page": page, "page_size": page_size, "filters": filters, "on_sale": on_sale, "clearance": clearance, "include_facets": include_facets, "store_id": store_id, "language": language}, extra)

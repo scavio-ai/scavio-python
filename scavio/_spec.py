@@ -5320,6 +5320,74 @@ _MARKS_ENDPOINTS = _ctc_endpoints(
     },
 )
 
+# RONA params shared across endpoints (RONA, rona.ca, the Canadian home improvement retailer). 9
+# endpoints on /api/v1/rona, Canada only, prices in CAD, language en | fr on every endpoint. prices,
+# categories, stores and store 1 credit; product and stock 3; search and deals 2 (3 with store_id;
+# search 2 more when RONA redirects the term); category 2 (3 with store_id) or 1 with family_id and
+# store_id (credits_note on search, category and deals; credits is the floor; credits_used is the
+# truth). Article numbers are strings (leading zeros count). 240 s floor on every method.
+_RONA_FIRST = (
+    "RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 "
+    "corporate and affiliated dealer stores per RONA inc.)"
+)
+_RONA_CHARGE = (
+    " Failed upstream calls and refused inputs are not charged; a not-found is charged "
+    "(credits_used is what was charged)."
+)
+_RONA_SLOW = " Answers can take up to about a minute: allow up to 2 minutes."
+_RONA_STORE = (
+    " Without store_id the prices and units are for the store RONA's site picks for the visit "
+    "(store.requested false); with store_id every item is priced at that store (store.requested "
+    "true)."
+)
+_RONA_UNITS = " units are exact store units; null means RONA showed no count, not zero."
+_RONA_TILE = (
+    "sku (RONA's Article #, the id), name, brand, model, url, image, price, regular_price, "
+    "on_sale, unit, rating, review_count, units, availability, price_shown"
+)
+_RONA_LIST = (
+    "page, page_size, sort, filters_applied, total, total_pages, has_more, count, items [{"
+    + _RONA_TILE + "}], store {store_id, name, requested}, facets (include_facets), market "
+    "{country, currency, language}, notes."
+)
+_RONA_NOT_AVAILABLE = (
+    " Not available: review text (rating and review count only), search suggestions, "
+    "postal-code store lookup, the printed flyer, cart or checkout, price history (poll and "
+    "store the answers). For the same item at Home Depot Canada use the home_depot namespace "
+    "with country 'ca'; match the same grade and length, or the same model."
+)
+_RONA_POSTAL = (
+    " Postal code lookup is not supported: pass latitude and longitude, or a city or province."
+)
+_RONA_SORTS = (
+    "relevance", "price_low_to_high", "price_high_to_low", "highest_rated", "newest",
+    "best_sellers",
+)
+_RONA_LANGUAGE = _lit(
+    "language", ("en", "fr"), "en (default) or fr: RONA's French names, links and labels. "
+    "Article numbers and CAD prices are the same in both."
+)
+_RONA_STORE_ID = _str_or_int(
+    "store_id", "A RONA store number (5 digits, from stores(); e.g. '55130' RONA+ Toronto "
+    "Stockyards, '41460' RONA+ Brossard Dix/30, '62860' RONA+ Calgary NE). Prices and units are "
+    "that store's."
+)
+_RONA_FILTER_PARAMS = (
+    _str_list("filters", "Up to 10 facet values (facets[].values[].value from include_facets): "
+              "brand, price band, rating, offer (on sale, clearance, Buy in Bulk), in-store or "
+              "online-only products, category."),
+    _bool("on_sale", "Only products on sale."),
+    _bool("clearance", "Only clearance products."),
+    _bool("include_facets", "Also return facets [{facet, name, values [{value, name, count}]}] "
+          "to filter on."),
+    _RONA_STORE_ID,
+    _RONA_LANGUAGE,
+)
+_RONA_PAGE = _int("page", "Page, 1-based (default 1).")
+_RONA_PAGE_SIZE = _ilit("page_size", (24, 48, 96), "Products per page (default 48).")
+_RONA_SORT = _lit("sort", _RONA_SORTS, "relevance (default), price_low_to_high, "
+                  "price_high_to_low, highest_rated, newest, best_sellers.")
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -22276,6 +22344,299 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     # 8 endpoints each on /api/v1/sportchek and /api/v1/marks (_ctc_endpoints above).
     *_SPORTCHEK_ENDPOINTS,
     *_MARKS_ENDPOINTS,
+    # ================================ RONA ================================
+    # 9 endpoints on /api/v1/rona: Canada only, CAD, language en | fr. Credits vary by endpoint
+    # (credits_note on search, category and deals). 240 s floor.
+    Endpoint(
+        key="rona_search",
+        namespace="rona",
+        method="search",
+        http="POST",
+        path="/api/v1/rona/search",
+        summary=(
+            "Search the products of " + _RONA_FIRST + " by keywords, with paging (24, 48 or 96 a "
+            "page), six sorts and RONA's filters (brand, price band, rating, on sale, clearance, "
+            "Buy in Bulk, in-store or online-only products, category). For terms RONA sends to a "
+            "category or a filtered search, that page is read and redirected_to says where."
+            + _RONA_STORE + " Returns query, redirected_to, " + _RONA_LIST + _RONA_UNITS
+            + " Captured 2026-11-26: '2x4' at store '41460' listed 2440 products (102 pages); "
+            "the first, 2-in x 4-in x 8-ft SPF Select Lumber (0971073), at 4.35 CAD."
+            + _RONA_NOT_AVAILABLE + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            _req("query", "Keywords (e.g. '2x4')."),
+            _RONA_PAGE,
+            _RONA_PAGE_SIZE,
+            _RONA_SORT,
+        ) + _RONA_FILTER_PARAMS,
+        credits=2,
+        credits_note=(
+            "Costs 2 credits; 3 with store_id; 2 more when RONA redirects the term to a category "
+            "or a filtered search. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_product",
+        namespace="rona",
+        method="product",
+        http="POST",
+        path="/api/v1/rona/product",
+        summary=(
+            "One product of " + _RONA_FIRST + " by article number or link: sku, item_number, "
+            "name, brand, model, upc, format, unit, url, images, description, bullets, specs "
+            "[{name, value}], breadcrumb, rating, review_count, price, regular_price, rebate, "
+            "on_sale, sale_ends_text (the sale end as RONA shows it), sale_ends (ISO date only "
+            "when unambiguous), price_shown, store {store_id, name, requested}, units, "
+            "availability, aisle, dc_units, parcel_units, parcel_units_on_hand, back_in_stock, "
+            "pickup_message, nearby_stores [{store_id, name, distance_km, units}], buyable, "
+            "market, notes." + _RONA_STORE + _RONA_UNITS + " Captured 2026-11-26: the DEWALT 20 "
+            "V MAX Brushless Compact Drill/Driver Kit (00277649) at store '55130' at 118 CAD "
+            "(regular 219, rebate 101), sale_ends_text 'until Dec 10th, 2026', 12 units in aisle "
+            "F20T1, rated 4.6 from 50 reviews. No review text. An unknown article is a charged "
+            "404." + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[str]",
+                positional=True,
+                doc="A RONA article number (Article #, items[].sku) as a string: leading zeros "
+                "count (e.g. '00277649'). Send sku or url.",
+            ),
+            _str("url", "A rona.ca product link instead of sku."),
+            _RONA_STORE_ID,
+            _RONA_LANGUAGE,
+        ),
+        one_of=(("sku", "url"),),
+        credits=3,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_prices",
+        namespace="rona",
+        method="prices",
+        http="POST",
+        path="/api/v1/rona/prices",
+        summary=(
+            "Prices and exact stock for up to 60 articles at one RONA store, from " + _RONA_FIRST
+            + ": the per-store price check. RONA prices some goods per store: lumber and panels "
+            "can differ between stores and provinces. Returns store, requested, count, items "
+            "[{sku, found, sold_at_store, name, brand, model, upc, format, unit, price, "
+            "regular_price, rebate, on_sale, units, dc_units, parcel_units, "
+            "parcel_units_on_hand, aisle, availability, price_shown, buyable, rating, "
+            "review_count, url, image}], not_found, market, notes." + _RONA_UNITS + " Captured "
+            "2026-11-26: 2-in x 4-in x 8-ft SPF Select Lumber (0971073) at 4.35 CAD at store "
+            "'41460' (Quebec), 4.22 at '55130' (Ontario), 4.19 at '62860' (Alberta); the DEWALT "
+            "drill kit on sale (00277649) at 118 at all three. Run the same article list at "
+            "several stores to compare them. An unknown store or no known article is a charged "
+            "404." + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            Param(
+                "skus",
+                "Union[list[str], str]",
+                required=True,
+                doc="1-60 RONA article numbers as strings (a list or comma-separated), e.g. "
+                "['0971073', '0938002', '00277649'].",
+            ),
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc="A RONA store number (5 digits, from stores(), e.g. '55130').",
+            ),
+            _RONA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_category",
+        namespace="rona",
+        method="category",
+        http="POST",
+        path="/api/v1/rona/category",
+        summary=(
+            "Browse one category of " + _RONA_FIRST + " by path (from categories()) with "
+            "paging, sorts, filters and facets. With family_id (from a category answer) and "
+            "store_id and no sort, filters or facets, the products come from RONA's product "
+            "list for the category at that store." + _RONA_STORE + " Returns category {path, "
+            "name, category_id, family_id, url}, source (page or family), " + _RONA_LIST
+            + _RONA_UNITS + " Captured 2026-11-26: Cordless Drills and Drivers "
+            "('/en/tools/power-tools-158001/cordless-drills-and-drivers-158003', family_id "
+            "318485) at store '55130' listed 233 products. An unknown path is a charged 404."
+            + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                positional=True,
+                doc="A category path from categories() (e.g. "
+                "'/en/tools/power-tools-158001/cordless-drills-and-drivers-158003') or a rona.ca "
+                "category link. Its language (/en or /fr) is the answer's language. Send category "
+                "or family_id.",
+            ),
+            _str_or_int("family_id", "A category answer's family_id: with store_id and no sort, "
+                        "filters or facets, the category's products at that store for 1 "
+                        "credit."),
+            _RONA_PAGE,
+            _int("page_size", "Products per page: 24, 48 or 96 (default 48); with family_id "
+                 "1-100."),
+            _RONA_SORT,
+        ) + _RONA_FILTER_PARAMS,
+        one_of=(("category", "family_id"),),
+        credits=1,
+        credits_note=(
+            "Costs 2 credits (3 with store_id); 1 credit with family_id and store_id. "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_categories",
+        namespace="rona",
+        method="categories",
+        http="POST",
+        path="/api/v1/rona/categories",
+        summary=(
+            "The department tree of " + _RONA_FIRST + ": language, depth, count, total, "
+            "departments [{name, path, url, category_id, children [...]}], market, notes. Paths "
+            "are category()'s category. Captured 2026-11-26: 22 departments, 232 categories at "
+            "depth 2." + _RONA_CHARGE
+        ),
+        params=(
+            _int("depth", "Levels to return, 1-3 (default 3: departments, categories, "
+                 "sub-categories)."),
+            _RONA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_stores",
+        namespace="rona",
+        method="stores",
+        http="POST",
+        path="/api/v1/rona/stores",
+        summary=(
+            "Every store on RONA's store locator (" + _RONA_FIRST + "): RONA+ and RONA stores, "
+            "corporate and dealer, filtered by province, city and banner, or nearest a latitude "
+            "and longitude. Returns language, location, filters_applied, total, count, stores "
+            "[{store_id, name, banner (RONA+ or RONA), format (big_box or proximity), "
+            "relationship (corporate, dealer, franchisee), city, province, address, postal_code, "
+            "phone, latitude, longitude, distance_km, services {click_and_collect, installation, "
+            "truck_delivery, parcel_shipping, appliances}, url}], market, notes. store_id is the "
+            "input of every per-store method. Captured 2026-11-26: 403 stores; the nearest to "
+            "43.6426, -79.3871 (downtown Toronto) RONA+ Toronto Stockyards ('55130', corporate) "
+            "at 7.29 km." + _RONA_POSTAL + _RONA_CHARGE
+        ),
+        params=(
+            _float("latitude", "With longitude: stores nearest this point, with distance_km."),
+            _float("longitude", "With latitude."),
+            _str("province", "A province code ('qc', 'on', 'ab', 'bc' ...) or name."),
+            _str("city", "Stores whose city contains this (accents and case ignored)."),
+            _lit("banner", ("rona", "rona_plus"), "rona (RONA stores) or rona_plus (RONA+ "
+                 "stores)."),
+            _int("limit", "Stores to return, 1-403 (default 20 with latitude and longitude, "
+                 "else all)."),
+            _RONA_LANGUAGE,
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_store",
+        namespace="rona",
+        method="store",
+        http="POST",
+        path="/api/v1/rona/store",
+        summary=(
+            "One RONA store of " + _RONA_FIRST + " by store number or link: store_id, name, "
+            "banner, address {street, city, province, postal_code, country}, phone, latitude, "
+            "longitude, hours [{day, opens, closes}], special_hours, departments [{name, "
+            "hours}], url, relationship, services, market, notes. Hours are local store time. "
+            "Captured 2026-11-26: store '55130', RONA+ Toronto Stockyards, 110 West Toronto "
+            "Street, corporate. An unknown store is a charged 404." + _RONA_CHARGE
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="A RONA store number (5 digits, from stores(), e.g. '55130'). Send store_id "
+                "or url.",
+            ),
+            _str("url", "A rona.ca store link instead of store_id."),
+            _RONA_LANGUAGE,
+        ),
+        one_of=(("store_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_stock",
+        namespace="rona",
+        method="stock",
+        http="POST",
+        path="/api/v1/rona/stock",
+        summary=(
+            "Which RONA stores near a store (or a latitude and longitude) have one article, from "
+            + _RONA_FIRST + ": sku, name, model, center, count, in_stock_count, stores "
+            "[{store_id, name, distance_km, address, city, province, postal_code, units (exact), "
+            "in_stock, stock_message, pickup_message, latitude, longitude, url}] (RONA's list, "
+            "nearest first), market, notes. RONA offers no nearby-store list for some articles "
+            "(lumber), and the list can come back empty now and then: call once more. Captured "
+            "2026-11-26: the DEWALT drill kit (00277649) near store '62860' (Calgary NE): 12 "
+            "stores, 10 in stock, 21 units at '62860'." + _RONA_POSTAL + " An unknown article or "
+            "store is a charged 404." + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            _req("sku", "A RONA article number (items[].sku) as a string (e.g. '00277649')."),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc="The stores near this store (5 digits, from stores(), e.g. '62860'). Send "
+                "store_id or latitude and longitude.",
+            ),
+            _float("latitude", "Instead of store_id, with longitude: the stores near this "
+                   "point."),
+            _float("longitude", "With latitude."),
+            _RONA_LANGUAGE,
+        ),
+        one_of=(("store_id", "latitude"),),
+        credits=3,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rona_deals",
+        namespace="rona",
+        method="deals",
+        http="POST",
+        path="/api/v1/rona/deals",
+        summary=(
+            "RONA's weekly deals (or clearance) listing on " + _RONA_FIRST + ": every promoted "
+            "product with its sale price and regular price, paged and filtered like search(), in "
+            "RONA's own order (the listing has no sort)." + _RONA_STORE + " Returns type, "
+            + _RONA_LIST + _RONA_UNITS + " A product's sale end is on product() "
+            "(sale_ends_text). Not the printed flyer. Captured 2026-11-26: weekly deals at store "
+            "'55130', the first a DEWALT 20 V MAX Impact Driver Kit (00277645) at 118 CAD, "
+            "regular 219." + _RONA_SLOW + _RONA_CHARGE
+        ),
+        params=(
+            _lit("type", ("weekly", "clearance"), "weekly (default: RONA's weekly deals) or "
+                 "clearance."),
+            _RONA_PAGE,
+            _RONA_PAGE_SIZE,
+        ) + _RONA_FILTER_PARAMS,
+        credits=2,
+        credits_note=(
+            "Costs 2 credits; 3 with store_id. credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -29201,6 +29562,7 @@ NAMESPACES: tuple[str, ...] = (
     "offerup",
     "sportchek",
     "marks",
+    "rona",
 )
 
 

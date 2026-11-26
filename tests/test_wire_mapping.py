@@ -657,6 +657,9 @@ BODY_PRICED_KEYS = {
     "michaels_category",
     "michaels_deals",
     "offerup_listing",
+    "rona_search",
+    "rona_category",
+    "rona_deals",
     "home_depot_search",
     "home_depot_product",
     "home_depot_reviews",
@@ -8362,3 +8365,144 @@ def test_sephora_docstrings_state_credits(module):
         assert "Costs 1 credit." in " ".join((getattr(cls, method).__doc__ or "").split()), method
     for method in ("product", "offers"):
         assert "Costs 2 credits." in " ".join((getattr(cls, method).__doc__ or "").split()), method
+
+
+def test_rona_credits_paths_and_wire(monkeypatch):
+    """rona (0.94.0): 9 endpoints on /api/v1/rona.
+
+    prices, categories, stores and store 1 credit; product and stock 3; search and deals 2 (3
+    with store_id; search 2 more on a redirect); category 2 (3 with store_id) or 1 with
+    family_id and store_id. Canada only, language en | fr on every endpoint. Every method gets
+    a 240 s floor.
+    """
+    first = (
+        "RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores, about 425 "
+        "corporate and affiliated dealer stores per RONA inc.)"
+    )
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "rona"}
+    assert sorted(eps) == [
+        "categories", "category", "deals", "prices", "product", "search", "stock", "store",
+        "stores",
+    ]
+    credits = {"search": 2, "product": 3, "prices": 1, "category": 1, "categories": 1,
+               "stores": 1, "store": 1, "stock": 3, "deals": 2}
+    for m, ep in eps.items():
+        assert ep.http == "POST", ep.key
+        assert ep.path == "/api/v1/rona/" + m, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert ep.credits == credits[m], m
+        assert first in ep.summary, m
+        names = {p.name for p in ep.params}
+        assert "language" in names, m
+        assert "country" not in names, m
+        assert "postal_code" not in names, m
+        if m in ("search", "category", "deals"):
+            assert ep.credits_note is not None and "3 with store_id" in ep.credits_note, m
+        else:
+            assert ep.credits_note is None, m
+    assert "2 more when RONA redirects" in eps["search"].credits_note
+    assert "1 credit with family_id and store_id" in eps["category"].credits_note
+    for m in ("search", "product", "category", "deals"):
+        assert "store.requested false" in eps[m].summary, m
+    for m in ("search", "product", "prices", "category", "deals"):
+        assert "null means RONA showed no count, not zero" in eps[m].summary, m
+    assert "4.35 CAD at store '41460' (Quebec), 4.22 at '55130' (Ontario)" in eps[
+        "prices"].summary
+    assert "until Dec 10th, 2026" in eps["product"].summary
+    assert "Postal code lookup is not supported" in eps["stores"].summary
+    assert "Postal code lookup is not supported" in eps["stock"].summary
+    assert "no sort" in eps["deals"].summary
+    assert "sort" not in {p.name for p in eps["deals"].params}
+    assert "review text" in eps["search"].summary
+    assert eps["product"].one_of == (("sku", "url"),)
+    assert eps["category"].one_of == (("category", "family_id"),)
+    assert eps["store"].one_of == (("store_id", "url"),)
+    assert eps["stock"].one_of == (("store_id", "latitude"),)
+    prices = {p.name: p for p in eps["prices"].params}
+    assert prices["skus"].required is True
+    assert prices["skus"].annotation == "Union[list[str], str]"
+    assert prices["store_id"].required is True
+    search = {p.name: p for p in eps["search"].params}
+    assert search["query"].required is True
+    assert search["query"].wire_field == "query"
+    assert search["page_size"].annotation == "Optional[Literal[24, 48, 96]]"
+    assert search["sort"].annotation == (
+        'Optional[Literal["relevance", "price_low_to_high", "price_high_to_low", '
+        '"highest_rated", "newest", "best_sellers"]]'
+    )
+    assert search["language"].annotation == 'Optional[Literal["en", "fr"]]'
+    stock = {p.name: p for p in eps["stock"].params}
+    assert stock["sku"].required is True
+    banned = re.compile(r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|"
+                        r"render\w*|retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|"
+                        r"cloudflare|firewall|pool|affiliates?|class action|only api|"
+                        r"only at|first api)\b")
+    for ep in eps.values():
+        assert not banned.search(ep.summary.lower()), ep.key
+        assert not banned.search((ep.credits_note or "").lower()), ep.key
+        assert "https://www.rona.ca" not in ep.summary, ep.key
+
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    rn = client.rona
+    rn.search("2x4")
+    rn.search("perceuse", page=2, page_size=24, sort="price_low_to_high",
+              filters=["1000337236"], on_sale=True, include_facets=True, store_id="41460",
+              language="fr")
+    rn.product("00277649", store_id="55130")
+    rn.product(url="https://www.rona.ca/en/product/x-00277649")
+    rn.prices(["0971073", "0938002", "00277649"], "55130")
+    rn.prices("0971073,00277649", 41460, language="fr")
+    rn.category("/en/tools/power-tools-158001/cordless-drills-and-drivers-158003",
+                store_id="55130", clearance=True)
+    rn.category(family_id="318485", store_id="55130", page_size=100)
+    rn.categories(depth=2)
+    rn.stores(latitude=43.6426, longitude=-79.3871, limit=10)
+    rn.stores(province="qc", banner="rona_plus")
+    rn.store("55130")
+    rn.stock("00277649", "62860")
+    rn.stock("00277649", latitude=51.0774, longitude=-113.99011)
+    rn.deals()
+    rn.deals(type="clearance", store_id="55130", page=3)
+    base = "/api/v1/rona/"
+    assert seen == [
+        (base + "search", {"query": "2x4"}, 240.0),
+        (base + "search", {"query": "perceuse", "page": 2, "page_size": 24,
+                           "sort": "price_low_to_high", "filters": ["1000337236"],
+                           "on_sale": True, "include_facets": True, "store_id": "41460",
+                           "language": "fr"}, 240.0),
+        (base + "product", {"sku": "00277649", "store_id": "55130"}, 240.0),
+        (base + "product", {"url": "https://www.rona.ca/en/product/x-00277649"}, 240.0),
+        (base + "prices", {"skus": ["0971073", "0938002", "00277649"], "store_id": "55130"},
+         240.0),
+        (base + "prices", {"skus": "0971073,00277649", "store_id": 41460, "language": "fr"},
+         240.0),
+        (base + "category", {"category": "/en/tools/power-tools-158001/"
+                             "cordless-drills-and-drivers-158003", "clearance": True,
+                             "store_id": "55130"}, 240.0),
+        (base + "category", {"family_id": "318485", "page_size": 100, "store_id": "55130"},
+         240.0),
+        (base + "categories", {"depth": 2}, 240.0),
+        (base + "stores", {"latitude": 43.6426, "longitude": -79.3871, "limit": 10}, 240.0),
+        (base + "stores", {"province": "qc", "banner": "rona_plus"}, 240.0),
+        (base + "store", {"store_id": "55130"}, 240.0),
+        (base + "stock", {"sku": "00277649", "store_id": "62860"}, 240.0),
+        (base + "stock", {"sku": "00277649", "latitude": 51.0774, "longitude": -113.99011},
+         240.0),
+        (base + "deals", {}, 240.0),
+        (base + "deals", {"type": "clearance", "page": 3, "store_id": "55130"}, 240.0),
+    ]
+    with pytest.raises(ScavioError):
+        rn.product()
+    with pytest.raises(ScavioError):
+        rn.category()
+    with pytest.raises(ScavioError):
+        rn.store()
+    with pytest.raises(ScavioError):
+        rn.stock("00277649")

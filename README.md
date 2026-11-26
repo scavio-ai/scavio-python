@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 111 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 112 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -21,6 +21,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | SportChek and Mark's Prices in CAD with the Was Price, Sale Label and Sale End Date, Sizes and Colours with Assigned-Store Units, SportChek Reviews, Mark's Questions, L'Equipeur in French (Canada; 16 endpoints) | Yes | No | No | No |
+| RONA Store Prices in CAD for Up to 60 Articles at One Store with Exact Units, Search, Category and Weekly Deals Priced at a Chosen Store, Sale End Text, 403 Stores, Stock Near a Store (Canada; 9 endpoints) | Yes | No | No | No |
 | Beauty, Pharmacy, Grocery and Electronics Stores (Sephora, Ulta Beauty, ALDI, Micro Center, Walgreens, CVS; Sephora Canada CAD Prices, Sale Prices, Dated Offers and Stores; 26 endpoints) | Yes | No | No | No |
 | Grocery, Pet, Supplement and Hardware Stores (Whole Foods Market, Harbor Freight, PetSmart, Petco, iHerb, Chewy, Menards; 33 endpoints) | Yes | No | No | No |
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
@@ -5656,6 +5657,74 @@ same product at other Canadian retailers use the `dermstore`
 (`country="ca"`), `amazon` (`country="ca"`) and `walmart` (`domain="ca"`)
 namespaces; match on brand, name and size.
 
+### 83. Canadian home improvement -- RONA store prices, exact units, stores
+
+RONA (rona.ca, the Canadian home improvement retailer: RONA+ and RONA stores,
+about 425 corporate and affiliated dealer stores per RONA inc.). Namespace
+`rona`, 9 endpoints: `search`, `product`, `prices`, `category`, `categories`,
+`stores`, `store`, `stock`, `deals`. Credits: `prices`, `categories`, `stores`
+and `store` 1; `search` and `deals` 2 (3 with `store_id`; `search` 2 more when
+RONA redirects the term); `product` 3; `stock` 3; `category` 2 (3 with
+`store_id`), or 1 with `family_id` and `store_id`. `credits_used` in the
+response is what was charged. Canada only, prices in CAD; `language` is `en`
+(default) or `fr` on every method. Answers can take up to about a minute: the
+request timeout is raised to at least 240s. RONA has no public API. Pair a
+RONA item with the `home_depot` namespace and `country="ca"` for Home Depot
+Canada in the same city: match the same grade and length, or the same model.
+See the [RONA API page](https://scavio.dev/rona-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rn = client.rona
+
+# --- Find stores: by province, city or banner, or nearest a point.
+near = rn.stores(latitude=43.6426, longitude=-79.3871, limit=5)["data"]
+for s in near["stores"]:
+    print(s["store_id"], s["name"], s["banner"], s["relationship"], s["distance_km"])
+
+# --- The same articles at three stores (up to 60 articles per call, 1 credit).
+skus = ["0971073", "0938002", "0938042", "00277649"]
+for store_id in ("41460", "55130", "62860"):
+    res = rn.prices(skus, store_id)["data"]
+    for it in res["items"]:
+        print(store_id, it["sku"], it["name"], it["price"], it["regular_price"],
+              it["on_sale"], it["units"], it["aisle"])
+
+# --- Search and deals priced at one store (store.requested says whose prices).
+hits = rn.search("2x4", store_id="41460")["data"]
+print(hits["total"], hits["store"], hits["items"][0]["price"])
+deals = rn.deals(store_id="55130")["data"]
+
+# --- One product: the sale end as RONA shows it, store units and aisle.
+p = rn.product("00277649", store_id="55130")["data"]
+print(p["price"], p["regular_price"], p["rebate"], p["sale_ends_text"], p["sale_ends"])
+
+# --- Which stores near a store have an article.
+st = rn.stock("00277649", "62860")["data"]
+print(st["count"], st["in_stock_count"], [(s["name"], s["units"]) for s in st["stores"][:3]])
+```
+
+Without `store_id`, `search`, `category` and `deals` are priced at the store
+RONA's site picks for the visit (`store.requested` false); with `store_id`
+prices and units are that store's. RONA prices some goods per store: captured
+2026-11-26, 2-in x 4-in x 8-ft SPF Select Lumber (0971073) was 4.35 CAD at
+store 41460 (Quebec), 4.22 at 55130 (Ontario) and 4.19 at 62860 (Alberta),
+while the DEWALT 20 V MAX Brushless Compact Drill/Driver Kit on sale
+(00277649) was 118 (regular 219) at all three. `units` are exact store units;
+`None` means RONA showed no count, not zero. Article numbers are strings
+(leading zeros count). `product` returns `sale_ends_text` as RONA shows it
+("until Dec 10th, 2026") and `sale_ends` as an ISO date only when it is
+unambiguous; rating and review count only, no review text. `stores` covers
+the 403 stores on RONA's store locator (RONA+ and RONA; corporate and dealer).
+`stock`: RONA offers no nearby-store list for some articles (lumber), and the
+list can come back empty now and then (call once more). Not available: review
+text, search suggestions, postal-code store lookup (pass latitude and
+longitude, or a city or province), the printed flyer, cart or checkout, price
+history (poll and store the answers). Failed calls and refused inputs are not
+charged; a not-found (an unknown article, category or store) is charged.
+
 ## Error Handling
 
 ```python
@@ -5773,6 +5842,7 @@ Scavio works with popular AI/LLM frameworks:
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
 | SportChek (`sportchek`) | `search`, `list`, `product`, `reviews`, `suggestions`, `store`, `brands`, `categories`; Canada, English only; `product` and `reviews` take `code` or `url`, `list` takes `path` or `url` | 1 each |
 | Mark's (`marks`) | `search`, `list`, `product`, `questions`, `suggestions`, `store`, `brands`, `categories`; Canada; `language` en or fr (L'Equipeur) on `search`, `list`, `product`, `brands`, `categories` | 1 each |
+| RONA (`rona`) | `search`, `product`, `prices`, `category`, `categories`, `stores`, `store`, `stock`, `deals`; Canada; `language` en or fr on every method; `prices` takes up to 60 `skus` and a `store_id` (required) | `prices`, `categories`, `stores`, `store` 1; `search` and `deals` 2 (3 with `store_id`); `product` and `stock` 3; `category` 1-3 |
 | Dollar General | `stores` (start here), `search`, `product`, `deals`, `coupons` | 1 each |
 | Sephora | `search`, `category`, `product` (`country="ca"` for Sephora Canada); Canada only: `brand`, `brands`, `suggestions`, `offers`, `stores`, `store` | 1 each; `product` and `offers` 2 (the same in both countries) |
 | Ulta Beauty | `search`, `category`, `product`, `stores` | 1 each |
@@ -5847,6 +5917,19 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.94.0
+
+- **New `rona` namespace** (sync and async) for RONA (rona.ca, the Canadian
+  home improvement retailer: RONA+ and RONA stores), 9 endpoints: `search`,
+  `product`, `prices`, `category`, `categories`, `stores`, `store`, `stock`,
+  `deals`. Store prices in CAD for up to 60 articles at one store with exact
+  units, search, category and weekly deals priced at the store you choose, a
+  product's sale end as RONA shows it, the 403 stores on RONA's store locator
+  and which stores near a store have an article; `language` en or fr.
+  Credits: `prices`, `categories`, `stores`, `store` 1; `search` and `deals`
+  2 (3 with `store_id`); `product` and `stock` 3; `category` 1-3. The
+  request timeout is raised to at least 240s.
 
 ### Changed in 0.93.0
 

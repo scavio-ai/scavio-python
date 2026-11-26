@@ -88,6 +88,7 @@ from ._namespaces_sync import (
     _RedditNamespace,
     _RedfinNamespace,
     _RightmoveNamespace,
+    _RonaNamespace,
     _SaksNamespace,
     _SamsClubNamespace,
     _SECNamespace,
@@ -291,6 +292,7 @@ class ScavioClient:
         self.offerup = _OfferupNamespace(self)
         self.sportchek = _SportchekNamespace(self)
         self.marks = _MarksNamespace(self)
+        self.rona = _RonaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
