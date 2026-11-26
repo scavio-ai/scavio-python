@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 135 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Booking.com, Tripadvisor, Airbnb, Vrbo, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 146 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -72,6 +72,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Discount Tire Tire Prices by Store, the Same Tire at Other Discount Tire and America's Tire Stores, Tires That Fit a Vehicle, Exact Units at the Stores near a ZIP, Reviews (US; 15 endpoints) | Yes | No | No | No |
 | Vevor Prices per Storefront in 13 Countries, Was Price Only During a Deal with Deal Dates, Variants with Their Own Price and Stock, Shipping Fee by State or Province, the Same SKU on Every Storefront, Reviews (13 storefronts; 11 endpoints) | Yes | No | No | No |
 | Nellis Auction Lot Prices: Current Bid, Bid Count and Nellis's Estimated Retail Price, a Sold Lot's Final Price, Bid History Without Bidder Names, Pickup Warehouses and Hours (6 US shopping locations; 4 endpoints) | Yes | No | No | No |
+| EstateSales.net Estate Sales near a ZIP with Dates and Picture Counts, Sale Details, Companies by Metro, Marketplace Items (US; 6 endpoints) | Yes | No | No | No |
 | Bring a Trailer Auction Results, Sale Prices and High Bids, Model Price History with Sell-Through Rate, Listings with Bids and Comments, Live Auctions (8 endpoints) | Yes | No | No | No |
 | Dermstore Skincare Prices, RRP and Dermstore's Offer Text per Product and Brand, Variants with Their Own Price and Stock, UPC, Current Offers with End Times, US vs Canada Prices, the 10 Latest Reviews (US and Canada; 7 endpoints) | Yes | No | No | No |
 | Space NK Luxury Beauty Prices in GBP, EUR and AUD, Discount and Promo Badges, Online Stock per Shade, Reviews, UK Store Availability and Gifts with Purchase (4 markets; 9 endpoints) | Yes | No | No | No |
@@ -88,6 +89,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
 | Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
+| Goodreads Book Ratings and Rating Distribution, Reader Reviews by Star and Language, Authors, Series, Editions, Lists, Quotes and New Releases (14 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
@@ -103,8 +105,17 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Trulia Neighborhood Pages with What Locals Say, Safety Statements and Market Snapshot, Homes for Sale, for Rent and Sold, Schools (US; 5 endpoints) | Yes | No | No | No |
 | StreetEasy NYC and North NJ Sales, Rentals and Past Sales, Net Effective Rent, Price History, Buildings, Monthly Market Data and Indexes (5 endpoints) | Yes | No | No | No |
 | RentCafe Rentals with Rent Ranges, Rent Specials, Floor Plan Units, Resident Reviews and City Rent Trends (US and Canada; 6 endpoints) | Yes | No | No | No |
+| Movoto Homes for Sale, Sold and for Rent by City, ZIP, County or School Zone, Price History, Market Trends with Median Price and Days on Market (US; 5 endpoints) | Yes | No | No | No |
+| HotPads Rentals by Area with Rent Ranges and Special Offers, Floor Plans, Rent History, Move-In and Monthly Costs and Fees (US; 5 endpoints) | Yes | No | No | No |
+| Apartment List Rentals with Rent per Bed Count, Units Available and Rent Specials, Floor Plan Unit Prices, the City Rent Report and Market Summaries (US; 6 endpoints) | Yes | No | No | No |
+| Compass Homes for Sale, for Rent and Sold, Pricing with Monthly Charges and Financing Terms, Price History and Building Details (US; 3 endpoints) | Yes | No | No | No |
+| AffordableHousing.com Section 8 and Income-Restricted Rentals, Housing Waiting Lists and Housing Authorities by State (US; 6 endpoints) | Yes | No | No | No |
+| Lennar New-Home Prices and Was Prices by Market, Communities, Plans, Homesites, Promotions and Monthly Payment Estimates (US; 11 endpoints) | Yes | No | No | No |
+| Extra Space Storage Unit Prices by Size near a ZIP or Point, Promotions, Facility Units, Reviews and City Storage Prices (US; 5 endpoints) | Yes | No | No | No |
+| Public Storage Unit Prices (Online and In-Store), Promotions and Move-In Costs, Facilities and Reviews (US and Canada; 3 endpoints) | Yes | No | No | No |
 | Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
 | Vrbo Vacation Rental Nightly Prices and Stay Totals for Your Dates, Deals, Ratings, Property Details and House Rules (20 market-languages; 3 endpoints) | Yes | No | No | No |
+| Expedia Hotel Prices for Your Dates (Nightly, Total, Was Price), Property Details and Fees, Daily Price Calendars (51 market-languages; 4 endpoints) | Yes | No | No | No |
 | Jobs & Employers (Indeed + Glassdoor, 8 endpoints) | Yes | No | No | No |
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
@@ -6583,6 +6594,390 @@ for c in cars["listings"][:5]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 107. US homes -- Movoto listings, sold prices and market trends by city or ZIP
+
+Movoto (movoto.com, the US home search site owned by Lower): homes for sale,
+sold or for rent by city and state, ZIP, county, neighborhood or school zone
+(50 a page, with Movoto's market summary, snapshot and top ZIP codes and
+neighborhoods); one home in full with its features, price history and schools;
+a city's or ZIP code's market trends (median list price, price per square
+foot, days on market, inventory, by home type); search-box suggestions; and
+one school page. US only, prices in USD. No listing-agent names or contact
+details are returned; brokerage company names are. Namespace `movoto`, 5
+endpoints: `search`, `property`, `market_trends`, `suggestions`, `school`.
+Credits: 1 credit each. `credits_used` in the response is what was charged.
+The request timeout is raised to at least 240s.
+See the [Movoto API
+page](https://scavio.dev/movoto-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/movoto-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mv = client.movoto
+res = mv.search("Austin", state="TX")["data"]
+print(res["total"], res["pages"])
+for home in res["listings"][:5]:
+    print(home["address"]["full"], home["price"], home["beds"], home["baths"], home["sqft"])
+trends = mv.market_trends("Los Angeles", state="CA")["data"]
+print(trends["summary"])
+for card in trends["stat_cards"]:
+    print(card["title"], card["value"], card["change"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 108. US rentals -- HotPads rents, rent history and move-in costs and fees
+
+HotPads (hotpads.com, Zillow Group's rental search site): rentals in an area
+(apartments, houses, rooms, by-owner and more) grouped by building with the
+rent range, beds, baths, square feet and special offers, filtered and sorted;
+one listing or building in full with floor plans, office hours, amenities and
+pet policies; a listing's rent history; its move-in and monthly costs and
+fees; and area suggestions. US only, rents in USD. No landlord names or phone
+numbers are returned. Namespace `hotpads`, 5 endpoints: `search`, `listing`,
+`price_history`, `fees`, `suggestions`. Credits: 1 credit each. `credits_used`
+in the response is what was charged. The request timeout is raised to at least
+240s.
+See the [HotPads API
+page](https://scavio.dev/hotpads-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/hotpads-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+hp = client.hotpads
+res = hp.search("brooklyn-new-york-ny", beds=1, sort="price_low")["data"]
+print(res["title"], res["total_units"], res["min_price"])
+for building in res["buildings"][:5]:
+    for it in building["listings"]:
+        print(it["title"], it["price_min"], it["price_max"], it["address"]["street"])
+fees = hp.fees("24ga0pwypzg8y")["data"]
+print(fees["base_rent"]["min"], fees["monthly_total"]["min"], fees["move_in_total"]["min"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 109. US rentals -- Apartment List rents, rent specials and the rent report
+
+Apartment List (apartmentlist.com, the US rental search site): rentals in a
+city, neighborhood or ZIP code with the rent range and rent per bed count,
+units available, the soonest move-in date and rent specials (20 a page,
+filtered and sorted); one listing with every floor plan and unit price;
+Apartment List's published rent report for a city (median rents, month and
+year growth, the metro table); a place's market summary; review summaries for
+a city's listings; and place suggestions. US only, rents in USD. Namespace
+`apartmentlist`, 6 endpoints: `suggestions`, `search`, `listing`,
+`rent_report`, `market_summary`, `review_summaries`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Apartment List API
+page](https://scavio.dev/apartmentlist-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/apartmentlist-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+al = client.apartmentlist
+res = al.search(city="Austin", state="TX")["data"]
+print(res["total_listings"], res["total_units"], res["pages"])
+for it in res["listings"][:5]:
+    print(it["name"], it["price_min"], it["price_max"], it["units_available"], it["has_rent_special"])
+report = al.rent_report(city="Chicago", state="IL")["data"]
+glance = report["at_a_glance"]
+print(glance["median_rent_1br"], glance["median_rent_2br"], glance["rent_growth_year"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 110. Homes for sale and rent -- Compass listings, pricing and price history
+
+Compass (compass.com, the US real estate brokerage): homes for sale, for rent
+or sold in an area with the price, beds, baths, square feet, status and open
+houses, filtered and sorted; one listing in full with pricing (monthly
+charges, financing terms), dates, price history, key details, schools and the
+building; and place suggestions. US, prices in USD; 2 credits per call.
+Brokerage names only, never agent names. Namespace `compass`, 3 endpoints:
+`search`, `listing`, `suggestions`. Credits: 2 credits each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [Compass API
+page](https://scavio.dev/compass-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/compass-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cp = client.compass
+res = cp.search("manhattan-ny", mode="for_sale", beds_min=2, price_max=2000000)["data"]
+print(res["total"], res["reachable"], res["pages"])
+for it in res["listings"][:5]:
+    print(it["address"], it["price_text"], it["beds"], it["baths"], it["status"])
+home = cp.listing(res["listings"][0]["url"])["data"]
+print(home["pricing"]["price"], home["pricing"]["monthly_charges"], home["days_on_market"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 111. Affordable housing -- Section 8 rentals, waiting lists, housing authorities
+
+AffordableHousing.com (affordablehousing.com, the US affordable and Section 8
+rental site): rentals in a state, city, county or ZIP code with the rent
+range, beds, baths, Section 8 acceptance and income restrictions, filtered by
+price, pets, utilities, age and accessibility; one listing in full; place
+suggestions; open and opening-soon Section 8 and public housing waiting lists;
+one housing authority (public housing agency) with its waitlist status; and a
+state's housing authorities. US only, rents in USD. The agency's public phone
+number is returned, never a landlord's contact details. Namespace
+`affordablehousing`, 6 endpoints: `search`, `listing`, `suggestions`,
+`waiting_lists`, `housing_authority`, `housing_authorities`. Credits: `search`
+and `suggestions` 2 credits, the other endpoints 1. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [AffordableHousing.com API
+page](https://scavio.dev/affordablehousing-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/affordablehousing-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ah = client.affordablehousing
+res = ah.search("TX", city="Houston", sort="price_asc")["data"]
+print(res["total"], res["pages"])
+for it in res["listings"][:5]:
+    print(it["title"], it["rent_min"], it["rent_max"], it["beds_min"], it["section8_accepted"])
+pha = ah.housing_authorities("CA")["data"]
+for agency in pha["agencies"][:5]:
+    print(agency["name"], agency["waitlist_status"], agency["jurisdiction"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 112. New homes -- Lennar homesites, plans, communities, promotions and payments
+
+Lennar (lennar.com, the US homebuilder): new homes, homesites, plans and
+communities in a market, state, city, point or map box with the price, was
+price, beds, baths and square feet, filtered by home type, availability,
+features and schools; one community with its plans, homesites, HOA fee and tax
+rate; one plan; one homesite; a master-planned community; every market and one
+market's cities and filter codes; suggestions; a link resolved to its record;
+a market's current promotions; and a monthly payment estimate for a homesite.
+US only, prices in USD. For new-home price tracking, incentive monitoring and
+market comparisons. Namespace `lennar`, 11 endpoints: `search`, `community`,
+`plan`, `home`, `master_planned`, `markets`, `market`, `suggestions`,
+`resolve`, `promotions`, `payment`. Credits: 1 credit each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [Lennar API
+page](https://scavio.dev/lennar-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/lennar-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ln = client.lennar
+res = ln.search("DAL", sort="price_asc")["data"]
+print(res["total"], res["count"])
+for home in res["homes"][:5]:
+    print(home["address"], home["price"], home["was_price"], home["beds"], home["sqft"])
+com = ln.community("22704")["data"]
+print(com["name"], com["base_price"], com["hoa_fee"], com["tax_rate_percent"])
+for plan in com["plans"][:3]:
+    print(plan["name"], plan["starting_price"], plan["available_homesites"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 113. Self storage -- Extra Space Storage unit prices and city storage prices
+
+Extra Space Storage (extraspace.com, the US self-storage REIT): self-storage
+facilities near a ZIP code, city, place or point (up to 120, nearest first)
+with the starting price by unit size, promotions, rating and features,
+filtered by climate control, drive-up, indoor, vehicle storage, 24-hour access
+and unit size; one facility with every unit and its price; a facility's
+reviews (no reviewer names); a city's published storage prices by unit size;
+and Extra Space's locations by state. US only, prices in USD. Namespace
+`extraspace`, 5 endpoints: `search`, `facility`, `reviews`, `city_prices`,
+`locations`. Credits: 1 credit each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 240s.
+See the [Extra Space Storage API
+page](https://scavio.dev/extraspace-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/extraspace-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+es = client.extraspace
+res = es.search("90012")["data"]
+print(res["total"], res["count"])
+for f in res["facilities"][:5]:
+    print(f["name"], f["distance_mi"], f["starting_at"]["small"], f["starting_at"]["large"])
+city = es.city_prices("Dallas", "TX")["data"]
+for row in city["price_stats"][1:5]:
+    print(row["category"], row["store_count"], row["lowest"], row["average"], row["highest"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 114. Self storage -- Public Storage unit prices in the US and Canada
+
+Public Storage (publicstorage.com, the US self-storage operator, also in
+Canada): self-storage facilities near a place with the starting price,
+distance, hours and features, filtered by climate control, drive-up, 24/7
+access, business, vehicle, RV and boat storage and unit size; one facility
+with every unit's online price, in-store rent, promotion and move-in cost; and
+a US facility's reviews (no reviewer names). `market` us or ca (USD or CAD),
+`language` en or fr in Canada. Namespace `publicstorage`, 3 endpoints:
+`search`, `facility`, `reviews`. Credits: 1 credit each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [Public Storage API
+page](https://scavio.dev/publicstorage-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/publicstorage-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ps = client.publicstorage
+res = ps.search("75201", sort="price_low")["data"]
+for f in res["facilities"][:5]:
+    print(f["name"], f["distance"], f["starting_from"], f["currency"])
+fac = ps.facility("2044")["data"]
+for unit in fac["units"][:5]:
+    print(unit["name"], unit["online_price"], unit["in_store_rent"], unit["move_in_cost"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 115. Estate sales -- EstateSales.net sales near a ZIP, companies and items
+
+EstateSales.net (estatesales.net, the US estate sale directory): estate sales,
+auctions and moving sales near a ZIP code or city with the dates, sale type,
+picture count and the company running it; one sale in full with every date,
+terms, description and pictures; a metro's estate sale companies and one
+company's profile and sales; keyword search over sales and marketplace items;
+and one marketplace item with its price, bids and shipping. US only, prices in
+USD. A private sale gives its city, state and ZIP only; a company's contact
+details are public business data. Namespace `estatesales`, 6 endpoints:
+`sales`, `sale`, `companies`, `company`, `search`, `item`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 240s.
+See the [EstateSales.net API
+page](https://scavio.dev/estatesales-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/estatesales-sales?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ess = client.estatesales
+res = ess.sales("75201")["data"]
+print(res["total_count"], res["count"])
+for sale in res["sales"][:5]:
+    print(sale["name"], sale["type_name"], sale["city"], sale["starts_at_local"], sale["picture_count"])
+sale = ess.sale("5114622")["data"]
+print(sale["name"], sale["location"]["city"], sale["picture_count"])
+for day in sale["dates"]:
+    print(day["starts_at_local"], day["ends_at_local"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 116. Books -- Goodreads ratings, reviews, authors, series, lists and quotes
+
+Goodreads (goodreads.com, Amazon's book community): book, author, quote and
+list search; one book with its rating, rating distribution, genres, series,
+editions and awards; reader reviews with Goodreads' own sort and star,
+language and edition filters (no reviewer names); suggestions; an author and
+their books; a series; a work's editions; a Listopia list, a book's lists and
+list search; quotes; a genre page; and new releases by genre or month. One
+global English site. Namespace `goodreads`, 14 endpoints: `search`, `book`,
+`reviews`, `suggestions`, `author`, `author_books`, `series`, `editions`,
+`list`, `book_lists`, `list_search`, `quotes`, `genre`, `new_releases`.
+Credits: 1 credit each. `credits_used` in the response is what was charged.
+The request timeout is raised to at least 240s. Goodreads retired its official
+API (no new developer keys since 2020).
+See the [Goodreads API
+page](https://scavio.dev/goodreads-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/goodreads-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+gr = client.goodreads
+res = gr.search("dune")["data"]
+for b in res["results"][:5]:
+    print(b["book_id"], b["title"], b["rating"], b["ratings_count"], b["published"])
+book = gr.book("44767458")["data"]
+print(book["title"], book["rating"], book["ratings_count"], book["reviews_count"])
+print([g["name"] for g in book["genres"][:3]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 117. Hotels -- Expedia prices for your dates and price calendars in 51 markets
+
+Expedia (expedia.com, Expedia Group's travel booking site): hotels and stays
+for a place or region id and dates with the nightly price, the stay total, the
+was price, rating and review count, sorted and filtered by star rating,
+amenity and guest rating (the top results of Expedia's first page; `partial`
+flags a 3-result answer); one property in full with amenities, fees, policies
+and Expedia's own summary lines (fetched without dates); a property's price
+calendar for every day Expedia shows; and destination suggestions. 51
+market-languages (`market`), each in its own language and currency. No
+reviews, dated room rates or flights. Namespace `expedia`, 4 endpoints:
+`search`, `property`, `price_calendar`, `suggestions`. Credits: billed on
+actual cost: 2 credits per call (1 on some New Zealand, Korea and Indonesia
+pages). `credits_used` in the response is what was charged. The request
+timeout is raised to at least 250s.
+See the [Expedia API
+page](https://scavio.dev/expedia-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/expedia-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ex = client.expedia
+res = ex.search("2027-01-25", "2027-01-28", destination="Las Vegas, NV", adults=2)["data"]
+print(res["destination_name"], res["matched_total"], res["count"], res["partial"])
+for p in res["properties"]:
+    print(p["property_id"], p["name"], p["price"]["nightly"], p["price"]["total"], p["rating"]["score"])
+hotel = ex.property("17117062")["data"]
+print(hotel["name"], hotel["stars"], hotel["rating"]["score"], hotel["fees"][:2])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -6684,10 +7079,19 @@ Scavio works with popular AI/LLM frameworks:
 | Trulia (`trulia`) | `neighborhood`, `search`, `property`, `school`, `suggestions`; US; `language` en or es (rental search, buildings, neighborhoods); `property` takes `zpid`, `building_id` or `url` | 1 each |
 | StreetEasy (`streeteasy`) | `search`, `listing`, `building`, `buildings`, `market`; NYC and North NJ; `mode` sale, rent or sold; `listing` by `url`, or `id` with `listing_type`; `market` NYC only | 1 each |
 | RentCafe (`rentcafe`) | `search`, `property`, `floorplan_units`, `reviews`, `suggestions`, `rent_trends`; `market` us or ca, `language` en or fr; one of beds, rent specials, short-term, furnished, utilities included or an amenity per search | 1 each |
+| Movoto (`movoto`) | `search`, `property`, `market_trends`, `suggestions`, `school`; US; `search` by `city` and `state`, `zip`, `county`, `neighborhood` or `school_id`; `status` for_sale, sold or rentals; `property` and `school` by `url` or `path` | 1 each |
+| HotPads (`hotpads`) | `search`, `listing`, `price_history`, `fees`, `suggestions`; US; `search` takes an `area` (a `suggestions` id or a place such as Austin, TX); `price_history` and `fees` take the listing's `listing_alias` | 1 each |
+| Apartment List (`apartmentlist`) | `suggestions`, `search`, `listing`, `rent_report`, `market_summary`, `review_summaries`; US; `search` and `market_summary` take `location`, `city` and `state` or `zip`; `rent_report` and `review_summaries` a city | 1 each |
+| Compass (`compass`) | `search`, `listing`, `suggestions`; US; `search` takes an `area` slug and `mode` for_sale, for_rent or sold; `listing` by `url` or `id` | 2 each |
+| AffordableHousing.com (`affordablehousing`) | `search`, `listing`, `suggestions`, `waiting_lists`, `housing_authority`, `housing_authorities`; US; `search` and `housing_authorities` take a `state`; `housing_authority` by `url`, or `id` with `state` | `search` and `suggestions` 2; the rest 1 |
+| Lennar (`lennar`) | `search`, `community`, `plan`, `home`, `master_planned`, `markets`, `market`, `suggestions`, `resolve`, `promotions`, `payment`; US; `search` by `market`, `state`, `city`, `text`, a point or `bounds`; `payment` takes a homesite and its community, a down payment and an interest rate | 1 each |
+| Extra Space Storage (`extraspace`) | `search`, `facility`, `reviews`, `city_prices`, `locations`; US; `search` by `term` (ZIP, city or place) or a point; `facility` and `reviews` by `store_id` or `url` | 1 each |
+| Public Storage (`publicstorage`) | `search`, `facility`, `reviews`; `market` us or ca, `language` en or fr; `search` by `location` or `slug`; `reviews` US facilities | 1 each |
 | Booking.com | `search`, `hotel`, `reviews` | 1 each |
 | Tripadvisor | `locations` (start here), `search`, `location`, `reviews` | 2 each |
 | Airbnb | `search`, `listing`, `reviews` | 1 each |
 | Vrbo (`vrbo`) | `search`, `property`, `suggestions`; 20 market-languages (`market`); `search` needs dates, the first 50 results; `property` without dates | `search` 2 per attempt (2 to 8); the rest 2 |
+| Expedia (`expedia`) | `search`, `property`, `price_calendar`, `suggestions`; 51 market-languages (`market`); `search` needs dates, the top results of the first page; `property` without dates; hotel pages held in en-gb, pt-br, zh-hk, en-hk, zh-hans-hk, en-my, en-ph | 2 each, billed on actual cost (1 on some pages) |
 | Yelp | `search`, `business`, `reviews` | 2 each |
 | Indeed | `search`, `job`, `company`, `company_reviews` | 2 each |
 | Glassdoor | `companies` (start here), `company`, `reviews`, `salaries` | 1 each |
@@ -6780,6 +7184,7 @@ Scavio works with popular AI/LLM frameworks:
 | Depop (`depop`) | `search`, `product`, `category`, `brand`, `explore`, `suggestions`, `shop`, `shop_products`, `shop_sold`, `shop_reviews`, `shops_search`, `categories`, `brands`, `similar`; buyer markets us, gb, au, ie, ca, nz, de, fr, it via `country` (`similar` us only; shop data, `categories` and `brands` global) | `search`, `category`, `brand`, `explore` 1 (5 on nz); `product` 1 on us, 2 on gb au ie ca de fr it, 6 on nz; the rest 1 each |
 | Poshmark (`poshmark`) | `search`, `sold`, `product`, `category`, `brand`, `closet`, `closet_listings`, `love_notes`, `closets_search`, `categories`, `brands`, `suggestions`, `parties`, `party_listings`, `similar`; `country` us or ca (`product`, closet endpoints and `categories` global) | 1 each |
 | OfferUp (`offerup`) | `search`, `listing`, `category`, `categories`, `seller`; us only (no `country`); `search` and `category` take `zip` (required); `listing` takes `listing_id` or `url` | 1 each; `listing` 1, or 2 when it needs a second, costlier fetch |
+| EstateSales.net (`estatesales`) | `sales`, `sale`, `companies`, `company`, `search`, `item`; US; `sales` by `zip`, or `city` with `state`; `companies` by `state` and metro; `sale`, `company` and `item` by id or `url` | 1 each |
 | thredUP (`thredup`) | `search`, `sold`, `product`, `category`, `brand`, `deals`, `rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`, `similar`; thredUP's US store (no `country`) | 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
 | Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
@@ -6789,6 +7194,7 @@ Scavio works with popular AI/LLM frameworks:
 | Ashley Furniture (`ashley`) | `search`, `product`, `category`, `deals`, `stores`, `store`; `search` and `product` also on ca, mx, ph, sa, tr via `country` (`product` by `handle` there) | `search` and `product` 2 on us and mx, 1 on ca, ph, sa, tr; the rest (us only) 2 each |
 | Maisons du Monde (`maisonsdumonde`) | `search`, `product`, `category`, `deals`, `reviews`, `stores`, `store`, `availability`, `seller`; markets fr, be (fr / nl), lu, nl, de, es, it, pt, ch (fr / de / it) via `country` and `language` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
+| Goodreads (`goodreads`) | `search`, `book`, `reviews`, `suggestions`, `author`, `author_books`, `series`, `editions`, `list`, `book_lists`, `list_search`, `quotes`, `genre`, `new_releases`; one global English site; `reviews` reads up to 4 pages of one view per call; `book` by `book_id`, `url` or `isbn` | 1 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
@@ -6798,6 +7204,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.98.0
+
+- **11 new namespaces** (sync and async), 68 endpoints. Real estate: `movoto` (5),
+  `hotpads` (HotPads, 5), `apartmentlist` (Apartment List, 6), `compass` (3),
+  `affordablehousing` (AffordableHousing.com, 6), `lennar` (11). Self storage:
+  `extraspace` (Extra Space Storage, 5), `publicstorage` (Public Storage, 3). Estate
+  sales: `estatesales` (EstateSales.net, 6). Books: `goodreads` (14). Travel: `expedia`
+  (4). Credits: 1 per call except `compass` (2), AffordableHousing.com `search` and
+  `suggestions` (2) and `expedia` (billed on actual cost: 2, 1 on some pages). The
+  request timeout is raised to at least 240s (`expedia` 250s).
 
 ### Changed in 0.97.0
 

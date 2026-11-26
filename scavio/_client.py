@@ -8,10 +8,12 @@ from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
     _AcehardwareNamespace,
     _ActionNamespace,
+    _AffordablehousingNamespace,
     _AirbnbNamespace,
     _AldiNamespace,
     _AllegroNamespace,
     _AmazonNamespace,
+    _ApartmentlistNamespace,
     _AppStoreNamespace,
     _ArgosNamespace,
     _AshleyNamespace,
@@ -34,6 +36,7 @@ from ._namespaces_sync import (
     _ChewyNamespace,
     _CompaniesHouseNamespace,
     _CompanyNamespace,
+    _CompassNamespace,
     _CostcoNamespace,
     _CultbeautyNamespace,
     _CvsNamespace,
@@ -47,12 +50,16 @@ from ._namespaces_sync import (
     _DouglasNamespace,
     _EbayNamespace,
     _EdmundsNamespace,
+    _EstatesalesNamespace,
+    _ExpediaNamespace,
+    _ExtraspaceNamespace,
     _FanaticsNamespace,
     _FashionnovaNamespace,
     _FootlockerNamespace,
     _G2Namespace,
     _GeminiNamespace,
     _GlassdoorNamespace,
+    _GoodreadsNamespace,
     _GoogleAdsNamespace,
     _GoogleNamespace,
     _GooglePlayNamespace,
@@ -61,6 +68,7 @@ from ._namespaces_sync import (
     _HemaNamespace,
     _HmNamespace,
     _HomeDepotNamespace,
+    _HotpadsNamespace,
     _IherbNamespace,
     _IkeaNamespace,
     _IndeedNamespace,
@@ -71,6 +79,7 @@ from ._namespaces_sync import (
     _KohlsNamespace,
     _KrogerNamespace,
     _KuaishouNamespace,
+    _LennarNamespace,
     _LinkedInNamespace,
     _LookfantasticNamespace,
     _LowesNamespace,
@@ -84,6 +93,7 @@ from ._namespaces_sync import (
     _MetaAdsNamespace,
     _MichaelsNamespace,
     _MicroCenterNamespace,
+    _MovotoNamespace,
     _NellisNamespace,
     _NikeNamespace,
     _NintendoNamespace,
@@ -97,6 +107,7 @@ from ._namespaces_sync import (
     _PetcoNamespace,
     _PetsmartNamespace,
     _PoshmarkNamespace,
+    _PublicstorageNamespace,
     _PublixNamespace,
     _RealtorNamespace,
     _RedditNamespace,
@@ -339,6 +350,17 @@ class ScavioClient:
         self.truecar = _TruecarNamespace(self)
         self.edmunds = _EdmundsNamespace(self)
         self.kbb = _KbbNamespace(self)
+        self.movoto = _MovotoNamespace(self)
+        self.hotpads = _HotpadsNamespace(self)
+        self.apartmentlist = _ApartmentlistNamespace(self)
+        self.compass = _CompassNamespace(self)
+        self.affordablehousing = _AffordablehousingNamespace(self)
+        self.lennar = _LennarNamespace(self)
+        self.extraspace = _ExtraspaceNamespace(self)
+        self.publicstorage = _PublicstorageNamespace(self)
+        self.estatesales = _EstatesalesNamespace(self)
+        self.goodreads = _GoodreadsNamespace(self)
+        self.expedia = _ExpediaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

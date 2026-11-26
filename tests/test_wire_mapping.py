@@ -687,6 +687,10 @@ BODY_PRICED_KEYS = {
     "kbb_car_value",
     "kbb_reviews",
     "vrbo_search",
+    "expedia_price_calendar",
+    "expedia_property",
+    "expedia_search",
+    "expedia_suggestions",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -9334,3 +9338,376 @@ def test_batch2_1126_vin_is_input_only_and_skipped_params_absent():
     assert ENDPOINTS["edmunds_makes"].credits == 2
     assert ENDPOINTS["kbb_car_value"].min_timeout == 250.0
     assert ENDPOINTS["rentcom_search"].min_timeout == 240.0
+
+
+# --- batch 3 2026-11-26: 11 namespaces (real estate, storage, estate sales, books, travel) ---
+
+BATCH3_1126 = {
+    "movoto": {
+        "search": ("search", 1, 240.0),
+        "property": ("property", 1, 240.0),
+        "market_trends": ("market-trends", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "school": ("school", 1, 240.0),
+    },
+    "hotpads": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "price_history": ("price-history", 1, 240.0),
+        "fees": ("fees", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "apartmentlist": {
+        "suggestions": ("suggestions", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "rent_report": ("rent-report", 1, 240.0),
+        "market_summary": ("market-summary", 1, 240.0),
+        "review_summaries": ("review-summaries", 1, 240.0),
+    },
+    "compass": {
+        "search": ("search", 2, 240.0),
+        "listing": ("listing", 2, 240.0),
+        "suggestions": ("suggestions", 2, 240.0),
+    },
+    "affordablehousing": {
+        "search": ("search", 2, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "suggestions": ("suggestions", 2, 240.0),
+        "waiting_lists": ("waiting-lists", 1, 240.0),
+        "housing_authority": ("housing-authority", 1, 240.0),
+        "housing_authorities": ("housing-authorities", 1, 240.0),
+    },
+    "lennar": {
+        "search": ("search", 1, 240.0),
+        "community": ("community", 1, 240.0),
+        "plan": ("plan", 1, 240.0),
+        "home": ("home", 1, 240.0),
+        "master_planned": ("master-planned", 1, 240.0),
+        "markets": ("markets", 1, 240.0),
+        "market": ("market", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "resolve": ("resolve", 1, 240.0),
+        "promotions": ("promotions", 1, 240.0),
+        "payment": ("payment", 1, 240.0),
+    },
+    "extraspace": {
+        "search": ("search", 1, 240.0),
+        "facility": ("facility", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "city_prices": ("city-prices", 1, 240.0),
+        "locations": ("locations", 1, 240.0),
+    },
+    "publicstorage": {
+        "search": ("search", 1, 240.0),
+        "facility": ("facility", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+    },
+    "estatesales": {
+        "sales": ("sales", 1, 240.0),
+        "sale": ("sale", 1, 240.0),
+        "companies": ("companies", 1, 240.0),
+        "company": ("company", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "item": ("item", 1, 240.0),
+    },
+    "goodreads": {
+        "search": ("search", 1, 240.0),
+        "book": ("book", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "author": ("author", 1, 240.0),
+        "author_books": ("author-books", 1, 240.0),
+        "series": ("series", 1, 240.0),
+        "editions": ("editions", 1, 240.0),
+        "list": ("list", 1, 240.0),
+        "book_lists": ("book-lists", 1, 240.0),
+        "list_search": ("list-search", 1, 240.0),
+        "quotes": ("quotes", 1, 240.0),
+        "genre": ("genre", 1, 240.0),
+        "new_releases": ("new-releases", 1, 240.0),
+    },
+    "expedia": {
+        "search": ("search", 2, 250.0),
+        "property": ("property", 2, 250.0),
+        "price_calendar": ("price-calendar", 2, 250.0),
+        "suggestions": ("suggestions", 2, 250.0),
+    },
+}
+BATCH3_1126_ONE_OF = {
+    "movoto_search": ("city", "zip", "county"),
+    "movoto_property": ("url", "path"),
+    "movoto_market_trends": ("city", "zip"),
+    "movoto_school": ("url", "path"),
+    "hotpads_listing": ("url", "id"),
+    "apartmentlist_search": ("location", "city", "zip"),
+    "apartmentlist_listing": ("url", "slug"),
+    "apartmentlist_rent_report": ("city_slug", "city"),
+    "apartmentlist_market_summary": ("location", "city", "zip"),
+    "apartmentlist_review_summaries": ("city_slug", "city"),
+    "compass_listing": ("url", "id"),
+    "affordablehousing_listing": ("url", "id"),
+    "affordablehousing_housing_authority": ("url", "id"),
+    "lennar_search": ("market", "state", "city", "text", "latitude", "bounds"),
+    "lennar_resolve": ("url", "path"),
+    "extraspace_search": ("term", "latitude"),
+    "extraspace_facility": ("store_id", "url"),
+    "extraspace_reviews": ("store_id", "url"),
+    "publicstorage_search": ("location", "slug"),
+    "publicstorage_facility": ("store_id", "url"),
+    "estatesales_sales": ("zip", "city"),
+    "estatesales_companies": ("metro", "city"),
+    "estatesales_sale": ("sale_id", "url"),
+    "estatesales_company": ("org_id", "url"),
+    "estatesales_item": ("item_id", "url"),
+    "goodreads_book": ("book_id", "url", "isbn"),
+    "goodreads_reviews": ("book_id", "url"),
+    "goodreads_author": ("author_id", "url"),
+    "goodreads_author_books": ("author_id", "url"),
+    "goodreads_series": ("series_id", "url"),
+    "goodreads_editions": ("work_id", "url"),
+    "goodreads_list": ("list_id", "url"),
+    "goodreads_book_lists": ("book_id", "url"),
+    "goodreads_quotes": ("query", "tag", "work_id"),
+    "goodreads_new_releases": ("genre", "month"),
+    "expedia_search": ("destination", "region_id"),
+    "expedia_property": ("id", "path"),
+    "expedia_price_calendar": ("id", "path"),
+    "expedia_suggestions": ("query", "text"),
+}
+BATCH3_1126_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH3_1126))
+def test_batch3_1126_credits_paths_timeouts(namespace):
+    """Every endpoint of the 11 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH3_1126[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(ep.one_of) == ((BATCH3_1126_ONE_OF[ep.key],) if ep.key in
+                                    BATCH3_1126_ONE_OF else ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("is_fallback", "").replace("unrelated fallback", "")
+        assert not BATCH3_1126_BANNED.search(text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH3_1126_WIRE = [
+    ("movoto", "search", {"city": "Austin"}, "search"),
+    (
+        "movoto", "property",
+        {
+            "url": ("https://www.movoto.com/austin-tx/6001-sier"
+                "ra-arbor-ct-austin-tx-78759/pid_lgzxbh54nh/"),
+        },
+        "property",
+    ),
+    ("movoto", "market_trends", {"city": "Austin"}, "market-trends"),
+    ("movoto", "suggestions", {"query": "Austin"}, "suggestions"),
+    (
+        "movoto", "school",
+        {
+            "url": ("https://www.movoto.com/schools/austin-t"
+                "x/davis-elementary-school-480894022775/"),
+        },
+        "school",
+    ),
+    ("hotpads", "search", {"area": "brooklyn-new-york-ny"}, "search"),
+    (
+        "hotpads", "listing",
+        {
+            "url": "https://hotpads.com/11227-drummond-dr-dallas-tx-75228-skrzz0/pad",
+        },
+        "listing",
+    ),
+    (
+        "hotpads", "price_history",
+        {
+            "listing_alias": "5759ydyqtn49h",
+            "model_id": "738529",
+        },
+        "price-history",
+    ),
+    ("hotpads", "fees", {"listing_alias": "5759ydyqtn49h"}, "fees"),
+    ("hotpads", "suggestions", {"text": "brooklyn"}, "suggestions"),
+    ("apartmentlist", "suggestions", {"query": "Austin"}, "suggestions"),
+    ("apartmentlist", "search", {"location": "/tx/austin"}, "search"),
+    (
+        "apartmentlist", "listing",
+        {
+            "url": "https://www.apartmentlist.com/tx/austin/riata--4",
+        },
+        "listing",
+    ),
+    ("apartmentlist", "rent_report", {"city_slug": "/tx/austin"}, "rent-report"),
+    ("apartmentlist", "market_summary", {"location": "/tx/austin"}, "market-summary"),
+    ("apartmentlist", "review_summaries", {"city_slug": "/tx/austin"}, "review-summaries"),
+    ("compass", "search", {"area": "austin-tx"}, "search"),
+    (
+        "compass", "listing",
+        {
+            "url": ("https://www.compass.com/homedetails/214"
+                "1-Norlock-Ln-Dallas-TX-75201/19YYG3_pid/"),
+        },
+        "listing",
+    ),
+    ("compass", "suggestions", {"query": "Austin, TX"}, "suggestions"),
+    ("affordablehousing", "search", {"state": "TX"}, "search"),
+    (
+        "affordablehousing", "listing",
+        {
+            "url": ("https://www.affordablehousing.com/hous"
+                "ton-tx/the-reserve-at-westwood--766073/"),
+        },
+        "listing",
+    ),
+    ("affordablehousing", "suggestions", {"text": "Houston"}, "suggestions"),
+    ("affordablehousing", "waiting_lists", {}, "waiting-lists"),
+    (
+        "affordablehousing", "housing_authority",
+        {
+            "url": ("https://www.affordablehousing.com/housing-au"
+                "thority-ma/somerville-housing-authority-674/"),
+        },
+        "housing-authority",
+    ),
+    ("affordablehousing", "housing_authorities", {"state": "TX"}, "housing-authorities"),
+    ("lennar", "search", {"market": "DAL"}, "search"),
+    ("lennar", "community", {"comnum": "22704"}, "community"),
+    ("lennar", "plan", {"comnum": "22704", "plan_number": "4504"}, "plan"),
+    ("lennar", "home", {"lot_id": "22704535134"}, "home"),
+    ("lennar", "master_planned", {"mpc_id": 1916}, "master-planned"),
+    ("lennar", "markets", {}, "markets"),
+    ("lennar", "market", {"market": "PHO"}, "market"),
+    ("lennar", "suggestions", {"query": "Katy"}, "suggestions"),
+    (
+        "lennar", "resolve",
+        {
+            "path": "/new-homes/texas/houston/montgomery/kresston/melrose-ii",
+        },
+        "resolve",
+    ),
+    ("lennar", "promotions", {"market": "DAL"}, "promotions"),
+    (
+        "lennar", "payment",
+        {
+            "lot_id": "22704535134",
+            "comnum": "22704",
+            "down_payment": 40000,
+            "interest_rate": 0.065,
+        },
+        "payment",
+    ),
+    ("extraspace", "search", {"term": "90012"}, "search"),
+    ("extraspace", "facility", {"store_id": "1934"}, "facility"),
+    ("extraspace", "reviews", {"store_id": "1934"}, "reviews"),
+    ("extraspace", "city_prices", {"city": "Dallas", "state": "TX"}, "city-prices"),
+    ("extraspace", "locations", {}, "locations"),
+    ("publicstorage", "search", {"location": "75201"}, "search"),
+    ("publicstorage", "facility", {"store_id": "2044"}, "facility"),
+    ("publicstorage", "reviews", {"store_id": "2044"}, "reviews"),
+    ("estatesales", "sales", {"zip": "75201"}, "sales"),
+    ("estatesales", "sale", {"sale_id": "5114622"}, "sale"),
+    (
+        "estatesales", "companies",
+        {
+            "state": "TX",
+            "metro": "Dallas-Fort-Worth-Arlington",
+        },
+        "companies",
+    ),
+    ("estatesales", "company", {"org_id": "14402"}, "company"),
+    ("estatesales", "search", {"query": "rolex"}, "search"),
+    ("estatesales", "item", {"item_id": "2038603"}, "item"),
+    ("goodreads", "search", {"query": "dune"}, "search"),
+    ("goodreads", "book", {"book_id": "44767458"}, "book"),
+    ("goodreads", "reviews", {"book_id": "44767458"}, "reviews"),
+    ("goodreads", "suggestions", {"query": "sanderson"}, "suggestions"),
+    ("goodreads", "author", {"author_id": "38550"}, "author"),
+    ("goodreads", "author_books", {"author_id": "38550"}, "author-books"),
+    ("goodreads", "series", {"series_id": "49075"}, "series"),
+    ("goodreads", "editions", {"work_id": "3634639"}, "editions"),
+    ("goodreads", "list", {"list_id": "1"}, "list"),
+    ("goodreads", "book_lists", {"book_id": "44767458"}, "book-lists"),
+    ("goodreads", "list_search", {"query": "fantasy"}, "list-search"),
+    ("goodreads", "quotes", {"query": "hope"}, "quotes"),
+    ("goodreads", "genre", {"genre": "fantasy"}, "genre"),
+    ("goodreads", "new_releases", {"genre": "fantasy"}, "new-releases"),
+    (
+        "expedia", "search",
+        {
+            "check_in": "2027-03-12",
+            "check_out": "2027-03-15",
+            "destination": "Las Vegas, NV",
+        },
+        "search",
+    ),
+    ("expedia", "property", {"id": "17117062"}, "property"),
+    (
+        "expedia", "price_calendar",
+        {
+            "check_in": "2027-03-12",
+            "check_out": "2027-03-15",
+            "id": "17117062",
+        },
+        "price-calendar",
+    ),
+    ("expedia", "suggestions", {"query": "new yo"}, "suggestions"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH3_1126_WIRE)
+def test_batch3_1126_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH3_1126[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH3_1126_ONE_OF))
+def test_batch3_1126_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch3_1126_credits_wire_and_timeouts():
+    """Compass 2 credits, AffordableHousing.com 2 on search and suggestions, Expedia actual cost."""
+    assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == "compass"} == {2}
+    assert ENDPOINTS["affordablehousing_search"].credits == 2
+    assert ENDPOINTS["affordablehousing_suggestions"].credits == 2
+    assert ENDPOINTS["affordablehousing_listing"].credits == 1
+    assert ENDPOINTS["affordablehousing_waiting_lists"].credits == 1
+    for m in ("search", "property", "price_calendar", "suggestions"):
+        ep = ENDPOINTS[f"expedia_{m}"]
+        assert ep.credits == 2 and ep.min_timeout == 250.0, ep.key
+        assert "actual cost" in (ep.credits_note or ""), ep.key
+    q = {p.name: p.wire_field for p in ENDPOINTS["compass_suggestions"].params}
+    assert q == {"query": "q"}
+    assert ENDPOINTS["lennar_markets"].params == ()
+    assert "pages" in {p.name for p in ENDPOINTS["goodreads_reviews"].params}
+    assert ENDPOINTS["movoto_search"].min_timeout == 240.0
+    assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH3_1126 for p in ep.params)

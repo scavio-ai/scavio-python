@@ -10,10 +10,12 @@ from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
     _AsyncAcehardwareNamespace,
     _AsyncActionNamespace,
+    _AsyncAffordablehousingNamespace,
     _AsyncAirbnbNamespace,
     _AsyncAldiNamespace,
     _AsyncAllegroNamespace,
     _AsyncAmazonNamespace,
+    _AsyncApartmentlistNamespace,
     _AsyncAppStoreNamespace,
     _AsyncArgosNamespace,
     _AsyncAshleyNamespace,
@@ -36,6 +38,7 @@ from ._namespaces_async import (
     _AsyncChewyNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCompanyNamespace,
+    _AsyncCompassNamespace,
     _AsyncCostcoNamespace,
     _AsyncCultbeautyNamespace,
     _AsyncCvsNamespace,
@@ -49,12 +52,16 @@ from ._namespaces_async import (
     _AsyncDouglasNamespace,
     _AsyncEbayNamespace,
     _AsyncEdmundsNamespace,
+    _AsyncEstatesalesNamespace,
+    _AsyncExpediaNamespace,
+    _AsyncExtraspaceNamespace,
     _AsyncFanaticsNamespace,
     _AsyncFashionnovaNamespace,
     _AsyncFootlockerNamespace,
     _AsyncG2Namespace,
     _AsyncGeminiNamespace,
     _AsyncGlassdoorNamespace,
+    _AsyncGoodreadsNamespace,
     _AsyncGoogleAdsNamespace,
     _AsyncGoogleNamespace,
     _AsyncGooglePlayNamespace,
@@ -63,6 +70,7 @@ from ._namespaces_async import (
     _AsyncHemaNamespace,
     _AsyncHmNamespace,
     _AsyncHomeDepotNamespace,
+    _AsyncHotpadsNamespace,
     _AsyncIherbNamespace,
     _AsyncIkeaNamespace,
     _AsyncIndeedNamespace,
@@ -73,6 +81,7 @@ from ._namespaces_async import (
     _AsyncKohlsNamespace,
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
+    _AsyncLennarNamespace,
     _AsyncLinkedInNamespace,
     _AsyncLookfantasticNamespace,
     _AsyncLowesNamespace,
@@ -86,6 +95,7 @@ from ._namespaces_async import (
     _AsyncMetaAdsNamespace,
     _AsyncMichaelsNamespace,
     _AsyncMicroCenterNamespace,
+    _AsyncMovotoNamespace,
     _AsyncNellisNamespace,
     _AsyncNikeNamespace,
     _AsyncNintendoNamespace,
@@ -99,6 +109,7 @@ from ._namespaces_async import (
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
     _AsyncPoshmarkNamespace,
+    _AsyncPublicstorageNamespace,
     _AsyncPublixNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
@@ -334,6 +345,17 @@ class AsyncScavioClient:
         self.truecar = _AsyncTruecarNamespace(self)
         self.edmunds = _AsyncEdmundsNamespace(self)
         self.kbb = _AsyncKbbNamespace(self)
+        self.movoto = _AsyncMovotoNamespace(self)
+        self.hotpads = _AsyncHotpadsNamespace(self)
+        self.apartmentlist = _AsyncApartmentlistNamespace(self)
+        self.compass = _AsyncCompassNamespace(self)
+        self.affordablehousing = _AsyncAffordablehousingNamespace(self)
+        self.lennar = _AsyncLennarNamespace(self)
+        self.extraspace = _AsyncExtraspaceNamespace(self)
+        self.publicstorage = _AsyncPublicstorageNamespace(self)
+        self.estatesales = _AsyncEstatesalesNamespace(self)
+        self.goodreads = _AsyncGoodreadsNamespace(self)
+        self.expedia = _AsyncExpediaNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

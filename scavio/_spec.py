@@ -17938,6 +17938,4206 @@ _KBB_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 3 2026-11-26: 11 platforms (real estate, self storage, estate sales, books, travel) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc; the few inputs the schema leaves undescribed get a plain doc
+# from their bounds). 240 s floor on every method (Expedia 250 s).
+
+# Movoto: 5 endpoints on /api/v1/movoto.
+_MOVOTO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="movoto_search",
+        namespace="movoto",
+        method="search",
+        http="POST",
+        path="/api/v1/movoto/search",
+        summary=(
+            "Search homes for sale, sold homes or rentals on Movoto (movoto.com, the US home "
+            "search site owned by Lower; US only, USD). Scavio fetches the public Movoto page "
+            "on request. Places: city + state, ZIP code, county + state, neighborhood + city + "
+            "state, or the homes zoned for one school (school_id + city + state). Filters: "
+            "property types, bedroom, bathroom, price, size, lot, year built, HOA and "
+            "days-on-market ranges, garage spaces, pool, sold window, hide pending, open "
+            "houses, price reduced (30 days), new listings (7 days), new construction, "
+            "foreclosures; 8 sorts; 50 homes a page, up to 99 pages. Returns status, "
+            "sold_within, location, url, sort, page, page_size, total, pages, has_more, count, "
+            "listings [id, property_id, url, path (the input of property), status, "
+            "status_code, is_sold, is_rental, price (USD; monthly rent on rentals), sold_price "
+            "(null in non-disclosure states such as Texas), currency, sold_date, list_date, "
+            "days_on_movoto, price_change, price_changed_date, beds, baths, sqft, lot_sqft, "
+            "year_built, hoa_fee_monthly, garage_spaces, property_type, property_type_label, "
+            "mls_number, mls_id, brokerage, address {street, unit, city, state, zip, county, "
+            "neighborhood, full}, latitude, longitude, photo, photo_count, open_houses [{date, "
+            "start_time, end_time}], has_3d_tour, has_video_tour], market_summary "
+            "{homes_for_sale, average_list_price, median_price_per_sqft, min_list_price, "
+            "max_list_price, new_listings, open_houses, price_reduced, new_construction, "
+            "with_pool, condos, single_family, schools}, market_snapshot {today, "
+            "one_month_ago, one_year_ago: {date, all, single_family, condo: "
+            "{median_list_price, median_price_per_sqft, median_days_on_market, "
+            "median_home_sqft, inventory, change_1m_percent, change_1y_percent}}}, "
+            "facet_counts {beds, baths, price_ranges, amenities}, top_zips, top_neighborhoods, "
+            "nearby_cities, notes. No listing-agent names, phones, emails or license numbers "
+            "are returned; brokerage company names are (a brokerage label that is a person's "
+            "name is null). 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A US city, with state."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Two-letter US state code."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a five-digit ZIP code (state optional)."
+                ),
+            ),
+            Param(
+                "county",
+                "Optional[str]",
+                doc=(
+                    "Or a county, with state (Travis or Travis County)."
+                ),
+            ),
+            Param(
+                "neighborhood",
+                "Optional[str]",
+                doc=(
+                    "Or a neighborhood, with city and state (suggestions returns neighborhood "
+                    "names)."
+                ),
+            ),
+            Param(
+                "school_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or the homes zoned for one school: a Movoto school id (school id, "
+                    "suggestions school_id), with city and state."
+                ),
+            ),
+            Param(
+                "status",
+                'Optional[Literal["for_sale", "sold", "rentals"]]',
+                doc=(
+                    "for_sale (default), sold or rentals."
+                ),
+            ),
+            Param(
+                "sold_within",
+                'Optional[Literal["1w", "1m", "3m", "6m", "1y", "2y"]]',
+                doc=(
+                    "status sold: sold in the last 1w, 1m, 3m, 6m, 1y or 2y (default every "
+                    "sale Movoto lists)."
+                ),
+            ),
+            Param(
+                "hide_pending",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: leave out pending and contingent homes."
+                ),
+            ),
+            Param(
+                "property_types",
+                'Optional[list[Literal["single_family", "condo", "multi_family", "land", "mobile", "other"]]]',
+                doc=(
+                    "Any of: single_family, condo, multi_family, land, mobile, other."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bedrooms, 0-20."
+                ),
+            ),
+            Param(
+                "beds_max",
+                "Optional[int]",
+                doc=(
+                    "Most bedrooms, 0-20."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bathrooms, 0-20."
+                ),
+            ),
+            Param(
+                "baths_max",
+                "Optional[int]",
+                doc=(
+                    "Most bathrooms, 0-20."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "USD (monthly rent on rentals)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "USD (monthly rent on rentals)."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest living area, square feet."
+                ),
+            ),
+            Param(
+                "sqft_max",
+                "Optional[int]",
+                doc=(
+                    "Largest living area, square feet."
+                ),
+            ),
+            Param(
+                "lot_sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest lot, square feet."
+                ),
+            ),
+            Param(
+                "lot_sqft_max",
+                "Optional[int]",
+                doc=(
+                    "Largest lot, square feet."
+                ),
+            ),
+            Param(
+                "year_built_min",
+                "Optional[int]",
+                doc=(
+                    "Built in or after this year."
+                ),
+            ),
+            Param(
+                "year_built_max",
+                "Optional[int]",
+                doc=(
+                    "Built in or before this year."
+                ),
+            ),
+            Param(
+                "hoa_min",
+                "Optional[int]",
+                doc=(
+                    "Monthly HOA fee, USD (for_sale and sold)."
+                ),
+            ),
+            Param(
+                "hoa_max",
+                "Optional[int]",
+                doc=(
+                    "Monthly HOA fee, USD (for_sale and sold)."
+                ),
+            ),
+            Param(
+                "days_on_market_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest days on Movoto (for_sale and rentals)."
+                ),
+            ),
+            Param(
+                "days_on_market_max",
+                "Optional[int]",
+                doc=(
+                    "Days on Movoto (for_sale and rentals)."
+                ),
+            ),
+            Param(
+                "garage_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest garage spaces."
+                ),
+            ),
+            Param(
+                "pool",
+                "Optional[bool]",
+                doc=(
+                    "Only homes whose listing mentions a pool."
+                ),
+            ),
+            Param(
+                "open_houses",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: only homes with an open house scheduled."
+                ),
+            ),
+            Param(
+                "price_reduced",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: price reduced in the last 30 days."
+                ),
+            ),
+            Param(
+                "new_listings",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: listed in the last 7 days."
+                ),
+            ),
+            Param(
+                "new_construction",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: new construction."
+                ),
+            ),
+            Param(
+                "foreclosed",
+                "Optional[bool]",
+                doc=(
+                    "status for_sale: foreclosures."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevant", "newest", "updated", "price_low", "price_high", "sqft_large", "sqft_small", "price_per_sqft"]]',
+                doc=(
+                    "relevant (Movoto's default), newest (list date), updated, price_low, "
+                    "price_high, sqft_large, sqft_small, price_per_sqft (lowest first)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1 (50 homes a page). Movoto serves up to 99 pages per search; "
+                    "a page past the last is empty (with a note)."
+                ),
+            ),
+        ),
+        one_of=(("city", "zip", "county"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="movoto_property",
+        namespace="movoto",
+        method="property",
+        http="POST",
+        path="/api/v1/movoto/property",
+        summary=(
+            "One home on Movoto (movoto.com, the US home search site owned by Lower; US only, "
+            "USD). Scavio fetches the public Movoto page on request. (for sale, sold or for "
+            "rent) by link or path from search. Returns the card fields (id, property_id, url, "
+            "path (the input of property), status, status_code, is_sold, is_rental, price "
+            "(USD; monthly rent on rentals), sold_price (null in non-disclosure states such as "
+            "Texas), currency, sold_date, list_date, days_on_movoto, price_change, "
+            "price_changed_date, beds, baths, sqft, lot_sqft, year_built, hoa_fee_monthly, "
+            "garage_spaces, property_type, property_type_label, mls_number, mls_id, brokerage, "
+            "address {street, unit, city, state, zip, county, neighborhood, full}, latitude, "
+            "longitude, photo, photo_count, open_houses [{date, start_time, end_time}], "
+            "has_3d_tour, has_video_tour) plus on_market_date, building_name, mls_name, "
+            "neighborhood_url, description (phone numbers and emails removed), features "
+            "[{category, group, name, value}] (property tax, HOA fee and name, interior, "
+            "exterior, utilities, schools...), price_history [{date, event, price, "
+            "change_percent, source, mls_number}], tax_history [{year, tax, assessed_total, "
+            "assessed_land, assessed_improvements, tax_rate_percent}], estimate (Movoto's "
+            "area-based estimate: the area's price per square foot times the home's size; "
+            "for-sale and sold homes only, null on rentals), key_insights, schools [{id, name, "
+            "rating (GreatSchools 1-10), level, type, url (the input of school)}], "
+            "school_districts, area_trends {city, zip, neighborhood, county}, "
+            "city_market_snapshot, local_scores {food, pet, walk, kid}, local_highlights, "
+            "nearby {sold, for_sale, new_construction, rentals: {total, homes [{id, url, path, "
+            "status, address, city, state, zip, price, sold_price, beds, baths, sqft, "
+            "lot_sqft, days_on_market, list_date, photo, brokerage}]}}, photos [{url, tag}], "
+            "updated {last_updated, last_checked}, notes. No listing-agent names, phones, "
+            "emails or license numbers are returned; brokerage company names are (a brokerage "
+            "label that is a person's name is null). An unknown listing is a charged 404. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Movoto property link (listings[].url)."
+                ),
+            ),
+            Param(
+                "path",
+                "Optional[str]",
+                doc=(
+                    "Or its path (listings[].path), e.g. "
+                    "austin-tx/6001-sierra-arbor-ct-austin-tx-78759/pid_lgzxbh54nh/."
+                ),
+            ),
+        ),
+        one_of=(("url", "path"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="movoto_market_trends",
+        namespace="movoto",
+        method="market_trends",
+        http="POST",
+        path="/api/v1/movoto/market-trends",
+        summary=(
+            "The housing market trends Movoto (movoto.com, the US home search site owned by "
+            "Lower; US only, USD) publishes for a city (city + state) or a ZIP code: location, "
+            "url, last_updated, summary, snapshots {today, one_month_ago, one_year_ago: {date, "
+            "all, single_family, condo: {median_list_price, median_price_per_sqft, "
+            "median_days_on_market, median_home_sqft, inventory, change_1m_percent, "
+            "change_1y_percent}}}, stat_cards, by_type {all, single_family, condo}, compare "
+            "{label, rows [{name, current, median_price, yoy_change_percent, price_per_sqft, "
+            "days_on_market, active_homes, url}]} (the nearby cities or ZIP codes), overview "
+            "[{label, count, url}], daily (ZIP codes: Movoto's daily statistics, same shape as "
+            "snapshots), notes. Today, one month ago and one year ago only: Movoto publishes "
+            "no monthly series. Scavio fetches the public Movoto page on request. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A US city, with state."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Two-letter US state code."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a five-digit ZIP code (state optional)."
+                ),
+            ),
+            Param(
+                "include_daily",
+                "Optional[bool]",
+                doc=(
+                    "With zip: add daily, Movoto's daily statistics for the ZIP code (default "
+                    "true; same 1 credit)."
+                ),
+            ),
+        ),
+        one_of=(("city", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="movoto_suggestions",
+        namespace="movoto",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/movoto/suggestions",
+        summary=(
+            "The places Movoto (movoto.com, the US home search site owned by Lower; US only, "
+            "USD) suggests for the start of a city, ZIP code, neighborhood, county or school "
+            "name: query, count, places [{type (city, zipcode, neighborhood, county, school), "
+            "name, full_name, city, county, state, zip, neighborhood, school_id, listings, "
+            "geo_id, latitude, longitude, search (the input of search for that place)}], "
+            "notes. Places only: Movoto does not suggest street addresses. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a city, ZIP code, neighborhood, county or school name."
+                ),
+            ),
+            Param(
+                "types",
+                'Optional[list[Literal["city", "zipcode", "neighborhood", "county", "school"]]]',
+                doc=(
+                    "Only these place types: city, zipcode, neighborhood, county, school."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="movoto_school",
+        namespace="movoto",
+        method="school",
+        http="POST",
+        path="/api/v1/movoto/school",
+        summary=(
+            "One school on Movoto (movoto.com, the US home search site owned by Lower; US "
+            "only, USD). Scavio fetches the public Movoto page on request. by link or path "
+            "(property schools[].url): id, nces_id, name, url, level, type, address, latitude, "
+            "longitude, district {id, name, nces_id, url, school_count}, rating (GreatSchools "
+            "1-10), state_rating {rating, year}, teacher_student_ratio, tests [{name, "
+            "abbreviation, description, grades [{grade, subjects [{name, scores {year: "
+            "percent}}]}]}], zone_homes [card], zone_search {school_id, city, state, url} (the "
+            "search input for every home zoned for the school), nearby_schools, notes. Ratings "
+            "and test scores are GreatSchools data as Movoto shows them; parent reviews are "
+            "not returned. An unknown school is a charged 404. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Movoto school link (property schools[].url)."
+                ),
+            ),
+            Param(
+                "path",
+                "Optional[str]",
+                doc=(
+                    "Or its path: schools/<city-st>/<school>-<id>/."
+                ),
+            ),
+        ),
+        one_of=(("url", "path"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# HotPads: 5 endpoints on /api/v1/hotpads.
+_HOTPADS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="hotpads_search",
+        namespace="hotpads",
+        method="search",
+        http="POST",
+        path="/api/v1/hotpads/search",
+        summary=(
+            "Search rentals on HotPads (hotpads.com, Zillow Group's rental search site). "
+            "Scavio fetches the public HotPads page on request. Apartments, houses, condos, "
+            "townhomes, rooms, sublets or for-rent-by-owner listings in a US city, "
+            "neighborhood, borough or ZIP code, filtered by beds (exact or minimum), baths, "
+            "rent, square feet, dogs or cats, in-unit laundry, parking or furnished and "
+            "keywords, sorted 4 ways, 40 buildings a page. Returns area, type, currency, "
+            "filters, applied_filters (the filters HotPads applied), sort, applied_sort, "
+            "title, total_units, total_buildings, min_price, page, page_size, pages, has_more, "
+            "count, listing_count, buildings [{id (the id of listing), url, latitude, "
+            "longitude, listing_count, listings [alias (the listing_alias of fees), url (the "
+            "url of listing), property_type, listing_type, title, unit, address {street, city, "
+            "state, zip}, beds_min, beds_max, baths_min, baths_max, sqft_min, sqft_max, "
+            "price_min, price_max, currency, unit_count, new_unit_count, price_drop_count, "
+            "special_offer, tags (HotPads' card tags, e.g. New Today, Price Drop), labels "
+            "(e.g. trusted, specialOffers, paidMultifamily), total_monthly_price, room "
+            "{furnished, private_bath, roommates, room_sqft}, photo_count, photos, activated, "
+            "updated]}], notes. Rents are USD. A page past the last one is an empty page with "
+            "a note. An area HotPads does not have is a charged 404. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "area",
+                "str",
+                required=True,
+                doc=(
+                    "A HotPads area: a suggestions areas[].resource_id (brooklyn-new-york-ny, "
+                    "austin-tx, 90012), or a place such as Austin, TX. US only."
+                ),
+            ),
+            Param(
+                "type",
+                'Optional[Literal["apartments", "houses", "condos", "townhomes", "rooms", "sublets", "by_owner"]]',
+                doc=(
+                    "apartments (default), houses, condos, townhomes, rooms (rooms for rent), "
+                    "sublets or by_owner (for rent by owner)."
+                ),
+            ),
+            Param(
+                "beds",
+                "Optional[int]",
+                doc=(
+                    "An exact bedroom count (0 is a studio)."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "Or at least this many bedrooms."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[float]",
+                doc=(
+                    "At least this many bathrooms: 1, 1.5, 2, 3 or 4."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest unit, square feet."
+                ),
+            ),
+            Param(
+                "sqft_max",
+                "Optional[int]",
+                doc=(
+                    "Largest unit, square feet."
+                ),
+            ),
+            Param(
+                "pets",
+                'Optional[Literal["dogs", "cats"]]',
+                doc=(
+                    "dogs or cats: listings that allow them (HotPads takes one per search)."
+                ),
+            ),
+            Param(
+                "in_unit_laundry",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with an in-unit washer and dryer."
+                ),
+            ),
+            Param(
+                "amenity",
+                'Optional[Literal["parking", "furnished"]]',
+                doc=(
+                    "parking or furnished (the amenity filters HotPads applies; one per "
+                    "search)."
+                ),
+            ),
+            Param(
+                "keywords",
+                "Optional[str]",
+                doc=(
+                    "Keywords HotPads matches in listings, e.g. balcony."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["default", "price_low", "price_high", "newest"]]',
+                doc=(
+                    "default (HotPads' own order), price_low, price_high or newest."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 40 buildings, from 1; pages says how many."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hotpads_listing",
+        namespace="hotpads",
+        method="listing",
+        http="POST",
+        path="/api/v1/hotpads/listing",
+        summary=(
+            "One HotPads listing in full by link or id (a single home, a unit, or a building "
+            "with its floor plans): id, alias (the listing_alias of fees), url, building_url, "
+            "title, name, property_type, listing_type, is_building, unit, active, address, "
+            "latitude, longitude, currency, price_min, price_max, price_text, beds / baths / "
+            "sqft ranges, unit_count, new_unit_count, price_drop_count, description, is_mls, "
+            "mls_disclaimer, furnished, lease_terms, office_hours, special_offer, "
+            "special_offers, amenities, highlights, amenity_summary, pet_policies {cats, dogs "
+            "[{allowed, size, deposit, one_time_fee, monthly_fee, max_allowed, max_weight, "
+            "comment, restriction}]}, floorplans [{model_id, name, beds, baths, sqft, "
+            "price_min, price_max, price_text, availability_date, layouts, unit_count, units "
+            "[{id, name, beds, baths, sqft, price_min, price_max, availability_date, is_new, "
+            "price_drop, listed}]}], total_monthly_price [{id, text}], history {created, "
+            "activated, updated}, popularity {since, views, inquiries, favorites}, "
+            "area_comparison [{type, name, area_average_price, listing_price, difference, "
+            "vs_area_pct}] (HotPads' comparison with neighborhood, ZIP, city and county "
+            "averages), schools [{name, type, grades, rating, is_private, students, city}], "
+            "similar_listings, photo_count, photos, price_history {listing_alias, model_id} "
+            "(the inputs of price-history; null when HotPads publishes none), company_name "
+            "(property-managed listings only), paid_multifamily, trusted, rental_application, "
+            "notes. Landlord and agent contact details are not returned. A listing HotPads "
+            "does not have is a charged 404. HotPads (hotpads.com, Zillow Group's rental "
+            "search site). Scavio fetches the public HotPads page on request. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A HotPads listing link: search buildings[].listings[].url or "
+                    "buildings[].url (/pad, /building or /<unit>/pad)."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[str]",
+                doc=(
+                    "Or a building id (search buildings[].id, suggestions listings[].id), e.g. "
+                    "skrzz0."
+                ),
+            ),
+        ),
+        one_of=(("url", "id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hotpads_price_history",
+        namespace="hotpads",
+        method="price_history",
+        http="POST",
+        path="/api/v1/hotpads/price-history",
+        summary=(
+            "The rent history HotPads publishes for one listing: listing_alias, model_id, "
+            "currency, truncated, count, events [{date, type (listedForRent, priceChanged, "
+            "listingRemoved), price, price_per_sqft, change_pct, currency, source}], notes. "
+            "Send the listing's price_history.listing_alias and price_history.model_id "
+            "(listing returns price_history null when HotPads publishes none). A wrong alias "
+            "or model id is a charged 404. HotPads (hotpads.com, Zillow Group's rental search "
+            "site). Scavio fetches the public HotPads page on request. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "listing_alias",
+                "str",
+                required=True,
+                doc=(
+                    "A HotPads listing alias: listing alias, or search "
+                    "buildings[].listings[].alias."
+                ),
+            ),
+            Param(
+                "model_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The listing's price_history.model_id. HotPads gives a price history only "
+                    "to listings whose price_history is set."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hotpads_fees",
+        namespace="hotpads",
+        method="fees",
+        http="POST",
+        path="/api/v1/hotpads/fees",
+        summary=(
+            "The costs and fees the property manager lists for one HotPads listing: "
+            "listing_alias, currency, move_in_total, monthly_total, base_rent ({min, max, "
+            "text}), move_in_fees and monthly_fees {required, optional [{type, name, amount "
+            "{min, max, text}, count {min, max}, notes}]}, usage_fees (late fees and others "
+            "charged when they apply), unit_count, disclaimer, notes. An unknown alias is a "
+            "charged 404. HotPads (hotpads.com, Zillow Group's rental search site). Scavio "
+            "fetches the public HotPads page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "listing_alias",
+                "str",
+                required=True,
+                doc=(
+                    "A HotPads listing alias: listing alias, or search "
+                    "buildings[].listings[].alias."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="hotpads_suggestions",
+        namespace="hotpads",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/hotpads/suggestions",
+        summary=(
+            "HotPads' location suggestions for a text: text, areas [{type (city, neighborhood, "
+            "borough, county, zip, school), label, resource_id (the area of search), "
+            "region_id, city, county, state}], listings [{id (the id of listing), label, city, "
+            "state}], count, notes. US only. HotPads (hotpads.com, Zillow Group's rental "
+            "search site). Scavio fetches the public HotPads page on request. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "text",
+                "str",
+                required=True,
+                doc=(
+                    "A city, neighborhood, borough, county, ZIP code, school or address (3+ "
+                    "characters)."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Suggestions to return, 1-10 (default 6)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Apartment List: 6 endpoints on /api/v1/apartmentlist.
+_APARTMENTLIST_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="apartmentlist_suggestions",
+        namespace="apartmentlist",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/apartmentlist/suggestions",
+        summary=(
+            "Places on Apartment List (apartmentlist.com, the US rental search site). Scavio "
+            "fetches the public Apartment List page on request. US only, rents in USD. "
+            "Apartment List's location suggestions for a city, neighborhood, ZIP code, county "
+            "or state: query, count, places [{id, slug (the location input of search and "
+            "market-summary; a city's is the city_slug of rent-report and review-summaries), "
+            "type (city, neighborhood, zip_code, county, state), name, display_name, "
+            "long_name, metro_id, county_id, population, coordinates, bounds {ne, sw}, parents "
+            "{state, metro, city, ...}, searchable}], notes. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "A city, neighborhood, ZIP code, county or state."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="apartmentlist_search",
+        namespace="apartmentlist",
+        method="search",
+        http="POST",
+        path="/api/v1/apartmentlist/search",
+        summary=(
+            "Rentals on Apartment List (apartmentlist.com, the US rental search site). Scavio "
+            "fetches the public Apartment List page on request. US only, rents in USD. Search "
+            "a city, neighborhood or ZIP code, 20 a page. Without filters or sort the answer "
+            "is fast and lists every listing in Apartment List's map order; with beds, baths, "
+            "price_min, price_max, move_in_date, amenities, occupancy_types or sort (city or "
+            "ZIP code only) it reads Apartment List's filtered results, which can take up to "
+            "about 2 minutes (set a client timeout of at least 150 seconds). A ZIP code search "
+            "returns its city's listings inside the ZIP code's bounding box (said in notes). "
+            "Returns location, zip and city (for a ZIP code), filters, sort, total_listings, "
+            "total_units, page, page_size, pages, has_more, count, listings [id, name, slug, "
+            "url (the input of listing), address, neighborhood, latitude, longitude, currency, "
+            "show_price, price_min, price_max, price_by_beds [{beds, price_min, price_max}], "
+            "bed_range, floor_plans [{id, name, beds, baths, sqft, sqft_max, price, price_max, "
+            "photo, unit_count, units [{unit_id, name, price, base_price, total_price, "
+            "required_fees, sqft, availability, available_on, available_now, "
+            "lease_length_months, updated_at}]}], units_available, soonest_available, "
+            "has_rent_special, fee_transparent, occupancy_types, amenities {community, unit}, "
+            "amenities_text, photos, photo_count, highlight {title, text, tag}, "
+            "unit_highlights [{unit_id, unit, unit_type, price, price_change, is_total_price, "
+            "available_now, available_on, lease_length_months}], rating, value_rating, "
+            "review_snippet, standout_category, updated_at], location_summary {location_id, "
+            "location_name, average_rent {studio, one_bedroom, two_bedroom, three_bedroom, "
+            "pricing_date, trend}, listings_summary {average_price, median_price, "
+            "average_sqft, median_sqft, property_count, unit_count, amenity_shares, "
+            "price_histogram [{price, unit_count, property_count}]}}, notes. A place Apartment "
+            "List does not have is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "location",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A place slug from suggestions places[].slug: a city (/tx/austin), a "
+                    "neighborhood (/tx/austin/neighborhoods/riverside) or a ZIP code "
+                    "(/tx/austin/zip-78704)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (with state), e.g. Chicago."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With city: the 2-letter US state code (TX). Optional with zip."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a 5-digit US ZIP code, e.g. 78704."
+                ),
+            ),
+            Param(
+                "beds",
+                "Optional[Union[int, str, list[Union[int, str]]]]",
+                doc=(
+                    "Bedrooms: 0 (studio), 1, 2 or 3 (3 or more), or a list of them, e.g. [1, "
+                    "2]."
+                ),
+            ),
+            Param(
+                "baths",
+                "Optional[int]",
+                doc=(
+                    "Bathrooms: 1, 2 or 3 (or more)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "move_in_date",
+                "Optional[str]",
+                doc=(
+                    "Move-in date, YYYY-MM-DD."
+                ),
+            ),
+            Param(
+                "amenities",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Amenity filters (all must match): is_pet_friendly, is_dog_friendly, "
+                    "is_cat_friendly, has_pool, has_gym, has_in_unit_laundry, "
+                    "has_on_site_laundry, has_laundry_connections, has_garage, has_parking, "
+                    "has_hardwood_floors, has_dishwasher, has_air_conditioning, has_balcony, "
+                    "is_accessible, has_bbq, has_bathtub, has_business_center, has_elevator, "
+                    "has_doorman, has_walk_in_closet, has_stainless_steel, "
+                    "has_granite_counter, has_garbage_disposal, has_furnished_option, "
+                    "has_fireplace, has_hot_tub, has_ceiling_fan."
+                ),
+            ),
+            Param(
+                "occupancy_types",
+                'Optional[Union[str, list[Literal["affordable", "senior", "student", "military", "co-living"]]]]',
+                doc=(
+                    "Occupancy types: affordable, senior, student, military, co-living."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "freshness", "price_asc", "price_desc"]]',
+                doc=(
+                    "best_match, freshness (newest), price_asc or price_desc. Without sort or "
+                    "filters, listings come in Apartment List's map order."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 20, from 1; pages says how many."
+                ),
+            ),
+        ),
+        one_of=(("location", "city", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="apartmentlist_listing",
+        namespace="apartmentlist",
+        method="listing",
+        http="POST",
+        path="/api/v1/apartmentlist/listing",
+        summary=(
+            "One Apartment List listing in full by link or slug: id, name, slug, url, "
+            "rental_type, address {street, city, county, state, zip, formatted}, neighborhood, "
+            "meta_neighborhood, latitude, longitude, description, year_built, year_remodeled, "
+            "total_units, currency, show_price, price_by_beds [{beds, price_from}], "
+            "floor_plan_count, available_unit_count, floor_plans (with every unit's price, "
+            "base_price, total_price and required_fees), specials [{text, type, "
+            "monthly_price_discount, estimated_value, expires_at, created_at, updated_at}], "
+            "fees {fee_sheet_url, price_shown_plus_fees, application_fee, deposit, "
+            "move_in_fees, additional_fees, utilities_included}, pet_policies {allowed, "
+            "allowed_pets, details, general, cats, dogs}, parking, requirements {income, "
+            "income_multiplier, evictions_allowed, evictions_policy, credit_check, "
+            "criminal_check}, lease_terms, occupancy_types, amenities {top, unit, community}, "
+            "office_hours [{day, opens, closes}], time_zone, website_url, phone (apartment "
+            "communities only), source, availability_last_checked_at, updated_at, highlight, "
+            "floor_plan_disclaimers, photos, photo_count, review_summary {rating, "
+            "amenities_rating, value_rating, rating_count, best_rating, worst_rating, snippet, "
+            "snippet_rating, snippet_date}, reviews_total, reviews [{date, text, rating, "
+            "value, amenities, location, management, maintenance, parking, noise}] (where the "
+            "listing page shows them; no reviewer names), notes. A listing no longer on "
+            "Apartment List is a charged 404. Apartment List (apartmentlist.com, the US rental "
+            "search site). Scavio fetches the public Apartment List page on request. US only, "
+            "rents in USD. 1 credit. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The listing link (search listings[].url)."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "Or the listing slug (search listings[].slug), e.g. /tx/austin/riata--4."
+                ),
+            ),
+        ),
+        one_of=(("url", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="apartmentlist_rent_report",
+        namespace="apartmentlist",
+        method="rent_report",
+        http="POST",
+        path="/api/v1/apartmentlist/rent-report",
+        summary=(
+            "Apartment List's monthly rent report for a US city, as it publishes it: "
+            "city_slug, location, url, currency, at_a_glance {name, median_rent_1br, "
+            "median_rent_2br, rent_growth_month, rent_growth_year}, annual_trend {city, state, "
+            "national} (monthly cumulative change over 12 months), ytd_growth {year, lines "
+            "[{year, months [{month, label, growth}]}]}, metro_table [{city, slug, "
+            "median_rent_1br, median_rent_2br, rent_growth_month, rent_growth_year}], "
+            "top_rent_growth and top_rent_levels [{location_id, name, value}], sections "
+            "[{name, text}], notes. A city with no rent report is a charged 404. Apartment "
+            "List (apartmentlist.com, the US rental search site). Scavio fetches the public "
+            "Apartment List page on request. US only, rents in USD. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city_slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A city slug (suggestions places[].slug of a city), e.g. /tx/austin."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (with state), e.g. Chicago."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With city: the 2-letter US state code (TX). Optional with zip."
+                ),
+            ),
+        ),
+        one_of=(("city_slug", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="apartmentlist_market_summary",
+        namespace="apartmentlist",
+        method="market_summary",
+        http="POST",
+        path="/api/v1/apartmentlist/market-summary",
+        summary=(
+            "Average rents by bed count and a listings summary for a city, neighborhood or ZIP "
+            "code (a ZIP code reads its city), optionally for some bed counts and amenities: "
+            "location, filters, currency, location_id, location_name, average_rent {studio, "
+            "one_bedroom, two_bedroom, three_bedroom, pricing_date, trend}, listings_summary "
+            "{average_price, median_price, average_sqft, median_sqft, property_count, "
+            "unit_count, amenity_shares, price_histogram [{price, unit_count, "
+            "property_count}]}, notes. Apartment List (apartmentlist.com, the US rental search "
+            "site). Scavio fetches the public Apartment List page on request. US only, rents "
+            "in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "location",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A place slug from suggestions places[].slug: a city (/tx/austin), a "
+                    "neighborhood (/tx/austin/neighborhoods/riverside) or a ZIP code "
+                    "(/tx/austin/zip-78704)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (with state), e.g. Chicago."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With city: the 2-letter US state code (TX). Optional with zip."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a 5-digit US ZIP code, e.g. 78704."
+                ),
+            ),
+            Param(
+                "beds",
+                "Optional[Union[int, str, list[Union[int, str]]]]",
+                doc=(
+                    "Bedrooms: 0 (studio), 1, 2 or 3 (3 or more), or a list of them, e.g. [1, "
+                    "2]."
+                ),
+            ),
+            Param(
+                "amenities",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Amenity filters (all must match): is_pet_friendly, is_dog_friendly, "
+                    "is_cat_friendly, has_pool, has_gym, has_in_unit_laundry, "
+                    "has_on_site_laundry, has_laundry_connections, has_garage, has_parking, "
+                    "has_hardwood_floors, has_dishwasher, has_air_conditioning, has_balcony, "
+                    "is_accessible, has_bbq, has_bathtub, has_business_center, has_elevator, "
+                    "has_doorman, has_walk_in_closet, has_stainless_steel, "
+                    "has_granite_counter, has_garbage_disposal, has_furnished_option, "
+                    "has_fireplace, has_hot_tub, has_ceiling_fan."
+                ),
+            ),
+        ),
+        one_of=(("location", "city", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="apartmentlist_review_summaries",
+        namespace="apartmentlist",
+        method="review_summaries",
+        http="POST",
+        path="/api/v1/apartmentlist/review-summaries",
+        summary=(
+            "Resident-review summaries for every listing with reviews in a city: city_slug, "
+            "count, review_summaries [{listing_id (search listings[].id), rating, "
+            "amenities_rating, value_rating, rating_count, best_rating, worst_rating, snippet, "
+            "snippet_rating, snippet_date}] (most reviewed first; no reviewer names), notes. "
+            "Apartment List (apartmentlist.com, the US rental search site). Scavio fetches the "
+            "public Apartment List page on request. US only, rents in USD. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city_slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A city slug (suggestions places[].slug of a city), e.g. /tx/austin."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (with state), e.g. Chicago."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With city: the 2-letter US state code (TX). Optional with zip."
+                ),
+            ),
+        ),
+        one_of=(("city_slug", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Compass: 3 endpoints on /api/v1/compass.
+_COMPASS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="compass_search",
+        namespace="compass",
+        method="search",
+        http="POST",
+        path="/api/v1/compass/search",
+        summary=(
+            "Search homes for sale, rentals or homes sold in the last 90 days in a US area on "
+            "Compass (compass.com, the US real estate brokerage). Filters: highest price, "
+            "fewest bedrooms, bathrooms and square feet, property type, open house this "
+            "weekend, coming soon; sorts: default, price_asc, price_desc; 41 a page, up to 9 "
+            "pages. Compass does not apply a minimum price or a maximum bedroom count next to "
+            "other filters, nor year built or lot size: those are refused with a 400. Returns "
+            "mode, area {slug, location_id}, sort, page, per_page, total (Compass's count), "
+            "reachable (at most 369: Compass pages through the first 369 results), pages, "
+            "has_more, count, criteria (the filters as Compass applied them), listings [id "
+            "(the input of listing), url, property_url, address, neighborhood, city, state, "
+            "zip, latitude, longitude, price (USD; rent per month on for_rent), price_text, "
+            "price_period, currency, beds, baths, baths_detail, sqft, lot_size, "
+            "property_types, status (active, pending, sold, coming_soon), status_code, "
+            "sold_date, brand, badges, open_houses [{start, end, by_appointment_only, "
+            "virtual}], photo, thumbnail], nearby_areas [{name, slug}], notes. Days on market, "
+            "the MLS number and the source MLS are on listing. No agent names, emails, phones, "
+            "license numbers or photos are returned; the listing brand (Compass, Corcoran, "
+            "Coldwell Banker, Sotheby's International Realty) is. Compass lists homes across "
+            "the US, in English and USD. Scavio fetches the public Compass page on request. 2 "
+            "credits. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "area",
+                "str",
+                required=True,
+                doc=(
+                    "A Compass area slug from suggestions (areas[].slug): a city (austin-tx, "
+                    "manhattan-ny), a city and ZIP (los-angeles-ca-90012), a neighborhood "
+                    "(brooklyn-heights-brooklyn-ny), a county or a school (school/<slug>, "
+                    "school-district/<slug>). A place written as \"Austin, TX\" reads as its "
+                    "slug. An unknown area is a charged 404."
+                ),
+            ),
+            Param(
+                "mode",
+                'Optional[Literal["for_sale", "for_rent", "sold"]]',
+                doc=(
+                    "for_sale (default), for_rent, or sold (homes sold in the last 90 days)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, USD (on for_rent the monthly rent)."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bedrooms."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bathrooms."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest size in square feet."
+                ),
+            ),
+            Param(
+                "property_type",
+                'Optional[Literal["homes", "condos", "townhomes", "co_ops", "multi_family", "land"]]',
+                doc=(
+                    "One of homes, condos, townhomes, co_ops, multi_family, land (homes = "
+                    "single family)."
+                ),
+            ),
+            Param(
+                "open_house",
+                "Optional[bool]",
+                doc=(
+                    "Mode for_sale: only homes with an open house this weekend."
+                ),
+            ),
+            Param(
+                "coming_soon",
+                "Optional[bool]",
+                doc=(
+                    "Mode for_sale: only Coming Soon listings."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["default", "price_asc", "price_desc"]]',
+                doc=(
+                    "default (Compass's own order), price_asc or price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1 (41 listings a page). Compass pages through the first 369 "
+                    "results of a search (9 pages); a page past the end answers with no "
+                    "listings and a note."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="compass_listing",
+        namespace="compass",
+        method="listing",
+        http="POST",
+        path="/api/v1/compass/listing",
+        summary=(
+            "One Compass (compass.com, the US real estate brokerage) listing in full (for "
+            "sale, coming soon, sold or for rent) by link or id: id, url, property_url, "
+            "property_code, mls_number, listing_type (sale or rent), status, mls_status, "
+            "address {street, city, state, zip, neighborhood, county, full}, latitude, "
+            "longitude, timezone, beds, baths, full_baths, half_baths, total_baths, rooms, "
+            "sqft, lot_sqft, lot_size, stories, property_types, mls_property_type, description "
+            "(phone numbers and emails taken out), pricing {price, price_text, price_period, "
+            "currency, listed_price, last_asking_price, sold_price, sold_price_verification, "
+            "price_per_sqft, monthly_charges, monthly_charges_incl_taxes, "
+            "max_financing_percent, min_down_payment_percent, last_property_sale_price}, dates "
+            "{listed, contract, sold, available, updated, last_property_sale}, days_on_market, "
+            "cumulative_days_on_market, history [{date, event (Listed, Price Change, Contract "
+            "Signed, Sold, Sold (Public Record), Expired, ...), price, source, public_record, "
+            "record_url}], key_details, regional_details, details [{category, sections [{name, "
+            "fields [{key, values}]}]}], amenities, schools [{name, distance_miles, types, "
+            "grades, rating, url}], school_districts, building {id, name, address, floors, "
+            "units, year_built, url, key_details}, rental {lease_term, lease_term_min_months, "
+            "lease_term_max_months, broker_fee_percent}, tax {tax_year, tax, monthly_tax, "
+            "assessment_year, land_value, improvement_value}, parcel_number, badges, photos, "
+            "photo_count, brand, source_mls (the MLS the listing comes from), disclaimer and "
+            "mls_disclaimer (as Compass shows them with the listing). No agent names, emails, "
+            "phones, license numbers or photos are returned; the listing brand (Compass, "
+            "Corcoran, Coldwell Banker, Sotheby's International Realty) is. An unknown listing "
+            "is a charged 404. Compass lists homes across the US, in English and USD. Scavio "
+            "fetches the public Compass page on request. 2 credits. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Compass listing link (listings[].url or property_url: "
+                    "/homedetails/<address>/<id>_lid/ or /<code>_pid/; suggestions' "
+                    "/listing/<id>/view links work too)."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or a Compass listing id (listings[].id), as a string."
+                ),
+            ),
+        ),
+        one_of=(("url", "id"),),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="compass_suggestions",
+        namespace="compass",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/compass/suggestions",
+        summary=(
+            "The Compass (compass.com, the US real estate brokerage) search box suggestions "
+            "for a place, ZIP code, school or address: q, count, areas [{name, region, slug "
+            "(the area input of search), kind (city, zip, neighborhood, school, "
+            "school_district or area), location_id, url}], listings [{id (the id input of "
+            "listing), address, region, url}]. Agent suggestions are left out. Compass lists "
+            "homes across the US, in English and USD. Scavio fetches the public Compass page "
+            "on request. 2 credits. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                wire="q",
+                required=True,
+                doc=(
+                    "A city, neighborhood, ZIP code, school or address."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+)
+
+# AffordableHousing.com: 6 endpoints on /api/v1/affordablehousing.
+_AFFORDABLEHOUSING_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="affordablehousing_search",
+        namespace="affordablehousing",
+        method="search",
+        http="POST",
+        path="/api/v1/affordablehousing/search",
+        summary=(
+            "Search affordable and Section 8 rentals on AffordableHousing.com "
+            "(affordablehousing.com, the US affordable and Section 8 rental site run by "
+            "Affordable Housing Network). Scavio fetches the public AffordableHousing.com page "
+            "on request. A state, city, county or ZIP code (with its city), with beds, baths, "
+            "property type, rent range, pet friendly, Section 8, utilities included, age "
+            "restricted and accessibility filters, sorted 9 ways, 42 a page. Returns state, "
+            "city, county, zip, currency, filters, sort, title, total, page, page_size, pages, "
+            "has_more, count, listings [id (the input of listing), title, address, unit, city, "
+            "county, state, zip, latitude, longitude, property_type, rent_min, rent_max, "
+            "currency, beds_min, beds_max, baths_min, baths_max, sqft_min, sqft_max, "
+            "year_built, unit_count, section8_accepted, trusted_owner, income_restricted, "
+            "government_listing, special_offer, room_for_rent, tier (premium, spotlight or "
+            "standard), availability, is_new, just_updated, url, photo, photo_count], notes. "
+            "Premium and spotlight listings are placed first by the site; the sort applies "
+            "within each tier. Phone numbers and email addresses are cut out of titles. 2 "
+            "credits. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "A US state: 2-letter code (TX, CA, DC) or its name."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A city in the state (suggestions places[].search.city)."
+                ),
+            ),
+            Param(
+                "county",
+                "Optional[str]",
+                doc=(
+                    "Or a county in the state, e.g. Harris (suggestions "
+                    "places[].search.county). Leave out city and county to search the whole "
+                    "state."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "A 5-digit ZIP code, sent with its city and state (AffordableHousing.com "
+                    "searches a ZIP code within its city)."
+                ),
+            ),
+            Param(
+                "beds",
+                "Optional[Union[int, list[int]]]",
+                doc=(
+                    "Bedrooms: 0 (studio) to 4, or 5 for 5+; one number or a list (2 and 3: "
+                    "[2, 3])."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "At least this many bathrooms (1 to 5)."
+                ),
+            ),
+            Param(
+                "property_type",
+                'Optional[Union[Literal["apartment", "condo", "townhouse", "house"], list[Literal["apartment", "condo", "townhouse", "house"]]]]',
+                doc=(
+                    "apartment, condo, townhouse or house (single family house); one or a list."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly rent, USD."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["default", "price_asc", "price_desc", "newest", "beds_asc", "beds_desc", "sqft_asc", "sqft_desc", "affordability"]]',
+                doc=(
+                    "default (the site's own order), price_asc, price_desc, newest (last "
+                    "updated), beds_asc, beds_desc, sqft_asc, sqft_desc or affordability. "
+                    "Premium and spotlight listings come first in every sort."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 42, from 1; pages says how many."
+                ),
+            ),
+            Param(
+                "pet_friendly",
+                "Optional[bool]",
+                doc=(
+                    "Only pet-friendly listings."
+                ),
+            ),
+            Param(
+                "section8",
+                "Optional[bool]",
+                doc=(
+                    "Only listings whose owner has experience with the Section 8 / Housing "
+                    "Choice Voucher program."
+                ),
+            ),
+            Param(
+                "utilities_included",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with utilities included."
+                ),
+            ),
+            Param(
+                "age_restricted",
+                "Optional[bool]",
+                doc=(
+                    "Only age-restricted (senior) housing."
+                ),
+            ),
+            Param(
+                "accessibility",
+                'Optional[Union[Literal["physical", "visual_hearing"], list[Literal["physical", "visual_hearing"]]]]',
+                doc=(
+                    "physical (ramps, grab bars, roll-in showers) and / or visual_hearing "
+                    "(visual alarms and doorbells)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="affordablehousing_listing",
+        namespace="affordablehousing",
+        method="listing",
+        http="POST",
+        path="/api/v1/affordablehousing/listing",
+        summary=(
+            "One listing in full by link or id: id, url, name, title, listing_status, "
+            "date_posted, address {street, city, county, state, zip, country}, latitude, "
+            "longitude, property_type, currency, rent_min, rent_max, rent_text, beds, baths, "
+            "sqft_min, sqft_max, section8_accepted, pets_allowed, pets_max, age_restriction, "
+            "age_restricted, description (phone numbers and email addresses cut out), models "
+            "[{id, name, beds, full_baths, half_baths, sqft, rent, rent_text, deposit, "
+            "deposit_negotiable, year_built, property_type, available_date, "
+            "accepting_applications, subsidized_units, description, units [{unit, rent, "
+            "available_date, accepting_applications}]}], fees {move_in_total, move_out_total, "
+            "estimated_monthly_total, estimated_one_time_total, application_fee, pet_rent, "
+            "pet_deposit, pet_fee_one_time}, utilities {tenant_pays, owner_pays}, amenities "
+            "and accessibility (by the listing's groups), photos, listed_by (business owners "
+            "only; private landlords are never named), notes. An unknown id is a charged 404. "
+            "AffordableHousing.com (affordablehousing.com, the US affordable and Section 8 "
+            "rental site run by Affordable Housing Network). Scavio fetches the public "
+            "AffordableHousing.com page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The listing link (search listings[].url)."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or the listing id (search listings[].id), e.g. 766073."
+                ),
+            ),
+        ),
+        one_of=(("url", "id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="affordablehousing_suggestions",
+        namespace="affordablehousing",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/affordablehousing/suggestions",
+        summary=(
+            "AffordableHousing.com's place suggestions for a city, county or ZIP code: text, "
+            "total, count, places [{label, type (city, county or zip), state, county, city, "
+            "zip, population, search (the location input of search)}], notes. "
+            "AffordableHousing.com (affordablehousing.com, the US affordable and Section 8 "
+            "rental site run by Affordable Housing Network). Scavio fetches the public "
+            "AffordableHousing.com page on request. 2 credits. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "text",
+                "str",
+                required=True,
+                doc=(
+                    "A city, county or ZIP code (start of it)."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Most places to return (default 25)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="affordablehousing_waiting_lists",
+        namespace="affordablehousing",
+        method="waiting_lists",
+        http="POST",
+        path="/api/v1/affordablehousing/waiting-lists",
+        summary=(
+            "Open Section 8 and public housing waiting lists, nationwide or for one state: "
+            "state, title, count, open [{waitlist_id, name, program, agency_id, agency_name, "
+            "agency_url (the input of housing-authority), state, online_application, status, "
+            "opened_on (as the site gives it, MM/DD/YYYY)}], opening_soon_count, opening_soon, "
+            "notes. AffordableHousing.com (affordablehousing.com, the US affordable and "
+            "Section 8 rental site run by Affordable Housing Network). Scavio fetches the "
+            "public AffordableHousing.com page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "A US state (code or name); leave out for every open list nationwide."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="affordablehousing_housing_authority",
+        namespace="affordablehousing",
+        method="housing_authority",
+        http="POST",
+        path="/api/v1/affordablehousing/housing-authority",
+        summary=(
+            "One housing authority (public housing agency) by link or id and state: id, name, "
+            "address, address2, city, county, state, zip, phone, fax, website, hcv_url, "
+            "latitude, longitude, participant_code, waitlist_status, waitlist_open_date, "
+            "waitlist_close_date, voucher_count, section8_inventory, programs, jurisdiction "
+            "[{county, full_county}], waiting_lists [{id, name, program, selected_by, "
+            "centralized}], url, notes. The agency's public office contact only; no staff "
+            "contact details. Payment standards and fair market rents are not given as numbers "
+            "by the site. An unknown id is a charged 404. AffordableHousing.com "
+            "(affordablehousing.com, the US affordable and Section 8 rental site run by "
+            "Affordable Housing Network). Scavio fetches the public AffordableHousing.com page "
+            "on request. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The housing authority link (waiting-lists open[].agency_url, "
+                    "housing-authorities agencies[].url)."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or its id (agency_id, agencies[].id) with state."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With id: the agency's state."
+                ),
+            ),
+        ),
+        one_of=(("url", "id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="affordablehousing_housing_authorities",
+        namespace="affordablehousing",
+        method="housing_authorities",
+        http="POST",
+        path="/api/v1/affordablehousing/housing-authorities",
+        summary=(
+            "The housing authorities of a state as the site's state page lists them: state, "
+            "total (the site's count for the state), count, agencies [{id, name, address, "
+            "waitlist_status (Open or Closed), programs, jurisdiction, url (the input of "
+            "housing-authority)}], notes. The page shows its first 14 agencies (sorted by the "
+            "site). AffordableHousing.com (affordablehousing.com, the US affordable and "
+            "Section 8 rental site run by Affordable Housing Network). Scavio fetches the "
+            "public AffordableHousing.com page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "A US state: 2-letter code (TX, CA, DC) or its name."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Lennar: 11 endpoints on /api/v1/lennar.
+_LENNAR_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="lennar_search",
+        namespace="lennar",
+        method="search",
+        http="POST",
+        path="/api/v1/lennar/search",
+        summary=(
+            "Search new homes or communities on Lennar (lennar.com, the US homebuilder; US "
+            "only, USD). Scavio fetches the public Lennar page data on request. Places: a "
+            "market code, a state, a city, Lennar's text search, latitude + longitude (+ "
+            "radius in miles) or a map box (bounds). Filters: fewest beds and baths, price and "
+            "square-foot ranges, home types, community types (active adult, lifestyle), "
+            "homesite availability (quick move-in, under construction, coming soon, future "
+            "release), community status, feature codes, school district, school type, school "
+            "level and school rating; 7 sorts; 1-200 results a page. Returns mode, the place "
+            "echoed, sort, page, page_size, total, totals {communities, plans, homesites}, "
+            "is_fallback, count, has_more, homes [type homesite: lot_id, status, address, "
+            "beds, baths, half_baths, sqft, price, was_price, price_text, currency, badge, "
+            "hot_of_the_week, offer_available, offer_end_date, estimated_monthly_payment (as "
+            "Lennar shows it, where it shows one), image, url, plan {plan_number, name, "
+            "starting_price, url}, community {comnum, name, city, market}; type plan: "
+            "plan_number, name, status, beds, baths, half_baths, sqft, starting_price, "
+            "price_text, available_homesites, active_adult, next_gen, image, url, community] "
+            "or communities [type community: comnum, name, status, badge, brand, types, "
+            "base_price, price_text, bed_range, bath_range, sqft_range, address, zip, "
+            "latitude, longitude, city, market, url; type master_planned: mpc_id, name, "
+            "status, price_text, search_price_text, ranges, city, market, url, communities "
+            "[{comnum, base_price}]], notes. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Lennar market code (markets[].code from markets, e.g. DAL, PHO, ORL, "
+                    "HOU)."
+                ),
+            ),
+            Param(
+                "mode",
+                'Optional[Literal["homes", "communities"]]',
+                doc=(
+                    "homes (default: homesites and floor plans) or communities (communities "
+                    "and master-planned communities)."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Or a two-letter state code."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (market cities[].name), alone or with market or state."
+                ),
+            ),
+            Param(
+                "text",
+                "Optional[str]",
+                doc=(
+                    "Or Lennar's text search (it matches community and plan names; use "
+                    "suggestions for places)."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "Or a point: latitude with longitude (+ radius in miles)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "With latitude: the point's longitude."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "With latitude + longitude: miles."
+                ),
+            ),
+            Param(
+                "bounds",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Or a map box (a suggestion's search.bounds)."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bedrooms, 1-6."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bathrooms, 1-6."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "USD."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest home, square feet."
+                ),
+            ),
+            Param(
+                "sqft_max",
+                "Optional[int]",
+                doc=(
+                    "Largest home, square feet."
+                ),
+            ),
+            Param(
+                "home_types",
+                'Optional[list[Literal["single_family", "multi_family", "next_gen", "single_story"]]]',
+                doc=(
+                    "Any of: single_family, multi_family, next_gen, single_story."
+                ),
+            ),
+            Param(
+                "community_types",
+                'Optional[list[Literal["active_adult", "lifestyle"]]]',
+                doc=(
+                    "active_adult (55+) or lifestyle."
+                ),
+            ),
+            Param(
+                "availability",
+                'Optional[list[Literal["quick_move_in", "under_construction", "coming_soon", "future_release"]]]',
+                doc=(
+                    "Homesite availability: quick_move_in (move-in ready), under_construction, "
+                    "coming_soon, future_release."
+                ),
+            ),
+            Param(
+                "community_status",
+                'Optional[list[Literal["active", "coming_soon", "sold_out"]]]',
+                doc=(
+                    "active, coming_soon or sold_out."
+                ),
+            ),
+            Param(
+                "features",
+                "Optional[list[str]]",
+                doc=(
+                    "Feature codes as the market endpoint gives them (features[].code, e.g. "
+                    "SSTORY, 3GAR, SWIMMING_POOL)."
+                ),
+            ),
+            Param(
+                "school_district",
+                "Optional[str]",
+                doc=(
+                    "A school district as the market endpoint gives it "
+                    "(school_districts[].code)."
+                ),
+            ),
+            Param(
+                "school_types",
+                'Optional[list[Literal["public", "private", "charter"]]]',
+                doc=(
+                    "Any of: public, private, charter."
+                ),
+            ),
+            Param(
+                "school_levels",
+                'Optional[list[Literal["elementary", "middle", "high"]]]',
+                doc=(
+                    "Any of: elementary, middle, high."
+                ),
+            ),
+            Param(
+                "school_rating",
+                'Optional[Literal["A", "B", "C", "D"]]',
+                doc=(
+                    "Lennar's school rating filter: A, B, C or D."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["featured", "newest", "distance", "price_asc", "price_desc", "sqft_asc", "sqft_desc"]]',
+                doc=(
+                    "featured (default), newest, distance (needs latitude + longitude), "
+                    "price_asc, price_desc, sqft_asc, sqft_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Results per page, 1-200 (default 25)."
+                ),
+            ),
+        ),
+        one_of=(("market", "state", "city", "text", "latitude", "bounds"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_community",
+        namespace="lennar",
+        method="community",
+        http="POST",
+        path="/api/v1/lennar/community",
+        summary=(
+            "One community on Lennar (lennar.com, the US homebuilder; US only, USD). Scavio "
+            "fetches the public Lennar page data on request. by community number: comnum, "
+            "name, status, brand, types, address, city, state, zip, latitude, longitude, "
+            "market, master_planned, base_price, price_range {min, max}, price_text, "
+            "sqft_range, bed_range, bath_range, stories_range, homesites_count, tourable, "
+            "hoa_fee, hoa_fee_is_monthly, development_fee, tax_rate_percent, deposit_amount, "
+            "overview, hours [{day, opening, closing, by_appointment}] (the sales center), "
+            "sales_office {phone, time_zone, phone_hours}, schools [{name, grades, district, "
+            "public}], amenities, image, url, plans [{plan_number, name, beds, baths, sqft, "
+            "garages, starting_price, available_homesites, url, homesites [{lot_id, status, "
+            "address, price, was_price, est_move_in_date, hot_of_the_week, url}]}]. No sales "
+            "consultant names. An unknown community is a charged 404. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "comnum",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar community number (community.comnum in search answers)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_plan",
+        namespace="lennar",
+        method="plan",
+        http="POST",
+        path="/api/v1/lennar/plan",
+        summary=(
+            "One floor plan on Lennar (lennar.com, the US homebuilder; US only, USD). Scavio "
+            "fetches the public Lennar page data on request. by community number + plan "
+            "number: plan_number, name, status, beds, baths, half_baths, sqft, garages, "
+            "starting_price, was_starting_price, price_text, next_gen, available_homesites, "
+            "tourable, virtual_tour_url, video_tour_url, overview, image, floor_plans [{name, "
+            "image}], included_features [{category, items}], homesites [{lot_id, status, "
+            "address, sqft, price, was_price, url}], other_homes [{name, starting_price, "
+            "available_homesites, url}], community, url. An unknown plan is a charged 404. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "comnum",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar community number (community.comnum in search answers)."
+                ),
+            ),
+            Param(
+                "plan_number",
+                "str",
+                required=True,
+                doc=(
+                    "A plan number (community plans[].plan_number)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_home",
+        namespace="lennar",
+        method="home",
+        http="POST",
+        path="/api/v1/lennar/home",
+        summary=(
+            "One homesite (a quick move-in or to-be-built home) on Lennar (lennar.com, the US "
+            "homebuilder; US only, USD). Scavio fetches the public Lennar page data on "
+            "request. by lot id: lot_id, homesite_number, name, status, address, latitude, "
+            "longitude, price, was_price, price_text, beds, baths, half_baths, garages, "
+            "stories, sqft, closing_cost_incentive, incentive_disclaimer, est_move_in_date, "
+            "reserved, hot_of_the_week, badge, offer_available, offer_end_date, tourable, "
+            "virtual_tour_url, overview, estimated_monthly_payment, image, url, plan, "
+            "community {comnum, name, city, market, hoa_fee, tax_rate_percent, url}. An "
+            "unknown or sold homesite is a charged 404. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "lot_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar homesite lot id (homes[].lot_id in search answers)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_master_planned",
+        namespace="lennar",
+        method="master_planned",
+        http="POST",
+        path="/api/v1/lennar/master-planned",
+        summary=(
+            "One master-planned community on Lennar (lennar.com, the US homebuilder; US only, "
+            "USD). Scavio fetches the public Lennar page data on request. by id: mpc_id, name, "
+            "status, brand, overview, price_text, search_price_text, bed_range, bath_range, "
+            "sqft_range, latitude, longitude, city, market, url, communities [{comnum, name, "
+            "status, types, base_price, price_range, homesites_count, hoa_fee, "
+            "tax_rate_percent, url}]. An unknown id is a charged 404. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "mpc_id",
+                "int",
+                required=True,
+                doc=(
+                    "A master-planned community id (communities[].mpc_id in community search "
+                    "answers)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_markets",
+        namespace="lennar",
+        method="markets",
+        http="POST",
+        path="/api/v1/lennar/markets",
+        summary=(
+            "Every state and metro market Lennar (lennar.com, the US homebuilder; US only, "
+            "USD) builds in: state_count, market_count, states [{code, name, markets [{code, "
+            "name, plan_count, latitude, longitude, url}]}]. Market codes are the search and "
+            "market input. 1 credit. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_market",
+        namespace="lennar",
+        method="market",
+        http="POST",
+        path="/api/v1/lennar/market",
+        summary=(
+            "One metro market on Lennar (lennar.com, the US homebuilder; US only, USD). Scavio "
+            "fetches the public Lennar page data on request. by market code: code, name, "
+            "state, plan_count, latitude, longitude, phone, promo_url, url, cities [{name, "
+            "url}], features [{name, code}] and school_districts [{name, code}] (the search "
+            "filter codes for the market). An unknown code is a charged 404. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar market code (markets[].code)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_suggestions",
+        namespace="lennar",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/lennar/suggestions",
+        summary=(
+            "The places, communities and plans Lennar (lennar.com, the US homebuilder; US "
+            "only, USD) suggests for a few letters: query, market, count, suggestions "
+            "[{category, type, text, search (the search input the suggestion stands for: "
+            "market, state, city, bounds, beds_min), path, url}], notes. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a city, ZIP code, region, community or plan name."
+                ),
+            ),
+            Param(
+                "market",
+                "Optional[str]",
+                doc=(
+                    "Favor one market (a market code)."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Suggestions, 1-20 (default 10)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_resolve",
+        namespace="lennar",
+        method="resolve",
+        http="POST",
+        path="/api/v1/lennar/resolve",
+        summary=(
+            "What a lennar.com link is on Lennar (lennar.com, the US homebuilder; US only, "
+            "USD). Scavio fetches the public Lennar page data on request.: path, type "
+            "(community, plan, home or master_planned), page_type, ids {comnum, plan_number, "
+            "lot_id, mpc_id} (the inputs of community, plan, home and master-planned). A link "
+            "that is no such page is a charged 404. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A lennar.com community, plan, home or master-planned community link."
+                ),
+            ),
+            Param(
+                "path",
+                "Optional[str]",
+                doc=(
+                    "Or its path (/new-homes/...)."
+                ),
+            ),
+        ),
+        one_of=(("url", "path"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_promotions",
+        namespace="lennar",
+        method="promotions",
+        http="POST",
+        path="/api/v1/lennar/promotions",
+        summary=(
+            "The market-wide promotion Lennar (lennar.com, the US homebuilder; US only, USD) "
+            "shows for a market: market, promo_url, promotion {title, legal, offers [{header, "
+            "type, title, incentives, legal, legal_details}], homesites [{lot_id, community, "
+            "comnum, city, plan, plan_number, address, zip, beds, baths, sqft, price, "
+            "was_price, status, est_move_in_date, url}]} (offers and legal copy exactly as "
+            "Lennar shows them), or promotion null when none runs. Scavio fetches the public "
+            "promotion page on request. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "market",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar market code (markets[].code)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="lennar_payment",
+        namespace="lennar",
+        method="payment",
+        http="POST",
+        path="/api/v1/lennar/payment",
+        summary=(
+            "The monthly payment estimate Lennar's calculator gives for a homesite on Lennar "
+            "(lennar.com, the US homebuilder; US only, USD). Scavio fetches the public Lennar "
+            "page data on request. with a down payment and an interest rate (a decimal: 0.065 "
+            "for 6.5%): lot_id, comnum, input, currency, estimate {principal_and_interest, "
+            "property_tax, property_tax_rate, home_insurance, home_insurance_rate, "
+            "mortgage_insurance, mortgage_insurance_rate, hoa_fee, community_development_fee, "
+            "down_payment, down_payment_percent, interest_rate, legal_disclaimer}. A homesite "
+            "with no estimate is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "lot_id",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar homesite lot id (homes[].lot_id in search answers)."
+                ),
+            ),
+            Param(
+                "comnum",
+                "str",
+                required=True,
+                doc=(
+                    "A Lennar community number (community.comnum in search answers)."
+                ),
+            ),
+            Param(
+                "down_payment",
+                "float",
+                required=True,
+                doc=(
+                    "USD."
+                ),
+            ),
+            Param(
+                "interest_rate",
+                "float",
+                required=True,
+                doc=(
+                    "A decimal: 0.065 for 6.5% (values above 1 are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Extra Space Storage: 5 endpoints on /api/v1/extraspace.
+_EXTRASPACE_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="extraspace_search",
+        namespace="extraspace",
+        method="search",
+        http="POST",
+        path="/api/v1/extraspace/search",
+        summary=(
+            "Self-storage facilities near a ZIP code, \"City, ST\", place or point on Extra "
+            "Space Storage (extraspace.com, the US self-storage REIT). Scavio fetches the "
+            "public Extra Space page on request. US only, prices in USD. Up to 120 facilities, "
+            "nearest first (Extra Space has no further pages), filtered by climate control, "
+            "drive-up, indoor, RV parking, enclosed vehicle storage, 24-hour access and unit "
+            "sizes, sorted by distance or Starting at price. Returns term, latitude, "
+            "longitude, search_center, did_you_mean (an ambiguous place: send one of them as "
+            "term), currency, filters, sort, total, count, facilities [store_id (the input of "
+            "facility and reviews), store_number, name, url, address, city, state, state_name, "
+            "postal_code, latitude, longitude, distance_mi, phone, promotion, starting_at "
+            "{starting, small, medium, large, parking}, rating, review_count, hours, features, "
+            "unit_sizes_available, is_coming_soon, is_grand_opening, expected_opening, "
+            "best_prices [{unit_id, type, size_class, dimensions, width, depth, square_feet, "
+            "features, promotions, first_come, limited, in_store_price, web_rate}], image, "
+            "google_maps_url], notes. Prices are monthly and labelled as the facility pages "
+            "label them: in_store_price (IN STORE) and web_rate (WEB RATE); a price Extra "
+            "Space does not give is null. A place with no match is a charged 404. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "term",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A ZIP code, \"City, ST\" (e.g. Denver, CO) or a place. An ambiguous place "
+                    "answers did_you_mean: send one of them as term."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "Or a point: latitude with longitude (e.g. 32.7767, -96.797 for Dallas)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "With latitude: the point's longitude."
+                ),
+            ),
+            Param(
+                "climate_controlled",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with climate-controlled units."
+                ),
+            ),
+            Param(
+                "drive_up_access",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with drive-up units."
+                ),
+            ),
+            Param(
+                "indoor",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with indoor units."
+                ),
+            ),
+            Param(
+                "rv_parking",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with RV, boat or vehicle parking (covered or uncovered)."
+                ),
+            ),
+            Param(
+                "enclosed_vehicle_storage",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with enclosed vehicle storage."
+                ),
+            ),
+            Param(
+                "all_hour_access",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with 24-hour access."
+                ),
+            ),
+            Param(
+                "unit_sizes",
+                'Optional[list[Literal["5x5", "5x10", "5x15", "10x10", "10x15", "10x20", "10x25", "10x30"]]]',
+                doc=(
+                    "Only facilities with at least one of these sizes available: 5x5, 5x10, "
+                    "5x15, 10x10, 10x15, 10x20, 10x25, 10x30."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["distance", "price"]]',
+                doc=(
+                    "distance (default, nearest first, as Extra Space orders them) or price "
+                    "(lowest Starting at price first; facilities without one last)."
+                ),
+            ),
+        ),
+        one_of=(("term", "latitude"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="extraspace_facility",
+        namespace="extraspace",
+        method="facility",
+        http="POST",
+        path="/api/v1/extraspace/facility",
+        summary=(
+            "One Extra Space facility in full by id or link: store_id, store_number, name, "
+            "url, address, latitude, longitude, phone, existing_customer_phone, time_zone, "
+            "hours by type, has_24_hour_access, rating, review_count, promotion, starting_at, "
+            "price_stats [{category, lowest, average, highest, historical_lowest, "
+            "historical_average, historical_highest}] (as Extra Space's page data gives them), "
+            "has_kiosk, has_available_inventory, is_newly_built, is_coming_soon, "
+            "is_grand_opening, description, directions, google_maps_url, images, "
+            "unit_class_count, available_unit_class_count, units [{unit_id, size_class, "
+            "dimensions, width, depth, square_feet, exact_size, is_parking, features, "
+            "available, available_count, first_come, limited, promotions, in_store_price, "
+            "web_rate}], nearest_locations, notes. Prices are monthly and labelled as the "
+            "facility pages label them: in_store_price (IN STORE) and web_rate (WEB RATE); a "
+            "price Extra Space does not give is null. An unknown id is a charged 404. Extra "
+            "Space Storage (extraspace.com, the US self-storage REIT). Scavio fetches the "
+            "public Extra Space page on request. US only, prices in USD. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An Extra Space facility id (search facilities[].store_id; the last number "
+                    "of the facility link). The store number in the facility name is a "
+                    "different number."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the facility link (search facilities[].url), e.g. "
+                    "https://www.extraspace.com/storage/facilities/us/tennessee/knoxville/1934/."
+                ),
+            ),
+            Param(
+                "include_unavailable",
+                "Optional[bool]",
+                doc=(
+                    "Also list unit classes with nothing to rent now (default: only the "
+                    "classes available now, as the facility page lists them)."
+                ),
+            ),
+        ),
+        one_of=(("store_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="extraspace_reviews",
+        namespace="extraspace",
+        method="reviews",
+        http="POST",
+        path="/api/v1/extraspace/reviews",
+        summary=(
+            "The Google reviews shown on an Extra Space facility page, sorted (recent, oldest, "
+            "rating_desc, rating_asc), filtered by stars and paged by Scavio over the "
+            "facility's full set: store_id, name, rating, rating_count (Extra Space's summary, "
+            "star-only ratings included), review_count, histogram, stars, sort, page, "
+            "page_size, total, pages, has_more, count, reviews [{review_id, rating, text, "
+            "date, source, reply (Extra Space's reply; the reviewer's name reads [name]), "
+            "reply_date}], notes. No reviewer name is returned. An unknown id is a charged "
+            "404. Extra Space Storage (extraspace.com, the US self-storage REIT). Scavio "
+            "fetches the public Extra Space page on request. US only, prices in USD. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An Extra Space facility id (search facilities[].store_id; the last number "
+                    "of the facility link). The store number in the facility name is a "
+                    "different number."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the facility link (search facilities[].url), e.g. "
+                    "https://www.extraspace.com/storage/facilities/us/tennessee/knoxville/1934/."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recent", "oldest", "rating_desc", "rating_asc"]]',
+                doc=(
+                    "recent (default), oldest, rating_desc or rating_asc (newest first within "
+                    "a rating)."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[list[int]]",
+                doc=(
+                    "Only reviews with these star ratings, e.g. [1, 2]."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews per page, 1 to 100 (default 20)."
+                ),
+            ),
+        ),
+        one_of=(("store_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="extraspace_city_prices",
+        namespace="extraspace",
+        method="city_prices",
+        http="POST",
+        path="/api/v1/extraspace/city-prices",
+        summary=(
+            "Self-storage prices in a US city as Extra Space's city page gives them: city, "
+            "state, state_name, url, currency, search_center, rating, review_count, "
+            "price_summary (the page's own sentences, e.g. \"105 self storage facilities near "
+            "Dallas, TX have small 5' x 5' units available now, starting at $7 and averaging "
+            "$24 per month.\"), price_stats [{category, store_count, lowest, average, highest, "
+            "historical_lowest, historical_average, historical_highest}], count, facilities "
+            "[store_id (the input of facility and reviews), store_number, name, url, address, "
+            "city, state, state_name, postal_code, latitude, longitude, distance_mi, phone, "
+            "promotion, starting_at {starting, small, medium, large, parking}, rating, "
+            "review_count, hours, features, unit_sizes_available, is_coming_soon, "
+            "is_grand_opening, expected_opening, best_prices [{unit_id, type, size_class, "
+            "dimensions, width, depth, square_feet, features, promotions, first_come, limited, "
+            "in_store_price, web_rate}], image, google_maps_url], notes. City pages are large: "
+            "allow up to 3 minutes. A city with no page is a charged 404. Extra Space Storage "
+            "(extraspace.com, the US self-storage REIT). Scavio fetches the public Extra Space "
+            "page on request. US only, prices in USD. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "str",
+                required=True,
+                doc=(
+                    "A US city Extra Space has a city page for (see locations)."
+                ),
+            ),
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "Its state: a 2-letter code or the state's name."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="extraspace_locations",
+        namespace="extraspace",
+        method="locations",
+        http="POST",
+        path="/api/v1/extraspace/locations",
+        summary=(
+            "The US cities Extra Space lists for its place search (about 1,700 in 44 states "
+            "and DC), optionally narrowed by state or by the start of a city name: state, "
+            "query, total, states, count, cities [{city, state, state_name}], notes. city and "
+            "state are the inputs of city-prices. Extra Space Storage (extraspace.com, the US "
+            "self-storage REIT). Scavio fetches the public Extra Space page on request. US "
+            "only, prices in USD. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Only cities in this state (code or name)."
+                ),
+            ),
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Only cities whose name starts with this (\"San\", or \"San Antonio, TX\")."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Public Storage: 3 endpoints on /api/v1/publicstorage.
+_PUBLICSTORAGE_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="publicstorage_search",
+        namespace="publicstorage",
+        method="search",
+        http="POST",
+        path="/api/v1/publicstorage/search",
+        summary=(
+            "Self-storage facilities near a ZIP or postal code, a city or an address on Public "
+            "Storage (publicstorage.com, the largest US self-storage operator, now also in "
+            "Canada). Scavio fetches the public Public Storage page on request. US or Canada "
+            "(English or French), sorted recommended, by distance or by price, with filters "
+            "(climate controlled, drive-up, 24/7 access, business, vehicle, RV or boat "
+            "storage, a unit size) applied to the facilities on the page. Returns market, "
+            "language, currency, distance_unit, location {query, slug, heading}, sort, "
+            "filters, page, pages, has_more, listed, count, facilities [rank, store_id (the "
+            "input of facility and reviews), site_number, name, url, address, city, state, "
+            "postal_code, country, phone, latitude, longitude, distance, distance_unit, "
+            "today_hours {opens, closes}, starting_from, currency, features "
+            "{climate_controlled, drive_up, access_24_7, business_storage, vehicle_storage, "
+            "rv_storage, boat_storage, manager_on_site, electronic_gate, instant_booking}, "
+            "unit_sizes, units_shown, units [id, name, size_class, size, dimension, vehicle, "
+            "features, currency, in_store_rent (In-Store Rent), online_price (Online price), "
+            "first_month_rent, first_month_after_promotion, second_month_after_promotion, "
+            "move_in_cost, admin_fee, lock_charge, promotion {id, name, label, reward_type, "
+            "amount, length_months, promotion_months_label, in_store_months_label}, "
+            "availability, units_left (only where the page says so)]], notes. 9-19 facilities "
+            "a page; a ZIP search pages through its slug. A place Public Storage cannot find "
+            "is a charged 404. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "location",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A ZIP or postal code, a city with its state or province (Austin, TX; "
+                    "Toronto, ON) or a street address. Not latitude / longitude."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "Or the search slug an earlier answer gave (location.slug, e.g. "
+                    "dallas-tx-75201): needed for page 2 and later."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default) or ca (Public Storage Canada)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "fr"]]',
+                doc=(
+                    "en (default) or fr: Public Storage Canada's French pages (market ca). The "
+                    "US site is English only."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recommended", "distance", "price_low"]]',
+                doc=(
+                    "recommended (Public Storage's default order), distance or price_low."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page from 1 (with slug past page 1). Public Storage pages shallowly: "
+                    "pages says how many."
+                ),
+            ),
+            Param(
+                "climate_controlled",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with climate-controlled units."
+                ),
+            ),
+            Param(
+                "drive_up",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with drive-up access."
+                ),
+            ),
+            Param(
+                "access_24_7",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with 24/7 access."
+                ),
+            ),
+            Param(
+                "business_storage",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities offering business storage."
+                ),
+            ),
+            Param(
+                "vehicle_storage",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with vehicle storage."
+                ),
+            ),
+            Param(
+                "rv_storage",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with RV storage."
+                ),
+            ),
+            Param(
+                "boat_storage",
+                "Optional[bool]",
+                doc=(
+                    "Only facilities with boat storage."
+                ),
+            ),
+            Param(
+                "unit_size",
+                'Optional[Literal["5x5", "5x10", "5x15", "10x10", "10x15", "10x20", "10x25", "10x30"]]',
+                doc=(
+                    "Only facilities with this unit size: 5x5, 5x10, 5x15, 10x10, 10x15, "
+                    "10x20, 10x25, 10x30."
+                ),
+            ),
+        ),
+        one_of=(("location", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="publicstorage_facility",
+        namespace="publicstorage",
+        method="facility",
+        http="POST",
+        path="/api/v1/publicstorage/facility",
+        summary=(
+            "One Public Storage facility in full by store id or link: store_id, site_number, "
+            "name, url, market, language, country, currency, phone, address {street, city, "
+            "state, postal_code, country}, latitude, longitude, market_area, rating, "
+            "review_count (US), office_hours, access_hours, rental_support_hours [{day, "
+            "hours}], hours_labels, amenities, images, payment_accepted, admin_fee_note, "
+            "units_count, units [id, name, size_class, size, dimension, vehicle, features, "
+            "currency, in_store_rent (In-Store Rent), online_price (Online price), "
+            "first_month_rent, first_month_after_promotion, second_month_after_promotion, "
+            "move_in_cost, admin_fee, lock_charge, promotion {id, name, label, reward_type, "
+            "amount, length_months, promotion_months_label, in_store_months_label}, "
+            "availability, units_left (only where the page says so)], notes. Prices are the "
+            "page's own per unit (In-Store Rent and Online price); promotions are as given and "
+            "can vary between visits. Public Storage does not publish occupancy. An unknown "
+            "store id is a charged 404. Public Storage (publicstorage.com, the largest US "
+            "self-storage operator, now also in Canada). Scavio fetches the public Public "
+            "Storage page on request. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Public Storage store id (search facilities[].store_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the facility link (facilities[].url), e.g. "
+                    "https://www.publicstorage.com/self-storage-tx-dallas/2044.html."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default) or ca. Read from url when sent."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "fr"]]',
+                doc=(
+                    "en (default) or fr: Public Storage Canada's French pages (market ca). The "
+                    "US site is English only."
+                ),
+            ),
+        ),
+        one_of=(("store_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="publicstorage_reviews",
+        namespace="publicstorage",
+        method="reviews",
+        http="POST",
+        path="/api/v1/publicstorage/reviews",
+        summary=(
+            "Every customer review Public Storage shows for one US facility, newest first (its "
+            "only order), in one answer, optionally only one star rating: store_id, stars, "
+            "count, reviews [{rating, date, date_iso, source (as given: Google), text}], "
+            "notes. No reviewer name is returned. US only (Canadian facility pages show none). "
+            "Public Storage (publicstorage.com, the largest US self-storage operator, now also "
+            "in Canada). Scavio fetches the public Public Storage page on request. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Public Storage store id (search facilities[].store_id)."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this many stars (1-5)."
+                ),
+            ),
+            Param(
+                "site_number",
+                "Optional[str]",
+                doc=(
+                    "Optional: the facility's site number (facilities[].site_number)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us"]]',
+                doc=(
+                    "us only: Public Storage Canada's pages show no reviews."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# EstateSales.net: 6 endpoints on /api/v1/estatesales.
+_ESTATESALES_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="estatesales_sales",
+        namespace="estatesales",
+        method="sales",
+        http="POST",
+        path="/api/v1/estatesales/sales",
+        summary=(
+            "Estate sales, auctions and moving sales near a US ZIP code or in a city's metro "
+            "area on EstateSales.net (estatesales.net, the US estate sale directory run by "
+            "Vintage Software). Scavio fetches the public EstateSales.net page on request. "
+            "Returns location {query, kind (zip or metro), state, city, metro, zip, heading, "
+            "latitude, longitude}, when, types, sort, total_count and filtered_count (the "
+            "site's own counts for the area), listed, count, sales [sale_id (the input of "
+            "sale), name, type, type_name, url, seller_type (company or private), company "
+            "{org_id, name, page_url, website, phones, logo, package} (company-run sales), "
+            "city, state, zip, address, address_released, latitude, longitude (company-run "
+            "sales, once the address is released), distance_miles, schedule (Today, Tomorrow), "
+            "starts_at_local / ends_at_local (the sale's wall-clock time), starts_at_utc / "
+            "ends_at_utc, dates [{starts_at_local, ends_at_local, starts_at_utc, ends_at_utc, "
+            "show_end_time}], first_published_at, featured {local, regional, national}, "
+            "picture_count, main_picture {url, thumbnail_url, width, height, description}, "
+            "auction_url, is_marketplace_sale], note. The page lists the first 20 sales of the "
+            "area (nearest first); when, type and sort apply to those 20. Private sellers are "
+            "never identified: a private sale gives its city, state and ZIP only (no name, "
+            "phone, street address or coordinates). An unknown ZIP or city is a charged 404. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A 5-digit US ZIP code: the sales around it."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city (with state): EstateSales.net lists the sales of its metro area."
+                ),
+            ),
+            Param(
+                "state",
+                'Optional[Literal["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]]',
+                doc=(
+                    "A US state code (the 50 states and DC)."
+                ),
+            ),
+            Param(
+                "when",
+                'Optional[Literal["any", "today", "tomorrow", "15_days"]]',
+                doc=(
+                    "any (default), today, tomorrow or 15_days (starting within 15 days), read "
+                    "as the site's own date filter reads each sale."
+                ),
+            ),
+            Param(
+                "type",
+                'Optional[Union[Literal["estate_sales", "auctions", "moving_sales", "business_closings", "moved_offsite_to_warehouse", "by_appointment", "online_only_auctions", "auction_house", "moved_offsite_to_store", "charity_sales", "outside_sales", "single_item_type_collections", "buyouts_or_cleanouts", "demolition_sales", "online_estate_sales"], list[Literal["estate_sales", "auctions", "moving_sales", "business_closings", "moved_offsite_to_warehouse", "by_appointment", "online_only_auctions", "auction_house", "moved_offsite_to_store", "charity_sales", "outside_sales", "single_item_type_collections", "buyouts_or_cleanouts", "demolition_sales", "online_estate_sales"]]]]',
+                doc=(
+                    "Sale types to keep: estate_sales, auctions, moving_sales, "
+                    "business_closings, moved_offsite_to_warehouse, by_appointment, "
+                    "online_only_auctions, auction_house, moved_offsite_to_store, "
+                    "charity_sales, outside_sales, single_item_type_collections, "
+                    "buyouts_or_cleanouts, demolition_sales, online_estate_sales."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["distance", "start_date", "end_date", "newest", "most_pictures"]]',
+                doc=(
+                    "distance (default: the site's order, nearest first), start_date, "
+                    "end_date, newest (first published) or most_pictures."
+                ),
+            ),
+        ),
+        one_of=(("zip", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estatesales_sale",
+        namespace="estatesales",
+        method="sale",
+        http="POST",
+        path="/api/v1/estatesales/sale",
+        summary=(
+            "One estate sale in full by sale id or link: sale_id, name, type, type_name, url, "
+            "status {message, has_started, is_over}, seller (company: {type, org_id, name, "
+            "phones, page_url, website, logo, trusted}; private: {type}), location {address, "
+            "city, state, zip, latitude, longitude, directions, address_released, "
+            "address_shown_after_utc, address_shown_after_local}, starts_at_local / "
+            "ends_at_local (the sale's wall-clock time), starts_at_utc / ends_at_utc, dates "
+            "[{starts_at_local, ends_at_local, starts_at_utc, ends_at_utc, show_end_time}], "
+            "utc_offset, length_in_days, terms, description (plain text), featured, "
+            "picture_count, pictures [{url, thumbnail_url, width, height, description}], "
+            "auction_url, video_url, is_marketplace_sale, note. A company-run sale's street "
+            "address is given as published, after its show-address time. Private sellers are "
+            "never identified: a private sale gives its city, state and ZIP only (no name, "
+            "phone, street address or coordinates). An unknown sale id is a charged 404. "
+            "EstateSales.net (estatesales.net, the US estate sale directory run by Vintage "
+            "Software). Scavio fetches the public EstateSales.net page on request. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "sale_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An EstateSales.net sale id (sales[].sale_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the sale link (sales[].url), e.g. "
+                    "https://www.estatesales.net/TX/Garland/75041/5114622."
+                ),
+            ),
+        ),
+        one_of=(("sale_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estatesales_companies",
+        namespace="estatesales",
+        method="companies",
+        http="POST",
+        path="/api/v1/estatesales/companies",
+        summary=(
+            "Every estate sale company EstateSales.net lists for a US metro area: state, "
+            "metro, heading, count, companies [org_id (the input of company), name, tagline, "
+            "trusted, package, address, city, state, zip, latitude, longitude, phones, "
+            "website, social {facebook, instagram, youtube, pinterest, linkedin, twitter}, "
+            "page_url, logo, has_home_page, created_at, distance {miles, display}], note. A "
+            "city resolves to its metro area. An unknown metro is a charged 404. "
+            "EstateSales.net (estatesales.net, the US estate sale directory run by Vintage "
+            "Software). Scavio fetches the public EstateSales.net page on request. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "state",
+                'Literal["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]',
+                required=True,
+                doc=(
+                    "A US state code (the 50 states and DC)."
+                ),
+            ),
+            Param(
+                "metro",
+                "Optional[str]",
+                doc=(
+                    "The metro area as EstateSales.net names it (Dallas-Fort-Worth-Arlington, "
+                    "New-York) or a city in it (Dallas)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Alias of metro: a city resolves to its metro area."
+                ),
+            ),
+        ),
+        one_of=(("metro", "city"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estatesales_company",
+        namespace="estatesales",
+        method="company",
+        http="POST",
+        path="/api/v1/estatesales/company",
+        summary=(
+            "One estate sale company's public page by org id or link: profile {org_id, name, "
+            "logo, phones, website, description, city, state, zip, page_url, "
+            "primary_metro_area, metro_areas, social, memberships [{name, description}], "
+            "has_home_page}, testimonials [{id, text, date}] (no author names), sales_count, "
+            "sales [sale_id, name, type, type_name, url, address (as published), city, state, "
+            "zip, status, has_started, starts_at_local, ends_at_local, picture_count, "
+            "thumbnail_url, featured], note. 10-50 s: set a client timeout of at least 150 s. "
+            "An unknown org id is a charged 404. EstateSales.net (estatesales.net, the US "
+            "estate sale directory run by Vintage Software). Scavio fetches the public "
+            "EstateSales.net page on request. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "org_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An EstateSales.net company id (companies[].org_id, "
+                    "sales[].company.org_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the company link (companies[].page_url), e.g. "
+                    "https://www.estatesales.net/companies/TX/Arlington/76017/14402."
+                ),
+            ),
+        ),
+        one_of=(("org_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estatesales_search",
+        namespace="estatesales",
+        method="search",
+        http="POST",
+        path="/api/v1/estatesales/search",
+        summary=(
+            "EstateSales.net's keyword search over estate sales and marketplace items, 24 a "
+            "page (pages 1 to 4): query, page, page_size, total, total_pages, has_more, "
+            "max_page, count, items [kind item: item_id (the input of item), name, url, "
+            "currency (USD), current_price, current_bid, buy_now_price, base_buy_now_price, "
+            "bids, accepts_bids, buy_now, allows_shipping, shipping_cost, allows_local_pickup, "
+            "city, state, starts_at_utc, ends_at_utc, main_picture; kind sale: sale_id, name, "
+            "type, type_name, url, seller_type, company_name, address (company-run), city, "
+            "state, zip, starts_at_local, ends_at_local, dates, featured, main_picture], "
+            "companies [{org_id, name, city, state, zip, page_url}] (companies whose name "
+            "matches), note. 10-50 s: set a client timeout of at least 150 s. Private sellers "
+            "are never identified: a private sale gives its city, state and ZIP only (no name, "
+            "phone, street address or coordinates). EstateSales.net (estatesales.net, the US "
+            "estate sale directory run by Vintage Software). Scavio fetches the public "
+            "EstateSales.net page on request. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "A keyword: searches sales and marketplace items."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 24, 1 to 4."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estatesales_item",
+        namespace="estatesales",
+        method="item",
+        http="POST",
+        path="/api/v1/estatesales/item",
+        summary=(
+            "One EstateSales.net marketplace item by item id or link: item_id, sale_id, name, "
+            "url, description, currency (USD), prices {current, current_bid, starting_bid, "
+            "minimum_bid, buy_now, base_buy_now, discount_percent}, bids, has_reserve, "
+            "allows_bidding, allows_buy_now, shipping {allows_shipping, cost, days_to_ship}, "
+            "pickup {allows_local_pickup, local_pickup_discount, details}, payment {online, "
+            "in_person, in_person_details}, terms, categories [{id, name, parent_id}], tags, "
+            "city, state, zip, published_at, starts_at_utc, ends_at_utc, utc_offset, status "
+            "{has_started, has_ended, is_active, sale_has_ended}, dimensions, picture_count, "
+            "pictures [{url, thumbnail_url}], seller {type, org_id, name, page_url, website, "
+            "phones, logo, trusted} (the company selling it), note. No bidder identity is "
+            "returned. An unknown item id is a charged 404. EstateSales.net (estatesales.net, "
+            "the US estate sale directory run by Vintage Software). Scavio fetches the public "
+            "EstateSales.net page on request. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "item_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "An EstateSales.net marketplace item id (search items[].item_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the item link, e.g. "
+                    "https://www.estatesales.net/marketplace/items/2038603."
+                ),
+            ),
+        ),
+        one_of=(("item_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Goodreads: 14 endpoints on /api/v1/goodreads.
+_GOODREADS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="goodreads_search",
+        namespace="goodreads",
+        method="search",
+        http="POST",
+        path="/api/v1/goodreads/search",
+        summary=(
+            "Search Goodreads (goodreads.com, Amazon's book community) for books (by title, "
+            "author or ISBN), Listopia lists or quotes, 20 per page: site, query, type, page, "
+            "page_size, total (exact counts only), total_text (as Goodreads words it, e.g. "
+            "over 111k), has_more, count, results. Books: [{position, book_id, work_id, title, "
+            "url, cover_url, author {author_id, name, url, goodreads_author}, rating (0-5), "
+            "ratings_count, other_authors, reviews_count, editions_count, published (this "
+            "edition), series [{series_id, title, position, url}], kindle_price (USD, as "
+            "given), description}]. Lists: [{position, list_id, title, url, books_count, "
+            "voters, sponsored, top_books}]. Quotes: [{position, quote_id, text, author, "
+            "book_title, likes (rounded as the search shows it), likes_text, url}]. Goodreads "
+            "search has no sort and no title or author field filter. Scavio fetches the public "
+            "Goodreads page on request. Goodreads retired its official API (no new developer "
+            "keys since 2020). 1 credit per call. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search text: a title, an author, a phrase or an ISBN (an ISBN finds that "
+                    "edition)."
+                ),
+            ),
+            Param(
+                "type",
+                'Optional[Literal["books", "lists", "quotes"]]',
+                doc=(
+                    "books (default), lists or quotes: Goodreads' own search tabs."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 20 (1 to 100; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_book",
+        namespace="goodreads",
+        method="book",
+        http="POST",
+        path="/api/v1/goodreads/book",
+        summary=(
+            "One book on Goodreads (goodreads.com, Amazon's book community) by id, link or "
+            "ISBN: requested, book_id, work_id, url, title, title_complete, original_title, "
+            "description, cover_url, author, authors [{author_id, name, role, url, "
+            "goodreads_author}], author_profile {bio, photo_url, works_count, followers}, "
+            "rating, ratings_count, rating_distribution {5..1}, reviews_count, "
+            "review_languages [{language, count}], genres [{name, slug, url}], series "
+            "[{series_id, title, position, url}], format, pages, publisher, published, "
+            "first_published, language, isbn, isbn13, asin, awards [{name, category, "
+            "designation (winner, nominee), year, url}], places, characters, kindle {price, "
+            "currency (USD), price_text, kindle_unlimited, prime_reading} (as Goodreads shows "
+            "it), quotes_count, questions_count, discussions_count, editions_url, "
+            "reviews_total, reviews_shown, reviews (the first 30, popular order) [{review_id, "
+            "rating (1-5; null when the reader gave no stars), created_at, updated_at, text "
+            "(plain text), spoiler, recommend_for, likes, comments}]. Reviewer names, avatars "
+            "and profile links are never returned (profile links are cut out of review text). "
+            "An unknown id or ISBN is a charged 404. Scavio fetches the public Goodreads page "
+            "on request. Goodreads retired its official API (no new developer keys since "
+            "2020). 1 credit per call. Failed upstream calls are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "book_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads book id (book_id of any answer) or the id with its slug "
+                    "(44767458-dune)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com book link."
+                ),
+            ),
+            Param(
+                "isbn",
+                "Optional[str]",
+                doc=(
+                    "An ISBN-13 or ISBN-10 (checksum verified): the edition with it."
+                ),
+            ),
+        ),
+        one_of=(("book_id", "url", "isbn"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_reviews",
+        namespace="goodreads",
+        method="reviews",
+        http="POST",
+        path="/api/v1/goodreads/reviews",
+        summary=(
+            "Reader reviews of one book on Goodreads (goodreads.com, Amazon's book community), "
+            "30 per page, with Goodreads' own sort (popular, newest, oldest), star filter, "
+            "language filter and this-edition filter: book {book_id, work_id, title, author, "
+            "url}, sort, stars, language, edition_only, pages_requested, pages_read, "
+            "page_size, total (as Goodreads counts the view), has_more, count, reviews "
+            "[{review_id, rating (1-5; null when the reader gave no stars), created_at, "
+            "updated_at, text (plain text), spoiler, recommend_for, likes, comments}]. The "
+            "default view (popular, page 1, no filter) also returns rating, ratings_count, "
+            "rating_distribution and review_languages. Reviewer names, avatars and profile "
+            "links are never returned (profile links are cut out of review text). Up to 4 "
+            "pages (120 reviews) of one view per call: Goodreads has no jump to a deeper page. "
+            "Sorted, filtered or multi-page views open the review page and read what it shows: "
+            "slower (typically 15-60 s, up to about 2 minutes; set a client timeout of at "
+            "least 150 s). Scavio fetches the public Goodreads page on request. Goodreads "
+            "retired its official API (no new developer keys since 2020). 1 credit per call. "
+            "Failed upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "book_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads book id."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com book link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["popular", "newest", "oldest"]]',
+                doc=(
+                    "popular (default), newest or oldest: the review page's own orders."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this many stars (1-5)."
+                ),
+            ),
+            Param(
+                "language",
+                "Optional[str]",
+                doc=(
+                    "Only reviews in this language, as the page's filter lists it (en, es, fr, "
+                    "de, zh-TW ...; review_languages of a book or plain reviews answer lists "
+                    "them with counts)."
+                ),
+            ),
+            Param(
+                "edition_only",
+                "Optional[bool]",
+                doc=(
+                    "Only reviews of this edition (default: every edition of the work, as "
+                    "Goodreads shows them)."
+                ),
+            ),
+            Param(
+                "pages",
+                "Optional[int]",
+                doc=(
+                    "Pages of 30 to read in this call, 1 to 4 (up to 120 reviews of the view)."
+                ),
+            ),
+        ),
+        one_of=(("book_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_suggestions",
+        namespace="goodreads",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/goodreads/suggestions",
+        summary=(
+            "The books Goodreads (goodreads.com, Amazon's book community) suggests as a reader "
+            "types a title, author or ISBN (its search box): query, count, books [{book_id, "
+            "work_id, title, url, cover_url, author {author_id, name, url, goodreads_author}, "
+            "rating (0-5), ratings_count, title_bare, pages, description}]. An ISBN returns "
+            "that edition. 1 credit per call. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a reader has typed so far: a title, an author or an ISBN."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_author",
+        namespace="goodreads",
+        method="author",
+        http="POST",
+        path="/api/v1/goodreads/author",
+        summary=(
+            "One author's page on Goodreads (goodreads.com, Amazon's book community): "
+            "author_id, name, url, goodreads_author, photo_url, born {date, place}, died, "
+            "website, genres, influences, member_since (Goodreads Authors), bio, rating, "
+            "ratings_count, reviews_count, works_count, followers, top_books [{book_id, "
+            "work_id, title, url, cover_url, author {author_id, name, url, goodreads_author}, "
+            "rating (0-5), ratings_count, published_year, editions_count}], series "
+            "[{series_id, title, url}]. An unknown id is a charged 404. Scavio fetches the "
+            "public Goodreads page on request. Goodreads retired its official API (no new "
+            "developer keys since 2020). 1 credit per call. Failed upstream calls are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "author_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads author id (author.author_id of any answer)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com author link."
+                ),
+            ),
+        ),
+        one_of=(("author_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_author_books",
+        namespace="goodreads",
+        method="author_books",
+        http="POST",
+        path="/api/v1/goodreads/author-books",
+        summary=(
+            "Every book of one author on Goodreads (goodreads.com, Amazon's book community), "
+            "30 per page, in Goodreads' order or by original_publication_year, title, "
+            "average_rating or number_of_pages: author_id, author, sort, page, page_size, "
+            "has_more, count, books [{book_id, work_id, title, url, cover_url, author "
+            "{author_id, name, url, goodreads_author}, rating (0-5), ratings_count, "
+            "other_authors, published_year, editions_count}]. 1 credit per call. Failed "
+            "upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "author_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads author id."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com author link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["popularity", "original_publication_year", "title", "average_rating", "number_of_pages"]]',
+                doc=(
+                    "popularity (default), original_publication_year, title, average_rating, "
+                    "number_of_pages: the author page's own sorts."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 30 (1 to 100; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        one_of=(("author_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_series",
+        namespace="goodreads",
+        method="series",
+        http="POST",
+        path="/api/v1/goodreads/series",
+        summary=(
+            "One series on Goodreads (goodreads.com, Amazon's book community) with every book "
+            "in Goodreads' reading order: series_id, url, title, primary_works, total_works, "
+            "description, count, books [{label (Book 1, Book 2.5 ...), position, book_id, "
+            "work_id, title, url, cover_url, author {author_id, name, url, goodreads_author}, "
+            "rating (0-5), ratings_count, title_bare, reviews_count, pages, published, "
+            "description}]. 1 credit per call. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "series_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads series id (series[].series_id of a book answer)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com series link."
+                ),
+            ),
+        ),
+        one_of=(("series_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_editions",
+        namespace="goodreads",
+        method="editions",
+        http="POST",
+        path="/api/v1/goodreads/editions",
+        summary=(
+            "Every edition of one work on Goodreads (goodreads.com, Amazon's book community), "
+            "10 per page, with Goodreads' six sorts: work_id, title, author, first_published, "
+            "book_url, sort, page, page_size, total, has_more, count, editions [{book_id, "
+            "title, url, cover_url, published, publisher, format, edition, pages, isbn13, "
+            "isbn10, asin, language, authors, rating, ratings_count}]. 1 credit per call. "
+            "Failed upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "work_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads work id: work_id of a book answer (all editions of a book "
+                    "share it)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com work editions link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["title", "original_date_published", "date_published", "avg_rating", "num_ratings", "format"]]',
+                doc=(
+                    "title, original_date_published, date_published, avg_rating, num_ratings, "
+                    "format: the editions page's own six sorts (default Goodreads' own order)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 10 (1 to 1000; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        one_of=(("work_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_list",
+        namespace="goodreads",
+        method="list",
+        http="POST",
+        path="/api/v1/goodreads/list",
+        summary=(
+            "One Listopia list on Goodreads (goodreads.com, Amazon's book community), 100 "
+            "books per page in vote order: list_id, url, title, description, books_count, "
+            "voters, created, tags, page, page_size, has_more, count, books [{rank, book_id, "
+            "work_id, title, url, cover_url, author {author_id, name, url, goodreads_author}, "
+            "rating (0-5), ratings_count, other_authors, score, votes}]. The list's creator is "
+            "not returned. 1 credit per call. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "list_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads Listopia list id (list_id of a list answer)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com list link."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 100 (1 to 1000; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        one_of=(("list_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_book_lists",
+        namespace="goodreads",
+        method="book_lists",
+        http="POST",
+        path="/api/v1/goodreads/book-lists",
+        summary=(
+            "The Listopia lists that contain one book on Goodreads (goodreads.com, Amazon's "
+            "book community), 30 per page: book_id, title, page, page_size, has_more, count, "
+            "lists [{list_id, title, url, rank (the book's place on the list), rank_text, "
+            "books_count, voters}]. 1 credit per call. Failed upstream calls are not charged; "
+            "a not-found is charged."
+        ),
+        params=(
+            Param(
+                "book_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Goodreads book id."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A goodreads.com book link."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 30 (1 to 1000; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        one_of=(("book_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_list_search",
+        namespace="goodreads",
+        method="list_search",
+        http="POST",
+        path="/api/v1/goodreads/list-search",
+        summary=(
+            "Listopia lists on Goodreads (goodreads.com, Amazon's book community) whose title "
+            "matches, 20 per page: query, page, page_size, total_text, has_more, count, lists "
+            "[{position, list_id, title, url, books_count, voters, sponsored, top_books "
+            "[{book_id, title, author, url, cover_url, rating, ratings_count}]}]. 1 credit per "
+            "call. Failed upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Words in a list's title."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 20 (1 to 100; has_more says whether there is another)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_quotes",
+        namespace="goodreads",
+        method="quotes",
+        http="POST",
+        path="/api/v1/goodreads/quotes",
+        summary=(
+            "Quotes on Goodreads (goodreads.com, Amazon's book community) by search words, by "
+            "tag or from one book (work_id): query, tag, work_id, title, page, page_size, "
+            "total, has_more, count, quotes [{quote_id, text, author, book {title, work_id, "
+            "quotes_url}, tags, likes, url}]. 1 credit per call. Failed upstream calls are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Quotes containing these words, or by this author or from this book."
+                ),
+            ),
+            Param(
+                "tag",
+                "Optional[str]",
+                doc=(
+                    "Quotes with this tag (tags[] of a quote answer)."
+                ),
+            ),
+            Param(
+                "work_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Quotes from one book: its work_id (book answer)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 20 (query) or 30 (tag, work_id) (1 to 100; has_more says whether "
+                    "there is another)."
+                ),
+            ),
+        ),
+        one_of=(("query", "tag", "work_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_genre",
+        namespace="goodreads",
+        method="genre",
+        http="POST",
+        path="/api/v1/goodreads/genre",
+        summary=(
+            "Books of one genre on Goodreads (goodreads.com, Amazon's book community): the "
+            "first 50 of the genre's shelf (popular: book_id, title, url, cover_url, author, "
+            "other_authors, shelved_count, rating, ratings_count, published_year; "
+            "shelved_books is the shelf's size) or the books most read this week (most_read: "
+            "position, book_id, title, url, cover_url): genre, list, title, count, books, "
+            "notes. Goodreads shows visitors one page of a genre. An unknown genre is a "
+            "charged 404. 1 credit per call. Failed upstream calls are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "genre",
+                "str",
+                required=True,
+                doc=(
+                    "A Goodreads genre as its link writes it (fantasy, science-fiction, "
+                    "young-adult, historical-fiction; genres[].slug of a book answer)."
+                ),
+            ),
+            Param(
+                "list",
+                'Optional[Literal["popular", "most_read"]]',
+                doc=(
+                    "popular (default): the first 50 books of the genre's shelf, most shelved "
+                    "first; most_read: the books most read this week in the genre."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="goodreads_new_releases",
+        namespace="goodreads",
+        method="new_releases",
+        http="POST",
+        path="/api/v1/goodreads/new-releases",
+        summary=(
+            "New releases on Goodreads (goodreads.com, Amazon's book community): by genre (the "
+            "new releases Goodreads tags with it: position, book_id, title, url, cover_url) or "
+            "by month (YYYY-MM: the month's most popular releases across every genre, the "
+            "first 15 Goodreads shows on its page: rank, count (the number Goodreads ranks by, "
+            "as given), book_id, work_id, title, url, cover_url, author {author_id, name, url, "
+            "goodreads_author}, rating (0-5), ratings_count, reviews_count, description; "
+            "has_more says whether its list ranks more). 1 credit per call. Failed upstream "
+            "calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "genre",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "New releases Goodreads tags with this genre."
+                ),
+            ),
+            Param(
+                "month",
+                "Optional[str]",
+                doc=(
+                    "YYYY-MM: the month's most popular releases across every genre (the first "
+                    "15 Goodreads shows)."
+                ),
+            ),
+        ),
+        one_of=(("genre", "month"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Expedia: 4 endpoints on /api/v1/expedia.
+_EXPEDIA_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="expedia_search",
+        namespace="expedia",
+        method="search",
+        http="POST",
+        path="/api/v1/expedia/search",
+        summary=(
+            "Search hotels and stays on Expedia (expedia.com, Expedia Group's travel booking "
+            "site). Scavio fetches the public Expedia page on request. Labels and texts are in "
+            "the market's language, as Expedia writes them; field names are English. By place "
+            "name or region id, dates and adults (one room), with Expedia's sorts and filters "
+            "(star rating, amenity, guest rating): market, language, currency, destination, "
+            "region_id, destination_name, check_in, check_out, nights, adults, rooms, sort, "
+            "filters, applied (the selections Expedia's page echoed), matched_total (as "
+            "Expedia reports it), results_heading, count, partial, properties [position, "
+            "property_id (the input of property and price_calendar), name, path, neighborhood, "
+            "messages, rating {score, score_display, label, review_count, review_count_text}, "
+            "price {amount, amount_display (the card's large price), lead (nightly or total: "
+            "which one the large price is; markets differ), nightly, nightly_display, total, "
+            "total_display, was, was_display (the struck-through price), was_applies_to, "
+            "fees_text (Expedia's own line, e.g. Total with taxes and fees), stay_text, "
+            "price_messages, currency} or null, deal (Expedia's deal badge, e.g. Black Friday "
+            "$436 off), scarcity (as shown, e.g. We have 1 left at this price), badges (e.g. "
+            "VIP Access, Member Price available, Ad), vip_access, member_price, sponsored "
+            "(Expedia's Ad placements, kept in place), coordinates {latitude, longitude} or "
+            "null, images], notes. These are the top results Expedia shows on the first page "
+            "of its results: Expedia's page carries 3 of them on most requests (partial: true) "
+            "and 10 on some; no further page can be fetched. Prices are exactly as Expedia "
+            "shows them for the requested dates. 2 credits. Can take up to about 4 minutes "
+            "when Expedia answers slowly: set a client timeout of at least 250 s. Billed on "
+            "what the request actually costs: credits_used reports it (2 credits for most "
+            "pages, 1 on some New Zealand, Korea and Indonesia pages). Failed upstream calls "
+            "and another market's page are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "check_in",
+                "str",
+                required=True,
+                doc=(
+                    "Check-in date, YYYY-MM-DD."
+                ),
+            ),
+            Param(
+                "check_out",
+                "str",
+                required=True,
+                doc=(
+                    "Check-out date, YYYY-MM-DD (at most 28 nights after check_in)."
+                ),
+            ),
+            Param(
+                "destination",
+                "Optional[str]",
+                doc=(
+                    "A place as you would type it on Expedia (city, area, landmark or airport)."
+                ),
+            ),
+            Param(
+                "region_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or an Expedia region id: places[].region_id of suggestions."
+                ),
+            ),
+            Param(
+                "adults",
+                "Optional[int]",
+                doc=(
+                    "Adults in the room (default 2). One room."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recommended", "price_asc", "price_desc", "review"]]',
+                doc=(
+                    "recommended (default), price_asc, price_desc, review (guest rating): "
+                    "Expedia's own sort options."
+                ),
+            ),
+            Param(
+                "star",
+                "Optional[int]",
+                doc=(
+                    "Expedia's star rating filter (1-5)."
+                ),
+            ),
+            Param(
+                "amenity",
+                'Optional[Literal["POOL", "PETS", "WIFI", "AIR_CONDITIONING", "FREE_AIRPORT_TRANSPORTATION", "HOT_TUB", "SPA_ON_SITE", "WASHER_DRYER", "KITCHEN_KITCHENETTE", "ELECTRIC_CAR", "GYM", "CRIB", "FREE_PARKING", "BALCONY_OR_TERRACE", "RESTAURANT_IN_HOTEL"]]',
+                doc=(
+                    "One of Expedia's popular amenity filters: POOL, PETS, WIFI, "
+                    "AIR_CONDITIONING, FREE_AIRPORT_TRANSPORTATION, HOT_TUB, SPA_ON_SITE, "
+                    "WASHER_DRYER, KITCHEN_KITCHENETTE, ELECTRIC_CAR, GYM, CRIB, FREE_PARKING, "
+                    "BALCONY_OR_TERRACE, RESTAURANT_IN_HOTEL."
+                ),
+            ),
+            Param(
+                "guest_rating_min",
+                "Optional[int]",
+                doc=(
+                    "Expedia's guest rating filter: 7 (7+), 8 (8+) or 9 (9+)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "es-us", "zh-us", "en-gb", "en-ie", "en-ca", "fr-ca", "en-au", "en-nz", "de-de", "de-at", "de-ch", "fr-ch", "fr-fr", "nl-be", "fr-be", "nl-nl", "it-it", "es-es", "da-dk", "sv-se", "no-no", "fi-fi", "es-mx", "pt-br", "es-ar", "es-cl", "es-co", "es-pe", "es-cr", "en-eg", "ja-jp", "en-jp", "ko-kr", "en-kr", "zh-tw", "zh-hk", "en-hk", "zh-hans-hk", "en-sg", "en-my", "en-ph", "id-id", "en-id", "th-th", "en-th", "vi-vn", "en-in", "en-ae", "ar-ae", "ar-sa"]]',
+                doc=(
+                    "The Expedia market-language (default us): us, es-us, zh-us, en-gb, en-ie, "
+                    "en-ca, fr-ca, en-au, en-nz, de-de, de-at, de-ch, fr-ch, fr-fr, nl-be, "
+                    "fr-be, nl-nl, it-it, es-es, da-dk, sv-se, no-no, fi-fi, es-mx, pt-br, "
+                    "es-ar, es-cl, es-co, es-pe, es-cr, en-eg, ja-jp, en-jp, ko-kr, en-kr, "
+                    "zh-tw, zh-hk, en-hk, zh-hans-hk, en-sg, en-my, en-ph, id-id, en-id, "
+                    "th-th, en-th, vi-vn, en-in, en-ae, ar-ae, ar-sa. Each answers in its own "
+                    "language and currency (es-cl, es-co, es-pe, es-cr and en-eg are Expedia's "
+                    "Chile, Colombia, Peru, Costa Rica and Egypt sites). property and "
+                    "price_calendar are not available in en-gb, pt-br, zh-hk, en-hk, "
+                    "zh-hans-hk, en-my, en-ph (Expedia answers hotel pages there with another "
+                    "country's site)."
+                ),
+            ),
+        ),
+        one_of=(("destination", "region_id"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits, billed on actual cost (1 on some New Zealand, Korea and "
+            "Indonesia pages); another market's page and failed upstream calls are not "
+            "charged. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="expedia_property",
+        namespace="expedia",
+        method="property",
+        http="POST",
+        path="/api/v1/expedia/property",
+        summary=(
+            "One Expedia property page by id or path, fetched without dates: market, language, "
+            "currency, property_id, requested_id, name, path, stars, featured, address "
+            "{street, locality, region, postal_code, country}, coordinates {latitude, "
+            "longitude}, region_id, rating {score, score_display, best, label, review_count, "
+            "review_count_text} or null, description, about [{heading, texts}], amenities "
+            "[{group, items}] (every group, incl. parking and breakfast fees as Expedia writes "
+            "them), guest_liked [{heading, text}] (Expedia's own summary lines), fees (every "
+            "fee, deposit and resort fee line as Expedia writes it), policies [{kind, heading, "
+            "texts}] (check-in, check-out, minimum age, pets, children, payment types), "
+            "important_information [{kind, heading, texts}], neighborhood_text, nearby "
+            "[{group, places [{name, distance, travel_time}]}], faqs [{question, answer}], "
+            "photo_count, photos [{url, caption}], notes. Rooms and rates for dates and review "
+            "texts are not offered. An unknown property is a charged 404. 2 credits. Can take "
+            "up to about 4 minutes when Expedia answers slowly: set a client timeout of at "
+            "least 250 s. Billed on what the request actually costs: credits_used reports it "
+            "(2 credits for most pages, 1 on some New Zealand, Korea and Indonesia pages). "
+            "Failed upstream calls and another market's page are not charged; a not-found is "
+            "charged."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "An Expedia property id: properties[].property_id of search."
+                ),
+            ),
+            Param(
+                "path",
+                "Optional[str]",
+                doc=(
+                    "Or properties[].path of search (or an Expedia hotel link)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "es-us", "zh-us", "en-gb", "en-ie", "en-ca", "fr-ca", "en-au", "en-nz", "de-de", "de-at", "de-ch", "fr-ch", "fr-fr", "nl-be", "fr-be", "nl-nl", "it-it", "es-es", "da-dk", "sv-se", "no-no", "fi-fi", "es-mx", "pt-br", "es-ar", "es-cl", "es-co", "es-pe", "es-cr", "en-eg", "ja-jp", "en-jp", "ko-kr", "en-kr", "zh-tw", "zh-hk", "en-hk", "zh-hans-hk", "en-sg", "en-my", "en-ph", "id-id", "en-id", "th-th", "en-th", "vi-vn", "en-in", "en-ae", "ar-ae", "ar-sa"]]',
+                doc=(
+                    "The Expedia market-language (default us): us, es-us, zh-us, en-gb, en-ie, "
+                    "en-ca, fr-ca, en-au, en-nz, de-de, de-at, de-ch, fr-ch, fr-fr, nl-be, "
+                    "fr-be, nl-nl, it-it, es-es, da-dk, sv-se, no-no, fi-fi, es-mx, pt-br, "
+                    "es-ar, es-cl, es-co, es-pe, es-cr, en-eg, ja-jp, en-jp, ko-kr, en-kr, "
+                    "zh-tw, zh-hk, en-hk, zh-hans-hk, en-sg, en-my, en-ph, id-id, en-id, "
+                    "th-th, en-th, vi-vn, en-in, en-ae, ar-ae, ar-sa. Each answers in its own "
+                    "language and currency (es-cl, es-co, es-pe, es-cr and en-eg are Expedia's "
+                    "Chile, Colombia, Peru, Costa Rica and Egypt sites). property and "
+                    "price_calendar are not available in en-gb, pt-br, zh-hk, en-hk, "
+                    "zh-hans-hk, en-my, en-ph (Expedia answers hotel pages there with another "
+                    "country's site)."
+                ),
+            ),
+        ),
+        one_of=(("id", "path"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits, billed on actual cost (1 on some New Zealand, Korea and "
+            "Indonesia pages); another market's page and failed upstream calls are not "
+            "charged. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="expedia_price_calendar",
+        namespace="expedia",
+        method="price_calendar",
+        http="POST",
+        path="/api/v1/expedia/price-calendar",
+        summary=(
+            "Expedia's price calendar for one property: the price Expedia shows for each day "
+            "from today to about 10 months ahead (up to 302 days), labelled by Expedia \"Lowest "
+            "prices in the past 24 hours\": market, language, currency, property_id, name, "
+            "check_in, check_out, adults, label (Expedia's wording in the market's language), "
+            "label_en, begin, end, count, days_with_price, days [{date, price, price_display}] "
+            "(price null on days Expedia shows none), notes. check_in and check_out open the "
+            "page; the calendar spans Expedia's own window. Send path from search where you "
+            "can (some market sites answer a page opened from the id alone without its "
+            "calendar: tried again, then an unbilled 502). An unknown property is a charged "
+            "404. 2 credits. Can take up to about 4 minutes when Expedia answers slowly: set a "
+            "client timeout of at least 250 s. Billed on what the request actually costs: "
+            "credits_used reports it (2 credits for most pages, 1 on some New Zealand, Korea "
+            "and Indonesia pages). Failed upstream calls and another market's page are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "check_in",
+                "str",
+                required=True,
+                doc=(
+                    "Check-in date, YYYY-MM-DD (opens the page; the calendar spans Expedia's "
+                    "own window)."
+                ),
+            ),
+            Param(
+                "check_out",
+                "str",
+                required=True,
+                doc=(
+                    "Check-out date, YYYY-MM-DD."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[str]",
+                doc=(
+                    "An Expedia property id: properties[].property_id of search."
+                ),
+            ),
+            Param(
+                "path",
+                "Optional[str]",
+                doc=(
+                    "properties[].path of search (recommended: some market sites answer a page "
+                    "opened from the id alone without its calendar), or an Expedia hotel link."
+                ),
+            ),
+            Param(
+                "adults",
+                "Optional[int]",
+                doc=(
+                    "Adults (default 2)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "es-us", "zh-us", "en-gb", "en-ie", "en-ca", "fr-ca", "en-au", "en-nz", "de-de", "de-at", "de-ch", "fr-ch", "fr-fr", "nl-be", "fr-be", "nl-nl", "it-it", "es-es", "da-dk", "sv-se", "no-no", "fi-fi", "es-mx", "pt-br", "es-ar", "es-cl", "es-co", "es-pe", "es-cr", "en-eg", "ja-jp", "en-jp", "ko-kr", "en-kr", "zh-tw", "zh-hk", "en-hk", "zh-hans-hk", "en-sg", "en-my", "en-ph", "id-id", "en-id", "th-th", "en-th", "vi-vn", "en-in", "en-ae", "ar-ae", "ar-sa"]]',
+                doc=(
+                    "The Expedia market-language (default us): us, es-us, zh-us, en-gb, en-ie, "
+                    "en-ca, fr-ca, en-au, en-nz, de-de, de-at, de-ch, fr-ch, fr-fr, nl-be, "
+                    "fr-be, nl-nl, it-it, es-es, da-dk, sv-se, no-no, fi-fi, es-mx, pt-br, "
+                    "es-ar, es-cl, es-co, es-pe, es-cr, en-eg, ja-jp, en-jp, ko-kr, en-kr, "
+                    "zh-tw, zh-hk, en-hk, zh-hans-hk, en-sg, en-my, en-ph, id-id, en-id, "
+                    "th-th, en-th, vi-vn, en-in, en-ae, ar-ae, ar-sa. Each answers in its own "
+                    "language and currency (es-cl, es-co, es-pe, es-cr and en-eg are Expedia's "
+                    "Chile, Colombia, Peru, Costa Rica and Egypt sites). property and "
+                    "price_calendar are not available in en-gb, pt-br, zh-hk, en-hk, "
+                    "zh-hans-hk, en-my, en-ph (Expedia answers hotel pages there with another "
+                    "country's site)."
+                ),
+            ),
+        ),
+        one_of=(("id", "path"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits, billed on actual cost (1 on some New Zealand, Korea and "
+            "Indonesia pages); another market's page and failed upstream calls are not "
+            "charged. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="expedia_suggestions",
+        namespace="expedia",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/expedia/suggestions",
+        summary=(
+            "Expedia's destination suggestions for a partial place name: market, language, "
+            "currency, query, count, places [{type (CITY, NEIGHBORHOOD, POI, AIRPORT, "
+            "METROCODE ...), region_id (the input of search), name, display_name, full_name, "
+            "primary_name, secondary_name, latitude, longitude, country, country_code, "
+            "airport_code}], notes. Hotel names often return no place. 2 credits. Billed on "
+            "what the request actually costs: credits_used reports it (2 credits for most "
+            "pages, 1 on some New Zealand, Korea and Indonesia pages). Failed upstream calls "
+            "and another market's page are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "What a traveller has typed so far (a place name)."
+                ),
+            ),
+            Param(
+                "text",
+                "Optional[str]",
+                doc=(
+                    "The same as query."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Most places to return (1-8, default 8)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "es-us", "zh-us", "en-gb", "en-ie", "en-ca", "fr-ca", "en-au", "en-nz", "de-de", "de-at", "de-ch", "fr-ch", "fr-fr", "nl-be", "fr-be", "nl-nl", "it-it", "es-es", "da-dk", "sv-se", "no-no", "fi-fi", "es-mx", "pt-br", "es-ar", "es-cl", "es-co", "es-pe", "es-cr", "en-eg", "ja-jp", "en-jp", "ko-kr", "en-kr", "zh-tw", "zh-hk", "en-hk", "zh-hans-hk", "en-sg", "en-my", "en-ph", "id-id", "en-id", "th-th", "en-th", "vi-vn", "en-in", "en-ae", "ar-ae", "ar-sa"]]',
+                doc=(
+                    "The Expedia market-language (default us): us, es-us, zh-us, en-gb, en-ie, "
+                    "en-ca, fr-ca, en-au, en-nz, de-de, de-at, de-ch, fr-ch, fr-fr, nl-be, "
+                    "fr-be, nl-nl, it-it, es-es, da-dk, sv-se, no-no, fi-fi, es-mx, pt-br, "
+                    "es-ar, es-cl, es-co, es-pe, es-cr, en-eg, ja-jp, en-jp, ko-kr, en-kr, "
+                    "zh-tw, zh-hk, en-hk, zh-hans-hk, en-sg, en-my, en-ph, id-id, en-id, "
+                    "th-th, en-th, vi-vn, en-in, en-ae, ar-ae, ar-sa. Each answers in its own "
+                    "language and currency (es-cl, es-co, es-pe, es-cr and en-eg are Expedia's "
+                    "Chile, Colombia, Peru, Costa Rica and Egypt sites). property and "
+                    "price_calendar are not available in en-gb, pt-br, zh-hk, en-hk, "
+                    "zh-hans-hk, en-my, en-ph (Expedia answers hotel pages there with another "
+                    "country's site)."
+                ),
+            ),
+        ),
+        one_of=(("query", "text"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits, billed on actual cost (1 on some New Zealand, Korea and "
+            "Indonesia pages); another market's page and failed upstream calls are not "
+            "charged. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -35413,6 +39613,18 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_TRUECAR_ENDPOINTS,
     *_EDMUNDS_ENDPOINTS,
     *_KBB_ENDPOINTS,
+    # ====== batch 3 2026-11-26: 11 platforms (real estate, self storage, estate sales, books, travel) ======
+    *_MOVOTO_ENDPOINTS,
+    *_HOTPADS_ENDPOINTS,
+    *_APARTMENTLIST_ENDPOINTS,
+    *_COMPASS_ENDPOINTS,
+    *_AFFORDABLEHOUSING_ENDPOINTS,
+    *_LENNAR_ENDPOINTS,
+    *_EXTRASPACE_ENDPOINTS,
+    *_PUBLICSTORAGE_ENDPOINTS,
+    *_ESTATESALES_ENDPOINTS,
+    *_GOODREADS_ENDPOINTS,
+    *_EXPEDIA_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -42362,6 +46574,17 @@ NAMESPACES: tuple[str, ...] = (
     "truecar",
     "edmunds",
     "kbb",
+    "movoto",
+    "hotpads",
+    "apartmentlist",
+    "compass",
+    "affordablehousing",
+    "lennar",
+    "extraspace",
+    "publicstorage",
+    "estatesales",
+    "goodreads",
+    "expedia",
 )
 
 
