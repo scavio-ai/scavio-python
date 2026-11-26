@@ -9711,3 +9711,309 @@ def test_batch3_1126_credits_wire_and_timeouts():
     assert "pages" in {p.name for p in ENDPOINTS["goodreads_reviews"].params}
     assert ENDPOINTS["movoto_search"].min_timeout == 240.0
     assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH3_1126 for p in ep.params)
+
+
+# --- batch 4 2026-11-26: 8 namespaces (US retailers) ---
+
+BATCH4_1126 = {
+    "academy": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "store_availability": ("store-availability", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "bathandbodyworks": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "promotions": ("promotions", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+        "store_availability": ("store-availability", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "reviews_summary": ("reviews-summary", 1, 240.0),
+    },
+    "gap": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "prices": ("prices", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "store_stock": ("store-stock", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "trending": ("trending", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+    "rakuten": {
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "store_coupons": ("store-coupons", 1, 240.0),
+        "rates": ("rates", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "in_store": ("in-store", 1, 240.0),
+    },
+    "bjs": {
+        "product": ("product", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "coupons": ("coupons", 1, 240.0),
+        "clubs": ("clubs", 1, 240.0),
+    },
+    "zappos": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "questions": ("questions", 1, 240.0),
+        "lowest_prices": ("lowest-prices", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "newegg": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "categories": ("categories", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "offers": ("offers", 2, 240.0),
+        "reviews": ("reviews", 2, 240.0),
+        "deals": ("deals", 2, 240.0),
+        "seller": ("seller", 2, 240.0),
+        "seller_products": ("seller-products", 2, 240.0),
+        "suggestions": ("suggestions", 2, 240.0),
+    },
+    "rei": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "deals": ("deals", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "reviews": ("reviews", 2, 240.0),
+        "store_stock": ("store-stock", 2, 240.0),
+        "stores": ("stores", 2, 240.0),
+        "store": ("store", 2, 240.0),
+        "suggestions": ("suggestions", 2, 240.0),
+    },
+}
+BATCH4_1126_ONE_OF = {
+    "academy_product": ("url", "slug"),
+    "academy_stores": ("zip", "latitude"),
+    "academy_category": ("path", "url"),
+    "bathandbodyworks_product": ("product_id", "url"),
+    "bathandbodyworks_promotions": ("product_id", "url"),
+    "bathandbodyworks_store_availability": ("product_id", "url"),
+    "bathandbodyworks_reviews_summary": ("product_id", "url"),
+    "gap_category": ("cid", "url"),
+    "gap_product": ("pid", "url"),
+    "gap_stores": ("zip", "latitude"),
+    "gap_store_stock": ("sku_ids", "style_id"),
+    "bjs_product": ("product_id", "url"),
+    "bjs_reviews": ("product_id", "url"),
+    "zappos_product": ("product_id", "style_id", "stock_id", "asin"),
+    "rei_category": ("slug", "url"),
+    "rei_product": ("product_id", "url"),
+    "rei_reviews": ("product_id", "url"),
+    "rei_store_stock": ("zip", "city", "latitude"),
+    "rei_stores": ("zip", "latitude"),
+}
+BATCH4_1126_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH4_1126))
+def test_batch4_1126_credits_paths_timeouts(namespace):
+    """Every endpoint of the 8 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH4_1126[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(ep.one_of) == ((BATCH4_1126_ONE_OF[ep.key],) if ep.key in
+                                    BATCH4_1126_ONE_OF else ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("is_fallback", "").replace("unrelated fallback", "")
+        assert not BATCH4_1126_BANNED.search(text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH4_1126_WIRE = [
+    ("academy", "search", {"query": "yeti tumbler"}, "search"),
+    (
+        "academy", "product",
+        {
+            "url": "https://www.academy.com/p/yeti-duracoat-rambler-20-oz-tumbler",
+        },
+        "product",
+    ),
+    (
+        "academy", "store_availability",
+        {
+            "part_number": "111805768",
+            "store_id": "19",
+            "state": "TX",
+        },
+        "store-availability",
+    ),
+    ("academy", "stores", {"zip": "77098"}, "stores"),
+    ("academy", "store", {"store_ids": ["19", "327", "256"]}, "store"),
+    ("academy", "category", {"path": "/c/outdoors/coolers"}, "category"),
+    ("academy", "categories", {}, "categories"),
+    ("academy", "deals", {}, "deals"),
+    ("academy", "suggestions", {"query": "yeti"}, "suggestions"),
+    ("bathandbodyworks", "search", {"query": "candle"}, "search"),
+    ("bathandbodyworks", "category", {"path": "/c/all-candles/3-wick-candles"}, "category"),
+    ("bathandbodyworks", "categories", {}, "categories"),
+    ("bathandbodyworks", "product", {"product_id": "028029548"}, "product"),
+    ("bathandbodyworks", "promotions", {"product_id": "028029548"}, "promotions"),
+    ("bathandbodyworks", "offers", {}, "offers"),
+    (
+        "bathandbodyworks", "store_availability",
+        {
+            "store_id": "BBW00010",
+            "product_id": "028029548",
+        },
+        "store-availability",
+    ),
+    ("bathandbodyworks", "store", {"store_id": "BBW00010"}, "store"),
+    ("bathandbodyworks", "stores", {}, "stores"),
+    ("bathandbodyworks", "reviews_summary", {"product_id": "028029548"}, "reviews-summary"),
+    ("gap", "search", {"query": "jeans"}, "search"),
+    ("gap", "category", {"cid": "3033077"}, "category"),
+    ("gap", "categories", {}, "categories"),
+    ("gap", "product", {"pid": "403540002"}, "product"),
+    (
+        "gap", "prices",
+        {
+            "items": [{"brand": "old_navy", "pid": "903453022"}, "athleta:1177198082"],
+        },
+        "prices",
+    ),
+    ("gap", "stores", {"zip": "10001"}, "stores"),
+    ("gap", "store", {"store_id": "4132"}, "store"),
+    (
+        "gap", "store_stock",
+        {
+            "store_ids": ["220", "1519", "1456"],
+            "sku_ids": ["4035400023503"],
+        },
+        "store-stock",
+    ),
+    ("gap", "suggestions", {"query": "jea"}, "suggestions"),
+    ("gap", "trending", {}, "trending"),
+    ("gap", "deals", {}, "deals"),
+    ("rakuten", "stores", {}, "stores"),
+    ("rakuten", "store", {"store": "macys"}, "store"),
+    ("rakuten", "store_coupons", {"store": "macys"}, "store-coupons"),
+    ("rakuten", "rates", {"store_ids": ["8333", "7206", "3930"]}, "rates"),
+    ("rakuten", "search", {"query": "nike"}, "search"),
+    ("rakuten", "suggestions", {"query": "target"}, "suggestions"),
+    ("rakuten", "category", {"category": "electronics"}, "category"),
+    ("rakuten", "deals", {}, "deals"),
+    ("rakuten", "in_store", {}, "in-store"),
+    ("bjs", "product", {"product_id": "3000000000005430255"}, "product"),
+    ("bjs", "search", {"query": "coffee"}, "search"),
+    ("bjs", "category", {"category": "tvs-and-electronics>tvs"}, "category"),
+    ("bjs", "categories", {}, "categories"),
+    ("bjs", "reviews", {"product_id": "3000000000005430255"}, "reviews"),
+    ("bjs", "coupons", {}, "coupons"),
+    ("bjs", "clubs", {}, "clubs"),
+    ("zappos", "search", {}, "search"),
+    ("zappos", "product", {"product_id": "10002909"}, "product"),
+    ("zappos", "reviews", {"product_id": "10002909"}, "reviews"),
+    ("zappos", "questions", {"product_id": "10002909"}, "questions"),
+    ("zappos", "lowest_prices", {"product_id": "10002909"}, "lowest-prices"),
+    ("zappos", "categories", {}, "categories"),
+    ("zappos", "suggestions", {"query": "hoka bon"}, "suggestions"),
+    ("newegg", "search", {"query": "rtx 5070"}, "search"),
+    ("newegg", "category", {"category_id": "100007709"}, "category"),
+    ("newegg", "categories", {}, "categories"),
+    ("newegg", "product", {"item_number": "N82E16819113877"}, "product"),
+    ("newegg", "offers", {"item_number": "N82E16819113877"}, "offers"),
+    (
+        "newegg", "reviews",
+        {
+            "item_number": "N82E16819113877",
+            "group_id": 196668433,
+            "subcategory_id": 343,
+        },
+        "reviews",
+    ),
+    ("newegg", "deals", {}, "deals"),
+    ("newegg", "seller", {"seller": "TECH-EDGE"}, "seller"),
+    ("newegg", "seller_products", {"seller_id": "1066805289"}, "seller-products"),
+    ("newegg", "suggestions", {"query": "rtx 5"}, "suggestions"),
+    ("rei", "search", {"query": "rain jacket"}, "search"),
+    ("rei", "category", {"slug": "tents"}, "category"),
+    ("rei", "deals", {}, "deals"),
+    ("rei", "product", {"product_id": "243702"}, "product"),
+    ("rei", "reviews", {"product_id": "228617"}, "reviews"),
+    ("rei", "store_stock", {"sku": "2437020001", "zip": "98101"}, "store-stock"),
+    ("rei", "stores", {"zip": "80202"}, "stores"),
+    ("rei", "store", {"store_number": "18"}, "store"),
+    ("rei", "suggestions", {"query": "tent"}, "suggestions"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH4_1126_WIRE)
+def test_batch4_1126_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH4_1126[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH4_1126_ONE_OF))
+def test_batch4_1126_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch4_1126_credits_wire_and_timeouts():
+    """Newegg and REI 2 credits, the other six 1; 240 s floor everywhere."""
+    for ns in ("newegg", "rei"):
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {2}, ns
+    for ns in ("academy", "bathandbodyworks", "gap", "rakuten", "bjs", "zappos"):
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    assert {ep.min_timeout for ep in ENDPOINTS.values() if ep.namespace in BATCH4_1126} == {240.0}
+    assert not [
+        ep.key for ep in ENDPOINTS.values() if ep.namespace in BATCH4_1126 and ep.credits_note
+    ]
+    assert ENDPOINTS["academy_categories"].params == ()
+    assert ENDPOINTS["bjs_coupons"].params == ()
+    assert [p.name for p in ENDPOINTS["academy_store_availability"].required_params] == [
+        "part_number", "store_id", "state"]
+    assert ENDPOINTS["zappos_product"].one_of == (("product_id", "style_id", "stock_id", "asin"),)
+    assert ENDPOINTS["gap_store_stock"].one_of == (("sku_ids", "style_id"),)
+    assert "items" in {p.name for p in ENDPOINTS["gap_prices"].required_params}
+    assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH4_1126 for p in ep.params)

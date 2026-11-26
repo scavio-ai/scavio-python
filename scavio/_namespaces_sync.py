@@ -155,6 +155,14 @@ __all__ = [
     "_EstatesalesNamespace",
     "_GoodreadsNamespace",
     "_ExpediaNamespace",
+    "_AcademyNamespace",
+    "_BathandbodyworksNamespace",
+    "_GapNamespace",
+    "_RakutenNamespace",
+    "_BjsNamespace",
+    "_ZapposNamespace",
+    "_NeweggNamespace",
+    "_ReiNamespace",
 ]
 
 class _GoogleNamespace:
@@ -28880,3 +28888,1594 @@ class _ExpediaNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("expedia_suggestions", {"query": query, "text": text, "limit": limit, "market": market}, extra)
+
+class _AcademyNamespace:
+    """Academy Sports + Outdoors (academy.com, the US sporting goods retailer) search, product, store_availability, stores, store, category, categories, deals and suggestions endpoints; US only, prices in USD (national), exact units per store, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "newest", "top_rated", "price_asc", "price_desc"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). By keyword, sorted (relevance, best selling, newest, top rated, price), filtered by any facet (brand, product type, color, deals, size...) and a price range. Returns page, page_size, total, total_pages, has_more, count, sort, items [{position, id, part_number (use it in store-availability), name, brand, slug and url (use them in product), image, price and price_max (current), was_price, saving and percent_off (the tile's default variant, as Academy lists them), price_in_cart (Academy shows the lowest price only in the cart), promotion {message, promo_price}, rating, review_count, badges (Academy's deal tags: Hot Deal, Clearance, New, Ships to Store...), color_count, ecom_code (Academy's selling code as given: 01 SELL ONLINE, 02 DISPLAY ONLY, 04 DROP SHIP...), special_order, ships_to_store, same_day_delivery, free_shipping, default_variant {item_id, sku, attributes, url}}], sponsored (the paid placements, flagged apart from the organic items, with ad_position), facets [{id, label, values [{value, label, count, selected}]}] (any id and value works in facets), subcategories [{id, name, path, url, image}], title, filters_applied and notes. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            page: Results page, 1-based (the site shows up to 29 organic results per page; page_size reports it). A page past the last one returns an empty items list (total 0). Defaults to 1.
+            sort: relevance (default, the site's own order), best_selling, newest, top_rated, price_asc or price_desc (Academy's own price order, by its list price: promotions and cart prices can sit slightly out of order).
+            facets: Facet filters from a previous answer: {facets[].id: facets[].values[].value, or a list of values}, e.g. {"facet_Brand": "Nike"}, {"facet_Deals": "Clearance"}, {"facet_IndustrySubGroup": "Black"} (color). Values are case-sensitive and must be passed exactly as the site lists them ("Yeti" and "YETI" are different brand values). Facets combine.
+            min_price: Lowest price in USD (the site's price filter).
+            max_price: Highest price in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_search", {"query": query, "page": page, "sort": sort, "facets": facets, "min_price": min_price, "max_price": max_price}, extra)
+
+    def product(
+        self,
+        url: Optional[str] = None,
+        *,
+        slug: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). By link or slug, every variant: id, part_number, name, brand, description, breadcrumbs, images, rating, review_count, price {min, max, map_price_applies, currency}, badges, ecom_code, product_type, special_order, is_firearm, is_ammo, returnable, shippable, notices and warnings (Academy's own text on the product page, as given), rebate {text, starts_at, ends_at, link}, promotion, option_axes, features, specifications, whats_in_the_box, selected_variant and variants [{sku_id, item_id, manufacturer_item_id, sku, url, attributes, upc, price, was_price, saving, percent_off, price_type, savings_text, unit_price_text (e.g. per round), price_valid_until (as the page gives it), availability, image, images, badges, is_clearance, online_only, pickup_eligible, ship_to_store_eligible, free_shipping, same_day_delivery, rebate, online_units, online_status, add_to_cart, special_order, online_message}]. Review text is not available (rating and count only). An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: An academy.com product link (/p/<slug>; a ?sku= in it is not needed, every variant is returned).
+            slug: The product slug (items[].slug, the part after /p/). Alternative to url.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_product", {"url": url, "slug": slug}, extra)
+
+    def store_availability(
+        self,
+        part_number: str,
+        store_id: Union[str, int],
+        state: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Per-variant stock of one product at one store of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). By part_number, store_id and the store's state: store {store_id, state, pickup_eligible, ship_to_store_eligible}, variants_in_stock_at_store, in_store_units_total and variants [{item_id, sku_id, store_status, store_message, fulfillment (BOPIS, STS or LSI), in_store_units (exact units at the store for pickup), ship_to_store_units (units Academy can ship to the store), available_today_units (in-store-only items), nearest_store_with_stock {store_id, units, inventory_type, status, as_of}, online_units, online_status, add_to_cart, special_order, is_clearance, online_message}]. Match variants to product by item_id. An unknown part number is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            part_number: The product's part number: items[].part_number or product part_number.
+            store_id: The store: stores[].store_id (19, 0019 and store-0019 all work).
+            state: The store's state (stores[].address.state), as the site sends it with the store: one of AL, AR, FL, GA, IL, IN, KS, KY, LA, MD, MS, MO, NC, OH, OK, PA, SC, TN, TX, VA, WV.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_store_availability", {"part_number": part_number, "store_id": store_id, "state": state}, extra)
+
+    def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). Near a US ZIP code or a point, nearest first, within 50 miles by default (up to 250). Each store: store_id, name, address {street, city, state, zip}, neighborhood, phone, latitude, longitude, distance_miles, status, today, next_change, today_date, time_zone_utc_offset, hours, hours_by_day, services, pickup_eligible, ship_to_store_eligible, special_order_eligible, doordash_eligible, temporarily_closed, future_store and nearby_store_ids. Academy has stores in 21 states; a place with none in range is an empty list. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around.
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            radius: Radius in miles, 1-250. Defaults to 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius}, extra)
+
+    def store(
+        self,
+        store_ids: Union[str, int, list[Union[str, int]]],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """1 to 20 stores of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). By id, in the order asked, with the same fields as stores (distance excepted) and not_found for ids Academy does not know. When none is found it is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_ids: 1 to 20 store ids (stores[].store_id), a list or a comma-separated string.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_store", {"store_ids": store_ids}, extra)
+
+    def category(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "newest", "top_rated", "price_asc", "price_desc"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). By path or link (Coolers, Men's Running Shoes, Handguns...), sorted and filtered like search. Returns page, page_size, total, total_pages, has_more, count, sort, items [{position, id, part_number (use it in store-availability), name, brand, slug and url (use them in product), image, price and price_max (current), was_price, saving and percent_off (the tile's default variant, as Academy lists them), price_in_cart (Academy shows the lowest price only in the cart), promotion {message, promo_price}, rating, review_count, badges (Academy's deal tags: Hot Deal, Clearance, New, Ships to Store...), color_count, ecom_code (Academy's selling code as given: 01 SELL ONLINE, 02 DISPLAY ONLY, 04 DROP SHIP...), special_order, ships_to_store, same_day_delivery, free_shipping, default_variant {item_id, sku, attributes, url}}], sponsored (the paid placements, flagged apart from the organic items, with ad_position), facets [{id, label, values [{value, label, count, selected}]}] (any id and value works in facets), subcategories [{id, name, path, url, image}], title, filters_applied and notes. Also path and url. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A category path (/c/...), as categories and subcategories[].path give it.
+            url: An academy.com category link (its query string is not read: send filters in facets).
+            page: Results page, 1-based (the site shows up to 29 organic results per page; page_size reports it). A page past the last one returns an empty items list (total 0). Defaults to 1.
+            sort: relevance (default, the site's own order), best_selling, newest, top_rated, price_asc or price_desc (Academy's own price order, by its list price: promotions and cart prices can sit slightly out of order).
+            facets: Facet filters from a previous answer: {facets[].id: facets[].values[].value, or a list of values}, e.g. {"facet_Brand": "Nike"}, {"facet_Deals": "Clearance"}, {"facet_IndustrySubGroup": "Black"} (color). Values are case-sensitive and must be passed exactly as the site lists them ("Yeti" and "YETI" are different brand values). Facets combine.
+            min_price: Lowest price in USD (the site's price filter).
+            max_price: Highest price in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_category", {"path": path, "url": url, "page": page, "sort": sort, "facets": facets, "min_price": min_price, "max_price": max_price}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category navigation of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). As the site's header shows it: departments [{name, path, url, id, children (groups) [{..., children (links)}]}] with count, group_count and link_count. Any path works in category. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_categories", {}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["hot_deals", "clearance", "black_friday", "flash_sale"]] = None,
+        sub_shop: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "best_selling", "newest", "top_rated", "price_asc", "price_desc"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal listings of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). Hot Deals (default), Clearance, Black Friday (and one of its sub_shops) or the Flash Sale, sorted and filtered like search. Returns page, page_size, total, total_pages, has_more, count, sort, items [{position, id, part_number (use it in store-availability), name, brand, slug and url (use them in product), image, price and price_max (current), was_price, saving and percent_off (the tile's default variant, as Academy lists them), price_in_cart (Academy shows the lowest price only in the cart), promotion {message, promo_price}, rating, review_count, badges (Academy's deal tags: Hot Deal, Clearance, New, Ships to Store...), color_count, ecom_code (Academy's selling code as given: 01 SELL ONLINE, 02 DISPLAY ONLY, 04 DROP SHIP...), special_order, ships_to_store, same_day_delivery, free_shipping, default_variant {item_id, sku, attributes, url}}], sponsored (the paid placements, flagged apart from the organic items, with ad_position), facets [{id, label, values [{value, label, count, selected}]}] (any id and value works in facets), subcategories [{id, name, path, url, image}], title, filters_applied and notes. Also type, sub_shop, path, url, sub_shops [{id, name, path, url, image, slug}] and site_banner [{starts_at, ends_at}] (the schedule of the banner the page shows, as the site gives it). Listings carry no end date per item; Academy has no weekly ad. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: hot_deals (default), clearance, black_friday or flash_sale.
+            sub_shop: black_friday only: one sub-shop, sub_shops[].slug of a black_friday answer.
+            page: Results page, 1-based (the site shows up to 29 organic results per page; page_size reports it). A page past the last one returns an empty items list (total 0). Defaults to 1.
+            sort: relevance (default, the site's own order), best_selling, newest, top_rated, price_asc or price_desc (Academy's own price order, by its list price: promotions and cart prices can sit slightly out of order).
+            facets: Facet filters from a previous answer: {facets[].id: facets[].values[].value, or a list of values}, e.g. {"facet_Brand": "Nike"}, {"facet_Deals": "Clearance"}, {"facet_IndustrySubGroup": "Black"} (color). Values are case-sensitive and must be passed exactly as the site lists them ("Yeti" and "YETI" are different brand values). Facets combine.
+            min_price: Lowest price in USD (the site's price filter).
+            max_price: Highest price in USD.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_deals", {"type": type, "sub_shop": sub_shop, "page": page, "sort": sort, "facets": facets, "min_price": min_price, "max_price": max_price}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        include_popular: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of Academy Sports + Outdoors (academy.com, the US sporting goods retailer). Scavio fetches the public academy.com page on request; Academy has no public API. US storefront, prices in US dollars; prices are national (the same at every store). For a partial query: suggestions (keyword completions), products (the same item fields as search) and, with include_popular, popular_searches. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            include_popular: Also return the site's popular searches. Defaults to false.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("academy_suggestions", {"query": query, "include_popular": include_popular}, extra)
+
+class _BathandbodyworksNamespace:
+    """Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer, and bathandbodyworks.ca) search, category, categories, product, promotions, offers, store_availability, store, stores and reviews_summary endpoints; country us or ca, prices in USD or CAD, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "top_rated", "new_arrivals"]] = None,
+        fragrance_name: Optional[Union[str, list[str]]] = None,
+        fragrance_family: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword search on Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. Sorted relevance, by price, top rated or new arrivals and filtered by fragrance name, fragrance family and product type. Returns country, currency, query, sort, filters, total (the site's own count), count (at most 48: the site shows 48 results on its page; there is no page 2, narrow with sort and filters), has_more, selected_filters, products [id, name, brand, product_type, form, size, currency, price, list_price, promotional_price (where the site states one), promotions [{id, callout, promotional_price}], rating, review_count, badge, fragrance_name, fragrance_family, online_orderable, in_store_pickup, member_exclusive, launch_date, image, url_path, us_product_id (ca: the matching US product id)], facets [{filter, label, values [{value, count}]}], redirect_path (where the site sends a search instead of listing results), notes. A search with no results is an answer with count 0. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A keyword: a product, a fragrance or a collection.
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            sort: relevance (default), price_low, price_high, top_rated or new_arrivals: the site's own sorts.
+            fragrance_name: Products of these fragrances, as the site names them (facets fragrance_name, e.g. Champagne Toast). One value or a list.
+            fragrance_family: Products of these fragrance families: Warm & Woodsy, Treats & Sweets, Fruity & Bright, Fresh & Clean, Botanicals & Blooms (facets fragrance_family). One value or a list.
+            product_type: Products of these product types, as the site names them (facets product_type, e.g. 3-Wick Candle, Body Lotion). One value or a list.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_search", {"query": query, "country": country, "sort": sort, "fragrance_name": fragrance_name, "fragrance_family": fragrance_family, "product_type": product_type}, extra)
+
+    def category(
+        self,
+        path: str,
+        *,
+        country: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_low", "price_high", "top_rated", "new_arrivals"]] = None,
+        fragrance_name: Optional[Union[str, list[str]]] = None,
+        fragrance_family: Optional[Union[str, list[str]]] = None,
+        product_type: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one category page (categories[].path: /c/..., /g/..., /t/..., including deal pages such as /g/top-offers and /t/black-friday) with the same sorts and filters as search. Returns path, category {id, name, page_title, description, breadcrumbs}, country, currency, sort, filters, total (the site's own count), count (at most 48: the site shows 48 results on its page; there is no page 2, narrow with sort and filters), has_more, selected_filters, products [id, name, brand, product_type, form, size, currency, price, list_price, promotional_price (where the site states one), promotions [{id, callout, promotional_price}], rating, review_count, badge, fragrance_name, fragrance_family, online_orderable, in_store_pickup, member_exclusive, launch_date, image, url_path, us_product_id (ca: the matching US product id)], facets [{filter, label, values [{value, count}]}], notes. An unknown path is a charged 404. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A category path from categories (categories[].path), e.g. /c/all-candles/3-wick-candles, /g/top-offers, /t/black-friday, or its link.
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            sort: relevance (default), price_low, price_high, top_rated or new_arrivals: the site's own sorts.
+            fragrance_name: Products of these fragrances, as the site names them (facets fragrance_name, e.g. Champagne Toast). One value or a list.
+            fragrance_family: Products of these fragrance families: Warm & Woodsy, Treats & Sweets, Fruity & Bright, Fresh & Clean, Botanicals & Blooms (facets fragrance_family). One value or a list.
+            product_type: Products of these product types, as the site names them (facets product_type, e.g. 3-Wick Candle, Body Lotion). One value or a list.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_category", {"path": path, "country": country, "sort": sort, "fragrance_name": fragrance_name, "fragrance_family": fragrance_family, "product_type": product_type}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site's category tree (its navigation menu): country, count, categories [{id, name, path (the input of category; null for a menu group), children}], notes. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_categories", {"country": country}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product in full by id or link: id, name, brand, product_type, form, size, currency, price, list_price, promotional_price, promotions [{id, callout, promotional_price}], rating, review_count, badge, fragrance_name, fragrance_family, fragrance_classification, fragrance_description, fragrance_notes {top, heart, base}, description, short_description, highlights, ingredients, upc, member_exclusive, launch_date, collection, online {orderable, purchase_limit, low_stock}, in_store_pickup, images, breadcrumbs, url_path, us_product_id (ca), notes. Every size is its own product id. No stock counts (the site publishes none). An unknown id is a charged 404. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bath & Body Works product id (9 digits: products[].id). Every size is its own id.
+            url: Or the product link, e.g. https://www.bathandbodyworks.com/p/champagne-toast-3-wick-candle-028029548 (the link's site sets country).
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_product", {"product_id": product_id, "url": url, "country": country}, extra)
+
+    def promotions(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The promotions attached to one product with their start and end times (ISO, UTC) and terms as given: country, product_id, name, currency, price, count, promotions [{id, name, callout, promotional_price, start_date, end_date, terms}], notes. Slower than product (10-40 s). An unknown id is a charged 404. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bath & Body Works product id (9 digits: products[].id). Every size is its own id.
+            url: Or the product link, e.g. https://www.bathandbodyworks.com/p/champagne-toast-3-wick-candle-028029548 (the link's site sets country).
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_promotions", {"product_id": product_id, "url": url, "country": country}, extra)
+
+    def offers(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current offers: the home page's offer cards and the Top Offers tiles. Returns country, currency, count, promotions [{id, placement (banner, menu or home), title, headline, form_headline, details, urgency, romance_copy, percent_off, percent_off_copy, price_point {dollars, cents}, promo_code, promo_code_instructions, validity (as given), terms, link_path, published_at}], top_offers_count, top_offers [{id, label, offer, applies_to, detail, urgency, link_path}], notes. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_offers", {"country": country}, extra)
+
+    def store_availability(
+        self,
+        store_id: str,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Whether one store takes a pickup order for one product: country, product_id, store_id, store {name, city, state}, name, size, currency, price (national: the same at every store), store_orderable, pickup_purchase_limit (the most the store lets you reserve for pickup, 0-24; not a stock count: the site publishes none), online_orderable, online_purchase_limit, low_stock, notes. Slower than product (10-40 s). An unknown product id or store id is a charged 404. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Bath & Body Works store id (BBW + 5 digits: stores[].store_id).
+            product_id: A Bath & Body Works product id (9 digits: products[].id). Every size is its own id.
+            url: Or the product link, e.g. https://www.bathandbodyworks.com/p/champagne-toast-3-wick-candle-028029548 (the link's site sets country).
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_store_availability", {"store_id": store_id, "product_id": product_id, "url": url, "country": country}, extra)
+
+    def store(
+        self,
+        store_id: str,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store's public page by store id: country, store_id, name, address {line1, city, state, postal_code, country}, phone, latitude, longitude, hours [{day, hours}], services, store_types (BBW, BBWO outlet, WBC White Barn), url_path, nearby_stores (where the page lists them), notes. An unknown store id is a charged 404. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Bath & Body Works store id (BBW + 5 digits: stores[].store_id).
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_store", {"store_id": store_id, "country": country}, extra)
+
+    def stores(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every store id in the market's store directory (about 1,800 US, 114 Canada): country, count, stores [{store_id, url_path}], notes. The directory lists store ids (store reads a store's address); there is no search by ZIP. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_stores", {"country": country}, extra)
+
+    def reviews_summary(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product's rating, review count and up to 4 newest reviews: country, product_id, rating, review_count, best_rating, count, reviews [{id, rating, title, text, date_created, date_published, verified_purchaser}], notes. No reviewer name is returned; full review pagination is not offered. A product without a review summary answers rating null and no reviews. Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance retailer; country ca reads bathandbodyworks.ca in English, CAD). Scavio fetches the public Bath & Body Works page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bath & Body Works product id (9 digits: products[].id). Every size is its own id.
+            url: Or the product link, e.g. https://www.bathandbodyworks.com/p/champagne-toast-3-wick-candle-028029548 (the link's site sets country).
+            country: us (default): bathandbodyworks.com in USD; ca: bathandbodyworks.ca in English, CAD. Spanish and French pages are not offered (the site serves the same English data there).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bathandbodyworks_reviews_summary", {"product_id": product_id, "url": url, "country": country}, extra)
+
+class _GapNamespace:
+    """Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta, Gap Factory and Banana Republic Factory, chosen with brand) search, category, categories, product, prices, stores, store, store_stock, suggestions, trending and deals endpoints; country us or ca (English or French), prices in USD or CAD, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "top_rated", "best_sellers"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        department: Optional[str] = None,
+        sale_type: Optional[Literal["regular", "sale", "clearance"]] = None,
+        color: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        rating: Optional[int] = None,
+        store_id: Optional[str] = None,
+        facets: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword search on one banner of Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. Filters: department, sale_type (regular, sale, clearance), color, min_price / max_price, rating, store_id (pickup) and any facet; sorts featured, price_asc, price_desc, top_rated, best_sellers; up to 200 per page. Returns brand, country, language, currency, query, sort, page, page_size, total, pages, has_more, count, items [style_id, pid (color id), name, url, regular_price, effective_price, price_type, percent_off, regular_price_range, sale_price_range, rating, review_count, product_type, excluded_from_promotion, free_shipping, color_count, image, badges, flags, colors [{pid, name, description, url, regular_price, effective_price, price_type, percent_off, badges, flags, image}]], facets [{name, label, type, options [{value, label, count}], range}], notes. regular_price is the list price, effective_price the price shown (price_type regular, promotion or markdown; percent_off); a checkout code discount is never applied to a price (it shows in flags). A query Gap cannot match answers its closest products. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords.
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            sort: featured (default, the site's order), price_asc, price_desc, top_rated or best_sellers.
+            page: Page, from 1. A page past the last is a charged 404.
+            page_size: Per page, 1 to 200 (default 50). Large pages are slow (200 items can take 25 s).
+            department: A department as the facets list it (Women, Men, Girls, Boys, ...).
+            sale_type: regular, sale (promotion) or clearance (markdown): styles with at least one color of that type.
+            color: A color family as the facets list it.
+            min_price: Lowest price, 0 to 100000.
+            max_price: Highest price, 0 to 100000.
+            rating: Minimum star rating, 1 to 4 ("4 & up").
+            store_id: Only products available for pickup at this store (stores[].store_id).
+            facets: Other filters as facet name to value: facets[].name and facets[].options[].value of an answer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_search", {"query": query, "brand": brand, "country": country, "language": language, "sort": sort, "page": page, "page_size": page_size, "department": department, "sale_type": sale_type, "color": color, "min_price": min_price, "max_price": max_price, "rating": rating, "store_id": store_id, "facets": facets}, extra)
+
+    def category(
+        self,
+        cid: Optional[str] = None,
+        *,
+        style: Optional[str] = None,
+        url: Optional[str] = None,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "top_rated", "best_sellers"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        facets: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The items of one category (cid and style from categories, or a category link), sorted and filtered by facets, with each color's online unit count as given: cid, style, sort, page, page_size, total_colors, pages, has_more, count, items [style_id, pid (color id), name, url, regular_price, effective_price, price_type, percent_off, rating, review_count, product_type, excluded_from_promotion, flags, colors [{pid, name, description, url, regular_price, effective_price, price_type, percent_off, online_units, online_status, backorder_units, badges, flags, image}]], groups, facets, notes. page_size counts colors. regular_price is the list price, effective_price the price shown (price_type regular, promotion or markdown; percent_off); a checkout code discount is never applied to a price (it shows in flags). An unknown cid is a charged 404. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cid: A category id: categories[].cid (the cid of the category link, not the nav node id).
+            style: The link's style= (categories[].style), when it has one.
+            url: Or a category link, e.g. https://oldnavy.gap.com/browse/todays-deals/for-fam-1?cid=3033077 (sets brand and country).
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            sort: featured (default, the site's order), price_asc, price_desc, top_rated or best_sellers.
+            page: Page, from 1. A page past the last is a charged 404.
+            page_size: Per page, 1 to 200 (default 50). Large pages are slow (200 items can take 25 s).
+            facets: Other filters as facet name to value: facets[].name and facets[].options[].value of an answer.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_category", {"cid": cid, "style": style, "url": url, "brand": brand, "country": country, "language": language, "sort": sort, "page": page, "page_size": page_size, "facets": facets}, extra)
+
+    def categories(
+        self,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The banner's navigation tree as its site menu lists it: url, division_count, category_count, categories [{name, type (division, section, category), cid, style, url, children}], notes. cid and style come from each category's link and are the inputs of category. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_categories", {"brand": brand, "country": country, "language": language}, extra)
+
+    def product(
+        self,
+        pid: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product by color id or product link: pid, style_id, brand, name, url, currency, category, rating, rating_count, review_count, review_summary {summary, likes, dislikes} (Gap's summary of its reviews, as shown; no review texts or reviewer names), highlights, details [{section, description, bullets}], flags, excluded_from_promotion, max_order_quantity, fully_out_of_stock, pickup_available, variants [{variant (REGULAR, TALL, PETITE), price, sizes, colors [{pid, style_id, name, url, price, stock_status, low_stock, out_of_stock, final_sale, flags, badges, image, skus [{sku_id, size, regular_price, effective_price, price_type, discount_percentage, discount_saving, on_clearance, stock_status (in_stock, low_stock, out_of_stock, on_order), backordered, backorder_date, estimated_ship_date, upc, retail_upc}]}]}], notes. regular_price is the list price, effective_price the price shown (price_type regular, promotion or markdown; percent_off); a checkout code discount is never applied to a price (it shows in flags). A dead or other-market id is a charged 404. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            pid: A color id (search items[].pid or colors[].pid; the pid= of a product link).
+            url: Or a product link, e.g. https://www.gap.com/browse/product.do?pid=403540002 (sets brand and country).
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_product", {"pid": pid, "url": url, "brand": brand, "country": country, "language": language}, extra)
+
+    def prices(
+        self,
+        items: list[Union[str, dict[str, Any]]],
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current prices for up to 100 colors in one call, brands may mix: requested, found, items [{brand, pid, found, style_id, name, color, category, url, currency, regular_price, effective_price, max_regular_price, max_effective_price, percent_off, price_types, online_status, rating, review_count, flags, badges, excluded_from_promotion, image}], notes. regular_price is the list price, effective_price the price shown (price_type regular, promotion or markdown; percent_off); a checkout code discount is never applied to a price (it shows in flags). Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            items: Up to 100 colors, brands may mix: {"brand", "pid"} or "brand:pid".
+            brand: The brand of items that do not name one.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_prices", {"items": items, "brand": brand, "country": country, "language": language}, extra)
+
+    def stores(
+        self,
+        zip: Optional[str] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        limit: Optional[int] = None,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Stores of one banner near a ZIP / postal code or a point, with in-store pickup: count, stores [{store_id, brand, name, address {lines, city, state, postal_code, country}, phone, latitude, longitude, distance_mi, time_zone, hours, holiday_hours (dated), pickup}], notes. An invalid ZIP or postal code is a 400. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP (country us) or a Canadian postal code (A1A 1A1, country ca).
+            latitude: Or a point: latitude with longitude.
+            longitude: With latitude: the point's longitude.
+            radius: Search radius in miles (the site's default when omitted).
+            limit: Stores to return, 1 to 20 (default 10).
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius, "limit": limit, "brand": brand, "country": country}, extra)
+
+    def store(
+        self,
+        store_id: str,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store's public details by store id: store_id, brand, brand_name, name, status, opened, address, phone, latitude, longitude, time_zone, languages, pickup, services (in_store_pickup, ship_from_store, order_in_store), notes. Hours are on stores. An unknown id is a charged 404. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store id (stores[].store_id).
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_store", {"store_id": store_id, "brand": brand, "country": country}, extra)
+
+    def store_stock(
+        self,
+        store_ids: list[str],
+        *,
+        sku_ids: Optional[list[str]] = None,
+        style_id: Optional[str] = None,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Pickup stock at up to 10 stores for up to 20 SKUs (or every SKU of one style), as the site's buckets: skus [{sku_id, (pid, variant, status for a style), stores [{store_id, status: in_stock, low_stock or out_of_stock}]}], notes. No unit counts and no per-store price exist. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_ids: 1 to 10 store ids from stores (same banner and market).
+            sku_ids: 1 to 20 SKU ids (product colors[].skus[].sku_id).
+            style_id: Or a style id (every SKU of the style): product style_id or search items[].style_id.
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_store_stock", {"store_ids": store_ids, "sku_ids": sku_ids, "style_id": style_id, "brand": brand, "country": country}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search box's suggestions for what has been typed: count, suggestions [{query, display_query, filters [{key, value, name}]}], product_count, products [{pid, name, url, regular_price, effective_price, price_type, sale_price_range, colors, image}], notes. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What has been typed so far.
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_suggestions", {"query": query, "brand": brand, "country": country, "language": language}, extra)
+
+    def trending(
+        self,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The trending searches the banner's search box shows: count, searches, notes. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_trending", {"brand": brand, "country": country, "language": language}, extra)
+
+    def deals(
+        self,
+        *,
+        brand: Optional[Literal["gap", "old_navy", "banana_republic", "athleta", "gap_factory", "banana_republic_factory"]] = None,
+        country: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The banner's current promotions as its promo drawer words them, and its menu's sale, deal and clearance links: offer_count, offers [{promo_id, text, message, applied (e.g. "Applied at checkout"), links [{name, cid, url}]}], deal_link_count, deal_links [{name, path, cid, style, url}], notes. Scavio never computes a price after a checkout code; the site gives no end dates. Gap Inc. (gap.com: Gap, Old Navy, Banana Republic, Athleta and the factory stores). Scavio fetches the public Gap Inc. page on request; Gap Inc. has no public API. brand picks the banner; country us (USD) or ca (CAD, language en or fr). Ids are per banner and market. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: gap (default), old_navy, banana_republic, athleta, gap_factory or banana_republic_factory.
+            country: us (default; gap.com sites, USD) or ca (the Canadian sites, CAD).
+            language: en (default) or fr (country ca only: the French Canadian site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("gap_deals", {"brand": brand, "country": country, "language": language}, extra)
+
+class _RakutenNamespace:
+    """Rakuten (rakuten.com, the cashback site formerly Ebates) stores, store, store_coupons, rates, search, suggestions, category, deals and in_store endpoints; country us, gb or ca (English or French), 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def stores(
+        self,
+        *,
+        country: Optional[Literal["us", "gb", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        category: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["cashback", "recommended", "az", "za"]] = None,
+        filter: Optional[Union[Literal["increased", "top", "new", "canadian", "bnpl"], list[Literal["increased", "top", "new", "canadian", "bnpl"]]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store directory of Rakuten (rakuten.com, the cashback site, formerly Ebates): every store with its current cash back rate. us and gb page Rakuten's all-stores list (36 a page; us filters by category); ca reads Rakuten Canada's whole list (or one department) and filters by flag. Returns country, sort, category, page, per_page, total (null on a filtered us list until its last page), pages, has_more, count, stores [store_id, name, slug, page_path, rate_text (as Rakuten writes it), was_text, elevated (true when Rakuten shows a was rate: a raised rate), reward {amount, type (percentage or fixed), up_to, tiered}, was_amount, in_store {rate_text, was_text, amount, type} or null, image; ca adds coupons_only and flags {increased, top, new, canadian, bnpl}], categories (us) or departments and filters (ca), notes. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: us, gb, ca (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            language: Rakuten Canada only: en (default) or fr (the /fr/ pages, French text, CAD).
+            category: us: a Rakuten category slug or id (stores answers its categories list: electronics or 651, clothing or 2, travel-vacations or 54). ca: a Rakuten Canada department (baby-kids-toys, books-music-movies-games, clothing-shoes-accessories, computers-electronics-office, ...). Not on gb (its list has no category filter).
+            sort: cashback (highest rate first), recommended (Rakuten's order), az or za. Default: the site's own (us cashback, gb az, ca recommended = A to Z).
+            filter: ca only: increased (raised rate), top, new, canadian, bnpl (buy now, pay later); several are combined.
+            page: Page, from 1 (36 stores a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_stores", {"country": country, "language": language, "category": category, "sort": sort, "filter": filter, "page": page}, extra)
+
+    def store(
+        self,
+        store: Union[str, int],
+        *,
+        country: Optional[Literal["us", "gb", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store on Rakuten (rakuten.com, the cashback site, formerly Ebates) by slug or id: store_id, name, slug, page_path, rate_text, online {rate_text, was_text, amount, type, up_to, tiered}, elevated, was_amount, boosted, in_store {rate_text, reward_text, amount, type} or null, category_rates [{rate_text, amount, type, categories [{id, name}]}], terms {text, exclusions, special_terms}, in_store_terms (Rakuten's text, its end date as given), posting_time, free_shipping, about, title, coupons {total, has_more, count, coupons [first ones]}, reviews {average, count_text, items [{rating, text}]} (no reviewer names). ca (en or fr): rate_text, was_text, elevated, reward, category_rates [{category, rate_text, amount, type}], special_conditions, days_to_report, total_cash_back_to_date, attributes, coupons. An unknown store is a charged 404. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: The store's Rakuten slug (macys: the path after /shop/ on rakuten.com and rakuten.co.uk; best-buy after / on rakuten.ca), its Rakuten page link, or its numeric store id (us, gb: stores[].store_id).
+            country: Market: us, gb, ca (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            language: Rakuten Canada only: en (default) or fr (the /fr/ pages, French text, CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_store", {"store": store, "country": country, "language": language}, extra)
+
+    def store_coupons(
+        self,
+        store: Union[str, int],
+        *,
+        country: Optional[Literal["us", "gb"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every coupon and deal one store has on Rakuten (rakuten.com, the cashback site, formerly Ebates) (us, gb), 18 a page: store_id, name, page, per_page, total, pages, has_more, count, coupons [{coupon_id, store_id, store_name, description, code (null on a deal), restriction, tag (Rakuten's own label such as ENDS TODAY), rate_text, was_rate_text, image}]. Rakuten US and UK give no coupon end dates. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store: The store's Rakuten slug (macys: the path after /shop/ on rakuten.com and rakuten.co.uk; best-buy after / on rakuten.ca), its Rakuten page link, or its numeric store id (us, gb: stores[].store_id).
+            country: Market: us, gb (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            page: Page, from 1 (18 coupons a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_store_coupons", {"store": store, "country": country, "page": page}, extra)
+
+    def rates(
+        self,
+        store_ids: Union[list[Union[str, int]], str],
+        *,
+        country: Optional[Literal["us", "gb"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current cash back rates for up to 100 stores in one call on Rakuten (rakuten.com, the cashback site, formerly Ebates) (us, gb): requested, count, stores [{store_id, name, slug, page_path, rate_text, rate_with_type_text, amount, type, up_to, was_text, was_amount, elevated, tiered, in_store {rate_text, rate_with_type_text, was_text, amount, type} or null, image}] in the order asked, not_found (ids Rakuten did not answer). The batch check for rate changes. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_ids: 1 to 100 Rakuten store ids (stores[].store_id), as an array or comma-separated. Sent on as strings.
+            country: Market: us, gb (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_rates", {"store_ids": store_ids, "country": country}, extra)
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "gb", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        type: Optional[Literal["all", "stores", "coupons"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Rakuten (rakuten.com, the cashback site, formerly Ebates) for a store, brand or product. type all (us, gb): top_store, offers_cash_back (false with no_cash_back_message when Rakuten says the store does not offer Cash Back), store_lists [{title (e.g. Stores that carry Nike), total, has_more, count, stores}], coupons {total, count, items}, products {total (Rakuten's count), has_more, count, items [{product_id, item_id, name, store_id, store_name, price_text, price, was_price_text, was_price, tag, rate_text, was_rate_text, store_count, image}]}. type stores: every store matching the query, 12 a page (us pages). type coupons: the coupons matching it. ca: stores, products and coupons (expires as an ISO date; null where Rakuten writes a far-future placeholder). Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A store, brand or product.
+            country: Market: us, gb, ca (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            language: Rakuten Canada only: en (default) or fr (the /fr/ pages, French text, CAD).
+            type: all (default: top store, stores, coupons, products), stores (every store matching the query, paged on us) or coupons.
+            page: us type stores only: page, from 1 (12 stores a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_search", {"query": query, "country": country, "language": language, "type": type, "page": page}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The rakuten.com search box suggestions (us): stores {total, items [{store_id, name, slug, page_path, rate_text, amount, type, up_to, in_store_text, logo}]} and products [{term, categories}]. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a member types in rakuten.com's search box.
+            country: Market: us (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_suggestions", {"query": query, "country": country}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        country: Optional[Literal["us"]] = None,
+        sort: Optional[Literal["cashback", "recommended", "az", "za"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One rakuten.com category (us): every store with Cash Back in it, 36 a page, sorted recommended, cashback, az or za: category {id, name, slug}, sort, page, per_page, total, pages, has_more, count, stores [store_id, name, slug, page_path, rate_text (as Rakuten writes it), was_text, elevated (true when Rakuten shows a was rate: a raised rate), reward {amount, type (percentage or fixed), up_to, tiered}, was_amount, in_store {rate_text, was_text, amount, type} or null, image]; page 1 adds subcategories [{id, name, slug}] and sections (the category page's featured stores, deals, coupons and products) [{title, kind, total, has_more, count, items}]. An unknown category is a charged 404. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A rakuten.com category slug (stores' categories[].slug: electronics, clothing, travel-vacations, home-garden; subcategories such as electronics/computers-tablets).
+            country: Market: us (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            sort: recommended (default), cashback, az or za.
+            page: Page, from 1 (36 stores a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_category", {"category": category, "country": country, "sort": sort, "page": page}, extra)
+
+    def deals(
+        self,
+        *,
+        country: Optional[Literal["us"]] = None,
+        page: Optional[Literal["black_friday", "cyber_monday", "coupons"]] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Rakuten's event pages on rakuten.com (us): black_friday, cyber_monday or the coupons hub, or one store's own Black Friday page. Returns page, store, count, sections [{title, kind (stores, coupons or products), total, has_more, count, items}]: stores with current and was rates, coupons with codes, product deals with sale and was prices and Rakuten's tag (63% OFF) as given. Rakuten gives no start or end dates. Rakuten's shopping-trip links are never returned: page_path is the store's Rakuten page path as a plain identifier. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: us (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            page: black_friday (default), cyber_monday or coupons (Rakuten's deals and coupons hub).
+            store: With page black_friday: a store slug (macys) for that store's own Black Friday page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_deals", {"country": country, "page": page, "store": store}, extra)
+
+    def in_store(
+        self,
+        *,
+        country: Optional[Literal["us"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Rakuten's card-linked in-store offers (us), 21 a page: page, per_page, total, pages, has_more, count, offers [{offer_id, store_id, name, slug, page_path, rate_text, amount, type, status, terms (Rakuten's text, its end date and minimum spend as given), image}]. The public list only: Scavio never adds an offer to an account. Scavio fetches the public Rakuten page on request: rakuten.com (us, USD), rakuten.co.uk (gb, GBP), rakuten.ca (ca, CAD, English and French). Rakuten has no public API for cashback rates. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: Market: us (default us). us = rakuten.com (USD), gb = rakuten.co.uk (GBP), ca = rakuten.ca (CAD).
+            page: Page, from 1 (21 offers a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rakuten_in_store", {"country": country, "page": page}, extra)
+
+class _BjsNamespace:
+    """BJ's Wholesale Club (bjs.com, the US warehouse club) product, search, category, categories, reviews, coupons and clubs endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One BJ's product by product id or link: product_id, item_number, name, brand, model, upc, url, currency, price (online; the offer price while an instant saving runs), regular_price, savings, offer {starts_at, ends_at}, map_price, unit_price, unit_of_measure, price_range (variant products), member_only_price, club_only, weighted_item, available_online, available_in_club, in_stock_online, estimated_delivery, free_shipping, rating, review_count, description, summary, specifications, breadcrumbs, images, options, variant_count, variants [item_id, item_number, attributes, price, regular_price, savings, offer, map_price, unit_price, unit_of_measure, available_online, available_in_club, in_stock_online, gtin], fulfillment [{item_number, item_type (CLUB_ONLINE or CLUB_ONLY), ebt_eligible, same_day_delivery, pickup_in_club, ship_from_club, fresh_delivery, ebt_clubs: {eligible_club_ids, ineligible_count}}], note. Club prices are not returned. Where BJ's shows "Member Only Price" to a visitor, member_only_price is true and the answer carries the list price (no member price, sale price or sale dates). A club-only item (sold in clubs, no online price) has price null and club_only true. An unknown product id is a charged 404. BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A BJ's product id: the 19-digit number at the end of a bjs.com/product/ link (search results[].product_id).
+            url: Or the product link, e.g. https://www.bjs.com/product/scotch-brite-420-sheet-lint-rollers-4-pk/3000000000005430255/.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_product", {"product_id": product_id, "url": url}, extra)
+
+    def search(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """BJ's keyword search: query, departments [{category_id, name, count, url}], related_searches, total, count, page_size (40), has_more, priced_for {club_id, name, city, state} (the club BJ's assigned to the visit, or null), results [product_id (the input of product and reviews), item_number, name, url, image_url, currency, price (online), was_price, sale {price, starts_at, ends_at}, club_price, club_was_price, club_sale, member_only_price, club_only, available_online, available_in_club, out_of_stock, in_stock_online, in_stock_club, fulfillment_online and fulfillment_club {same_day_delivery, pickup_in_club, ebt}, ebt_eligible, weighted_item, rating, review_count, coupon, free_shipping, badges {promotional_badge, promotional_event, spec_badge, plp_badge}, max_quantity, bought_last_month, first_available, categories], facets [{name, label, options [{value, label, count}]}], note. Up to 40 results: BJ's page parameter is ignored, so there is no deeper paging. The club cannot be chosen. Where BJ's shows "Member Only Price" to a visitor, member_only_price is true and the answer carries the list price (no member price, sale price or sale dates). A club-only item (sold in clubs, no online price) has price null and club_only true. Set a client timeout of at least 240 s (the page takes 15-100 s; a second attempt is on us). BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_search", {"query": query}, extra)
+
+    def category(
+        self,
+        category: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one BJ's category (ids from categories), as BJ's lists them: category_id, url, subcategories [{category_id, name, count, url}], total, count, page_size (40), has_more, priced_for {club_id, name, city, state} (the club BJ's assigned to the visit, or null), results [product_id (the input of product and reviews), item_number, name, url, image_url, currency, price (online), was_price, sale {price, starts_at, ends_at}, club_price, club_was_price, club_sale, member_only_price, club_only, available_online, available_in_club, out_of_stock, in_stock_online, in_stock_club, fulfillment_online and fulfillment_club {same_day_delivery, pickup_in_club, ebt}, ebt_eligible, weighted_item, rating, review_count, coupon, free_shipping, badges {promotional_badge, promotional_event, spec_badge, plp_badge}, max_quantity, bought_last_month, first_available, categories], facets [{name, label, options [{value, label, count}]}], note. Up to 40 results: BJ's page parameter is ignored, so there is no deeper paging. The club cannot be chosen. Departments list too (grocery: 3,000+ products). A category whose page redirects to a landing page with no product list is a charged 404 that points to its subcategories. Where BJ's shows "Member Only Price" to a visitor, member_only_price is true and the answer carries the list price (no member price, sale price or sale dates). Set a client timeout of at least 240 s (the page takes 15-100 s; a second attempt is on us). BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A BJ's category id from categories (tvs-and-electronics>tvs), or its bjs.com/category/ path or link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_category", {"category": category}, extra)
+
+    def categories(
+        self,
+        *,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """BJ's full category tree (about 980 categories), or one category's subtree: root, product_count, count, categories [{category_id (the input of category), name, count (products), url, level, hidden (kept out of BJ's menus), children}], note. BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: Optional: one category id; the answer is its subtree.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_categories", {"category": category}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one BJ's product, 10 a page in BJ's order (newest to oldest): product_id, item_number, page, page_size, total, total_pages, has_more, count, summary {average_rating, review_count, rating_histogram, recommended_ratio, themes} (page 1), ai_summary {text, generated_at, highlights [{label, type (pro or con), count}]} (BJ's own AI review summary, as given), reviews [review_id, rating, title, text, created_at, would_recommend, item_number, verified_buyer, staff_reviewer, helpful_votes, not_helpful_votes, photos], questions_total, questions [question_id, text, created_at, answer_count, answers [answer_id, text, created_at, author_type, is_expert, helpful_votes]], note. No reviewer, asker or answerer names or locations. Set a client timeout of at least 240 s (the page takes 15-100 s; a second attempt is on us). BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A BJ's product id: the 19-digit number at the end of a bjs.com/product/ link (search results[].product_id).
+            url: Or the product link, e.g. https://www.bjs.com/product/scotch-brite-420-sheet-lint-rollers-4-pk/3000000000005430255/.
+            page: Reviews page, 1-based, 10 a page (1 to 500).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_reviews", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def coupons(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """BJ's guest coupon book (the manufacturer and BJ's coupons a visitor sees on the coupon page, about 570): total, count (about 240 to 300, as the page loads them), has_more, categories, coupons [offer_id, description, brand, manufacturer, summary, value, category, offer_type, min_quantity, redemption_limit, redemption_frequency, source (MFG or BJSSCPN), active_from, expires_at, upcs, gtins, image_url, disclaimer], note. Set a client timeout of at least 240 s (the page takes 15-100 s; a second attempt is on us). BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_coupons", {}, extra)
+
+    def clubs(
+        self,
+        *,
+        state: Optional[Literal["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "DC", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """BJ's club directory (about 280 clubs in 22 states, announced openings included), all or one state: state, state_count, count, states [{state, state_name, count}], clubs [{club_id, name, state, url}], note. BJ's Wholesale Club (bjs.com, the US warehouse club). Scavio fetches the public BJ's page on request. United States, prices in USD. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: Optional: a US state code; the answer is that state's clubs.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bjs_clubs", {"state": state}, extra)
+
+class _ZapposNamespace:
+    """Zappos (zappos.com, the US shoe and clothing store) and 6pm (6pm.com, its outlet site, chosen with site) search, product, reviews, questions, lowest_prices, categories and suggestions endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        query: Optional[str] = None,
+        facets: Optional[dict[str, Any]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "percent_off", "rating", "newest", "best_sellers"]] = None,
+        mode: Optional[Literal["all", "sale"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Zappos (zappos.com, the US shoe and clothing store, an Amazon company), or 6pm (6pm.com, the Zappos outlet site) with site 6pm. Scavio fetches the public page on request; Zappos has no public API. Keywords (or the whole catalog), ONE value per facet (brand, brand id, gender, department, category, subcategory, size, width, color, price band, on sale, any attribute facet), sorted by relevance, price, percent off, rating, newest or best sellers; mode sale lists items on sale by percent off. Returns query, mode, sort, page, limit, total, total_pages, searched_as (the term the site searched when it corrected the query), applied_filters, count, items (position, product_id, style_id, color_id, name, brand, color, price, original_price, percent_off, on_sale, is_new, rating, review_count, on_hand (units in stock for that color, all sizes), gender, product_type, badges [{code, name}], promo_badges, image, url), facets [{field (send back in facets), name, group, values [{value, name, count, selected}]}]. Every answer carries site, host, country (us), currency (USD) and language (en). Prices are the site's own in USD. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: zappos (www.zappos.com, the default) or 6pm (www.6pm.com, the Zappos outlet site). Both are US stores in USD with the same product, style and stock ids; prices and stock differ between them, so every answer names its site.
+            query: Search keywords. Leave out to browse the whole catalog (narrowed by facets).
+            facets: Facet filters, ONE value per facet (the site matches one value of a facet at a time): {facet: value}, up to 12. Names: brand (as facets[].values[].name lists it), brand_id (a Zappos brand id, e.g. 26), gender (Women, Men, Girls, Boys), department (e.g. Shoes), category (e.g. Boots), subcategory (e.g. Running Shoes), color (e.g. Black), price (a price band as listed, e.g. "$100 and Under"; 6pm has its own bands), on_sale (true), size and width (with gender Men or Women, e.g. {"gender": "Men", "size": "10", "width": "Wide"}), or any facet field an answer lists in facets[].field (txAttrFacet_Materials, txAttrFacet_Features, hc_men_size, ...). Values are matched as the site writes them; an unknown value is an empty answer.
+            sort: relevance (default; the site's own order), price_asc, price_desc, percent_off, rating, newest (new arrivals) or best_sellers: the site's sort menu.
+            mode: all (default) or sale: items on sale, sorted by percent off unless sort is set (the site's sale page is the same listing).
+            page: Results page, 1-based (default 1). A page past the last one is an empty items list with the real total.
+            limit: Items per page, 1 to 100 (default 50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_search", {"site": site, "query": query, "facets": facets, "sort": sort, "mode": mode, "page": page, "limit": limit}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        style_id: Optional[str] = None,
+        stock_id: Optional[str] = None,
+        asin: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Zappos (zappos.com, the US shoe and clothing store, an Amazon company), or 6pm (6pm.com, the Zappos outlet site) with site 6pm. Scavio fetches the public page on request; Zappos has no public API. By product_id, style_id, stock_id or asin: requested, match {style_id, stock_id} (for a style, stock or ASIN lookup), product_id, name, brand {id, name}, brand_product_name, product_type, category, subcategory, genders, url, rating, review_count, fit {size, width, arch: {text, percent}} (the leading fit answer of reviewers, as given), review_summary (totals, average_rating, overall_star_counts, overall / comfort / look star percent, size / width / arch fit counts and percent, most and least helpful review without reviewer names), description {bullets, measurements, size_charts}, out_of_stock, style_count, sku_count, in_stock_sku_count, total_on_hand, styles [{style_id, color_id, color, price, original_price, percent_off, price_note, on_sale, is_new, final_sale, launch_date, on_hand, in_stock, badges, promo_badges, attributes [{name, value}], images, url, skus [{stock_id, size, width, on_hand (exact units), price, original_price, upc, asin}]}], notes. A color or a size that is out of stock has no price on the site: price is null with a price_note. on_hand is the store's warehouse stock (Zappos sells online; there is no store stock). Every answer carries site, host, country (us), currency (USD) and language (en). An unknown id is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Zappos product id (items[].product_id; the number after /product/ in a Zappos link). The same on 6pm.
+            site: zappos (www.zappos.com, the default) or 6pm (www.6pm.com, the Zappos outlet site). Both are US stores in USD with the same product, style and stock ids; prices and stock differ between them, so every answer names its site.
+            style_id: A style (one color) id instead of product_id (items[].style_id).
+            stock_id: A stock id (one size of one color, skus[].stock_id) instead of product_id.
+            asin: An ASIN (skus[].asin) instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_product", {"product_id": product_id, "site": site, "style_id": style_id, "stock_id": stock_id, "asin": asin}, extra)
+
+    def reviews(
+        self,
+        product_id: str,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best", "latest"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Zappos product (zappos.com; 6pm has none of its own), 25 per page, most helpful first or latest: product_id, name, brand, rating, total_reviews, page, total_pages, per_page, sort, count, reviews [{id, overall_rating, comfort_rating, look_rating, size_fit, width_fit, arch_fit, text, date, upvotes, verified_purchase, incentivized, customer_reward_review, source (where a review was first written when it came from another site, as given), other_shoes, media [{type, url}]}]. No reviewer names, locations or bylines. Every answer carries site, host, country (us), currency (USD) and language (en). A product without a reviews page is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Zappos product id (items[].product_id; the number after /product/ in a Zappos link). The same on 6pm.
+            site: zappos (the default). 6pm (6pm.com) has none of its own: site 6pm is a 400 that says so, not charged.
+            page: Reviews page, 1-based, 25 reviews per page (total_pages says how many).
+            sort: best (default; most helpful first) or latest.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_reviews", {"product_id": product_id, "site": site, "page": page, "sort": sort}, extra)
+
+    def questions(
+        self,
+        product_id: str,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The customer questions of one Zappos product (zappos.com; 6pm has none of its own), all in one answer: product_id, total, count, staff_answer_count, questions [{id, text, votes, answer_count, top_answer, answers}] where each answer is {text, date, upvotes, best, is_staff (an answer by Zappos staff)}. No asker or answerer names. Every answer carries site, host, country (us), currency (USD) and language (en). An unknown product is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Zappos product id (items[].product_id; the number after /product/ in a Zappos link). The same on 6pm.
+            site: zappos (the default). 6pm (6pm.com) has none of its own: site 6pm is a 400 that says so, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_questions", {"product_id": product_id, "site": site}, extra)
+
+    def lowest_prices(
+        self,
+        product_id: str,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The lowest price of each style (color) of one Zappos product as Zappos gives it for its product page (zappos.com): product_id, count, styles [{style_id, price}], note. Zappos does not state the period these prices cover, and they can include colors out of stock now. Every answer carries site, host, country (us), currency (USD) and language (en). A product with no lowest prices is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Zappos product id (items[].product_id; the number after /product/ in a Zappos link). The same on 6pm.
+            site: zappos (the default). 6pm (6pm.com) has none of its own: site 6pm is a 400 that says so, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_lowest_prices", {"product_id": product_id, "site": site}, extra)
+
+    def categories(
+        self,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        department: Optional[str] = None,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department > category > subcategory tree of Zappos (zappos.com, the US shoe and clothing store, an Amazon company), or 6pm (6pm.com, the Zappos outlet site) with site 6pm. Scavio fetches the public page on request; Zappos has no public API. One level per call with item counts: the departments, the categories of a department, or the subcategories of a category. Returns level, department, category, total (items in the level asked), count, categories [{name, count, level, facets (send to search as facets)}]. Every answer carries site, host, country (us), currency (USD) and language (en). An unknown department or category is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: zappos (www.zappos.com, the default) or 6pm (www.6pm.com, the Zappos outlet site). Both are US stores in USD with the same product, style and stock ids; prices and stock differ between them, so every answer names its site.
+            department: A department (categories[].name of the top level) to list its categories.
+            category: A category to list its subcategories (with department, or alone).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_categories", {"site": site, "department": department, "category": category}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["zappos", "6pm"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of Zappos (zappos.com, the US shoe and clothing store, an Amazon company), or 6pm (6pm.com, the Zappos outlet site) with site 6pm. Scavio fetches the public page on request; Zappos has no public API. Up to 10 keyword completions for a partial query: query, count, suggestions. Every answer carries site, host, country (us), currency (USD) and language (en). 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A partial search query.
+            site: zappos (www.zappos.com, the default) or 6pm (www.6pm.com, the Zappos outlet site). Both are US stores in USD with the same product, style and stock ids; prices and stock differ between them, so every answer names its site.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zappos_suggestions", {"query": query, "site": site}, extra)
+
+class _NeweggNamespace:
+    """Newegg (newegg.com, the US computer and electronics store) search, category, categories, product, offers, reviews, deals, seller, seller_products and suggestions endpoints; country us, ca or one of 9 Newegg Global storefronts (local currency), 2 credits each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        filters: Optional[list[str]] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "best_selling", "top_rated", "most_reviews"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword search on Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). Filters by name (sold_by_newegg, in_stock, new, recertified, used, open_box, lowest_price_30_days, 40_percent_off) or facet id; sorts featured, price_asc, price_desc, best_selling, top_rated, most_reviews. Returns country, storefront, currency, query, sort, filters, page, total, count, items [type (item or combo), item_number, product_number, title, brand, model, url, list_price, price, instant_rebate, lowest_price_30_days, is_lowest_price_30_days, shipping {charge, free}, promo {text, code, code_discount}, badges, rating, review_count, seller {name, url_key, marketplace}, shipped_by_newegg, ship_from_country, in_stock, open_box, refurbished, sponsored, best_selling_rank, category, image, review_params {group_id, subcategory_id}, group; combos: combo_id, title, url, list_price, combo_discount, price, items], facets [{name, type, options [{id, name, selected}]}], categories [{name, category_id, children}] (this storefront's category ids), breadcrumbs, notes. list_price is the struck-through price, price the price shown after instant_rebate; a promo code's discount is given apart (promo.code_discount) and never taken off price. Markets: us, ca and the Global storefronts. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords.
+            country: us (default; www.newegg.com, USD), ca (www.newegg.ca, CAD) or a Newegg Global storefront: uk, au, nz, jp, ph, sg, kr, th, mx (local currency, part of the catalog, English).
+            filters: Up to 10 filters: sold_by_newegg, in_stock, new, recertified, used, open_box, lowest_price_30_days, 40_percent_off, or a facet id from an answer's facets[].options[].id (brands, specs, price bands).
+            sort: featured (default, the site's order), price_asc, price_desc, best_selling, top_rated or most_reviews.
+            page: Page, from 1 (36 to 60 items per page as the site lists them). A page past the last answers no items.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_search", {"query": query, "country": country, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def category(
+        self,
+        category_id: str,
+        *,
+        query: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        filters: Optional[list[str]] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "best_selling", "top_rated", "most_reviews"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The items of one category (category_id from categories, or from a search answer's categories on ca and the Global storefronts: ids differ per storefront), with keywords, filters and sorts as search: category_id, query, sort, filters, page, total, count, items [type (item or combo), item_number, product_number, title, brand, model, url, list_price, price, instant_rebate, lowest_price_30_days, is_lowest_price_30_days, shipping {charge, free}, promo {text, code, code_discount}, badges, rating, review_count, seller {name, url_key, marketplace}, shipped_by_newegg, ship_from_country, in_stock, open_box, refurbished, sponsored, best_selling_rank, category, image, review_params {group_id, subcategory_id}, group; combos: combo_id, title, url, list_price, combo_discount, price, items], facets (the category's spec filters), breadcrumbs, notes. list_price is the struck-through price, price the price shown after instant_rebate; a promo code's discount is given apart (promo.code_discount) and never taken off price. Markets: us, ca and the Global storefronts. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id of this storefront: categories[].category_id of categories (us) or of a search answer (every storefront), breadcrumbs[].category_id, or a category link's N=. Ids differ per storefront (GPUs: 100007709 us, 100007708 ca).
+            query: Keywords within the category.
+            country: us (default; www.newegg.com, USD), ca (www.newegg.ca, CAD) or a Newegg Global storefront: uk, au, nz, jp, ph, sg, kr, th, mx (local currency, part of the catalog, English).
+            filters: Up to 10 filters: sold_by_newegg, in_stock, new, recertified, used, open_box, lowest_price_30_days, 40_percent_off, or a facet id from an answer's facets[].options[].id (brands, specs, price bands).
+            sort: featured (default, the site's order), price_asc, price_desc, best_selling, top_rated or most_reviews.
+            page: Page, from 1 (36 to 60 items per page as the site lists them). A page past the last answers no items.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_category", {"category_id": category_id, "query": query, "country": country, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The newegg.com menu tree: department_count, category_count, categories [{name, category_id, link, children}], notes. category_id is the id category takes. Market: us. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            country: us (default; the newegg.com menu). Other markets are a 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_categories", {"country": country}, extra)
+
+    def product(
+        self,
+        item_number: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One item by item number: item_number, buy_box_changed, requested_item, served_item, parent_item, title, brand, model, mpn, upc, url, currency, list_price, original_price, price, instant_rebate, lowest_price_30_days, is_lowest_price_30_days, black_friday_save_percent, promo {text, code, code_discount}, promo_expires_at, shell_shocker, badges [{title, starts_at, ends_at}], in_stock, stock, quantity_limit, shipping, ship_from_country, seller {name, url_key, marketplace, rating, review_count, top_rated}, shipped_by_newegg, open_box, refurbished, rating, review_count, review_params {group_id, subcategory_id}, category, breadcrumbs, bullets, specs [{group, specs [{name, value}]}], warranty, images, variants {options, items [{item_number, options, active}]}, combo_builder, package_options, review_summary {total, stars}, reviews (those the page shows, up to 8, no reviewer names), questions [{question, date, upvotes, answers}], notes. When Newegg's own unit is unavailable the page serves a marketplace offer: buy_box_changed true and served_item is that offer's item number. list_price is the struck-through price, price the price shown after instant_rebate; a promo code's discount is given apart (promo.code_discount) and never taken off price. An unknown item number is a charged 404. Markets: us, ca and the Global storefronts. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            item_number: A Newegg item number: N82E16819113877 or 19-113-877 (R suffix = open box), 9SIA2W0KDW5195 (a marketplace item) or 0D9-000E-00346 (search items[].item_number).
+            country: us (default; www.newegg.com, USD), ca (www.newegg.ca, CAD) or a Newegg Global storefront: uk, au, nz, jp, ph, sg, kr, th, mx (local currency, part of the catalog, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_product", {"item_number": item_number, "country": country}, extra)
+
+    def offers(
+        self,
+        item_number: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        condition: Optional[Literal["all", "new", "used"]] = None,
+        sort: Optional[Literal["price", "seller_rating"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every seller's offer on one item (Newegg's own included), by condition: item_number, condition, sort, page, page_size, total, pages, count, tabs [{condition, count, lowest_price, lowest_price_item}], offers [{item_number, url, price, list_price, instant_rebate, shipping, condition, in_stock, seller {name, url_key, marketplace, rating, review_count, rating_12_months, review_count_12_months, top_rated}, shipped_by_newegg, ship_from_country, delivery_days {fastest, slowest}}], notes. price = the offer's price after its instant rebate. Markets: us, ca (the Global storefronts list no other sellers). Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            item_number: A Newegg item number: N82E16819113877 or 19-113-877 (R suffix = open box), 9SIA2W0KDW5195 (a marketplace item) or 0D9-000E-00346 (search items[].item_number).
+            country: us (default; www.newegg.com, USD) or ca (www.newegg.ca, CAD). The Newegg Global storefronts do not serve this endpoint (400).
+            condition: all (default), new or used.
+            sort: price (default, low to high) or seller_rating.
+            page: Offers page, 1 to 50.
+            page_size: Offers per page, 1 to 20 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_offers", {"item_number": item_number, "country": country, "condition": condition, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    def reviews(
+        self,
+        item_number: str,
+        group_id: int,
+        subcategory_id: int,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        sort: Optional[Literal["most_helpful", "newest", "highest_rated", "lowest_rated"]] = None,
+        rating: Optional[int] = None,
+        verified_only: Optional[bool] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one item, 25 per page, with group_id and subcategory_id from the product answer's review_params: item_number, sort, rating, verified_only, page, per_page, total, pages, count, stars {5..1}, reviews [{rating, title, text, pros, cons, date, verified_owner, helpful_votes, total_votes, item_number, item_title, language, manufacturer_reply}], notes. No reviewer names. One review pool across Newegg's storefronts. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            item_number: A Newegg item number: N82E16819113877 or 19-113-877 (R suffix = open box), 9SIA2W0KDW5195 (a marketplace item) or 0D9-000E-00346 (search items[].item_number).
+            group_id: review_params.group_id of the product (or search) answer for this item.
+            subcategory_id: review_params.subcategory_id of the product (or search) answer for this item.
+            country: us (default; www.newegg.com, USD), ca (www.newegg.ca, CAD) or a Newegg Global storefront: uk, au, nz, jp, ph, sg, kr, th, mx (local currency, part of the catalog, English).
+            sort: most_helpful (default), newest, highest_rated or lowest_rated.
+            rating: Reviews with this star rating.
+            verified_only: Verified owners' reviews when true.
+            page: Page of 25 reviews, from 1.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_reviews", {"item_number": item_number, "group_id": group_id, "subcategory_id": subcategory_id, "country": country, "sort": sort, "rating": rating, "verified_only": verified_only, "page": page}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["shell_shocker", "black_friday"]] = None,
+        category_id: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Newegg's deal event stores: Shell Shocker (daily deals) or the Black Friday store, optionally one category: type, category_id, page, total, count, ends_at (the Shell Shocker countdown end, ISO), items [type (item or combo), item_number, product_number, title, brand, model, url, list_price, price, instant_rebate, lowest_price_30_days, is_lowest_price_30_days, shipping {charge, free}, promo {text, code, code_discount}, badges, rating, review_count, seller {name, url_key, marketplace}, shipped_by_newegg, ship_from_country, in_stock, open_box, refurbished, sponsored, best_selling_rank, category, image, review_params {group_id, subcategory_id}, group; combos: combo_id, title, url, list_price, combo_discount, price, items], categories [{name, category_id, children}], notes. list_price is the struck-through price, price the price shown after instant_rebate; a promo code's discount is given apart (promo.code_discount) and never taken off price. Markets: us, ca. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            type: shell_shocker (default, Newegg's daily deals) or black_friday (the Black Friday event store).
+            category_id: Deals in this category (the answer's categories[].category_id).
+            country: us (default; www.newegg.com, USD) or ca (www.newegg.ca, CAD). The Newegg Global storefronts do not serve this endpoint (400).
+            page: Page, from 1 (36 to 60 items per page as the site lists them). A page past the last answers no items.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_deals", {"type": type, "category_id": category_id, "country": country, "page": page}, extra)
+
+    def seller(
+        self,
+        seller: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A marketplace seller's public store details: seller, name, seller_id, rating, review_count, positive_percent, about, return_policy, notes. seller_id is the input of seller-products. Markets: us, ca. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            seller: A marketplace seller's store key: items[].seller.url_key of search or offers, or a /Seller-Store/ link.
+            country: us (default; www.newegg.com, USD) or ca (www.newegg.ca, CAD). The Newegg Global storefronts do not serve this endpoint (400).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_seller", {"seller": seller, "country": country}, extra)
+
+    def seller_products(
+        self,
+        seller_id: str,
+        *,
+        query: Optional[str] = None,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        filters: Optional[list[str]] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "best_selling", "top_rated", "most_reviews"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The items one marketplace seller lists (seller_id from seller), with keywords, filters and sorts as search: seller_id, query, sort, filters, page, total, count, items [type (item or combo), item_number, product_number, title, brand, model, url, list_price, price, instant_rebate, lowest_price_30_days, is_lowest_price_30_days, shipping {charge, free}, promo {text, code, code_discount}, badges, rating, review_count, seller {name, url_key, marketplace}, shipped_by_newegg, ship_from_country, in_stock, open_box, refurbished, sponsored, best_selling_rank, category, image, review_params {group_id, subcategory_id}, group; combos: combo_id, title, url, list_price, combo_discount, price, items], facets, notes. Markets: us, ca. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            seller_id: The seller's listing id: seller_id of the seller answer.
+            query: Keywords within the seller's items.
+            country: us (default; www.newegg.com, USD) or ca (www.newegg.ca, CAD). The Newegg Global storefronts do not serve this endpoint (400).
+            filters: Up to 10 filters: sold_by_newegg, in_stock, new, recertified, used, open_box, lowest_price_30_days, 40_percent_off, or a facet id from an answer's facets[].options[].id (brands, specs, price bands).
+            sort: featured (default, the site's order), price_asc, price_desc, best_selling, top_rated or most_reviews.
+            page: Page, from 1 (36 to 60 items per page as the site lists them). A page past the last answers no items.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_seller_products", {"seller_id": seller_id, "query": query, "country": country, "filters": filters, "sort": sort, "page": page}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[Literal["us", "ca", "uk", "au", "nz", "jp", "ph", "sg", "kr", "th", "mx"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search box's suggestions for what has been typed: query, count, suggestions, product_count, products [{item_number, title, url, promo_text, rating, review_count, image}], notes. Markets: us, ca. Newegg (newegg.com, the US computer and electronics store). Scavio fetches the public Newegg page on request; Newegg has no public product API (its developer API is for marketplace sellers). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What has been typed so far.
+            country: us (default; www.newegg.com, USD) or ca (www.newegg.ca, CAD). The Newegg Global storefronts do not serve this endpoint (400).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("newegg_suggestions", {"query": query, "country": country}, extra)
+
+class _ReiNamespace:
+    """REI (rei.com, the US outdoor co-op) search, category, deals, product, reviews, store_stock, stores, store and suggestions endpoints; US only, prices in USD, 2 credits each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[30, 90]] = None,
+        sort: Optional[Literal["relevance", "brand_a_z", "brand_z_a", "price_asc", "price_desc", "newest", "top_rated", "best_selling", "percent_off"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        store: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. By keyword, in the site's 9 sorts, 30 or 90 per page, filtered by any facet (brand, price, rating, deals, features, color, size...) and by one store. Returns page, page_size, total, total_pages, has_more, count, sort, title, items [{position, product_id (use it in product and reviews), name, brand, url, image, rating, review_count, price and price_max (current), compare_at, regular_price, percent_off, savings_text, price_text, price_type (regular, sale or outlet), price_display (single or range), sale, clearance, partial_clearance, outlet, members_only (REI's Just for Members badge), available, online_only, badges (REI Outlet, Top Rated, Staff Pick, New arrival, Just for Members), flair (dated promo text as given, e.g. Sale Ends Dec 1), attributes, colors [{color_id, name, family, sample_sku, available, image}] and sizes [{size, available, skus [{color_id, sku_id}]}] (use a sku_id in store-stock)}], facets [{key, title, multi_select, values [{value, label, count, selected}]}] (any key and value works in facets), categories [{slug, label, count, value, selected, children}], breadcrumbs, store_filter, filters_applied, store and notes. Used gear is not listed: REI does not sell it online (Re/Supply is in its stores). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            page: Results page, 1-based. Defaults to 1; total_pages reports the last one.
+            page_size: 30 (default) or 90 results per page, the two sizes REI offers.
+            sort: relevance (default, REI's Best Match), brand_a_z, brand_z_a, price_asc, price_desc, newest, top_rated (rating, then review count), best_selling or percent_off.
+            facets: Facet filters from a previous answer: {facets[].key: facets[].values[].value, or a list of values (OR-ed)}, at most 10 keys. Values are passed exactly as REI writes them, e.g. {"brand": "arcteryx"}, {"price": "$20.00 to $49.99"}, {"average-rating": "4 to 5"}, {"category": "womens-clothing|womens-jackets"} (categories[].value). Keys combine.
+            store: A store_number (stores, store-stock): limits results to items REI shows as available at that store (its own store filter). store_filter reports the store and its count.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_search", {"query": query, "page": page, "page_size": page_size, "sort": sort, "facets": facets, "store": store}, extra)
+
+    def category(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[30, 90]] = None,
+        sort: Optional[Literal["relevance", "brand_a_z", "brand_z_a", "price_asc", "price_desc", "newest", "top_rated", "best_selling", "percent_off"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        store: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. By slug or link (tents, mens-rain-jackets, camping-and-hiking...), sorted and filtered like search. Returns page, page_size, total, total_pages, has_more, count, sort, title, items [{position, product_id (use it in product and reviews), name, brand, url, image, rating, review_count, price and price_max (current), compare_at, regular_price, percent_off, savings_text, price_text, price_type (regular, sale or outlet), price_display (single or range), sale, clearance, partial_clearance, outlet, members_only (REI's Just for Members badge), available, online_only, badges (REI Outlet, Top Rated, Staff Pick, New arrival, Just for Members), flair (dated promo text as given, e.g. Sale Ends Dec 1), attributes, colors [{color_id, name, family, sample_sku, available, image}] and sizes [{size, available, skus [{color_id, sku_id}]}] (use a sku_id in store-stock)}], facets [{key, title, multi_select, values [{value, label, count, selected}]}] (any key and value works in facets), categories [{slug, label, count, value, selected, children}], breadcrumbs, store_filter, filters_applied, store and notes. Also slug and url. categories holds the child categories with counts. An unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            slug: A category slug (categories[].slug or breadcrumbs[].slug, the part after /c/ in an rei.com link).
+            url: An rei.com category link (its query string is not read: send filters in facets).
+            page: Results page, 1-based. Defaults to 1; total_pages reports the last one.
+            page_size: 30 (default) or 90 results per page, the two sizes REI offers.
+            sort: relevance (default, REI's Best Match), brand_a_z, brand_z_a, price_asc, price_desc, newest, top_rated (rating, then review count), best_selling or percent_off.
+            facets: Facet filters from a previous answer: {facets[].key: facets[].values[].value, or a list of values (OR-ed)}, at most 10 keys. Values are passed exactly as REI writes them, e.g. {"brand": "arcteryx"}, {"price": "$20.00 to $49.99"}, {"average-rating": "4 to 5"}, {"category": "womens-clothing|womens-jackets"} (categories[].value). Keys combine.
+            store: A store_number (stores, store-stock): limits results to items REI shows as available at that store (its own store filter). store_filter reports the store and its count.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_category", {"slug": slug, "url": url, "page": page, "page_size": page_size, "sort": sort, "facets": facets, "store": store}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["deals", "outlet"]] = None,
+        category: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[30, 90]] = None,
+        sort: Optional[Literal["relevance", "brand_a_z", "brand_z_a", "price_asc", "price_desc", "newest", "top_rated", "best_selling", "percent_off"]] = None,
+        facets: Optional[dict[str, Any]] = None,
+        store: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal listings of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. deals (everything on sale or clearance) or outlet (REI Outlet), optionally in one category, sorted and filtered like search. Returns page, page_size, total, total_pages, has_more, count, sort, title, items [{position, product_id (use it in product and reviews), name, brand, url, image, rating, review_count, price and price_max (current), compare_at, regular_price, percent_off, savings_text, price_text, price_type (regular, sale or outlet), price_display (single or range), sale, clearance, partial_clearance, outlet, members_only (REI's Just for Members badge), available, online_only, badges (REI Outlet, Top Rated, Staff Pick, New arrival, Just for Members), flair (dated promo text as given, e.g. Sale Ends Dec 1), attributes, colors [{color_id, name, family, sample_sku, available, image}] and sizes [{size, available, skus [{color_id, sku_id}]}] (use a sku_id in store-stock)}], facets [{key, title, multi_select, values [{value, label, count, selected}]}] (any key and value works in facets), categories [{slug, label, count, value, selected, children}], breadcrumbs, store_filter, filters_applied, store and notes. Also type, category and url. Per-item end dates come as flair text as REI gives it (Sale Ends Dec 1). REI has no Black Friday page (its stores close that day). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            type: deals (default: everything on sale or clearance) or outlet (REI Outlet).
+            category: Optional category slug: limits the deals to one category.
+            page: Results page, 1-based. Defaults to 1; total_pages reports the last one.
+            page_size: 30 (default) or 90 results per page, the two sizes REI offers.
+            sort: relevance (default, REI's Best Match), brand_a_z, brand_z_a, price_asc, price_desc, newest, top_rated (rating, then review count), best_selling or percent_off.
+            facets: Facet filters from a previous answer: {facets[].key: facets[].values[].value, or a list of values (OR-ed)}, at most 10 keys. Values are passed exactly as REI writes them, e.g. {"brand": "arcteryx"}, {"price": "$20.00 to $49.99"}, {"average-rating": "4 to 5"}, {"category": "womens-clothing|womens-jackets"} (categories[].value). Keys combine.
+            store: A store_number (stores, store-stock): limits results to items REI shows as available at that store (its own store filter). store_filter reports the store and its count.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_deals", {"type": type, "category": category, "page": page, "page_size": page_size, "sort": sort, "facets": facets, "store": store}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. By id or link: product_id, name, brand, url, description, features, specs, featured_specs, breadcrumbs, primary_category, price {min, max, compare_at_min, compare_at_max}, outlet, badges, members_only, member_reward_estimate (REI's estimate of the co-op member reward, not a member price), return_days, colors, sizes, images, sku_count, available_sku_count, skus [{sku_id, color, size, available, status, sellable, price, compare_at, price_type (regular or clearance), savings_percent, savings_amount, upc, members_only, new_arrival, store_pickup_only}], review_summary {count, average_rating, histogram, recommended_percent, ratings_only_count, fit [{id, label, average, range, min_label, max_label}]} and questions [{question, submitted_at, answer_count, answers [{answer, is_brand_answer, submitted_at}]}] (no author names). An unknown product is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: The REI product id (items[].product_id, e.g. 243702 or C09719).
+            url: An rei.com product link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_product", {"product_id": product_id, "url": url}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["relevance", "most_helpful", "newest", "highest_rating", "lowest_rating"]] = None,
+        page: Optional[int] = None,
+        rating: Optional[Union[int, list[int]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Reviews of one product of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. 10 per page in the site's 5 sorts, optionally filtered by star rating: product_id, page, total, total_reviews, total_pages, has_more and reviews [{review_id, rating, title, text, submitted_at, modified_at, would_recommend, ratings_only, helpful_votes, unhelpful_votes, badges, verified_purchaser, incentivized, syndicated, syndicated_from, fit [{label, value, value_label}], reviewer_context (age, height, weight bands), purchased_size, date_of_use, photo_count, brand_responses [{department, response, date, source}], original_product_name}]. No reviewer names or locations; staff and reviewer names are taken out of brand responses. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: The REI product id.
+            url: An rei.com product link, instead of product_id.
+            sort: relevance (default), most_helpful, newest, highest_rating or lowest_rating.
+            page: Page of 10 reviews, 1-based.
+            rating: Star filter: 1-5 or a list (e.g. [1, 2] for the critical reviews). total then counts the matching reviews.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_reviews", {"product_id": product_id, "url": url, "sort": sort, "page": page, "rating": rating}, extra)
+
+    def store_stock(
+        self,
+        sku: str,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store pickup status of one SKU of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. At the 4-10 REI stores nearest a ZIP, a city + state or a point: count, in_stock_count, ship_to_store_count and stores [{status (in_stock: on the shelf for pickup; ship_to_store: free shipping to that store; unavailable), status_text, estimated_arrival, store {store_number, name, type, address, phone, latitude, longitude, distance_miles, hours, holidays, services, rentals, departments...}}]. Pickup flags: REI publishes no unit counts. A charged 404 is billed; a location REI cannot place is an unbilled 400. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: A SKU id: product skus[].sku_id or items[].sizes[].skus[].sku_id.
+            zip: US ZIP code. Pass one of zip, city + state, or latitude + longitude.
+            city: US city (with state).
+            state: 2-letter state code (with city).
+            latitude: Latitude (with longitude).
+            longitude: Longitude (with latitude).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_store_stock", {"sku": sku, "zip": zip, "city": city, "state": state, "latitude": latitude, "longitude": longitude}, extra)
+
+    def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        limit: Optional[int] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. Near a US ZIP code or a point, ordered by distance, up to 10 within 100 miles by default: store_number, name, type, address, phone, latitude, longitude, distance_miles, url, open_for_shopping, curbside_pickup, product_count and events (upcoming special hours as given, e.g. Thanksgiving and #OptOutside closures). A place with no store in range is an empty list. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP code to search around.
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            limit: Stores to return, 1-10. Defaults to 10.
+            radius: Radius in miles, 1-250. Defaults to 100.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_stores", {"zip": zip, "latitude": latitude, "longitude": longitude, "limit": limit, "radius": radius}, extra)
+
+    def store(
+        self,
+        store_number: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. By store number: name, type, address, phone, coordinates, time_zone, url, opened, open and closure flags, curbside, has_rentals, has_bike_shop, has_ski_shop, has_used_gear, has_trade_in, services, rentals, rentals_reservation_url, departments, hours (normal, curbside and dated special hours as given) and holidays (dates the store is closed). An unknown store is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_number: The store number (stores[].store_number, e.g. 18 for Denver Flagship).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_store", {"store_number": store_number}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-term suggestions of REI (rei.com, the US outdoor co-op). Scavio fetches the public rei.com page on request; REI has no public API. US storefront, prices in US dollars, as shown to a visitor who is not signed in. For a partial query: suggestions [{term, top_products_available}]: terms that start with the query, then terms that contain it. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            limit: Suggestions to return, 1-50. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rei_suggestions", {"query": query, "limit": limit}, extra)

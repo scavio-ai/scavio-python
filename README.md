@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 146 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 154 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Academy Sports + Outdoors, REI, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Bath & Body Works, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -19,6 +19,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Amazon Products | Yes | No | Yes | No |
 | Walmart Products | Yes | No | No | No |
 | Costco Warehouse Prices, Stock, Gas and Coupons (13 endpoints) | Yes | No | No | No |
+| BJ's Wholesale Club Prices, Sale Dates, Member-Only Price Flags, Coupons, Reviews, Categories and the Club Directory (US; 7 endpoints) | Yes | No | No | No |
 | Store-Level Prices and Stock (Lowe's, Sam's Club, Canadian Tire, Dollar General; 21 endpoints) | Yes | No | No | No |
 | SportChek and Mark's Prices in CAD with the Was Price, Sale Label and Sale End Date, Sizes and Colours with Assigned-Store Units, SportChek Reviews, Mark's Questions, L'Equipeur in French (Canada; 16 endpoints) | Yes | No | No | No |
 | RONA Store Prices in CAD for Up to 60 Articles at One Store with Exact Units, Search, Category and Weekly Deals Priced at a Chosen Store, Sale End Text, 403 Stores, Stock Near a Store (Canada; 9 endpoints) | Yes | No | No | No |
@@ -28,6 +29,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Nordstrom Products, Reviews, Categories, Brands, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Nordstrom Rack Clearance, Flash Events, Products, Reviews, Store Pickup and Store Locator (8 endpoints) | Yes | No | No | No |
 | Best Buy Products, Open-Box Prices, Store Pickup, Deal of the Day, Reviews and Batch Prices; Best Buy Canada Exact Units per Store, EHF by Province, Sale End Dates and Questions (10 endpoints) | Yes | No | No | No |
+| Newegg Prices, Every Seller's Offer by Condition, Reviews, Deals and Marketplace Seller Stores (US, Canada and 9 Global storefronts; 10 endpoints) | Yes | No | No | No |
 | TCGplayer Card Market Prices, Price History, Recent Sales, Listings, Set Price Guides and Sellers (13 endpoints) | Yes | No | No | No |
 | Nintendo eShop Prices by Country, Sale End Dates, Deals, Releases and DLC (46 countries; 6 endpoints) | Yes | No | No | No |
 | H&M Prices by Country, Member Prices, Online Stock by Size, Stores and Production (47 countries; 9 endpoints) | Yes | No | No | No |
@@ -42,11 +44,17 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | OfferUp Asking Prices Around Any US ZIP, the Same Item in Different Metros, Cars and Trucks by Dealer or Private Seller, Make, Year and Mileage, Listings with Condition and Vehicle Details, Seller Profiles (US; 5 endpoints) | Yes | No | No | No |
 | thredUP Prices, Estimated Retail, Sold Listings and Deals (US store; 12 endpoints) | Yes | No | No | No |
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
+| Gap, Old Navy, Banana Republic and Athleta Prices, Promotion and Markdown Prices, Batch Prices, In, Low or Out Store Stock by Size, Stores and Deals (US and Canada; 11 endpoints) | Yes | No | No | No |
+| Bath & Body Works Prices, Product Promotions with Dates, Current Offers, Store Pickup Purchase Limits, Stores and Review Summaries (US and Canada; 10 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
+| Rakuten Cash Back Rates and Was Rates by Store, Rate Checks for 100 Stores, Store Coupons, Event Deals and In-Store Offers (US, UK and Canada; 9 endpoints) | Yes | No | No | No |
 | JCPenney Clearance, Sale Prices, Coupon Codes, Store Unit Counts, Reviews and Q&A (11 endpoints) | Yes | No | No | No |
 | Dick's Sporting Goods Clearance, Per-Size Prices, Store Unit Counts and Reviews (9 endpoints) | Yes | No | No | No |
+| Academy Sports + Outdoors Prices, Was Prices and Deals, Exact Units per Store for Pickup, Stores and Categories (US; 9 endpoints) | Yes | No | No | No |
+| REI Prices, Sale, Clearance and Outlet Deals, Store Pickup Status near a ZIP, Reviews and Stores (US; 9 endpoints) | Yes | No | No | No |
 | Foot Locker Release Calendar, Size Availability, Sale Prices, Reviews and Q&A (13 markets; 10 endpoints) | Yes | No | No | No |
+| Zappos and 6pm Prices, Exact Warehouse Units per Size, Width and Color, Reviews with Fit Ratings, Questions and Lowest Prices (US; 7 endpoints) | Yes | No | No | No |
 | Fanatics Merchandise: Jersey Sale, Clearance and With-Code Prices, Size Stock Levels, League Stores and Reviews (8 markets; 5 endpoints) | Yes | No | No | No |
 | Argos Store Stock by UK Postcode, Prices, Was Prices, Badges and Reviews (UK; 10 endpoints) | Yes | No | No | No |
 | Media Expert Black Week Prices, Omnibus 30-Day Low, Code Prices, Store Stock and Reviews (Poland; 13 endpoints) | Yes | No | No | No |
@@ -6978,6 +6986,296 @@ print(hotel["name"], hotel["stars"], hotel["rating"]["score"], hotel["fees"][:2]
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 118. Sporting goods -- Academy Sports + Outdoors prices, deals and units per store
+
+Academy Sports + Outdoors (academy.com, the US sporting goods retailer):
+keyword search, category and deal listings (Hot Deals, Clearance, Black
+Friday, the Flash Sale) with the price, was price, saving and Academy's deal
+tags, sorted and filtered by any facet; one product in full with every
+variant; the exact units one store holds for pickup per variant; stores near a
+ZIP or a point and store details with hours; the category tree; and search
+suggestions. US only, prices in USD and national (the same at every store).
+Product types are described as Academy lists them. Namespace `academy`, 9
+endpoints: `search`, `product`, `store_availability`, `stores`, `store`,
+`category`, `categories`, `deals`, `suggestions`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Academy Sports + Outdoors API
+page](https://scavio.dev/academy-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/academy-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ac = client.academy
+res = ac.search("yeti tumbler")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["name"], it["price"], it["was_price"], it["percent_off"])
+stock = ac.store_availability("111805768", "19", "TX")["data"]
+print(stock["in_store_units_total"], stock["variants_in_stock_at_store"])
+for v in stock["variants"][:5]:
+    print(v["sku_id"], v["store_status"], v["in_store_units"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 119. Body care and candles -- Bath & Body Works prices, offers and store pickup
+
+Bath & Body Works (bathandbodyworks.com, the US body care and home fragrance
+retailer, and bathandbodyworks.ca): keyword search and category listings (48
+results, as the site shows them) with the price, list price, promotions,
+fragrance and size; the category tree; one product in full; a product's
+promotions with their start and end times; the current offers; whether one
+store takes a pickup order for a product and the most it lets you reserve; the
+store directory and one store; and a product's rating with its newest reviews.
+Country us or ca, prices in USD or CAD. Namespace `bathandbodyworks`, 10
+endpoints: `search`, `category`, `categories`, `product`, `promotions`,
+`offers`, `store_availability`, `store`, `stores`, `reviews_summary`. Credits:
+1 credit each. `credits_used` in the response is what was charged. The request
+timeout is raised to at least 240s.
+See the [Bath & Body Works API
+page](https://scavio.dev/bathandbodyworks-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/bathandbodyworks-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bbw = client.bathandbodyworks
+res = bbw.search("candle", sort="top_rated")["data"]
+print(res["total"], res["count"], res["currency"])
+for it in res["products"][:5]:
+    print(it["name"], it["size"], it["price"], [p["callout"] for p in it["promotions"]])
+pickup = bbw.store_availability("BBW00010", product_id="028029548")["data"]
+print(pickup["store"]["name"], pickup["store_orderable"], pickup["pickup_purchase_limit"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 120. Apparel -- Gap, Old Navy, Banana Republic and Athleta prices and store stock
+
+Gap Inc. (gap.com): one API for Gap, Old Navy, Banana Republic, Athleta, Gap
+Factory and Banana Republic Factory (brand). Keyword search and category
+listings with the regular price, the price shown and whether it is a promotion
+or a markdown; the category tree; one product with every color and size;
+prices for up to 100 colors in one call; stores near a ZIP, a postal code or a
+point and one store with hours; the in, low or out pickup stock of sizes at up
+to 10 stores; search suggestions, trending searches and the deal pages.
+Country us or ca (English or French), prices in USD or CAD. A checkout code is
+never applied to a price. Namespace `gap`, 11 endpoints: `search`, `category`,
+`categories`, `product`, `prices`, `stores`, `store`, `store_stock`,
+`suggestions`, `trending`, `deals`. Credits: 1 credit each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [Gap Inc. API
+page](https://scavio.dev/gap-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/gap-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+gap = client.gap
+res = gap.search("jeans", brand="gap")["data"]
+print(res["brand_name"], res["total"], res["pages"])
+for it in res["items"][:5]:
+    print(it["name"], it["regular_price"], it["effective_price"], it["price_type"])
+stock = gap.store_stock(["220", "1519", "1456"], sku_ids=["4035400023503"])["data"]
+for sku in stock["skus"]:
+    print(sku["sku_id"], [(s["store_id"], s["status"]) for s in sku["stores"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 121. Cashback -- Rakuten cash back rates, coupons and deals in the US, UK and Canada
+
+Rakuten (rakuten.com, the cashback site formerly Ebates; rakuten.co.uk and
+rakuten.ca too): the store directory with each store's cash back rate and was
+rate, one store with its rate, terms and coupons, a store's coupons, a rate
+check for up to 100 stores in one call, search over stores, coupons and
+products, search suggestions, a category of stores, the event deal pages
+(Black Friday, Cyber Monday, the coupons hub) and the card-linked in-store
+offers. Country us, gb or ca (English or French). Rates are as Rakuten writes
+them; Rakuten gives no rate end dates, and its shopping-trip links are never
+returned. Namespace `rakuten`, 9 endpoints: `stores`, `store`,
+`store_coupons`, `rates`, `search`, `suggestions`, `category`, `deals`,
+`in_store`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 240s.
+See the [Rakuten API
+page](https://scavio.dev/rakuten-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rakuten-stores?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rk = client.rakuten
+res = rk.stores(sort="cashback")["data"]
+print(res["total"], res["pages"])
+for st in res["stores"][:5]:
+    print(st["name"], st["rate_text"], st["was_text"], st["elevated"])
+rates = rk.rates(["8333", "7206", "3930", "9528"])["data"]
+for st in rates["stores"]:
+    print(st["name"], st["rate_text"], st["amount"], st["type"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 122. Warehouse club -- BJ's Wholesale Club prices, coupons, reviews and clubs
+
+BJ's Wholesale Club (bjs.com, the US warehouse club): one product in full,
+keyword search and category listings (40 results, as the page lists them) with
+the online price, sale dates and whether an item is in stock online or in
+club, the category tree, product reviews, the guest coupon book and the club
+directory by state. Where BJ's shows a member-only price to a visitor, the
+answer flags it and gives the list price only; a club-only item has no online
+price. Search is priced for the club BJ's assigns to the visit: a club cannot
+be chosen, and there is no club price, club stock or ZIP club finder. US only,
+prices in USD. Namespace `bjs`, 7 endpoints: `product`, `search`, `category`,
+`categories`, `reviews`, `coupons`, `clubs`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [BJ's Wholesale Club API
+page](https://scavio.dev/bjs-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/bjs-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bjs = client.bjs
+res = bjs.search("coffee")["data"]
+print(res["total"], res["count"], res["priced_for"])
+for it in res["results"][:5]:
+    print(it["name"], it["price"], it["member_only_price"], it["club_only"])
+clubs = bjs.clubs(state="NY")["data"]
+for club in clubs["clubs"][:5]:
+    print(club["club_id"], club["name"], club["state"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 123. Shoes -- Zappos and 6pm prices and exact units per size, width and color
+
+Zappos (zappos.com, the US shoe and clothing store) and 6pm (6pm.com, its
+outlet site; site): keyword search or a catalog browse by facets, sorted, with
+the price, original price, percent off and units on hand; one product with
+every color and size and the exact warehouse units per size, width and color;
+customer reviews with comfort, look and fit ratings; customer questions; the
+lowest price of each color as Zappos gives it; category facets; and search
+suggestions. Reviews, questions and lowest prices come from zappos.com. US
+only, prices in USD; no stores. No reviewer names. Namespace `zappos`, 7
+endpoints: `search`, `product`, `reviews`, `questions`, `lowest_prices`,
+`categories`, `suggestions`. Credits: 1 credit each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [Zappos API
+page](https://scavio.dev/zappos-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/zappos-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+zp = client.zappos
+res = zp.search(query="running shoes")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["brand"], it["name"], it["price"], it["original_price"], it["on_hand"])
+shoe = zp.product("10002909")["data"]
+print(shoe["name"], shoe["total_on_hand"], shoe["in_stock_sku_count"])
+for style in shoe["styles"][:3]:
+    print(style["color"], style["price"], [(s["size"], s["width"], s["on_hand"]) for s in style["skus"][:4]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 124. Computers and electronics -- Newegg prices, seller offers, reviews and deals
+
+Newegg (newegg.com, the US computer and electronics store): keyword search,
+category listings and the deal stores (Shell Shocker, Black Friday) with the
+price, list price, instant rebate, shipping and the seller; the category menu;
+one item in full; every seller's offer on an item by condition; reviews; a
+marketplace seller's store and its products; and search suggestions. Country
+us, ca or one of 9 Newegg Global storefronts (local currency, part of the
+catalog). When Newegg serves a different item than the one requested, the
+answer shows both. Namespace `newegg`, 10 endpoints: `search`, `category`,
+`categories`, `product`, `offers`, `reviews`, `deals`, `seller`,
+`seller_products`, `suggestions`. Credits: 2 credits each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [Newegg API
+page](https://scavio.dev/newegg-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/newegg-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ne = client.newegg
+res = ne.search("rtx 5070")["data"]
+print(res["total"], res["count"])
+for it in res["items"][:5]:
+    print(it["title"], it["price"], it["list_price"], it["in_stock"])
+offers = ne.offers("19-113-877", sort="price")["data"]
+print(offers["total"], [(t["condition"], t["lowest_price"]) for t in offers["tabs"]])
+for o in offers["offers"][:5]:
+    print(o["price"], o["condition"], o["shipping"]["free"], o["seller"]["marketplace"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 125. Outdoor gear -- REI prices, deals, reviews and store pickup status
+
+REI (rei.com, the US outdoor co-op): keyword search, category listings and the
+deal pages (sale and clearance, REI Outlet) with the price, regular price,
+percent off and flags, sorted and filtered by facets or one store; one product
+in full with every SKU; reviews; the pickup status of one SKU at the REI
+stores near a ZIP, a city or a point (in stock, ship to store or unavailable:
+REI publishes no unit counts); stores and one store with hours; and search
+suggestions. US only, prices in USD as shown to a visitor who is not signed
+in; no used gear online and no member prices. Namespace `rei`, 9 endpoints:
+`search`, `category`, `deals`, `product`, `reviews`, `store_stock`, `stores`,
+`store`, `suggestions`. Credits: 2 credits each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [REI API
+page](https://scavio.dev/rei-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rei-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rei = client.rei
+res = rei.search("rain jacket")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["brand"], it["name"], it["price"], it["regular_price"], it["sale"])
+stock = rei.store_stock("2437020001", zip="98101")["data"]
+print(stock["in_stock_count"], stock["ship_to_store_count"])
+for row in stock["stores"][:5]:
+    print(row["store"]["name"], row["status"], row["estimated_arrival"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -7104,6 +7402,7 @@ Scavio works with popular AI/LLM frameworks:
 | Google Ads Transparency | `advertisers` (start here), `search`, `creative` | 1 each |
 | Meta Ad Library | `search`, `advertiser`, `ad` | 1 each |
 | Costco | `search`, `category`, `categories`, `product`, `prices`, `availability`, `reviews`, `warehouses`, `gas`, `coupons`, `deals`, `clearance`, `autocomplete` | 1 each, except `prices` (2 at 10 warehouses), `availability` (1 per 5 warehouses), `warehouses` (2 with `country="ca"`) and `gas` (2 by location on ca; by `warehouse_ids`, 1 per 5 on us and 2 per warehouse on ca) |
+| BJ's Wholesale Club (`bjs`) | `product`, `search`, `category`, `categories`, `reviews`, `coupons`, `clubs`; US; `search` and `category` list 40 results, priced for the club BJ's assigns; `product` and `reviews` by `product_id` or `url`; `clubs` by `state` | 1 each |
 | Lowe's | `stores` (start here), `search`, `product`, `reviews` | `reviews` 1, the rest 2 each |
 | Sam's Club | `clubs`, `search`, `product`, `savings`, `category`, `reviews` | `clubs` 1, the rest 2 each |
 | Canadian Tire | `stores` (start here), `search`, `product`, `availability`, `clearance`, `deals` | 1 each |
@@ -7128,14 +7427,21 @@ Scavio works with popular AI/LLM frameworks:
 | Nordstrom | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Nordstrom Rack (`nordstrom_rack`) | `search`, `category`, `brand`, `product`, `reviews`, `availability`, `stores`, `suggestions` | `availability` and `reviews` 10, the rest 5 each |
 | Best Buy (`best_buy`) | `search`, `product`, `reviews`, `category`, `deals`, `stores`, `availability`, `suggestions`, `prices` (`country="ca"` for Best Buy Canada); Canada only: `questions` | US: `stores` and `suggestions` 1; `deals` 3; `category` 2, 3 on a `pcmcat` page; the rest 2 each (`prices` per call, up to 15 SKUs; `availability` flat, up to 8 stores). 1 each for Canada |
+| Newegg (`newegg`) | `search`, `category`, `categories`, `product`, `offers`, `reviews`, `deals`, `seller`, `seller_products`, `suggestions`; `country` us, ca or a Newegg Global storefront (uk, au, nz, jp, ph, sg, kr, th, mx); `offers` us and ca; `reviews` takes the product's `group_id` and `subcategory_id` | 2 each |
 | TCGplayer | `search`, `product`, `listings`, `price_history`, `sales`, `games`, `sets`, `price_guide`, `suggestions`, `trending`, `seller`, `seller_feedback`, `seller_products` | 1 each |
 | Vinted | `search`, `product`, `seller`, `seller_products`, `seller_feedback`, `brands`, `suggestions`, `filters`, `categories` | 1 each |
 | Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
+| Gap Inc. (`gap`) | `search`, `category`, `categories`, `product`, `prices`, `stores`, `store`, `store_stock`, `suggestions`, `trending`, `deals`; `brand` gap, old_navy, banana_republic, athleta, gap_factory or banana_republic_factory; `country` us or ca, `language` en or fr; `store_stock` takes 1 to 10 `store_ids` and `sku_ids` or a `style_id` | 1 each |
+| Bath & Body Works (`bathandbodyworks`) | `search`, `category`, `categories`, `product`, `promotions`, `offers`, `store_availability`, `store`, `stores`, `reviews_summary`; `country` us or ca; `search` and `category` show 48 results (no page 2); `product`, `promotions`, `store_availability` and `reviews_summary` by `product_id` or `url` | 1 each |
 | Saks Fifth Avenue (`saks`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `designers` | 2 each |
 | Kohl's (`kohls`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | `stores` 1, the rest 2 each |
+| Rakuten (`rakuten`) | `stores`, `store`, `store_coupons`, `rates`, `search`, `suggestions`, `category`, `deals`, `in_store`; `country` us, gb or ca (`language` en or fr on ca); `rates` checks up to 100 `store_ids`; `store` and `store_coupons` by store slug or id | 1 each |
 | JCPenney (`jcpenney`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons`, `reviews`, `questions` | 1 each |
 | Dick's Sporting Goods (`dicks`) | `search`, `product`, `products`, `reviews`, `category`, `brand`, `deals`, `store_availability`, `suggestions` | `product` and `reviews` 2, the rest 1 each |
+| Academy Sports + Outdoors (`academy`) | `search`, `product`, `store_availability`, `stores`, `store`, `category`, `categories`, `deals`, `suggestions`; US; `search` by `query`; `product` by `url` or `slug`; `store_availability` takes a `part_number`, a `store_id` and its `state`; `stores` by `zip` or a point | 1 each |
+| REI (`rei`) | `search`, `category`, `deals`, `product`, `reviews`, `store_stock`, `stores`, `store`, `suggestions`; US; `category` by `slug` or `url`; `product` and `reviews` by `product_id` or `url`; `store_stock` takes a `sku` and a `zip`, a `city` and `state` or a point | 2 each |
 | Foot Locker (`footlocker`) | `search`, `product`, `category`, `brand`, `deals`, `releases`, `stores`, `store_availability`, `reviews`, `questions` | 1 each |
+| Zappos (`zappos`) | `search`, `product`, `reviews`, `questions`, `lowest_prices`, `categories`, `suggestions`; `site` zappos or 6pm; `product` by exactly one of `product_id`, `style_id`, `stock_id` or `asin`; `reviews`, `questions` and `lowest_prices` zappos only | 1 each |
 | Fanatics (`fanatics`) | `search`, `product`, `browse`, `deals`, `reviews` | 1 each |
 | Argos (`argos`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `questions`, `categories`, `category`, `deals`, `suggestions`; one UK store (argos.co.uk, GBP), no `country` | 2 each |
 | Media Expert (`mediaexpert`) | `search`, `product`, `store_stock`, `stores`, `reviews`, `category`, `categories`, `brands`, `brand`, `promotions`, `outlet`, `seller`, `suggestions`; one Polish store (mediaexpert.pl, PLN), no `country` | actual cost, 1 to 3: `store_stock` and `categories` 2; `search` 3 (1 when it redirects to a full category page); `category`, `brand`, `outlet`, `seller` and promotion-list products 1 unsorted, 3 sorted or lazily loaded; the rest 1 |
@@ -7204,6 +7510,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.99.0
+
+- **8 new namespaces** (sync and async), 72 endpoints, US retailers: `academy` (Academy
+  Sports + Outdoors, 9), `bathandbodyworks` (Bath & Body Works, 10), `gap` (Gap Inc.:
+  Gap, Old Navy, Banana Republic, Athleta and the factory stores, 11), `rakuten` (9),
+  `bjs` (BJ's Wholesale Club, 7), `zappos` (Zappos and 6pm, 7), `newegg` (10) and `rei`
+  (REI, 9). Credits: 1 per call except `newegg` and `rei` (2). The request timeout is
+  raised to at least 240s.
 
 ### Changed in 0.98.0
 

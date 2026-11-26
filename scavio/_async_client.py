@@ -8,6 +8,7 @@ from ._exceptions import ScavioError
 from ._extract import AsyncExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
+    _AsyncAcademyNamespace,
     _AsyncAcehardwareNamespace,
     _AsyncActionNamespace,
     _AsyncAffordablehousingNamespace,
@@ -22,7 +23,9 @@ from ._namespaces_async import (
     _AsyncAsosNamespace,
     _AsyncAutotraderNamespace,
     _AsyncAutozoneNamespace,
+    _AsyncBathandbodyworksNamespace,
     _AsyncBestBuyNamespace,
+    _AsyncBjsNamespace,
     _AsyncBolcomNamespace,
     _AsyncBookingNamespace,
     _AsyncBootsNamespace,
@@ -59,6 +62,7 @@ from ._namespaces_async import (
     _AsyncFashionnovaNamespace,
     _AsyncFootlockerNamespace,
     _AsyncG2Namespace,
+    _AsyncGapNamespace,
     _AsyncGeminiNamespace,
     _AsyncGlassdoorNamespace,
     _AsyncGoodreadsNamespace,
@@ -97,6 +101,7 @@ from ._namespaces_async import (
     _AsyncMicroCenterNamespace,
     _AsyncMovotoNamespace,
     _AsyncNellisNamespace,
+    _AsyncNeweggNamespace,
     _AsyncNikeNamespace,
     _AsyncNintendoNamespace,
     _AsyncNordstromNamespace,
@@ -111,9 +116,11 @@ from ._namespaces_async import (
     _AsyncPoshmarkNamespace,
     _AsyncPublicstorageNamespace,
     _AsyncPublixNamespace,
+    _AsyncRakutenNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
+    _AsyncReiNamespace,
     _AsyncRentcafeNamespace,
     _AsyncRentcomNamespace,
     _AsyncRightmoveNamespace,
@@ -153,6 +160,7 @@ from ._namespaces_async import (
     _AsyncYelpNamespace,
     _AsyncYesstyleNamespace,
     _AsyncYouTubeNamespace,
+    _AsyncZapposNamespace,
     _AsyncZaraNamespace,
     _AsyncZillowNamespace,
 )
@@ -356,6 +364,14 @@ class AsyncScavioClient:
         self.estatesales = _AsyncEstatesalesNamespace(self)
         self.goodreads = _AsyncGoodreadsNamespace(self)
         self.expedia = _AsyncExpediaNamespace(self)
+        self.academy = _AsyncAcademyNamespace(self)
+        self.bathandbodyworks = _AsyncBathandbodyworksNamespace(self)
+        self.gap = _AsyncGapNamespace(self)
+        self.rakuten = _AsyncRakutenNamespace(self)
+        self.bjs = _AsyncBjsNamespace(self)
+        self.zappos = _AsyncZapposNamespace(self)
+        self.newegg = _AsyncNeweggNamespace(self)
+        self.rei = _AsyncReiNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

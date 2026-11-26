@@ -6,6 +6,7 @@ from ._exceptions import ScavioError
 from ._extract import ExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
+    _AcademyNamespace,
     _AcehardwareNamespace,
     _ActionNamespace,
     _AffordablehousingNamespace,
@@ -20,7 +21,9 @@ from ._namespaces_sync import (
     _AsosNamespace,
     _AutotraderNamespace,
     _AutozoneNamespace,
+    _BathandbodyworksNamespace,
     _BestBuyNamespace,
+    _BjsNamespace,
     _BolcomNamespace,
     _BookingNamespace,
     _BootsNamespace,
@@ -57,6 +60,7 @@ from ._namespaces_sync import (
     _FashionnovaNamespace,
     _FootlockerNamespace,
     _G2Namespace,
+    _GapNamespace,
     _GeminiNamespace,
     _GlassdoorNamespace,
     _GoodreadsNamespace,
@@ -95,6 +99,7 @@ from ._namespaces_sync import (
     _MicroCenterNamespace,
     _MovotoNamespace,
     _NellisNamespace,
+    _NeweggNamespace,
     _NikeNamespace,
     _NintendoNamespace,
     _NordstromNamespace,
@@ -109,9 +114,11 @@ from ._namespaces_sync import (
     _PoshmarkNamespace,
     _PublicstorageNamespace,
     _PublixNamespace,
+    _RakutenNamespace,
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
+    _ReiNamespace,
     _RentcafeNamespace,
     _RentcomNamespace,
     _RightmoveNamespace,
@@ -151,6 +158,7 @@ from ._namespaces_sync import (
     _YelpNamespace,
     _YesstyleNamespace,
     _YouTubeNamespace,
+    _ZapposNamespace,
     _ZaraNamespace,
     _ZillowNamespace,
 )
@@ -361,6 +369,14 @@ class ScavioClient:
         self.estatesales = _EstatesalesNamespace(self)
         self.goodreads = _GoodreadsNamespace(self)
         self.expedia = _ExpediaNamespace(self)
+        self.academy = _AcademyNamespace(self)
+        self.bathandbodyworks = _BathandbodyworksNamespace(self)
+        self.gap = _GapNamespace(self)
+        self.rakuten = _RakutenNamespace(self)
+        self.bjs = _BjsNamespace(self)
+        self.zappos = _ZapposNamespace(self)
+        self.newegg = _NeweggNamespace(self)
+        self.rei = _ReiNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

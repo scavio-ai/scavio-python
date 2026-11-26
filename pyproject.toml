@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.98.0"
-description = "Python SDK for the Scavio Search API - real-time data from 146 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.99.0"
+description = "Python SDK for the Scavio Search API - real-time data from 154 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -138,6 +138,28 @@ keywords = [
     "expedia",
     "expedia-api",
     "hotel-prices",
+    "academy",
+    "academy-sports-api",
+    "bathandbodyworks",
+    "bath-and-body-works-api",
+    "gap",
+    "gap-api",
+    "old-navy-api",
+    "banana-republic-api",
+    "athleta-api",
+    "rakuten",
+    "rakuten-api",
+    "cashback",
+    "bjs",
+    "bjs-wholesale-club-api",
+    "zappos",
+    "zappos-api",
+    "6pm",
+    "newegg",
+    "newegg-api",
+    "rei",
+    "rei-api",
+    "outdoor-gear",
     "aldi",
     "instacart",
     "instacart-api",
