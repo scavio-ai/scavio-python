@@ -1670,7 +1670,7 @@ def test_us_retail_batch_1_credits_and_paths():
         "aldi": {"search": 1, "product": 1, "stores": 1},
         "micro_center": {"search": 2, "product": 2, "stores": 1},
         "walgreens": {"search": 2, "product": 2, "stores": 2, "stock": 4},
-        "cvs": {"search": 1, "product": 1, "stock": 1},
+        "cvs": {"search": 1, "product": 2, "stock": 1},  # product 2 since 0.95.1
     }
     for ns, methods in expected.items():
         eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == ns}

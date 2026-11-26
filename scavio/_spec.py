@@ -23608,7 +23608,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=4,
     ),
     # ================================ CVS ================================
-    # 3 endpoints, 1 credit each. Front-store products only (no pharmacy).
+    # 3 endpoints: search and stock 1 credit, product 2 (since 0.95.1). Front-store products only (no pharmacy).
     # Prices are the same at every store; stock is one store's. There is no
     # store locator: the store number is on every cvs.com store page. search
     # defaults to store 7019 (New York). product() can take 10-30+ seconds, so
@@ -23656,7 +23656,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
             _str("product_id", "CVS product id or SKU id, e.g. '789787' (a search result's product_id or sku_id). Pass this or url."),
         ),
         one_of=(("url", "product_id"),),
-        credits=1,
+        credits=2,
         min_timeout=120.0,
     ),
     Endpoint(
