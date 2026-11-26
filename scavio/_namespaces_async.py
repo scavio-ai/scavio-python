@@ -136,6 +136,14 @@ __all__ = [
     "_AsyncCarmaxNamespace",
     "_AsyncCarvanaNamespace",
     "_AsyncBringatrailerNamespace",
+    "_AsyncRentcomNamespace",
+    "_AsyncTruliaNamespace",
+    "_AsyncStreeteasyNamespace",
+    "_AsyncRentcafeNamespace",
+    "_AsyncVrboNamespace",
+    "_AsyncTruecarNamespace",
+    "_AsyncEdmundsNamespace",
+    "_AsyncKbbNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -25913,3 +25921,1330 @@ class _AsyncBringatrailerNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("bringatrailer_suggestions", {"query": query}, extra)
+
+class _AsyncRentcomNamespace:
+    """Rent.com (rent.com) and Apartment Guide (apartmentguide.com, same inventory; site rent or apartmentguide) search, listing, building, rent_trends, suggestions and cities endpoints; US rentals, rents in USD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        city: Optional[str] = None,
+        *,
+        site: Optional[Literal["rent", "apartmentguide"]] = None,
+        state: Optional[str] = None,
+        neighborhood: Optional[str] = None,
+        zip: Optional[str] = None,
+        property_type: Optional[Literal["apartments", "houses", "condos", "townhouses", "rooms"]] = None,
+        beds: Optional[Union[int, Literal["studio"], list[Union[int, Literal["studio"]]]]] = None,
+        baths: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        sqft_min: Optional[int] = None,
+        pets: Optional[Literal["pet_friendly", "dogs", "cats", "no_pets"]] = None,
+        cheap: Optional[bool] = None,
+        luxury: Optional[bool] = None,
+        deals: Optional[bool] = None,
+        amenities: Optional[list[str]] = None,
+        sort: Optional[Literal["best_match", "price_low", "price_high", "beds", "sqft", "latest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search rentals on Rent.com or Apartment Guide: Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. By city and state, ZIP or neighborhood; property type (apartments, houses, condos, townhouses, rooms), beds, baths, monthly rent range, minimum square feet, pets, cheap / luxury, rent specials and amenities; sorted 6 ways; 30 a page on rent.com, 50 on Apartment Guide. Apartment Guide takes city and state (with one beds value) or ZIP and page, as its links do; send site rent for the other filters (the same rentals). Returns query, site, location {name, type, city, state, state_code, zip, neighborhood, latitude, longitude}, total, available_units, page, page_size, pages, has_more, count, average_rent {studio, one_bedroom, two_bedroom: {average_rent, yoy_change_pct, yoy_change_text}}, listings [id (the input of listing; kind building ids are the input of building), kind (listing or building), name, address, address_full, city, state, state_code, zip, latitude, longitude, property_type, price (lowest listed rent, USD a month), price_text, rent_min, rent_max, beds_min, beds_max, baths_min, baths_max, sqft_min, sqft_max, bed_text, bath_text, sqft_text, rent_by_beds [{beds, rent_min, rent_max, sqft_min, sqft_max}], units_available_text, availability, deals_text, deals [{category, description, expires}], special_terms, has_price_drops, price_drops (USD amounts), pet_friendly, amenities_highlighted, highlights, image, url, management_company, verified, private_listing, updated_at], notes. A page past the last page is an empty page with a note (charged); an unknown city, ZIP or neighborhood is a charged 404. No phone number, email or agent / landlord name is returned; management_company is given only for listings a property manager pays to list. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            city: A city name (Austin, New York, St. Louis) or its slug (new-york; cities lists them).
+            site: rent (www.rent.com, default, 30 listings a page) or apartmentguide (www.apartmentguide.com, the same rentals, 50 a page).
+            state: A US state: 2-letter code (TX) or name (Texas).
+            neighborhood: With city and state (site rent): a neighborhood by name or slug (downtown-manhattan).
+            zip: Or a 5-digit US ZIP code (instead of city and state).
+            property_type: apartments (default), houses, condos, townhouses or rooms (rooms for rent). Site rent.
+            beds: Bedrooms: studio or 0-4 (4 = 4 or more), or a list (site rent; apartmentguide takes one value with city and state). Listings with at least one matching floor plan.
+            baths: Bathrooms, 1-4 (4 = 4 or more). Site rent.
+            price_min: Lowest monthly rent, USD. Site rent.
+            price_max: Highest monthly rent, USD. Site rent.
+            sqft_min: Smallest square feet, one of 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600. Site rent.
+            pets: pet_friendly, dogs, cats or no_pets. Site rent.
+            cheap: The site's cheap apartments filter. Site rent.
+            luxury: The site's luxury filter. Site rent.
+            deals: Only listings with rent specials. Site rent.
+            amenities: Up to 8 amenities: air-conditioning, assisted-living, att-fiber, available-now, cable-ready, college, controlled-limited-access, corporate-billing-available, disability-access, dishwasher, elevator, ev-charging, extra-storage, fitness-center, furnished, garage, gated-access, hardwood-floor, best, high-speed-internet-access, income-restricted, independent-living, laundry-facility, loft, military, new-construction, remodeled, no-credit-check, onsite-personnel, oversized-closets, patio, pool, new, senior-living, short-term-available, virtual-tours, utilities-included, view, washer-dryer-connections, washer-dryer-in-unit, waterfront. Site rent.
+            sort: best_match (default), price_low, price_high, beds (fewest first), sqft (smallest first) or latest (latest update). Site rent.
+            page: Page, from 1; pages and has_more say how deep the results go.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_search", {"city": city, "site": site, "state": state, "neighborhood": neighborhood, "zip": zip, "property_type": property_type, "beds": beds, "baths": baths, "price_min": price_min, "price_max": price_max, "sqft_min": sqft_min, "pets": pets, "cheap": cheap, "luxury": luxury, "deals": deals, "amenities": amenities, "sort": sort, "page": page}, extra)
+
+    async def listing(
+        self,
+        id: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["rent", "apartmentguide"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One rental in full by id or link: site, id, name, url, description, address, city, state, state_code, zip, neighborhoods, latitude, longitude, property_type, room_for_rent, total_units, units_available, price, price_text, rent_min, rent_max, beds / baths / sqft ranges, floor_plans [{id, name, beds, baths, half_baths, sqft, sqft_min, sqft_max, rent_min, rent_max, rent_text, available_count, availability_text, available_date, deposit, amenities, image, units [{unit_id, rent, rent_text, sqft, available_date, available, deposit, floor}]}], fees {admin_fee, application_fee, broker_fee, amenity_fee, utilities_included, utilities_notes, tenant_paid_utilities, insurance, sales_tax}, pet_policies [{type, label, comment, initial_fee, additional_rent, deposit, max_pets, weight_limit}], pet_friendly, parking [{type, assigned, assigned_fee, per_space_fee, total_spaces, comments}], amenities [{name, subcategory, category}], amenities_highlighted, highlights, office_hours [{day, hours [{open, close}]}], deals_text, deals, special_terms, has_price_drops, price_drops, price_drop_overall, lease_terms, income_restrictions, schools [{name, type, grades, rating, district, distance_miles, address}], nearby [{category, total, places [{name, type, distance_miles}]}], walk_score {walk, bike, transit with descriptions}, vibes, photos, management_company, verified, private_listing, updated_at, similar [{id, name, address_full, price_text, rent_min, rent_max, bed_text, url}], similar_ids, notes. Fields the site leaves empty are null or []. An id the site does not have (or a listing taken down) is a charged 404. No phone number, email or agent / landlord name is returned; management_company is given only for listings a property manager pays to list. Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            id: A listing id (listings[].id from search: lc5898701, 206824305, lv3119690811). Apartment Guide's 5898701 and Rent.com's lc5898701 are the same listing; either works on either site.
+            site: rent (www.rent.com, default, 30 listings a page) or apartmentguide (www.apartmentguide.com, the same rentals, 50 a page).
+            url: Or the listing's link on rent.com or apartmentguide.com (its host sets the site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_listing", {"id": id, "site": site, "url": url}, extra)
+
+    async def building(
+        self,
+        building_id: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["rent"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One building on Rent.com (the separate unit listings at one address) by building id or link: id, url, address, address_full, city, state, state_code, zip, neighborhoods, latitude, longitude, price_text, bed_text, bath_text, sqft_text, rent_min, rent_max, photos, count, listings [id (the input of listing; kind building ids are the input of building), kind (listing or building), name, address, address_full, city, state, state_code, zip, latitude, longitude, property_type, price (lowest listed rent, USD a month), price_text, rent_min, rent_max, beds_min, beds_max, baths_min, baths_max, sqft_min, sqft_max, bed_text, bath_text, sqft_text, rent_by_beds [{beds, rent_min, rent_max, sqft_min, sqft_max}], units_available_text, availability, deals_text, deals [{category, description, expires}], special_terms, has_price_drops, price_drops (USD amounts), pet_friendly, amenities_highlighted, highlights, image, url, management_company, verified, private_listing, updated_at], schools, notes. An unknown building is a charged 404. No phone number, email or agent / landlord name is returned; management_company is given only for listings a property manager pays to list. Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            building_id: A building id (listings[].id where kind is building, e.g. b147857).
+            site: rent (the default). This endpoint reads Rent.com's page; Apartment Guide lists the same rentals.
+            url: Or the building's rent.com link (https://www.rent.com/building/<address>-b<id>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_building", {"building_id": building_id, "site": site, "url": url}, extra)
+
+    async def rent_trends(
+        self,
+        city: str,
+        state: str,
+        *,
+        site: Optional[Literal["rent"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Rent.com's rent trends for one city: location, current {studio, one_bedroom, two_bedroom, three_bedroom: {average_rent, yoy_change_pct, yoy_change_text}} (Rent.com's current averages, USD a month, and year-on-year change), listing_count, series {studio, one_bedroom, two_bedroom, three_bedroom: [{month, label, average_rent}]} (the monthly series as Rent.com publishes it on the page; series_range {from, to, points} says which months it covers, and it can end well before today), rent_distribution [{min, max, count, percent}], nearby_cities and nearby_neighborhoods [{name, url, listing_count, averages}], url, notes. An unknown city is a charged 404. Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            city: A city name (Austin, New York, St. Louis) or its slug (new-york; cities lists them).
+            state: A US state: 2-letter code (TX) or name (Texas).
+            site: rent (the default). This endpoint reads Rent.com's page; Apartment Guide lists the same rentals.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_rent_trends", {"city": city, "state": state, "site": site}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["rent", "apartmentguide"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site's search-box suggestions for the start of a place or property name: query, site, count, places [{name, type (city, zip, neighborhood, school, ...), id, path, url}], listings [{id, name, address, address_full, city, state_code, property_type, url}], notes. Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a city, ZIP, neighborhood, school or property name.
+            site: rent (www.rent.com, default, 30 listings a page) or apartmentguide (www.apartmentguide.com, the same rentals, 50 a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_suggestions", {"query": query, "site": site}, extra)
+
+    async def cities(
+        self,
+        state: str,
+        *,
+        site: Optional[Literal["rent"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The cities Rent.com links from a state page, A to Z (a smaller town can be missing and still have a search page): state, state_code, count, cities [{name, city (the city input of search and rent-trends), url}], notes. Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: A US state: 2-letter code (TX) or name (Texas).
+            site: rent (the default). This endpoint reads Rent.com's page; Apartment Guide lists the same rentals.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcom_cities", {"state": state, "site": site}, extra)
+
+class _AsyncTruliaNamespace:
+    """Trulia (trulia.com, Zillow Group's home and neighborhood site) neighborhood, search, property, school and suggestions endpoints; US only, prices in USD, language en or es; 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def neighborhood(
+        self,
+        location_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        include_market_snapshot: Optional[bool] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Trulia neighborhood page by location id or link: Trulia (trulia.com, Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the public Trulia page on request. Returns location_id, region_id, name, city, state, county, zip_code, url, search_urls, what_locals_say {title, minimum_responses, statements [{type, statement, percent}]} (Trulia's 16 "What Locals Say" survey results), safety {minimum_responses, statements}, reviews {total, shown, categories [{id, name, count}], items [{id, text, category, category_name, reviewer_type (Resident, Prev. Resident), date, helpful}]} (Trulia's page shows up to 40 reviews; total and the category counts cover all), facts {homes_for_sale, homes_for_rent, for_sale_price_range, for_rent_price_range, commute {destination, minutes}}, amenities {categories, count, items [{name, category, subcategory, website, latitude, longitude}]}, schools {levels, items [{id, name, url, district, type, levels, grades, students, rating (GreatSchools, of 10), parent_rating, review_count, address, reviews [{rating, text, type, date}]}]}, geo {centroid, bounding_box, encoded_polygon, wkt}, nearby_neighborhoods, homes_for_sale {total, listings}, market (default on) {snapshot {scope (neighborhood or city, as Trulia scopes it), area, last_updated, avg_sale_price, sale_to_list_ratio, price_per_sqft, active_listings (each {value, display, mom_change, mom_direction}), market_condition, market_temperature_index, source}, median_sale_price_history {scope, area, last_updated, points [{month, median_sale_price}]}, rental_snapshot, rent_history, read_from}, notes. Survey results, safety statements and market figures are Trulia's, as Trulia gives them. Crime data is no longer on Trulia. No listing-agent names, phones, emails or license numbers and no reviewer names are returned; brokerage company names are. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location_id: A Trulia neighborhood location id: property neighborhood.location_id, or location_id of a neighborhood in suggestions.
+            url: Or the neighborhood's trulia.com link (https://www.trulia.com/n/<st>/<city>/<neighborhood>/<location id>/).
+            include_market_snapshot: Add market: Trulia's market snapshot and monthly median sale price history, read from a home for sale in the neighborhood (default true; same 1 credit). false answers faster.
+            language: en (default) or es: Trulia's US Spanish neighborhood page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trulia_neighborhood", {"location_id": location_id, "url": url, "include_market_snapshot": include_market_snapshot, "language": language}, extra)
+
+    async def search(
+        self,
+        location: str,
+        *,
+        listing_status: Optional[Literal["for_sale", "for_rent", "sold"]] = None,
+        beds_min: Optional[int] = None,
+        baths_min: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        sqft_min: Optional[int] = None,
+        sqft_max: Optional[int] = None,
+        year_built_min: Optional[int] = None,
+        year_built_max: Optional[int] = None,
+        hoa_max: Optional[int] = None,
+        property_types: Optional[list[Literal["single_family", "townhouse", "condo", "coop", "apartment", "multi_family"]]] = None,
+        keyword: Optional[str] = None,
+        pets: Optional[list[Literal["cats", "small_dogs", "large_dogs"]]] = None,
+        sort: Optional[Literal["default", "newest", "price_low", "price_high", "sqft", "beds", "baths"]] = None,
+        page: Optional[int] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Trulia homes for sale, for rent or recently sold in a ZIP code, city or neighborhood: Trulia (trulia.com, Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the public Trulia page on request. Filters: beds_min, baths_min, price, sqft and year-built ranges, hoa_max, property_types, keyword, pets (rentals); 7 sorts; 40 homes a page. Returns listing_status, location {city, state, zip_code, neighborhood, location_id}, url, language, total, page, page_size, total_pages, has_more, sort, applied_filters (the filters Trulia says it applied), neighborhoods [{name, id, count}], count, listings [id, zpid, building_id, url, status (for_sale, for_rent, sold, rented, off_market), listing_type, price (USD; sold rows read from the sale price Trulia prints), price_min, price_max (rental buildings), price_display, price_note (e.g. Total price) and price_note_details, currency, price_change_direction, address, street_address, city, state, zip_code, community_name, latitude, longitude, beds, beds_min, beds_max, baths, baths_min, baths_max, living_area (sqft), living_area_min, living_area_max, lot_size_display, home_type, tags, date_listed, sold_date, open_houses, brokerage (company), has_3d_tour, has_video, image, images], notes. No listing-agent names, phones, emails or license numbers and no reviewer names are returned; brokerage company names are. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: A ZIP code (78701), "City, ST" (Austin, TX) or "Neighborhood, City, ST" (Upper East Side, New York, NY). suggestions returns search_location values.
+            listing_status: for_sale (default), for_rent or sold (recently sold).
+            beds_min: beds_min.
+            baths_min: baths_min.
+            price_min: USD (monthly rent on for_rent).
+            price_max: USD (monthly rent on for_rent).
+            sqft_min: sqft_min.
+            sqft_max: sqft_max.
+            year_built_min: year_built_min.
+            year_built_max: year_built_max.
+            hoa_max: Highest monthly HOA fee, USD (for_sale and sold).
+            property_types: Any of: single_family, townhouse, condo, coop, apartment, multi_family.
+            keyword: A listing keyword Trulia filters on (letters, digits, spaces), e.g. pool, hardwood floors.
+            pets: Rentals only: cats, small_dogs, large_dogs.
+            sort: default (Trulia's order: newest on for_sale, its own ranking on for_rent, latest sale on sold), newest, price_low, price_high, sqft (largest), beds (most), baths (most).
+            page: Page, from 1 (40 homes a page, up to page 50); has_more says whether another exists.
+            language: en (default) or es: Trulia's US Spanish pages exist for rental searches (for_rent) only.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trulia_search", {"location": location, "listing_status": listing_status, "beds_min": beds_min, "baths_min": baths_min, "price_min": price_min, "price_max": price_max, "sqft_min": sqft_min, "sqft_max": sqft_max, "year_built_min": year_built_min, "year_built_max": year_built_max, "hoa_max": hoa_max, "property_types": property_types, "keyword": keyword, "pets": pets, "sort": sort, "page": page, "language": language}, extra)
+
+    async def property(
+        self,
+        zpid: Optional[Union[str, int]] = None,
+        *,
+        building_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Trulia home (for sale, sold, for rent) by zpid or link, or one rental building by building_id or link: Trulia (trulia.com, Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the public Trulia page on request. Returns id, zpid, building_id, url, language, name, status, status_label, listing_type, address parts, latitude, longitude, price, price_min, price_max, price_display, price_note, currency, beds, baths, baths_summary, living_area, lot_size_display, home_type, date_listed, tags, insights, description, zestimate and rent_zestimate (Zillow's estimates as Trulia shows them), home_value {current_display, since_last_month, since_last_year, since_last_sale, history}, price_history [{date, event, price, source, details}], last_sold, taxes {assessment, history [{year, tax, assessment}]}, features {highlights, categories [{name, attributes, groups}]}, open_houses, brokerage (company), mls, payment_estimate {monthly_total, principal_and_interest, property_taxes, homeowners_insurance, hoa, down_payment_percent, text} and price_vs_median {percent, direction, median_display, area, text} (read from Trulia's FAQ answers), faqs, market_snapshot and median_sale_price_history (Trulia's neighborhood or city market, with its scope), rental_market_snapshot, rent_history, seller_net_proceeds, neighborhood {location_id (the input of neighborhood), region_id, url, search_url, what_locals_say}, schools_summary, and for buildings floor_plans {groups [{title, beds, plans [{id, name, availability, beds, baths, price_min, price_max, sqft_display, units [{name, availability, available_now, price_display}]}]}]}, fees {monthly_required, one_time_required, monthly_optional, one_time_optional [{name, min, max, amount, amount_text}], disclaimer}, total_monthly_fee_included, pet_policy, special_offers, ideal_income, units {total, available}, plus photo_count, images (up to 50). An id Trulia does not have is a charged 404. No listing-agent names, phones, emails or license numbers and no reviewer names are returned; brokerage company names are. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zpid: A home's zpid (the id Trulia shares with Zillow; listings[].zpid).
+            building_id: Or a rental building's id (listings[].building_id).
+            url: Or the trulia.com link (https://www.trulia.com/home/<address>-<zpid> or /building/<name>-<id>).
+            language: en (default) or es: Spanish is available on building pages only.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trulia_property", {"zpid": zpid, "building_id": building_id, "url": url, "language": language}, extra)
+
+    async def school(
+        self,
+        url: Optional[str] = None,
+        *,
+        school_id: Optional[Union[str, int]] = None,
+        state: Optional[str] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One school on Trulia by link, or by school id and state: Trulia (trulia.com, Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the public Trulia page on request. Returns id, name, url, type, levels, grades, students, district, district_url, address, latitude, longitude, website, greatschools_url, ratings {overall, max, test_scores, equity, academic_progress, college_readiness, student_growth, source (GreatSchools)}, student_teacher_ratio, student_counselor_ratio, certified_teachers_percent, parent_rating, review_count, reviews [{rating, rating_max, text, type, date}] (parent reviews, no names), nearby_schools, assigned_homes {for_sale, for_rent: {total, listings}}, notes. An unknown school is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A Trulia school link (neighborhood schools.items[].url).
+            school_id: Or the number at the end of the school link (suggestions schools[].school_id), with state.
+            state: The school's two-letter state code (with school_id).
+            language: en only: Trulia's school pages are English.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trulia_school", {"url": url, "school_id": school_id, "state": state, "language": language}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        listing_status: Optional[Literal["for_sale", "for_rent"]] = None,
+        include_schools: Optional[bool] = None,
+        language: Optional[Literal["en", "es"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Trulia's place suggestions for the start of a city, neighborhood, ZIP code, address or school name: Trulia (trulia.com, Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the public Trulia page on request. Returns query, listing_status, count, places [{title, details, type (city, neighborhood, zipcode, address, ...), city, state, zip_code, location_id (a neighborhood's is the input of neighborhood), region_id, zpid (addresses: the input of property), url, search_location (the input of search), latitude, longitude}], schools [{title, subtitle, details, type, school_id, city, state, latitude, longitude}]. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a city, neighborhood, ZIP code, address or school name.
+            listing_status: for_sale (default) or for_rent: Trulia's suggestions for that kind of search.
+            include_schools: Add matching schools and districts (default true).
+            language: en only: Trulia's suggestions are English.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("trulia_suggestions", {"query": query, "listing_status": listing_status, "include_schools": include_schools, "language": language}, extra)
+
+class _AsyncStreeteasyNamespace:
+    """StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) search, listing, building, buildings and market endpoints; NYC and North NJ (market data NYC only), prices in USD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        area: Union[str, int],
+        *,
+        mode: Optional[Literal["sale", "rent", "sold"]] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        beds_min: Optional[int] = None,
+        beds_max: Optional[int] = None,
+        baths_min: Optional[int] = None,
+        sqft_min: Optional[int] = None,
+        home_types: Optional[list[Literal["condo", "coop", "house", "multifamily"]]] = None,
+        sale_types: Optional[list[Literal["sponsor", "resale", "foreclosure", "restricted"]]] = None,
+        year_built_min: Optional[int] = None,
+        year_built_max: Optional[int] = None,
+        amenities: Optional[list[Literal["washer_dryer", "dishwasher", "elevator", "doorman", "laundry", "gym", "parking", "pool", "storage", "private_outdoor_space", "public_outdoor_space", "central_ac", "furnished", "fireplace", "loft", "city_view", "garden_view", "park_view", "skyline_view", "waterview", "guarantor_ok", "pied_a_terre", "childrens_playroom", "smoke_free"]]] = None,
+        pets_allowed: Optional[bool] = None,
+        zip: Optional[str] = None,
+        by_owner: Optional[bool] = None,
+        status: Optional[Literal["active", "in_contract"]] = None,
+        sort: Optional[Literal["recommended", "newest", "recently_updated", "price_desc", "price_asc", "sqft_desc", "sqft_asc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search homes for sale, rentals or past sales in an NYC or North NJ area on StreetEasy (streeteasy.com, Zillow Group's New York City real estate site). StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the public StreetEasy page on request. Filters: price, bedrooms, bathrooms, size, home type, sale type, year built, amenities, pets, ZIP, by owner (rent) and in contract (sale); 7 sorts; up to 100 pages. Returns mode, area {id, name, slug, borough}, criteria (StreetEasy's search criteria as it read them), sort, page, total, pages, has_more, count, listings [id (the input of listing), url, placement (organic, featured or sponsored: StreetEasy's paid placements come first), address, unit, area, area_id, zip, state, latitude, longitude, price (USD; rent per month), currency, sold_price, net_effective_rent, months_free, lease_term_months, total_monthly_price, price_change, beds, full_baths, half_baths, sqft, building_type, sale_type, status, available_date, off_market_date, is_new_development, furnished, has_videos, has_3d_tour, source_type, listed_by_owner, brokerage, open_house {start, end, appointment_only}, photo, photos], notes. No agent or private landlord names, emails, phones or photos are returned; the brokerage is. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            area: A StreetEasy area by name, slug or id: a borough (Manhattan, Brooklyn, Queens, Bronx, Staten Island), a neighborhood (Williamsburg, Upper West Side), a New Jersey city (Jersey City, Hoboken), or nyc for all of NYC and NJ. Ids: 100 Manhattan, 300 Brooklyn, 400 Queens, 302 Williamsburg, 1001000 Jersey City. The answer returns the area id.
+            mode: sale (homes for sale, default), rent (rentals) or sold (past sales).
+            price_min: Lowest price (rent per month on mode rent), USD.
+            price_max: Highest price (rent per month on mode rent), USD.
+            beds_min: Fewest bedrooms (0 = studio).
+            beds_max: Most bedrooms. beds_min = beds_max asks for exactly that many.
+            baths_min: Fewest bathrooms.
+            sqft_min: Smallest size in square feet (listings without a size are left out).
+            home_types: Mode sale and sold: condo, coop, house, multifamily.
+            sale_types: Mode sale and sold: sponsor, resale, foreclosure, restricted (sponsor = a sponsor unit, sold by the developer).
+            year_built_min: year_built_min.
+            year_built_max: year_built_max.
+            amenities: StreetEasy's amenity filters, all required: washer_dryer, dishwasher, elevator, doorman, laundry, gym, parking, pool, storage, private_outdoor_space, public_outdoor_space, central_ac, furnished, fireplace, loft, city_view, garden_view, park_view, skyline_view, waterview, guarantor_ok, pied_a_terre, childrens_playroom, smoke_free.
+            pets_allowed: Only listings that allow pets.
+            zip: Only listings in this ZIP code (with area nyc to search every borough).
+            by_owner: Mode rent: only listings posted by the owner (no broker).
+            status: Mode sale: active (default: on the market) or in_contract (StreetEasy's pending).
+            sort: recommended (StreetEasy's default; mode sold defaults to newest), newest, recently_updated, price_desc, price_asc, sqft_desc, sqft_asc. The sort orders the organic results.
+            page: Page, from 1; pages and has_more say how deep the results go (sale pages hold about 38 cards, rent pages 14).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("streeteasy_search", {"area": area, "mode": mode, "price_min": price_min, "price_max": price_max, "beds_min": beds_min, "beds_max": beds_max, "baths_min": baths_min, "sqft_min": sqft_min, "home_types": home_types, "sale_types": sale_types, "year_built_min": year_built_min, "year_built_max": year_built_max, "amenities": amenities, "pets_allowed": pets_allowed, "zip": zip, "by_owner": by_owner, "status": status, "sort": sort, "page": page}, extra)
+
+    async def listing(
+        self,
+        url: Optional[str] = None,
+        *,
+        id: Optional[Union[str, int]] = None,
+        listing_type: Optional[Literal["sale", "rent"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) listing in full (for sale, sold or for rent) by link or by id with listing_type: id, url, listing_type, status, address {street, unit, city, state, zip, full}, area, building {id, name, slug, url, type, status, year_built, floors, units, area, latitude, longitude, amenities, policies}, sale_type, description, days_on_market, listed_date, available_date, off_market_date, sold_date, updated_at, status_changes, rooms, beds, full_baths, half_baths, sqft, amenities, doorman, parking, shared_outdoor_space, storage, features, fireplaces, private_outdoor_space, views, pricing {price, currency, sold_price, rented_price, price_changes [{price, at}], monthly_maintenance, monthly_taxes, monthly_common_charges, estimated_monthly_payment, max_financing_percent, net_effective_rent, months_free, lease_term_months, security_deposit, move_in_fees [{type, label, amount, refundable, required, timing}], monthly_fees, additional_fees}, property_history [{listing_id, brokerage, sold_date, off_market_date, events [{date, price, status, price_change_percent}]}] (the unit's past listings), open_houses, media {photos, floor_plans, video_count, has_3d_tour}, area_price_stats {beds, sale {min, median, max, listings}, rental {...}} (StreetEasy's recent-listing prices for that bedroom count in the area), source_type, listed_by_owner, mls_number, brokerage {name, listed_as, license_type, license_address}, agent_brokerages [{brokerage, license_type, license_address}]. No agent or private landlord names, emails, phones or photos are returned; the brokerage is. An unknown listing is a charged 404. StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the public StreetEasy page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A StreetEasy listing link or path (listings[].url), e.g. /building/<building>/<unit> or /sale/<id>.
+            id: Or a StreetEasy listing id (listings[].id) with listing_type.
+            listing_type: With id: sale (for sale and sold listings) or rent.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("streeteasy_listing", {"url": url, "id": id, "listing_type": listing_type}, extra)
+
+    async def building(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One NYC or North NJ building on StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) by slug or link: id, name, slug, url, address, area, neighborhood, type, unit_type, status, year_built, floors, units, latitude, longitude, description, amenities, policies (pets, sublets, pied-a-terre, ...), pets, details {developer, architect, interiors, manager, marketing_team, owner (the deed owner when a business), sales_office, leasing_office, website, sales_start_date}, nyc {building_class, building_class_description, community_district, council_district, police_precinct, hurricane_evacuation_zone, has_abatements}, inventory {sales, rentals: per bedroom count the available and past listing counts with min / max price; active_sale_ids, active_rental_ids}, sales, rentals (the building's listed units with price, status and brokerage), schools, transit, nearby {parks, colleges, museums}, similar_buildings, photo_count, photos. An unknown building is a charged 404. StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the public StreetEasy page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A StreetEasy building slug (building.slug).
+            url: Or the building's StreetEasy link (a listing link in the building works too).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("streeteasy_building", {"slug": slug, "url": url}, extra)
+
+    async def buildings(
+        self,
+        area: Union[str, int],
+        *,
+        building_type: Optional[Literal["condo", "coop", "rental"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The building directory of StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) for an area: area, building_type, page, total, pages, has_more, count, buildings [{id, name, slug (the input of building), url, address, active_sales, active_rentals, units, floors, year_built, status, buildings_in_complex, type, neighborhood, latitude, longitude, photo}]. StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the public StreetEasy page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            area: A StreetEasy area by name, slug or id (as in search).
+            building_type: Only condo, coop, rental buildings.
+            page: Page, from 1 (StreetEasy lists about 11 buildings a page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("streeteasy_buildings", {"area": area, "building_type": building_type, "page": page}, extra)
+
+    async def market(
+        self,
+        *,
+        type: Optional[Literal["sales", "rentals"]] = None,
+        metric: Optional[str] = None,
+        filter: Optional[str] = None,
+        area: Optional[Union[str, int]] = None,
+        start_month: Optional[str] = None,
+        end_month: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The monthly market data StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) publishes for New York City from 2010-01 (its neighborhoods, the five boroughs and NYC; the price and rental indexes for Brooklyn, Manhattan, Queens and NYC, from 2005 and 2007), as StreetEasy publishes it; New Jersey areas have no published series. Sales: price_index, inventory, sale_to_list_ratio, recorded_sales, median_sale_price, median_asking_price, median_days_on_market, share_of_price_cuts, by home type. Rentals: rental_index, inventory, median_asking_rent, share_of_rent_cuts, by bedrooms. Returns type, metric, metric_label, filter, filter_label, first_month, last_month, months, count, areas [{area, area_id, area_slug, borough, area_type (neighborhood, borough or city), latest {month, value}, values (aligned with months; null where none is published)}], notes. An area StreetEasy publishes no series for is a charged 404. Scavio fetches the public data file on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: sales (default) or rentals.
+            metric: sales: price_index, inventory, sale_to_list_ratio, recorded_sales, median_sale_price, median_asking_price, median_days_on_market, share_of_price_cuts (default median_sale_price). rentals: rental_index, inventory, median_asking_rent, share_of_rent_cuts (default median_asking_rent).
+            filter: sales by home type: all (default), condo, coop, single_family. rentals by bedrooms: all, studio, one_bedroom, two_bedrooms, three_plus_bedrooms. price_index and rental_index are published for all only. (8 values.)
+            area: One area by name, slug or id (a neighborhood, a borough, or NYC); every published area when omitted. The data covers New York City.
+            start_month: First month (YYYY-MM); StreetEasy's series start in 2010-01 (price_index in 2005-01, rental_index in 2007-01).
+            end_month: Last month (YYYY-MM).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("streeteasy_market", {"type": type, "metric": metric, "filter": filter, "area": area, "start_month": start_month, "end_month": end_month}, extra)
+
+class _AsyncRentcafeNamespace:
+    """RentCafe (rentcafe.com, Yardi's US and Canada rental listing site) search, property, floorplan_units, reviews, suggestions and rent_trends endpoints; markets us and ca (English or French), rents in USD or CAD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        location: Optional[str] = None,
+        *,
+        city: Optional[str] = None,
+        zip: Optional[str] = None,
+        state: Optional[str] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        property_type: Optional[Literal["apartments", "houses", "condos", "townhomes"]] = None,
+        beds: Optional[Union[Literal["1", "2", "3", "4", "studio"], int]] = None,
+        rent_specials: Optional[bool] = None,
+        short_term: Optional[bool] = None,
+        furnished: Optional[bool] = None,
+        utilities_included: Optional[bool] = None,
+        amenity: Optional[Literal["washer-dryer", "pool", "garage", "fitness-center", "balcony", "air-conditioning", "dishwasher", "fireplace", "hardwood-floors", "walk-in-closets", "wheelchair-accessible", "controlled-access", "playground", "public-transportation", "recent-build", "tennis-court", "yard", "cheap", "luxury"]] = None,
+        pet_friendly: Optional[bool] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        sort: Optional[Literal["default", "rent", "rent_desc", "rating_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search rentals on RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. Apartments, houses, condos or townhomes in a city, ZIP code, neighborhood or state (US and Canada), with one of beds, rent specials, short-term, furnished, utilities included or an amenity, plus price range and pet-friendly, sorted 5 ways, 25 a page; English or French. Returns market, language, currency, property_type, location, filters, sort, title, total (RentCafe's count), page, page_size, pages, has_more, count, listings [id (the property_id of reviews and floorplan-units), name, url (the input of property), address, city, state, zip, latitude, longitude, beds, baths, rent_min, rent_max, currency, rent_by_bed [{beds, rent, rent_text}], rating, review_count, pets_allowed, rent_specials, units_available, tags, badges, featured_type, management_company, image, image_count], notes. Rents are in the market's currency (USD or CAD); a rent RentCafe does not state is null. A location RentCafe does not have is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location: A RentCafe location as its search links write it (austin-tx, 78704-tx, downtown-toronto-toronto-on, a state such as tx), or a suggestions places[].seo_url (us/tx/austin, ca/on/toronto/downtown-toronto).
+            city: Or a city name (with state), e.g. Chicago.
+            zip: Or a US ZIP code (with state), e.g. 78704.
+            state: With city or zip: the 2-letter US state or Canadian province code (TX, ON, QC).
+            market: us or ca. Read from the location's state or province when left out (a mismatch is refused).
+            language: en (default) or fr: RentCafe's French pages (fr-CA labels over the same listings). Prices stay in the market's currency.
+            property_type: apartments (default), houses, condos or townhomes.
+            beds: studio, 1, 2, 3 or 4 bedrooms (0 is studio).
+            rent_specials: Only listings with a rent special.
+            short_term: Only short-term leases.
+            furnished: furnished.
+            utilities_included: utilities_included.
+            amenity: One amenity filter as RentCafe links it: washer-dryer, pool, garage, fitness-center, balcony, air-conditioning, dishwasher, fireplace, hardwood-floors, walk-in-closets, wheelchair-accessible, controlled-access, playground, public-transportation, recent-build, tennis-court, yard, cheap, luxury. RentCafe takes one of beds, rent_specials, short_term, furnished, utilities_included or amenity per search.
+            pet_friendly: Only pet-friendly listings (combines with any filter).
+            price_min: Lowest monthly rent, in the market's currency.
+            price_max: Highest monthly rent, in the market's currency.
+            sort: default (RentCafe's Best Match), rent (low to high; listings without a stated rent come first), rent_desc, rating_desc or newest (listings with new units at the top, as RentCafe sorts them).
+            page: Page of 25, from 1. RentCafe pages through about 15-20 pages at most: pages says how many; narrow with filters for more.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_search", {"location": location, "city": city, "zip": zip, "state": state, "market": market, "language": language, "property_type": property_type, "beds": beds, "rent_specials": rent_specials, "short_term": short_term, "furnished": furnished, "utilities_included": utilities_included, "amenity": amenity, "pet_friendly": pet_friendly, "price_min": price_min, "price_max": price_max, "sort": sort, "page": page}, extra)
+
+    async def property(
+        self,
+        url: Optional[str] = None,
+        *,
+        slug: Optional[str] = None,
+        language: Optional[Literal["en", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One RentCafe listing in full by link or slug: id, name, url, market, language, currency, address {street, city, state, zip, country}, latitude, longitude, rent_min, rent_max, rent_text, beds, baths, rating, rating_label, review_count, badges, great_deal (RentCafe's bare Great deal badge; its basis is not stated), price_drop, rent_special, units_available, images, floorplans [{id (the floorplan_id of floorplan-units), name, beds, baths, size, rent, rent_text, has_units, price_drop, units_shown, units [{id, name, size, rent, rent_text, availability}]}], policies [{name, items [{label, value, amount}], text}] (deposit, application fees, pet fees and pet policy as RentCafe lists them), amenities {apartment, community}, services, building_details, category_ratings [{category, rating}], renters_summary {text, source} (RentCafe's own What renters are saying summary), reviews [{rating, date, text}] (no reviewer names), office_hours [{day, hours}], office_hours_note, phone (the leasing office), management_company, description, notes. French pages read the same, with RentCafe's French labels. A link RentCafe does not have is a charged 404. RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: The listing link (search listings[].url), e.g. https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx.
+            slug: Or <st>/<city>/<name> as in the listing link (housing/... or single-family/... for those links).
+            language: en (default) or fr: RentCafe's French pages (fr-CA labels over the same listings). Prices stay in the market's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_property", {"url": url, "slug": slug, "language": language}, extra)
+
+    async def floorplan_units(
+        self,
+        property_id: Union[str, int],
+        floorplan_id: Union[str, int],
+        *,
+        unit_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every unit of one floor plan of a RentCafe listing (the property page shows up to 2): property_id, floorplan_id, name, beds, baths, size, rent, rent_text, currency, price_drop, selected_unit {id, base_rent, base_rent_text, availability} (with unit_id), count, units [{id, name, availability, available_now, beds, baths, size, rent, rent_text, specials}], amenities, photos [{url, alt}], specials, notes. An unknown floor plan is a charged 404. RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            property_id: A RentCafe property id (search listings[].id, suggestions properties[].id, property id).
+            floorplan_id: A floor plan id (property floorplans[].id).
+            unit_id: A unit id (floorplans[].units[].id): selected_unit gives its base rent and availability.
+            url: The listing link (search listings[].url), e.g. https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx.
+            market: us (default) or ca: the currency of the rents. Read from url when sent.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_floorplan_units", {"property_id": property_id, "floorplan_id": floorplan_id, "unit_id": unit_id, "url": url, "market": market}, extra)
+
+    async def reviews(
+        self,
+        property_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Resident reviews of one RentCafe listing, 10 a page in RentCafe's order: property_id, page, page_size, total, pages, has_more, rating, rating_label, category_ratings, renters_summary (RentCafe's own summary; page 1), count, reviews [{rating, resident_type (e.g. Verified Resident), date, text}], notes. RentCafe offers no review sort or star filter. No reviewer name is returned. An unknown property id is a charged 404. RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            property_id: A RentCafe property id (search listings[].id, suggestions properties[].id, property id).
+            page: Page of 10 reviews, from 1; pages says how many.
+            url: The listing link (search listings[].url), e.g. https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_reviews", {"property_id": property_id, "page": page, "url": url}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RentCafe's location and property suggestions for a city, neighborhood, ZIP code or property name: query, market, places [{name, label, seo_url, location (the location input of search)}], properties [{id (the property_id of reviews and floorplan-units), name, address, city, state, zip, seo_url, location}], notes. RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A city, neighborhood, ZIP code or property name.
+            market: us (default) or ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_suggestions", {"query": query, "market": market}, extra)
+
+    async def rent_trends(
+        self,
+        city: str,
+        state: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """RentCafe's rent trends for a US city, as it publishes them: city, state, currency, url, title, last_updated, source (as RentCafe states it), average_rent, average_rent_previous_year, yoy_change_pct, highlights, by_bed_type [{type, average_rent, average_sqft}], budget_share [{range, share_pct}], households {renter_occupied, renter_pct, owner_occupied, owner_pct}, most_affordable_neighborhoods and most_expensive_neighborhoods [{name, average_rent, location (the location input of search)}], rent_by_neighborhood [{name, average_rent}], compared_cities [{name, average_rent}], notes. US only (RentCafe has no Canada rent trends pages). A city with no rent trends page is a 404 (not charged). RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe page on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            city: A US city.
+            state: Its 2-letter state code.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rentcafe_rent_trends", {"city": city, "state": state}, extra)
+
+class _AsyncVrboNamespace:
+    """Vrbo (vrbo.com, Expedia Group's vacation rental site) search, property and suggestions endpoints; 20 market-languages; billed on actual cost: 2 credits per attempt (a search usually 2 to 8)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        check_in: str,
+        check_out: str,
+        *,
+        destination: Optional[str] = None,
+        region_id: Optional[Union[str, int]] = None,
+        adults: Optional[int] = None,
+        children: Optional[list[int]] = None,
+        sort: Optional[Literal["recommended", "price_low", "price_high", "review", "review_count"]] = None,
+        property_type: Optional[Literal["house", "apartment_or_condo", "cottage", "cabin", "estate", "resort", "villa", "hotel", "houseboat", "guest_house", "boat", "chalet", "RV"]] = None,
+        amenity: Optional[Literal["pool", "private_pool", "heated_pool", "hot_tub", "balcony", "king_sized_bed", "parking", "internet_available", "fireplace", "washer", "clothes_dryer", "electric_vehicle_charging_station", "air_conditioning", "television", "outdoor_grill", "patio_or_deck", "garden_or_backyard", "bed_linens_provided", "crib", "stove", "microwave", "oven", "dishwasher", "kids_high_chair", "iron_and_board"]] = None,
+        house_rule: Optional[Literal["pets_allowed", "pet_free", "children_allowed", "events_allowed", "smoking_allowed"]] = None,
+        pets_allowed: Optional[bool] = None,
+        location_type: Optional[Literal["oceanfront", "waterfront", "downtown_location", "lake_location", "mountains_location", "rural_location", "golf_course", "village_location", "skiin_skiout"]] = None,
+        premier_host: Optional[bool] = None,
+        bedrooms_min: Optional[int] = None,
+        market: Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search vacation rentals on Vrbo (vrbo.com, Expedia Group's vacation rental site). Scavio fetches the public Vrbo page on request. Labels and texts are in the market's language, as Vrbo writes them (host-written titles and descriptions can stay in the host's language); field names are English. By place name or region id, dates and guests, with Vrbo's sorts and filters (property type, amenity, house rule incl. pets, location type, Premier Host, minimum bedrooms): market, language, currency, destination, region_id, destination_name, check_in, check_out, nights, adults, children, sort, filters, applied (the selections Vrbo's page echoed), matched_total (as Vrbo reports it), page_label, count, partial, attempts, properties [position, property_id (the input of property), expedia_property_id, url, path, title, details (the type / bedrooms / beds line, split as shown), messages (as shown, incl. the refund deadline), location_messages, rating {score, score_display, label, review_count, review_count_text, external_reviews}, price {nightly, nightly_display, total, total_display, was, was_display, was_applies_to, lead (nightly or total: which one is the card's large price; markets differ), stay_text, fees_text (Vrbo's own line, e.g. All fees included), price_messages, currency}, deal, badges (e.g. Premier Host, Loved by Guests, Ad), sponsored (Vrbo's paid placements, kept in place), coordinates {latitude, longitude}, images], notes. The first 50 results only: Vrbo's pages carry no further page. Prices are exactly as Vrbo shows them for the requested dates. Vrbo serves its results page in a 50-card or a 3-card form; Scavio re-fetches the 3-card form up to 4 attempts in all and, if it is all Vrbo gives, returns those 3 with partial: true. 2 credits per attempt (2 to 8; typically 2-6). Can take up to about 3 minutes: set a client timeout of at least 240 s. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits per attempt, 2 to 8 (typically 2 to 6): Vrbo answers a results page in a
+        50-card or a 3-card form and a search makes up to 4 attempts for the 50-card one.
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            check_in: Check-in date, YYYY-MM-DD.
+            check_out: Check-out date, YYYY-MM-DD (at most 90 nights after check_in).
+            destination: A place as you would type it on Vrbo (city, region, area or landmark).
+            region_id: Or a Vrbo region id: places[].region_id of suggestions (exact, no guessing).
+            adults: Adults (default 2).
+            children: Children's ages, one per child (0-17).
+            sort: recommended (default), price_low, price_high, review (guest rating), review_count: Vrbo's own sort options.
+            property_type: Vrbo's property type filter: house, apartment_or_condo, cottage, cabin, estate, resort, villa, hotel, houseboat, guest_house, boat, chalet, RV.
+            amenity: One of Vrbo's amenity filters: pool, private_pool, heated_pool, hot_tub, balcony, king_sized_bed, parking, internet_available, fireplace, washer, clothes_dryer, electric_vehicle_charging_station, air_conditioning, television, outdoor_grill, patio_or_deck, garden_or_backyard, bed_linens_provided, crib, stove, microwave, oven, dishwasher, kids_high_chair, iron_and_board.
+            house_rule: One of Vrbo's house-rule filters: pets_allowed, pet_free, children_allowed, events_allowed, smoking_allowed.
+            pets_allowed: Pet-friendly places only (the same as house_rule pets_allowed).
+            location_type: One of Vrbo's location filters: oceanfront, waterfront, downtown_location, lake_location, mountains_location, rural_location, golf_course, village_location, skiin_skiout.
+            premier_host: Places run by Premier Hosts only.
+            bedrooms_min: Vrbo's bedrooms filter: this many bedrooms or more (Vrbo may still mix in sponsored places).
+            market: The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and bookabach.co.nz are separate sites and are not covered.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vrbo_search", {"check_in": check_in, "check_out": check_out, "destination": destination, "region_id": region_id, "adults": adults, "children": children, "sort": sort, "property_type": property_type, "amenity": amenity, "house_rule": house_rule, "pets_allowed": pets_allowed, "location_type": location_type, "premier_host": premier_host, "bedrooms_min": bedrooms_min, "market": market}, extra)
+
+    async def property(
+        self,
+        id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        market: Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Vrbo property in full by id or link, fetched without dates: market, language, currency, requested_id, property_id, expedia_property_id, url, title, property_type, location {locality, region, country, address_lines, latitude, longitude, region_id}, rating {score, score_display, best, label, review_count, review_count_text}, highlights [{title, text}], space {bedrooms, bathrooms, sleeps, texts}, amenities [{group, items}] (every group), house_rules [{kind, heading, texts}] (check-in / check-out, minimum age, children, pets, events, smoking), important_information [{kind, heading, texts}], special_features, description, damage_and_incidentals, host {premier_host, premier_host_label, premier_host_text, languages} (no host name, biography or photo), photo_count, photos [{url, caption}], nearby [{group, places [{name, distance, travel_time}]}], default_price {label (the site's own default stay, not a quote), price, price_display, qualifier, messages (the lines under it, as shown), site_note, currency} or null when the page shows none, breadcrumbs, notes. Reviews, the availability calendar and prices for chosen dates are not offered (use search for dated prices). An unknown property is a charged 404. 2 credits. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            id: A Vrbo property id: properties[].property_id of search (e.g. 1046285, 12245744ha or pdp/lo/30792130).
+            url: Or a vrbo.com property link (any market; the link's market is used unless market is sent).
+            market: The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and bookabach.co.nz are separate sites and are not covered.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vrbo_property", {"id": id, "url": url, "market": market}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        limit: Optional[int] = None,
+        market: Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Vrbo's destination suggestions for a partial place name: market, language, currency, query, count, places [{type (CITY, NEIGHBORHOOD, POI, AIRPORT ...), region_id (the input of search), name, display_name, full_name, primary_name, secondary_name, latitude, longitude, country, country_code}], notes. 2 credits. Billed on what the request actually costs: credits_used reports it. Failed upstream calls are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: What a traveller has typed so far.
+            limit: Most places to return (1-8, default 8).
+            market: The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and bookabach.co.nz are separate sites and are not covered.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("vrbo_suggestions", {"query": query, "limit": limit, "market": market}, extra)
+
+class _AsyncTruecarNamespace:
+    """TrueCar (truecar.com, the US car-buying marketplace) search, listing, model, reviews, dealer, dealer_inventory, suggestions, makes and models endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        zip: str,
+        *,
+        condition: Optional[Literal["used", "new"]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        trim: Optional[str] = None,
+        body_style: Optional[Literal["convertible", "coupe", "hatchback", "sedan", "suv", "truck", "van", "wagon"]] = None,
+        radius: Optional[int] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        drivetrains: Optional[Union[list[str], str]] = None,
+        colors: Optional[Union[list[str], str]] = None,
+        fuel_types: Optional[Union[list[str], str]] = None,
+        accident_free: Optional[bool] = None,
+        certified_pre_owned: Optional[bool] = None,
+        sort: Optional[Literal["best_match", "best_deal", "lowest_price", "highest_price", "nearest", "lowest_mileage", "highest_mileage", "oldest_year", "newest_year", "newest_listed"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the new or used dealer inventory of TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. Around a US ZIP, by make and model (names or slugs), 30 vehicles a page, with TrueCar's ten sorts and its filters: radius, model year, price, maximum mileage, trim, body style, drivetrains, colors, fuel types, accident-free and certified pre-owned. Returns condition, zip, make, model, sort, sort_applied, page, page_size, total (TrueCar's count caps at 10,000: total_capped), total_pages, has_more, count, is_fallback, filters_applied (TrueCar's own echo), items [{year, make, model, trim, style, condition, certified_pre_owned, price, msrp, base_msrp, price_label, price_rating (TrueCar's own label as given), no_extra_dealer_fees, mileage, exterior_color, exterior_color_generic, interior_color, drivetrain, engine, fuel_type, transmission, body_style, mpg {city, highway, combined}, electric_range, key_features, history {accident_count, owner_count, clean_title}, listed_at, days_on_market, distance_miles, nationwide_delivery, dealer {id, name, group, address, city, state, zip}, currency}], national (TrueCar's national price range, per-trim average listed price and counts by year for the make and model), market, notes. distance_miles is exposed because TrueCar also lists vehicles from dealers far outside the radius. No VIN, stock number, listing link or dealer photo is returned (TrueCar's listing links and photos carry the VIN). An unknown make or model is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: TrueCar searches dealers around it.
+            condition: used (default) or new.
+            make: A make name or slug as TrueCar writes it (makes lists them): Toyota, Ford, Mercedes-Benz, land-rover.
+            model: Needs make. A model name or slug as TrueCar writes it: RAV4, F-150, CR-V.
+            trim: Needs make and model. One trim name or slug (national.trims lists them).
+            body_style: One of convertible, coupe, hatchback, sedan, suv, truck, van, wagon.
+            radius: Miles around the ZIP (TrueCar's default: 75 used, 150 new). TrueCar also lists far-away vehicles offered with delivery: check items[].distance_miles.
+            year_min: Model year from.
+            year_max: Model year to.
+            price_min: Price from, USD.
+            price_max: Price to, USD.
+            mileage_max: Mileage up to.
+            drivetrains: Any of: 4wd, awd, fwd, rwd (a list or comma-separated).
+            colors: Any of: beige, black, blue, brown, gold, gray, green, orange, purple, red, silver, white, yellow (a list or comma-separated).
+            fuel_types: Any of: gas, hybrid, electric, diesel, plug_in_hybrid (a list or comma-separated).
+            accident_free: Only vehicles with no reported accident.
+            certified_pre_owned: Only certified pre-owned vehicles.
+            sort: TrueCar's sorts: best_match, best_deal, lowest_price, highest_price, nearest, lowest_mileage, highest_mileage, oldest_year, newest_year, newest_listed (default best_match).
+            page: Page, 1-based (default 1); 30 vehicles a page, up to page 334.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_search", {"zip": zip, "condition": condition, "make": make, "model": model, "trim": trim, "body_style": body_style, "radius": radius, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_max": mileage_max, "drivetrains": drivetrains, "colors": colors, "fuel_types": fuel_types, "accident_free": accident_free, "certified_pre_owned": certified_pre_owned, "sort": sort, "page": page}, extra)
+
+    async def listing(
+        self,
+        vin: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One listing of TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. By VIN or truecar.com listing link (input only: the VIN is never returned): year, make, model, trim, style, condition, price, msrp, price_label, price_rating (TrueCar's label as given; TrueCar shows no basis), price_summary {advertised_price, msrp, discount, dealer_fees [{label, text, amount}], dealer_asking_price, taxes_and_fees, advertised_price_disclaimer}, mileage, colors, drivetrain, engine, fuel_type, transmission, body_style, mpg, key_features, highlights {technology, safety, comfort, appearance}, specs and features [{group, items [{name, value, units}]}], warranties, cpo_program, history (the AutoCheck flags TrueCar shows: accidents, owners, fleet, rental, lemon, salvage, theft recovered, report date), seller_notes, listed_at, days_on_market, photo_count, stock_image, dealer {id, name, address, city, state, zip, type, phone, timezone, hours}, market, notes. No delivery quote, payment estimate, stock number, listing link or photo link. A VIN TrueCar does not list is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            vin: A 17-character VIN of a vehicle listed on TrueCar. Input only: it is never returned.
+            url: A truecar.com listing link instead of vin (https://www.truecar.com/used-cars-for-sale/listing/<VIN>/...).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_listing", {"vin": vin, "url": url}, extra)
+
+    async def model(
+        self,
+        make: str,
+        model: str,
+        *,
+        year: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """TrueCar's overview of one model (optionally one model year) on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. Returns make, model, slugs, year, generation, overview, pros, cons, whats_new, rating {value, count, stars {5..1}}, sub_ratings, trims [{trim, slug, starting_msrp, starting_market_average (TrueCar's "Starting Market Average" as labelled)}], body_styles, engine_types, horsepower, combined_mpg, seating, cargo_cubic_feet, max_towing_lbs, warranty, segment_ranking, has_new_inventory, has_used_inventory, model_years, national_new, national_used, image, market, notes. An unknown make, model or year is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make name or slug as TrueCar writes it (makes lists them): Toyota, Ford, Mercedes-Benz, land-rover.
+            model: A model name or slug as TrueCar writes it (models lists a make's models): RAV4, F-150, CR-V.
+            year: A model year (model_years lists them). Default: TrueCar's current model year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_model", {"make": make, "model": model, "year": year}, extra)
+
+    async def reviews(
+        self,
+        make: str,
+        model: str,
+        *,
+        year: Optional[int] = None,
+        stars: Optional[Union[list[int], int, str]] = None,
+        search: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Owner reviews of one model on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. TrueCar groups them by generation (pass year for an earlier one). Filter by overall stars and by words in the text, page up to 100 a page; TrueCar's own order (no sort). Returns make, model, name, model_year, year, rating {value, count, stars}, stars, search, page, page_size, total, total_pages, has_more, count, reviews [{rating, sub_ratings [{name, value}], pros, cons, other_text, date, purchase_date, vehicle}], market, notes. No reviewer names, initials or states. An unknown make or model is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make name or slug as TrueCar writes it (makes lists them): Toyota, Ford, Mercedes-Benz, land-rover.
+            model: A model name or slug as TrueCar writes it (models lists a make's models): RAV4, F-150, CR-V.
+            year: A model year: the reviews of that year's generation. Default: the current generation.
+            stars: Overall owner ratings to keep (1-5; a list or comma-separated).
+            search: Words to match in the review text.
+            page: Page, 1-based (default 1).
+            page_size: Reviews a page, 1-100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_reviews", {"make": make, "model": model, "year": year, "stars": stars, "search": search, "page": page, "page_size": page_size}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One dealer's profile on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. By dealer id or dealership link: id, name, group, address, city, state, zip, phone, hours {monday..sunday: {open, close, closed}}, description, links [{type, url}] (website, social, inventory, service), services, online_dealer, hybrid_dealer, dealer_group, images, market, notes. No employees. TrueCar shows no dealer reviews. An unknown dealer is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: A TrueCar dealer id (items[].dealer.id from search; the number at the end of a truecar.com dealership link).
+            url: A truecar.com dealership link instead of dealer_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_dealer", {"dealer_id": dealer_id, "url": url}, extra)
+
+    async def dealer_inventory(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        condition: Optional[Literal["used", "new"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One dealer's new or used vehicles on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. 30 a page. Returns dealer {id, name, group, address, city, state, zip, phone}, condition, page, page_size, total, total_pages, has_more, count, items [{year, make, model, trim, style, condition, certified_pre_owned, price, msrp, base_msrp, price_label, price_rating (TrueCar's own label as given), no_extra_dealer_fees, mileage, exterior_color, exterior_color_generic, interior_color, drivetrain, engine, fuel_type, transmission, body_style, mpg {city, highway, combined}, electric_range, key_features, history {accident_count, owner_count, clean_title}, listed_at, days_on_market, distance_miles, nationwide_delivery, dealer {id, name, group, address, city, state, zip}, currency}], market, notes. No VIN, stock number, listing link or dealer photo is returned (TrueCar's listing links and photos carry the VIN). An unknown dealer is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: A TrueCar dealer id (items[].dealer.id from search; the number at the end of a truecar.com dealership link).
+            url: A truecar.com dealership link instead of dealer_id.
+            condition: used (default) or new.
+            page: Page, 1-based (default 1); 30 vehicles a page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_dealer_inventory", {"dealer_id": dealer_id, "url": url, "condition": condition, "page": page}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """TrueCar's own search suggestions for a text on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. Returns query, did_you_mean, hint, count, suggestions [{type (make, model, trim, body_style), make, make_slug, model, model_slug, trim, trim_slug, body_style, body_style_slug, year, pages}], market, notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Text to complete (at least 2 characters): a make, model, trim or body style.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_suggestions", {"query": query}, extra)
+
+    async def makes(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every make with used inventory on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. Returns count, makes [{make, slug}], national_new_count, national_used_count, market, notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_makes", {}, extra)
+
+    async def models(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One make's models on TrueCar (truecar.com, the US car-buying marketplace). Scavio fetches the public truecar.com page on request; TrueCar has no public API. US only, prices in USD. Returns make, make_slug, count, models [{model, slug, year, body_styles, engine_types, new_inventory, used_inventory, image}], market, notes. An unknown make is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make name or slug as TrueCar writes it (makes lists them): Toyota, Ford, Mercedes-Benz, land-rover.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("truecar_models", {"make": make}, extra)
+
+class _AsyncEdmundsNamespace:
+    """Edmunds (edmunds.com, the US car research and shopping site) search, listing, reviews, dealer, model, price, appraisal and makes endpoints; US only, prices in USD, 2 credits each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        city: str,
+        state: str,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        condition: Optional[Literal["used", "new"]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["best_match", "price_asc", "price_desc", "mileage_asc", "newest_listed"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        trim: Optional[str] = None,
+        drivetrain: Optional[str] = None,
+        exterior_color: Optional[str] = None,
+        body_type: Optional[str] = None,
+        deal_rating: Optional[str] = None,
+        no_accidents: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the car listings of Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. Used (with certified pre-owned) or new cars around a US city (city + state; Edmunds places a search by its own city pages, so a ZIP is not accepted), by make and model or every make (used), with a radius, 5 sorts and filters for year, price, mileage, trim, drivetrain, exterior colour, body type, Edmunds deal rating and no accidents; 21 a page. Returns condition, make, model, location {city, state, zip} (the city Edmunds searched around), radius, sort, page, page_size, total, total_pages, has_more, filters_applied, count, items [{position, condition (new, used, certified), year, make, model, trim, style, style_id, body_type, mileage, colors, drivetrain, engine, transmission, mpg, seats, features, photo_count, stock_image, price, price_change, msrp, estimated_monthly_payment, deal_rating, days_on_edmunds, estimated_days_to_sell, listed_at, history {owners, accidents, usage, clean_title}, in_transit, seller {type, dealer_id, name, street, city, state, zip, distance_miles, rating, review_count, phone, url}}], market, notes. deal_rating {local, national} is Edmunds' own deal rating as Edmunds gives it (Great, Good, Fair, Above_market ...) with Edmunds' list_price_estimate, max_great_price, max_good_price, max_fair_price, savings and savings_percent. When Edmunds has no listing matching every filter, items is empty (Edmunds' unrelated fallback listings are not returned). VINs are input only and never returned (listing photos are not returned: every Edmunds photo link carries the VIN); no stock numbers; private sellers city and state only; reviewer names are never returned. Dealer business name, address, phone, website, hours and ratings are kept. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            city: Required. A US city: Edmunds searches around its own page for that city (New York, Los Angeles, Dallas, small towns too). An unknown city is a charged 404.
+            state: Required. The city's state, 2-letter code (NY) or name.
+            zip: Not accepted: Edmunds places a search by its own city pages and ignores ZIP codes, so pass city and state (a zip is a 400, not charged).
+            condition: used (default; used and certified pre-owned) or new (needs make and model).
+            make: A make (with model). Leave make and model out to search every make (used only).
+            model: A model of make (with make), e.g. RAV4, Civic, F-150.
+            radius: Miles around the city: 10, 25, 50, 75, 100, 200, 500 (default 25). radius in the answer is the radius Edmunds used.
+            page: Page (default 1); 21 listings a page.
+            sort: best_match (default), price_asc, price_desc, mileage_asc, newest_listed.
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest price, whole USD.
+            price_max: Highest price, whole USD.
+            mileage_min: Fewest miles.
+            mileage_max: Most miles.
+            trim: A trim of make + model as Edmunds names it (XLE, LX, Lariat).
+            drivetrain: all_wheel_drive, four_wheel_drive, front_wheel_drive, rear_wheel_drive (or awd, 4wd, fwd, rwd).
+            exterior_color: Exterior colour: black, white, gray, silver, blue, red, brown, green, beige, gold, orange, yellow, purple.
+            body_type: Body type as Edmunds labels it: suv, sedan, pickup, hatchback, coupe, convertible, minivan, wagon (truck = pickup).
+            deal_rating: Edmunds' deal rating: great, good, fair.
+            no_accidents: Only listings with no reported accidents.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_search", {"city": city, "state": state, "zip": zip, "condition": condition, "make": make, "model": model, "radius": radius, "page": page, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "trim": trim, "drivetrain": drivetrain, "exterior_color": exterior_color, "body_type": body_type, "deal_rating": deal_rating, "no_accidents": no_accidents}, extra)
+
+    async def listing(
+        self,
+        vin: Optional[str] = None,
+        *,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        year: Optional[int] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One car listing on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. By VIN with make, model and year, or by its edmunds.com link (input only: the VIN is never returned): the vehicle (year, make, model, trim, style, mileage, colors, drivetrain, engine, transmission, mpg, seats, options, highlighted_features), price, advertised_price, price_change, msrp, base_msrp, total_msrp, destination_fee, dealer_fees [{name, amount, included_in_price}], estimated_monthly_payment, price_history {total_change, entries [{price, date}]}, deal_rating, days_on_edmunds, estimated_days_to_sell, selling_slowly, listed_at, history (owners, accidents, usage, clean title, salvage, frame damage, lemon and theft flags and the provider, as given), seller_comments, seller (dealer details with hours [{day, open, close, closed}], websites and url), market, notes. A sold or unknown listing is a charged 404. VINs are input only and never returned (listing photos are not returned: every Edmunds photo link carries the VIN); no stock numbers; private sellers city and state only; reviewer names are never returned. Dealer business name, address, phone, website, hours and ratings are kept. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            vin: A 17-character VIN (input only; never returned), with make, model and year.
+            make: The listing's make (with vin).
+            model: The listing's model (with vin).
+            year: The listing's model year (with vin).
+            url: An edmunds.com listing link (https://www.edmunds.com/<make>/<model>/<year>/vin/<VIN>/) instead of vin, make, model and year.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_listing", {"vin": vin, "make": make, "model": model, "year": year, "url": url}, extra)
+
+    async def reviews(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["most_helpful", "most_recent", "highest_rated", "lowest_rated"]] = None,
+        stars: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Owner (consumer) reviews of one model year on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. 5 a page, 4 sorts (most_helpful, most_recent, highest_rated, lowest_rated) and a star filter: make, model, year, rating, total_reviews, star_counts [{stars, count}], sort, stars, total_matching, page, page_size, total_pages, has_more, pros, cons (the topics Edmunds groups reviews by), styles [{style_id, name, review_count}], count, reviews [{id, rating, title, text, style, style_id, created, updated, helpful_votes, unhelpful_votes, ratings {safety, technology, performance, interior, comfort, reliability, value}}], market, notes. Reviewer names are never returned. An unknown model year is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land-rover). The makes endpoint lists all 69.
+            model: Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) or Edmunds' slug (rav4, f-150). An unknown model is a charged 404.
+            year: Required. The model year.
+            page: Page (default 1); 5 reviews a page.
+            sort: most_helpful (default), most_recent, highest_rated, lowest_rated.
+            stars: Only reviews with this many stars (1 to 5).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_reviews", {"make": make, "model": model, "year": year, "page": page, "sort": sort, "stars": stars}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A car dealer's page on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. By dealer id or link (search and listing give both): dealer_id, name, parent_group, franchise_make, url, websites, address, latitude, longitude, phones, hours [{day, open, close, closed}], verified, sales_rating and service_rating {average, count, recommended, not_recommended}, inventory {total, new, used, certified, models [{make, model, total, new, used, certified}]}, reviews_total, page, page_size, total_pages, has_more, count, reviews [{id, rating, type (sales or service), title, text, created, updated, recommends_dealer, bought_here, dealer_replies [{text, date}]}], market, notes. 21 reviews a page, newest first. Edmunds serves its first review page twice, so our pages skip the repeat: each review appears once. Reviewer names are never returned and are taken out of the dealer's replies. An unknown dealer is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            dealer_id: An Edmunds dealer id as search and listing give it (seller.dealer_id).
+            url: An edmunds.com dealer link (seller.url: https://www.edmunds.com/dealerships/all/<state>/<city>/<dealer id>/) instead of dealer_id.
+            page: Review page (default 1); 21 reviews a page, newest first.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_dealer", {"dealer_id": dealer_id, "url": url, "page": page}, extra)
+
+    async def model(
+        self,
+        make: str,
+        model: str,
+        *,
+        year: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A model year's research page on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. By make, model and year (default: the current model year): make, model, make_slug, model_slug, year, msrp_range {low, high}, styles [{style_id, name, trim, base_msrp, base_invoice, seats, body_type, sold_as, exterior_colors, specs {group: [{name, value}]}}], editorial_review {title, published, updated, rating, scale, ratings, verdict, summary, pros, cons, recommended_trim} (Edmunds' expert review), consumer_rating {average, count, star_counts}, inventory {near, new, used, certified, total, used_listings} (Edmunds' listing counts near its own location), market, notes. An unknown model or year is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land-rover). The makes endpoint lists all 69.
+            model: Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) or Edmunds' slug (rav4, f-150). An unknown model is a charged 404.
+            year: A model year (default: Edmunds' current model year).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_model", {"make": make, "model": model, "year": year}, extra)
+
+    async def price(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        trim: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """MSRP, invoice price and Edmunds Suggested Price per trim of one model year on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. make, model, year, trim, count, trims [{trim, msrp, invoice (null where Edmunds shows N/A), edmunds_suggested, most_popular}], table_note, suggested_price_near {city, state, zip, text} (Edmunds computes its suggested price for its own location and states it; always shown with the price), sales_through, market, notes. Figures as Edmunds gives them. An unknown model year is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land-rover). The makes endpoint lists all 69.
+            model: Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) or Edmunds' slug (rav4, f-150). An unknown model is a charged 404.
+            year: Required. The model year.
+            trim: Only this trim (as Edmunds names it). A trim the page does not list is a charged 404 that lists the page's trims.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_price", {"make": make, "model": model, "year": year, "trim": trim}, extra)
+
+    async def appraisal(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        trim: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Used-car values of one model year on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. Per style and condition (outstanding, clean, average, rough) as Edmunds gives them: make, model, year, trim, estimated_mileage (the mileage Edmunds assumes), values_near {city, state} (Edmunds' own location), count, styles [{style_id, style, base_msrp, base_invoice, values_updated, conditions {outstanding, clean, average, rough: {dealer_retail, private_party, trade_in, auction}}}], market, notes. Edmunds' estimates, not an offer. An unknown model year is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz ...) or its slug (land-rover). The makes endpoint lists all 69.
+            model: Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) or Edmunds' slug (rav4, f-150). An unknown model is a charged 404.
+            year: Required. The model year.
+            trim: Only this trim (as Edmunds names it). A trim the page does not list is a charged 404 that lists the page's trims.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_appraisal", {"make": make, "model": model, "year": year, "trim": trim}, extra)
+
+    async def makes(
+        self,
+        make: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every make on Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API is for partners and dealers only. US only, prices in USD. (69) and one make's models: make, make_slug, models_count, models [{name, slug (the model input of the other endpoints), latest_year, vehicle_type, new, used, submodels}], makes_count, makes [{name, slug, new, used}], market, notes. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            make: Required. A make: its models are returned with every make Edmunds lists.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("edmunds_makes", {"make": make}, extra)
+
+class _AsyncKbbNamespace:
+    """Kelley Blue Book (kbb.com, Cox Automotive's car value and research site) car_value, model, search, listing, reviews, dealers, dealer and makes_models endpoints; US only, prices in USD; 1 credit each (a car value at a zip 2, up to 6; deeper review pages up to 5)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def car_value(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        trim: str,
+        *,
+        intent: Optional[Literal["buy_used", "buy_new", "trade_in_sell"]] = None,
+        condition: Optional[Literal["fair", "good", "very_good", "excellent"]] = None,
+        mileage: Optional[int] = None,
+        zip: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A car's Kelley Blue Book values on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By make, model, year and trim (KBB slugs; model_page lists the trims), intent (buy_used, buy_new, trade_in_sell), condition and mileage, optionally for a ZIP code: vehicle {make, model, model_slug, year, trim, trim_slug, vehicle_id, body_style}, intent, condition, mileage, typical_mileage, location {zip, chosen_zip, valid_text ("Valid for ZIP Code N through date" as KBB gives it), valid_through}, valuation_date, headline (the values for the intent and condition), prices (every KBB price type the page gives; 17 for a used car: [{type_id, type (Lending Value, Typical Listing Price, Trade-In Value Fair ... Excellent, Private Party Value Fair ... Excellent, Auction Value Fair ... Excellent, Typical Listing Price (CPO), Fair Purchase Price, Fair Purchase Price (CPO); a new car: MSRP, Invoice, Fair Purchase Price), category, condition, value, base_value, region_adjustment, mileage_adjustment, option_adjustment, range_low, range_high}]), url, market, notes. Values are exactly as KBB gives them; without zip they are for KBB's default location. Credits: 1; with zip 2 (6 when a second way of reading the page is needed). Not charged when the upstream fails; a car KBB has no page for is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit; 2 with a zip (6 when a second way of reading the page is needed).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            make: A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 makes, makes_models lists them).
+            model: KBB's model slug as makes_models gives it (rav4, civic, f150-supercrew-cab, 3-series). A model KBB has no page for is a charged 404.
+            year: Model year.
+            trim: The trim: its trim_slug (model_page trims[].trim_slug, e.g. le-sport-utility-4d), its vehicle_id, or a name that starts exactly one trim (LE). A name several trims share is a 400 listing them.
+            intent: buy_used (default), buy_new (a new model year) or trade_in_sell. Every KBB price type the value page gives comes back; intent picks the headline values.
+            condition: Condition for the headline trade-in, private party and auction values: fair, good (default), very_good, excellent.
+            mileage: Odometer miles. Without it KBB values the mileage it assumes.
+            zip: Optional US ZIP code the values are for (buy_used and trade_in_sell; needs mileage). Without it the values are for Kelley Blue Book's default location (location.zip says which). With it: 2 credits (6 when a second way of reading the page is needed).
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_car_value", {"make": make, "model": model, "year": year, "trim": trim, "intent": intent, "condition": condition, "mileage": mileage, "zip": zip, "country": country}, extra)
+
+    async def model(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One model year on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By make, model and year: make, model, year, zip (KBB's default location for the prices), categories, trims [{vehicle_id, name, trim_slug, model, model_slug, body_style, fair_purchase_price, trade_in_value, private_party_value, combined_mpg, epa_city, epa_highway, epa_combined, mpge_combined, horsepower, torque, engine, drivetrain, seating, curb_weight_lbs, towing_capacity_lbs, cargo_capacity_cu_ft, ev_range_miles, is_ev, url}], new_car_pricing [{trim, trim_id, msrp, fair_purchase_price, fair_market_range {low, high}, epa_city, epa_highway}] and new_car_summary for a new model year, depreciation {three_year_depreciation, current_resale_value, current_trade_in_value, history [{year, resale_value, trade_in_value, annual_depreciation}], forecast [...]}, specs {fuel_economy, fuel_type, horsepower, max_seating, cargo_space, maximum_towing, basic_warranty, additional [{category, specs [{name, value}]}]}, rankings [{metric, value, top [...]}], best_cars {list, rank, winner, url}, years, other_models, image, url, market, notes. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            make: A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 makes, makes_models lists them).
+            model: KBB's model slug as makes_models gives it (rav4, civic, f150-supercrew-cab, 3-series). A model KBB has no page for is a charged 404.
+            year: Model year.
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_model", {"make": make, "model": model, "year": year, "country": country}, extra)
+
+    async def search(
+        self,
+        zip: Union[str, int],
+        *,
+        listing_type: Optional[Literal["all", "used", "new"]] = None,
+        make: Optional[str] = None,
+        model: Optional[str] = None,
+        model_code: Optional[str] = None,
+        radius: Optional[int] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "mileage_asc", "year_desc"]] = None,
+        year_min: Optional[int] = None,
+        year_max: Optional[int] = None,
+        price_min: Optional[int] = None,
+        price_max: Optional[int] = None,
+        mileage_min: Optional[int] = None,
+        mileage_max: Optional[int] = None,
+        drivetrain: Optional[str] = None,
+        exterior_color: Optional[str] = None,
+        seller_type: Optional[Literal["dealer", "private"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search the cars for sale on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. Around a US ZIP code with a radius, used, new or all, by make and model (validated: never widened to the make), sorted by relevance, price, mileage or model year, filtered by model year, price, mileage, drivetrain, exterior colour and dealer or private seller; 25 or 100 a page. Returns search, location {zip, place, radius_miles}, filters_applied, filters_not_applied, sort, page, page_size, total, total_pages, has_more, count, listings [{listing_id, url, title, year, make, make_code, model, model_code, trim, trim_code, listing_type, mileage, exterior_color, interior_color, body_style, drivetrain, engine, fuel, transmission, mpg_city, mpg_highway, doors, days_on_site, newly_listed, reduced_price, price (USD; null when the dealer asks you to call: price_label), display_price, msrp, price_label, deal_label, kbb_fair_purchase_price, dealer_fees {total, items [{name, amount}]}, price_history [{date, price, current}], history_preview (history flags as given, e.g. NO_ACCIDENTS_REPORTED, ONE_OWNER), warranties, image, sponsored, seller ({type: dealer, dealer_id, name, rating, rating_count, city, state, distance_miles, url} or a private seller)}], spotlights (paid placements, sponsored: true), stats {price, mileage, year: {min, avg, max}}, market, notes. deal_label is Kelley Blue Book's deal rating (Great, Good ...) as KBB gives it, based on the Kelley Blue Book Fair Purchase Price range: kbb_fair_purchase_price {amount, low, high, delta (that price minus the listing price; negative = above it)}. Private sellers: seller is {type: private, city, state, distance_miles} only (no name, phone or street address). VINs and stock numbers are never returned; phone numbers, emails, stock numbers and VIN-like codes inside descriptions read "[removed]". 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: cars for sale around it (an unknown ZIP is a 400, not charged).
+            listing_type: all (default), used or new cars for sale.
+            make: A make by name or code (Toyota, Ford, Mercedes-Benz, or TOYOTA, MB ...).
+            model: A model as the listings name it (RAV4, Civic, F150) or a spelling of it (F-150 is matched to F150). Needs make. A model KBB does not list for the make is a charged 404 that lists the make's models (it is never widened to the whole make).
+            model_code: A model code as listings[].model_code gives it (instead of model). Needs make.
+            radius: Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 400, 500, 0 (0 = nationwide). KBB's default otherwise (location.radius_miles).
+            page: Page (default 1, at most 100).
+            page_size: Listings a page: 25 (default) or 100.
+            sort: relevance (default), price_asc, mileage_asc, year_desc (newest model year).
+            year_min: Earliest model year.
+            year_max: Latest model year.
+            price_min: Lowest price, whole USD.
+            price_max: Highest price, whole USD.
+            mileage_min: Fewest miles.
+            mileage_max: Most miles.
+            drivetrain: Drivetrain: AWD4WD (AWD/4WD), FWD (Front Wheel Drive), RWD (Rear Wheel Drive).
+            exterior_color: Exterior colour: BEIGE (Beige), BLACK (Black), BLUE (Blue), BROWN (Brown), BURGUNDY (Burgundy), CHARCOAL (Charcoal), GOLD (Gold), GRAY (Gray), GREEN (Green), OFFWHITE (Off White), ORANGE (Orange), PINK (Pink), PURPLE (Purple), RED (Red), SILVER (Silver), TAN (Tan), TURQUOISE (Turquoise), WHITE (White), YELLOW (Yellow).
+            seller_type: dealer or private (private sellers).
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_search", {"zip": zip, "listing_type": listing_type, "make": make, "model": model, "model_code": model_code, "radius": radius, "page": page, "page_size": page_size, "sort": sort, "year_min": year_min, "year_max": year_max, "price_min": price_min, "price_max": price_max, "mileage_min": mileage_min, "mileage_max": mileage_max, "drivetrain": drivetrain, "exterior_color": exterior_color, "seller_type": seller_type, "country": country}, extra)
+
+    async def listing(
+        self,
+        listing_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One car for sale on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By listing id or link: the search tile fields plus description, images, features {group: [...]}, ranked_features, specifications, warranties [{group, type, label, details, years, miles, unlimited_miles, remaining_years, remaining_miles}], recall_count and recall_note (open safety recalls as KBB shows them), kbb_vehicle_id, kbb_consumer_rating, kbb_consumer_review_count, price_history, price_valid_until, deal_label + deal_basis, dealer {dealer_id, name, rating, rating_count, address, phone, website, hours [{day, open, close}], home_services, is_open, url} (null for a private seller), zip, market, notes. deal_label is Kelley Blue Book's deal rating (Great, Good ...) as KBB gives it, based on the Kelley Blue Book Fair Purchase Price range: kbb_fair_purchase_price {amount, low, high, delta (that price minus the listing price; negative = above it)}. Private sellers: seller is {type: private, city, state, distance_miles} only (no name, phone or street address). VINs and stock numbers are never returned; phone numbers, emails, stock numbers and VIN-like codes inside descriptions read "[removed]". A sold or removed listing is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            listing_id: A KBB listing id (search listings[].listing_id, dealer inventory[].listing_id).
+            url: A KBB listing link (https://www.kbb.com/cars-for-sale/vehicle/<id>) instead of listing_id.
+            zip: Optional: seller.distance_miles is measured from this US ZIP code; without it distance_miles is null.
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_listing", {"listing_id": listing_id, "url": url, "zip": zip, "country": country}, extra)
+
+    async def reviews(
+        self,
+        make: str,
+        model: str,
+        year: int,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["recent", "rating_desc", "rating_asc"]] = None,
+        stars: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Owner reviews of a model year on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By make, model and year, a page of 8 (1 to 10), sorted most recent, highest or lowest rated, optionally only one star rating: vehicle, sort, stars, page, per_page, total, total_pages, has_more, count, reviews [{review_id, title, text, rating, ratings {value, reliability, performance, styling, comfort, quality}, recommend, date, ownership, year, make, model, pros, cons, helpful_yes, helpful_no, photos, staff, incentivized}], ratings (KBB's averages: rating, review_count, value, reliability, performance, styling, comfort, quality, recommendation, distribution {five ... one}), most_helpful {positive, negative} (page 1), url, market, notes. No reviewer name, nickname or location. 1 credit (up to 5 for a page beyond 1, a sort or a star filter). Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit; a page beyond 1, a sort other than recent or a star filter up to 5.
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            make: A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 makes, makes_models lists them).
+            model: KBB's model slug as makes_models gives it (rav4, civic, f150-supercrew-cab, 3-series). A model KBB has no page for is a charged 404.
+            year: Model year.
+            page: Page of 8 reviews (default 1, at most 10).
+            sort: recent (default, most recent first), rating_desc (highest rated first) or rating_asc (lowest rated first).
+            stars: Only reviews with this overall star rating (1 to 5).
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_reviews", {"make": make, "model": model, "year": year, "page": page, "sort": sort, "stars": stars, "country": country}, extra)
+
+    async def dealers(
+        self,
+        zip: Union[str, int],
+        *,
+        make: Optional[str] = None,
+        radius: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Car dealers near a US ZIP code on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. Optionally of one make and within a radius: search, location {zip, place, radius_miles}, count, dealers [{dealer_id, name, franchise_name, make, rating, rating_count, distance_miles, address {street, street2, city, state, zip}, phone, website, url}] (at most 50, nearest first as KBB orders them; the dealer finder does not page, so narrow with radius or make), market, notes. Dealer details are the dealer's public business details. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: Required. A 5-digit US ZIP code: dealers near it.
+            make: Only dealers of this make (by name or code).
+            radius: Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 500, 0 (0 = any). KBB's default otherwise (25).
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_dealers", {"zip": zip, "make": make, "radius": radius, "country": country}, extra)
+
+    async def dealer(
+        self,
+        dealer_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One dealer on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By dealer id or link: dealer_id, name, rating, rating_count, address, phone, website, hours, home_services {buy_online, test_drive, vehicle_delivery, virtual_tour}, is_open, url, inventory_count (the dealer's listings on KBB), price_stats {min, avg, max}, makes [{make, make_code, count}], inventory_sort, inventory [the search tile fields] (the first page as the dealer page shows it; each listing_id opens with listing), market, notes. Dealer reviews are not included (rating and rating_count only). An unknown id is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            dealer_id: A KBB dealer id (dealers[].dealer_id, listings[].seller.dealer_id).
+            url: A KBB dealer link (https://www.kbb.com/dealers/<city-st>/<id>/<name>/) instead of dealer_id.
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_dealer", {"dealer_id": dealer_id, "url": url, "country": country}, extra)
+
+    async def makes_models(
+        self,
+        *,
+        vehicle_class: Optional[Literal["used", "new"]] = None,
+        make: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Kelley Blue Book's make and model directory on Kelley Blue Book (kbb.com, Cox Automotive's car value and research site), US. Scavio fetches the public KBB page on request; KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. Used (every model year KBB values; 68 makes, about 1,500 models) or new: vehicle_class, make, make_count, count, makes [{make, make_slug, model_count}], models [{make, make_slug, model, model_slug, years}] (the slugs car_value, model_page and reviews take), market, notes. Optionally one make. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            vehicle_class: used (default: every model year KBB values) or new (models sold new).
+            make: Only this make's models.
+            country: Optional: us (the only market; kbb.ca and kbb.com.br no longer carry Kelley Blue Book data and are refused).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kbb_makes_models", {"vehicle_class": vehicle_class, "make": make, "country": country}, extra)

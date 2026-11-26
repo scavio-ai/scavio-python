@@ -48,6 +48,7 @@ from ._namespaces_async import (
     _AsyncDollarTreeNamespace,
     _AsyncDouglasNamespace,
     _AsyncEbayNamespace,
+    _AsyncEdmundsNamespace,
     _AsyncFanaticsNamespace,
     _AsyncFashionnovaNamespace,
     _AsyncFootlockerNamespace,
@@ -68,6 +69,7 @@ from ._namespaces_async import (
     _AsyncInstacartNamespace,
     _AsyncInstagramNamespace,
     _AsyncJcpenneyNamespace,
+    _AsyncKbbNamespace,
     _AsyncKohlsNamespace,
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
@@ -101,6 +103,8 @@ from ._namespaces_async import (
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
+    _AsyncRentcafeNamespace,
+    _AsyncRentcomNamespace,
     _AsyncRightmoveNamespace,
     _AsyncRockautoNamespace,
     _AsyncRonaNamespace,
@@ -112,6 +116,7 @@ from ._namespaces_async import (
     _AsyncSpecsNamespace,
     _AsyncSportchekNamespace,
     _AsyncStaplesNamespace,
+    _AsyncStreeteasyNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
     _AsyncThreadsNamespace,
@@ -121,11 +126,14 @@ from ._namespaces_async import (
     _AsyncTractorsupplyNamespace,
     _AsyncTrendyolNamespace,
     _AsyncTripadvisorNamespace,
+    _AsyncTruecarNamespace,
+    _AsyncTruliaNamespace,
     _AsyncTrustpilotNamespace,
     _AsyncUltaNamespace,
     _AsyncUniqloNamespace,
     _AsyncVevorNamespace,
     _AsyncVintedNamespace,
+    _AsyncVrboNamespace,
     _AsyncWalgreensNamespace,
     _AsyncWalmartNamespace,
     _AsyncWayfairNamespace,
@@ -318,6 +326,14 @@ class AsyncScavioClient:
         self.carmax = _AsyncCarmaxNamespace(self)
         self.carvana = _AsyncCarvanaNamespace(self)
         self.bringatrailer = _AsyncBringatrailerNamespace(self)
+        self.rentcom = _AsyncRentcomNamespace(self)
+        self.trulia = _AsyncTruliaNamespace(self)
+        self.streeteasy = _AsyncStreeteasyNamespace(self)
+        self.rentcafe = _AsyncRentcafeNamespace(self)
+        self.vrbo = _AsyncVrboNamespace(self)
+        self.truecar = _AsyncTruecarNamespace(self)
+        self.edmunds = _AsyncEdmundsNamespace(self)
+        self.kbb = _AsyncKbbNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

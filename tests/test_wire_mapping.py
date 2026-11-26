@@ -684,6 +684,9 @@ BODY_PRICED_KEYS = {
     "spacenk_category",
     "spacenk_search",
     "yesstyle_product",
+    "kbb_car_value",
+    "kbb_reviews",
+    "vrbo_search",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -9093,3 +9096,241 @@ def test_batch_1126_boots_has_no_search_and_carvana_no_zip():
     assert {p.wire_field for p in ENDPOINTS["lookfantastic_search"].params} >= {"q"}
     assert ENDPOINTS["notino_reviews"].min_timeout == 250.0
     assert ENDPOINTS["douglas_search"].min_timeout == 250.0
+
+
+# --- batch 2 2026-11-26: 8 namespaces (real estate, travel, cars), from the backend routes ---
+
+BATCH2_1126 = {
+    "rentcom": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "building": ("building", 1, 240.0),
+        "rent_trends": ("rent-trends", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "cities": ("cities", 1, 240.0),
+    },
+    "trulia": {
+        "neighborhood": ("neighborhood", 1, 240.0),
+        "search": ("search", 1, 240.0),
+        "property": ("property", 1, 240.0),
+        "school": ("school", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "streeteasy": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "building": ("building", 1, 240.0),
+        "buildings": ("buildings", 1, 240.0),
+        "market": ("market", 1, 240.0),
+    },
+    "rentcafe": {
+        "search": ("search", 1, 240.0),
+        "property": ("property", 1, 240.0),
+        "floorplan_units": ("floorplan-units", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "rent_trends": ("rent-trends", 1, 240.0),
+    },
+    "vrbo": {
+        "search": ("search", 2, 250.0),
+        "property": ("property", 2, 250.0),
+        "suggestions": ("suggestions", 2, 250.0),
+    },
+    "truecar": {
+        "search": ("search", 1, 240.0),
+        "listing": ("listing", 1, 240.0),
+        "model": ("model", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "dealer": ("dealer", 1, 240.0),
+        "dealer_inventory": ("dealer-inventory", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "makes": ("makes", 1, 240.0),
+        "models": ("models", 1, 240.0),
+    },
+    "edmunds": {
+        "search": ("search", 2, 250.0),
+        "listing": ("listing", 2, 250.0),
+        "reviews": ("reviews", 2, 250.0),
+        "dealer": ("dealer", 2, 250.0),
+        "model": ("model", 2, 250.0),
+        "price": ("price", 2, 250.0),
+        "appraisal": ("appraisal", 2, 250.0),
+        "makes": ("makes", 2, 250.0),
+    },
+    "kbb": {
+        "car_value": ("car-value", 1, 250.0),
+        "model": ("model", 1, 250.0),
+        "search": ("search", 1, 250.0),
+        "listing": ("listing", 1, 250.0),
+        "reviews": ("reviews", 1, 250.0),
+        "dealers": ("dealers", 1, 250.0),
+        "dealer": ("dealer", 1, 250.0),
+        "makes_models": ("makes-models", 1, 250.0),
+    },
+}
+BATCH2_1126_ONE_OF = {
+    "rentcom_search": ("city", "zip"),
+    "rentcom_listing": ("id", "url"),
+    "rentcom_building": ("building_id", "url"),
+    "trulia_neighborhood": ("location_id", "url"),
+    "trulia_property": ("zpid", "building_id", "url"),
+    "trulia_school": ("url", "school_id"),
+    "streeteasy_listing": ("url", "id"),
+    "streeteasy_building": ("slug", "url"),
+    "rentcafe_search": ("location", "city", "zip"),
+    "rentcafe_property": ("url", "slug"),
+    "vrbo_search": ("destination", "region_id"),
+    "vrbo_property": ("id", "url"),
+    "truecar_listing": ("vin", "url"),
+    "truecar_dealer": ("dealer_id", "url"),
+    "truecar_dealer_inventory": ("dealer_id", "url"),
+    "edmunds_listing": ("vin", "url"),
+    "edmunds_dealer": ("dealer_id", "url"),
+    "kbb_listing": ("listing_id", "url"),
+    "kbb_dealer": ("dealer_id", "url"),
+}
+BATCH2_1126_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH2_1126))
+def test_batch2_1126_credits_paths_timeouts(namespace):
+    """Every endpoint of the 8 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH2_1126[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(ep.one_of) == ((BATCH2_1126_ONE_OF[ep.key],) if ep.key in
+                                    BATCH2_1126_ONE_OF else ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("is_fallback", "").replace("unrelated fallback", "")
+        assert not BATCH2_1126_BANNED.search(text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH2_1126_WIRE = [
+    ("rentcom", "search", {"city": "Austin"}, "search"),
+    ("rentcom", "listing", {"id": "lc5898701"}, "listing"),
+    ("rentcom", "building", {"building_id": "b147857"}, "building"),
+    ("rentcom", "rent_trends", {"city": "Austin", "state": "TX"}, "rent-trends"),
+    ("rentcom", "suggestions", {"query": "Austin"}, "suggestions"),
+    ("rentcom", "cities", {"state": "TX"}, "cities"),
+    ("trulia", "neighborhood", {"location_id": "85381"}, "neighborhood"),
+    ("trulia", "search", {"location": "Austin, TX"}, "search"),
+    ("trulia", "property", {"zpid": "339349810"}, "property"),
+    ("trulia", "school", {"url": "x-url"}, "school"),
+    ("trulia", "suggestions", {"query": "Austin"}, "suggestions"),
+    ("streeteasy", "search", {"area": "Brooklyn"}, "search"),
+    ("streeteasy", "listing", {"url": "https://streeteasy.com/building/the-pilot/3e"}, "listing"),
+    ("streeteasy", "building", {"slug": "eastlight-condominium"}, "building"),
+    ("streeteasy", "buildings", {"area": "Williamsburg"}, "buildings"),
+    ("streeteasy", "market", {}, "market"),
+    ("rentcafe", "search", {"location": "austin-tx"}, "search"),
+    ("rentcafe", "property", {"url": "x-url"}, "property"),
+    (
+        "rentcafe", "floorplan_units",
+        {
+            "property_id": "1651075",
+            "floorplan_id": "4746456",
+        },
+        "floorplan-units",
+    ),
+    ("rentcafe", "reviews", {"property_id": "1651075"}, "reviews"),
+    ("rentcafe", "suggestions", {"query": "Austin"}, "suggestions"),
+    ("rentcafe", "rent_trends", {"city": "Austin", "state": "TX"}, "rent-trends"),
+    (
+        "vrbo", "search",
+        {
+            "check_in": "2027-01-15",
+            "check_out": "2027-01-18",
+            "destination": "Destin, Florida",
+        },
+        "search",
+    ),
+    ("vrbo", "property", {"id": "1046285"}, "property"),
+    ("vrbo", "suggestions", {"query": "destin"}, "suggestions"),
+    ("truecar", "search", {"zip": "10001"}, "search"),
+    ("truecar", "listing", {"vin": "x-vin"}, "listing"),
+    ("truecar", "model", {"make": "Toyota", "model": "RAV4"}, "model"),
+    ("truecar", "reviews", {"make": "Toyota", "model": "RAV4"}, "reviews"),
+    ("truecar", "dealer", {"dealer_id": "414984"}, "dealer"),
+    ("truecar", "dealer_inventory", {"dealer_id": "414984"}, "dealer-inventory"),
+    ("truecar", "suggestions", {"query": "rav4"}, "suggestions"),
+    ("truecar", "makes", {}, "makes"),
+    ("truecar", "models", {"make": "Toyota"}, "models"),
+    ("edmunds", "search", {"city": "New York", "state": "NY"}, "search"),
+    ("edmunds", "listing", {"vin": "x-vin"}, "listing"),
+    ("edmunds", "reviews", {"make": "Toyota", "model": "RAV4", "year": 2022}, "reviews"),
+    ("edmunds", "dealer", {"dealer_id": "JakeSweeneyMitsubishi_891713"}, "dealer"),
+    ("edmunds", "model", {"make": "Toyota", "model": "RAV4"}, "model"),
+    ("edmunds", "price", {"make": "Toyota", "model": "RAV4", "year": 2022}, "price"),
+    ("edmunds", "appraisal", {"make": "Toyota", "model": "RAV4", "year": 2022}, "appraisal"),
+    ("edmunds", "makes", {"make": "Toyota"}, "makes"),
+    (
+        "kbb", "car_value",
+        {
+            "make": "Toyota",
+            "model": "rav4",
+            "year": 2021,
+            "trim": "le-sport-utility-4d",
+        },
+        "car-value",
+    ),
+    ("kbb", "model", {"make": "Toyota", "model": "rav4", "year": 2021}, "model"),
+    ("kbb", "search", {"zip": "10001"}, "search"),
+    ("kbb", "listing", {"listing_id": "796688649"}, "listing"),
+    ("kbb", "reviews", {"make": "Toyota", "model": "rav4", "year": 2021}, "reviews"),
+    ("kbb", "dealers", {"zip": "10001"}, "dealers"),
+    ("kbb", "dealer", {"dealer_id": "68613"}, "dealer"),
+    ("kbb", "makes_models", {}, "makes-models"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH2_1126_WIRE)
+def test_batch2_1126_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH2_1126[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH2_1126_ONE_OF))
+def test_batch2_1126_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch2_1126_vin_is_input_only_and_skipped_params_absent():
+    """VINs go in (truecar / edmunds listing) and the refused TrueCar inputs are not offered."""
+    assert "vin" in {p.name for p in ENDPOINTS["truecar_listing"].params}
+    assert "vin" in {p.name for p in ENDPOINTS["edmunds_listing"].params}
+    truecar = {p.name for p in ENDPOINTS["truecar_search"].params}
+    assert not {"query", "keyword", "mileage_min", "seller_type"} & truecar
+    assert "sort" not in {p.name for p in ENDPOINTS["truecar_reviews"].params}
+    assert ENDPOINTS["truecar_makes"].params == ()
+    assert ENDPOINTS["vrbo_search"].credits == 2
+    assert ENDPOINTS["edmunds_makes"].credits == 2
+    assert ENDPOINTS["kbb_car_value"].min_timeout == 250.0
+    assert ENDPOINTS["rentcom_search"].min_timeout == 240.0

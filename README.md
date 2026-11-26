@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 127 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Booking.com, Tripadvisor, Airbnb, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 135 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Foot Locker, Fanatics, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Booking.com, Tripadvisor, Airbnb, Vrbo, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -60,6 +60,9 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | CarGurus Listings with Expected Price and Deal Rating, Dealer Inventory, Price Trends, Research and Expert Reviews (US, Canada, UK; 8 endpoints) | Yes | No | No | No |
 | CarMax No-Haggle Prices near a ZIP, Price Drops, Shipping Fees, 263 Stores and Store Inventory, Owner Reviews, Recent CarMax Offers per Model Year (12 endpoints) | Yes | No | No | No |
 | Carvana Used-Car Prices, KBB Values, Shipping Costs and Labels by Make and Model, Inspection and Imperfections, Model-Year Guides and Trims (US; 6 endpoints) | Yes | No | No | No |
+| TrueCar New and Used Prices near a ZIP, Price Rating, Dealer Fees, National Price and Trim Stats, Model Overviews and Owner Reviews (US; 9 endpoints) | Yes | No | No | No |
+| Edmunds Listings with Deal Rating, MSRP, Invoice and Edmunds Suggested Price per Trim, Appraisal Values per Condition, Owner Reviews (US; 8 endpoints) | Yes | No | No | No |
+| Kelley Blue Book Car Values (Fair Purchase Price, Private Party, Trade-In, Auction; 17 Price Types) at a ZIP, Listings with KBB Fair Price, Owner Reviews, Dealers (US; 8 endpoints) | Yes | No | No | No |
 | Ace Hardware Prices by Store, Exact Units on Hand at a Store and Its 25 Nearest, Weekly Ad per Store, Deals and Paint Colors (US; 11 endpoints) | Yes | No | No | No |
 | Tractor Supply Prices by Store and Price Zone, One Item at 25 Stores, Exact Store Stock with In-Transit Units, Fulfillment and Promotions (US; 12 endpoints) | Yes | No | No | No |
 | Michaels Craft Prices with Reg. Price and Offer Dates, Exact Units at the Stores near a ZIP, One Store's Inventory, Variants and Deals (US; Canada in English or French; 11 endpoints) | Yes | No | No | No |
@@ -96,7 +99,12 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | eBay Sold-Listing Price History | Yes | No | No | No |
 | Real Estate (Zillow + Redfin + Realtor.com + Rightmove, 19 endpoints) | Yes | No | No | No |
 | UK Sold House Prices since 1995 (Rightmove, England and Wales) | Yes | No | No | No |
+| Rent.com and Apartment Guide Rentals by City, ZIP or Neighborhood, Rent per Bed Count, Deals and Price Drops, Floor Plans and Fees, City Rent Trends (US; 6 endpoints) | Yes | No | No | No |
+| Trulia Neighborhood Pages with What Locals Say, Safety Statements and Market Snapshot, Homes for Sale, for Rent and Sold, Schools (US; 5 endpoints) | Yes | No | No | No |
+| StreetEasy NYC and North NJ Sales, Rentals and Past Sales, Net Effective Rent, Price History, Buildings, Monthly Market Data and Indexes (5 endpoints) | Yes | No | No | No |
+| RentCafe Rentals with Rent Ranges, Rent Specials, Floor Plan Units, Resident Reviews and City Rent Trends (US and Canada; 6 endpoints) | Yes | No | No | No |
 | Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
+| Vrbo Vacation Rental Nightly Prices and Stay Totals for Your Dates, Deals, Ratings, Property Details and House Rules (20 market-languages; 3 endpoints) | Yes | No | No | No |
 | Jobs & Employers (Indeed + Glassdoor, 8 endpoints) | Yes | No | No | No |
 | Ad Transparency (Meta + Google, 6 endpoints) | Yes | No | No | No |
 | Filings (SEC EDGAR + Companies House, 10 endpoints) | Yes | No | No | No |
@@ -6294,6 +6302,287 @@ for lot in res["lots"][:5]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 99. US rentals -- Rent.com and Apartment Guide rents, deals and city rent trends
+
+Rent.com (rent.com) and Apartment Guide (apartmentguide.com), the US rental
+listing sites run by Redfin: rental search by city and state, ZIP or
+neighborhood with the rent range per bed count, deals, price drops and the
+site's average rents; one rental with floor plans, fees, pet policies, office
+hours, schools and walk scores; one building's unit listings; a city's rent
+trends by bed count with year-on-year change and the rent spread; search-box
+suggestions; and a state's cities. `site` is rent (default) or apartmentguide
+(the same rentals). Rents are monthly, in USD. No agent or landlord personal
+data is returned. Namespace `rentcom`, 6 endpoints: `search`, `listing`,
+`building`, `rent_trends`, `suggestions`, `cities`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Rent.com API
+page](https://scavio.dev/rentcom-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rentcom-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rc = client.rentcom
+res = rc.search("Austin", state="TX", beds=2, price_max=3000)["data"]
+print(res["total"], res["average_rent"]["two_bedroom"])
+for it in res["listings"][:5]:
+    print(it["id"], it["name"], it["price_text"], it["bed_text"], it["deals_text"])
+trends = rc.rent_trends("Austin", "TX")["data"]
+print(trends["current"]["one_bedroom"]["average_rent"], trends["listing_count"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 100. Neighborhoods and homes -- Trulia local survey, market snapshot, listings
+
+Trulia (trulia.com, Zillow Group's home and neighborhood site): a neighborhood
+page with Trulia's local survey (what locals say, safety statements with the
+share of residents who agree), resident review counts by topic, amenities,
+schools and a market snapshot; homes for sale, for rent or recently sold by
+ZIP, city or neighborhood (40 a page, 7 sorts); one home by zpid or one rental
+building; one school; and place suggestions. US only, prices in USD;
+`language` es on rental searches, buildings and neighborhoods. Brokerage
+company names only: no agent names or reviewer names. Namespace `trulia`, 5
+endpoints: `neighborhood`, `search`, `property`, `school`, `suggestions`.
+Credits: 1 credit each. `credits_used` in the response is what was charged.
+The request timeout is raised to at least 240s.
+See the [Trulia API
+page](https://scavio.dev/trulia-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/trulia-neighborhood?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tr = client.trulia
+hood = tr.neighborhood("85381")["data"]
+for s in hood["what_locals_say"]["statements"][:5]:
+    print(s["statement"], s["percent"])
+print(hood["market"]["snapshot"]["avg_sale_price"]["display"], hood["reviews"]["total"])
+homes = tr.search("Austin, TX", beds_min=3, price_max=600000)["data"]
+for h in homes["listings"][:5]:
+    print(h["zpid"], h["address"], h["price"], h["beds"], h["baths"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 101. New York City real estate -- StreetEasy listings, buildings and market data
+
+StreetEasy (streeteasy.com, Zillow Group's New York City real estate site):
+sales, rentals and past sales in an NYC or North NJ area with the price, net
+effective rent and months free, beds, baths and the building type; one listing
+in full with its price history, monthly charges and open houses (by link, or
+by id with `listing_type`); one building and an area's building directory; and
+StreetEasy's published monthly market data for NYC (price and rental indexes,
+median asking rent, inventory, share of price cuts). Brokerage names only: no
+agent personal data. Namespace `streeteasy`, 5 endpoints: `search`, `listing`,
+`building`, `buildings`, `market`. Credits: 1 credit each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [StreetEasy API
+page](https://scavio.dev/streeteasy-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/streeteasy-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+se = client.streeteasy
+res = se.search("Brooklyn", mode="rent", price_max=4000)["data"]
+for it in res["listings"][:5]:
+    print(it["id"], it["address"], it["unit"], it["price"], it["beds"], it["net_effective_rent"])
+idx = se.market(type="rentals", metric="rental_index")["data"]
+for a in idx["areas"]:
+    print(a["area"], a["latest"]["month"], a["latest"]["value"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 102. Rentals in the US and Canada -- RentCafe rents, specials, reviews, rent trends
+
+RentCafe (rentcafe.com, Yardi's US and Canada rental listing site): rental
+search by location, city or ZIP with the rent range, rating, review count and
+rent specials (25 a page; one of beds, rent specials, short-term, furnished,
+utilities included or an amenity per search, plus price and pet-friendly); one
+listing in full; every unit of a floor plan; resident reviews with RentCafe's
+own summary (no names); suggestions; and a US city's rent trends. `market` us
+or ca (USD or CAD), `language` en or fr. Namespace `rentcafe`, 6 endpoints:
+`search`, `property`, `floorplan_units`, `reviews`, `suggestions`,
+`rent_trends`. Credits: 1 credit each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 240s.
+See the [RentCafe API
+page](https://scavio.dev/rentcafe-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rentcafe-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rcf = client.rentcafe
+res = rcf.search("austin-tx", price_max=2000)["data"]
+for it in res["listings"][:5]:
+    print(it["id"], it["name"], it["rent_min"], it["rent_max"], it["rating"], it["rent_specials"])
+trends = rcf.rent_trends("Austin", "TX")["data"]
+print(trends["average_rent"], trends["yoy_change_pct"], trends["last_updated"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 103. Vacation rentals -- Vrbo nightly prices and stay totals for your dates
+
+Vrbo (vrbo.com, Expedia Group's vacation rental site): vacation rentals for a
+place or region id and dates with the nightly price, the stay total, deals,
+rating and review count as Vrbo shows them, sorted and filtered by property
+type, amenity, house rule, location type, Premier Host and bedrooms (the first
+50 results; `partial` flags a 3-result answer); one property in full with
+amenities, house rules and the site's default stay price (fetched without
+dates); and destination suggestions. 20 market-languages (`market`). No host
+names, reviews or calendar. Namespace `vrbo`, 3 endpoints: `search`,
+`property`, `suggestions`. Credits: billed on actual cost: `search` 2 credits
+per attempt, 2 to 8 (typically 2 to 6); `property` and `suggestions` 2.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 250s.
+See the [Vrbo API
+page](https://scavio.dev/vrbo-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/vrbo-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+vr = client.vrbo
+res = vr.search("2027-01-15", "2027-01-18", destination="Destin, Florida", adults=2)["data"]
+print(res["matched_total"], res["count"], res["partial"])
+for p in res["properties"][:5]:
+    print(p["property_id"], p["price"]["nightly"], p["price"]["total"], p["rating"]["score"])
+home = vr.property("1046285")["data"]
+print(home["property_type"], home["space"]["bedrooms"], home["default_price"]["price_display"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 104. Car prices -- TrueCar listings, price rating, dealer fees, model overviews
+
+TrueCar (truecar.com, the US car-buying marketplace): new and used dealer
+inventory around a ZIP with the price, MSRP, TrueCar's price rating and the
+dealer, plus national price and trim stats; one listing by VIN or link with
+the price summary and dealer fees (the VIN is input only, never returned, so a
+search result cannot feed `listing`); a model overview with trims and starting
+prices; owner reviews; a dealer and its inventory; suggestions, makes and
+models. US only, prices in USD. Namespace `truecar`, 9 endpoints: `search`,
+`listing`, `model`, `reviews`, `dealer`, `dealer_inventory`, `suggestions`,
+`makes`, `models`. Credits: 1 credit each. `credits_used` in the response is
+what was charged. The request timeout is raised to at least 240s. TrueCar has
+no public API.
+See the [TrueCar API
+page](https://scavio.dev/truecar-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/truecar-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tc = client.truecar
+res = tc.search("10001", make="Toyota", model="RAV4", condition="used")["data"]
+for it in res["items"][:5]:
+    print(it["year"], it["trim"], it["price"], it["price_rating"], it["mileage"], it["dealer"]["name"])
+print(res["national"]["price"])
+model = tc.model("Toyota", "RAV4")["data"]
+for t in model["trims"]:
+    print(t["trim"], t["starting_msrp"], t["starting_market_average"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 105. Car research -- Edmunds deal rating, suggested price per trim, appraisal values
+
+Edmunds (edmunds.com, the US car research and shopping site): new, used and
+certified listings around a city and state with the price, Edmunds' deal
+rating (local and national) and estimated days to sell; one listing (VIN with
+make, model and year, input only); owner reviews of a model year; a dealer
+page; a model year's research page; MSRP, invoice and Edmunds Suggested Price
+per trim; used-car appraisal values per style and condition; and a make's
+models. The suggested price and appraisal name the place Edmunds priced for.
+US only, prices in USD; 2 credits per call. Namespace `edmunds`, 8 endpoints:
+`search`, `listing`, `reviews`, `dealer`, `model`, `price`, `appraisal`,
+`makes`. Credits: 2 credits each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 250s. Edmunds' own API is
+for partners and dealers only.
+See the [Edmunds API
+page](https://scavio.dev/edmunds-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/edmunds-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ed = client.edmunds
+res = ed.search("New York", "NY", make="Toyota", model="RAV4")["data"]
+for it in res["items"][:5]:
+    print(it["year"], it["trim"], it["price"], it["mileage"], it["deal_rating"]["local"]["rating"])
+price = ed.price("Toyota", "RAV4", 2025)["data"]
+print(price["suggested_price_near"]["text"])
+for t in price["trims"]:
+    print(t["trim"], t["msrp"], t["invoice"], t["edmunds_suggested"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 106. Car values -- Kelley Blue Book values at a ZIP, listings, owner reviews
+
+Kelley Blue Book (kbb.com, Cox Automotive's car value and research site): a
+car's KBB values by make, model, year and trim for buy_used, buy_new or
+trade_in_sell (every price type the page gives, 17 for a used car: Fair
+Purchase Price, private party, trade-in and auction values per condition),
+optionally at a ZIP (not for buy_new); a model year page with its trims; cars
+for sale near a ZIP with KBB's fair purchase price; one listing; owner
+reviews; dealers near a ZIP and one dealer; and the make and model directory.
+US only, prices in USD. Namespace `kbb`, 8 endpoints: `car_value`, `model`,
+`search`, `listing`, `reviews`, `dealers`, `dealer`, `makes_models`. Credits:
+1 credit each; `car_value` with a `zip` 2 (6 when a second way of reading the
+page is needed); `reviews` beyond page 1, with a sort other than recent or a
+star filter up to 5. `credits_used` in the response is what was charged. The
+request timeout is raised to at least 250s. KBB's own data feed is a business
+contract, not a self-serve API.
+See the [Kelley Blue Book API
+page](https://scavio.dev/kbb-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/kbb-car-value?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+kbb = client.kbb
+val = kbb.car_value("Toyota", "rav4", 2021, "le-sport-utility-4d", mileage=40000, zip="10001")
+val = val["data"]
+print(val["location"]["valid_text"], val["headline"]["fair_purchase_price"]["value"])
+for p in val["prices"][:5]:
+    print(p["type"], p["value"], p["range_low"], p["range_high"])
+cars = kbb.search("10001", make="Toyota", model="RAV4")["data"]
+for c in cars["listings"][:5]:
+    print(c["title"], c["price"], c["deal_label"], c["kbb_fair_purchase_price"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -6391,9 +6680,14 @@ Scavio works with popular AI/LLM frameworks:
 | Redfin | `search`, `property`, `market` | 1 each |
 | Realtor.com | `search`, `property`, `locations`, `market`, `agents`, `agent` | 1 each |
 | Rightmove | `locations` (start here), `search`, `property`, `sold`, `sold_property`, `agents`, `agent` | 1 each |
+| Rent.com (`rentcom`) | `search`, `listing`, `building`, `rent_trends`, `suggestions`, `cities`; US; `site` rent (default) or apartmentguide; `search` takes `city` and `state` or `zip` | 1 each |
+| Trulia (`trulia`) | `neighborhood`, `search`, `property`, `school`, `suggestions`; US; `language` en or es (rental search, buildings, neighborhoods); `property` takes `zpid`, `building_id` or `url` | 1 each |
+| StreetEasy (`streeteasy`) | `search`, `listing`, `building`, `buildings`, `market`; NYC and North NJ; `mode` sale, rent or sold; `listing` by `url`, or `id` with `listing_type`; `market` NYC only | 1 each |
+| RentCafe (`rentcafe`) | `search`, `property`, `floorplan_units`, `reviews`, `suggestions`, `rent_trends`; `market` us or ca, `language` en or fr; one of beds, rent specials, short-term, furnished, utilities included or an amenity per search | 1 each |
 | Booking.com | `search`, `hotel`, `reviews` | 1 each |
 | Tripadvisor | `locations` (start here), `search`, `location`, `reviews` | 2 each |
 | Airbnb | `search`, `listing`, `reviews` | 1 each |
+| Vrbo (`vrbo`) | `search`, `property`, `suggestions`; 20 market-languages (`market`); `search` needs dates, the first 50 results; `property` without dates | `search` 2 per attempt (2 to 8); the rest 2 |
 | Yelp | `search`, `business`, `reviews` | 2 each |
 | Indeed | `search`, `job`, `company`, `company_reviews` | 2 each |
 | Glassdoor | `companies` (start here), `company`, `reviews`, `salaries` | 1 each |
@@ -6451,6 +6745,9 @@ Scavio works with popular AI/LLM frameworks:
 | CarGurus (`cargurus`) | `search`, `dealer`, `dealers`, `price_trends`, `research`, `expert_reviews`, `makes`, `models`; `market` us (default), us-es, ca, ca-fr, uk; no listing detail | 1 each |
 | CarMax (`carmax`) | `search`, `listing`, `photos`, `stores`, `store`, `store_inventory`, `reviews`, `review_summary`, `suggestions`, `makes`, `models`, `car_value`; US; `search` takes a `zip`; `stores` one of `zip`, `state`, `city` | 1 each |
 | Carvana (`carvana`) | `search`, `vehicle`, `model_guide`, `trims`, `make`, `makes`; US; by make and model, `city` (Carvana's city pages), no ZIP | 1 each |
+| TrueCar (`truecar`) | `search`, `listing`, `model`, `reviews`, `dealer`, `dealer_inventory`, `suggestions`, `makes`, `models`; US; `search` takes a `zip`; `listing` by VIN (input only) or link | 1 each |
+| Edmunds (`edmunds`) | `search`, `listing`, `reviews`, `dealer`, `model`, `price`, `appraisal`, `makes`; US; `search` takes `city` and `state`; `listing` by VIN (input only) with make, model and year, or link | 2 each |
+| Kelley Blue Book (`kbb`) | `car_value`, `model`, `search`, `listing`, `reviews`, `dealers`, `dealer`, `makes_models`; US; `car_value` by make, model, year and trim, optionally at a `zip` (not for buy_new) | 1 each; `car_value` at a `zip` 2 (up to 6); deeper `reviews` up to 5 |
 | Ace Hardware (`acehardware`) | `search`, `product`, `store_stock`, `store`, `stores`, `category`, `categories`, `brand`, `deals`, `weekly_ad`, `paint_colors`; us only (no `country`); store methods take a 5-digit Ace store number | 1 each; `search` 2 (3 on a category redirect); `product` 2; `store_stock` 1 per 5 stores (`nearby` 6); `stores` with `details` 1 lookup per store (25 stores 6) |
 | Tractor Supply (`tractorsupply`) | `search`, `product`, `store_prices`, `store_stock`, `fulfillment`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `promotions`; us only (no `country`); `search`, `product`, `category`, `brand` and `deals` need `store` or `zip` | 1 each; `product` 2 on the first call for a store not yet looked up; `store_prices` 1 per 5 lookups (25 new stores 11) |
 | Michaels (`michaels`) | `search`, `product`, `store_stock`, `store_inventory`, `stores`, `store`, `category`, `categories`, `brand`, `deals`, `suggestions`; us (default) on every method; ca (English or French) on every method except `stores`, `categories` and `suggestions` | 2 each; `category` and `deals` 4 with a `/shop/` category |
@@ -6501,6 +6798,16 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.97.0
+
+- **8 new namespaces** (sync and async), 50 endpoints. Real estate: `rentcom` (Rent.com
+  and Apartment Guide, 6), `trulia` (5), `streeteasy` (StreetEasy, 5), `rentcafe`
+  (RentCafe, 6). Travel: `vrbo` (3). Cars: `truecar` (TrueCar, 9), `edmunds` (8), `kbb`
+  (Kelley Blue Book, 8). Credits: 1 per call except `edmunds` (2), `vrbo` (billed on
+  actual cost: 2 per attempt, a search 2 to 8) and Kelley Blue Book `car_value` at a
+  `zip` (2, up to 6) and deeper `reviews` pages (up to 5). The request timeout is raised
+  to at least 240s (`vrbo`, `edmunds` and `kbb` 250s).
 
 ### Changed in 0.96.0
 

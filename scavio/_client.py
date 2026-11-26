@@ -46,6 +46,7 @@ from ._namespaces_sync import (
     _DollarTreeNamespace,
     _DouglasNamespace,
     _EbayNamespace,
+    _EdmundsNamespace,
     _FanaticsNamespace,
     _FashionnovaNamespace,
     _FootlockerNamespace,
@@ -66,6 +67,7 @@ from ._namespaces_sync import (
     _InstacartNamespace,
     _InstagramNamespace,
     _JcpenneyNamespace,
+    _KbbNamespace,
     _KohlsNamespace,
     _KrogerNamespace,
     _KuaishouNamespace,
@@ -99,6 +101,8 @@ from ._namespaces_sync import (
     _RealtorNamespace,
     _RedditNamespace,
     _RedfinNamespace,
+    _RentcafeNamespace,
+    _RentcomNamespace,
     _RightmoveNamespace,
     _RockautoNamespace,
     _RonaNamespace,
@@ -110,6 +114,7 @@ from ._namespaces_sync import (
     _SpecsNamespace,
     _SportchekNamespace,
     _StaplesNamespace,
+    _StreeteasyNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
     _ThreadsNamespace,
@@ -119,11 +124,14 @@ from ._namespaces_sync import (
     _TractorsupplyNamespace,
     _TrendyolNamespace,
     _TripadvisorNamespace,
+    _TruecarNamespace,
+    _TruliaNamespace,
     _TrustpilotNamespace,
     _UltaNamespace,
     _UniqloNamespace,
     _VevorNamespace,
     _VintedNamespace,
+    _VrboNamespace,
     _WalgreensNamespace,
     _WalmartNamespace,
     _WayfairNamespace,
@@ -323,6 +331,14 @@ class ScavioClient:
         self.carmax = _CarmaxNamespace(self)
         self.carvana = _CarvanaNamespace(self)
         self.bringatrailer = _BringatrailerNamespace(self)
+        self.rentcom = _RentcomNamespace(self)
+        self.trulia = _TruliaNamespace(self)
+        self.streeteasy = _StreeteasyNamespace(self)
+        self.rentcafe = _RentcafeNamespace(self)
+        self.vrbo = _VrboNamespace(self)
+        self.truecar = _TruecarNamespace(self)
+        self.edmunds = _EdmundsNamespace(self)
+        self.kbb = _KbbNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -14181,6 +14181,3763 @@ _BRINGATRAILER_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 2 2026-11-26: 8 platforms (real estate + travel + cars) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc); a param the backend only accepts to refuse (a 400 that says
+# 'not offered') is left out. 240 s floor on every method (Vrbo, Edmunds and Kelley
+# Blue Book 250 s).
+
+# Rent.com: 6 endpoints on /api/v1/rentcom.
+_RENTCOM_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="rentcom_search",
+        namespace="rentcom",
+        method="search",
+        http="POST",
+        path="/api/v1/rentcom/search",
+        summary=(
+            "Search rentals on Rent.com or Apartment Guide: Rent.com (rent.com) and Apartment "
+            "Guide (apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches "
+            "the public page on request. By city and state, ZIP or neighborhood; property type "
+            "(apartments, houses, condos, townhouses, rooms), beds, baths, monthly rent range, "
+            "minimum square feet, pets, cheap / luxury, rent specials and amenities; sorted 6 "
+            "ways; 30 a page on rent.com, 50 on Apartment Guide. Apartment Guide takes city "
+            "and state (with one beds value) or ZIP and page, as its links do; send site rent "
+            "for the other filters (the same rentals). Returns query, site, location {name, "
+            "type, city, state, state_code, zip, neighborhood, latitude, longitude}, total, "
+            "available_units, page, page_size, pages, has_more, count, average_rent {studio, "
+            "one_bedroom, two_bedroom: {average_rent, yoy_change_pct, yoy_change_text}}, "
+            "listings [id (the input of listing; kind building ids are the input of building), "
+            "kind (listing or building), name, address, address_full, city, state, state_code, "
+            "zip, latitude, longitude, property_type, price (lowest listed rent, USD a month), "
+            "price_text, rent_min, rent_max, beds_min, beds_max, baths_min, baths_max, "
+            "sqft_min, sqft_max, bed_text, bath_text, sqft_text, rent_by_beds [{beds, "
+            "rent_min, rent_max, sqft_min, sqft_max}], units_available_text, availability, "
+            "deals_text, deals [{category, description, expires}], special_terms, "
+            "has_price_drops, price_drops (USD amounts), pet_friendly, amenities_highlighted, "
+            "highlights, image, url, management_company, verified, private_listing, "
+            "updated_at], notes. A page past the last page is an empty page with a note "
+            "(charged); an unknown city, ZIP or neighborhood is a charged 404. No phone "
+            "number, email or agent / landlord name is returned; management_company is given "
+            "only for listings a property manager pays to list. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A city name (Austin, New York, St. Louis) or its slug (new-york; cities "
+                    "lists them)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent", "apartmentguide"]]',
+                doc=(
+                    "rent (www.rent.com, default, 30 listings a page) or apartmentguide "
+                    "(www.apartmentguide.com, the same rentals, 50 a page)."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "A US state: 2-letter code (TX) or name (Texas)."
+                ),
+            ),
+            Param(
+                "neighborhood",
+                "Optional[str]",
+                doc=(
+                    "With city and state (site rent): a neighborhood by name or slug "
+                    "(downtown-manhattan)."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a 5-digit US ZIP code (instead of city and state)."
+                ),
+            ),
+            Param(
+                "property_type",
+                'Optional[Literal["apartments", "houses", "condos", "townhouses", "rooms"]]',
+                doc=(
+                    "apartments (default), houses, condos, townhouses or rooms (rooms for "
+                    "rent). Site rent."
+                ),
+            ),
+            Param(
+                "beds",
+                'Optional[Union[int, Literal["studio"], list[Union[int, Literal["studio"]]]]]',
+                doc=(
+                    "Bedrooms: studio or 0-4 (4 = 4 or more), or a list (site rent; "
+                    "apartmentguide takes one value with city and state). Listings with at "
+                    "least one matching floor plan."
+                ),
+            ),
+            Param(
+                "baths",
+                "Optional[int]",
+                doc=(
+                    "Bathrooms, 1-4 (4 = 4 or more). Site rent."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest monthly rent, USD. Site rent."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly rent, USD. Site rent."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest square feet, one of 100, 200, 300, 400, 500, 600, 700, 800, 900, "
+                    "1000, 1100, 1200, 1300, 1400, 1500, 1600. Site rent."
+                ),
+            ),
+            Param(
+                "pets",
+                'Optional[Literal["pet_friendly", "dogs", "cats", "no_pets"]]',
+                doc=(
+                    "pet_friendly, dogs, cats or no_pets. Site rent."
+                ),
+            ),
+            Param(
+                "cheap",
+                "Optional[bool]",
+                doc=(
+                    "The site's cheap apartments filter. Site rent."
+                ),
+            ),
+            Param(
+                "luxury",
+                "Optional[bool]",
+                doc=(
+                    "The site's luxury filter. Site rent."
+                ),
+            ),
+            Param(
+                "deals",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with rent specials. Site rent."
+                ),
+            ),
+            Param(
+                "amenities",
+                "Optional[list[str]]",
+                doc=(
+                    "Up to 8 amenities: air-conditioning, assisted-living, att-fiber, "
+                    "available-now, cable-ready, college, controlled-limited-access, "
+                    "corporate-billing-available, disability-access, dishwasher, elevator, "
+                    "ev-charging, extra-storage, fitness-center, furnished, garage, "
+                    "gated-access, hardwood-floor, best, high-speed-internet-access, "
+                    "income-restricted, independent-living, laundry-facility, loft, military, "
+                    "new-construction, remodeled, no-credit-check, onsite-personnel, "
+                    "oversized-closets, patio, pool, new, senior-living, short-term-available, "
+                    "virtual-tours, utilities-included, view, washer-dryer-connections, "
+                    "washer-dryer-in-unit, waterfront. Site rent."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_low", "price_high", "beds", "sqft", "latest"]]',
+                doc=(
+                    "best_match (default), price_low, price_high, beds (fewest first), sqft "
+                    "(smallest first) or latest (latest update). Site rent."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1; pages and has_more say how deep the results go."
+                ),
+            ),
+        ),
+        one_of=(("city", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcom_listing",
+        namespace="rentcom",
+        method="listing",
+        http="POST",
+        path="/api/v1/rentcom/listing",
+        summary=(
+            "One rental in full by id or link: site, id, name, url, description, address, "
+            "city, state, state_code, zip, neighborhoods, latitude, longitude, property_type, "
+            "room_for_rent, total_units, units_available, price, price_text, rent_min, "
+            "rent_max, beds / baths / sqft ranges, floor_plans [{id, name, beds, baths, "
+            "half_baths, sqft, sqft_min, sqft_max, rent_min, rent_max, rent_text, "
+            "available_count, availability_text, available_date, deposit, amenities, image, "
+            "units [{unit_id, rent, rent_text, sqft, available_date, available, deposit, "
+            "floor}]}], fees {admin_fee, application_fee, broker_fee, amenity_fee, "
+            "utilities_included, utilities_notes, tenant_paid_utilities, insurance, "
+            "sales_tax}, pet_policies [{type, label, comment, initial_fee, additional_rent, "
+            "deposit, max_pets, weight_limit}], pet_friendly, parking [{type, assigned, "
+            "assigned_fee, per_space_fee, total_spaces, comments}], amenities [{name, "
+            "subcategory, category}], amenities_highlighted, highlights, office_hours [{day, "
+            "hours [{open, close}]}], deals_text, deals, special_terms, has_price_drops, "
+            "price_drops, price_drop_overall, lease_terms, income_restrictions, schools "
+            "[{name, type, grades, rating, district, distance_miles, address}], nearby "
+            "[{category, total, places [{name, type, distance_miles}]}], walk_score {walk, "
+            "bike, transit with descriptions}, vibes, photos, management_company, verified, "
+            "private_listing, updated_at, similar [{id, name, address_full, price_text, "
+            "rent_min, rent_max, bed_text, url}], similar_ids, notes. Fields the site leaves "
+            "empty are null or []. An id the site does not have (or a listing taken down) is a "
+            "charged 404. No phone number, email or agent / landlord name is returned; "
+            "management_company is given only for listings a property manager pays to list. "
+            "Rent.com (rent.com) and Apartment Guide (apartmentguide.com), US rental listing "
+            "sites run by Redfin. Scavio fetches the public page on request. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A listing id (listings[].id from search: lc5898701, 206824305, "
+                    "lv3119690811). Apartment Guide's 5898701 and Rent.com's lc5898701 are the "
+                    "same listing; either works on either site."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent", "apartmentguide"]]',
+                doc=(
+                    "rent (www.rent.com, default, 30 listings a page) or apartmentguide "
+                    "(www.apartmentguide.com, the same rentals, 50 a page)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the listing's link on rent.com or apartmentguide.com (its host sets "
+                    "the site)."
+                ),
+            ),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcom_building",
+        namespace="rentcom",
+        method="building",
+        http="POST",
+        path="/api/v1/rentcom/building",
+        summary=(
+            "One building on Rent.com (the separate unit listings at one address) by building "
+            "id or link: id, url, address, address_full, city, state, state_code, zip, "
+            "neighborhoods, latitude, longitude, price_text, bed_text, bath_text, sqft_text, "
+            "rent_min, rent_max, photos, count, listings [id (the input of listing; kind "
+            "building ids are the input of building), kind (listing or building), name, "
+            "address, address_full, city, state, state_code, zip, latitude, longitude, "
+            "property_type, price (lowest listed rent, USD a month), price_text, rent_min, "
+            "rent_max, beds_min, beds_max, baths_min, baths_max, sqft_min, sqft_max, bed_text, "
+            "bath_text, sqft_text, rent_by_beds [{beds, rent_min, rent_max, sqft_min, "
+            "sqft_max}], units_available_text, availability, deals_text, deals [{category, "
+            "description, expires}], special_terms, has_price_drops, price_drops (USD "
+            "amounts), pet_friendly, amenities_highlighted, highlights, image, url, "
+            "management_company, verified, private_listing, updated_at], schools, notes. An "
+            "unknown building is a charged 404. No phone number, email or agent / landlord "
+            "name is returned; management_company is given only for listings a property "
+            "manager pays to list. Rent.com (rent.com) and Apartment Guide "
+            "(apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the "
+            "public page on request. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "building_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A building id (listings[].id where kind is building, e.g. b147857)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent"]]',
+                doc=(
+                    "rent (the default). This endpoint reads Rent.com's page; Apartment Guide "
+                    "lists the same rentals."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the building's rent.com link "
+                    "(https://www.rent.com/building/<address>-b<id>)."
+                ),
+            ),
+        ),
+        one_of=(("building_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcom_rent_trends",
+        namespace="rentcom",
+        method="rent_trends",
+        http="POST",
+        path="/api/v1/rentcom/rent-trends",
+        summary=(
+            "Rent.com's rent trends for one city: location, current {studio, one_bedroom, "
+            "two_bedroom, three_bedroom: {average_rent, yoy_change_pct, yoy_change_text}} "
+            "(Rent.com's current averages, USD a month, and year-on-year change), "
+            "listing_count, series {studio, one_bedroom, two_bedroom, three_bedroom: [{month, "
+            "label, average_rent}]} (the monthly series as Rent.com publishes it on the page; "
+            "series_range {from, to, points} says which months it covers, and it can end well "
+            "before today), rent_distribution [{min, max, count, percent}], nearby_cities and "
+            "nearby_neighborhoods [{name, url, listing_count, averages}], url, notes. An "
+            "unknown city is a charged 404. Rent.com (rent.com) and Apartment Guide "
+            "(apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the "
+            "public page on request. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "str",
+                required=True,
+                doc=(
+                    "A city name (Austin, New York, St. Louis) or its slug (new-york; cities "
+                    "lists them)."
+                ),
+            ),
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "A US state: 2-letter code (TX) or name (Texas)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent"]]',
+                doc=(
+                    "rent (the default). This endpoint reads Rent.com's page; Apartment Guide "
+                    "lists the same rentals."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcom_suggestions",
+        namespace="rentcom",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/rentcom/suggestions",
+        summary=(
+            "The site's search-box suggestions for the start of a place or property name: "
+            "query, site, count, places [{name, type (city, zip, neighborhood, school, ...), "
+            "id, path, url}], listings [{id, name, address, address_full, city, state_code, "
+            "property_type, url}], notes. Rent.com (rent.com) and Apartment Guide "
+            "(apartmentguide.com), US rental listing sites run by Redfin. Scavio fetches the "
+            "public page on request. 1 credit. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a city, ZIP, neighborhood, school or property name."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent", "apartmentguide"]]',
+                doc=(
+                    "rent (www.rent.com, default, 30 listings a page) or apartmentguide "
+                    "(www.apartmentguide.com, the same rentals, 50 a page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcom_cities",
+        namespace="rentcom",
+        method="cities",
+        http="POST",
+        path="/api/v1/rentcom/cities",
+        summary=(
+            "The cities Rent.com links from a state page, A to Z (a smaller town can be "
+            "missing and still have a search page): state, state_code, count, cities [{name, "
+            "city (the city input of search and rent-trends), url}], notes. Rent.com "
+            "(rent.com) and Apartment Guide (apartmentguide.com), US rental listing sites run "
+            "by Redfin. Scavio fetches the public page on request. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "A US state: 2-letter code (TX) or name (Texas)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["rent"]]',
+                doc=(
+                    "rent (the default). This endpoint reads Rent.com's page; Apartment Guide "
+                    "lists the same rentals."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Trulia: 5 endpoints on /api/v1/trulia.
+_TRULIA_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="trulia_neighborhood",
+        namespace="trulia",
+        method="neighborhood",
+        http="POST",
+        path="/api/v1/trulia/neighborhood",
+        summary=(
+            "One Trulia neighborhood page by location id or link: Trulia (trulia.com, Zillow "
+            "Group's home and neighborhood site; US only, USD). Scavio fetches the public "
+            "Trulia page on request. Returns location_id, region_id, name, city, state, "
+            "county, zip_code, url, search_urls, what_locals_say {title, minimum_responses, "
+            "statements [{type, statement, percent}]} (Trulia's 16 \"What Locals Say\" survey "
+            "results), safety {minimum_responses, statements}, reviews {total, shown, "
+            "categories [{id, name, count}], items [{id, text, category, category_name, "
+            "reviewer_type (Resident, Prev. Resident), date, helpful}]} (Trulia's page shows "
+            "up to 40 reviews; total and the category counts cover all), facts "
+            "{homes_for_sale, homes_for_rent, for_sale_price_range, for_rent_price_range, "
+            "commute {destination, minutes}}, amenities {categories, count, items [{name, "
+            "category, subcategory, website, latitude, longitude}]}, schools {levels, items "
+            "[{id, name, url, district, type, levels, grades, students, rating (GreatSchools, "
+            "of 10), parent_rating, review_count, address, reviews [{rating, text, type, "
+            "date}]}]}, geo {centroid, bounding_box, encoded_polygon, wkt}, "
+            "nearby_neighborhoods, homes_for_sale {total, listings}, market (default on) "
+            "{snapshot {scope (neighborhood or city, as Trulia scopes it), area, last_updated, "
+            "avg_sale_price, sale_to_list_ratio, price_per_sqft, active_listings (each {value, "
+            "display, mom_change, mom_direction}), market_condition, market_temperature_index, "
+            "source}, median_sale_price_history {scope, area, last_updated, points [{month, "
+            "median_sale_price}]}, rental_snapshot, rent_history, read_from}, notes. Survey "
+            "results, safety statements and market figures are Trulia's, as Trulia gives them. "
+            "Crime data is no longer on Trulia. No listing-agent names, phones, emails or "
+            "license numbers and no reviewer names are returned; brokerage company names are. "
+            "1 credit. Failed upstream calls and refused inputs are not charged; a not-found "
+            "is charged."
+        ),
+        params=(
+            Param(
+                "location_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Trulia neighborhood location id: property neighborhood.location_id, or "
+                    "location_id of a neighborhood in suggestions."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the neighborhood's trulia.com link "
+                    "(https://www.trulia.com/n/<st>/<city>/<neighborhood>/<location id>/)."
+                ),
+            ),
+            Param(
+                "include_market_snapshot",
+                "Optional[bool]",
+                doc=(
+                    "Add market: Trulia's market snapshot and monthly median sale price "
+                    "history, read from a home for sale in the neighborhood (default true; "
+                    "same 1 credit). false answers faster."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es"]]',
+                doc=(
+                    "en (default) or es: Trulia's US Spanish neighborhood page."
+                ),
+            ),
+        ),
+        one_of=(("location_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="trulia_search",
+        namespace="trulia",
+        method="search",
+        http="POST",
+        path="/api/v1/trulia/search",
+        summary=(
+            "Search Trulia homes for sale, for rent or recently sold in a ZIP code, city or "
+            "neighborhood: Trulia (trulia.com, Zillow Group's home and neighborhood site; US "
+            "only, USD). Scavio fetches the public Trulia page on request. Filters: beds_min, "
+            "baths_min, price, sqft and year-built ranges, hoa_max, property_types, keyword, "
+            "pets (rentals); 7 sorts; 40 homes a page. Returns listing_status, location {city, "
+            "state, zip_code, neighborhood, location_id}, url, language, total, page, "
+            "page_size, total_pages, has_more, sort, applied_filters (the filters Trulia says "
+            "it applied), neighborhoods [{name, id, count}], count, listings [id, zpid, "
+            "building_id, url, status (for_sale, for_rent, sold, rented, off_market), "
+            "listing_type, price (USD; sold rows read from the sale price Trulia prints), "
+            "price_min, price_max (rental buildings), price_display, price_note (e.g. Total "
+            "price) and price_note_details, currency, price_change_direction, address, "
+            "street_address, city, state, zip_code, community_name, latitude, longitude, beds, "
+            "beds_min, beds_max, baths, baths_min, baths_max, living_area (sqft), "
+            "living_area_min, living_area_max, lot_size_display, home_type, tags, date_listed, "
+            "sold_date, open_houses, brokerage (company), has_3d_tour, has_video, image, "
+            "images], notes. No listing-agent names, phones, emails or license numbers and no "
+            "reviewer names are returned; brokerage company names are. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "location",
+                "str",
+                required=True,
+                doc=(
+                    "A ZIP code (78701), \"City, ST\" (Austin, TX) or \"Neighborhood, City, ST\" "
+                    "(Upper East Side, New York, NY). suggestions returns search_location "
+                    "values."
+                ),
+            ),
+            Param(
+                "listing_status",
+                'Optional[Literal["for_sale", "for_rent", "sold"]]',
+                doc=(
+                    "for_sale (default), for_rent or sold (recently sold)."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "beds_min."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "baths_min."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "USD (monthly rent on for_rent)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "USD (monthly rent on for_rent)."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "sqft_min."
+                ),
+            ),
+            Param(
+                "sqft_max",
+                "Optional[int]",
+                doc=(
+                    "sqft_max."
+                ),
+            ),
+            Param(
+                "year_built_min",
+                "Optional[int]",
+                doc=(
+                    "year_built_min."
+                ),
+            ),
+            Param(
+                "year_built_max",
+                "Optional[int]",
+                doc=(
+                    "year_built_max."
+                ),
+            ),
+            Param(
+                "hoa_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly HOA fee, USD (for_sale and sold)."
+                ),
+            ),
+            Param(
+                "property_types",
+                'Optional[list[Literal["single_family", "townhouse", "condo", "coop", "apartment", "multi_family"]]]',
+                doc=(
+                    "Any of: single_family, townhouse, condo, coop, apartment, multi_family."
+                ),
+            ),
+            Param(
+                "keyword",
+                "Optional[str]",
+                doc=(
+                    "A listing keyword Trulia filters on (letters, digits, spaces), e.g. pool, "
+                    "hardwood floors."
+                ),
+            ),
+            Param(
+                "pets",
+                'Optional[list[Literal["cats", "small_dogs", "large_dogs"]]]',
+                doc=(
+                    "Rentals only: cats, small_dogs, large_dogs."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["default", "newest", "price_low", "price_high", "sqft", "beds", "baths"]]',
+                doc=(
+                    "default (Trulia's order: newest on for_sale, its own ranking on for_rent, "
+                    "latest sale on sold), newest, price_low, price_high, sqft (largest), beds "
+                    "(most), baths (most)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1 (40 homes a page, up to page 50); has_more says whether "
+                    "another exists."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es"]]',
+                doc=(
+                    "en (default) or es: Trulia's US Spanish pages exist for rental searches "
+                    "(for_rent) only."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="trulia_property",
+        namespace="trulia",
+        method="property",
+        http="POST",
+        path="/api/v1/trulia/property",
+        summary=(
+            "One Trulia home (for sale, sold, for rent) by zpid or link, or one rental "
+            "building by building_id or link: Trulia (trulia.com, Zillow Group's home and "
+            "neighborhood site; US only, USD). Scavio fetches the public Trulia page on "
+            "request. Returns id, zpid, building_id, url, language, name, status, "
+            "status_label, listing_type, address parts, latitude, longitude, price, price_min, "
+            "price_max, price_display, price_note, currency, beds, baths, baths_summary, "
+            "living_area, lot_size_display, home_type, date_listed, tags, insights, "
+            "description, zestimate and rent_zestimate (Zillow's estimates as Trulia shows "
+            "them), home_value {current_display, since_last_month, since_last_year, "
+            "since_last_sale, history}, price_history [{date, event, price, source, details}], "
+            "last_sold, taxes {assessment, history [{year, tax, assessment}]}, features "
+            "{highlights, categories [{name, attributes, groups}]}, open_houses, brokerage "
+            "(company), mls, payment_estimate {monthly_total, principal_and_interest, "
+            "property_taxes, homeowners_insurance, hoa, down_payment_percent, text} and "
+            "price_vs_median {percent, direction, median_display, area, text} (read from "
+            "Trulia's FAQ answers), faqs, market_snapshot and median_sale_price_history "
+            "(Trulia's neighborhood or city market, with its scope), rental_market_snapshot, "
+            "rent_history, seller_net_proceeds, neighborhood {location_id (the input of "
+            "neighborhood), region_id, url, search_url, what_locals_say}, schools_summary, and "
+            "for buildings floor_plans {groups [{title, beds, plans [{id, name, availability, "
+            "beds, baths, price_min, price_max, sqft_display, units [{name, availability, "
+            "available_now, price_display}]}]}]}, fees {monthly_required, one_time_required, "
+            "monthly_optional, one_time_optional [{name, min, max, amount, amount_text}], "
+            "disclaimer}, total_monthly_fee_included, pet_policy, special_offers, "
+            "ideal_income, units {total, available}, plus photo_count, images (up to 50). An "
+            "id Trulia does not have is a charged 404. No listing-agent names, phones, emails "
+            "or license numbers and no reviewer names are returned; brokerage company names "
+            "are. 1 credit. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "zpid",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A home's zpid (the id Trulia shares with Zillow; listings[].zpid)."
+                ),
+            ),
+            Param(
+                "building_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or a rental building's id (listings[].building_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the trulia.com link (https://www.trulia.com/home/<address>-<zpid> or "
+                    "/building/<name>-<id>)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es"]]',
+                doc=(
+                    "en (default) or es: Spanish is available on building pages only."
+                ),
+            ),
+        ),
+        one_of=(("zpid", "building_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="trulia_school",
+        namespace="trulia",
+        method="school",
+        http="POST",
+        path="/api/v1/trulia/school",
+        summary=(
+            "One school on Trulia by link, or by school id and state: Trulia (trulia.com, "
+            "Zillow Group's home and neighborhood site; US only, USD). Scavio fetches the "
+            "public Trulia page on request. Returns id, name, url, type, levels, grades, "
+            "students, district, district_url, address, latitude, longitude, website, "
+            "greatschools_url, ratings {overall, max, test_scores, equity, academic_progress, "
+            "college_readiness, student_growth, source (GreatSchools)}, student_teacher_ratio, "
+            "student_counselor_ratio, certified_teachers_percent, parent_rating, review_count, "
+            "reviews [{rating, rating_max, text, type, date}] (parent reviews, no names), "
+            "nearby_schools, assigned_homes {for_sale, for_rent: {total, listings}}, notes. An "
+            "unknown school is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Trulia school link (neighborhood schools.items[].url)."
+                ),
+            ),
+            Param(
+                "school_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or the number at the end of the school link (suggestions "
+                    "schools[].school_id), with state."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "The school's two-letter state code (with school_id)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es"]]',
+                doc=(
+                    "en only: Trulia's school pages are English."
+                ),
+            ),
+        ),
+        one_of=(("url", "school_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="trulia_suggestions",
+        namespace="trulia",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/trulia/suggestions",
+        summary=(
+            "Trulia's place suggestions for the start of a city, neighborhood, ZIP code, "
+            "address or school name: Trulia (trulia.com, Zillow Group's home and neighborhood "
+            "site; US only, USD). Scavio fetches the public Trulia page on request. Returns "
+            "query, listing_status, count, places [{title, details, type (city, neighborhood, "
+            "zipcode, address, ...), city, state, zip_code, location_id (a neighborhood's is "
+            "the input of neighborhood), region_id, zpid (addresses: the input of property), "
+            "url, search_location (the input of search), latitude, longitude}], schools "
+            "[{title, subtitle, details, type, school_id, city, state, latitude, longitude}]. "
+            "1 credit. Failed upstream calls and refused inputs are not charged; a not-found "
+            "is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a city, neighborhood, ZIP code, address or school name."
+                ),
+            ),
+            Param(
+                "listing_status",
+                'Optional[Literal["for_sale", "for_rent"]]',
+                doc=(
+                    "for_sale (default) or for_rent: Trulia's suggestions for that kind of "
+                    "search."
+                ),
+            ),
+            Param(
+                "include_schools",
+                "Optional[bool]",
+                doc=(
+                    "Add matching schools and districts (default true)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "es"]]',
+                doc=(
+                    "en only: Trulia's suggestions are English."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# StreetEasy: 5 endpoints on /api/v1/streeteasy.
+_STREETEASY_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="streeteasy_search",
+        namespace="streeteasy",
+        method="search",
+        http="POST",
+        path="/api/v1/streeteasy/search",
+        summary=(
+            "Search homes for sale, rentals or past sales in an NYC or North NJ area on "
+            "StreetEasy (streeteasy.com, Zillow Group's New York City real estate site). "
+            "StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the "
+            "public StreetEasy page on request. Filters: price, bedrooms, bathrooms, size, "
+            "home type, sale type, year built, amenities, pets, ZIP, by owner (rent) and in "
+            "contract (sale); 7 sorts; up to 100 pages. Returns mode, area {id, name, slug, "
+            "borough}, criteria (StreetEasy's search criteria as it read them), sort, page, "
+            "total, pages, has_more, count, listings [id (the input of listing), url, "
+            "placement (organic, featured or sponsored: StreetEasy's paid placements come "
+            "first), address, unit, area, area_id, zip, state, latitude, longitude, price "
+            "(USD; rent per month), currency, sold_price, net_effective_rent, months_free, "
+            "lease_term_months, total_monthly_price, price_change, beds, full_baths, "
+            "half_baths, sqft, building_type, sale_type, status, available_date, "
+            "off_market_date, is_new_development, furnished, has_videos, has_3d_tour, "
+            "source_type, listed_by_owner, brokerage, open_house {start, end, "
+            "appointment_only}, photo, photos], notes. No agent or private landlord names, "
+            "emails, phones or photos are returned; the brokerage is. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "area",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A StreetEasy area by name, slug or id: a borough (Manhattan, Brooklyn, "
+                    "Queens, Bronx, Staten Island), a neighborhood (Williamsburg, Upper West "
+                    "Side), a New Jersey city (Jersey City, Hoboken), or nyc for all of NYC "
+                    "and NJ. Ids: 100 Manhattan, 300 Brooklyn, 400 Queens, 302 Williamsburg, "
+                    "1001000 Jersey City. The answer returns the area id."
+                ),
+            ),
+            Param(
+                "mode",
+                'Optional[Literal["sale", "rent", "sold"]]',
+                doc=(
+                    "sale (homes for sale, default), rent (rentals) or sold (past sales)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price (rent per month on mode rent), USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price (rent per month on mode rent), USD."
+                ),
+            ),
+            Param(
+                "beds_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bedrooms (0 = studio)."
+                ),
+            ),
+            Param(
+                "beds_max",
+                "Optional[int]",
+                doc=(
+                    "Most bedrooms. beds_min = beds_max asks for exactly that many."
+                ),
+            ),
+            Param(
+                "baths_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest bathrooms."
+                ),
+            ),
+            Param(
+                "sqft_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest size in square feet (listings without a size are left out)."
+                ),
+            ),
+            Param(
+                "home_types",
+                'Optional[list[Literal["condo", "coop", "house", "multifamily"]]]',
+                doc=(
+                    "Mode sale and sold: condo, coop, house, multifamily."
+                ),
+            ),
+            Param(
+                "sale_types",
+                'Optional[list[Literal["sponsor", "resale", "foreclosure", "restricted"]]]',
+                doc=(
+                    "Mode sale and sold: sponsor, resale, foreclosure, restricted (sponsor = a "
+                    "sponsor unit, sold by the developer)."
+                ),
+            ),
+            Param(
+                "year_built_min",
+                "Optional[int]",
+                doc=(
+                    "year_built_min."
+                ),
+            ),
+            Param(
+                "year_built_max",
+                "Optional[int]",
+                doc=(
+                    "year_built_max."
+                ),
+            ),
+            Param(
+                "amenities",
+                'Optional[list[Literal["washer_dryer", "dishwasher", "elevator", "doorman", "laundry", "gym", "parking", "pool", "storage", "private_outdoor_space", "public_outdoor_space", "central_ac", "furnished", "fireplace", "loft", "city_view", "garden_view", "park_view", "skyline_view", "waterview", "guarantor_ok", "pied_a_terre", "childrens_playroom", "smoke_free"]]]',
+                doc=(
+                    "StreetEasy's amenity filters, all required: washer_dryer, dishwasher, "
+                    "elevator, doorman, laundry, gym, parking, pool, storage, "
+                    "private_outdoor_space, public_outdoor_space, central_ac, furnished, "
+                    "fireplace, loft, city_view, garden_view, park_view, skyline_view, "
+                    "waterview, guarantor_ok, pied_a_terre, childrens_playroom, smoke_free."
+                ),
+            ),
+            Param(
+                "pets_allowed",
+                "Optional[bool]",
+                doc=(
+                    "Only listings that allow pets."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Only listings in this ZIP code (with area nyc to search every borough)."
+                ),
+            ),
+            Param(
+                "by_owner",
+                "Optional[bool]",
+                doc=(
+                    "Mode rent: only listings posted by the owner (no broker)."
+                ),
+            ),
+            Param(
+                "status",
+                'Optional[Literal["active", "in_contract"]]',
+                doc=(
+                    "Mode sale: active (default: on the market) or in_contract (StreetEasy's "
+                    "pending)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recommended", "newest", "recently_updated", "price_desc", "price_asc", "sqft_desc", "sqft_asc"]]',
+                doc=(
+                    "recommended (StreetEasy's default; mode sold defaults to newest), newest, "
+                    "recently_updated, price_desc, price_asc, sqft_desc, sqft_asc. The sort "
+                    "orders the organic results."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1; pages and has_more say how deep the results go (sale pages "
+                    "hold about 38 cards, rent pages 14)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="streeteasy_listing",
+        namespace="streeteasy",
+        method="listing",
+        http="POST",
+        path="/api/v1/streeteasy/listing",
+        summary=(
+            "One StreetEasy (streeteasy.com, Zillow Group's New York City real estate site) "
+            "listing in full (for sale, sold or for rent) by link or by id with listing_type: "
+            "id, url, listing_type, status, address {street, unit, city, state, zip, full}, "
+            "area, building {id, name, slug, url, type, status, year_built, floors, units, "
+            "area, latitude, longitude, amenities, policies}, sale_type, description, "
+            "days_on_market, listed_date, available_date, off_market_date, sold_date, "
+            "updated_at, status_changes, rooms, beds, full_baths, half_baths, sqft, amenities, "
+            "doorman, parking, shared_outdoor_space, storage, features, fireplaces, "
+            "private_outdoor_space, views, pricing {price, currency, sold_price, rented_price, "
+            "price_changes [{price, at}], monthly_maintenance, monthly_taxes, "
+            "monthly_common_charges, estimated_monthly_payment, max_financing_percent, "
+            "net_effective_rent, months_free, lease_term_months, security_deposit, "
+            "move_in_fees [{type, label, amount, refundable, required, timing}], monthly_fees, "
+            "additional_fees}, property_history [{listing_id, brokerage, sold_date, "
+            "off_market_date, events [{date, price, status, price_change_percent}]}] (the "
+            "unit's past listings), open_houses, media {photos, floor_plans, video_count, "
+            "has_3d_tour}, area_price_stats {beds, sale {min, median, max, listings}, rental "
+            "{...}} (StreetEasy's recent-listing prices for that bedroom count in the area), "
+            "source_type, listed_by_owner, mls_number, brokerage {name, listed_as, "
+            "license_type, license_address}, agent_brokerages [{brokerage, license_type, "
+            "license_address}]. No agent or private landlord names, emails, phones or photos "
+            "are returned; the brokerage is. An unknown listing is a charged 404. StreetEasy "
+            "covers NYC's five boroughs and North New Jersey. Scavio fetches the public "
+            "StreetEasy page on request. 1 credit. Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A StreetEasy listing link or path (listings[].url), e.g. "
+                    "/building/<building>/<unit> or /sale/<id>."
+                ),
+            ),
+            Param(
+                "id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or a StreetEasy listing id (listings[].id) with listing_type."
+                ),
+            ),
+            Param(
+                "listing_type",
+                'Optional[Literal["sale", "rent"]]',
+                doc=(
+                    "With id: sale (for sale and sold listings) or rent."
+                ),
+            ),
+        ),
+        one_of=(("url", "id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="streeteasy_building",
+        namespace="streeteasy",
+        method="building",
+        http="POST",
+        path="/api/v1/streeteasy/building",
+        summary=(
+            "One NYC or North NJ building on StreetEasy (streeteasy.com, Zillow Group's New "
+            "York City real estate site) by slug or link: id, name, slug, url, address, area, "
+            "neighborhood, type, unit_type, status, year_built, floors, units, latitude, "
+            "longitude, description, amenities, policies (pets, sublets, pied-a-terre, ...), "
+            "pets, details {developer, architect, interiors, manager, marketing_team, owner "
+            "(the deed owner when a business), sales_office, leasing_office, website, "
+            "sales_start_date}, nyc {building_class, building_class_description, "
+            "community_district, council_district, police_precinct, hurricane_evacuation_zone, "
+            "has_abatements}, inventory {sales, rentals: per bedroom count the available and "
+            "past listing counts with min / max price; active_sale_ids, active_rental_ids}, "
+            "sales, rentals (the building's listed units with price, status and brokerage), "
+            "schools, transit, nearby {parks, colleges, museums}, similar_buildings, "
+            "photo_count, photos. An unknown building is a charged 404. StreetEasy covers "
+            "NYC's five boroughs and North New Jersey. Scavio fetches the public StreetEasy "
+            "page on request. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A StreetEasy building slug (building.slug)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or the building's StreetEasy link (a listing link in the building works "
+                    "too)."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="streeteasy_buildings",
+        namespace="streeteasy",
+        method="buildings",
+        http="POST",
+        path="/api/v1/streeteasy/buildings",
+        summary=(
+            "The building directory of StreetEasy (streeteasy.com, Zillow Group's New York "
+            "City real estate site) for an area: area, building_type, page, total, pages, "
+            "has_more, count, buildings [{id, name, slug (the input of building), url, "
+            "address, active_sales, active_rentals, units, floors, year_built, status, "
+            "buildings_in_complex, type, neighborhood, latitude, longitude, photo}]. "
+            "StreetEasy covers NYC's five boroughs and North New Jersey. Scavio fetches the "
+            "public StreetEasy page on request. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "area",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A StreetEasy area by name, slug or id (as in search)."
+                ),
+            ),
+            Param(
+                "building_type",
+                'Optional[Literal["condo", "coop", "rental"]]',
+                doc=(
+                    "Only condo, coop, rental buildings."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, from 1 (StreetEasy lists about 11 buildings a page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="streeteasy_market",
+        namespace="streeteasy",
+        method="market",
+        http="POST",
+        path="/api/v1/streeteasy/market",
+        summary=(
+            "The monthly market data StreetEasy (streeteasy.com, Zillow Group's New York City "
+            "real estate site) publishes for New York City from 2010-01 (its neighborhoods, "
+            "the five boroughs and NYC; the price and rental indexes for Brooklyn, Manhattan, "
+            "Queens and NYC, from 2005 and 2007), as StreetEasy publishes it; New Jersey areas "
+            "have no published series. Sales: price_index, inventory, sale_to_list_ratio, "
+            "recorded_sales, median_sale_price, median_asking_price, median_days_on_market, "
+            "share_of_price_cuts, by home type. Rentals: rental_index, inventory, "
+            "median_asking_rent, share_of_rent_cuts, by bedrooms. Returns type, metric, "
+            "metric_label, filter, filter_label, first_month, last_month, months, count, areas "
+            "[{area, area_id, area_slug, borough, area_type (neighborhood, borough or city), "
+            "latest {month, value}, values (aligned with months; null where none is "
+            "published)}], notes. An area StreetEasy publishes no series for is a charged 404. "
+            "Scavio fetches the public data file on request. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "type",
+                'Optional[Literal["sales", "rentals"]]',
+                doc=(
+                    "sales (default) or rentals."
+                ),
+            ),
+            Param(
+                "metric",
+                "Optional[str]",
+                doc=(
+                    "sales: price_index, inventory, sale_to_list_ratio, recorded_sales, "
+                    "median_sale_price, median_asking_price, median_days_on_market, "
+                    "share_of_price_cuts (default median_sale_price). rentals: rental_index, "
+                    "inventory, median_asking_rent, share_of_rent_cuts (default "
+                    "median_asking_rent)."
+                ),
+            ),
+            Param(
+                "filter",
+                "Optional[str]",
+                doc=(
+                    "sales by home type: all (default), condo, coop, single_family. rentals by "
+                    "bedrooms: all, studio, one_bedroom, two_bedrooms, three_plus_bedrooms. "
+                    "price_index and rental_index are published for all only. (8 values.)"
+                ),
+            ),
+            Param(
+                "area",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "One area by name, slug or id (a neighborhood, a borough, or NYC); every "
+                    "published area when omitted. The data covers New York City."
+                ),
+            ),
+            Param(
+                "start_month",
+                "Optional[str]",
+                doc=(
+                    "First month (YYYY-MM); StreetEasy's series start in 2010-01 (price_index "
+                    "in 2005-01, rental_index in 2007-01)."
+                ),
+            ),
+            Param(
+                "end_month",
+                "Optional[str]",
+                doc=(
+                    "Last month (YYYY-MM)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# RentCafe: 6 endpoints on /api/v1/rentcafe.
+_RENTCAFE_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="rentcafe_search",
+        namespace="rentcafe",
+        method="search",
+        http="POST",
+        path="/api/v1/rentcafe/search",
+        summary=(
+            "Search rentals on RentCafe (rentcafe.com, Yardi's US and Canada rental listing "
+            "site). Scavio fetches the public RentCafe page on request. Apartments, houses, "
+            "condos or townhomes in a city, ZIP code, neighborhood or state (US and Canada), "
+            "with one of beds, rent specials, short-term, furnished, utilities included or an "
+            "amenity, plus price range and pet-friendly, sorted 5 ways, 25 a page; English or "
+            "French. Returns market, language, currency, property_type, location, filters, "
+            "sort, title, total (RentCafe's count), page, page_size, pages, has_more, count, "
+            "listings [id (the property_id of reviews and floorplan-units), name, url (the "
+            "input of property), address, city, state, zip, latitude, longitude, beds, baths, "
+            "rent_min, rent_max, currency, rent_by_bed [{beds, rent, rent_text}], rating, "
+            "review_count, pets_allowed, rent_specials, units_available, tags, badges, "
+            "featured_type, management_company, image, image_count], notes. Rents are in the "
+            "market's currency (USD or CAD); a rent RentCafe does not state is null. A "
+            "location RentCafe does not have is a charged 404. 1 credit. Failed upstream calls "
+            "and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "location",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A RentCafe location as its search links write it (austin-tx, 78704-tx, "
+                    "downtown-toronto-toronto-on, a state such as tx), or a suggestions "
+                    "places[].seo_url (us/tx/austin, ca/on/toronto/downtown-toronto)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Or a city name (with state), e.g. Chicago."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[str]",
+                doc=(
+                    "Or a US ZIP code (with state), e.g. 78704."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "With city or zip: the 2-letter US state or Canadian province code (TX, "
+                    "ON, QC)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us or ca. Read from the location's state or province when left out (a "
+                    "mismatch is refused)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "fr"]]',
+                doc=(
+                    "en (default) or fr: RentCafe's French pages (fr-CA labels over the same "
+                    "listings). Prices stay in the market's currency."
+                ),
+            ),
+            Param(
+                "property_type",
+                'Optional[Literal["apartments", "houses", "condos", "townhomes"]]',
+                doc=(
+                    "apartments (default), houses, condos or townhomes."
+                ),
+            ),
+            Param(
+                "beds",
+                'Optional[Union[Literal["1", "2", "3", "4", "studio"], int]]',
+                doc=(
+                    "studio, 1, 2, 3 or 4 bedrooms (0 is studio)."
+                ),
+            ),
+            Param(
+                "rent_specials",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with a rent special."
+                ),
+            ),
+            Param(
+                "short_term",
+                "Optional[bool]",
+                doc=(
+                    "Only short-term leases."
+                ),
+            ),
+            Param(
+                "furnished",
+                "Optional[bool]",
+                doc=(
+                    "furnished."
+                ),
+            ),
+            Param(
+                "utilities_included",
+                "Optional[bool]",
+                doc=(
+                    "utilities_included."
+                ),
+            ),
+            Param(
+                "amenity",
+                'Optional[Literal["washer-dryer", "pool", "garage", "fitness-center", "balcony", "air-conditioning", "dishwasher", "fireplace", "hardwood-floors", "walk-in-closets", "wheelchair-accessible", "controlled-access", "playground", "public-transportation", "recent-build", "tennis-court", "yard", "cheap", "luxury"]]',
+                doc=(
+                    "One amenity filter as RentCafe links it: washer-dryer, pool, garage, "
+                    "fitness-center, balcony, air-conditioning, dishwasher, fireplace, "
+                    "hardwood-floors, walk-in-closets, wheelchair-accessible, "
+                    "controlled-access, playground, public-transportation, recent-build, "
+                    "tennis-court, yard, cheap, luxury. RentCafe takes one of beds, "
+                    "rent_specials, short_term, furnished, utilities_included or amenity per "
+                    "search."
+                ),
+            ),
+            Param(
+                "pet_friendly",
+                "Optional[bool]",
+                doc=(
+                    "Only pet-friendly listings (combines with any filter)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest monthly rent, in the market's currency."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest monthly rent, in the market's currency."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["default", "rent", "rent_desc", "rating_desc", "newest"]]',
+                doc=(
+                    "default (RentCafe's Best Match), rent (low to high; listings without a "
+                    "stated rent come first), rent_desc, rating_desc or newest (listings with "
+                    "new units at the top, as RentCafe sorts them)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 25, from 1. RentCafe pages through about 15-20 pages at most: "
+                    "pages says how many; narrow with filters for more."
+                ),
+            ),
+        ),
+        one_of=(("location", "city", "zip"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcafe_property",
+        namespace="rentcafe",
+        method="property",
+        http="POST",
+        path="/api/v1/rentcafe/property",
+        summary=(
+            "One RentCafe listing in full by link or slug: id, name, url, market, language, "
+            "currency, address {street, city, state, zip, country}, latitude, longitude, "
+            "rent_min, rent_max, rent_text, beds, baths, rating, rating_label, review_count, "
+            "badges, great_deal (RentCafe's bare Great deal badge; its basis is not stated), "
+            "price_drop, rent_special, units_available, images, floorplans [{id (the "
+            "floorplan_id of floorplan-units), name, beds, baths, size, rent, rent_text, "
+            "has_units, price_drop, units_shown, units [{id, name, size, rent, rent_text, "
+            "availability}]}], policies [{name, items [{label, value, amount}], text}] "
+            "(deposit, application fees, pet fees and pet policy as RentCafe lists them), "
+            "amenities {apartment, community}, services, building_details, category_ratings "
+            "[{category, rating}], renters_summary {text, source} (RentCafe's own What renters "
+            "are saying summary), reviews [{rating, date, text}] (no reviewer names), "
+            "office_hours [{day, hours}], office_hours_note, phone (the leasing office), "
+            "management_company, description, notes. French pages read the same, with "
+            "RentCafe's French labels. A link RentCafe does not have is a charged 404. "
+            "RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio "
+            "fetches the public RentCafe page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "url",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The listing link (search listings[].url), e.g. "
+                    "https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "Or <st>/<city>/<name> as in the listing link (housing/... or "
+                    "single-family/... for those links)."
+                ),
+            ),
+            Param(
+                "language",
+                'Optional[Literal["en", "fr"]]',
+                doc=(
+                    "en (default) or fr: RentCafe's French pages (fr-CA labels over the same "
+                    "listings). Prices stay in the market's currency."
+                ),
+            ),
+        ),
+        one_of=(("url", "slug"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcafe_floorplan_units",
+        namespace="rentcafe",
+        method="floorplan_units",
+        http="POST",
+        path="/api/v1/rentcafe/floorplan-units",
+        summary=(
+            "Every unit of one floor plan of a RentCafe listing (the property page shows up to "
+            "2): property_id, floorplan_id, name, beds, baths, size, rent, rent_text, "
+            "currency, price_drop, selected_unit {id, base_rent, base_rent_text, availability} "
+            "(with unit_id), count, units [{id, name, availability, available_now, beds, "
+            "baths, size, rent, rent_text, specials}], amenities, photos [{url, alt}], "
+            "specials, notes. An unknown floor plan is a charged 404. RentCafe (rentcafe.com, "
+            "Yardi's US and Canada rental listing site). Scavio fetches the public RentCafe "
+            "page on request. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "property_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A RentCafe property id (search listings[].id, suggestions "
+                    "properties[].id, property id)."
+                ),
+            ),
+            Param(
+                "floorplan_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A floor plan id (property floorplans[].id)."
+                ),
+            ),
+            Param(
+                "unit_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A unit id (floorplans[].units[].id): selected_unit gives its base rent "
+                    "and availability."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "The listing link (search listings[].url), e.g. "
+                    "https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default) or ca: the currency of the rents. Read from url when sent."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcafe_reviews",
+        namespace="rentcafe",
+        method="reviews",
+        http="POST",
+        path="/api/v1/rentcafe/reviews",
+        summary=(
+            "Resident reviews of one RentCafe listing, 10 a page in RentCafe's order: "
+            "property_id, page, page_size, total, pages, has_more, rating, rating_label, "
+            "category_ratings, renters_summary (RentCafe's own summary; page 1), count, "
+            "reviews [{rating, resident_type (e.g. Verified Resident), date, text}], notes. "
+            "RentCafe offers no review sort or star filter. No reviewer name is returned. An "
+            "unknown property id is a charged 404. RentCafe (rentcafe.com, Yardi's US and "
+            "Canada rental listing site). Scavio fetches the public RentCafe page on request. "
+            "1 credit. Failed upstream calls and refused inputs are not charged; a not-found "
+            "is charged."
+        ),
+        params=(
+            Param(
+                "property_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A RentCafe property id (search listings[].id, suggestions "
+                    "properties[].id, property id)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 10 reviews, from 1; pages says how many."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "The listing link (search listings[].url), e.g. "
+                    "https://www.rentcafe.com/apartments/tx/austin/bridge-at-indigo/default.aspx."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcafe_suggestions",
+        namespace="rentcafe",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/rentcafe/suggestions",
+        summary=(
+            "RentCafe's location and property suggestions for a city, neighborhood, ZIP code "
+            "or property name: query, market, places [{name, label, seo_url, location (the "
+            "location input of search)}], properties [{id (the property_id of reviews and "
+            "floorplan-units), name, address, city, state, zip, seo_url, location}], notes. "
+            "RentCafe (rentcafe.com, Yardi's US and Canada rental listing site). Scavio "
+            "fetches the public RentCafe page on request. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "A city, neighborhood, ZIP code or property name."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default) or ca."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="rentcafe_rent_trends",
+        namespace="rentcafe",
+        method="rent_trends",
+        http="POST",
+        path="/api/v1/rentcafe/rent-trends",
+        summary=(
+            "RentCafe's rent trends for a US city, as it publishes them: city, state, "
+            "currency, url, title, last_updated, source (as RentCafe states it), average_rent, "
+            "average_rent_previous_year, yoy_change_pct, highlights, by_bed_type [{type, "
+            "average_rent, average_sqft}], budget_share [{range, share_pct}], households "
+            "{renter_occupied, renter_pct, owner_occupied, owner_pct}, "
+            "most_affordable_neighborhoods and most_expensive_neighborhoods [{name, "
+            "average_rent, location (the location input of search)}], rent_by_neighborhood "
+            "[{name, average_rent}], compared_cities [{name, average_rent}], notes. US only "
+            "(RentCafe has no Canada rent trends pages). A city with no rent trends page is a "
+            "404 (not charged). RentCafe (rentcafe.com, Yardi's US and Canada rental listing "
+            "site). Scavio fetches the public RentCafe page on request. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "str",
+                required=True,
+                doc=(
+                    "A US city."
+                ),
+            ),
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "Its 2-letter state code."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Vrbo: 3 endpoints on /api/v1/vrbo.
+_VRBO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="vrbo_search",
+        namespace="vrbo",
+        method="search",
+        http="POST",
+        path="/api/v1/vrbo/search",
+        summary=(
+            "Search vacation rentals on Vrbo (vrbo.com, Expedia Group's vacation rental site). "
+            "Scavio fetches the public Vrbo page on request. Labels and texts are in the "
+            "market's language, as Vrbo writes them (host-written titles and descriptions can "
+            "stay in the host's language); field names are English. By place name or region "
+            "id, dates and guests, with Vrbo's sorts and filters (property type, amenity, "
+            "house rule incl. pets, location type, Premier Host, minimum bedrooms): market, "
+            "language, currency, destination, region_id, destination_name, check_in, "
+            "check_out, nights, adults, children, sort, filters, applied (the selections "
+            "Vrbo's page echoed), matched_total (as Vrbo reports it), page_label, count, "
+            "partial, attempts, properties [position, property_id (the input of property), "
+            "expedia_property_id, url, path, title, details (the type / bedrooms / beds line, "
+            "split as shown), messages (as shown, incl. the refund deadline), "
+            "location_messages, rating {score, score_display, label, review_count, "
+            "review_count_text, external_reviews}, price {nightly, nightly_display, total, "
+            "total_display, was, was_display, was_applies_to, lead (nightly or total: which "
+            "one is the card's large price; markets differ), stay_text, fees_text (Vrbo's own "
+            "line, e.g. All fees included), price_messages, currency}, deal, badges (e.g. "
+            "Premier Host, Loved by Guests, Ad), sponsored (Vrbo's paid placements, kept in "
+            "place), coordinates {latitude, longitude}, images], notes. The first 50 results "
+            "only: Vrbo's pages carry no further page. Prices are exactly as Vrbo shows them "
+            "for the requested dates. Vrbo serves its results page in a 50-card or a 3-card "
+            "form; Scavio re-fetches the 3-card form up to 4 attempts in all and, if it is all "
+            "Vrbo gives, returns those 3 with partial: true. 2 credits per attempt (2 to 8; "
+            "typically 2-6). Can take up to about 3 minutes: set a client timeout of at least "
+            "240 s. Billed on what the request actually costs: credits_used reports it. Failed "
+            "upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "check_in",
+                "str",
+                required=True,
+                doc=(
+                    "Check-in date, YYYY-MM-DD."
+                ),
+            ),
+            Param(
+                "check_out",
+                "str",
+                required=True,
+                doc=(
+                    "Check-out date, YYYY-MM-DD (at most 90 nights after check_in)."
+                ),
+            ),
+            Param(
+                "destination",
+                "Optional[str]",
+                doc=(
+                    "A place as you would type it on Vrbo (city, region, area or landmark)."
+                ),
+            ),
+            Param(
+                "region_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Or a Vrbo region id: places[].region_id of suggestions (exact, no "
+                    "guessing)."
+                ),
+            ),
+            Param(
+                "adults",
+                "Optional[int]",
+                doc=(
+                    "Adults (default 2)."
+                ),
+            ),
+            Param(
+                "children",
+                "Optional[list[int]]",
+                doc=(
+                    "Children's ages, one per child (0-17)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recommended", "price_low", "price_high", "review", "review_count"]]',
+                doc=(
+                    "recommended (default), price_low, price_high, review (guest rating), "
+                    "review_count: Vrbo's own sort options."
+                ),
+            ),
+            Param(
+                "property_type",
+                'Optional[Literal["house", "apartment_or_condo", "cottage", "cabin", "estate", "resort", "villa", "hotel", "houseboat", "guest_house", "boat", "chalet", "RV"]]',
+                doc=(
+                    "Vrbo's property type filter: house, apartment_or_condo, cottage, cabin, "
+                    "estate, resort, villa, hotel, houseboat, guest_house, boat, chalet, RV."
+                ),
+            ),
+            Param(
+                "amenity",
+                'Optional[Literal["pool", "private_pool", "heated_pool", "hot_tub", "balcony", "king_sized_bed", "parking", "internet_available", "fireplace", "washer", "clothes_dryer", "electric_vehicle_charging_station", "air_conditioning", "television", "outdoor_grill", "patio_or_deck", "garden_or_backyard", "bed_linens_provided", "crib", "stove", "microwave", "oven", "dishwasher", "kids_high_chair", "iron_and_board"]]',
+                doc=(
+                    "One of Vrbo's amenity filters: pool, private_pool, heated_pool, hot_tub, "
+                    "balcony, king_sized_bed, parking, internet_available, fireplace, washer, "
+                    "clothes_dryer, electric_vehicle_charging_station, air_conditioning, "
+                    "television, outdoor_grill, patio_or_deck, garden_or_backyard, "
+                    "bed_linens_provided, crib, stove, microwave, oven, dishwasher, "
+                    "kids_high_chair, iron_and_board."
+                ),
+            ),
+            Param(
+                "house_rule",
+                'Optional[Literal["pets_allowed", "pet_free", "children_allowed", "events_allowed", "smoking_allowed"]]',
+                doc=(
+                    "One of Vrbo's house-rule filters: pets_allowed, pet_free, "
+                    "children_allowed, events_allowed, smoking_allowed."
+                ),
+            ),
+            Param(
+                "pets_allowed",
+                "Optional[bool]",
+                doc=(
+                    "Pet-friendly places only (the same as house_rule pets_allowed)."
+                ),
+            ),
+            Param(
+                "location_type",
+                'Optional[Literal["oceanfront", "waterfront", "downtown_location", "lake_location", "mountains_location", "rural_location", "golf_course", "village_location", "skiin_skiout"]]',
+                doc=(
+                    "One of Vrbo's location filters: oceanfront, waterfront, "
+                    "downtown_location, lake_location, mountains_location, rural_location, "
+                    "golf_course, village_location, skiin_skiout."
+                ),
+            ),
+            Param(
+                "premier_host",
+                "Optional[bool]",
+                doc=(
+                    "Places run by Premier Hosts only."
+                ),
+            ),
+            Param(
+                "bedrooms_min",
+                "Optional[int]",
+                doc=(
+                    "Vrbo's bedrooms filter: this many bedrooms or more (Vrbo may still mix in "
+                    "sponsored places)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]]',
+                doc=(
+                    "The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, "
+                    "es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, "
+                    "sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own "
+                    "language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, "
+                    "SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and "
+                    "bookabach.co.nz are separate sites and are not covered."
+                ),
+            ),
+        ),
+        one_of=(("destination", "region_id"),),
+        credits=2,
+        credits_note=(
+            "Costs 2 credits per attempt, 2 to 8 (typically 2 to 6): Vrbo answers a results "
+            "page in a 50-card or a 3-card form and a search makes up to 4 attempts for the "
+            "50-card one. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="vrbo_property",
+        namespace="vrbo",
+        method="property",
+        http="POST",
+        path="/api/v1/vrbo/property",
+        summary=(
+            "One Vrbo property in full by id or link, fetched without dates: market, language, "
+            "currency, requested_id, property_id, expedia_property_id, url, title, "
+            "property_type, location {locality, region, country, address_lines, latitude, "
+            "longitude, region_id}, rating {score, score_display, best, label, review_count, "
+            "review_count_text}, highlights [{title, text}], space {bedrooms, bathrooms, "
+            "sleeps, texts}, amenities [{group, items}] (every group), house_rules [{kind, "
+            "heading, texts}] (check-in / check-out, minimum age, children, pets, events, "
+            "smoking), important_information [{kind, heading, texts}], special_features, "
+            "description, damage_and_incidentals, host {premier_host, premier_host_label, "
+            "premier_host_text, languages} (no host name, biography or photo), photo_count, "
+            "photos [{url, caption}], nearby [{group, places [{name, distance, "
+            "travel_time}]}], default_price {label (the site's own default stay, not a quote), "
+            "price, price_display, qualifier, messages (the lines under it, as shown), "
+            "site_note, currency} or null when the page shows none, breadcrumbs, notes. "
+            "Reviews, the availability calendar and prices for chosen dates are not offered "
+            "(use search for dated prices). An unknown property is a charged 404. 2 credits. "
+            "Billed on what the request actually costs: credits_used reports it. Failed "
+            "upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Vrbo property id: properties[].property_id of search (e.g. 1046285, "
+                    "12245744ha or pdp/lo/30792130)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "Or a vrbo.com property link (any market; the link's market is used unless "
+                    "market is sent)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]]',
+                doc=(
+                    "The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, "
+                    "es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, "
+                    "sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own "
+                    "language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, "
+                    "SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and "
+                    "bookabach.co.nz are separate sites and are not covered."
+                ),
+            ),
+        ),
+        one_of=(("id", "url"),),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="vrbo_suggestions",
+        namespace="vrbo",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/vrbo/suggestions",
+        summary=(
+            "Vrbo's destination suggestions for a partial place name: market, language, "
+            "currency, query, count, places [{type (CITY, NEIGHBORHOOD, POI, AIRPORT ...), "
+            "region_id (the input of search), name, display_name, full_name, primary_name, "
+            "secondary_name, latitude, longitude, country, country_code}], notes. 2 credits. "
+            "Billed on what the request actually costs: credits_used reports it. Failed "
+            "upstream calls are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a traveller has typed so far."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Most places to return (1-8, default 8)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "en-gb", "en-ca", "fr-ca", "es-mx", "pt-br", "es-es", "it-it", "pt-pt", "nl-nl", "de-at", "el-gr", "fi-fi", "da-dk", "sv-se", "no-no", "ja-jp", "en-sg", "en-au", "en-nz"]]',
+                doc=(
+                    "The vrbo.com market-language (default us): us, en-gb, en-ca, fr-ca, "
+                    "es-mx, pt-br, es-es, it-it, pt-pt, nl-nl, de-at, el-gr, fi-fi, da-dk, "
+                    "sv-se, no-no, ja-jp, en-sg, en-au, en-nz. Each answers in its own "
+                    "language and currency (USD, GBP, CAD, MXN, BRL, EUR, DKK, SEK, NOK, JPY, "
+                    "SGD, AUD, NZD). abritel.fr, fewo-direkt.de, stayz.com.au and "
+                    "bookabach.co.nz are separate sites and are not covered."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+)
+
+# TrueCar: 9 endpoints on /api/v1/truecar.
+_TRUECAR_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="truecar_search",
+        namespace="truecar",
+        method="search",
+        http="POST",
+        path="/api/v1/truecar/search",
+        summary=(
+            "Search the new or used dealer inventory of TrueCar (truecar.com, the US "
+            "car-buying marketplace). Scavio fetches the public truecar.com page on request; "
+            "TrueCar has no public API. US only, prices in USD. Around a US ZIP, by make and "
+            "model (names or slugs), 30 vehicles a page, with TrueCar's ten sorts and its "
+            "filters: radius, model year, price, maximum mileage, trim, body style, "
+            "drivetrains, colors, fuel types, accident-free and certified pre-owned. Returns "
+            "condition, zip, make, model, sort, sort_applied, page, page_size, total "
+            "(TrueCar's count caps at 10,000: total_capped), total_pages, has_more, count, "
+            "is_fallback, filters_applied (TrueCar's own echo), items [{year, make, model, "
+            "trim, style, condition, certified_pre_owned, price, msrp, base_msrp, price_label, "
+            "price_rating (TrueCar's own label as given), no_extra_dealer_fees, mileage, "
+            "exterior_color, exterior_color_generic, interior_color, drivetrain, engine, "
+            "fuel_type, transmission, body_style, mpg {city, highway, combined}, "
+            "electric_range, key_features, history {accident_count, owner_count, clean_title}, "
+            "listed_at, days_on_market, distance_miles, nationwide_delivery, dealer {id, name, "
+            "group, address, city, state, zip}, currency}], national (TrueCar's national price "
+            "range, per-trim average listed price and counts by year for the make and model), "
+            "market, notes. distance_miles is exposed because TrueCar also lists vehicles from "
+            "dealers far outside the radius. No VIN, stock number, listing link or dealer "
+            "photo is returned (TrueCar's listing links and photos carry the VIN). An unknown "
+            "make or model is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "zip",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: TrueCar searches dealers around it."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "used (default) or new."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make name or slug as TrueCar writes it (makes lists them): Toyota, "
+                    "Ford, Mercedes-Benz, land-rover."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "Needs make. A model name or slug as TrueCar writes it: RAV4, F-150, CR-V."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "Needs make and model. One trim name or slug (national.trims lists them)."
+                ),
+            ),
+            Param(
+                "body_style",
+                'Optional[Literal["convertible", "coupe", "hatchback", "sedan", "suv", "truck", "van", "wagon"]]',
+                doc=(
+                    "One of convertible, coupe, hatchback, sedan, suv, truck, van, wagon."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP (TrueCar's default: 75 used, 150 new). TrueCar also "
+                    "lists far-away vehicles offered with delivery: check "
+                    "items[].distance_miles."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Model year from."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Model year to."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Price from, USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Price to, USD."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Mileage up to."
+                ),
+            ),
+            Param(
+                "drivetrains",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: 4wd, awd, fwd, rwd (a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "colors",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: beige, black, blue, brown, gold, gray, green, orange, purple, "
+                    "red, silver, white, yellow (a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "fuel_types",
+                "Optional[Union[list[str], str]]",
+                doc=(
+                    "Any of: gas, hybrid, electric, diesel, plug_in_hybrid (a list or "
+                    "comma-separated)."
+                ),
+            ),
+            Param(
+                "accident_free",
+                "Optional[bool]",
+                doc=(
+                    "Only vehicles with no reported accident."
+                ),
+            ),
+            Param(
+                "certified_pre_owned",
+                "Optional[bool]",
+                doc=(
+                    "Only certified pre-owned vehicles."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "best_deal", "lowest_price", "highest_price", "nearest", "lowest_mileage", "highest_mileage", "oldest_year", "newest_year", "newest_listed"]]',
+                doc=(
+                    "TrueCar's sorts: best_match, best_deal, lowest_price, highest_price, "
+                    "nearest, lowest_mileage, highest_mileage, oldest_year, newest_year, "
+                    "newest_listed (default best_match)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1); 30 vehicles a page, up to page 334."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_listing",
+        namespace="truecar",
+        method="listing",
+        http="POST",
+        path="/api/v1/truecar/listing",
+        summary=(
+            "One listing of TrueCar (truecar.com, the US car-buying marketplace). Scavio "
+            "fetches the public truecar.com page on request; TrueCar has no public API. US "
+            "only, prices in USD. By VIN or truecar.com listing link (input only: the VIN is "
+            "never returned): year, make, model, trim, style, condition, price, msrp, "
+            "price_label, price_rating (TrueCar's label as given; TrueCar shows no basis), "
+            "price_summary {advertised_price, msrp, discount, dealer_fees [{label, text, "
+            "amount}], dealer_asking_price, taxes_and_fees, advertised_price_disclaimer}, "
+            "mileage, colors, drivetrain, engine, fuel_type, transmission, body_style, mpg, "
+            "key_features, highlights {technology, safety, comfort, appearance}, specs and "
+            "features [{group, items [{name, value, units}]}], warranties, cpo_program, "
+            "history (the AutoCheck flags TrueCar shows: accidents, owners, fleet, rental, "
+            "lemon, salvage, theft recovered, report date), seller_notes, listed_at, "
+            "days_on_market, photo_count, stock_image, dealer {id, name, address, city, state, "
+            "zip, type, phone, timezone, hours}, market, notes. No delivery quote, payment "
+            "estimate, stock number, listing link or photo link. A VIN TrueCar does not list "
+            "is a charged 404. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "vin",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A 17-character VIN of a vehicle listed on TrueCar. Input only: it is "
+                    "never returned."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A truecar.com listing link instead of vin "
+                    "(https://www.truecar.com/used-cars-for-sale/listing/<VIN>/...)."
+                ),
+            ),
+        ),
+        one_of=(("vin", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_model",
+        namespace="truecar",
+        method="model",
+        http="POST",
+        path="/api/v1/truecar/model",
+        summary=(
+            "TrueCar's overview of one model (optionally one model year) on TrueCar "
+            "(truecar.com, the US car-buying marketplace). Scavio fetches the public "
+            "truecar.com page on request; TrueCar has no public API. US only, prices in USD. "
+            "Returns make, model, slugs, year, generation, overview, pros, cons, whats_new, "
+            "rating {value, count, stars {5..1}}, sub_ratings, trims [{trim, slug, "
+            "starting_msrp, starting_market_average (TrueCar's \"Starting Market Average\" as "
+            "labelled)}], body_styles, engine_types, horsepower, combined_mpg, seating, "
+            "cargo_cubic_feet, max_towing_lbs, warranty, segment_ranking, has_new_inventory, "
+            "has_used_inventory, model_years, national_new, national_used, image, market, "
+            "notes. An unknown make, model or year is a charged 404. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make name or slug as TrueCar writes it (makes lists them): Toyota, "
+                    "Ford, Mercedes-Benz, land-rover."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model name or slug as TrueCar writes it (models lists a make's models): "
+                    "RAV4, F-150, CR-V."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "A model year (model_years lists them). Default: TrueCar's current model "
+                    "year."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_reviews",
+        namespace="truecar",
+        method="reviews",
+        http="POST",
+        path="/api/v1/truecar/reviews",
+        summary=(
+            "Owner reviews of one model on TrueCar (truecar.com, the US car-buying "
+            "marketplace). Scavio fetches the public truecar.com page on request; TrueCar has "
+            "no public API. US only, prices in USD. TrueCar groups them by generation (pass "
+            "year for an earlier one). Filter by overall stars and by words in the text, page "
+            "up to 100 a page; TrueCar's own order (no sort). Returns make, model, name, "
+            "model_year, year, rating {value, count, stars}, stars, search, page, page_size, "
+            "total, total_pages, has_more, count, reviews [{rating, sub_ratings [{name, "
+            "value}], pros, cons, other_text, date, purchase_date, vehicle}], market, notes. "
+            "No reviewer names, initials or states. An unknown make or model is a charged 404. "
+            "1 credit. Failed upstream calls and refused inputs are not charged; a not-found "
+            "is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make name or slug as TrueCar writes it (makes lists them): Toyota, "
+                    "Ford, Mercedes-Benz, land-rover."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "A model name or slug as TrueCar writes it (models lists a make's models): "
+                    "RAV4, F-150, CR-V."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "A model year: the reviews of that year's generation. Default: the current "
+                    "generation."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[Union[list[int], int, str]]",
+                doc=(
+                    "Overall owner ratings to keep (1-5; a list or comma-separated)."
+                ),
+            ),
+            Param(
+                "search",
+                "Optional[str]",
+                doc=(
+                    "Words to match in the review text."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews a page, 1-100 (default 20)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_dealer",
+        namespace="truecar",
+        method="dealer",
+        http="POST",
+        path="/api/v1/truecar/dealer",
+        summary=(
+            "One dealer's profile on TrueCar (truecar.com, the US car-buying marketplace). "
+            "Scavio fetches the public truecar.com page on request; TrueCar has no public API. "
+            "US only, prices in USD. By dealer id or dealership link: id, name, group, "
+            "address, city, state, zip, phone, hours {monday..sunday: {open, close, closed}}, "
+            "description, links [{type, url}] (website, social, inventory, service), services, "
+            "online_dealer, hybrid_dealer, dealer_group, images, market, notes. No employees. "
+            "TrueCar shows no dealer reviews. An unknown dealer is a charged 404. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A TrueCar dealer id (items[].dealer.id from search; the number at the end "
+                    "of a truecar.com dealership link)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A truecar.com dealership link instead of dealer_id."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_dealer_inventory",
+        namespace="truecar",
+        method="dealer_inventory",
+        http="POST",
+        path="/api/v1/truecar/dealer-inventory",
+        summary=(
+            "One dealer's new or used vehicles on TrueCar (truecar.com, the US car-buying "
+            "marketplace). Scavio fetches the public truecar.com page on request; TrueCar has "
+            "no public API. US only, prices in USD. 30 a page. Returns dealer {id, name, "
+            "group, address, city, state, zip, phone}, condition, page, page_size, total, "
+            "total_pages, has_more, count, items [{year, make, model, trim, style, condition, "
+            "certified_pre_owned, price, msrp, base_msrp, price_label, price_rating (TrueCar's "
+            "own label as given), no_extra_dealer_fees, mileage, exterior_color, "
+            "exterior_color_generic, interior_color, drivetrain, engine, fuel_type, "
+            "transmission, body_style, mpg {city, highway, combined}, electric_range, "
+            "key_features, history {accident_count, owner_count, clean_title}, listed_at, "
+            "days_on_market, distance_miles, nationwide_delivery, dealer {id, name, group, "
+            "address, city, state, zip}, currency}], market, notes. No VIN, stock number, "
+            "listing link or dealer photo is returned (TrueCar's listing links and photos "
+            "carry the VIN). An unknown dealer is a charged 404. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A TrueCar dealer id (items[].dealer.id from search; the number at the end "
+                    "of a truecar.com dealership link)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A truecar.com dealership link instead of dealer_id."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "used (default) or new."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (default 1); 30 vehicles a page."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_suggestions",
+        namespace="truecar",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/truecar/suggestions",
+        summary=(
+            "TrueCar's own search suggestions for a text on TrueCar (truecar.com, the US "
+            "car-buying marketplace). Scavio fetches the public truecar.com page on request; "
+            "TrueCar has no public API. US only, prices in USD. Returns query, did_you_mean, "
+            "hint, count, suggestions [{type (make, model, trim, body_style), make, make_slug, "
+            "model, model_slug, trim, trim_slug, body_style, body_style_slug, year, pages}], "
+            "market, notes. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Text to complete (at least 2 characters): a make, model, trim or body "
+                    "style."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_makes",
+        namespace="truecar",
+        method="makes",
+        http="POST",
+        path="/api/v1/truecar/makes",
+        summary=(
+            "Every make with used inventory on TrueCar (truecar.com, the US car-buying "
+            "marketplace). Scavio fetches the public truecar.com page on request; TrueCar has "
+            "no public API. US only, prices in USD. Returns count, makes [{make, slug}], "
+            "national_new_count, national_used_count, market, notes. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged; a not-found is charged."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="truecar_models",
+        namespace="truecar",
+        method="models",
+        http="POST",
+        path="/api/v1/truecar/models",
+        summary=(
+            "One make's models on TrueCar (truecar.com, the US car-buying marketplace). Scavio "
+            "fetches the public truecar.com page on request; TrueCar has no public API. US "
+            "only, prices in USD. Returns make, make_slug, count, models [{model, slug, year, "
+            "body_styles, engine_types, new_inventory, used_inventory, image}], market, notes. "
+            "An unknown make is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make name or slug as TrueCar writes it (makes lists them): Toyota, "
+                    "Ford, Mercedes-Benz, land-rover."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Edmunds: 8 endpoints on /api/v1/edmunds.
+_EDMUNDS_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="edmunds_search",
+        namespace="edmunds",
+        method="search",
+        http="POST",
+        path="/api/v1/edmunds/search",
+        summary=(
+            "Search the car listings of Edmunds (edmunds.com, the US car research and shopping "
+            "site owned by CarMax). Scavio fetches the public Edmunds page on request; "
+            "Edmunds' own API is for partners and dealers only. US only, prices in USD. Used "
+            "(with certified pre-owned) or new cars around a US city (city + state; Edmunds "
+            "places a search by its own city pages, so a ZIP is not accepted), by make and "
+            "model or every make (used), with a radius, 5 sorts and filters for year, price, "
+            "mileage, trim, drivetrain, exterior colour, body type, Edmunds deal rating and no "
+            "accidents; 21 a page. Returns condition, make, model, location {city, state, zip} "
+            "(the city Edmunds searched around), radius, sort, page, page_size, total, "
+            "total_pages, has_more, filters_applied, count, items [{position, condition (new, "
+            "used, certified), year, make, model, trim, style, style_id, body_type, mileage, "
+            "colors, drivetrain, engine, transmission, mpg, seats, features, photo_count, "
+            "stock_image, price, price_change, msrp, estimated_monthly_payment, deal_rating, "
+            "days_on_edmunds, estimated_days_to_sell, listed_at, history {owners, accidents, "
+            "usage, clean_title}, in_transit, seller {type, dealer_id, name, street, city, "
+            "state, zip, distance_miles, rating, review_count, phone, url}}], market, notes. "
+            "deal_rating {local, national} is Edmunds' own deal rating as Edmunds gives it "
+            "(Great, Good, Fair, Above_market ...) with Edmunds' list_price_estimate, "
+            "max_great_price, max_good_price, max_fair_price, savings and savings_percent. "
+            "When Edmunds has no listing matching every filter, items is empty (Edmunds' "
+            "unrelated fallback listings are not returned). VINs are input only and never "
+            "returned (listing photos are not returned: every Edmunds photo link carries the "
+            "VIN); no stock numbers; private sellers city and state only; reviewer names are "
+            "never returned. Dealer business name, address, phone, website, hours and ratings "
+            "are kept. 2 credits. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "city",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A US city: Edmunds searches around its own page for that city "
+                    "(New York, Los Angeles, Dallas, small towns too). An unknown city is a "
+                    "charged 404."
+                ),
+            ),
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "Required. The city's state, 2-letter code (NY) or name."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Not accepted: Edmunds places a search by its own city pages and ignores "
+                    "ZIP codes, so pass city and state (a zip is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "used (default; used and certified pre-owned) or new (needs make and "
+                    "model)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make (with model). Leave make and model out to search every make (used "
+                    "only)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model of make (with make), e.g. RAV4, Civic, F-150."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the city: 10, 25, 50, 75, 100, 200, 500 (default 25). radius "
+                    "in the answer is the radius Edmunds used."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); 21 listings a page."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_asc", "price_desc", "mileage_asc", "newest_listed"]]',
+                doc=(
+                    "best_match (default), price_asc, price_desc, mileage_asc, newest_listed."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, whole USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, whole USD."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest miles."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Most miles."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "A trim of make + model as Edmunds names it (XLE, LX, Lariat)."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[str]",
+                doc=(
+                    "all_wheel_drive, four_wheel_drive, front_wheel_drive, rear_wheel_drive "
+                    "(or awd, 4wd, fwd, rwd)."
+                ),
+            ),
+            Param(
+                "exterior_color",
+                "Optional[str]",
+                doc=(
+                    "Exterior colour: black, white, gray, silver, blue, red, brown, green, "
+                    "beige, gold, orange, yellow, purple."
+                ),
+            ),
+            Param(
+                "body_type",
+                "Optional[str]",
+                doc=(
+                    "Body type as Edmunds labels it: suv, sedan, pickup, hatchback, coupe, "
+                    "convertible, minivan, wagon (truck = pickup)."
+                ),
+            ),
+            Param(
+                "deal_rating",
+                "Optional[str]",
+                doc=(
+                    "Edmunds' deal rating: great, good, fair."
+                ),
+            ),
+            Param(
+                "no_accidents",
+                "Optional[bool]",
+                doc=(
+                    "Only listings with no reported accidents."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_listing",
+        namespace="edmunds",
+        method="listing",
+        http="POST",
+        path="/api/v1/edmunds/listing",
+        summary=(
+            "One car listing on Edmunds (edmunds.com, the US car research and shopping site "
+            "owned by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own "
+            "API is for partners and dealers only. US only, prices in USD. By VIN with make, "
+            "model and year, or by its edmunds.com link (input only: the VIN is never "
+            "returned): the vehicle (year, make, model, trim, style, mileage, colors, "
+            "drivetrain, engine, transmission, mpg, seats, options, highlighted_features), "
+            "price, advertised_price, price_change, msrp, base_msrp, total_msrp, "
+            "destination_fee, dealer_fees [{name, amount, included_in_price}], "
+            "estimated_monthly_payment, price_history {total_change, entries [{price, date}]}, "
+            "deal_rating, days_on_edmunds, estimated_days_to_sell, selling_slowly, listed_at, "
+            "history (owners, accidents, usage, clean title, salvage, frame damage, lemon and "
+            "theft flags and the provider, as given), seller_comments, seller (dealer details "
+            "with hours [{day, open, close, closed}], websites and url), market, notes. A sold "
+            "or unknown listing is a charged 404. VINs are input only and never returned "
+            "(listing photos are not returned: every Edmunds photo link carries the VIN); no "
+            "stock numbers; private sellers city and state only; reviewer names are never "
+            "returned. Dealer business name, address, phone, website, hours and ratings are "
+            "kept. 2 credits. Failed upstream calls and refused inputs are not charged; a "
+            "not-found is charged."
+        ),
+        params=(
+            Param(
+                "vin",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A 17-character VIN (input only; never returned), with make, model and "
+                    "year."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "The listing's make (with vin)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "The listing's model (with vin)."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "The listing's model year (with vin)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An edmunds.com listing link "
+                    "(https://www.edmunds.com/<make>/<model>/<year>/vin/<VIN>/) instead of "
+                    "vin, make, model and year."
+                ),
+            ),
+        ),
+        one_of=(("vin", "url"),),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_reviews",
+        namespace="edmunds",
+        method="reviews",
+        http="POST",
+        path="/api/v1/edmunds/reviews",
+        summary=(
+            "Owner (consumer) reviews of one model year on Edmunds (edmunds.com, the US car "
+            "research and shopping site owned by CarMax). Scavio fetches the public Edmunds "
+            "page on request; Edmunds' own API is for partners and dealers only. US only, "
+            "prices in USD. 5 a page, 4 sorts (most_helpful, most_recent, highest_rated, "
+            "lowest_rated) and a star filter: make, model, year, rating, total_reviews, "
+            "star_counts [{stars, count}], sort, stars, total_matching, page, page_size, "
+            "total_pages, has_more, pros, cons (the topics Edmunds groups reviews by), styles "
+            "[{style_id, name, review_count}], count, reviews [{id, rating, title, text, "
+            "style, style_id, created, updated, helpful_votes, unhelpful_votes, ratings "
+            "{safety, technology, performance, interior, comfort, reliability, value}}], "
+            "market, notes. Reviewer names are never returned. An unknown model year is a "
+            "charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; "
+            "a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz "
+                    "...) or its slug (land-rover). The makes endpoint lists all 69."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) "
+                    "or Edmunds' slug (rav4, f-150). An unknown model is a charged 404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Required. The model year."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1); 5 reviews a page."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_helpful", "most_recent", "highest_rated", "lowest_rated"]]',
+                doc=(
+                    "most_helpful (default), most_recent, highest_rated, lowest_rated."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this many stars (1 to 5)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_dealer",
+        namespace="edmunds",
+        method="dealer",
+        http="POST",
+        path="/api/v1/edmunds/dealer",
+        summary=(
+            "A car dealer's page on Edmunds (edmunds.com, the US car research and shopping "
+            "site owned by CarMax). Scavio fetches the public Edmunds page on request; "
+            "Edmunds' own API is for partners and dealers only. US only, prices in USD. By "
+            "dealer id or link (search and listing give both): dealer_id, name, parent_group, "
+            "franchise_make, url, websites, address, latitude, longitude, phones, hours [{day, "
+            "open, close, closed}], verified, sales_rating and service_rating {average, count, "
+            "recommended, not_recommended}, inventory {total, new, used, certified, models "
+            "[{make, model, total, new, used, certified}]}, reviews_total, page, page_size, "
+            "total_pages, has_more, count, reviews [{id, rating, type (sales or service), "
+            "title, text, created, updated, recommends_dealer, bought_here, dealer_replies "
+            "[{text, date}]}], market, notes. 21 reviews a page, newest first. Edmunds serves "
+            "its first review page twice, so our pages skip the repeat: each review appears "
+            "once. Reviewer names are never returned and are taken out of the dealer's "
+            "replies. An unknown dealer is a charged 404. 2 credits. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "An Edmunds dealer id as search and listing give it (seller.dealer_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An edmunds.com dealer link (seller.url: "
+                    "https://www.edmunds.com/dealerships/all/<state>/<city>/<dealer id>/) "
+                    "instead of dealer_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Review page (default 1); 21 reviews a page, newest first."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_model",
+        namespace="edmunds",
+        method="model",
+        http="POST",
+        path="/api/v1/edmunds/model",
+        summary=(
+            "A model year's research page on Edmunds (edmunds.com, the US car research and "
+            "shopping site owned by CarMax). Scavio fetches the public Edmunds page on "
+            "request; Edmunds' own API is for partners and dealers only. US only, prices in "
+            "USD. By make, model and year (default: the current model year): make, model, "
+            "make_slug, model_slug, year, msrp_range {low, high}, styles [{style_id, name, "
+            "trim, base_msrp, base_invoice, seats, body_type, sold_as, exterior_colors, specs "
+            "{group: [{name, value}]}}], editorial_review {title, published, updated, rating, "
+            "scale, ratings, verdict, summary, pros, cons, recommended_trim} (Edmunds' expert "
+            "review), consumer_rating {average, count, star_counts}, inventory {near, new, "
+            "used, certified, total, used_listings} (Edmunds' listing counts near its own "
+            "location), market, notes. An unknown model or year is a charged 404. 2 credits. "
+            "Failed upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz "
+                    "...) or its slug (land-rover). The makes endpoint lists all 69."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) "
+                    "or Edmunds' slug (rav4, f-150). An unknown model is a charged 404."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[int]",
+                doc=(
+                    "A model year (default: Edmunds' current model year)."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_price",
+        namespace="edmunds",
+        method="price",
+        http="POST",
+        path="/api/v1/edmunds/price",
+        summary=(
+            "MSRP, invoice price and Edmunds Suggested Price per trim of one model year on "
+            "Edmunds (edmunds.com, the US car research and shopping site owned by CarMax). "
+            "Scavio fetches the public Edmunds page on request; Edmunds' own API is for "
+            "partners and dealers only. US only, prices in USD. make, model, year, trim, "
+            "count, trims [{trim, msrp, invoice (null where Edmunds shows N/A), "
+            "edmunds_suggested, most_popular}], table_note, suggested_price_near {city, state, "
+            "zip, text} (Edmunds computes its suggested price for its own location and states "
+            "it; always shown with the price), sales_through, market, notes. Figures as "
+            "Edmunds gives them. An unknown model year is a charged 404. 2 credits. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz "
+                    "...) or its slug (land-rover). The makes endpoint lists all 69."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) "
+                    "or Edmunds' slug (rav4, f-150). An unknown model is a charged 404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Required. The model year."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "Only this trim (as Edmunds names it). A trim the page does not list is a "
+                    "charged 404 that lists the page's trims."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_appraisal",
+        namespace="edmunds",
+        method="appraisal",
+        http="POST",
+        path="/api/v1/edmunds/appraisal",
+        summary=(
+            "Used-car values of one model year on Edmunds (edmunds.com, the US car research "
+            "and shopping site owned by CarMax). Scavio fetches the public Edmunds page on "
+            "request; Edmunds' own API is for partners and dealers only. US only, prices in "
+            "USD. Per style and condition (outstanding, clean, average, rough) as Edmunds "
+            "gives them: make, model, year, trim, estimated_mileage (the mileage Edmunds "
+            "assumes), values_near {city, state} (Edmunds' own location), count, styles "
+            "[{style_id, style, base_msrp, base_invoice, values_updated, conditions "
+            "{outstanding, clean, average, rough: {dealer_retail, private_party, trade_in, "
+            "auction}}}], market, notes. Edmunds' estimates, not an offer. An unknown model "
+            "year is a charged 404. 2 credits. Failed upstream calls and refused inputs are "
+            "not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make Edmunds lists (Toyota, Ford, Land Rover, Mercedes-Benz "
+                    "...) or its slug (land-rover). The makes endpoint lists all 69."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A model of make: its name (RAV4, F-150, CR-V, Grand Cherokee) "
+                    "or Edmunds' slug (rav4, f-150). An unknown model is a charged 404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Required. The model year."
+                ),
+            ),
+            Param(
+                "trim",
+                "Optional[str]",
+                doc=(
+                    "Only this trim (as Edmunds names it). A trim the page does not list is a "
+                    "charged 404 that lists the page's trims."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="edmunds_makes",
+        namespace="edmunds",
+        method="makes",
+        http="POST",
+        path="/api/v1/edmunds/makes",
+        summary=(
+            "Every make on Edmunds (edmunds.com, the US car research and shopping site owned "
+            "by CarMax). Scavio fetches the public Edmunds page on request; Edmunds' own API "
+            "is for partners and dealers only. US only, prices in USD. (69) and one make's "
+            "models: make, make_slug, models_count, models [{name, slug (the model input of "
+            "the other endpoints), latest_year, vehicle_type, new, used, submodels}], "
+            "makes_count, makes [{name, slug, new, used}], market, notes. 2 credits. Failed "
+            "upstream calls and refused inputs are not charged; a not-found is charged."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A make: its models are returned with every make Edmunds lists."
+                ),
+            ),
+        ),
+        credits=2,
+        min_timeout=250.0,
+    ),
+)
+
+# Kelley Blue Book: 8 endpoints on /api/v1/kbb.
+_KBB_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="kbb_car_value",
+        namespace="kbb",
+        method="car_value",
+        http="POST",
+        path="/api/v1/kbb/car-value",
+        summary=(
+            "A car's Kelley Blue Book values on Kelley Blue Book (kbb.com, Cox Automotive's "
+            "car value and research site), US. Scavio fetches the public KBB page on request; "
+            "KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By "
+            "make, model, year and trim (KBB slugs; model_page lists the trims), intent "
+            "(buy_used, buy_new, trade_in_sell), condition and mileage, optionally for a ZIP "
+            "code: vehicle {make, model, model_slug, year, trim, trim_slug, vehicle_id, "
+            "body_style}, intent, condition, mileage, typical_mileage, location {zip, "
+            "chosen_zip, valid_text (\"Valid for ZIP Code N through date\" as KBB gives it), "
+            "valid_through}, valuation_date, headline (the values for the intent and "
+            "condition), prices (every KBB price type the page gives; 17 for a used car: "
+            "[{type_id, type (Lending Value, Typical Listing Price, Trade-In Value Fair ... "
+            "Excellent, Private Party Value Fair ... Excellent, Auction Value Fair ... "
+            "Excellent, Typical Listing Price (CPO), Fair Purchase Price, Fair Purchase Price "
+            "(CPO); a new car: MSRP, Invoice, Fair Purchase Price), category, condition, "
+            "value, base_value, region_adjustment, mileage_adjustment, option_adjustment, "
+            "range_low, range_high}]), url, market, notes. Values are exactly as KBB gives "
+            "them; without zip they are for KBB's default location. Credits: 1; with zip 2 (6 "
+            "when a second way of reading the page is needed). Not charged when the upstream "
+            "fails; a car KBB has no page for is charged. Answers can take up to 4 minutes: "
+            "allow a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 "
+                    "makes, makes_models lists them)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "KBB's model slug as makes_models gives it (rav4, civic, "
+                    "f150-supercrew-cab, 3-series). A model KBB has no page for is a charged "
+                    "404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Model year."
+                ),
+            ),
+            Param(
+                "trim",
+                "str",
+                required=True,
+                doc=(
+                    "The trim: its trim_slug (model_page trims[].trim_slug, e.g. "
+                    "le-sport-utility-4d), its vehicle_id, or a name that starts exactly one "
+                    "trim (LE). A name several trims share is a 400 listing them."
+                ),
+            ),
+            Param(
+                "intent",
+                'Optional[Literal["buy_used", "buy_new", "trade_in_sell"]]',
+                doc=(
+                    "buy_used (default), buy_new (a new model year) or trade_in_sell. Every "
+                    "KBB price type the value page gives comes back; intent picks the headline "
+                    "values."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["fair", "good", "very_good", "excellent"]]',
+                doc=(
+                    "Condition for the headline trade-in, private party and auction values: "
+                    "fair, good (default), very_good, excellent."
+                ),
+            ),
+            Param(
+                "mileage",
+                "Optional[int]",
+                doc=(
+                    "Odometer miles. Without it KBB values the mileage it assumes."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Optional US ZIP code the values are for (buy_used and trade_in_sell; "
+                    "needs mileage). Without it the values are for Kelley Blue Book's default "
+                    "location (location.zip says which). With it: 2 credits (6 when a second "
+                    "way of reading the page is needed)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; 2 with a zip (6 when a second way of reading the page is needed). "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_model",
+        namespace="kbb",
+        method="model",
+        http="POST",
+        path="/api/v1/kbb/model",
+        summary=(
+            "One model year on Kelley Blue Book (kbb.com, Cox Automotive's car value and "
+            "research site), US. Scavio fetches the public KBB page on request; KBB's own data "
+            "feed (InfoDriver) is a business contract, not a self-serve API. By make, model "
+            "and year: make, model, year, zip (KBB's default location for the prices), "
+            "categories, trims [{vehicle_id, name, trim_slug, model, model_slug, body_style, "
+            "fair_purchase_price, trade_in_value, private_party_value, combined_mpg, epa_city, "
+            "epa_highway, epa_combined, mpge_combined, horsepower, torque, engine, drivetrain, "
+            "seating, curb_weight_lbs, towing_capacity_lbs, cargo_capacity_cu_ft, "
+            "ev_range_miles, is_ev, url}], new_car_pricing [{trim, trim_id, msrp, "
+            "fair_purchase_price, fair_market_range {low, high}, epa_city, epa_highway}] and "
+            "new_car_summary for a new model year, depreciation {three_year_depreciation, "
+            "current_resale_value, current_trade_in_value, history [{year, resale_value, "
+            "trade_in_value, annual_depreciation}], forecast [...]}, specs {fuel_economy, "
+            "fuel_type, horsepower, max_seating, cargo_space, maximum_towing, basic_warranty, "
+            "additional [{category, specs [{name, value}]}]}, rankings [{metric, value, top "
+            "[...]}], best_cars {list, rank, winner, url}, years, other_models, image, url, "
+            "market, notes. 1 credit. Failed upstream calls and refused inputs are not "
+            "charged; a not-found is charged. Answers can take up to 4 minutes: allow a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 "
+                    "makes, makes_models lists them)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "KBB's model slug as makes_models gives it (rav4, civic, "
+                    "f150-supercrew-cab, 3-series). A model KBB has no page for is a charged "
+                    "404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Model year."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_search",
+        namespace="kbb",
+        method="search",
+        http="POST",
+        path="/api/v1/kbb/search",
+        summary=(
+            "Search the cars for sale on Kelley Blue Book (kbb.com, Cox Automotive's car value "
+            "and research site), US. Scavio fetches the public KBB page on request; KBB's own "
+            "data feed (InfoDriver) is a business contract, not a self-serve API. Around a US "
+            "ZIP code with a radius, used, new or all, by make and model (validated: never "
+            "widened to the make), sorted by relevance, price, mileage or model year, filtered "
+            "by model year, price, mileage, drivetrain, exterior colour and dealer or private "
+            "seller; 25 or 100 a page. Returns search, location {zip, place, radius_miles}, "
+            "filters_applied, filters_not_applied, sort, page, page_size, total, total_pages, "
+            "has_more, count, listings [{listing_id, url, title, year, make, make_code, model, "
+            "model_code, trim, trim_code, listing_type, mileage, exterior_color, "
+            "interior_color, body_style, drivetrain, engine, fuel, transmission, mpg_city, "
+            "mpg_highway, doors, days_on_site, newly_listed, reduced_price, price (USD; null "
+            "when the dealer asks you to call: price_label), display_price, msrp, price_label, "
+            "deal_label, kbb_fair_purchase_price, dealer_fees {total, items [{name, amount}]}, "
+            "price_history [{date, price, current}], history_preview (history flags as given, "
+            "e.g. NO_ACCIDENTS_REPORTED, ONE_OWNER), warranties, image, sponsored, seller "
+            "({type: dealer, dealer_id, name, rating, rating_count, city, state, "
+            "distance_miles, url} or a private seller)}], spotlights (paid placements, "
+            "sponsored: true), stats {price, mileage, year: {min, avg, max}}, market, notes. "
+            "deal_label is Kelley Blue Book's deal rating (Great, Good ...) as KBB gives it, "
+            "based on the Kelley Blue Book Fair Purchase Price range: kbb_fair_purchase_price "
+            "{amount, low, high, delta (that price minus the listing price; negative = above "
+            "it)}. Private sellers: seller is {type: private, city, state, distance_miles} "
+            "only (no name, phone or street address). VINs and stock numbers are never "
+            "returned; phone numbers, emails, stock numbers and VIN-like codes inside "
+            "descriptions read \"[removed]\". 1 credit. Failed upstream calls and refused inputs "
+            "are not charged; a not-found is charged. Answers can take up to 4 minutes: allow "
+            "a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: cars for sale around it (an unknown ZIP "
+                    "is a 400, not charged)."
+                ),
+            ),
+            Param(
+                "listing_type",
+                'Optional[Literal["all", "used", "new"]]',
+                doc=(
+                    "all (default), used or new cars for sale."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "A make by name or code (Toyota, Ford, Mercedes-Benz, or TOYOTA, MB ...)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "A model as the listings name it (RAV4, Civic, F150) or a spelling of it "
+                    "(F-150 is matched to F150). Needs make. A model KBB does not list for the "
+                    "make is a charged 404 that lists the make's models (it is never widened "
+                    "to the whole make)."
+                ),
+            ),
+            Param(
+                "model_code",
+                "Optional[str]",
+                doc=(
+                    "A model code as listings[].model_code gives it (instead of model). Needs "
+                    "make."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 400, 500, 0 (0 = "
+                    "nationwide). KBB's default otherwise (location.radius_miles)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1, at most 100)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Listings a page: 25 (default) or 100."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "mileage_asc", "year_desc"]]',
+                doc=(
+                    "relevance (default), price_asc, mileage_asc, year_desc (newest model "
+                    "year)."
+                ),
+            ),
+            Param(
+                "year_min",
+                "Optional[int]",
+                doc=(
+                    "Earliest model year."
+                ),
+            ),
+            Param(
+                "year_max",
+                "Optional[int]",
+                doc=(
+                    "Latest model year."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[int]",
+                doc=(
+                    "Lowest price, whole USD."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[int]",
+                doc=(
+                    "Highest price, whole USD."
+                ),
+            ),
+            Param(
+                "mileage_min",
+                "Optional[int]",
+                doc=(
+                    "Fewest miles."
+                ),
+            ),
+            Param(
+                "mileage_max",
+                "Optional[int]",
+                doc=(
+                    "Most miles."
+                ),
+            ),
+            Param(
+                "drivetrain",
+                "Optional[str]",
+                doc=(
+                    "Drivetrain: AWD4WD (AWD/4WD), FWD (Front Wheel Drive), RWD (Rear Wheel "
+                    "Drive)."
+                ),
+            ),
+            Param(
+                "exterior_color",
+                "Optional[str]",
+                doc=(
+                    "Exterior colour: BEIGE (Beige), BLACK (Black), BLUE (Blue), BROWN "
+                    "(Brown), BURGUNDY (Burgundy), CHARCOAL (Charcoal), GOLD (Gold), GRAY "
+                    "(Gray), GREEN (Green), OFFWHITE (Off White), ORANGE (Orange), PINK "
+                    "(Pink), PURPLE (Purple), RED (Red), SILVER (Silver), TAN (Tan), TURQUOISE "
+                    "(Turquoise), WHITE (White), YELLOW (Yellow)."
+                ),
+            ),
+            Param(
+                "seller_type",
+                'Optional[Literal["dealer", "private"]]',
+                doc=(
+                    "dealer or private (private sellers)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_listing",
+        namespace="kbb",
+        method="listing",
+        http="POST",
+        path="/api/v1/kbb/listing",
+        summary=(
+            "One car for sale on Kelley Blue Book (kbb.com, Cox Automotive's car value and "
+            "research site), US. Scavio fetches the public KBB page on request; KBB's own data "
+            "feed (InfoDriver) is a business contract, not a self-serve API. By listing id or "
+            "link: the search tile fields plus description, images, features {group: [...]}, "
+            "ranked_features, specifications, warranties [{group, type, label, details, years, "
+            "miles, unlimited_miles, remaining_years, remaining_miles}], recall_count and "
+            "recall_note (open safety recalls as KBB shows them), kbb_vehicle_id, "
+            "kbb_consumer_rating, kbb_consumer_review_count, price_history, price_valid_until, "
+            "deal_label + deal_basis, dealer {dealer_id, name, rating, rating_count, address, "
+            "phone, website, hours [{day, open, close}], home_services, is_open, url} (null "
+            "for a private seller), zip, market, notes. deal_label is Kelley Blue Book's deal "
+            "rating (Great, Good ...) as KBB gives it, based on the Kelley Blue Book Fair "
+            "Purchase Price range: kbb_fair_purchase_price {amount, low, high, delta (that "
+            "price minus the listing price; negative = above it)}. Private sellers: seller is "
+            "{type: private, city, state, distance_miles} only (no name, phone or street "
+            "address). VINs and stock numbers are never returned; phone numbers, emails, stock "
+            "numbers and VIN-like codes inside descriptions read \"[removed]\". A sold or "
+            "removed listing is a charged 404. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: "
+            "allow a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "listing_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A KBB listing id (search listings[].listing_id, dealer "
+                    "inventory[].listing_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A KBB listing link (https://www.kbb.com/cars-for-sale/vehicle/<id>) "
+                    "instead of listing_id."
+                ),
+            ),
+            Param(
+                "zip",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Optional: seller.distance_miles is measured from this US ZIP code; "
+                    "without it distance_miles is null."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        one_of=(("listing_id", "url"),),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_reviews",
+        namespace="kbb",
+        method="reviews",
+        http="POST",
+        path="/api/v1/kbb/reviews",
+        summary=(
+            "Owner reviews of a model year on Kelley Blue Book (kbb.com, Cox Automotive's car "
+            "value and research site), US. Scavio fetches the public KBB page on request; "
+            "KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. By "
+            "make, model and year, a page of 8 (1 to 10), sorted most recent, highest or "
+            "lowest rated, optionally only one star rating: vehicle, sort, stars, page, "
+            "per_page, total, total_pages, has_more, count, reviews [{review_id, title, text, "
+            "rating, ratings {value, reliability, performance, styling, comfort, quality}, "
+            "recommend, date, ownership, year, make, model, pros, cons, helpful_yes, "
+            "helpful_no, photos, staff, incentivized}], ratings (KBB's averages: rating, "
+            "review_count, value, reliability, performance, styling, comfort, quality, "
+            "recommendation, distribution {five ... one}), most_helpful {positive, negative} "
+            "(page 1), url, market, notes. No reviewer name, nickname or location. 1 credit "
+            "(up to 5 for a page beyond 1, a sort or a star filter). Answers can take up to 4 "
+            "minutes: allow a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "make",
+                "str",
+                required=True,
+                doc=(
+                    "A make by name or KBB slug (Toyota, Mercedes-Benz, land-rover ...; 68 "
+                    "makes, makes_models lists them)."
+                ),
+            ),
+            Param(
+                "model",
+                "str",
+                required=True,
+                doc=(
+                    "KBB's model slug as makes_models gives it (rav4, civic, "
+                    "f150-supercrew-cab, 3-series). A model KBB has no page for is a charged "
+                    "404."
+                ),
+            ),
+            Param(
+                "year",
+                "int",
+                required=True,
+                doc=(
+                    "Model year."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page of 8 reviews (default 1, at most 10)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recent", "rating_desc", "rating_asc"]]',
+                doc=(
+                    "recent (default, most recent first), rating_desc (highest rated first) or "
+                    "rating_asc (lowest rated first)."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this overall star rating (1 to 5)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; a page beyond 1, a sort other than recent or a star filter up to "
+            "5. credits_used in the response is the exact charge."
+        ),
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_dealers",
+        namespace="kbb",
+        method="dealers",
+        http="POST",
+        path="/api/v1/kbb/dealers",
+        summary=(
+            "Car dealers near a US ZIP code on Kelley Blue Book (kbb.com, Cox Automotive's car "
+            "value and research site), US. Scavio fetches the public KBB page on request; "
+            "KBB's own data feed (InfoDriver) is a business contract, not a self-serve API. "
+            "Optionally of one make and within a radius: search, location {zip, place, "
+            "radius_miles}, count, dealers [{dealer_id, name, franchise_name, make, rating, "
+            "rating_count, distance_miles, address {street, street2, city, state, zip}, phone, "
+            "website, url}] (at most 50, nearest first as KBB orders them; the dealer finder "
+            "does not page, so narrow with radius or make), market, notes. Dealer details are "
+            "the dealer's public business details. 1 credit. Failed upstream calls and refused "
+            "inputs are not charged; a not-found is charged. Answers can take up to 4 minutes: "
+            "allow a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "Required. A 5-digit US ZIP code: dealers near it."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "Only dealers of this make (by name or code)."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles around the ZIP: 10, 25, 50, 75, 100, 200, 300, 500, 0 (0 = any). "
+                    "KBB's default otherwise (25)."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_dealer",
+        namespace="kbb",
+        method="dealer",
+        http="POST",
+        path="/api/v1/kbb/dealer",
+        summary=(
+            "One dealer on Kelley Blue Book (kbb.com, Cox Automotive's car value and research "
+            "site), US. Scavio fetches the public KBB page on request; KBB's own data feed "
+            "(InfoDriver) is a business contract, not a self-serve API. By dealer id or link: "
+            "dealer_id, name, rating, rating_count, address, phone, website, hours, "
+            "home_services {buy_online, test_drive, vehicle_delivery, virtual_tour}, is_open, "
+            "url, inventory_count (the dealer's listings on KBB), price_stats {min, avg, max}, "
+            "makes [{make, make_code, count}], inventory_sort, inventory [the search tile "
+            "fields] (the first page as the dealer page shows it; each listing_id opens with "
+            "listing), market, notes. Dealer reviews are not included (rating and rating_count "
+            "only). An unknown id is a charged 404. 1 credit. Failed upstream calls and "
+            "refused inputs are not charged; a not-found is charged. Answers can take up to 4 "
+            "minutes: allow a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "dealer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A KBB dealer id (dealers[].dealer_id, listings[].seller.dealer_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A KBB dealer link (https://www.kbb.com/dealers/<city-st>/<id>/<name>/) "
+                    "instead of dealer_id."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        one_of=(("dealer_id", "url"),),
+        credits=1,
+        min_timeout=250.0,
+    ),
+    Endpoint(
+        key="kbb_makes_models",
+        namespace="kbb",
+        method="makes_models",
+        http="POST",
+        path="/api/v1/kbb/makes-models",
+        summary=(
+            "Kelley Blue Book's make and model directory on Kelley Blue Book (kbb.com, Cox "
+            "Automotive's car value and research site), US. Scavio fetches the public KBB page "
+            "on request; KBB's own data feed (InfoDriver) is a business contract, not a "
+            "self-serve API. Used (every model year KBB values; 68 makes, about 1,500 models) "
+            "or new: vehicle_class, make, make_count, count, makes [{make, make_slug, "
+            "model_count}], models [{make, make_slug, model, model_slug, years}] (the slugs "
+            "car_value, model_page and reviews take), market, notes. Optionally one make. 1 "
+            "credit. Failed upstream calls and refused inputs are not charged; a not-found is "
+            "charged. Answers can take up to 4 minutes: allow a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "vehicle_class",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "used (default: every model year KBB values) or new (models sold new)."
+                ),
+            ),
+            Param(
+                "make",
+                "Optional[str]",
+                doc=(
+                    "Only this make's models."
+                ),
+            ),
+            Param(
+                "country",
+                "Optional[str]",
+                doc=(
+                    "Optional: us (the only market; kbb.ca and kbb.com.br no longer carry "
+                    "Kelley Blue Book data and are refused)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=250.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -31647,6 +35404,15 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_CARMAX_ENDPOINTS,
     *_CARVANA_ENDPOINTS,
     *_BRINGATRAILER_ENDPOINTS,
+    # ====== batch 2 2026-11-26: 8 platforms (real estate + travel + cars) ======
+    *_RENTCOM_ENDPOINTS,
+    *_TRULIA_ENDPOINTS,
+    *_STREETEASY_ENDPOINTS,
+    *_RENTCAFE_ENDPOINTS,
+    *_VRBO_ENDPOINTS,
+    *_TRUECAR_ENDPOINTS,
+    *_EDMUNDS_ENDPOINTS,
+    *_KBB_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -38588,6 +42354,14 @@ NAMESPACES: tuple[str, ...] = (
     "carmax",
     "carvana",
     "bringatrailer",
+    "rentcom",
+    "trulia",
+    "streeteasy",
+    "rentcafe",
+    "vrbo",
+    "truecar",
+    "edmunds",
+    "kbb",
 )
 
 
