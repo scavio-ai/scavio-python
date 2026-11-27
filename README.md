@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 174 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 177 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -118,6 +118,9 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Natura Beauty Prices, Shades and Black Friday Deals in 6 Latin American Markets, Brazil Stores (7 endpoints) | Yes | No | No | No |
 | O Boticario and Eudora Card and Pix Prices, Shades, Reviews, Promotions and Store Pickup (Brazil; 11 endpoints) | Yes | No | No | No |
 | Centauro Sporting Goods Prices per Size, Freight and Store Pickup by CEP (Brazil; 7 endpoints) | Yes | No | No | No |
+| Enjoei Second-Hand Fashion Listings, Shops, Sold Listings and Buyer Reviews (Brazil; 9 endpoints) | Yes | No | No | No |
+| Atacadao Cash-and-Carry Store Prices with Quantity Tiers, Stores and Flyers (Brazil; 10 endpoints) | Yes | No | No | No |
+| Carrefour Brasil Grocery Prices by CEP, Marketplace Sellers, Delivery and Coupons (9 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8062,6 +8065,136 @@ for st in fr["stores"][:5]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 146. Brazil second-hand fashion -- Enjoei listings, prices, shops, sold listings and buyer reviews
+
+Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace): keyword
+search and category listings (30 a page, paged by cursor, 4 sorts, filtered by
+brand, clothing, waist and shoe size, price, condition, listing age, store
+kind and discount) with the price, the price before the seller's discount,
+condition, size and the free-shipping flag; the category tree; one listing
+with its make-an-offer range, installments, sizes, brand, condition and
+photos; a seller's shop with its counters, rating and on-time delivery
+history; a shop's listings on sale, its sold listings (up to 50 pages, no sold
+date) and its buyer reviews (no reviewer names); and search suggestions.
+Sellers appear by @handle only (no names, avatars or cities). Prices in BRL as
+shown to a visitor who is not signed in; no shipping quotes (they need a
+signed-in buyer) and no colour filter (put the colour in the query). Namespace
+`enjoei`, 9 endpoints: `search`, `category`, `categories`, `product`, `shop`,
+`shop_listings`, `shop_sold`, `shop_reviews`, `suggestions`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 240s. See the [Enjoei API
+page](https://scavio.dev/enjoei-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/enjoei-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+enj = client.enjoei
+res = enj.search("vestido farm")["data"]
+print(res["total"], res["total_capped"], res["has_more"])
+for it in res["items"][:5]:
+    print(it["id"], it["title"], it["price"], it["original_price"], it["condition"], it["size"], it["shipping"]["free"])
+more = enj.search("vestido farm", cursor=res["next_cursor"])["data"]
+item = enj.product("153252795")["data"]
+print(item["title"], item["price"], item["list_price"], item["offer"]["min_price"], item["installments_text"])
+shop = enj.shop("utstore")["data"]
+print(shop["counters"]["sold"], shop["rating"], shop["review_count"], shop["average_shipping_time"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 147. Brazil cash-and-carry -- Atacadao store prices, quantity tiers, stores and flyers
+
+Atacadao (atacadao.com.br, the Brazilian cash-and-carry wholesale chain of
+Grupo Carrefour Brasil): keyword search and category listings at the store you
+choose (up to 100 a page, 8 sorts, filtered by category, brand, price,
+collection and any facet) with the unit price, every quantity tier (the price
+drops at 3+ or 6+ units, for example), the case size and the bulk unit price;
+one product by sku, EAN, product id, slug or link, priced at one store; the
+filter values with the store's own counts; search suggestions and top
+searches; the department tree; pickup stores near a CEP (a Brazilian postal
+code) or a point; the store directory by state and city with hours and
+services; one store in full; and a store's current flyers (linked as PDFs, not
+opened). Without a store_id, prices are those of the site's default store
+(Vila Maria, Sao Paulo; priced_store_id says which). Prices in BRL; no stock
+units, reviews or price history, and the business (CNPJ) channel is not
+covered. Namespace `atacadao`, 10 endpoints: `search`, `category`, `product`,
+`stores_near`, `stores`, `store`, `flyers`, `facets`, `suggestions`,
+`categories`. Credits: 1 credit each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 240s. See the [Atacadao
+API
+page](https://scavio.dev/atacadao-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/atacadao-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+atc = client.atacadao
+res = atc.search("arroz", store_id="atacadaobr340")["data"]
+print(res["total"], res["priced_store_id"])
+for it in res["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["bulk_unit_price"], it["units_per_box"])
+    for t in it["price_tiers"]:
+        print("  ", t["min_quantity"], t["unit_price"])
+item = atc.product(ean="7896079431158", store_id="atacadaobr340")["data"]
+print(item["name"], item["available_at_store"], item["price"], item["price_tiers"])
+near = atc.stores_near("01310-100")["data"]
+for st in near["stores"][:5]:
+    print(st["store_id"], st["name"], st["distance_km"], st["address"]["city"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 148. Brazil grocery and marketplace -- Carrefour Brasil regional prices, sellers, delivery and coupons
+
+Carrefour Brasil (carrefour.com.br: the Mercado grocery site and the www
+marketplace, chosen with site): keyword or EAN search, category and collection
+listings (15 a page, up to 50 pages, 8 sorts, facet filters and a price range)
+with the price, list price, single-payment price, discount, seller and
+availability flag; one product with every seller's offer, payment-method
+prices (such as the Carrefour card or Pix, Brazil's instant payment),
+promotions, specs and variants; delivery and pickup options for one item to a
+CEP (a Brazilian postal code); the pickup stores by state and city; search
+suggestions and top searches; the coupon page; and the department menu. On
+Mercado a CEP or store gives that region's prices and assortment, otherwise
+the site's default prices; www prices are national. Prices in BRL;
+availability flags, not unit counts. Separate from the `carrefour` namespace
+(Carrefour France). Namespace `carrefourbr`, 9 endpoints: `search`,
+`category`, `collection`, `product`, `delivery`, `stores`, `suggestions`,
+`coupons`, `categories`. Credits: 1 credit each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [Carrefour Brasil API
+page](https://scavio.dev/carrefourbr-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/carrefourbr-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cbr = client.carrefourbr
+res = cbr.search("arroz", cep="01310-100")["data"]
+print(res["total"], res["price_scope"], res["region"]["cep"])
+for it in res["items"][:5]:
+    print(it["item_id"], it["name"], it["price"], it["list_price"], it["spot_price"], it["discount_percent"], it["seller"]["name"])
+item = cbr.product("1972")["data"]
+print(item["name"], item["ean"], item["price"], item["price_scope"])
+for o in item["payment_offers"]:
+    print(o["name"], o["discount_percent"], o["price"])
+dl = cbr.delivery("1972", "01310-100")["data"]
+for o in dl["options"]:
+    print(o["channel"], o["name"], o["price"], o["estimate"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -8308,6 +8441,9 @@ Scavio works with popular AI/LLM frameworks:
 | Natura (`natura`) | `search`, `category`, `categories`, `product`, `suggestions`, `stores`, `deals`; `country` br, ar, cl, co, mx or pe (default br); listings up to 100 a page; `product` by `product_id` or `url`; `stores` Brazil only, by `state`, `city`, `cep` prefix and `type` | 1 each |
 | O Boticario and Eudora (`boticario`) | `search`, `category`, `categories`, `deals`, `promotions`, `product`, `prices`, `reviews`, `stores`, `pickup`, `suggestions`; `brand` boticario or eudora; listings 36 a page; `product` and `pickup` by `slug`, `url` or `sku`; `prices` up to 10 `skus`; `stores` and `pickup` take a `cep` | 1 each; listings, `promotions` and `product` 2 when the page needs a second route; `prices` 1 per 5 SKUs |
 | Centauro (`centauro`) | `search`, `category`, `deals`, `product`, `freight`, `stores`, `suggestions`; Brazil; listings 36 a page; `product` by `product_id`, `model` + `color` or `url`; `freight` takes a size `sku` and a `cep`; `stores` by `cep` | 1 each |
+| Enjoei (`enjoei`) | `search`, `category`, `categories`, `product`, `shop`, `shop_listings`, `shop_sold`, `shop_reviews`, `suggestions`; Brazil; `search`, `category` and `shop_listings` paged by `cursor`; `category` by `department`, `category` and `subcategory` slugs; `product` by `product_id` or `url`; `shop`, `shop_listings` and `shop_sold` by `handle`; `shop_sold` `page` 1-50; `shop_reviews` by `handle` or `shop_id` | 1 each |
+| Atacadao (`atacadao`) | `search`, `category`, `product`, `stores_near`, `stores`, `store`, `flyers`, `facets`, `suggestions`, `categories`; Brazil; priced at `store_id` (default: the site's default store, Vila Maria, Sao Paulo); listings up to 100 a page; `category` by `category` path or `category_id`; `product` by `sku`, `ean`, `product_id`, `slug` or `url`; `stores_near` by `cep` or `latitude` + `longitude`; `stores` by `state` (and `city`); `store` and `flyers` by `store_id` | 1 each |
+| Carrefour Brasil (`carrefourbr`) | `search`, `category`, `collection`, `product`, `delivery`, `stores`, `suggestions`, `coupons`, `categories`; `site` mercado or www; listings 15 a page; regional `mercado` prices with `cep` or `store`; `product` by `item_id` or `url`; `delivery` takes an `item_id` and a `cep`; `stores` by `state` and `city` | 1 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
 | Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
@@ -8316,6 +8452,13 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.103.0
+
+- **3 new namespaces** (sync and async), 28 endpoints, Brazil: `enjoei` (Enjoei, 9),
+  `atacadao` (Atacadao, 10) and `carrefourbr` (Carrefour Brasil, Mercado grocery and
+  the www marketplace, 9; separate from `carrefour`, Carrefour France). Credits: 1 per
+  call. The request timeout is raised to at least 240s.
 
 ### Changed in 0.102.0
 

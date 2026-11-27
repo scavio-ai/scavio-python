@@ -11025,3 +11025,182 @@ def test_batch7w2_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["boticario_product"].positional_optional_params[0].name == "slug"
     assert "AI summary" not in ENDPOINTS["boticario_product"].summary
     assert all(p.doc for ep in w2 for p in ep.params)
+
+
+# --- batch 7 wave 3 2026-11-27: 3 Brazil namespaces (Enjoei, Atacadao, Carrefour Brasil) ---
+
+BATCH7W3_1127 = {
+    "enjoei": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "shop": ("shop", 1, 240.0),
+        "shop_listings": ("shop-listings", 1, 240.0),
+        "shop_sold": ("shop-sold", 1, 240.0),
+        "shop_reviews": ("shop-reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "atacadao": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "stores_near": ("stores-near", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "flyers": ("flyers", 1, 240.0),
+        "facets": ("facets", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+    },
+    "carrefourbr": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "collection": ("collection", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "delivery": ("delivery", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "coupons": ("coupons", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+    },
+}
+BATCH7W3_1127_ONE_OF = {
+    "enjoei_product": (("product_id", "url"),),
+    "enjoei_shop_reviews": (("handle", "shop_id"),),
+    "atacadao_category": (("category", "category_id"),),
+    "atacadao_product": (("sku", "ean", "product_id", "slug", "url"),),
+    "atacadao_stores_near": (("cep", "latitude"),),
+    "carrefourbr_product": (("item_id", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7W3_1127))
+def test_batch7w3_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 3 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7W3_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7W3_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b"
+        assert not re.search(ai, text.lower()), ep.key
+
+
+BATCH7W3_1127_WIRE = [
+    ("enjoei", "search", {"query": "vestido farm"}, "search"),
+    (
+        "enjoei", "search",
+        {"query": "vestido farm", "brand": ["farm"], "condition": "used", "sort": "price_asc"},
+        "search",
+    ),
+    (
+        "enjoei", "category",
+        {"department": "feminino", "category": "feminino-roupas",
+         "subcategory": "feminino-roupas-vestidos"},
+        "category",
+    ),
+    ("enjoei", "categories", {}, "categories"),
+    ("enjoei", "product", {"product_id": "153252795"}, "product"),
+    ("enjoei", "shop", {"handle": "utstore"}, "shop"),
+    ("enjoei", "shop_listings", {"handle": "utstore"}, "shop-listings"),
+    ("enjoei", "shop_sold", {"handle": "utstore", "page": 2}, "shop-sold"),
+    ("enjoei", "shop_reviews", {"handle": "utstore", "filter": "negative"}, "shop-reviews"),
+    ("enjoei", "suggestions", {"query": "vestido"}, "suggestions"),
+    ("atacadao", "search", {"query": "arroz"}, "search"),
+    (
+        "atacadao", "search",
+        {"query": "arroz", "store_id": "atacadaobr340", "brand": ["Camil"], "page_size": 50},
+        "search",
+    ),
+    (
+        "atacadao", "category",
+        {"category": "mercearia/graos", "store_id": "atacadaobr340"},
+        "category",
+    ),
+    ("atacadao", "product", {"ean": "7896079431158"}, "product"),
+    ("atacadao", "product", {"sku": "14443", "store_id": 340}, "product"),
+    ("atacadao", "stores_near", {"cep": "01310-100"}, "stores-near"),
+    ("atacadao", "stores_near", {"latitude": -23.56, "longitude": -46.65}, "stores-near"),
+    ("atacadao", "stores", {"state": "SP", "city": "Sao Paulo"}, "stores"),
+    ("atacadao", "store", {"store_id": "atacadaobr340"}, "store"),
+    ("atacadao", "flyers", {"store_id": 340}, "flyers"),
+    ("atacadao", "facets", {"query": "arroz"}, "facets"),
+    ("atacadao", "suggestions", {"query": "arroz"}, "suggestions"),
+    ("atacadao", "categories", {}, "categories"),
+    ("carrefourbr", "search", {"query": "arroz", "cep": "01310-100"}, "search"),
+    (
+        "carrefourbr", "search",
+        {"query": "geladeira", "site": "www", "filters": {"brand": "consul"}, "sort": "price_asc"},
+        "search",
+    ),
+    (
+        "carrefourbr", "category",
+        {"path": "/categoria/mercearia/alimentos-basicos/arroz"},
+        "category",
+    ),
+    ("carrefourbr", "collection", {"collection_id": 29861}, "collection"),
+    ("carrefourbr", "product", {"item_id": "1972"}, "product"),
+    ("carrefourbr", "delivery", {"item_id": "1972", "cep": "01310-100"}, "delivery"),
+    ("carrefourbr", "stores", {"state": "SP"}, "stores"),
+    ("carrefourbr", "suggestions", {"query": "arroz"}, "suggestions"),
+    ("carrefourbr", "coupons", {}, "coupons"),
+    ("carrefourbr", "categories", {"site": "www"}, "categories"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7W3_1127_WIRE)
+def test_batch7w3_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7W3_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7W3_1127_ONE_OF))
+def test_batch7w3_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7w3_1127_credits_wire_and_timeouts():
+    """Enjoei, Atacadao, Carrefour Brasil: 1 credit flat, 240 s floor, no credits note."""
+    for ns in BATCH7W3_1127:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w3 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W3_1127]
+    assert len(w3) == 28
+    assert {ep.min_timeout for ep in w3} == {240.0}
+    assert not [ep.key for ep in w3 if ep.credits_note]
+    assert [p.name for p in ENDPOINTS["carrefourbr_delivery"].required_params] == ["item_id", "cep"]
+    assert [p.name for p in ENDPOINTS["enjoei_shop"].required_params] == ["handle"]
+    assert [p.name for p in ENDPOINTS["atacadao_stores"].required_params] == ["state"]
+    assert [p.name for p in ENDPOINTS["atacadao_flyers"].required_params] == ["store_id"]
+    assert not ENDPOINTS["atacadao_suggestions"].required_params
+    assert not ENDPOINTS["carrefourbr_coupons"].required_params
+    assert ENDPOINTS["enjoei_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["atacadao_product"].positional_optional_params[0].name == "sku"
+    assert ENDPOINTS["carrefourbr_product"].positional_optional_params[0].name == "item_id"
+    # Carrefour Brasil is its own namespace, never merged with Carrefour France.
+    brasil = [ep for ep in w3 if ep.namespace == "carrefourbr"]
+    assert all(ep.path.startswith("/api/v1/carrefourbr/") for ep in brasil)
+    assert all(p.doc for ep in w3 for p in ep.params)

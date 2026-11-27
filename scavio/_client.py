@@ -20,6 +20,7 @@ from ._namespaces_sync import (
     _ArgosNamespace,
     _AshleyNamespace,
     _AsosNamespace,
+    _AtacadaoNamespace,
     _AutotraderNamespace,
     _AutozoneNamespace,
     _BarnesandnobleNamespace,
@@ -38,6 +39,7 @@ from ._namespaces_sync import (
     _CapterraNamespace,
     _CargurusNamespace,
     _CarmaxNamespace,
+    _CarrefourbrNamespace,
     _CarrefourNamespace,
     _CarscomNamespace,
     _CarvanaNamespace,
@@ -61,6 +63,7 @@ from ._namespaces_sync import (
     _DouglasNamespace,
     _EbayNamespace,
     _EdmundsNamespace,
+    _EnjoeiNamespace,
     _EstatesalesNamespace,
     _ExpediaNamespace,
     _ExtraspaceNamespace,
@@ -417,6 +420,9 @@ class ScavioClient:
         self.natura = _NaturaNamespace(self)
         self.boticario = _BoticarioNamespace(self)
         self.centauro = _CentauroNamespace(self)
+        self.enjoei = _EnjoeiNamespace(self)
+        self.atacadao = _AtacadaoNamespace(self)
+        self.carrefourbr = _CarrefourbrNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

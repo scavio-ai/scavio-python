@@ -37873,6 +37873,1788 @@ _CENTAURO_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 7 wave 3 2026-11-27: 3 platforms (Enjoei, Atacadao, Carrefour Brasil) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 240 s floor on every method.
+
+# Enjoei: 9 endpoints on /api/v1/enjoei.
+_ENJOEI_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="enjoei_search",
+        namespace="enjoei",
+        method="search",
+        http="POST",
+        path="/api/v1/enjoei/search",
+        summary=(
+            "Search listings on Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. Returns market, currency, query, sort, filters, "
+            "page, total (Enjoei's count, it stops at 10,000: total_capped true means 10,000 "
+            "or more), total_capped, count, has_more, next_cursor, items [{id, url, title, "
+            "brand, price, original_price (before the seller's discount), discount_percent "
+            "(computed from the two), currency, condition (new, used), size, sizes, shipping "
+            "{free, type (e.g. charge_by_weight, hand_deliver)}, department, category, "
+            "subcategory (slugs), image, tags (the card's badges, e.g. 20%, barateou), "
+            "bundle_allowed, seller_handle}], page_size (30), facets (best-effort, null when "
+            "the page did not show them): brands [{slug, name, count}] (top 50), departments, "
+            "subcategories, sizes {clothes, waist, shoes} and store_kinds, each [{slug, "
+            "name}] and notes. Sorts: relevance (default), price_asc, price_desc, discount. "
+            "Filters: brand (slugs), size_clothes / size_waist / size_shoes (slugs), "
+            "price_min / price_max (BRL), condition (new, used), listed_within (24h, 7d, 14d, "
+            "30d), store_kind (pro, celebrity), discount_min / discount_max (percent). "
+            "Listings cover sellers who ship to all of Brazil. There is no color filter (put "
+            "the colour in the query). Next pages: send next_cursor. No results is an empty "
+            "200. Seller names, avatars and cities are never returned (the @handle is "
+            "returned instead). 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 10-40 s, up to about two minutes; set a client "
+            "timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc or discount (largest discount "
+                    "at the top)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand slugs as Enjoei writes them (facets.brands[].slug, e.g. farm, "
+                    "zara, le-lis-blanc), one or up to 10."
+                ),
+            ),
+            Param(
+                "size_clothes",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Clothing sizes (facets.sizes.clothes[].slug: pp, p, m, g, gg, xgg, 36, "
+                    "38...)."
+                ),
+            ),
+            Param(
+                "size_waist",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Waist sizes (facets.sizes.waist[].slug)."
+                ),
+            ),
+            Param(
+                "size_shoes",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Shoe sizes (facets.sizes.shoes[].slug)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price, BRL."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["new", "used"]]',
+                doc=(
+                    "new (never used) or used."
+                ),
+            ),
+            Param(
+                "listed_within",
+                'Optional[Literal["24h", "7d", "14d", "30d"]]',
+                doc=(
+                    "Listed in the last 24h, 7d, 14d or 30d."
+                ),
+            ),
+            Param(
+                "store_kind",
+                'Optional[Literal["pro", "celebrity"]]',
+                doc=(
+                    "pro (Enjoei Pro stores) or celebrity (Enjoei's famosas, celebrity "
+                    "closets)."
+                ),
+            ),
+            Param(
+                "discount_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest discount, percent."
+                ),
+            ),
+            Param(
+                "discount_max",
+                "Optional[int]",
+                doc=(
+                    "Largest discount, percent."
+                ),
+            ),
+            Param(
+                "cursor",
+                "Optional[str]",
+                doc=(
+                    "next_cursor of the previous page (pages are cursor-paged: a page is "
+                    "reached from the one before it)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_category",
+        namespace="enjoei",
+        method="category",
+        http="POST",
+        path="/api/v1/enjoei/category",
+        summary=(
+            "One department, category or subcategory of Enjoei (enjoei.com.br, Brazil's "
+            "second-hand fashion marketplace). Scavio fetches the public Enjoei page on "
+            "request; Enjoei has no public API. One market, Brazil: text in Portuguese, "
+            "prices in BRL as shown to a visitor who is not signed in. By the slugs "
+            "categories lists (departments[].params). Returns department, category, "
+            "subcategory, query, sort, filters, page, total (Enjoei's count, it stops at "
+            "10,000: total_capped true means 10,000 or more), total_capped, count, has_more, "
+            "next_cursor, items [{id, url, title, brand, price, original_price (before the "
+            "seller's discount), discount_percent (computed from the two), currency, "
+            "condition (new, used), size, sizes, shipping {free, type (e.g. charge_by_weight, "
+            "hand_deliver)}, department, category, subcategory (slugs), image, tags (the "
+            "card's badges, e.g. 20%, barateou), bundle_allowed, seller_handle}], page_size "
+            "(30), facets (best-effort, null when the page did not show them): brands [{slug, "
+            "name, count}] (top 50), departments, subcategories, sizes {clothes, waist, "
+            "shoes} and store_kinds, each [{slug, name}] and notes. Sorts: relevance "
+            "(default), price_asc, price_desc, discount. Filters: brand (slugs), size_clothes "
+            "/ size_waist / size_shoes (slugs), price_min / price_max (BRL), condition (new, "
+            "used), listed_within (24h, 7d, 14d, 30d), store_kind (pro, celebrity), "
+            "discount_min / discount_max (percent). Listings cover sellers who ship to all of "
+            "Brazil. There is no color filter (put the colour in the query). A category slug "
+            "outside its department is a 400 before anything is charged. Seller names, "
+            "avatars and cities are never returned (the @handle is returned instead). 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 10-40 s, up to about two minutes; set a client timeout of at least "
+            "180 s."
+        ),
+        params=(
+            Param(
+                "department",
+                "str",
+                required=True,
+                doc=(
+                    "Department slug (categories: departments[].params.department, e.g. "
+                    "feminino, masculino, infantil, casa-e-decor)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "Category slug in that department (params.category, e.g. "
+                    "feminino-roupas)."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[str]",
+                doc=(
+                    "Subcategory slug in that category (params.subcategory, e.g. "
+                    "feminino-roupas-vestidos). Needs category."
+                ),
+            ),
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Optional keywords inside the category."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc or discount (largest discount "
+                    "at the top)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand slugs as Enjoei writes them (facets.brands[].slug, e.g. farm, "
+                    "zara, le-lis-blanc), one or up to 10."
+                ),
+            ),
+            Param(
+                "size_clothes",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Clothing sizes (facets.sizes.clothes[].slug: pp, p, m, g, gg, xgg, 36, "
+                    "38...)."
+                ),
+            ),
+            Param(
+                "size_waist",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Waist sizes (facets.sizes.waist[].slug)."
+                ),
+            ),
+            Param(
+                "size_shoes",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Shoe sizes (facets.sizes.shoes[].slug)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price, BRL."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["new", "used"]]',
+                doc=(
+                    "new (never used) or used."
+                ),
+            ),
+            Param(
+                "listed_within",
+                'Optional[Literal["24h", "7d", "14d", "30d"]]',
+                doc=(
+                    "Listed in the last 24h, 7d, 14d or 30d."
+                ),
+            ),
+            Param(
+                "store_kind",
+                'Optional[Literal["pro", "celebrity"]]',
+                doc=(
+                    "pro (Enjoei Pro stores) or celebrity (Enjoei's famosas, celebrity "
+                    "closets)."
+                ),
+            ),
+            Param(
+                "discount_min",
+                "Optional[int]",
+                doc=(
+                    "Smallest discount, percent."
+                ),
+            ),
+            Param(
+                "discount_max",
+                "Optional[int]",
+                doc=(
+                    "Largest discount, percent."
+                ),
+            ),
+            Param(
+                "cursor",
+                "Optional[str]",
+                doc=(
+                    "next_cursor of the previous page (pages are cursor-paged: a page is "
+                    "reached from the one before it)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_categories",
+        namespace="enjoei",
+        method="categories",
+        http="POST",
+        path="/api/v1/enjoei/categories",
+        summary=(
+            "The category tree of Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. Returns count (top-level nodes), node_count and "
+            "departments [{name, slug, url, params {department, category, subcategory} (the "
+            "category inputs; null on navigation nodes without a listing of their own), "
+            "children [...]}] three levels deep. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout "
+            "of at least 60 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_product",
+        namespace="enjoei",
+        method="product",
+        http="POST",
+        path="/api/v1/enjoei/product",
+        summary=(
+            "One listing of Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). "
+            "Scavio fetches the public Enjoei page on request; Enjoei has no public API. One "
+            "market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is "
+            "not signed in. By product id or link: id, url, title, description, status "
+            "(published, sold...), available, price (the sale price), list_price, "
+            "discount_percent, currency, installments_text (e.g. em ate 2x R$ 59,50 sem "
+            "juros), promo_text (a new-buyer coupon line when shown), offer {accepts_offers, "
+            "min_price, max_price} (the make-an-offer range the seller accepts), "
+            "bundle_allowed, size, sizes [{name, slug, available}], brand {name, slug, "
+            "verified}, condition (new, used), weight_kg, hand_delivery, single_piece, photos "
+            "(the item's photos), category_slug, breadcrumb [{title, url}], seller {id, "
+            "handle}, price_detail (full, or basic when the pricing details could not be read "
+            "and the product's own price is shown) and notes. Shipping cost and type are "
+            "shown to signed-in buyers, not to visitors (listing cards carry shipping.free "
+            "and shipping.type). An unknown product is a charged 404. Seller names, avatars "
+            "and cities are never returned (the @handle is returned instead). Not available: "
+            "shipping quotes by CEP (they need a signed-in buyer), product comments (not "
+            "shown to visitors), a site-wide sold search, coupons and Black Friday dates. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-10 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Enjoei product id (items[].id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link (https://www.enjoei.com.br/p/<name>-<id>)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_shop",
+        namespace="enjoei",
+        method="shop",
+        http="POST",
+        path="/api/v1/enjoei/shop",
+        summary=(
+            "A seller's shop on Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. By handle: handle, seller_id, url, joined_at, "
+            "on_vacation, business (an Enjoei business seller), badge (e.g. loja em destaque, "
+            "null when none), counters {listings, sold, likes, followers, following}, rating "
+            "(0-5), review_count, recent_deliveries (on-time history of the latest sales: "
+            "on_time, delayed, cancelled), average_shipping_time (e.g. 1 dia; shown after 5 "
+            "sales) and notes. An unknown handle is a charged 404. Names, avatars, header "
+            "images, cities and the shop's own description are never returned. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-10 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "handle",
+                "str",
+                required=True,
+                doc=(
+                    "Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or "
+                    "without the @, or the shop link."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_shop_listings",
+        namespace="enjoei",
+        method="shop_listings",
+        http="POST",
+        path="/api/v1/enjoei/shop-listings",
+        summary=(
+            "A shop's listings on sale on Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. By handle: handle, seller_id, page, total "
+            "(Enjoei's count, it stops at 10,000: total_capped true means 10,000 or more), "
+            "total_capped, count, has_more, next_cursor, items [{id, url, title, brand, "
+            "price, original_price (before the seller's discount), discount_percent (computed "
+            "from the two), currency, condition (new, used), size, sizes, shipping {free, "
+            "type (e.g. charge_by_weight, hand_deliver)}, department, category, subcategory "
+            "(slugs), image, tags (the card's badges, e.g. 20%, barateou), bundle_allowed, "
+            "seller_handle}] (20 on page 1, 30 on later pages), facets and notes. Next pages: "
+            "send next_cursor. An unknown handle is a charged 404. Seller names, avatars and "
+            "cities are never returned (the @handle is returned instead). 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "10-40 s, up to about two minutes; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "handle",
+                "str",
+                required=True,
+                doc=(
+                    "Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or "
+                    "without the @, or the shop link."
+                ),
+            ),
+            Param(
+                "cursor",
+                "Optional[str]",
+                doc=(
+                    "next_cursor of the previous page (pages are cursor-paged: a page is "
+                    "reached from the one before it)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_shop_sold",
+        namespace="enjoei",
+        method="shop_sold",
+        http="POST",
+        path="/api/v1/enjoei/shop-sold",
+        summary=(
+            "A shop's sold listings on Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. By handle and page (1-50): handle, page, page_size "
+            "(40), total, total_pages, has_more, count, items [{id, url, title, price (the "
+            "listed price), currency, image, status}] and notes. Enjoei shows no sold date, "
+            "and at most 50 pages (2,000 sold listings) per shop. An unknown handle is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-10 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "handle",
+                "str",
+                required=True,
+                doc=(
+                    "Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or "
+                    "without the @, or the shop link."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1 to 50, 40 sold listings each."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_shop_reviews",
+        namespace="enjoei",
+        method="shop_reviews",
+        http="POST",
+        path="/api/v1/enjoei/shop-reviews",
+        summary=(
+            "Buyer reviews of a shop on Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. By handle or shop_id, filter all (default), "
+            "positive or negative, 20 per page by cursor: handle, seller_id, filter, "
+            "page_size, count, has_more, next_cursor, items [{score (1-5), date, text, "
+            "feedback_tags (e.g. envio rapido, otima embalagem)}], summary {score, total, "
+            "stars [{stars, total}], feedbacks [{label, total}]} and notes. Reviewer names "
+            "and photos are never returned. An unknown handle is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-10 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "handle",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or "
+                    "without the @, or the shop link."
+                ),
+            ),
+            Param(
+                "shop_id",
+                "Optional[str]",
+                doc=(
+                    "Seller id (shop.seller_id, product.seller.id) instead of handle."
+                ),
+            ),
+            Param(
+                "filter",
+                'Optional[Literal["all", "positive", "negative"]]',
+                doc=(
+                    "all (default), positive or negative (Enjoei's own review filters)."
+                ),
+            ),
+            Param(
+                "cursor",
+                "Optional[str]",
+                doc=(
+                    "next_cursor of the previous page."
+                ),
+            ),
+        ),
+        one_of=(("handle", "shop_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="enjoei_suggestions",
+        namespace="enjoei",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/enjoei/suggestions",
+        summary=(
+            "Search suggestions of Enjoei (enjoei.com.br, Brazil's second-hand fashion "
+            "marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no "
+            "public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a "
+            "visitor who is not signed in. For what a shopper has typed: query, count, "
+            "suggestions [{text, query, department (the department slug a suggestion narrows "
+            "to, null for all of Enjoei)}]. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 10-40 s, up to about two minutes; set "
+            "a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What the shopper has typed so far."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Atacadao: 10 endpoints on /api/v1/atacadao.
+_ATACADAO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="atacadao_search",
+        namespace="atacadao",
+        method="search",
+        http="POST",
+        path="/api/v1/atacadao/search",
+        summary=(
+            "Search Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour "
+            "Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao "
+            "page on request; Atacadao has no public product API. Prices are the online "
+            "prices of the store you choose (store_id). By keyword at one store, sorted by "
+            "the site's sorts and filtered by category (1-3 levels), brand, price range, "
+            "collection (e.g. Black November) and any other facet. Returns store_id, "
+            "priced_store_id, page, page_size, total (the store's matching items), "
+            "total_pages, has_more, count, sort, filters_applied, items [{position, sku (use "
+            "it in product), product_id, name, brand, url, image, measurement_unit, "
+            "unit_multiplier, units_per_box (the case size), reference_code, price (the unit "
+            "price for 1 unit), price_tiers [{min_quantity, unit_price}] (every quantity tier "
+            "the store gives, ascending), bulk_unit_price (the unit price at the largest "
+            "tier), online_exclusive_price, priced_store_id, categories [{name, path}] and "
+            "collections [{id, name}]}] and notes. Items the chosen store does not sell are "
+            "left out. There is no was-price: the quantity tiers are the deal. The price "
+            "sorts follow the site's own order, which does not always follow the chosen "
+            "store's price. Also query. No results is an empty 200. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a "
+            "client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A category path of 1 to 3 levels (categories[].path, e.g. mercearia, "
+                    "mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br "
+                    "link."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The store to price at: its store id (atacadaobr340) or store number "
+                    "(340), from stores_near or stores (stores[].store_id). Default: the "
+                    "site's default store (atacadaobr60, Vila Maria, Sao Paulo)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "name_asc, name_desc, newest, discount (best_sellers = most ordered, "
+                    "newest = release date). Default relevance."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand value(s) from facets (key brand), e.g. camil."
+                ),
+            ),
+            Param(
+                "collection",
+                "Optional[str]",
+                doc=(
+                    "A collection id (items[].collections[].id), e.g. 382 Black November, 334 "
+                    "Black Week."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Minimum price in BRL (the site's price filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet by the site's own key: {\"<facets[].key>\": value or "
+                    "[values]}. Up to 5 keys."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Items per page, 1-100 (default 20)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_category",
+        namespace="atacadao",
+        method="category",
+        http="POST",
+        path="/api/v1/atacadao/category",
+        summary=(
+            "One category listing of Atacadao (atacadao.com.br, the cash-and-carry chain of "
+            "Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public Atacadao page on request; Atacadao has no public product API. Prices are "
+            "the online prices of the store you choose (store_id). By category path or "
+            "category_id, at one store, sorted and filtered like search. Returns store_id, "
+            "priced_store_id, page, page_size, total (the store's matching items), "
+            "total_pages, has_more, count, sort, filters_applied, items [{position, sku (use "
+            "it in product), product_id, name, brand, url, image, measurement_unit, "
+            "unit_multiplier, units_per_box (the case size), reference_code, price (the unit "
+            "price for 1 unit), price_tiers [{min_quantity, unit_price}] (every quantity tier "
+            "the store gives, ascending), bulk_unit_price (the unit price at the largest "
+            "tier), online_exclusive_price, priced_store_id, categories [{name, path}] and "
+            "collections [{id, name}]}] and notes. Items the chosen store does not sell are "
+            "left out. There is no was-price: the quantity tiers are the deal. The price "
+            "sorts follow the site's own order, which does not always follow the chosen "
+            "store's price. Also category, category_id and url. An unknown category_id is a "
+            "charged 404; an unknown path is an empty 200. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 2-20 s; set a client "
+            "timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A category path of 1 to 3 levels (categories[].path, e.g. mercearia, "
+                    "mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br "
+                    "link."
+                ),
+            ),
+            Param(
+                "category_id",
+                "Optional[int]",
+                doc=(
+                    "A category id (categories[].category_id) instead of category."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The store to price at: its store id (atacadaobr340) or store number "
+                    "(340), from stores_near or stores (stores[].store_id). Default: the "
+                    "site's default store (atacadaobr60, Vila Maria, Sao Paulo)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "name_asc, name_desc, newest, discount (best_sellers = most ordered, "
+                    "newest = release date). Default relevance."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand value(s) from facets (key brand), e.g. camil."
+                ),
+            ),
+            Param(
+                "collection",
+                "Optional[str]",
+                doc=(
+                    "A collection id (items[].collections[].id), e.g. 382 Black November, 334 "
+                    "Black Week."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Minimum price in BRL (the site's price filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet by the site's own key: {\"<facets[].key>\": value or "
+                    "[values]}. Up to 5 keys."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Items per page, 1-100 (default 20)."
+                ),
+            ),
+        ),
+        one_of=(("category", "category_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_product",
+        namespace="atacadao",
+        method="product",
+        http="POST",
+        path="/api/v1/atacadao/product",
+        summary=(
+            "One product of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo "
+            "Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public Atacadao page on request; Atacadao has no public product API. Prices are "
+            "the online prices of the store you choose (store_id). By sku, EAN, product id, "
+            "slug or link, priced at one store: sku, product_id, name, complement_name, "
+            "brand, ean (EAN-13), reference_code, url, images, categories, measurement_unit, "
+            "unit_multiplier, units_per_box, specifications, available_at_store, price, "
+            "price_tiers [{min_quantity, unit_price}], bulk_unit_price, "
+            "online_exclusive_price, priced_store_id and collections. No marketing "
+            "description, no stock units, reviews or price history. An unknown product is a "
+            "charged 404; a product the store does not sell is a 200 with available_at_store "
+            "false and no price. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The sku id (items[].sku)."
+                ),
+            ),
+            Param(
+                "ean",
+                "Optional[str]",
+                doc=(
+                    "The EAN / GTIN barcode (EAN-13)."
+                ),
+            ),
+            Param(
+                "product_id",
+                "Optional[str]",
+                doc=(
+                    "The product id (items[].product_id)."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "The product slug (arroz-branco-namorado-tipo-1-5619-14443)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link (https://www.atacadao.com.br/<slug>/p)."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The store to price at: its store id (atacadaobr340) or store number "
+                    "(340), from stores_near or stores (stores[].store_id). Default: the "
+                    "site's default store (atacadaobr60, Vila Maria, Sao Paulo)."
+                ),
+            ),
+        ),
+        one_of=(("sku", "ean", "product_id", "slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_stores_near",
+        namespace="atacadao",
+        method="stores_near",
+        http="POST",
+        path="/api/v1/atacadao/stores-near",
+        summary=(
+            "The Atacadao pickup stores near a CEP or a point (latitude / longitude), nearest "
+            "first: total, count and stores [{store_id, store_number, pickup_point_id, name, "
+            "distance_km, address {street, number, neighborhood, city, state, cep}, latitude, "
+            "longitude, hours [{day, opens, closes}]}]; for a CEP also serving_stores "
+            "[{store_id, store_number, name}] (the stores the site offers for that CEP). 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-20 s; set a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "Latitude of a point in Brazil (with longitude, instead of cep)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "Longitude of a point in Brazil."
+                ),
+            ),
+        ),
+        one_of=(("cep", "latitude"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_stores",
+        namespace="atacadao",
+        method="stores",
+        http="POST",
+        path="/api/v1/atacadao/stores",
+        summary=(
+            "The Atacadao store directory for a state (and city): total, page, page_size, "
+            "total_pages, has_more, count and stores [{store_number, store_id (the online "
+            "catalog id, null when the store does not sell online), sells_online, name, slug, "
+            "url, format, address, phone, latitude, longitude, hours [{day, opens, closes}], "
+            "holiday_hours [{date, description, hours}], online_services, flyer_count}]. A "
+            "city with no store is a charged 404 that lists the state's cities. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-20 s; set a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "state",
+                "str",
+                required=True,
+                doc=(
+                    "Brazilian state code (UF): AC, AL, AM, AP, BA, CE, DF, ES, GO, MA, MG, "
+                    "MS, MT, PA, PB, PE, PI, PR, RJ, RN, RO, RR, RS, SC, SE, SP, TO."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A city of that state (accents and case ignored)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Stores per page, 1-50 (default 24)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_store",
+        namespace="atacadao",
+        method="store",
+        http="POST",
+        path="/api/v1/atacadao/store",
+        summary=(
+            "One Atacadao store in full: the directory fields plus services (bakery, butcher, "
+            "cafe, fuel station...), recycling_points, payment_methods, credit_cards, "
+            "meal_vouchers and flyers [{flyer_id, name, valid_from, valid_to, pdf_url, "
+            "thumbnail_url, priority}]. An unknown store is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-20 s; set a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A store number (340), store id (atacadaobr340) or store slug (tatuape), "
+                    "from stores or stores_near."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_flyers",
+        namespace="atacadao",
+        method="flyers",
+        http="POST",
+        path="/api/v1/atacadao/flyers",
+        summary=(
+            "The current flyers (folhetos) of one Atacadao store: store_number, store_id, "
+            "name, slug, url, count and flyers [{flyer_id, name, valid_from, valid_to, "
+            "pdf_url (the flyer document, PDF), thumbnail_url, priority}]. The PDF is linked, "
+            "not opened. An unknown store is a charged 404. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 2-20 s; set a client "
+            "timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A store number (340), store id (atacadaobr340) or store slug (tatuape), "
+                    "from stores or stores_near."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_facets",
+        namespace="atacadao",
+        method="facets",
+        http="POST",
+        path="/api/v1/atacadao/facets",
+        summary=(
+            "The filter values of Atacadao (atacadao.com.br, the cash-and-carry chain of "
+            "Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public Atacadao page on request; Atacadao has no public product API. Prices are "
+            "the online prices of the store you choose (store_id). For a query and / or "
+            "category, brand or collection at one store: total and facets [{key, label, "
+            "param, values [{value, label, count, selected}] or min / max}] with the store's "
+            "own counts; param names the request field each one goes back into. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-20 s; set a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Search keywords (or give a category, brand or collection)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A category path of 1 to 3 levels (categories[].path, e.g. mercearia, "
+                    "mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br "
+                    "link."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The store to price at: its store id (atacadaobr340) or store number "
+                    "(340), from stores_near or stores (stores[].store_id). Default: the "
+                    "site's default store (atacadaobr60, Vila Maria, Sao Paulo)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "name_asc, name_desc, newest, discount (best_sellers = most ordered, "
+                    "newest = release date). Default relevance."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand value(s) from facets (key brand), e.g. camil."
+                ),
+            ),
+            Param(
+                "collection",
+                "Optional[str]",
+                doc=(
+                    "A collection id (items[].collections[].id), e.g. 382 Black November, 334 "
+                    "Black Week."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[float]",
+                doc=(
+                    "Minimum price in BRL (the site's price filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[float]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet by the site's own key: {\"<facets[].key>\": value or "
+                    "[values]}. Up to 5 keys."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Items per page, 1-100 (default 20)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_suggestions",
+        namespace="atacadao",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/atacadao/suggestions",
+        summary=(
+            "The search box of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo "
+            "Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public Atacadao page on request; Atacadao has no public product API. Prices are "
+            "the online prices of the store you choose (store_id). For the start of a search: "
+            "suggestions [{term, count, attributes}] and top_searches [{term, count}] "
+            "(without query: the top searches alone). 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 2-20 s; set a client "
+            "timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "The start of a search. Without it, the top searches alone."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="atacadao_categories",
+        namespace="atacadao",
+        method="categories",
+        http="POST",
+        path="/api/v1/atacadao/categories",
+        summary=(
+            "The department tree of Atacadao (atacadao.com.br, the cash-and-carry chain of "
+            "Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public Atacadao page on request; Atacadao has no public product API. Prices are "
+            "the online prices of the store you choose (store_id). count, node_count and "
+            "categories [{category_id, name, path, url, children [...]}]: use path as "
+            "category or category_id in category. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout "
+            "of at least 90 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Carrefour Brasil: 9 endpoints on /api/v1/carrefourbr.
+_CARREFOURBR_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="carrefourbr_search",
+        namespace="carrefourbr",
+        method="search",
+        http="POST",
+        path="/api/v1/carrefourbr/search",
+        summary=(
+            "Search Carrefour Brasil (carrefour.com.br and its grocery site "
+            "mercado.carrefour.com.br). Scavio fetches the site's public page on request; "
+            "Carrefour Brasil has no public API. Brazil, pt-BR, prices in BRL. site mercado "
+            "(default, grocery) or www (non-food and the marketplace). By keywords or an EAN. "
+            "Sort by the site's sorts; filter by any facet value (department, category, "
+            "brand, seller and the product attributes the site lists) and a price range. On "
+            "mercado, cep or store (a store_id from /carrefourbr/stores) gives that region's "
+            "prices and assortment (region, price_scope regional); without them the site's "
+            "default prices (price_scope national). www prices are national. Returns site, "
+            "store, query, suggestions (the site's related terms) and 15 items a page: total, "
+            "page, page_size, total_pages (up to 50), sort, count, items [{position, "
+            "product_id, item_id (the input of product), name, brand, product_reference, url, "
+            "categories, measurement_unit (kg: priced per kg), price, list_price, spot_price "
+            "(the single-payment price), discount_percent, available (a flag, no unit "
+            "counts), seller {seller_id, name}, seller_count, variant_count, stamps [{text, "
+            "type, image}], image, sponsored, international}], sponsored_count and sponsored "
+            "[the site's sponsored placements, kept apart from items: same fields plus "
+            "placement, their place on the page], facets [{key, name, type, values [{name, "
+            "value, count, selected, filter (the input of filters)}] or ranges [{from, to, "
+            "count}] for price}], region, price_scope, notes. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-25 s on "
+            "mercado, up to about 50 s on www; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords in Portuguese, or an EAN barcode."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Optional[str]",
+                doc=(
+                    "On mercado: a CEP for that region's prices and assortment (8 digits, "
+                    "dash optional). www prices are national; the CEP changes shipping there "
+                    "and nothing else (/carrefourbr/delivery)."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[str]",
+                doc=(
+                    "On mercado, instead of cep: a pickup store's store_id from "
+                    "/carrefourbr/stores, for that store's prices and assortment."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-50 (15 items a page). Defaults to 1."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), orders_desc (best selling), price_asc, price_desc, "
+                    "release_desc (newest), discount_desc, name_asc or name_desc: the site's "
+                    "sorts."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[dict[str, Any], list[str]]]",
+                doc=(
+                    "Facet filters from a previous answer's facets[].values[].filter "
+                    "({\"brand\": \"consul\"}, {\"category-2\": [\"geladeira\"]}), or \"key=value\" "
+                    "strings. Up to 10 values; values of one key combine as any of them."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in whole reais (BRL)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in whole reais (BRL)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_category",
+        namespace="carrefourbr",
+        method="category",
+        http="POST",
+        path="/api/v1/carrefourbr/category",
+        summary=(
+            "One Carrefour Brasil category by path "
+            "(/categoria/mercearia/alimentos-basicos/arroz) or link. Sort by the site's "
+            "sorts; filter by any facet value (department, category, brand, seller and the "
+            "product attributes the site lists) and a price range. On mercado, cep or store "
+            "(a store_id from /carrefourbr/stores) gives that region's prices and assortment "
+            "(region, price_scope regional); without them the site's default prices "
+            "(price_scope national). www prices are national. Returns category {path, "
+            "category_id, name, title, page_type, breadcrumbs} and 15 items a page: total, "
+            "page, page_size, total_pages (up to 50), sort, count, items [{position, "
+            "product_id, item_id (the input of product), name, brand, product_reference, url, "
+            "categories, measurement_unit (kg: priced per kg), price, list_price, spot_price "
+            "(the single-payment price), discount_percent, available (a flag, no unit "
+            "counts), seller {seller_id, name}, seller_count, variant_count, stamps [{text, "
+            "type, image}], image, sponsored, international}], sponsored_count and sponsored "
+            "[the site's sponsored placements, kept apart from items: same fields plus "
+            "placement, their place on the page], facets [{key, name, type, values [{name, "
+            "value, count, selected, filter (the input of filters)}] or ranges [{from, to, "
+            "count}] for price}], region, price_scope, notes. An unknown category is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client "
+            "timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "path",
+                "str",
+                required=True,
+                doc=(
+                    "A category path from /carrefourbr/categories or a list's breadcrumbs "
+                    "(departments[].path), or such a link."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Optional[str]",
+                doc=(
+                    "On mercado: a CEP for that region's prices and assortment (8 digits, "
+                    "dash optional). www prices are national; the CEP changes shipping there "
+                    "and nothing else (/carrefourbr/delivery)."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[str]",
+                doc=(
+                    "On mercado, instead of cep: a pickup store's store_id from "
+                    "/carrefourbr/stores, for that store's prices and assortment."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-50 (15 items a page). Defaults to 1."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), orders_desc (best selling), price_asc, price_desc, "
+                    "release_desc (newest), discount_desc, name_asc or name_desc: the site's "
+                    "sorts."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[dict[str, Any], list[str]]]",
+                doc=(
+                    "Facet filters from a previous answer's facets[].values[].filter "
+                    "({\"brand\": \"consul\"}, {\"category-2\": [\"geladeira\"]}), or \"key=value\" "
+                    "strings. Up to 10 values; values of one key combine as any of them."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in whole reais (BRL)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in whole reais (BRL)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_collection",
+        namespace="carrefourbr",
+        method="collection",
+        http="POST",
+        path="/api/v1/carrefourbr/collection",
+        summary=(
+            "One Carrefour Brasil collection (a themed or deal list, /colecao/<id>: the lists "
+            "the site's banners, coupons and menu link to) by id or link. Sort by the site's "
+            "sorts; filter by any facet value (department, category, brand, seller and the "
+            "product attributes the site lists) and a price range. On mercado, cep or store "
+            "(a store_id from /carrefourbr/stores) gives that region's prices and assortment "
+            "(region, price_scope regional); without them the site's default prices "
+            "(price_scope national). www prices are national. Returns collection "
+            "{collection_id, name (the site's own internal name, as given)} and 15 items a "
+            "page: total, page, page_size, total_pages (up to 50), sort, count, items "
+            "[{position, product_id, item_id (the input of product), name, brand, "
+            "product_reference, url, categories, measurement_unit (kg: priced per kg), price, "
+            "list_price, spot_price (the single-payment price), discount_percent, available "
+            "(a flag, no unit counts), seller {seller_id, name}, seller_count, variant_count, "
+            "stamps [{text, type, image}], image, sponsored, international}], sponsored_count "
+            "and sponsored [the site's sponsored placements, kept apart from items: same "
+            "fields plus placement, their place on the page], facets [{key, name, type, "
+            "values [{name, value, count, selected, filter (the input of filters)}] or ranges "
+            "[{from, to, count}] for price}], region, price_scope, notes. An unknown or empty "
+            "collection is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on "
+            "www; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "collection_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A collection id (the number in a /colecao/<id> link, "
+                    "coupons[].collection_id, categories collection_id) or such a link."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Optional[str]",
+                doc=(
+                    "On mercado: a CEP for that region's prices and assortment (8 digits, "
+                    "dash optional). www prices are national; the CEP changes shipping there "
+                    "and nothing else (/carrefourbr/delivery)."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[str]",
+                doc=(
+                    "On mercado, instead of cep: a pickup store's store_id from "
+                    "/carrefourbr/stores, for that store's prices and assortment."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-50 (15 items a page). Defaults to 1."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), orders_desc (best selling), price_asc, price_desc, "
+                    "release_desc (newest), discount_desc, name_asc or name_desc: the site's "
+                    "sorts."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[dict[str, Any], list[str]]]",
+                doc=(
+                    "Facet filters from a previous answer's facets[].values[].filter "
+                    "({\"brand\": \"consul\"}, {\"category-2\": [\"geladeira\"]}), or \"key=value\" "
+                    "strings. Up to 10 values; values of one key combine as any of them."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in whole reais (BRL)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in whole reais (BRL)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_product",
+        namespace="carrefourbr",
+        method="product",
+        http="POST",
+        path="/api/v1/carrefourbr/product",
+        summary=(
+            "One Carrefour Brasil product by item id or link. On mercado, cep or store (a "
+            "store_id from /carrefourbr/stores) gives that region's prices and assortment "
+            "(region, price_scope regional); without them the site's default prices "
+            "(price_scope national). www prices are national. Returns requested, item_id, "
+            "product_id, name, brand, ean, product_reference, url, categories, breadcrumbs, "
+            "measurement_unit, unit_multiplier, price, list_price, spot_price, "
+            "discount_percent, price_valid_until, seller, sellers [{seller_id, name (the "
+            "seller's business name), default, price, list_price, spot_price, available, "
+            "price_valid_until, payment_offers, promotions}] (sellers offering the item), "
+            "payment_offers [{name, payment_method_id, discount_percent, price (computed by "
+            "Scavio from the site's percentage)}] (the site's prices for one payment method, "
+            "such as the Carrefour card or Pix), promotions (other site offers, e.g. quantity "
+            "offers, with their conditions and effects as given), stamps [{text (the site's "
+            "promotion stamp as given), type, image}], dual_price, weight (items sold by "
+            "weight: unit_multiplier, price_per_kg, item_price computed by Scavio), "
+            "availability {available (a flag: the site publishes no unit counts), "
+            "unavailable_product}, description, specs [{group, name, value}], variants "
+            "[{attribute, values [{name, item_id, selected, image}]}] (each variant is its "
+            "own item id), images, international. An unknown item, or one the chosen region "
+            "does not sell, is a charged 404. No reviews or questions (the site has none). 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of "
+            "at least 120 s."
+        ),
+        params=(
+            Param(
+                "item_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The item id (items[].item_id, or the number at the end of a /produto/ "
+                    "link)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on either site instead of item_id (/produto/<name>-<item "
+                    "id>, or an older /<name>/p link)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Optional[str]",
+                doc=(
+                    "On mercado: a CEP for that region's prices and assortment (8 digits, "
+                    "dash optional). www prices are national; the CEP changes shipping there "
+                    "and nothing else (/carrefourbr/delivery)."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[str]",
+                doc=(
+                    "On mercado, instead of cep: a pickup store's store_id from "
+                    "/carrefourbr/stores, for that store's prices and assortment."
+                ),
+            ),
+        ),
+        one_of=(("item_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_delivery",
+        namespace="carrefourbr",
+        method="delivery",
+        http="POST",
+        path="/api/v1/carrefourbr/delivery",
+        summary=(
+            "Delivery and pickup options for one item from one seller to a CEP, on either "
+            "site: cep, address, can_deliver, message (the site's own text, e.g. when it "
+            "cannot deliver to the CEP), out_of_stock_for_region, minimum_order_value, "
+            "options [{group, name, channel (delivery or pickup-in-point), price, list_price, "
+            "estimate (e.g. 2h, 8bd), estimate_date, earliest_date {day_of_week, day, month, "
+            "month_name}, scheduled, pickup_store}], pickup_stores [{name, pickup_point_id, "
+            "distance_km, opening_hours, address}] (the pickup stores near the CEP, with "
+            "their hours). 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set "
+            "a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "item_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The item id."
+                ),
+            ),
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "The delivery CEP."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "seller_id",
+                "Optional[str]",
+                doc=(
+                    "The seller (sellers[].seller_id from /carrefourbr/product). Defaults to "
+                    "1, Carrefour itself; marketplace items on www need their seller's id."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_stores",
+        namespace="carrefourbr",
+        method="stores",
+        http="POST",
+        path="/api/v1/carrefourbr/stores",
+        summary=(
+            "The Carrefour pickup stores (Retire na Loja): total, count, stores [{store_id "
+            "(the input of store), name, street, neighborhood, city, state, cep}], filtered "
+            "by state and city. No opening hours here: /carrefourbr/delivery lists the pickup "
+            "stores near a CEP with their hours. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to "
+            "about 50 s on www; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Stores in this state (UF)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Stores in this city."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_suggestions",
+        namespace="carrefourbr",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/carrefourbr/suggestions",
+        summary=(
+            "The site's search suggestions for what a shopper has typed: terms [{term, "
+            "attributes [{key, label, value, value_label}]}], products (the suggested "
+            "products, list item fields), and top_searches [{term, count}] (the site's most "
+            "searched terms with their counts; alone when query is omitted). 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 "
+            "s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "What a shopper has typed. Without it, the top searches alone."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_coupons",
+        namespace="carrefourbr",
+        method="coupons",
+        http="POST",
+        path="/api/v1/carrefourbr/coupons",
+        summary=(
+            "The site's coupon page: title, count, coupons [{code, value, name, category, "
+            "active, expires (as given), expiration_date, link, collection_id (the list a "
+            "coupon applies to, the input of collection), rules}], categories and terms. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of "
+            "at least 120 s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="carrefourbr_categories",
+        namespace="carrefourbr",
+        method="categories",
+        http="POST",
+        path="/api/v1/carrefourbr/categories",
+        summary=(
+            "The site's department menu as its header lists it, 3 levels: count, node_count, "
+            "departments [{name, url, site, path (the input of category), filters (the facet "
+            "filters the link applies, the input of filters), collection_id (the input of "
+            "collection), children [...]}]. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on "
+            "www; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["mercado", "www"]]',
+                doc=(
+                    "mercado (default; mercado.carrefour.com.br, the grocery site) or www "
+                    "(www.carrefour.com.br: non-food and the marketplace)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -55393,6 +57175,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_NATURA_ENDPOINTS,
     *_BOTICARIO_ENDPOINTS,
     *_CENTAURO_ENDPOINTS,
+    # ====== batch 7 wave 3 2026-11-27: 3 platforms (Enjoei, Atacadao, Carrefour Brasil) ======
+    *_ENJOEI_ENDPOINTS,
+    *_ATACADAO_ENDPOINTS,
+    *_CARREFOURBR_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -62381,6 +64167,9 @@ NAMESPACES: tuple[str, ...] = (
     "natura",
     "boticario",
     "centauro",
+    "enjoei",
+    "atacadao",
+    "carrefourbr",
 )
 
 

@@ -183,6 +183,9 @@ __all__ = [
     "_NaturaNamespace",
     "_BoticarioNamespace",
     "_CentauroNamespace",
+    "_EnjoeiNamespace",
+    "_AtacadaoNamespace",
+    "_CarrefourbrNamespace",
 ]
 
 class _GoogleNamespace:
@@ -34856,3 +34859,675 @@ class _CentauroNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("centauro_suggestions", {"query": query}, extra)
+
+class _EnjoeiNamespace:
+    """Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace) search, category, categories, product, shop, shop listings, shop sold, shop reviews and suggestions endpoints; Brazil only, prices in BRL, sellers by @handle only, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        size_clothes: Optional[Union[str, list[str]]] = None,
+        size_waist: Optional[Union[str, list[str]]] = None,
+        size_shoes: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Literal["new", "used"]] = None,
+        listed_within: Optional[Literal["24h", "7d", "14d", "30d"]] = None,
+        store_kind: Optional[Literal["pro", "celebrity"]] = None,
+        discount_min: Optional[int] = None,
+        discount_max: Optional[int] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search listings on Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. Returns market, currency, query, sort, filters, page, total (Enjoei's count, it stops at 10,000: total_capped true means 10,000 or more), total_capped, count, has_more, next_cursor, items [{id, url, title, brand, price, original_price (before the seller's discount), discount_percent (computed from the two), currency, condition (new, used), size, sizes, shipping {free, type (e.g. charge_by_weight, hand_deliver)}, department, category, subcategory (slugs), image, tags (the card's badges, e.g. 20%, barateou), bundle_allowed, seller_handle}], page_size (30), facets (best-effort, null when the page did not show them): brands [{slug, name, count}] (top 50), departments, subcategories, sizes {clothes, waist, shoes} and store_kinds, each [{slug, name}] and notes. Sorts: relevance (default), price_asc, price_desc, discount. Filters: brand (slugs), size_clothes / size_waist / size_shoes (slugs), price_min / price_max (BRL), condition (new, used), listed_within (24h, 7d, 14d, 30d), store_kind (pro, celebrity), discount_min / discount_max (percent). Listings cover sellers who ship to all of Brazil. There is no color filter (put the colour in the query). Next pages: send next_cursor. No results is an empty 200. Seller names, avatars and cities are never returned (the @handle is returned instead). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about two minutes; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese).
+            sort: relevance (default), price_asc, price_desc or discount (largest discount at the top).
+            brand: Brand slugs as Enjoei writes them (facets.brands[].slug, e.g. farm, zara, le-lis-blanc), one or up to 10.
+            size_clothes: Clothing sizes (facets.sizes.clothes[].slug: pp, p, m, g, gg, xgg, 36, 38...).
+            size_waist: Waist sizes (facets.sizes.waist[].slug).
+            size_shoes: Shoe sizes (facets.sizes.shoes[].slug).
+            price_min: Lowest price, BRL.
+            price_max: Highest price, BRL.
+            condition: new (never used) or used.
+            listed_within: Listed in the last 24h, 7d, 14d or 30d.
+            store_kind: pro (Enjoei Pro stores) or celebrity (Enjoei's famosas, celebrity closets).
+            discount_min: Smallest discount, percent.
+            discount_max: Largest discount, percent.
+            cursor: next_cursor of the previous page (pages are cursor-paged: a page is reached from the one before it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_search", {"query": query, "sort": sort, "brand": brand, "size_clothes": size_clothes, "size_waist": size_waist, "size_shoes": size_shoes, "price_min": price_min, "price_max": price_max, "condition": condition, "listed_within": listed_within, "store_kind": store_kind, "discount_min": discount_min, "discount_max": discount_max, "cursor": cursor}, extra)
+
+    def category(
+        self,
+        department: str,
+        *,
+        category: Optional[str] = None,
+        subcategory: Optional[str] = None,
+        query: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        size_clothes: Optional[Union[str, list[str]]] = None,
+        size_waist: Optional[Union[str, list[str]]] = None,
+        size_shoes: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        condition: Optional[Literal["new", "used"]] = None,
+        listed_within: Optional[Literal["24h", "7d", "14d", "30d"]] = None,
+        store_kind: Optional[Literal["pro", "celebrity"]] = None,
+        discount_min: Optional[int] = None,
+        discount_max: Optional[int] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One department, category or subcategory of Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By the slugs categories lists (departments[].params). Returns department, category, subcategory, query, sort, filters, page, total (Enjoei's count, it stops at 10,000: total_capped true means 10,000 or more), total_capped, count, has_more, next_cursor, items [{id, url, title, brand, price, original_price (before the seller's discount), discount_percent (computed from the two), currency, condition (new, used), size, sizes, shipping {free, type (e.g. charge_by_weight, hand_deliver)}, department, category, subcategory (slugs), image, tags (the card's badges, e.g. 20%, barateou), bundle_allowed, seller_handle}], page_size (30), facets (best-effort, null when the page did not show them): brands [{slug, name, count}] (top 50), departments, subcategories, sizes {clothes, waist, shoes} and store_kinds, each [{slug, name}] and notes. Sorts: relevance (default), price_asc, price_desc, discount. Filters: brand (slugs), size_clothes / size_waist / size_shoes (slugs), price_min / price_max (BRL), condition (new, used), listed_within (24h, 7d, 14d, 30d), store_kind (pro, celebrity), discount_min / discount_max (percent). Listings cover sellers who ship to all of Brazil. There is no color filter (put the colour in the query). A category slug outside its department is a 400 before anything is charged. Seller names, avatars and cities are never returned (the @handle is returned instead). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about two minutes; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: Department slug (categories: departments[].params.department, e.g. feminino, masculino, infantil, casa-e-decor).
+            category: Category slug in that department (params.category, e.g. feminino-roupas).
+            subcategory: Subcategory slug in that category (params.subcategory, e.g. feminino-roupas-vestidos). Needs category.
+            query: Optional keywords inside the category.
+            sort: relevance (default), price_asc, price_desc or discount (largest discount at the top).
+            brand: Brand slugs as Enjoei writes them (facets.brands[].slug, e.g. farm, zara, le-lis-blanc), one or up to 10.
+            size_clothes: Clothing sizes (facets.sizes.clothes[].slug: pp, p, m, g, gg, xgg, 36, 38...).
+            size_waist: Waist sizes (facets.sizes.waist[].slug).
+            size_shoes: Shoe sizes (facets.sizes.shoes[].slug).
+            price_min: Lowest price, BRL.
+            price_max: Highest price, BRL.
+            condition: new (never used) or used.
+            listed_within: Listed in the last 24h, 7d, 14d or 30d.
+            store_kind: pro (Enjoei Pro stores) or celebrity (Enjoei's famosas, celebrity closets).
+            discount_min: Smallest discount, percent.
+            discount_max: Largest discount, percent.
+            cursor: next_cursor of the previous page (pages are cursor-paged: a page is reached from the one before it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_category", {"department": department, "category": category, "subcategory": subcategory, "query": query, "sort": sort, "brand": brand, "size_clothes": size_clothes, "size_waist": size_waist, "size_shoes": size_shoes, "price_min": price_min, "price_max": price_max, "condition": condition, "listed_within": listed_within, "store_kind": store_kind, "discount_min": discount_min, "discount_max": discount_max, "cursor": cursor}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. Returns count (top-level nodes), node_count and departments [{name, slug, url, params {department, category, subcategory} (the category inputs; null on navigation nodes without a listing of their own), children [...]}] three levels deep. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_categories", {}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One listing of Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By product id or link: id, url, title, description, status (published, sold...), available, price (the sale price), list_price, discount_percent, currency, installments_text (e.g. em ate 2x R$ 59,50 sem juros), promo_text (a new-buyer coupon line when shown), offer {accepts_offers, min_price, max_price} (the make-an-offer range the seller accepts), bundle_allowed, size, sizes [{name, slug, available}], brand {name, slug, verified}, condition (new, used), weight_kg, hand_delivery, single_piece, photos (the item's photos), category_slug, breadcrumb [{title, url}], seller {id, handle}, price_detail (full, or basic when the pricing details could not be read and the product's own price is shown) and notes. Shipping cost and type are shown to signed-in buyers, not to visitors (listing cards carry shipping.free and shipping.type). An unknown product is a charged 404. Seller names, avatars and cities are never returned (the @handle is returned instead). Not available: shipping quotes by CEP (they need a signed-in buyer), product comments (not shown to visitors), a site-wide sold search, coupons and Black Friday dates. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: Enjoei product id (items[].id).
+            url: A product link (https://www.enjoei.com.br/p/<name>-<id>).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_product", {"product_id": product_id, "url": url}, extra)
+
+    def shop(
+        self,
+        handle: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A seller's shop on Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By handle: handle, seller_id, url, joined_at, on_vacation, business (an Enjoei business seller), badge (e.g. loja em destaque, null when none), counters {listings, sold, likes, followers, following}, rating (0-5), review_count, recent_deliveries (on-time history of the latest sales: on_time, delayed, cancelled), average_shipping_time (e.g. 1 dia; shown after 5 sales) and notes. An unknown handle is a charged 404. Names, avatars, header images, cities and the shop's own description are never returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or without the @, or the shop link.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_shop", {"handle": handle}, extra)
+
+    def shop_listings(
+        self,
+        handle: str,
+        *,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A shop's listings on sale on Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By handle: handle, seller_id, page, total (Enjoei's count, it stops at 10,000: total_capped true means 10,000 or more), total_capped, count, has_more, next_cursor, items [{id, url, title, brand, price, original_price (before the seller's discount), discount_percent (computed from the two), currency, condition (new, used), size, sizes, shipping {free, type (e.g. charge_by_weight, hand_deliver)}, department, category, subcategory (slugs), image, tags (the card's badges, e.g. 20%, barateou), bundle_allowed, seller_handle}] (20 on page 1, 30 on later pages), facets and notes. Next pages: send next_cursor. An unknown handle is a charged 404. Seller names, avatars and cities are never returned (the @handle is returned instead). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about two minutes; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or without the @, or the shop link.
+            cursor: next_cursor of the previous page (pages are cursor-paged: a page is reached from the one before it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_shop_listings", {"handle": handle, "cursor": cursor}, extra)
+
+    def shop_sold(
+        self,
+        handle: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A shop's sold listings on Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By handle and page (1-50): handle, page, page_size (40), total, total_pages, has_more, count, items [{id, url, title, price (the listed price), currency, image, status}] and notes. Enjoei shows no sold date, and at most 50 pages (2,000 sold listings) per shop. An unknown handle is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or without the @, or the shop link.
+            page: Page, 1 to 50, 40 sold listings each.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_shop_sold", {"handle": handle, "page": page}, extra)
+
+    def shop_reviews(
+        self,
+        handle: Optional[str] = None,
+        *,
+        shop_id: Optional[str] = None,
+        filter: Optional[Literal["all", "positive", "negative"]] = None,
+        cursor: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Buyer reviews of a shop on Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. By handle or shop_id, filter all (default), positive or negative, 20 per page by cursor: handle, seller_id, filter, page_size, count, has_more, next_cursor, items [{score (1-5), date, text, feedback_tags (e.g. envio rapido, otima embalagem)}], summary {score, total, stars [{stars, total}], feedbacks [{label, total}]} and notes. Reviewer names and photos are never returned. An unknown handle is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            handle: Shop handle (enjoei.com.br/@<handle>, items[].seller_handle), with or without the @, or the shop link.
+            shop_id: Seller id (shop.seller_id, product.seller.id) instead of handle.
+            filter: all (default), positive or negative (Enjoei's own review filters).
+            cursor: next_cursor of the previous page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_shop_reviews", {"handle": handle, "shop_id": shop_id, "filter": filter, "cursor": cursor}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search suggestions of Enjoei (enjoei.com.br, Brazil's second-hand fashion marketplace). Scavio fetches the public Enjoei page on request; Enjoei has no public API. One market, Brazil: text in Portuguese, prices in BRL as shown to a visitor who is not signed in. For what a shopper has typed: query, count, suggestions [{text, query, department (the department slug a suggestion narrows to, null for all of Enjoei)}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about two minutes; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("enjoei_suggestions", {"query": query}, extra)
+
+class _AtacadaoNamespace:
+    """Atacadao (atacadao.com.br, the Brazilian cash-and-carry wholesale chain of Grupo Carrefour Brasil) search, category, product, stores near, stores, store, flyers, facets, suggestions and categories endpoints; Brazil only, prices in BRL at the store you choose with quantity tiers, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        category: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        collection: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). By keyword at one store, sorted by the site's sorts and filtered by category (1-3 levels), brand, price range, collection (e.g. Black November) and any other facet. Returns store_id, priced_store_id, page, page_size, total (the store's matching items), total_pages, has_more, count, sort, filters_applied, items [{position, sku (use it in product), product_id, name, brand, url, image, measurement_unit, unit_multiplier, units_per_box (the case size), reference_code, price (the unit price for 1 unit), price_tiers [{min_quantity, unit_price}] (every quantity tier the store gives, ascending), bulk_unit_price (the unit price at the largest tier), online_exclusive_price, priced_store_id, categories [{name, path}] and collections [{id, name}]}] and notes. Items the chosen store does not sell are left out. There is no was-price: the quantity tiers are the deal. The price sorts follow the site's own order, which does not always follow the chosen store's price. Also query. No results is an empty 200. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese.
+            category: A category path of 1 to 3 levels (categories[].path, e.g. mercearia, mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br link.
+            store_id: The store to price at: its store id (atacadaobr340) or store number (340), from stores_near or stores (stores[].store_id). Default: the site's default store (atacadaobr60, Vila Maria, Sao Paulo).
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, name_asc, name_desc, newest, discount (best_sellers = most ordered, newest = release date). Default relevance.
+            brand: Brand value(s) from facets (key brand), e.g. camil.
+            collection: A collection id (items[].collections[].id), e.g. 382 Black November, 334 Black Week.
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL.
+            filters: Any other facet by the site's own key: {"<facets[].key>": value or [values]}. Up to 5 keys.
+            page: Results page, 1-50 (default 1).
+            page_size: Items per page, 1-100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_search", {"query": query, "category": category, "store_id": store_id, "sort": sort, "brand": brand, "collection": collection, "min_price": min_price, "max_price": max_price, "filters": filters, "page": page, "page_size": page_size}, extra)
+
+    def category(
+        self,
+        category: Optional[str] = None,
+        *,
+        category_id: Optional[int] = None,
+        store_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        collection: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). By category path or category_id, at one store, sorted and filtered like search. Returns store_id, priced_store_id, page, page_size, total (the store's matching items), total_pages, has_more, count, sort, filters_applied, items [{position, sku (use it in product), product_id, name, brand, url, image, measurement_unit, unit_multiplier, units_per_box (the case size), reference_code, price (the unit price for 1 unit), price_tiers [{min_quantity, unit_price}] (every quantity tier the store gives, ascending), bulk_unit_price (the unit price at the largest tier), online_exclusive_price, priced_store_id, categories [{name, path}] and collections [{id, name}]}] and notes. Items the chosen store does not sell are left out. There is no was-price: the quantity tiers are the deal. The price sorts follow the site's own order, which does not always follow the chosen store's price. Also category, category_id and url. An unknown category_id is a charged 404; an unknown path is an empty 200. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path of 1 to 3 levels (categories[].path, e.g. mercearia, mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br link.
+            category_id: A category id (categories[].category_id) instead of category.
+            store_id: The store to price at: its store id (atacadaobr340) or store number (340), from stores_near or stores (stores[].store_id). Default: the site's default store (atacadaobr60, Vila Maria, Sao Paulo).
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, name_asc, name_desc, newest, discount (best_sellers = most ordered, newest = release date). Default relevance.
+            brand: Brand value(s) from facets (key brand), e.g. camil.
+            collection: A collection id (items[].collections[].id), e.g. 382 Black November, 334 Black Week.
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL.
+            filters: Any other facet by the site's own key: {"<facets[].key>": value or [values]}. Up to 5 keys.
+            page: Results page, 1-50 (default 1).
+            page_size: Items per page, 1-100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_category", {"category": category, "category_id": category_id, "store_id": store_id, "sort": sort, "brand": brand, "collection": collection, "min_price": min_price, "max_price": max_price, "filters": filters, "page": page, "page_size": page_size}, extra)
+
+    def product(
+        self,
+        sku: Optional[str] = None,
+        *,
+        ean: Optional[str] = None,
+        product_id: Optional[str] = None,
+        slug: Optional[str] = None,
+        url: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). By sku, EAN, product id, slug or link, priced at one store: sku, product_id, name, complement_name, brand, ean (EAN-13), reference_code, url, images, categories, measurement_unit, unit_multiplier, units_per_box, specifications, available_at_store, price, price_tiers [{min_quantity, unit_price}], bulk_unit_price, online_exclusive_price, priced_store_id and collections. No marketing description, no stock units, reviews or price history. An unknown product is a charged 404; a product the store does not sell is a 200 with available_at_store false and no price. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The sku id (items[].sku).
+            ean: The EAN / GTIN barcode (EAN-13).
+            product_id: The product id (items[].product_id).
+            slug: The product slug (arroz-branco-namorado-tipo-1-5619-14443).
+            url: A product link (https://www.atacadao.com.br/<slug>/p).
+            store_id: The store to price at: its store id (atacadaobr340) or store number (340), from stores_near or stores (stores[].store_id). Default: the site's default store (atacadaobr60, Vila Maria, Sao Paulo).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_product", {"sku": sku, "ean": ean, "product_id": product_id, "slug": slug, "url": url, "store_id": store_id}, extra)
+
+    def stores_near(
+        self,
+        cep: Optional[str] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Atacadao pickup stores near a CEP or a point (latitude / longitude), nearest first: total, count and stores [{store_id, store_number, pickup_point_id, name, distance_km, address {street, number, neighborhood, city, state, cep}, latitude, longitude, hours [{day, opens, closes}]}]; for a CEP also serving_stores [{store_id, store_number, name}] (the stores the site offers for that CEP). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            latitude: Latitude of a point in Brazil (with longitude, instead of cep).
+            longitude: Longitude of a point in Brazil.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_stores_near", {"cep": cep, "latitude": latitude, "longitude": longitude}, extra)
+
+    def stores(
+        self,
+        state: str,
+        *,
+        city: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Atacadao store directory for a state (and city): total, page, page_size, total_pages, has_more, count and stores [{store_number, store_id (the online catalog id, null when the store does not sell online), sells_online, name, slug, url, format, address, phone, latitude, longitude, hours [{day, opens, closes}], holiday_hours [{date, description, hours}], online_services, flyer_count}]. A city with no store is a charged 404 that lists the state's cities. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: Brazilian state code (UF): AC, AL, AM, AP, BA, CE, DF, ES, GO, MA, MG, MS, MT, PA, PB, PE, PI, PR, RJ, RN, RO, RR, RS, SC, SE, SP, TO.
+            city: A city of that state (accents and case ignored).
+            page: Page (default 1).
+            page_size: Stores per page, 1-50 (default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_stores", {"state": state, "city": city, "page": page, "page_size": page_size}, extra)
+
+    def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Atacadao store in full: the directory fields plus services (bakery, butcher, cafe, fuel station...), recycling_points, payment_methods, credit_cards, meal_vouchers and flyers [{flyer_id, name, valid_from, valid_to, pdf_url, thumbnail_url, priority}]. An unknown store is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store number (340), store id (atacadaobr340) or store slug (tatuape), from stores or stores_near.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_store", {"store_id": store_id}, extra)
+
+    def flyers(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current flyers (folhetos) of one Atacadao store: store_number, store_id, name, slug, url, count and flyers [{flyer_id, name, valid_from, valid_to, pdf_url (the flyer document, PDF), thumbnail_url, priority}]. The PDF is linked, not opened. An unknown store is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A store number (340), store id (atacadaobr340) or store slug (tatuape), from stores or stores_near.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_flyers", {"store_id": store_id}, extra)
+
+    def facets(
+        self,
+        *,
+        query: Optional[str] = None,
+        category: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "name_asc", "name_desc", "newest", "discount"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        collection: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The filter values of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). For a query and / or category, brand or collection at one store: total and facets [{key, label, param, values [{value, label, count, selected}] or min / max}] with the store's own counts; param names the request field each one goes back into. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (or give a category, brand or collection).
+            category: A category path of 1 to 3 levels (categories[].path, e.g. mercearia, mercearia/graos, mercearia/graos/arroz-branco) or its atacadao.com.br link.
+            store_id: The store to price at: its store id (atacadaobr340) or store number (340), from stores_near or stores (stores[].store_id). Default: the site's default store (atacadaobr60, Vila Maria, Sao Paulo).
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, name_asc, name_desc, newest, discount (best_sellers = most ordered, newest = release date). Default relevance.
+            brand: Brand value(s) from facets (key brand), e.g. camil.
+            collection: A collection id (items[].collections[].id), e.g. 382 Black November, 334 Black Week.
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL.
+            filters: Any other facet by the site's own key: {"<facets[].key>": value or [values]}. Up to 5 keys.
+            page: Results page, 1-50 (default 1).
+            page_size: Items per page, 1-100 (default 20).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_facets", {"query": query, "category": category, "store_id": store_id, "sort": sort, "brand": brand, "collection": collection, "min_price": min_price, "max_price": max_price, "filters": filters, "page": page, "page_size": page_size}, extra)
+
+    def suggestions(
+        self,
+        *,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search box of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). For the start of a search: suggestions [{term, count, attributes}] and top_searches [{term, count}] (without query: the top searches alone). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a search. Without it, the top searches alone.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_suggestions", {"query": query}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department tree of Atacadao (atacadao.com.br, the cash-and-carry chain of Grupo Carrefour Brasil), Brazil only, pt-BR text, BRL prices. Scavio fetches the public Atacadao page on request; Atacadao has no public product API. Prices are the online prices of the store you choose (store_id). count, node_count and categories [{category_id, name, path, url, children [...]}]: use path as category or category_id in category. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("atacadao_categories", {}, extra)
+
+class _CarrefourbrNamespace:
+    """Carrefour Brasil (carrefour.com.br: Mercado grocery + the www marketplace; chosen with site) search, category, collection, product, delivery, stores, suggestions, coupons and categories endpoints; Brazil only, prices in BRL, regional grocery prices by CEP or store, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        cep: Optional[str] = None,
+        store: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[dict[str, Any], list[str]]] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Carrefour Brasil (carrefour.com.br and its grocery site mercado.carrefour.com.br). Scavio fetches the site's public page on request; Carrefour Brasil has no public API. Brazil, pt-BR, prices in BRL. site mercado (default, grocery) or www (non-food and the marketplace). By keywords or an EAN. Sort by the site's sorts; filter by any facet value (department, category, brand, seller and the product attributes the site lists) and a price range. On mercado, cep or store (a store_id from /carrefourbr/stores) gives that region's prices and assortment (region, price_scope regional); without them the site's default prices (price_scope national). www prices are national. Returns site, store, query, suggestions (the site's related terms) and 15 items a page: total, page, page_size, total_pages (up to 50), sort, count, items [{position, product_id, item_id (the input of product), name, brand, product_reference, url, categories, measurement_unit (kg: priced per kg), price, list_price, spot_price (the single-payment price), discount_percent, available (a flag, no unit counts), seller {seller_id, name}, seller_count, variant_count, stamps [{text, type, image}], image, sponsored, international}], sponsored_count and sponsored [the site's sponsored placements, kept apart from items: same fields plus placement, their place on the page], facets [{key, name, type, values [{name, value, count, selected, filter (the input of filters)}] or ranges [{from, to, count}] for price}], region, price_scope, notes. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords in Portuguese, or an EAN barcode.
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            cep: On mercado: a CEP for that region's prices and assortment (8 digits, dash optional). www prices are national; the CEP changes shipping there and nothing else (/carrefourbr/delivery).
+            store: On mercado, instead of cep: a pickup store's store_id from /carrefourbr/stores, for that store's prices and assortment.
+            page: Page, 1-50 (15 items a page). Defaults to 1.
+            sort: relevance (default), orders_desc (best selling), price_asc, price_desc, release_desc (newest), discount_desc, name_asc or name_desc: the site's sorts.
+            filters: Facet filters from a previous answer's facets[].values[].filter ({"brand": "consul"}, {"category-2": ["geladeira"]}), or "key=value" strings. Up to 10 values; values of one key combine as any of them.
+            min_price: Minimum price in whole reais (BRL).
+            max_price: Maximum price in whole reais (BRL).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_search", {"query": query, "site": site, "cep": cep, "store": store, "page": page, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    def category(
+        self,
+        path: str,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        cep: Optional[str] = None,
+        store: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[dict[str, Any], list[str]]] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Carrefour Brasil category by path (/categoria/mercearia/alimentos-basicos/arroz) or link. Sort by the site's sorts; filter by any facet value (department, category, brand, seller and the product attributes the site lists) and a price range. On mercado, cep or store (a store_id from /carrefourbr/stores) gives that region's prices and assortment (region, price_scope regional); without them the site's default prices (price_scope national). www prices are national. Returns category {path, category_id, name, title, page_type, breadcrumbs} and 15 items a page: total, page, page_size, total_pages (up to 50), sort, count, items [{position, product_id, item_id (the input of product), name, brand, product_reference, url, categories, measurement_unit (kg: priced per kg), price, list_price, spot_price (the single-payment price), discount_percent, available (a flag, no unit counts), seller {seller_id, name}, seller_count, variant_count, stamps [{text, type, image}], image, sponsored, international}], sponsored_count and sponsored [the site's sponsored placements, kept apart from items: same fields plus placement, their place on the page], facets [{key, name, type, values [{name, value, count, selected, filter (the input of filters)}] or ranges [{from, to, count}] for price}], region, price_scope, notes. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A category path from /carrefourbr/categories or a list's breadcrumbs (departments[].path), or such a link.
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            cep: On mercado: a CEP for that region's prices and assortment (8 digits, dash optional). www prices are national; the CEP changes shipping there and nothing else (/carrefourbr/delivery).
+            store: On mercado, instead of cep: a pickup store's store_id from /carrefourbr/stores, for that store's prices and assortment.
+            page: Page, 1-50 (15 items a page). Defaults to 1.
+            sort: relevance (default), orders_desc (best selling), price_asc, price_desc, release_desc (newest), discount_desc, name_asc or name_desc: the site's sorts.
+            filters: Facet filters from a previous answer's facets[].values[].filter ({"brand": "consul"}, {"category-2": ["geladeira"]}), or "key=value" strings. Up to 10 values; values of one key combine as any of them.
+            min_price: Minimum price in whole reais (BRL).
+            max_price: Maximum price in whole reais (BRL).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_category", {"path": path, "site": site, "cep": cep, "store": store, "page": page, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    def collection(
+        self,
+        collection_id: Union[str, int],
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        cep: Optional[str] = None,
+        store: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "orders_desc", "price_asc", "price_desc", "release_desc", "discount_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[dict[str, Any], list[str]]] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Carrefour Brasil collection (a themed or deal list, /colecao/<id>: the lists the site's banners, coupons and menu link to) by id or link. Sort by the site's sorts; filter by any facet value (department, category, brand, seller and the product attributes the site lists) and a price range. On mercado, cep or store (a store_id from /carrefourbr/stores) gives that region's prices and assortment (region, price_scope regional); without them the site's default prices (price_scope national). www prices are national. Returns collection {collection_id, name (the site's own internal name, as given)} and 15 items a page: total, page, page_size, total_pages (up to 50), sort, count, items [{position, product_id, item_id (the input of product), name, brand, product_reference, url, categories, measurement_unit (kg: priced per kg), price, list_price, spot_price (the single-payment price), discount_percent, available (a flag, no unit counts), seller {seller_id, name}, seller_count, variant_count, stamps [{text, type, image}], image, sponsored, international}], sponsored_count and sponsored [the site's sponsored placements, kept apart from items: same fields plus placement, their place on the page], facets [{key, name, type, values [{name, value, count, selected, filter (the input of filters)}] or ranges [{from, to, count}] for price}], region, price_scope, notes. An unknown or empty collection is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection_id: A collection id (the number in a /colecao/<id> link, coupons[].collection_id, categories collection_id) or such a link.
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            cep: On mercado: a CEP for that region's prices and assortment (8 digits, dash optional). www prices are national; the CEP changes shipping there and nothing else (/carrefourbr/delivery).
+            store: On mercado, instead of cep: a pickup store's store_id from /carrefourbr/stores, for that store's prices and assortment.
+            page: Page, 1-50 (15 items a page). Defaults to 1.
+            sort: relevance (default), orders_desc (best selling), price_asc, price_desc, release_desc (newest), discount_desc, name_asc or name_desc: the site's sorts.
+            filters: Facet filters from a previous answer's facets[].values[].filter ({"brand": "consul"}, {"category-2": ["geladeira"]}), or "key=value" strings. Up to 10 values; values of one key combine as any of them.
+            min_price: Minimum price in whole reais (BRL).
+            max_price: Maximum price in whole reais (BRL).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_collection", {"collection_id": collection_id, "site": site, "cep": cep, "store": store, "page": page, "sort": sort, "filters": filters, "min_price": min_price, "max_price": max_price}, extra)
+
+    def product(
+        self,
+        item_id: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        url: Optional[str] = None,
+        cep: Optional[str] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Carrefour Brasil product by item id or link. On mercado, cep or store (a store_id from /carrefourbr/stores) gives that region's prices and assortment (region, price_scope regional); without them the site's default prices (price_scope national). www prices are national. Returns requested, item_id, product_id, name, brand, ean, product_reference, url, categories, breadcrumbs, measurement_unit, unit_multiplier, price, list_price, spot_price, discount_percent, price_valid_until, seller, sellers [{seller_id, name (the seller's business name), default, price, list_price, spot_price, available, price_valid_until, payment_offers, promotions}] (sellers offering the item), payment_offers [{name, payment_method_id, discount_percent, price (computed by Scavio from the site's percentage)}] (the site's prices for one payment method, such as the Carrefour card or Pix), promotions (other site offers, e.g. quantity offers, with their conditions and effects as given), stamps [{text (the site's promotion stamp as given), type, image}], dual_price, weight (items sold by weight: unit_multiplier, price_per_kg, item_price computed by Scavio), availability {available (a flag: the site publishes no unit counts), unavailable_product}, description, specs [{group, name, value}], variants [{attribute, values [{name, item_id, selected, image}]}] (each variant is its own item id), images, international. An unknown item, or one the chosen region does not sell, is a charged 404. No reviews or questions (the site has none). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: The item id (items[].item_id, or the number at the end of a /produto/ link).
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            url: A product link on either site instead of item_id (/produto/<name>-<item id>, or an older /<name>/p link).
+            cep: On mercado: a CEP for that region's prices and assortment (8 digits, dash optional). www prices are national; the CEP changes shipping there and nothing else (/carrefourbr/delivery).
+            store: On mercado, instead of cep: a pickup store's store_id from /carrefourbr/stores, for that store's prices and assortment.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_product", {"item_id": item_id, "site": site, "url": url, "cep": cep, "store": store}, extra)
+
+    def delivery(
+        self,
+        item_id: Union[str, int],
+        cep: str,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        seller_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Delivery and pickup options for one item from one seller to a CEP, on either site: cep, address, can_deliver, message (the site's own text, e.g. when it cannot deliver to the CEP), out_of_stock_for_region, minimum_order_value, options [{group, name, channel (delivery or pickup-in-point), price, list_price, estimate (e.g. 2h, 8bd), estimate_date, earliest_date {day_of_week, day, month, month_name}, scheduled, pickup_store}], pickup_stores [{name, pickup_point_id, distance_km, opening_hours, address}] (the pickup stores near the CEP, with their hours). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: The item id.
+            cep: The delivery CEP.
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            seller_id: The seller (sellers[].seller_id from /carrefourbr/product). Defaults to 1, Carrefour itself; marketplace items on www need their seller's id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_delivery", {"item_id": item_id, "cep": cep, "site": site, "seller_id": seller_id}, extra)
+
+    def stores(
+        self,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Carrefour pickup stores (Retire na Loja): total, count, stores [{store_id (the input of store), name, street, neighborhood, city, state, cep}], filtered by state and city. No opening hours here: /carrefourbr/delivery lists the pickup stores near a CEP with their hours. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: Stores in this state (UF).
+            city: Stores in this city.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_stores", {"state": state, "city": city}, extra)
+
+    def suggestions(
+        self,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site's search suggestions for what a shopper has typed: terms [{term, attributes [{key, label, value, value_label}]}], products (the suggested products, list item fields), and top_searches [{term, count}] (the site's most searched terms with their counts; alone when query is omitted). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            query: What a shopper has typed. Without it, the top searches alone.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_suggestions", {"site": site, "query": query}, extra)
+
+    def coupons(
+        self,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site's coupon page: title, count, coupons [{code, value, name, category, active, expires (as given), expiration_date, link, collection_id (the list a coupon applies to, the input of collection), rules}], categories and terms. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_coupons", {"site": site}, extra)
+
+    def categories(
+        self,
+        *,
+        site: Optional[Literal["mercado", "www"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site's department menu as its header lists it, 3 levels: count, node_count, departments [{name, url, site, path (the input of category), filters (the facet filters the link applies, the input of filters), collection_id (the input of collection), children [...]}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-25 s on mercado, up to about 50 s on www; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: mercado (default; mercado.carrefour.com.br, the grocery site) or www (www.carrefour.com.br: non-food and the marketplace).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("carrefourbr_categories", {"site": site}, extra)

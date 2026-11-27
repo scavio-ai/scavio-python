@@ -22,6 +22,7 @@ from ._namespaces_async import (
     _AsyncArgosNamespace,
     _AsyncAshleyNamespace,
     _AsyncAsosNamespace,
+    _AsyncAtacadaoNamespace,
     _AsyncAutotraderNamespace,
     _AsyncAutozoneNamespace,
     _AsyncBarnesandnobleNamespace,
@@ -40,6 +41,7 @@ from ._namespaces_async import (
     _AsyncCapterraNamespace,
     _AsyncCargurusNamespace,
     _AsyncCarmaxNamespace,
+    _AsyncCarrefourbrNamespace,
     _AsyncCarrefourNamespace,
     _AsyncCarscomNamespace,
     _AsyncCarvanaNamespace,
@@ -63,6 +65,7 @@ from ._namespaces_async import (
     _AsyncDouglasNamespace,
     _AsyncEbayNamespace,
     _AsyncEdmundsNamespace,
+    _AsyncEnjoeiNamespace,
     _AsyncEstatesalesNamespace,
     _AsyncExpediaNamespace,
     _AsyncExtraspaceNamespace,
@@ -412,6 +415,9 @@ class AsyncScavioClient:
         self.natura = _AsyncNaturaNamespace(self)
         self.boticario = _AsyncBoticarioNamespace(self)
         self.centauro = _AsyncCentauroNamespace(self)
+        self.enjoei = _AsyncEnjoeiNamespace(self)
+        self.atacadao = _AsyncAtacadaoNamespace(self)
+        self.carrefourbr = _AsyncCarrefourbrNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
