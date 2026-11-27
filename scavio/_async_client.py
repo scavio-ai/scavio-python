@@ -134,6 +134,7 @@ from ._namespaces_async import (
     _AsyncPcexpressNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
+    _AsyncPetzNamespace,
     _AsyncPichauNamespace,
     _AsyncPoshmarkNamespace,
     _AsyncPublicstorageNamespace,
@@ -149,6 +150,7 @@ from ._namespaces_async import (
     _AsyncRennerNamespace,
     _AsyncRentcafeNamespace,
     _AsyncRentcomNamespace,
+    _AsyncRiachueloNamespace,
     _AsyncRightmoveNamespace,
     _AsyncRockautoNamespace,
     _AsyncRonaNamespace,
@@ -434,6 +436,8 @@ class AsyncScavioClient:
         self.renner = _AsyncRennerNamespace(self)
         self.pichau = _AsyncPichauNamespace(self)
         self.dafiti = _AsyncDafitiNamespace(self)
+        self.riachuelo = _AsyncRiachueloNamespace(self)
+        self.petz = _AsyncPetzNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

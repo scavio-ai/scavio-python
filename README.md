@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 185 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 187 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -129,6 +129,8 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Lojas Renner Fashion Prices, Stock Levels, Store Card Installments and Stores by CEP (Brazil; 6 endpoints) | Yes | No | No | No |
 | Pichau PC Parts Card and Pix Prices, Deals with Units Left, Benchmarks and Coupons (Brazil; 11 endpoints) | Yes | No | No | No |
 | Dafiti Fashion Marketplace Prices, Units per Size, Delivery Type and Partner Stores (Brazil; 6 endpoints) | Yes | No | No | No |
+| Riachuelo Fashion Prices, Sold-Out Flags and Units per Size, Campaign Deals and Reviews (Brazil; 4 endpoints) | Yes | No | No | No |
+| Petz Pet Supply Prices, Subscription and Clubz Member Prices, Stock Units and Stores (Brazil; 7 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8565,6 +8567,90 @@ print(sz["size_count"], sz["sizes_in_stock"])
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 157. Brazil fashion -- Riachuelo prices, sold-out flags and units per size, campaign deals and reviews
+
+Riachuelo (riachuelo.com.br, the Brazilian fashion retailer): keyword search,
+category and campaign listings (24 a page, pages 1-500, in the site's 6 sorts,
+filtered by the listing's own filters for size, colour, gender, subcategory,
+brand and category group) with the price, the list price, the discount, the
+promotion tag, the seller and every colour and size with its sold-out flag and
+units, as the listing card carries them (the search total includes sold-out
+products); by default the deals listing is a department's Black Friday page (a
+seasonal page, so it changes or ends with the campaign), or any other campaign
+page by path; and one product by sku or link with composition, attributes, the
+rating summary and the reviews the product page itself shows (no reviewer
+names). Prices in BRL; the product page lists no stock per size, and there are
+no shipping quotes, store stock or search suggestions. Namespace `riachuelo`,
+4 endpoints: `search`, `category`, `deals`, `product`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 180s (300s on `search`). See the [Riachuelo API
+page](https://scavio.dev/riachuelo-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/riachuelo-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rc = client.riachuelo
+res = rc.search("vestido")["data"]
+print(res["total"], res["total_pages"], res["has_more"])
+for it in res["items"][:5]:
+    print(it["sku"], it["name"], it["price"], it["list_price"], it["sold_out"], [(v["size"], v["units"]) for v in it["variations"]])
+item = rc.product("16519710")["data"]
+print(item["name"], item["price"], item["list_price"], item["availability"], item["rating"]["average"], item["rating"]["count"])
+for r in item["reviews"]:
+    print(r["rating"], r["size"], r["date"], r["text"])
+deals = rc.deals(department="masculino")["data"]
+print(deals["campaign"], deals["total"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 158. Brazil pet store -- Petz prices, subscription and Clubz member prices, stock units and stores
+
+Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi): keyword
+search, category, brand and deals listings (the Promoções page or one of its
+themed collections, with no validity dates published; 20 a page, pages 1-50,
+by relevance, price or newest; a search counts at most 1,000 products) with
+the price, the list price, the Assinatura Petz subscription price, the Clubz
+loyalty member price, stock_units (capped at 100, with stock_capped) and every
+size or variant with its own price; one product by product_id or link with
+specs, the rating summary, the 3 latest reviews (no reviewer names) and each
+variant's prices and stock; and the store directory, about 270 stores with
+address, phone, hours and whether online orders can be picked up there,
+narrowed by state and city, plus one store by slug or link. Prices in BRL; no
+per-store stock or prices, prices by CEP, review paging, search suggestions,
+Pix prices, installments or shipping. Namespace `petz`, 7 endpoints: `search`,
+`category`, `brand`, `deals`, `product`, `stores`, `store`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 300s. See the [Petz API
+page](https://scavio.dev/petz-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/petz-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+pz = client.petz
+res = pz.search("ração golden")["data"]
+print(res["total"], res["total_capped"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["subscription_price"], (it["clubz"] or {}).get("price"), it["stock_units"], it["stock_capped"])
+item = pz.product("191628")["data"]
+print(item["name"], item["price"], item["list_price"], item["rating"]["average"], item["rating"]["count"])
+for v in item["variations"]:
+    print(v["name"], v["price"], v["subscription_price"], v["stock_units"], v["available"])
+stores = pz.stores(state="SP")["data"]
+for st in stores["stores"][:5]:
+    print(st["name"], st["address"]["city"], st["pickup"], st["hours"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -8822,6 +8908,8 @@ Scavio works with popular AI/LLM frameworks:
 | Lojas Renner (`renner`) | `search`, `category`, `deals`, `product`, `sku_price`, `stores`; Brazil; listings 48 a page, pages 1-200, filtered by refinement `filters`; `category` by navigation id or link, `deals` by `list` (default: every discounted product); `product` by `product_id` or `url` (optional `sku`); `sku_price` takes a `sku` with `product_id` or `url`; `stores` by `cep` | 1 each |
 | Pichau (`pichau`) | `search`, `category`, `brand`, `deals`, `product`, `product_live`, `reviews`, `installments`, `coupons`, `categories`, `suggestions`; Brazil; listings 36 a page filtered by facet `filters`; `category` by path, `brand` by slug, `deals` by `deal` (black_friday, open_box) or `campaign`; `product` and `product_live` by `url_key` or `url`; `reviews` by `product_id`, `rating` and `with_media`; `installments` by `product_id` with `price`, or by `url_key` / `url` | 1 each |
 | Dafiti (`dafiti`) | `search`, `category`, `brand`, `deals`, `product`, `sizes`; Brazil; listings 48 a page plus sponsored slots in the site's 5 sorts; `category` by path or link, `brand` by its link name; `deals` is the outlet; `product` by `product_id`, `sku` or `url`; `sizes` by `sku` (units exact 0-10, more than 10 above) | 1 each |
+| Riachuelo (`riachuelo`) | `search`, `category`, `deals`, `product`; Brazil; listings 24 a page, pages 1-500, in the site's 6 sorts, filtered by the listing's own `filters`; `category` by path or link; `deals` by `department` (its Black Friday page, seasonal; default feminino) or another `campaign` path; `product` by `sku` or `url` | 1 each |
+| Petz (`petz`) | `search`, `category`, `brand`, `deals`, `product`, `stores`, `store`; Brazil; listings 20 a page, pages 1-50, by relevance, price or newest (a search counts at most 1,000 products); `category` by path, `brand` by slug, `deals` by `collection` (default: the Promoções page); `product` by `product_id` or `url`; `stores` by `state` and `city`; `store` by `slug` or `url` | 1 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
 | Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
@@ -8836,6 +8924,10 @@ for field-level details.
 - **4 new namespaces** (sync and async), 33 endpoints, Brazil: `cea` (C&A Brasil, 10),
   `renner` (Lojas Renner, 6), `pichau` (Pichau, 11) and `dafiti` (Dafiti, 6). Credits: 1
   per call. The request timeout is raised to at least 240s (300s on `renner`).
+- **2 more new namespaces** (sync and async), 11 endpoints, Brazil: `riachuelo`
+  (Riachuelo, 4) and `petz` (Petz, 7). Credits: 1 per call. The request timeout is
+  raised to at least 300s on `petz` and `riachuelo.search`, 180s on the other `riachuelo`
+  methods.
 
 ### Changed in 0.104.0
 

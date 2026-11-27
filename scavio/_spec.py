@@ -43624,6 +43624,599 @@ _DAFITI_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 7 wave 6 2026-11-27: 2 platforms (Riachuelo, Petz) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 300 s floor on petz and riachuelo.search, 180 s on other riachuelo.
+
+# Riachuelo: 4 endpoints on /api/v1/riachuelo.
+_RIACHUELO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="riachuelo_search",
+        namespace="riachuelo",
+        method="search",
+        http="POST",
+        path="/api/v1/riachuelo/search",
+        summary=(
+            "Search Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). Scavio "
+            "fetches the public riachuelo.com.br pages on request. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By keyword, "
+            "across the whole site. 24 per page, pages 1-500, in the site's sorts (relevance, "
+            "newest, best_selling, discount, price_asc, price_desc), filtered by the "
+            "listing's own filters (size, colour, gender, subcategory, brand, category "
+            "group). Returns page, page_size, total (sold-out products included), "
+            "total_pages, has_more, count, items [{position, sku (use it in product), name, "
+            "brand, url, image, currency, price, list_price, discount_percent, on_sale, "
+            "price_varies, promo_tag {label, campaign}, seller {id, name}, colors [{name, "
+            "hex}], categories, sold_out, sizes_in_stock and variations [{color, size, sku, "
+            "sold_out, units}] (the listing's sold-out flag and units per size)}], filters "
+            "[{id, label, multi_select, options [{label, value, count}]}] with the site's "
+            "counts, price_range {min, max}, sort, filters_applied and notes. Also query. No "
+            "results is an empty 200 (charged). Search suggestions are not offered. 1 credit. "
+            "A not-found is charged; failed upstream calls and refused inputs are not. "
+            "Keyword searches are slow at the source: usually 5-90 s; set a client timeout of "
+            "at least 300 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese, as a shopper types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc or "
+                    "price_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filter id -> value or values, from a listing's filters[].id "
+                    "(filter_size, filter_color, gender, catalog_class, brand, gg) and "
+                    "filters[].options[].value; up to 10 values. Several values of one filter "
+                    "match any of them; several filters must all match."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-500 (24 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="riachuelo_category",
+        namespace="riachuelo",
+        method="category",
+        http="POST",
+        path="/api/v1/riachuelo/category",
+        summary=(
+            "One category listing of Riachuelo (riachuelo.com.br, the Brazilian fashion "
+            "retailer). Scavio fetches the public riachuelo.com.br pages on request. Brazil: "
+            "Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not "
+            "signed in. By category path (feminino, feminino/colecao-feminino/vestido) or "
+            "link, sorted and filtered like search. 24 per page, pages 1-500, in the site's "
+            "sorts (relevance, newest, best_selling, discount, price_asc, price_desc), "
+            "filtered by the listing's own filters (size, colour, gender, subcategory, brand, "
+            "category group). Returns page, page_size, total (sold-out products included), "
+            "total_pages, has_more, count, items [{position, sku (use it in product), name, "
+            "brand, url, image, currency, price, list_price, discount_percent, on_sale, "
+            "price_varies, promo_tag {label, campaign}, seller {id, name}, colors [{name, "
+            "hex}], categories, sold_out, sizes_in_stock and variations [{color, size, sku, "
+            "sold_out, units}] (the listing's sold-out flag and units per size)}], filters "
+            "[{id, label, multi_select, options [{label, value, count}]}] with the site's "
+            "counts, price_range {min, max}, sort, filters_applied and notes. Also category, "
+            "title and breadcrumbs. An unknown category is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-35 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category by its path as the site writes it (feminino, masculino, "
+                    "infantil, feminino/colecao-feminino/vestido; breadcrumbs[].path and "
+                    "items[].categories carry them) or a riachuelo.com.br link to one."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc or "
+                    "price_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filter id -> value or values, from a listing's filters[].id "
+                    "(filter_size, filter_color, gender, catalog_class, brand, gg) and "
+                    "filters[].options[].value; up to 10 values. Several values of one filter "
+                    "match any of them; several filters must all match."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-500 (24 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="riachuelo_deals",
+        namespace="riachuelo",
+        method="deals",
+        http="POST",
+        path="/api/v1/riachuelo/deals",
+        summary=(
+            "A campaign page of Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). "
+            "Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese "
+            "(pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The "
+            "Black Friday page of a department (default feminino), or another campaign page "
+            "by path (items[].promo_tag.campaign), sorted and filtered like search. 24 per "
+            "page, pages 1-500, in the site's sorts (relevance, newest, best_selling, "
+            "discount, price_asc, price_desc), filtered by the listing's own filters (size, "
+            "colour, gender, subcategory, brand, category group). Returns page, page_size, "
+            "total (sold-out products included), total_pages, has_more, count, items "
+            "[{position, sku (use it in product), name, brand, url, image, currency, price, "
+            "list_price, discount_percent, on_sale, price_varies, promo_tag {label, "
+            "campaign}, seller {id, name}, colors [{name, hex}], categories, sold_out, "
+            "sizes_in_stock and variations [{color, size, sku, sold_out, units}] (the "
+            "listing's sold-out flag and units per size)}], filters [{id, label, "
+            "multi_select, options [{label, value, count}]}] with the site's counts, "
+            "price_range {min, max}, sort, filters_applied and notes. Also campaign, "
+            "department, title and breadcrumbs. Campaign pages are seasonal and carry no "
+            "start or end dates; an unknown or ended campaign is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-35 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "department",
+                "Optional[str]",
+                doc=(
+                    "The Black Friday campaign page of a department (feminino, the default, "
+                    "masculino or infantil)."
+                ),
+            ),
+            Param(
+                "campaign",
+                "Optional[str]",
+                doc=(
+                    "Another campaign page by its path (campanha/...; "
+                    "items[].promo_tag.campaign carries them) or a riachuelo.com.br link, "
+                    "instead of department."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc or "
+                    "price_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filter id -> value or values, from a listing's filters[].id "
+                    "(filter_size, filter_color, gender, catalog_class, brand, gg) and "
+                    "filters[].options[].value; up to 10 values. Several values of one filter "
+                    "match any of them; several filters must all match."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-500 (24 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="riachuelo_product",
+        namespace="riachuelo",
+        method="product",
+        http="POST",
+        path="/api/v1/riachuelo/product",
+        summary=(
+            "One product of Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). "
+            "Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese "
+            "(pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By "
+            "link or sku: requested, sku, sku_group, name, brand, color, url, currency, "
+            "price, list_price, on_sale, discount_percent, sold_out, availability, gender, "
+            "department, subcategory, collection, composition, breadcrumbs, attributes [{id, "
+            "label, value, shown_on_page}], images, rating {average, count, histogram} and "
+            "reviews [{rating, title, text, size, color, date, sku}] (the reviews the product "
+            "page itself shows, without reviewer names), reviews_has_more and notes. The "
+            "product page lists no stock per size (listing cards carry the per-size flags and "
+            "units); more review pages, shipping quotes by CEP, store stock and the marketing "
+            "description are not included. An unknown product is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-35 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product sku (items[].sku: digits, or KIT<digits> for a kit), instead "
+                    "of url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A riachuelo.com.br product link or path (items[].url)."
+                ),
+            ),
+        ),
+        one_of=(("sku", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
+# Petz: 7 endpoints on /api/v1/petz.
+_PETZ_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="petz_search",
+        namespace="petz",
+        method="search",
+        http="POST",
+        path="/api/v1/petz/search",
+        summary=(
+            "Search Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio "
+            "fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices "
+            "in BRL as shown to a visitor who is not signed in. By keyword, sorted by "
+            "relevance, price or newest. 20 products per page, pages 1 to 50; a search counts "
+            "at most 1,000 products (total_capped). Returns page, page_size, sort, total, "
+            "total_capped, total_pages, has_more, count and items [{position, product_id, "
+            "sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the "
+            "regular price when a deal price applies), discount_percent, subscription_price "
+            "(Assinatura Petz, rounded to cents), subscription_discount_percent, clubz "
+            "{price, tiers} (the Clubz loyalty member price), currency, available, "
+            "availability, stock_units (capped at 100), stock_capped, has_variations, "
+            "variations [{product_id, sku, ean, name, url, price, list_price, "
+            "discount_percent, subscription_price, available, selected}]}]. A keyword with no "
+            "products returns total 0. Search suggestions are not offered. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Petz "
+            "listing pages are slow: usually 50-150 s, up to about 245 s; set a client "
+            "timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese as shoppers type them."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or newest."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page, up to page 50."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_category",
+        namespace="petz",
+        method="category",
+        http="POST",
+        path="/api/v1/petz/category",
+        summary=(
+            "One category of Petz (petz.com.br, the Brazilian pet store of Grupo Petz "
+            "Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. By "
+            "category path (a pet, or a pet and a department), sorted by relevance, price or "
+            "newest, with the category name; when Petz redirects a category link to another "
+            "listing, category.path is the listing answered and redirected_from the path "
+            "asked. 20 products per page, pages 1 to 50; a search counts at most 1,000 "
+            "products (total_capped). Returns page, page_size, sort, total, total_capped, "
+            "total_pages, has_more, count and items [{position, product_id, sku, ean, name, "
+            "url, image, brand, sub_brand, categories, price, list_price (the regular price "
+            "when a deal price applies), discount_percent, subscription_price (Assinatura "
+            "Petz, rounded to cents), subscription_discount_percent, clubz {price, tiers} "
+            "(the Clubz loyalty member price), currency, available, availability, stock_units "
+            "(capped at 100), stock_capped, has_variations, variations [{product_id, sku, "
+            "ean, name, url, price, list_price, discount_percent, subscription_price, "
+            "available, selected}]}]. An unknown category is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Petz "
+            "listing pages are slow: usually 50-150 s, up to about 245 s; set a client "
+            "timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path: a pet and a department, e.g. cachorro, cachorro/racao "
+                    "or gato/areia-e-banheiros (a product's categories[].path)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or newest."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page, up to page 50."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_brand",
+        namespace="petz",
+        method="brand",
+        http="POST",
+        path="/api/v1/petz/brand",
+        summary=(
+            "The products of one brand at Petz (petz.com.br, the Brazilian pet store of Grupo "
+            "Petz Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. By "
+            "brand slug, sorted by relevance, price or newest. 20 products per page, pages 1 "
+            "to 50; a search counts at most 1,000 products (total_capped). Returns page, "
+            "page_size, sort, total, total_capped, total_pages, has_more, count and items "
+            "[{position, product_id, sku, ean, name, url, image, brand, sub_brand, "
+            "categories, price, list_price (the regular price when a deal price applies), "
+            "discount_percent, subscription_price (Assinatura Petz, rounded to cents), "
+            "subscription_discount_percent, clubz {price, tiers} (the Clubz loyalty member "
+            "price), currency, available, availability, stock_units (capped at 100), "
+            "stock_capped, has_variations, variations [{product_id, sku, ean, name, url, "
+            "price, list_price, discount_percent, subscription_price, available, "
+            "selected}]}]. An unknown brand is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Petz listing pages "
+            "are slow: usually 50-150 s, up to about 245 s; set a client timeout of at least "
+            "300 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand slug as Petz writes it (a product's brand.slug), e.g. "
+                    "royal-canin or premierpet."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or newest."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page, up to page 50."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_deals",
+        namespace="petz",
+        method="deals",
+        http="POST",
+        path="/api/v1/petz/deals",
+        summary=(
+            "The deals page (Promoções) of Petz (petz.com.br, the Brazilian pet store of "
+            "Grupo Petz Cobasi) or one of its collections (themed deals lists). Scavio "
+            "fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices "
+            "in BRL as shown to a visitor who is not signed in. Products with the deal price "
+            "next to the regular price (list_price) and discount_percent, sorted by "
+            "relevance, price or newest. 20 products per page, pages 1 to 50; a search counts "
+            "at most 1,000 products (total_capped). Returns page, page_size, sort, total, "
+            "total_capped, total_pages, has_more, count and items [{position, product_id, "
+            "sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the "
+            "regular price when a deal price applies), discount_percent, subscription_price "
+            "(Assinatura Petz, rounded to cents), subscription_discount_percent, clubz "
+            "{price, tiers} (the Clubz loyalty member price), currency, available, "
+            "availability, stock_units (capped at 100), stock_capped, has_variations, "
+            "variations [{product_id, sku, ean, name, url, price, list_price, "
+            "discount_percent, subscription_price, available, selected}]}]. Petz publishes no "
+            "validity dates for these deals. An unknown collection is a charged 404. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Petz listing pages are slow: usually 50-150 s, up to about 245 s; set a "
+            "client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "collection",
+                "Optional[str]",
+                doc=(
+                    "A Petz collection (a themed deals list) by its slug. Leave out for the "
+                    "main deals page (Promoções)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or newest."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page, up to page 50."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_product",
+        namespace="petz",
+        method="product",
+        http="POST",
+        path="/api/v1/petz/product",
+        summary=(
+            "One product of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). "
+            "Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, "
+            "prices in BRL as shown to a visitor who is not signed in. product_id, sku, ean, "
+            "name, url, brand {name, slug}, sub_brand, category, categories [{name, path}], "
+            "images, price, list_price, discount_percent, subscription_price (Assinatura "
+            "Petz, rounded to cents), available, availability, stock_units (capped at 100), "
+            "stock_capped, published, specs [{name, value}], rating {average, count, stars "
+            "{1-5 counts}}, latest_reviews (the 3 latest reviews: date, rating, text; no "
+            "reviewer names) and variations [{product_id, sku, name, description, price, "
+            "list_price, discount_percent, subscription_price, available, stock_units, "
+            "stock_capped, on_promotion, is_combo, current, image}], each size or variant "
+            "with its own prices and stock. Per-store stock and prices, the full review "
+            "history, Pix prices, installments and shipping are not returned. An unknown "
+            "product is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 30-95 s; set a client timeout of at "
+            "least 300 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Petz product id (items[].product_id or variations[].product_id). "
+                    "Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Petz product link (www.petz.com.br/produto/..., ending in -<product "
+                    "id>), instead of product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_stores",
+        namespace="petz",
+        method="stores",
+        http="POST",
+        path="/api/v1/petz/stores",
+        summary=(
+            "The store directory of Petz (petz.com.br, the Brazilian pet store of Grupo Petz "
+            "Cobasi). Scavio fetches the public Petz page on request. All Petz stores (about "
+            "270) with store_id, slug, name, url, image, address {street, neighborhood, city, "
+            "state, cep}, phone, hours [{days, opens, closes, closed, open_24h}], pickup "
+            "(online orders can be picked up there), service_codes and pet_codes (Petz's own "
+            "codes), narrowed by state and city. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 30-95 s; set a client timeout "
+            "of at least 300 s."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "A Brazilian state code (UF), e.g. SP or RJ."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A city name; accents and case are ignored."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="petz_store",
+        namespace="petz",
+        method="store",
+        http="POST",
+        path="/api/v1/petz/store",
+        summary=(
+            "One store of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). "
+            "Scavio fetches the public Petz page on request. store_id, slug, name, url, "
+            "image, google_place_id, address {street, neighborhood, city, state, cep}, phone, "
+            "hours [{days, opens, closes, closed, open_24h}], service_codes and pet_codes. An "
+            "unknown store is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 30-95 s; set a client timeout "
+            "of at least 300 s."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The store slug (stores[].slug)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Petz store link (www.petz.com.br/loja/<slug>), instead of slug."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -61158,6 +61751,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_RENNER_ENDPOINTS,
     *_PICHAU_ENDPOINTS,
     *_DAFITI_ENDPOINTS,
+    # ====== batch 7 wave 6 2026-11-27: 2 platforms (Riachuelo, Petz) ======
+    *_RIACHUELO_ENDPOINTS,
+    *_PETZ_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -68157,6 +68753,8 @@ NAMESPACES: tuple[str, ...] = (
     "renner",
     "pichau",
     "dafiti",
+    "riachuelo",
+    "petz",
 )
 
 

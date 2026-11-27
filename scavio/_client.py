@@ -132,6 +132,7 @@ from ._namespaces_sync import (
     _PcexpressNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
+    _PetzNamespace,
     _PichauNamespace,
     _PoshmarkNamespace,
     _PublicstorageNamespace,
@@ -147,6 +148,7 @@ from ._namespaces_sync import (
     _RennerNamespace,
     _RentcafeNamespace,
     _RentcomNamespace,
+    _RiachueloNamespace,
     _RightmoveNamespace,
     _RockautoNamespace,
     _RonaNamespace,
@@ -439,6 +441,8 @@ class ScavioClient:
         self.renner = _RennerNamespace(self)
         self.pichau = _PichauNamespace(self)
         self.dafiti = _DafitiNamespace(self)
+        self.riachuelo = _RiachueloNamespace(self)
+        self.petz = _PetzNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

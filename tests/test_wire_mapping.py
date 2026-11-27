@@ -11661,3 +11661,145 @@ def test_batch7w5_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["pichau_product_live"].positional_optional_params[0].name == "url_key"
     assert ENDPOINTS["pichau_installments"].positional_optional_params[0].name == "url_key"
     assert ENDPOINTS["dafiti_product"].positional_optional_params[0].name == "product_id"
+
+
+# --- batch 7 wave 6 2026-11-27: 2 Brazil namespaces (Riachuelo, Petz) ---
+
+BATCH7W6_1127 = {
+    "riachuelo": {
+        "search": ("search", 1, 300.0),
+        "category": ("category", 1, 180.0),
+        "deals": ("deals", 1, 180.0),
+        "product": ("product", 1, 180.0),
+    },
+    "petz": {
+        "search": ("search", 1, 300.0),
+        "category": ("category", 1, 300.0),
+        "brand": ("brand", 1, 300.0),
+        "deals": ("deals", 1, 300.0),
+        "product": ("product", 1, 300.0),
+        "stores": ("stores", 1, 300.0),
+        "store": ("store", 1, 300.0),
+    },
+}
+BATCH7W6_1127_ONE_OF = {
+    "riachuelo_product": (("sku", "url"),),
+    "petz_product": (("product_id", "url"),),
+    "petz_store": (("slug", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7W6_1127))
+def test_batch7w6_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 2 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7W6_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7W6_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "as a browser" not in text, ep.key
+
+
+BATCH7W6_1127_WIRE = [
+    ("riachuelo", "search", {"query": "vestido"}, "search"),
+    (
+        "riachuelo", "search",
+        {
+            "query": "vestido", "sort": "price_asc",
+            "filters": {"filter_size": ["p", "m"]}, "page": 2,
+        },
+        "search",
+    ),
+    ("riachuelo", "category", {"category": "feminino", "sort": "newest"}, "category"),
+    (
+        "riachuelo", "category",
+        {"category": "feminino/colecao-feminino/vestido", "filters": {"brand": "pool-jeans"}},
+        "category",
+    ),
+    ("riachuelo", "deals", {}, "deals"),
+    ("riachuelo", "deals", {"department": "masculino", "sort": "discount"}, "deals"),
+    ("riachuelo", "deals", {"campaign": "campanha/r/promo/oferta-especial", "page": 2}, "deals"),
+    ("riachuelo", "product", {"sku": "16519710"}, "product"),
+    (
+        "riachuelo", "product",
+        {"url": "https://www.riachuelo.com.br/vestido-midi-gode-feminino-lequinha-com-bolso-marrom-16195833_sku"},
+        "product",
+    ),
+    ("petz", "search", {"query": "ração golden"}, "search"),
+    ("petz", "search", {"query": "ração golden", "sort": "price_asc", "page": 2}, "search"),
+    ("petz", "category", {"category": "cachorro/racao", "sort": "newest"}, "category"),
+    ("petz", "brand", {"brand": "royal-canin"}, "brand"),
+    ("petz", "deals", {}, "deals"),
+    ("petz", "deals", {"collection": "PF-racoes", "sort": "price_desc"}, "deals"),
+    ("petz", "product", {"product_id": "191628"}, "product"),
+    ("petz", "product", {"product_id": 191628}, "product"),
+    (
+        "petz", "product",
+        {"url": "https://www.petz.com.br/produto/racao-golden-special-para-caes-adultos-sabor-frango-e-carne-71343"},
+        "product",
+    ),
+    ("petz", "stores", {}, "stores"),
+    ("petz", "stores", {"state": "SP", "city": "São Paulo"}, "stores"),
+    ("petz", "store", {"slug": "petz-aclimacao"}, "store"),
+    ("petz", "store", {"url": "https://www.petz.com.br/loja/petz-aclimacao"}, "store"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7W6_1127_WIRE)
+def test_batch7w6_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7W6_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7W6_1127_ONE_OF))
+def test_batch7w6_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7w6_1127_credits_wire_and_timeouts():
+    """Riachuelo and Petz: 1 credit; 300 s floor on petz and riachuelo search, 180 s otherwise."""
+    for ns in BATCH7W6_1127:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w6 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W6_1127]
+    assert len(w6) == 11
+    assert not [ep.key for ep in w6 if ep.credits_note]
+    assert {ep.min_timeout for ep in w6 if ep.namespace == "petz"} == {300.0}
+    assert ENDPOINTS["riachuelo_search"].min_timeout == 300.0
+    pages = [ep for ep in w6 if ep.namespace == "riachuelo" and ep.method != "search"]
+    assert {ep.min_timeout for ep in pages} == {180.0}
+    assert [p.name for p in ENDPOINTS["riachuelo_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["riachuelo_category"].required_params] == ["category"]
+    assert [p.name for p in ENDPOINTS["petz_brand"].required_params] == ["brand"]
+    assert not ENDPOINTS["riachuelo_deals"].required_params
+    assert not ENDPOINTS["petz_deals"].required_params
+    assert not ENDPOINTS["petz_stores"].required_params
+    assert ENDPOINTS["riachuelo_product"].positional_optional_params[0].name == "sku"
+    assert ENDPOINTS["petz_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["petz_store"].positional_optional_params[0].name == "slug"
+    assert "Grupo Petz Cobasi) or one of its collections" in ENDPOINTS["petz_deals"].summary
+    assert all(p.doc for ep in w6 for p in ep.params)

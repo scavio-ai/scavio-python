@@ -194,6 +194,8 @@ __all__ = [
     "_AsyncRennerNamespace",
     "_AsyncPichauNamespace",
     "_AsyncDafitiNamespace",
+    "_AsyncRiachueloNamespace",
+    "_AsyncPetzNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -37130,3 +37132,235 @@ class _AsyncDafitiNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("dafiti_sizes", {"sku": sku}, extra)
+
+class _AsyncRiachueloNamespace:
+    """Riachuelo (riachuelo.com.br, the Brazilian fashion retailer) search, category, deals and product endpoints; Brazil only, prices in BRL, sold-out flags and units per size on listings, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By keyword, across the whole site. 24 per page, pages 1-500, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc), filtered by the listing's own filters (size, colour, gender, subcategory, brand, category group). Returns page, page_size, total (sold-out products included), total_pages, has_more, count, items [{position, sku (use it in product), name, brand, url, image, currency, price, list_price, discount_percent, on_sale, price_varies, promo_tag {label, campaign}, seller {id, name}, colors [{name, hex}], categories, sold_out, sizes_in_stock and variations [{color, size, sku, sold_out, units}] (the listing's sold-out flag and units per size)}], filters [{id, label, multi_select, options [{label, value, count}]}] with the site's counts, price_range {min, max}, sort, filters_applied and notes. Also query. No results is an empty 200 (charged). Search suggestions are not offered. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Keyword searches are slow at the source: usually 5-90 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese, as a shopper types them).
+            sort: relevance (default), newest, best_selling, discount, price_asc or price_desc (the site's sorts).
+            filters: Filter id -> value or values, from a listing's filters[].id (filter_size, filter_color, gender, catalog_class, brand, gg) and filters[].options[].value; up to 10 values. Several values of one filter match any of them; several filters must all match.
+            page: Results page, 1-500 (24 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("riachuelo_search", {"query": query, "sort": sort, "filters": filters, "page": page}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By category path (feminino, feminino/colecao-feminino/vestido) or link, sorted and filtered like search. 24 per page, pages 1-500, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc), filtered by the listing's own filters (size, colour, gender, subcategory, brand, category group). Returns page, page_size, total (sold-out products included), total_pages, has_more, count, items [{position, sku (use it in product), name, brand, url, image, currency, price, list_price, discount_percent, on_sale, price_varies, promo_tag {label, campaign}, seller {id, name}, colors [{name, hex}], categories, sold_out, sizes_in_stock and variations [{color, size, sku, sold_out, units}] (the listing's sold-out flag and units per size)}], filters [{id, label, multi_select, options [{label, value, count}]}] with the site's counts, price_range {min, max}, sort, filters_applied and notes. Also category, title and breadcrumbs. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-35 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category by its path as the site writes it (feminino, masculino, infantil, feminino/colecao-feminino/vestido; breadcrumbs[].path and items[].categories carry them) or a riachuelo.com.br link to one.
+            sort: relevance (default), newest, best_selling, discount, price_asc or price_desc (the site's sorts).
+            filters: Filter id -> value or values, from a listing's filters[].id (filter_size, filter_color, gender, catalog_class, brand, gg) and filters[].options[].value; up to 10 values. Several values of one filter match any of them; several filters must all match.
+            page: Results page, 1-500 (24 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("riachuelo_category", {"category": category, "sort": sort, "filters": filters, "page": page}, extra)
+
+    async def deals(
+        self,
+        *,
+        department: Optional[str] = None,
+        campaign: Optional[str] = None,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A campaign page of Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The Black Friday page of a department (default feminino), or another campaign page by path (items[].promo_tag.campaign), sorted and filtered like search. 24 per page, pages 1-500, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc), filtered by the listing's own filters (size, colour, gender, subcategory, brand, category group). Returns page, page_size, total (sold-out products included), total_pages, has_more, count, items [{position, sku (use it in product), name, brand, url, image, currency, price, list_price, discount_percent, on_sale, price_varies, promo_tag {label, campaign}, seller {id, name}, colors [{name, hex}], categories, sold_out, sizes_in_stock and variations [{color, size, sku, sold_out, units}] (the listing's sold-out flag and units per size)}], filters [{id, label, multi_select, options [{label, value, count}]}] with the site's counts, price_range {min, max}, sort, filters_applied and notes. Also campaign, department, title and breadcrumbs. Campaign pages are seasonal and carry no start or end dates; an unknown or ended campaign is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-35 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: The Black Friday campaign page of a department (feminino, the default, masculino or infantil).
+            campaign: Another campaign page by its path (campanha/...; items[].promo_tag.campaign carries them) or a riachuelo.com.br link, instead of department.
+            sort: relevance (default), newest, best_selling, discount, price_asc or price_desc (the site's sorts).
+            filters: Filter id -> value or values, from a listing's filters[].id (filter_size, filter_color, gender, catalog_class, brand, gg) and filters[].options[].value; up to 10 values. Several values of one filter match any of them; several filters must all match.
+            page: Results page, 1-500 (24 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("riachuelo_deals", {"department": department, "campaign": campaign, "sort": sort, "filters": filters, "page": page}, extra)
+
+    async def product(
+        self,
+        sku: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Riachuelo (riachuelo.com.br, the Brazilian fashion retailer). Scavio fetches the public riachuelo.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By link or sku: requested, sku, sku_group, name, brand, color, url, currency, price, list_price, on_sale, discount_percent, sold_out, availability, gender, department, subcategory, collection, composition, breadcrumbs, attributes [{id, label, value, shown_on_page}], images, rating {average, count, histogram} and reviews [{rating, title, text, size, color, date, sku}] (the reviews the product page itself shows, without reviewer names), reviews_has_more and notes. The product page lists no stock per size (listing cards carry the per-size flags and units); more review pages, shipping quotes by CEP, store stock and the marketing description are not included. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-35 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The product sku (items[].sku: digits, or KIT<digits> for a kit), instead of url.
+            url: A riachuelo.com.br product link or path (items[].url).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("riachuelo_product", {"sku": sku, "url": url}, extra)
+
+class _AsyncPetzNamespace:
+    """Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi) search, category, brand, deals, product, stores and store endpoints; Brazil only, prices in BRL with the Assinatura Petz subscription price and the Clubz member price, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By keyword, sorted by relevance, price or newest. 20 products per page, pages 1 to 50; a search counts at most 1,000 products (total_capped). Returns page, page_size, sort, total, total_capped, total_pages, has_more, count and items [{position, product_id, sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the regular price when a deal price applies), discount_percent, subscription_price (Assinatura Petz, rounded to cents), subscription_discount_percent, clubz {price, tiers} (the Clubz loyalty member price), currency, available, availability, stock_units (capped at 100), stock_capped, has_variations, variations [{product_id, sku, ean, name, url, price, list_price, discount_percent, subscription_price, available, selected}]}]. A keyword with no products returns total 0. Search suggestions are not offered. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Petz listing pages are slow: usually 50-150 s, up to about 245 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            sort: relevance (the default), price_asc, price_desc or newest.
+            page: Results page, 1-based, 20 products per page, up to page 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_search", {"query": query, "sort": sort, "page": page}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By category path (a pet, or a pet and a department), sorted by relevance, price or newest, with the category name; when Petz redirects a category link to another listing, category.path is the listing answered and redirected_from the path asked. 20 products per page, pages 1 to 50; a search counts at most 1,000 products (total_capped). Returns page, page_size, sort, total, total_capped, total_pages, has_more, count and items [{position, product_id, sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the regular price when a deal price applies), discount_percent, subscription_price (Assinatura Petz, rounded to cents), subscription_discount_percent, clubz {price, tiers} (the Clubz loyalty member price), currency, available, availability, stock_units (capped at 100), stock_capped, has_variations, variations [{product_id, sku, ean, name, url, price, list_price, discount_percent, subscription_price, available, selected}]}]. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Petz listing pages are slow: usually 50-150 s, up to about 245 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path: a pet and a department, e.g. cachorro, cachorro/racao or gato/areia-e-banheiros (a product's categories[].path).
+            sort: relevance (the default), price_asc, price_desc or newest.
+            page: Results page, 1-based, 20 products per page, up to page 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_category", {"category": category, "sort": sort, "page": page}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one brand at Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By brand slug, sorted by relevance, price or newest. 20 products per page, pages 1 to 50; a search counts at most 1,000 products (total_capped). Returns page, page_size, sort, total, total_capped, total_pages, has_more, count and items [{position, product_id, sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the regular price when a deal price applies), discount_percent, subscription_price (Assinatura Petz, rounded to cents), subscription_discount_percent, clubz {price, tiers} (the Clubz loyalty member price), currency, available, availability, stock_units (capped at 100), stock_capped, has_variations, variations [{product_id, sku, ean, name, url, price, list_price, discount_percent, subscription_price, available, selected}]}]. An unknown brand is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Petz listing pages are slow: usually 50-150 s, up to about 245 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand slug as Petz writes it (a product's brand.slug), e.g. royal-canin or premierpet.
+            sort: relevance (the default), price_asc, price_desc or newest.
+            page: Results page, 1-based, 20 products per page, up to page 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_brand", {"brand": brand, "sort": sort, "page": page}, extra)
+
+    async def deals(
+        self,
+        *,
+        collection: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deals page (Promoções) of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi) or one of its collections (themed deals lists). Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. Products with the deal price next to the regular price (list_price) and discount_percent, sorted by relevance, price or newest. 20 products per page, pages 1 to 50; a search counts at most 1,000 products (total_capped). Returns page, page_size, sort, total, total_capped, total_pages, has_more, count and items [{position, product_id, sku, ean, name, url, image, brand, sub_brand, categories, price, list_price (the regular price when a deal price applies), discount_percent, subscription_price (Assinatura Petz, rounded to cents), subscription_discount_percent, clubz {price, tiers} (the Clubz loyalty member price), currency, available, availability, stock_units (capped at 100), stock_capped, has_variations, variations [{product_id, sku, ean, name, url, price, list_price, discount_percent, subscription_price, available, selected}]}]. Petz publishes no validity dates for these deals. An unknown collection is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Petz listing pages are slow: usually 50-150 s, up to about 245 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection: A Petz collection (a themed deals list) by its slug. Leave out for the main deals page (Promoções).
+            sort: relevance (the default), price_asc, price_desc or newest.
+            page: Results page, 1-based, 20 products per page, up to page 50.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_deals", {"collection": collection, "sort": sort, "page": page}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. product_id, sku, ean, name, url, brand {name, slug}, sub_brand, category, categories [{name, path}], images, price, list_price, discount_percent, subscription_price (Assinatura Petz, rounded to cents), available, availability, stock_units (capped at 100), stock_capped, published, specs [{name, value}], rating {average, count, stars {1-5 counts}}, latest_reviews (the 3 latest reviews: date, rating, text; no reviewer names) and variations [{product_id, sku, name, description, price, list_price, discount_percent, subscription_price, available, stock_units, stock_capped, on_promotion, is_combo, current, image}], each size or variant with its own prices and stock. Per-store stock and prices, the full review history, Pix prices, installments and shipping are not returned. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-95 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Petz product id (items[].product_id or variations[].product_id). Send product_id or url.
+            url: A Petz product link (www.petz.com.br/produto/..., ending in -<product id>), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_product", {"product_id": product_id, "url": url}, extra)
+
+    async def stores(
+        self,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store directory of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. All Petz stores (about 270) with store_id, slug, name, url, image, address {street, neighborhood, city, state, cep}, phone, hours [{days, opens, closes, closed, open_24h}], pickup (online orders can be picked up there), service_codes and pet_codes (Petz's own codes), narrowed by state and city. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-95 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: A Brazilian state code (UF), e.g. SP or RJ.
+            city: A city name; accents and case are ignored.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_stores", {"state": state, "city": city}, extra)
+
+    async def store(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store of Petz (petz.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Petz page on request. store_id, slug, name, url, image, google_place_id, address {street, neighborhood, city, state, cep}, phone, hours [{days, opens, closes, closed, open_24h}], service_codes and pet_codes. An unknown store is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-95 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: The store slug (stores[].slug).
+            url: A Petz store link (www.petz.com.br/loja/<slug>), instead of slug.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("petz_store", {"slug": slug, "url": url}, extra)
