@@ -49,6 +49,7 @@ from ._namespaces_async import (
     _AsyncCentauroNamespace,
     _AsyncChatGPTNamespace,
     _AsyncChewyNamespace,
+    _AsyncCobasiNamespace,
     _AsyncCompaniesHouseNamespace,
     _AsyncCompanyNamespace,
     _AsyncCompassNamespace,
@@ -66,6 +67,7 @@ from ._namespaces_async import (
     _AsyncEbayNamespace,
     _AsyncEdmundsNamespace,
     _AsyncEnjoeiNamespace,
+    _AsyncEstantevirtualNamespace,
     _AsyncEstatesalesNamespace,
     _AsyncExpediaNamespace,
     _AsyncExtraspaceNamespace,
@@ -117,6 +119,7 @@ from ._namespaces_async import (
     _AsyncMovotoNamespace,
     _AsyncNaturaNamespace,
     _AsyncNellisNamespace,
+    _AsyncNetshoesNamespace,
     _AsyncNeweggNamespace,
     _AsyncNikeNamespace,
     _AsyncNintendoNamespace,
@@ -157,6 +160,7 @@ from ._namespaces_async import (
     _AsyncSweetwaterNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
+    _AsyncTerabyteNamespace,
     _AsyncThreadsNamespace,
     _AsyncThredupNamespace,
     _AsyncThriftbooksNamespace,
@@ -418,6 +422,10 @@ class AsyncScavioClient:
         self.enjoei = _AsyncEnjoeiNamespace(self)
         self.atacadao = _AsyncAtacadaoNamespace(self)
         self.carrefourbr = _AsyncCarrefourbrNamespace(self)
+        self.terabyte = _AsyncTerabyteNamespace(self)
+        self.cobasi = _AsyncCobasiNamespace(self)
+        self.netshoes = _AsyncNetshoesNamespace(self)
+        self.estantevirtual = _AsyncEstantevirtualNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

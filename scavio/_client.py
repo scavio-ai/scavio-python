@@ -47,6 +47,7 @@ from ._namespaces_sync import (
     _CentauroNamespace,
     _ChatGPTNamespace,
     _ChewyNamespace,
+    _CobasiNamespace,
     _CompaniesHouseNamespace,
     _CompanyNamespace,
     _CompassNamespace,
@@ -64,6 +65,7 @@ from ._namespaces_sync import (
     _EbayNamespace,
     _EdmundsNamespace,
     _EnjoeiNamespace,
+    _EstantevirtualNamespace,
     _EstatesalesNamespace,
     _ExpediaNamespace,
     _ExtraspaceNamespace,
@@ -115,6 +117,7 @@ from ._namespaces_sync import (
     _MovotoNamespace,
     _NaturaNamespace,
     _NellisNamespace,
+    _NetshoesNamespace,
     _NeweggNamespace,
     _NikeNamespace,
     _NintendoNamespace,
@@ -155,6 +158,7 @@ from ._namespaces_sync import (
     _SweetwaterNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
+    _TerabyteNamespace,
     _ThreadsNamespace,
     _ThredupNamespace,
     _ThriftbooksNamespace,
@@ -423,6 +427,10 @@ class ScavioClient:
         self.enjoei = _EnjoeiNamespace(self)
         self.atacadao = _AtacadaoNamespace(self)
         self.carrefourbr = _CarrefourbrNamespace(self)
+        self.terabyte = _TerabyteNamespace(self)
+        self.cobasi = _CobasiNamespace(self)
+        self.netshoes = _NetshoesNamespace(self)
+        self.estantevirtual = _EstantevirtualNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

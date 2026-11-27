@@ -186,6 +186,10 @@ __all__ = [
     "_EnjoeiNamespace",
     "_AtacadaoNamespace",
     "_CarrefourbrNamespace",
+    "_TerabyteNamespace",
+    "_CobasiNamespace",
+    "_NetshoesNamespace",
+    "_EstantevirtualNamespace",
 ]
 
 class _GoogleNamespace:
@@ -35531,3 +35535,929 @@ class _CarrefourbrNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("carrefourbr_categories", {"site": site}, extra)
+
+class _TerabyteNamespace:
+    """Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store) search, product, reviews, category, brand, deals, coupons, trending searches and PC builder endpoints; Brazil only, prices in BRL with the Pix price, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "top_rated", "most_reviewed"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By keyword, up to 100 per page. Returns page, page_size, sort, total, total_pages, has_more, count and items [{position, product_id, name, url, image, brand, category, gtin, mpn, price (the card price), pix_price (the Pix / boleto price), list_price (the struck-through regular price), discount_percent (Pix vs list), installment {count, amount, interest_free}, currency, available, open_box, free_shipping, free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, best_seller_rank {position, category}, rating, review_count, coupon {code, value, discount_type, units_left} and labels}]. The site's search ignores sorting, so sort (price, best sellers, rating, review count) orders the returned page and a note says so. A keyword that matches nothing returns total 0 (the site itself answers it with unrelated products, which are dropped). When the fast search answer fails, the search page is read instead: up to 300 results, total null, slower. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            page: Results page, 1-based.
+            page_size: Products per page, 1-100. Defaults to 24.
+            sort: relevance (the default, the site's order), price_asc, price_desc (by Pix price), best_sellers (units sold), top_rated or most_reviewed. The site's search ignores sorting, so Scavio sorts the returned page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_search", {"query": query, "page": page, "page_size": page_size, "sort": sort}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By product_id or link: product_id, requested_id, name, url, brand, category, gtin (EAN), mpn, part_number, images, price (card total), pix_price, list_price, discount_percent, pix_discount_percent, installment {count, amount, interest_free}, installments [{count, amount, discount_percent, interest}] (every card plan), currency, available, availability, condition (Novo, Open Box), open_box, warranty, warranty_months, sold_by, best_seller_rank {position, category, category_url}, offer {campaign, ends_at (Brasilia time), units_sold, units_left, stock_label} (a running deal), price_valid_until, coupon, free_shipping, free_shipping_states (states with free shipping), rating, review_count, return_days, key_specs [{name, value}], specs [{name, value}] and reviews [{rating, date, text}] (the 5 newest; no reviewer names). Not available: shipping by CEP (Terabyteshop quotes it in the cart), stores (it has none) and stock unit counts (it publishes availability flags, units sold and a deal's units left). An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Terabyteshop product id (items[].product_id; the number after /produto/ in a product link). Send product_id or url.
+            url: A product link on www.terabyteshop.com.br (items[].url), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_product", {"product_id": product_id, "url": url}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Newest to oldest, 5 per page: product_id, url, page, page_size, has_more, count and reviews [{rating, date, verified_buyer, text}]; sent with product_id alone it also returns average_rating, total_reviews and total_pages. No reviewer names or places. With url it is fastest. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Terabyteshop product id (items[].product_id; the number after /produto/ in a product link). Send product_id or url.
+            url: A product link on www.terabyteshop.com.br (items[].url), instead of product_id.
+            page: Page, 1-based, 5 reviews each (newest to oldest).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_reviews", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        subcategory: Optional[str] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By category path. 30 per page, in the site's order or by price, filtered by sub-category and spec attributes. Returns page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, name, url, image, brand, category, gtin, mpn, price (the card price), pix_price (the Pix / boleto price), list_price (the struck-through regular price), discount_percent (Pix vs list), installment {count, amount, interest_free}, currency, available, open_box, free_shipping, free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, best_seller_rank {position, category}, rating, review_count, coupon {code, value, discount_type, units_left} and labels}] (cards carry the Pix price, list price and installments; price, the card total, is on the product endpoint), facets {total, price_range, subcategories [{name, count}], brands [{brand_id, name, count}], attributes [{key, label, unit, numeric, values [{value, count}]}], attribute_category} and filters_applied. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path as the site writes it (the path of a category link on www.terabyteshop.com.br), e.g. hardware/placas-de-video, hardware/processadores, monitores, perifericos/mouse.
+            sort: relevance (the default, the site's own order), price_asc or price_desc.
+            page: Results page, 1-based, 30 products each. total_pages reports the last one.
+            subcategory: A sub-category name exactly as facets.subcategories[].name lists it.
+            filters: Spec filters, at most 5 keys: {key: value or [values]}, keys and values exactly as facets.attributes[].key and .values[].value list them (e.g. modelo, fabricante, vram_gb, conexao). Several values match any of them.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_category", {"category": category, "sort": sort, "page": page, "subcategory": subcategory, "filters": filters}, extra)
+
+    def brand(
+        self,
+        category: str,
+        *,
+        brand: Optional[str] = None,
+        brand_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        subcategory: Optional[str] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products in one category of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By category path and brand name or brand_id (facets.brands of a category answer): brand {brand_id, name, count} and the listing. 30 per page, in the site's order or by price, filtered by sub-category and spec attributes. Returns page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, name, url, image, brand, category, gtin, mpn, price (the card price), pix_price (the Pix / boleto price), list_price (the struck-through regular price), discount_percent (Pix vs list), installment {count, amount, interest_free}, currency, available, open_box, free_shipping, free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, best_seller_rank {position, category}, rating, review_count, coupon {code, value, discount_type, units_left} and labels}] (cards carry the Pix price, list price and installments; price, the card total, is on the product endpoint), facets {total, price_range, subcategories [{name, count}], brands [{brand_id, name, count}], attributes [{key, label, unit, numeric, values [{value, count}]}], attribute_category} and filters_applied. A brand with no products in the category is a charged 404 listing the brands there. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path as the site writes it (the path of a category link on www.terabyteshop.com.br), e.g. hardware/placas-de-video, hardware/processadores, monitores, perifericos/mouse.
+            brand: A brand name as facets.brands[].name lists it (case and accents ignored). Send brand or brand_id.
+            brand_id: A brand id (facets.brands[].brand_id), instead of brand.
+            sort: relevance (the default, the site's own order), price_asc or price_desc.
+            page: Results page, 1-based, 30 products each. total_pages reports the last one.
+            subcategory: A sub-category name exactly as facets.subcategories[].name lists it.
+            filters: Spec filters, at most 5 keys: {key: value or [values]}, keys and values exactly as facets.attributes[].key and .values[].value list them (e.g. modelo, fabricante, vram_gb, conexao). Several values match any of them.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_brand", {"category": category, "brand": brand, "brand_id": brand_id, "sort": sort, "page": page, "subcategory": subcategory, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        deal: Optional[Literal["black_friday", "open_box", "free_shipping"]] = None,
+        brand_id: Optional[Union[str, int]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        subcategory: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal listings of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. black_friday (the promotions page, Black Friday 2026), open_box or free_shipping, sorted, by sub-category or brand. 30 per page, in the site's order or by price, filtered by sub-category and spec attributes. Returns page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, name, url, image, brand, category, gtin, mpn, price (the card price), pix_price (the Pix / boleto price), list_price (the struck-through regular price), discount_percent (Pix vs list), installment {count, amount, interest_free}, currency, available, open_box, free_shipping, free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, best_seller_rank {position, category}, rating, review_count, coupon {code, value, discount_type, units_left} and labels}] (cards carry the Pix price, list price and installments; price, the card total, is on the product endpoint), facets {total, price_range, subcategories [{name, count}], brands [{brand_id, name, count}], attributes [{key, label, unit, numeric, values [{value, count}]}], attribute_category} and filters_applied. items[].offer.ends_at is each deal's end; the product endpoint adds its units left. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            deal: black_friday (the default: the site's promotions page, Black Friday 2026), open_box (open-box products) or free_shipping (free-shipping products).
+            brand_id: One brand (facets.brands[].brand_id).
+            sort: relevance (the default, the site's own order), price_asc or price_desc.
+            page: Results page, 1-based, 30 products each. total_pages reports the last one.
+            subcategory: A sub-category name exactly as facets.subcategories[].name lists it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_deals", {"deal": deal, "brand_id": brand_id, "sort": sort, "page": page, "subcategory": subcategory}, extra)
+
+    def coupons(
+        self,
+        *,
+        code: Optional[str] = None,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The active coupons of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. All of them, one category's, or one code with the products it covers: coupons [{code, discount, discount_type (percent, amount), discount_value, scope, units_left, valid_until, minimum_order, free_shipping, conditions, product_count, url}] and coupon_categories [{slug, name, coupon_count}]; with code, coupon {... used_percent} and products [{product_id, name, url, image, brand, product_type}]. An unknown code or category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            code: One coupon code (coupons[].code): the coupon and the products it covers.
+            category: A coupon category slug (coupon_categories[].slug, e.g. placa-mae, memoria-ram): its coupons. Without code or category, every active coupon.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_coupons", {"code": code, "category": category}, extra)
+
+    def trending_searches(
+        self,
+        *,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The top search terms of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. terms [{position, term, search_count, top_product {product_id, name, url, image, brand, category, price, pix_price, currency, available}}], up to 48, as the site ranks them. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            limit: How many terms, 1-48 (the default, all the site lists).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_trending_searches", {"limit": limit}, extra)
+
+    def pc_builder(
+        self,
+        *,
+        platform_id: Optional[Union[str, int]] = None,
+        group_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Full Custom PC builder of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. Without inputs, platforms [{platform_id, name, url}]; with platform_id, its component groups [{group_id, name, optional, max_items, min_items, option_count, note}]; with platform_id and group_id, that group's options [{product_id, name, url, image, brand, price (card), pix_price, pix_discount_percent, installment, on_offer, new_release, selected_by_default, assembly_available, available, availability_by_distribution_center [{distribution_center (SC, ES), available}]}]. Builder prices are the builder's own and can differ from the product page. Nothing is added to a cart or saved. An unknown platform is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            platform_id: A builder platform (platforms[].platform_id): its component groups. Without it, the platforms.
+            group_id: A component group of that platform (groups[].group_id): its options.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("terabyte_pc_builder", {"platform_id": platform_id, "group_id": group_id}, extra)
+
+class _CobasiNamespace:
+    """Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi) search, category, brand, deals, product, reviews, questions, availability, suggestions, stores and store endpoints; Brazil only, prices in BRL, pickup and delivery flags by CEP, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "discount_desc"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[list[str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By keyword, sorted by relevance, price or discount and narrowed by any facet (brand, department, size, age, flavour and more). 20 products per page; Cobasi stops paging at page 50 (1,000 products). Returns page, page_size, sort, total, total_pages, has_more, count and items [{position, product_id, name, url, image, brand, price, list_price (the regular price when a lower price applies), discount_percent, currency, available, rating, skus [{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. facets [{key, label, values [{value, label, count, selected}]}] (send values to filters) and filters_applied. A keyword with no products returns total 0. Subscription prices are on the product endpoint. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            sort: relevance (the default), price_asc, price_desc or discount_desc (largest discount at the top).
+            page: Results page, 1-based, 20 products per page. Cobasi stops paging at page 50 (1,000 products).
+            filters: Facet filters, at most 10: values exactly as facets[].values[].value of an answer lists them, e.g. brand/golden, porte/racas-pequenas or category-1/cachorro. Values of one facet widen the match; different facets narrow it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_search", {"query": query, "sort": sort, "page": page, "filters": filters}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["top_selling", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By category path, sorted by best sellers or price, with the category, its subcategories [{category_id, name, path, has_children}] and facet counts. 20 products per page; Cobasi stops paging at page 50 (1,000 products). Returns page, page_size, sort, total, total_pages, has_more, count and items [{position, product_id, name, url, image, brand, price, list_price (the regular price when a lower price applies), discount_percent, currency, available, rating, skus [{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. total is null when the category page does not count its products. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path (a product's categories[].path, a category's subcategories[].path, or the path after /c/ in a category link), e.g. cachorro or cachorro/racao/racao-seca.
+            sort: top_selling (the default, ordered by Cobasi's sales), price_asc or price_desc.
+            page: Results page, 1-based, 20 products per page. Cobasi stops paging at page 50 (1,000 products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_category", {"category": category, "sort": sort, "page": page}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        sort: Optional[Literal["top_selling", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one brand at Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. By brand slug, sorted by best sellers or price. 20 products per page; Cobasi stops paging at page 50 (1,000 products). Returns page, page_size, sort, total, total_pages, has_more, count and items [{position, product_id, name, url, image, brand, price, list_price (the regular price when a lower price applies), discount_percent, currency, available, rating, skus [{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. An unknown brand is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as its Cobasi link shows it (the part after /m/), e.g. golden, premier or gran-plus.
+            sort: top_selling (the default, ordered by Cobasi's sales), price_asc or price_desc.
+            page: Results page, 1-based, 20 products per page. Cobasi stops paging at page 50 (1,000 products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_brand", {"brand": brand, "sort": sort, "page": page}, extra)
+
+    def deals(
+        self,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "discount_desc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deals page (Promoções) of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. Products on promotion with the deal price next to the regular price (list_price) and discount_percent, sorted by relevance, price or discount. 20 products per page; Cobasi stops paging at page 50 (1,000 products). Returns page, page_size, sort, total, total_pages, has_more, count and items [{position, product_id, name, url, image, brand, price, list_price (the regular price when a lower price applies), discount_percent, currency, available, rating, skus [{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. Cobasi publishes no validity dates for these deals. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sort: relevance (the default), price_asc, price_desc or discount_desc (largest discount at the top).
+            page: Results page, 1-based, 20 products per page. Cobasi stops paging at page 50 (1,000 products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_deals", {"sort": sort, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed in. product_id, name, url, brand, brand_id, categories [{name, path}], images, available, sold_by, main_sku_id, skus [{sku_id, name (size), ean, available, price, list_price, discount_percent, subscription_price (Compra Programada, null unless can_subscribe), can_subscribe, installments {count, amount}, price_per_measure {unit, price} (e.g. price per kg), best_value, is_kit, price_valid_until}], subscription {frequencies} when the product can be bought on subscription, specs [{name, values}], dimensions {height_cm, width_cm, length_cm, weight_g}, rating {average, total, stars, recommend_percent} and latest_reviews (4 recent reviews, without reviewer names). available is a flag, not a unit count. Pix prices, per-store prices or units and marketplace sellers are not returned. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Cobasi product id (items[].product_id; the number before /p in a product link). Send product_id or url.
+            url: A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_product", {"product_id": product_id, "url": url}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. In Cobasi's own recent-review order, 4 per page: total, total_pages, average_rating, stars {1-5 counts}, recommend_percent and reviews [{date, purchase_date, rating, recommends, text}]. No reviewer names. 1 credit. Failed upstream calls and refused inputs are not charged. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Cobasi product id (items[].product_id; the number before /p in a product link). Send product_id or url.
+            url: A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), instead of product_id.
+            page: Page, 1-based, 4 per page. total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_reviews", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def questions(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Shopper questions about one product of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. with Cobasi's answers, 4 per page: total, total_pages and questions [{question_id, question, answer, answered_at}]. The answer's opening greeting, which names the asker, is removed; no asker names. 1 credit. Failed upstream calls and refused inputs are not charged. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Cobasi product id (items[].product_id; the number before /p in a product link). Send product_id or url.
+            url: A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), instead of product_id.
+            page: Page, 1-based, 4 per page. total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_questions", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def availability(
+        self,
+        sku_id: Union[str, int],
+        cep: Union[str, int],
+        *,
+        quantity: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Pickup and delivery for one SKU of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. at a Brazilian CEP: pickup {available, ready_in, store_count, stores [{store_code, name, ready_in, price, address, latitude, longitude}]} (the stores near the CEP that can hand the SKU over, usually in 45 minutes) and delivery [{option_id, name, price (BRL), free, estimate}] (e.g. Econômica, Cobasi Já), for the quantity asked. Flags, not unit counts: Cobasi publishes no per-store stock or per-store prices. No options for the CEP returns empty lists. 1 credit. Failed upstream calls and refused inputs are not charged. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku_id: The Cobasi SKU id (skus[].sku_id of a product or a listing item; one size or variant).
+            cep: The Brazilian CEP to pick up near or deliver to (8 digits).
+            quantity: Units, 1-10. Defaults to 1.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_availability", {"sku_id": sku_id, "cep": cep, "quantity": quantity}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search suggestions of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. for the start of a search: suggestions (up to 5 terms) and misspelled (Cobasi corrected the spelling, e.g. racao for ração). 1 credit. Failed upstream calls and refused inputs are not charged. Usually 2-6 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a search, as a shopper types it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_suggestions", {"query": query}, extra)
+
+    def stores(
+        self,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store directory of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. All Cobasi stores (about 250) with store_id, slug, name, url, address {street, number, neighborhood, city, state, cep}, latitude, longitude and services (e.g. pickup in 45 minutes, vet pharmacy, grooming), narrowed by state and city. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: A Brazilian state code (UF), e.g. SP or RJ.
+            city: A city name; accents and case are ignored.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_stores", {"state": state, "city": city}, extra)
+
+    def store(
+        self,
+        slug: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. slug, name, url, address, latitude, longitude, phone, whatsapp (the store's WhatsApp link), hours [{day, opens, closes}] per weekday, holiday_hours, grooming_hours and vet_hours where offered, services, pet_services and online_scheduling. An unknown store is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: The store slug (stores[].slug).
+            url: A Cobasi store link (www.cobasi.com.br/lojas/<slug>), instead of slug.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cobasi_store", {"slug": slug, "url": url}, extra)
+
+class _NetshoesNamespace:
+    """Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu) search, list, product, offers, inventory, shipping, reviews, questions, daily deal, seller and popular searches endpoints; Brazil only, prices in BRL with every seller's offer per size, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "best_sellers", "new_releases", "offers", "price_asc", "price_desc", "top_rated"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By keyword. 100 per page, pages 1-100, in the site's 7 sorts, filtered by any facet of the listing (brand, size, gender, product type, colour, department, promotion, sold-by and the rest, plus a BRL price range). Returns page, page_size, total (the site caps it at 10000: total_capped), total_pages, has_more, count, title, items [{position, product_id (the colour: use it in product), product_code, name, brand, department, product_type, url, image, available, price, list_price, discount_percent, installment_count, rating, review_count, badges, colors, flavors, sizes and other_colors [{product_id, image}]}], facets [{key, name, values [{value, label, count}], min, max}], quick_filters, sort, filters_applied and notes. Also query and landing_page (a keyword the site sends to a landing page returns that page's products, and says so). No results is an empty 200 (charged). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-30 s (slower when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese, as a shopper types them).
+            sort: relevance (default), best_sellers, new_releases, offers, price_asc, price_desc or top_rated: the site's 7 sorts.
+            filters: Facet filters: {key: value or [values]} with facets[].key and facets[].values[].value of an answer (marca, tamanho, genero, tipo-de-produto, cor-principal, departamento, promocoes, vendido-por, pisada and more, as the listing offers them). Up to 12 values.
+            brand: Brand facet value(s) (marca), e.g. nike or adidas.
+            gender: Gender facet value(s) (genero): masculino, feminino, unissex, menino, menina ...
+            size: Size facet value(s) (tamanho), e.g. 42 or m.
+            seller: Sold-by facet value(s) (vendido-por): netshoes-netshoes or a marketplace seller's value.
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            page: Results page, 1-100 (100 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_search", {"query": query, "sort": sort, "filters": filters, "brand": brand, "gender": gender, "size": size, "seller": seller, "price_min": price_min, "price_max": price_max, "page": page}, extra)
+
+    def list(
+        self,
+        *,
+        slug: Optional[str] = None,
+        sort: Optional[Literal["relevance", "best_sellers", "new_releases", "offers", "price_asc", "price_desc", "top_rated"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        gender: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Union[str, list[str]]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A list page of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By its slug or /lst/ link (tenis-black-friday, the Black Friday sneakers, is the default), sorted and filtered like search. 45 per page, pages 1-250, in the site's 7 sorts, filtered by any facet of the listing (brand, size, gender, product type, colour, department, promotion, sold-by and the rest, plus a BRL price range). Returns page, page_size, total (the site caps it at 10000: total_capped), total_pages, has_more, count, title, items [{position, product_id (the colour: use it in product), product_code, name, brand, department, product_type, url, image, available, price, list_price, discount_percent, installment_count, rating, review_count, badges, colors, flavors, sizes and other_colors [{product_id, image}]}], facets [{key, name, values [{value, label, count}], min, max}], quick_filters, sort, filters_applied and notes. Also slug and url. An unknown list is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-30 s (slower when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A list slug or its netshoes.com.br/lst/ link (tenis-black-friday is the default).
+            sort: relevance (default), best_sellers, new_releases, offers, price_asc, price_desc or top_rated: the site's 7 sorts.
+            filters: Facet filters: {key: value or [values]} with facets[].key and facets[].values[].value of an answer (marca, tamanho, genero, tipo-de-produto, cor-principal, departamento, promocoes, vendido-por, pisada and more, as the listing offers them). Up to 12 values.
+            brand: Brand facet value(s) (marca), e.g. nike or adidas.
+            gender: Gender facet value(s) (genero): masculino, feminino, unissex, menino, menina ...
+            size: Size facet value(s) (tamanho), e.g. 42 or m.
+            seller: Sold-by facet value(s) (vendido-por): netshoes-netshoes or a marketplace seller's value.
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            page: Results page, 1-250 (45 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_list", {"slug": slug, "sort": sort, "filters": filters, "brand": brand, "gender": gender, "size": size, "seller": seller, "price_min": price_min, "price_max": price_max, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id (the colour code), a size sku or a link: product_id, product_code, name, brand, department, product_type, genders, url, available, listing_type, color, currency, price_min, price_max, sellers, size_count, sizes_available, sizes [{sku, size, ean, available, price, pix_price, list_price, seller, offer_count, offers [{seller {id, name, is_store}, available, price, pix_price, pix_promotion {percent, amount, name}, list_price, discount_percent, installment, free_shipping}], weight_grams, release_date}], colors [{product_id, name, available, url}], images, badges, breadcrumbs, specs [{name, value}], ncm, rating, review_count, percent_recommended and question_count. price is the card price; pix_price the Pix price where a Pix promotion applies. No marketing description. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Netshoes product id: the colour code (items[].product_id, colors[].product_id). A size sku works too.
+            url: A netshoes.com.br product link, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_product", {"product_id": product_id, "url": url}, extra)
+
+    def offers(
+        self,
+        sku: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every seller's offer for one size of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By size sku: sku, product_id, product_code, name, size, ean, color, available, url, offer_count and offers [{seller {id, name, is_store, international}, available, price, pix_price, pix_promotion, list_price, discount_percent, installment, installments [{count, amount, total, interest_free}], free_shipping}]. An unknown sku is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A size sku (sizes[].sku of the product endpoint).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_offers", {"sku": sku}, extra)
+
+    def inventory(
+        self,
+        sku: str,
+        *,
+        seller_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The online stock count for one size of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By size sku and, optionally, seller: sku, seller {id, name, is_store}, quantity (as the site gives it; it may be capped) and in_stock. Without seller_id the size's buy-box seller is used. Not a store count. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A size sku (sizes[].sku of the product endpoint).
+            seller_id: The seller (sizes[].offers[].seller.id; 0 is Netshoes). Default: the size's buy-box seller.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_inventory", {"sku": sku, "seller_id": seller_id}, extra)
+
+    def shipping(
+        self,
+        sku: str,
+        cep: str,
+        *,
+        seller_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Delivery options for one size of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By size sku and CEP: sku, cep, seller, price, pix_price, currency, count, options [{type (NORMAL, COLLECT_MAGALU pickup ...), service, seller_id, cost, free, min_days, max_days, min_date, max_date}], lowest_cost, fastest and free_shipping_threshold {min_order, missing, reached}. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A size sku (sizes[].sku of the product endpoint).
+            cep: A Brazilian CEP (8 digits).
+            seller_id: Quote this seller's offer (default: the buy-box seller).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_shipping", {"sku": sku, "cep": cep, "seller_id": seller_id}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        rating: Optional[Union[Literal["positive", "negative"], int, list[int]]] = None,
+        with_photos: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Product reviews of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product code (or a colour id, sku or link), 13 per page, filtered by stars (positive, negative or star values) and photos: product_code, page, page_size, total_pages, has_more, total_reviews, total_filtered, count and reviews [{review_id, rating, text, date, recommends, photo_count}]. No reviewer names. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product code shared by every colour (product_code), or a colour product id or size sku.
+            url: A netshoes.com.br product link, instead of product_id.
+            page: Page, 1-based (13 per page).
+            rating: positive (5 and 4 stars), negative (2 and 1 star), or star values, e.g. [3].
+            with_photos: Reviews with photos.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_reviews", {"product_id": product_id, "url": url, "page": page, "rating": rating, "with_photos": with_photos}, extra)
+
+    def questions(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Shoppers' questions on a product of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product code (or a colour id, sku or link), 10 per page: product_code, page, total_pages, has_more, total_questions, count and questions [{question, asked_at, answer, answered_at, answered_by (the seller, or the site's automated assistant), answered_by_ai}]. No asker names or emails. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product code (product_code), or a colour product id or size sku.
+            url: A netshoes.com.br product link, instead of product_id.
+            page: Page, 1-based (10 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_questions", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def daily_deal(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The daily offer ("Barato do Dia") of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. title, starts_at, ends_at, count and items [{position, product_id, name, url, image, available, seller_ids}]. The answer carries no prices: send a product_id to product. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_daily_deal", {}, extra)
+
+    def seller(
+        self,
+        seller_id: Union[str, int],
+        *,
+        name: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A marketplace seller of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By seller id: seller_id, name, name_slug, official_store, active, member_since, company_name, cnpj, address (the company's business address as the seller page shows it), products_sold, logo, url, rating, review_count, reviews_with_comment, percent_recommended, product_quality_stamp, histogram, likert and the newest reviews [{rating, text, date, recommends}] without reviewer names. Contacts are not returned. An unknown seller is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A marketplace seller id (sizes[].offers[].seller.id, daily_deal items[].seller_ids).
+            name: The seller's name slug (name_slug), optional.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_seller", {"seller_id": seller_id, "name": name}, extra)
+
+    def popular_searches(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The popular searches of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. count and searches [{position, term}], as the site's search box lists them. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("netshoes_popular_searches", {}, extra)
+
+class _EstantevirtualNamespace:
+    """Estante Virtual (estantevirtual.com.br, Brazil's used and new book marketplace, part of Magalu) search, isbn, book, copies, copy, shipping, seller, seller books, seller reviews, sellers, category and list endpoints; Brazil only, prices in BRL, 1 credit each (copies with sellers ceil((1 + copies) / 5))."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_sellers", "price_plus_shipping"]] = None,
+        condition: Optional[Literal["used", "new"]] = None,
+        author: Optional[str] = None,
+        publisher: Optional[str] = None,
+        city: Optional[str] = None,
+        category: Optional[str] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By title, author or ISBN keywords. 44 per page, pages 1-238, in the site's 6 sorts, filtered by any facet (used / new, author, publisher, year, seller city, seller, category, language, rating, a BRL price range). Returns page, page_size, total, total_pages, has_more, count, title, items [{position, kind (book or listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, url, image, lowest_price, copies {used, new}, department, badges, rating, review_count}], facets [{key, name, values [{value, label, count}], min, max}], sort, filters_applied and notes. A book (kind book, book_id ...-BK) is every copy of one ISBN; a one-copy listing without an ISBN group is kind listing with a copy_id. There is no work level: other editions are separate books. Also query. No results is an empty 200 (charged). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Title, author or ISBN keywords (Portuguese, as a reader types them).
+            sort: relevance (default), price_asc, price_desc, newest, best_sellers or price_plus_shipping: the site's 6 sorts.
+            condition: Books with used or new copies (tipo-de-livro).
+            author: Author facet value (autor, facets[].values[].value), e.g. machado-de-assis.
+            publisher: Publisher facet value (editora).
+            city: Seller city facet value (cidade).
+            category: Category facet value (categoria).
+            filters: Facet filters: {key: value or [values]} with facets[].key and facets[].values[].value of an answer (tipo-de-livro, autor, editora, ano-de-publicacao, cidade, sebos-e-livreiros, promocoes, categoria, idioma, _avaliacao, compra-corporativa). Up to 12 values.
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            page: Results page, 1-238 (44 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_search", {"query": query, "sort": sort, "condition": condition, "author": author, "publisher": publisher, "city": city, "category": category, "filters": filters, "price_min": price_min, "price_max": price_max, "page": page}, extra)
+
+    def isbn(
+        self,
+        isbn: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The book for an ISBN on Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. isbn13, isbn10, book {position, kind (book or listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, url, image, lowest_price, copies {used, new}, department, badges, rating, review_count} (the copies grouped under the ISBN), listing_count and listings (single copies with the ISBN that the site did not group). The check digit is verified first. An ISBN with no copy on sale is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            isbn: An ISBN-10 or ISBN-13 (dashes and spaces allowed; the check digit is verified, so a typo is a 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_isbn", {"isbn": isbn}, extra)
+
+    def book(
+        self,
+        book_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One book of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By book_id or link: book_id, title, author, publisher, year, isbn, url, image, available, currency, lowest_price {used, new}, lowest_priced_used and lowest_priced_new {copy_id, price, seller {id, name}, year, publisher, has_invoice, condition_notes, installment, url}, rating, review_count, percent_recommended, histogram and reviews [{review_id, rating, text, date, recommends, photo_count}] (every review the page shows, no reviewer names). No synopsis. A book (kind book, book_id ...-BK) is every copy of one ISBN; a one-copy listing without an ISBN group is kind listing with a copy_id. There is no work level: other editions are separate books. An unknown book is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 4-25 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            book_id: The book id (items[].book_id of a search, book.book_id of an ISBN lookup).
+            url: An estantevirtual.com.br book link, instead of book_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_book", {"book_id": book_id, "url": url}, extra)
+
+    def copies(
+        self,
+        book_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        condition: Optional[Literal["used", "new"]] = None,
+        sort: Optional[Literal["price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sellers: Optional[bool] = None,
+        year: Optional[str] = None,
+        publisher: Optional[str] = None,
+        city: Optional[str] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every copy of a book on sale on Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By book_id and condition (used / new), paged (up to 50 per page), sorted by price in either direction, filtered by printing year, publisher, seller city, seller or price: book_id, condition, sort, page, page_size, total, total_pages, has_more, count, items [{copy_id, book_id, title, author, publisher, year, isbn, book_language, condition (used / new), has_invoice, condition_notes (the seller's own notes on a used copy), price, installment, department, image, available, url, badges, seller {id, name} with sellers: true, weight_grams}], facets and notes. The list carries no seller per copy: sellers: true adds each copy's seller with one extra call per copy, billed ceil((1 + copies) / 5) credits (10 copies = 3). Otherwise 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s, 10-60 s with sellers: true; set a client timeout of at least 180 s.
+
+        Costs 1 credit; with sellers ceil((1 + copies) / 5) (e.g. 10 copies = 3); credits_used
+        in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            book_id: The book id (items[].book_id of a search, book.book_id of an ISBN lookup).
+            url: An estantevirtual.com.br book link, instead of book_id.
+            condition: used (default) or new copies.
+            sort: price_asc (default) or price_desc.
+            page: Page, 1-based.
+            page_size: Copies per page, 1-50 (default 10).
+            sellers: Add each copy's seller (one extra call per copy: ceil((1 + copies) / 5) credits, e.g. 10 copies = 3 credits). Default false (1 credit).
+            year: Printing year facet (ano-de-publicacao).
+            publisher: Publisher facet value (editora).
+            city: Seller city facet value (cidade).
+            filters: Facet filters {key: value or [values]}: ano-de-publicacao, editora, cidade, sebos-e-livreiros, _preco (min-max in cents).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_copies", {"book_id": book_id, "url": url, "condition": condition, "sort": sort, "page": page, "page_size": page_size, "sellers": sellers, "year": year, "publisher": publisher, "city": city, "filters": filters}, extra)
+
+    def copy(
+        self,
+        copy_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One seller's copy on Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By copy_id or link: copy_id, book_id, title, author, publisher, year, isbn, book_language, condition (used / new), has_invoice, condition_notes (the seller's own notes on a used copy), price, installment, department, image, available, url, badges, seller {id, name, name_slug}, free_shipping, weight_grams, dimensions_cm and quantity (always 1: used copies are unique). An unknown copy is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 4-25 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            copy_id: The copy id (items[].copy_id of copies, lowest_priced_used.copy_id of a book, copy_id of a one-copy listing).
+            url: An estantevirtual.com.br copy link, instead of copy_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_copy", {"copy_id": copy_id, "url": url}, extra)
+
+    def shipping(
+        self,
+        cep: str,
+        *,
+        copy_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The delivery quote for one copy of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By copy_id and CEP: copy_id, cep, seller, price, currency, count, options [{type, service, seller_id, cost, free, min_days, max_days, min_date, max_date}] (the lowest-cost option the seller offers there) and free_shipping_threshold {min_order, missing, reached}. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            copy_id: The copy id (items[].copy_id of copies, lowest_priced_used.copy_id of a book, copy_id of a one-copy listing).
+            url: An estantevirtual.com.br copy link, instead of copy_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_shipping", {"cep": cep, "copy_id": copy_id, "url": url}, extra)
+
+    def seller(
+        self,
+        seller_id: Union[str, int],
+        *,
+        name: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A sebo or bookseller of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By seller id: seller_id, name (the shop name), name_slug, seller_type (private or business), official_store, active, member_since, city, state, description (phone numbers and emails removed), shipping_methods, url, rating, review_count, reviews_with_comment, percent_recommended, histogram, reviews (the newest, no reviewer names), catalogue_total and books (a page of 40 from its catalogue). No street address, ZIP, document number or contact is returned. An unknown seller is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 4-25 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id).
+            name: The seller's name slug (name_slug), optional.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_seller", {"seller_id": seller_id, "name": name}, extra)
+
+    def seller_books(
+        self,
+        seller_id: Union[str, int],
+        *,
+        query: Optional[str] = None,
+        sort: Optional[Literal["price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A sebo's catalogue on Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By seller id, optionally searched by keyword and sorted by price, 40 per page: seller_id, query, sort, page, page_size, total, total_pages, has_more, count and items [{copy_id, book_id, title, author, publisher, year, isbn, book_language, condition (used / new), has_invoice, condition_notes (the seller's own notes on a used copy), price, installment, department, image, available, url, badges}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id).
+            query: Search inside the seller's catalogue.
+            sort: price_asc or price_desc (default: the site's order).
+            page: Page, 1-based (40 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_seller_books", {"seller_id": seller_id, "query": query, "sort": sort, "page": page}, extra)
+
+    def seller_reviews(
+        self,
+        seller_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        rating: Optional[Literal["positive", "negative"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Buyers' reviews of a sebo on Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By seller id, 10 per page, newest to oldest, optionally positive or negative: seller_id, page, total_pages, has_more, total_filtered, count and reviews [{rating, text, date, recommends}]. No reviewer names. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            seller_id: A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id).
+            page: Page, 1-based (10 per page).
+            rating: positive (3 to 5 stars) or negative (0 to 2), as the site's filters.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_seller_reviews", {"seller_id": seller_id, "page": page, "rating": rating}, extra)
+
+    def sellers(
+        self,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The sebo and bookseller directory of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The whole country, a state (UF) or a city of that state (written as the site writes it, with accents), 30 per page: state, city, page, total, total_pages, has_more, count, sellers [{seller_id, name, active, member_since, city, state, free_shipping, rating, percent_recommended, url}], cities and states (the site's counts). City and state; no address or contact. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 4-25 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: A Brazilian state code (UF). Leave out for the whole country.
+            city: A city of that state, written as the site writes it, with accents (cities[] of the state's directory).
+            page: Page, 1-based (30 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_sellers", {"state": state, "city": city, "page": page}, extra)
+
+    def category(
+        self,
+        category_slug: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_sellers", "price_plus_shipping"]] = None,
+        condition: Optional[Literal["used", "new"]] = None,
+        author: Optional[str] = None,
+        publisher: Optional[str] = None,
+        city: Optional[str] = None,
+        category: Optional[str] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By slug (literatura-brasileira, filosofia, livros-raros ...), sorted and filtered like search. 44 per page, pages 1-238, in the site's 6 sorts, filtered by any facet (used / new, author, publisher, year, seller city, seller, category, language, rating, a BRL price range). Returns page, page_size, total, total_pages, has_more, count, title, items [{position, kind (book or listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, url, image, lowest_price, copies {used, new}, department, badges, rating, review_count}], facets [{key, name, values [{value, label, count}], min, max}], sort, filters_applied and notes. A book (kind book, book_id ...-BK) is every copy of one ISBN; a one-copy listing without an ISBN group is kind listing with a copy_id. There is no work level: other editions are separate books. Also category_slug and url. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_slug: A category slug or link: antropologia, artes, auto-ajuda, biografias, ciencia-politica, comunicacao, direito, engenharia, filosofia, historia-do-brasil, historia-geral, infanto-juvenis, literatura-brasileira, literatura-estrangeira, livros-raros, medicina, psicologia, ensino-de-idiomas (the site's menu), or a categoria facet value.
+            sort: relevance (default), price_asc, price_desc, newest, best_sellers or price_plus_shipping: the site's 6 sorts.
+            condition: Books with used or new copies (tipo-de-livro).
+            author: Author facet value (autor, facets[].values[].value), e.g. machado-de-assis.
+            publisher: Publisher facet value (editora).
+            city: Seller city facet value (cidade).
+            category: Category facet value (categoria).
+            filters: Facet filters: {key: value or [values]} with facets[].key and facets[].values[].value of an answer (tipo-de-livro, autor, editora, ano-de-publicacao, cidade, sebos-e-livreiros, promocoes, categoria, idioma, _avaliacao, compra-corporativa). Up to 12 values.
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            page: Results page, 1-238 (44 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_category", {"category_slug": category_slug, "sort": sort, "condition": condition, "author": author, "publisher": publisher, "city": city, "category": category, "filters": filters, "price_min": price_min, "price_max": price_max, "page": page}, extra)
+
+    def list(
+        self,
+        *,
+        slug: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A list page of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and new books from sebos and booksellers, owned by Magalu). Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By slug or /lst/ link: black-friday (default), livros-baratos, saldao-de-livros, livros-frete-gratis, lancamentos or another list of the site, 42 per page in the site's order: slug, url, page, total, total_pages, has_more, count, title and items [{position, kind (book or listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, url, image, lowest_price, copies {used, new}, department, badges, rating, review_count}]. An unknown list is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A list slug or /lst/ link: black-friday, livros-baratos, saldao-de-livros, livros-frete-gratis, lancamentos (black-friday is the default).
+            page: Page, 1-based (42 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("estantevirtual_list", {"slug": slug, "page": page}, extra)

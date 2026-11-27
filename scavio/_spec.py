@@ -39655,6 +39655,2323 @@ _CARREFOURBR_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 7 wave 4 2026-11-27: 4 platforms (Terabyteshop, Cobasi, Netshoes, Estante Virtual) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 240 s floor on every method.
+
+# Terabyteshop: 9 endpoints on /api/v1/terabyte.
+_TERABYTE_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="terabyte_search",
+        namespace="terabyte",
+        method="search",
+        http="POST",
+        path="/api/v1/terabyte/search",
+        summary=(
+            "Search Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). Scavio "
+            "fetches the public Terabyteshop page on request. Brazil: Portuguese text, prices "
+            "in BRL as shown to a visitor who is not signed in. By keyword, up to 100 per "
+            "page. Returns page, page_size, sort, total, total_pages, has_more, count and "
+            "items [{position, product_id, name, url, image, brand, category, gtin, mpn, "
+            "price (the card price), pix_price (the Pix / boleto price), list_price (the "
+            "struck-through regular price), discount_percent (Pix vs list), installment "
+            "{count, amount, interest_free}, currency, available, open_box, free_shipping, "
+            "free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, "
+            "best_seller_rank {position, category}, rating, review_count, coupon {code, "
+            "value, discount_type, units_left} and labels}]. The site's search ignores "
+            "sorting, so sort (price, best sellers, rating, review count) orders the returned "
+            "page and a note says so. A keyword that matches nothing returns total 0 (the "
+            "site itself answers it with unrelated products, which are dropped). When the "
+            "fast search answer fails, the search page is read instead: up to 300 results, "
+            "total null, slower. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese as shoppers type them."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-100. Defaults to 24."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "top_rated", "most_reviewed"]]',
+                doc=(
+                    "relevance (the default, the site's order), price_asc, price_desc (by Pix "
+                    "price), best_sellers (units sold), top_rated or most_reviewed. The "
+                    "site's search ignores sorting, so Scavio sorts the returned page."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_product",
+        namespace="terabyte",
+        method="product",
+        http="POST",
+        path="/api/v1/terabyte/product",
+        summary=(
+            "One product of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). "
+            "Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, "
+            "prices in BRL as shown to a visitor who is not signed in. By product_id or link: "
+            "product_id, requested_id, name, url, brand, category, gtin (EAN), mpn, "
+            "part_number, images, price (card total), pix_price, list_price, "
+            "discount_percent, pix_discount_percent, installment {count, amount, "
+            "interest_free}, installments [{count, amount, discount_percent, interest}] "
+            "(every card plan), currency, available, availability, condition (Novo, Open "
+            "Box), open_box, warranty, warranty_months, sold_by, best_seller_rank {position, "
+            "category, category_url}, offer {campaign, ends_at (Brasilia time), units_sold, "
+            "units_left, stock_label} (a running deal), price_valid_until, coupon, "
+            "free_shipping, free_shipping_states (states with free shipping), rating, "
+            "review_count, return_days, key_specs [{name, value}], specs [{name, value}] and "
+            "reviews [{rating, date, text}] (the 5 newest; no reviewer names). Not available: "
+            "shipping by CEP (Terabyteshop quotes it in the cart), stores (it has none) and "
+            "stock unit counts (it publishes availability flags, units sold and a deal's "
+            "units left). An unknown product is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to "
+            "about 90 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Terabyteshop product id (items[].product_id; the number after "
+                    "/produto/ in a product link). Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on www.terabyteshop.com.br (items[].url), instead of "
+                    "product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_reviews",
+        namespace="terabyte",
+        method="reviews",
+        http="POST",
+        path="/api/v1/terabyte/reviews",
+        summary=(
+            "Customer reviews of one product of Terabyteshop (terabyteshop.com.br, Brazil's "
+            "PC-parts store). Scavio fetches the public Terabyteshop page on request. Newest "
+            "to oldest, 5 per page: product_id, url, page, page_size, has_more, count and "
+            "reviews [{rating, date, verified_buyer, text}]; sent with product_id alone it "
+            "also returns average_rating, total_reviews and total_pages. No reviewer names or "
+            "places. With url it is fastest. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-6 s; set a client timeout "
+            "of at least 60 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Terabyteshop product id (items[].product_id; the number after "
+                    "/produto/ in a product link). Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on www.terabyteshop.com.br (items[].url), instead of "
+                    "product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based, 5 reviews each (newest to oldest)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_category",
+        namespace="terabyte",
+        method="category",
+        http="POST",
+        path="/api/v1/terabyte/category",
+        summary=(
+            "One category of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts store). "
+            "Scavio fetches the public Terabyteshop page on request. Brazil: Portuguese text, "
+            "prices in BRL as shown to a visitor who is not signed in. By category path. 30 "
+            "per page, in the site's order or by price, filtered by sub-category and spec "
+            "attributes. Returns page, page_size, sort, total, total_pages, has_more, count, "
+            "items [{position, product_id, name, url, image, brand, category, gtin, mpn, "
+            "price (the card price), pix_price (the Pix / boleto price), list_price (the "
+            "struck-through regular price), discount_percent (Pix vs list), installment "
+            "{count, amount, interest_free}, currency, available, open_box, free_shipping, "
+            "free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, "
+            "best_seller_rank {position, category}, rating, review_count, coupon {code, "
+            "value, discount_type, units_left} and labels}] (cards carry the Pix price, list "
+            "price and installments; price, the card total, is on the product endpoint), "
+            "facets {total, price_range, subcategories [{name, count}], brands [{brand_id, "
+            "name, count}], attributes [{key, label, unit, numeric, values [{value, "
+            "count}]}], attribute_category} and filters_applied. An unknown category is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 5-30 s, up to about 90 s; set a client timeout of at "
+            "least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path as the site writes it (the path of a category link on "
+                    "www.terabyteshop.com.br), e.g. hardware/placas-de-video, "
+                    "hardware/processadores, monitores, perifericos/mouse."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc or price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 30 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[str]",
+                doc=(
+                    "A sub-category name exactly as facets.subcategories[].name lists it."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Spec filters, at most 5 keys: {key: value or [values]}, keys and values "
+                    "exactly as facets.attributes[].key and .values[].value list them (e.g. "
+                    "modelo, fabricante, vram_gb, conexao). Several values match any of them."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_brand",
+        namespace="terabyte",
+        method="brand",
+        http="POST",
+        path="/api/v1/terabyte/brand",
+        summary=(
+            "One brand's products in one category of Terabyteshop (terabyteshop.com.br, "
+            "Brazil's PC-parts store). Scavio fetches the public Terabyteshop page on "
+            "request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not "
+            "signed in. By category path and brand name or brand_id (facets.brands of a "
+            "category answer): brand {brand_id, name, count} and the listing. 30 per page, in "
+            "the site's order or by price, filtered by sub-category and spec attributes. "
+            "Returns page, page_size, sort, total, total_pages, has_more, count, items "
+            "[{position, product_id, name, url, image, brand, category, gtin, mpn, price (the "
+            "card price), pix_price (the Pix / boleto price), list_price (the struck-through "
+            "regular price), discount_percent (Pix vs list), installment {count, amount, "
+            "interest_free}, currency, available, open_box, free_shipping, "
+            "free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, "
+            "best_seller_rank {position, category}, rating, review_count, coupon {code, "
+            "value, discount_type, units_left} and labels}] (cards carry the Pix price, list "
+            "price and installments; price, the card total, is on the product endpoint), "
+            "facets {total, price_range, subcategories [{name, count}], brands [{brand_id, "
+            "name, count}], attributes [{key, label, unit, numeric, values [{value, "
+            "count}]}], attribute_category} and filters_applied. A brand with no products in "
+            "the category is a charged 404 listing the brands there. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to "
+            "about 90 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path as the site writes it (the path of a category link on "
+                    "www.terabyteshop.com.br), e.g. hardware/placas-de-video, "
+                    "hardware/processadores, monitores, perifericos/mouse."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "A brand name as facets.brands[].name lists it (case and accents "
+                    "ignored). Send brand or brand_id."
+                ),
+            ),
+            Param(
+                "brand_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A brand id (facets.brands[].brand_id), instead of brand."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc or price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 30 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[str]",
+                doc=(
+                    "A sub-category name exactly as facets.subcategories[].name lists it."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Spec filters, at most 5 keys: {key: value or [values]}, keys and values "
+                    "exactly as facets.attributes[].key and .values[].value list them (e.g. "
+                    "modelo, fabricante, vram_gb, conexao). Several values match any of them."
+                ),
+            ),
+        ),
+        one_of=(("brand", "brand_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_deals",
+        namespace="terabyte",
+        method="deals",
+        http="POST",
+        path="/api/v1/terabyte/deals",
+        summary=(
+            "The deal listings of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts "
+            "store). Scavio fetches the public Terabyteshop page on request. Brazil: "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. "
+            "black_friday (the promotions page, Black Friday 2026), open_box or "
+            "free_shipping, sorted, by sub-category or brand. 30 per page, in the site's "
+            "order or by price, filtered by sub-category and spec attributes. Returns page, "
+            "page_size, sort, total, total_pages, has_more, count, items [{position, "
+            "product_id, name, url, image, brand, category, gtin, mpn, price (the card "
+            "price), pix_price (the Pix / boleto price), list_price (the struck-through "
+            "regular price), discount_percent (Pix vs list), installment {count, amount, "
+            "interest_free}, currency, available, open_box, free_shipping, "
+            "free_shipping_states, on_promotion, offer {campaign, ends_at}, units_sold, "
+            "best_seller_rank {position, category}, rating, review_count, coupon {code, "
+            "value, discount_type, units_left} and labels}] (cards carry the Pix price, list "
+            "price and installments; price, the card total, is on the product endpoint), "
+            "facets {total, price_range, subcategories [{name, count}], brands [{brand_id, "
+            "name, count}], attributes [{key, label, unit, numeric, values [{value, "
+            "count}]}], attribute_category} and filters_applied. items[].offer.ends_at is "
+            "each deal's end; the product endpoint adds its units left. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up "
+            "to about 90 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "deal",
+                'Optional[Literal["black_friday", "open_box", "free_shipping"]]',
+                doc=(
+                    "black_friday (the default: the site's promotions page, Black Friday "
+                    "2026), open_box (open-box products) or free_shipping (free-shipping "
+                    "products)."
+                ),
+            ),
+            Param(
+                "brand_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "One brand (facets.brands[].brand_id)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc or price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 30 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[str]",
+                doc=(
+                    "A sub-category name exactly as facets.subcategories[].name lists it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_coupons",
+        namespace="terabyte",
+        method="coupons",
+        http="POST",
+        path="/api/v1/terabyte/coupons",
+        summary=(
+            "The active coupons of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts "
+            "store). Scavio fetches the public Terabyteshop page on request. All of them, one "
+            "category's, or one code with the products it covers: coupons [{code, discount, "
+            "discount_type (percent, amount), discount_value, scope, units_left, valid_until, "
+            "minimum_order, free_shipping, conditions, product_count, url}] and "
+            "coupon_categories [{slug, name, coupon_count}]; with code, coupon {... "
+            "used_percent} and products [{product_id, name, url, image, brand, "
+            "product_type}]. An unknown code or category is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-6 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "code",
+                "Optional[str]",
+                doc=(
+                    "One coupon code (coupons[].code): the coupon and the products it covers."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A coupon category slug (coupon_categories[].slug, e.g. placa-mae, "
+                    "memoria-ram): its coupons. Without code or category, every active "
+                    "coupon."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_trending_searches",
+        namespace="terabyte",
+        method="trending_searches",
+        http="POST",
+        path="/api/v1/terabyte/trending-searches",
+        summary=(
+            "The top search terms of Terabyteshop (terabyteshop.com.br, Brazil's PC-parts "
+            "store). Scavio fetches the public Terabyteshop page on request. terms "
+            "[{position, term, search_count, top_product {product_id, name, url, image, "
+            "brand, category, price, pix_price, currency, available}}], up to 48, as the site "
+            "ranks them. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-6 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "How many terms, 1-48 (the default, all the site lists)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="terabyte_pc_builder",
+        namespace="terabyte",
+        method="pc_builder",
+        http="POST",
+        path="/api/v1/terabyte/pc-builder",
+        summary=(
+            "The Full Custom PC builder of Terabyteshop (terabyteshop.com.br, Brazil's "
+            "PC-parts store). Scavio fetches the public Terabyteshop page on request. Brazil: "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. "
+            "Without inputs, platforms [{platform_id, name, url}]; with platform_id, its "
+            "component groups [{group_id, name, optional, max_items, min_items, option_count, "
+            "note}]; with platform_id and group_id, that group's options [{product_id, name, "
+            "url, image, brand, price (card), pix_price, pix_discount_percent, installment, "
+            "on_offer, new_release, selected_by_default, assembly_available, available, "
+            "availability_by_distribution_center [{distribution_center (SC, ES), "
+            "available}]}]. Builder prices are the builder's own and can differ from the "
+            "product page. Nothing is added to a cart or saved. An unknown platform is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-6 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "platform_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A builder platform (platforms[].platform_id): its component groups. "
+                    "Without it, the platforms."
+                ),
+            ),
+            Param(
+                "group_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A component group of that platform (groups[].group_id): its options."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Cobasi: 11 endpoints on /api/v1/cobasi.
+_COBASI_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="cobasi_search",
+        namespace="cobasi",
+        method="search",
+        http="POST",
+        path="/api/v1/cobasi/search",
+        summary=(
+            "Search Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz Cobasi). "
+            "Scavio fetches the public Cobasi page on request. Brazil (pt-BR): Portuguese "
+            "text, prices in BRL as shown to a visitor who is not signed in. By keyword, "
+            "sorted by relevance, price or discount and narrowed by any facet (brand, "
+            "department, size, age, flavour and more). 20 products per page; Cobasi stops "
+            "paging at page 50 (1,000 products). Returns page, page_size, sort, total, "
+            "total_pages, has_more, count and items [{position, product_id, name, url, image, "
+            "brand, price, list_price (the regular price when a lower price applies), "
+            "discount_percent, currency, available, rating, skus [{sku_id, name, price, "
+            "list_price, discount_percent, available, best_choice}]}]. facets [{key, label, "
+            "values [{value, label, count, selected}]}] (send values to filters) and "
+            "filters_applied. A keyword with no products returns total 0. Subscription prices "
+            "are on the product endpoint. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); "
+            "set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese as shoppers type them."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount_desc"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or discount_desc (largest "
+                    "discount at the top)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page. Cobasi stops paging at page "
+                    "50 (1,000 products)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[list[str]]",
+                doc=(
+                    "Facet filters, at most 10: values exactly as facets[].values[].value of "
+                    "an answer lists them, e.g. brand/golden, porte/racas-pequenas or "
+                    "category-1/cachorro. Values of one facet widen the match; different "
+                    "facets narrow it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_category",
+        namespace="cobasi",
+        method="category",
+        http="POST",
+        path="/api/v1/cobasi/category",
+        summary=(
+            "One category of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz "
+            "Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. By "
+            "category path, sorted by best sellers or price, with the category, its "
+            "subcategories [{category_id, name, path, has_children}] and facet counts. 20 "
+            "products per page; Cobasi stops paging at page 50 (1,000 products). Returns "
+            "page, page_size, sort, total, total_pages, has_more, count and items [{position, "
+            "product_id, name, url, image, brand, price, list_price (the regular price when a "
+            "lower price applies), discount_percent, currency, available, rating, skus "
+            "[{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. "
+            "total is null when the category page does not count its products. An unknown "
+            "category is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Pages take 10-90 s (deals up to about 90 s); "
+            "set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path (a product's categories[].path, a category's "
+                    "subcategories[].path, or the path after /c/ in a category link), e.g. "
+                    "cachorro or cachorro/racao/racao-seca."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["top_selling", "price_asc", "price_desc"]]',
+                doc=(
+                    "top_selling (the default, ordered by Cobasi's sales), price_asc or "
+                    "price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page. Cobasi stops paging at page "
+                    "50 (1,000 products)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_brand",
+        namespace="cobasi",
+        method="brand",
+        http="POST",
+        path="/api/v1/cobasi/brand",
+        summary=(
+            "The products of one brand at Cobasi (cobasi.com.br, the Brazilian pet store of "
+            "Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil "
+            "(pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed "
+            "in. By brand slug, sorted by best sellers or price. 20 products per page; Cobasi "
+            "stops paging at page 50 (1,000 products). Returns page, page_size, sort, total, "
+            "total_pages, has_more, count and items [{position, product_id, name, url, image, "
+            "brand, price, list_price (the regular price when a lower price applies), "
+            "discount_percent, currency, available, rating, skus [{sku_id, name, price, "
+            "list_price, discount_percent, available, best_choice}]}]. An unknown brand is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Pages take 10-90 s (deals up to about 90 s); set a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand as its Cobasi link shows it (the part after /m/), e.g. golden, "
+                    "premier or gran-plus."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["top_selling", "price_asc", "price_desc"]]',
+                doc=(
+                    "top_selling (the default, ordered by Cobasi's sales), price_asc or "
+                    "price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page. Cobasi stops paging at page "
+                    "50 (1,000 products)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_deals",
+        namespace="cobasi",
+        method="deals",
+        http="POST",
+        path="/api/v1/cobasi/deals",
+        summary=(
+            "The deals page (Promoções) of Cobasi (cobasi.com.br, the Brazilian pet store of "
+            "Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. Brazil "
+            "(pt-BR): Portuguese text, prices in BRL as shown to a visitor who is not signed "
+            "in. Products on promotion with the deal price next to the regular price "
+            "(list_price) and discount_percent, sorted by relevance, price or discount. 20 "
+            "products per page; Cobasi stops paging at page 50 (1,000 products). Returns "
+            "page, page_size, sort, total, total_pages, has_more, count and items [{position, "
+            "product_id, name, url, image, brand, price, list_price (the regular price when a "
+            "lower price applies), discount_percent, currency, available, rating, skus "
+            "[{sku_id, name, price, list_price, discount_percent, available, best_choice}]}]. "
+            "Cobasi publishes no validity dates for these deals. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Pages take 10-90 s "
+            "(deals up to about 90 s); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount_desc"]]',
+                doc=(
+                    "relevance (the default), price_asc, price_desc or discount_desc (largest "
+                    "discount at the top)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 20 products per page. Cobasi stops paging at page "
+                    "50 (1,000 products)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_product",
+        namespace="cobasi",
+        method="product",
+        http="POST",
+        path="/api/v1/cobasi/product",
+        summary=(
+            "One product of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz "
+            "Cobasi). Scavio fetches the public Cobasi page on request. Brazil (pt-BR): "
+            "Portuguese text, prices in BRL as shown to a visitor who is not signed in. "
+            "product_id, name, url, brand, brand_id, categories [{name, path}], images, "
+            "available, sold_by, main_sku_id, skus [{sku_id, name (size), ean, available, "
+            "price, list_price, discount_percent, subscription_price (Compra Programada, null "
+            "unless can_subscribe), can_subscribe, installments {count, amount}, "
+            "price_per_measure {unit, price} (e.g. price per kg), best_value, is_kit, "
+            "price_valid_until}], subscription {frequencies} when the product can be bought "
+            "on subscription, specs [{name, values}], dimensions {height_cm, width_cm, "
+            "length_cm, weight_g}, rating {average, total, stars, recommend_percent} and "
+            "latest_reviews (4 recent reviews, without reviewer names). available is a flag, "
+            "not a unit count. Pix prices, per-store prices or units and marketplace sellers "
+            "are not returned. An unknown product is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Pages take 10-90 s "
+            "(deals up to about 90 s); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Cobasi product id (items[].product_id; the number before /p in a "
+                    "product link). Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), "
+                    "instead of product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_reviews",
+        namespace="cobasi",
+        method="reviews",
+        http="POST",
+        path="/api/v1/cobasi/reviews",
+        summary=(
+            "Customer reviews of one product of Cobasi (cobasi.com.br, the Brazilian pet "
+            "store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. "
+            "In Cobasi's own recent-review order, 4 per page: total, total_pages, "
+            "average_rating, stars {1-5 counts}, recommend_percent and reviews [{date, "
+            "purchase_date, rating, recommends, text}]. No reviewer names. 1 credit. Failed "
+            "upstream calls and refused inputs are not charged. Usually 2-6 s; set a client "
+            "timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Cobasi product id (items[].product_id; the number before /p in a "
+                    "product link). Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), "
+                    "instead of product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based, 4 per page. total_pages reports the last one."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_questions",
+        namespace="cobasi",
+        method="questions",
+        http="POST",
+        path="/api/v1/cobasi/questions",
+        summary=(
+            "Shopper questions about one product of Cobasi (cobasi.com.br, the Brazilian pet "
+            "store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. "
+            "with Cobasi's answers, 4 per page: total, total_pages and questions "
+            "[{question_id, question, answer, answered_at}]. The answer's opening greeting, "
+            "which names the asker, is removed; no asker names. 1 credit. Failed upstream "
+            "calls and refused inputs are not charged. Usually 2-6 s; set a client timeout of "
+            "at least 60 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The Cobasi product id (items[].product_id; the number before /p in a "
+                    "product link). Send product_id or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cobasi product link (www.cobasi.com.br, ending in -<product id>/p), "
+                    "instead of product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based, 4 per page. total_pages reports the last one."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_availability",
+        namespace="cobasi",
+        method="availability",
+        http="POST",
+        path="/api/v1/cobasi/availability",
+        summary=(
+            "Pickup and delivery for one SKU of Cobasi (cobasi.com.br, the Brazilian pet "
+            "store of Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. "
+            "at a Brazilian CEP: pickup {available, ready_in, store_count, stores "
+            "[{store_code, name, ready_in, price, address, latitude, longitude}]} (the stores "
+            "near the CEP that can hand the SKU over, usually in 45 minutes) and delivery "
+            "[{option_id, name, price (BRL), free, estimate}] (e.g. Econômica, Cobasi Já), "
+            "for the quantity asked. Flags, not unit counts: Cobasi publishes no per-store "
+            "stock or per-store prices. No options for the CEP returns empty lists. 1 credit. "
+            "Failed upstream calls and refused inputs are not charged. Usually 2-6 s; set a "
+            "client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "sku_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The Cobasi SKU id (skus[].sku_id of a product or a listing item; one "
+                    "size or variant)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The Brazilian CEP to pick up near or deliver to (8 digits)."
+                ),
+            ),
+            Param(
+                "quantity",
+                "Optional[int]",
+                doc=(
+                    "Units, 1-10. Defaults to 1."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_suggestions",
+        namespace="cobasi",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/cobasi/suggestions",
+        summary=(
+            "The search suggestions of Cobasi (cobasi.com.br, the Brazilian pet store of "
+            "Grupo Petz Cobasi). Scavio fetches the public Cobasi page on request. for the "
+            "start of a search: suggestions (up to 5 terms) and misspelled (Cobasi corrected "
+            "the spelling, e.g. racao for ração). 1 credit. Failed upstream calls and refused "
+            "inputs are not charged. Usually 2-6 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a search, as a shopper types it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_stores",
+        namespace="cobasi",
+        method="stores",
+        http="POST",
+        path="/api/v1/cobasi/stores",
+        summary=(
+            "The store directory of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo "
+            "Petz Cobasi). Scavio fetches the public Cobasi page on request. All Cobasi "
+            "stores (about 250) with store_id, slug, name, url, address {street, number, "
+            "neighborhood, city, state, cep}, latitude, longitude and services (e.g. pickup "
+            "in 45 minutes, vet pharmacy, grooming), narrowed by state and city. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Pages "
+            "take 10-90 s (deals up to about 90 s); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "A Brazilian state code (UF), e.g. SP or RJ."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A city name; accents and case are ignored."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cobasi_store",
+        namespace="cobasi",
+        method="store",
+        http="POST",
+        path="/api/v1/cobasi/store",
+        summary=(
+            "One store of Cobasi (cobasi.com.br, the Brazilian pet store of Grupo Petz "
+            "Cobasi). Scavio fetches the public Cobasi page on request. slug, name, url, "
+            "address, latitude, longitude, phone, whatsapp (the store's WhatsApp link), hours "
+            "[{day, opens, closes}] per weekday, holiday_hours, grooming_hours and vet_hours "
+            "where offered, services, pet_services and online_scheduling. An unknown store is "
+            "a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Pages take 10-90 s (deals up to about 90 s); set a "
+            "client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The store slug (stores[].slug)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A Cobasi store link (www.cobasi.com.br/lojas/<slug>), instead of slug."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Netshoes: 11 endpoints on /api/v1/netshoes.
+_NETSHOES_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="netshoes_search",
+        namespace="netshoes",
+        method="search",
+        http="POST",
+        path="/api/v1/netshoes/search",
+        summary=(
+            "Search Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of "
+            "Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has "
+            "no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as "
+            "shown to a visitor who is not signed in. By keyword. 100 per page, pages 1-100, "
+            "in the site's 7 sorts, filtered by any facet of the listing (brand, size, "
+            "gender, product type, colour, department, promotion, sold-by and the rest, plus "
+            "a BRL price range). Returns page, page_size, total (the site caps it at 10000: "
+            "total_capped), total_pages, has_more, count, title, items [{position, product_id "
+            "(the colour: use it in product), product_code, name, brand, department, "
+            "product_type, url, image, available, price, list_price, discount_percent, "
+            "installment_count, rating, review_count, badges, colors, flavors, sizes and "
+            "other_colors [{product_id, image}]}], facets [{key, name, values [{value, label, "
+            "count}], min, max}], quick_filters, sort, filters_applied and notes. Also query "
+            "and landing_page (a keyword the site sends to a landing page returns that page's "
+            "products, and says so). No results is an empty 200 (charged). 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-30 s (slower when the site is busy); set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese, as a shopper types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "best_sellers", "new_releases", "offers", "price_asc", "price_desc", "top_rated"]]',
+                doc=(
+                    "relevance (default), best_sellers, new_releases, offers, price_asc, "
+                    "price_desc or top_rated: the site's 7 sorts."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters: {key: value or [values]} with facets[].key and "
+                    "facets[].values[].value of an answer (marca, tamanho, genero, "
+                    "tipo-de-produto, cor-principal, departamento, promocoes, vendido-por, "
+                    "pisada and more, as the listing offers them). Up to 12 values."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand facet value(s) (marca), e.g. nike or adidas."
+                ),
+            ),
+            Param(
+                "gender",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Gender facet value(s) (genero): masculino, feminino, unissex, menino, "
+                    "menina ..."
+                ),
+            ),
+            Param(
+                "size",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Size facet value(s) (tamanho), e.g. 42 or m."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Sold-by facet value(s) (vendido-por): netshoes-netshoes or a marketplace "
+                    "seller's value."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price in BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price in BRL."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (100 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_list",
+        namespace="netshoes",
+        method="list",
+        http="POST",
+        path="/api/v1/netshoes/list",
+        summary=(
+            "A list page of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of "
+            "Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has "
+            "no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as "
+            "shown to a visitor who is not signed in. By its slug or /lst/ link "
+            "(tenis-black-friday, the Black Friday sneakers, is the default), sorted and "
+            "filtered like search. 45 per page, pages 1-250, in the site's 7 sorts, filtered "
+            "by any facet of the listing (brand, size, gender, product type, colour, "
+            "department, promotion, sold-by and the rest, plus a BRL price range). Returns "
+            "page, page_size, total (the site caps it at 10000: total_capped), total_pages, "
+            "has_more, count, title, items [{position, product_id (the colour: use it in "
+            "product), product_code, name, brand, department, product_type, url, image, "
+            "available, price, list_price, discount_percent, installment_count, rating, "
+            "review_count, badges, colors, flavors, sizes and other_colors [{product_id, "
+            "image}]}], facets [{key, name, values [{value, label, count}], min, max}], "
+            "quick_filters, sort, filters_applied and notes. Also slug and url. An unknown "
+            "list is a charged 404. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Usually 2-30 s (slower when the site is busy); set a "
+            "client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "A list slug or its netshoes.com.br/lst/ link (tenis-black-friday is the "
+                    "default)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "best_sellers", "new_releases", "offers", "price_asc", "price_desc", "top_rated"]]',
+                doc=(
+                    "relevance (default), best_sellers, new_releases, offers, price_asc, "
+                    "price_desc or top_rated: the site's 7 sorts."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters: {key: value or [values]} with facets[].key and "
+                    "facets[].values[].value of an answer (marca, tamanho, genero, "
+                    "tipo-de-produto, cor-principal, departamento, promocoes, vendido-por, "
+                    "pisada and more, as the listing offers them). Up to 12 values."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand facet value(s) (marca), e.g. nike or adidas."
+                ),
+            ),
+            Param(
+                "gender",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Gender facet value(s) (genero): masculino, feminino, unissex, menino, "
+                    "menina ..."
+                ),
+            ),
+            Param(
+                "size",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Size facet value(s) (tamanho), e.g. 42 or m."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Sold-by facet value(s) (vendido-por): netshoes-netshoes or a marketplace "
+                    "seller's value."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price in BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price in BRL."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-250 (45 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_product",
+        namespace="netshoes",
+        method="product",
+        http="POST",
+        path="/api/v1/netshoes/product",
+        summary=(
+            "One product of Netshoes (netshoes.com.br, Brazil's sporting-goods store, part of "
+            "Magalu). Scavio fetches the public netshoes.com.br data on request; Netshoes has "
+            "no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as "
+            "shown to a visitor who is not signed in. By product_id (the colour code), a size "
+            "sku or a link: product_id, product_code, name, brand, department, product_type, "
+            "genders, url, available, listing_type, color, currency, price_min, price_max, "
+            "sellers, size_count, sizes_available, sizes [{sku, size, ean, available, price, "
+            "pix_price, list_price, seller, offer_count, offers [{seller {id, name, "
+            "is_store}, available, price, pix_price, pix_promotion {percent, amount, name}, "
+            "list_price, discount_percent, installment, free_shipping}], weight_grams, "
+            "release_date}], colors [{product_id, name, available, url}], images, badges, "
+            "breadcrumbs, specs [{name, value}], ncm, rating, review_count, "
+            "percent_recommended and question_count. price is the card price; pix_price the "
+            "Pix price where a Pix promotion applies. No marketing description. An unknown "
+            "product is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-10 s; set a client timeout of at "
+            "least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Netshoes product id: the colour code (items[].product_id, "
+                    "colors[].product_id). A size sku works too."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A netshoes.com.br product link, instead of product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_offers",
+        namespace="netshoes",
+        method="offers",
+        http="POST",
+        path="/api/v1/netshoes/offers",
+        summary=(
+            "Every seller's offer for one size of Netshoes (netshoes.com.br, Brazil's "
+            "sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br "
+            "data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By size sku: "
+            "sku, product_id, product_code, name, size, ean, color, available, url, "
+            "offer_count and offers [{seller {id, name, is_store, international}, available, "
+            "price, pix_price, pix_promotion, list_price, discount_percent, installment, "
+            "installments [{count, amount, total, interest_free}], free_shipping}]. An "
+            "unknown sku is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-10 s; set a client timeout of at "
+            "least 120 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "A size sku (sizes[].sku of the product endpoint)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_inventory",
+        namespace="netshoes",
+        method="inventory",
+        http="POST",
+        path="/api/v1/netshoes/inventory",
+        summary=(
+            "The online stock count for one size of Netshoes (netshoes.com.br, Brazil's "
+            "sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br "
+            "data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By size sku "
+            "and, optionally, seller: sku, seller {id, name, is_store}, quantity (as the site "
+            "gives it; it may be capped) and in_stock. Without seller_id the size's buy-box "
+            "seller is used. Not a store count. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-10 s; set a client timeout "
+            "of at least 120 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "A size sku (sizes[].sku of the product endpoint)."
+                ),
+            ),
+            Param(
+                "seller_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The seller (sizes[].offers[].seller.id; 0 is Netshoes). Default: the "
+                    "size's buy-box seller."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_shipping",
+        namespace="netshoes",
+        method="shipping",
+        http="POST",
+        path="/api/v1/netshoes/shipping",
+        summary=(
+            "Delivery options for one size of Netshoes (netshoes.com.br, Brazil's "
+            "sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br "
+            "data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By size sku "
+            "and CEP: sku, cep, seller, price, pix_price, currency, count, options [{type "
+            "(NORMAL, COLLECT_MAGALU pickup ...), service, seller_id, cost, free, min_days, "
+            "max_days, min_date, max_date}], lowest_cost, fastest and free_shipping_threshold "
+            "{min_order, missing, reached}. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-10 s; set a client timeout of at "
+            "least 120 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "A size sku (sizes[].sku of the product endpoint)."
+                ),
+            ),
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+            Param(
+                "seller_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "Quote this seller's offer (default: the buy-box seller)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_reviews",
+        namespace="netshoes",
+        method="reviews",
+        http="POST",
+        path="/api/v1/netshoes/reviews",
+        summary=(
+            "Product reviews of Netshoes (netshoes.com.br, Brazil's sporting-goods store, "
+            "part of Magalu). Scavio fetches the public netshoes.com.br data on request; "
+            "Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and prices "
+            "in BRL, as shown to a visitor who is not signed in. By product code (or a colour "
+            "id, sku or link), 13 per page, filtered by stars (positive, negative or star "
+            "values) and photos: product_code, page, page_size, total_pages, has_more, "
+            "total_reviews, total_filtered, count and reviews [{review_id, rating, text, "
+            "date, recommends, photo_count}]. No reviewer names. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a "
+            "client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product code shared by every colour (product_code), or a colour "
+                    "product id or size sku."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A netshoes.com.br product link, instead of product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (13 per page)."
+                ),
+            ),
+            Param(
+                "rating",
+                'Optional[Union[Literal["positive", "negative"], int, list[int]]]',
+                doc=(
+                    "positive (5 and 4 stars), negative (2 and 1 star), or star values, e.g. "
+                    "[3]."
+                ),
+            ),
+            Param(
+                "with_photos",
+                "Optional[bool]",
+                doc=(
+                    "Reviews with photos."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_questions",
+        namespace="netshoes",
+        method="questions",
+        http="POST",
+        path="/api/v1/netshoes/questions",
+        summary=(
+            "Shoppers' questions on a product of Netshoes (netshoes.com.br, Brazil's "
+            "sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br "
+            "data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By product "
+            "code (or a colour id, sku or link), 10 per page: product_code, page, "
+            "total_pages, has_more, total_questions, count and questions [{question, "
+            "asked_at, answer, answered_at, answered_by (the seller, or the site's automated "
+            "assistant), answered_by_ai}]. No asker names or emails. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-10 s; set a "
+            "client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product code (product_code), or a colour product id or size sku."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A netshoes.com.br product link, instead of product_id."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (10 per page)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_daily_deal",
+        namespace="netshoes",
+        method="daily_deal",
+        http="POST",
+        path="/api/v1/netshoes/daily-deal",
+        summary=(
+            "The daily offer (\"Barato do Dia\") of Netshoes (netshoes.com.br, Brazil's "
+            "sporting-goods store, part of Magalu). Scavio fetches the public netshoes.com.br "
+            "data on request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. title, "
+            "starts_at, ends_at, count and items [{position, product_id, name, url, image, "
+            "available, seller_ids}]. The answer carries no prices: send a product_id to "
+            "product. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-10 s; set a client timeout of at least 120 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_seller",
+        namespace="netshoes",
+        method="seller",
+        http="POST",
+        path="/api/v1/netshoes/seller",
+        summary=(
+            "A marketplace seller of Netshoes (netshoes.com.br, Brazil's sporting-goods "
+            "store, part of Magalu). Scavio fetches the public netshoes.com.br data on "
+            "request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and "
+            "prices in BRL, as shown to a visitor who is not signed in. By seller id: "
+            "seller_id, name, name_slug, official_store, active, member_since, company_name, "
+            "cnpj, address (the company's business address as the seller page shows it), "
+            "products_sold, logo, url, rating, review_count, reviews_with_comment, "
+            "percent_recommended, product_quality_stamp, histogram, likert and the newest "
+            "reviews [{rating, text, date, recommends}] without reviewer names. Contacts are "
+            "not returned. An unknown seller is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 5-15 s; set a "
+            "client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A marketplace seller id (sizes[].offers[].seller.id, daily_deal "
+                    "items[].seller_ids)."
+                ),
+            ),
+            Param(
+                "name",
+                "Optional[str]",
+                doc=(
+                    "The seller's name slug (name_slug), optional."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="netshoes_popular_searches",
+        namespace="netshoes",
+        method="popular_searches",
+        http="POST",
+        path="/api/v1/netshoes/popular-searches",
+        summary=(
+            "The popular searches of Netshoes (netshoes.com.br, Brazil's sporting-goods "
+            "store, part of Magalu). Scavio fetches the public netshoes.com.br data on "
+            "request; Netshoes has no public product API. Brazil: Portuguese (pt-BR) text and "
+            "prices in BRL, as shown to a visitor who is not signed in. count and searches "
+            "[{position, term}], as the site's search box lists them. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 2-10 s; "
+            "set a client timeout of at least 120 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Estante Virtual: 12 endpoints on /api/v1/estantevirtual.
+_ESTANTEVIRTUAL_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="estantevirtual_search",
+        namespace="estantevirtual",
+        method="search",
+        http="POST",
+        path="/api/v1/estantevirtual/search",
+        summary=(
+            "Search Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used and "
+            "new books from sebos and booksellers, owned by Magalu). Scavio fetches the "
+            "public estantevirtual.com.br data on request; Estante Virtual has no public API. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. By title, author or ISBN keywords. 44 per page, pages 1-238, in "
+            "the site's 6 sorts, filtered by any facet (used / new, author, publisher, year, "
+            "seller city, seller, category, language, rating, a BRL price range). Returns "
+            "page, page_size, total, total_pages, has_more, count, title, items [{position, "
+            "kind (book or listing), book_id, copy_id, title, author, publisher, year, isbn, "
+            "book_language, url, image, lowest_price, copies {used, new}, department, badges, "
+            "rating, review_count}], facets [{key, name, values [{value, label, count}], min, "
+            "max}], sort, filters_applied and notes. A book (kind book, book_id ...-BK) is "
+            "every copy of one ISBN; a one-copy listing without an ISBN group is kind listing "
+            "with a copy_id. There is no work level: other editions are separate books. Also "
+            "query. No results is an empty 200 (charged). 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s "
+            "when the site is busy); set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Title, author or ISBN keywords (Portuguese, as a reader types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_sellers", "price_plus_shipping"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, best_sellers or "
+                    "price_plus_shipping: the site's 6 sorts."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "Books with used or new copies (tipo-de-livro)."
+                ),
+            ),
+            Param(
+                "author",
+                "Optional[str]",
+                doc=(
+                    "Author facet value (autor, facets[].values[].value), e.g. "
+                    "machado-de-assis."
+                ),
+            ),
+            Param(
+                "publisher",
+                "Optional[str]",
+                doc=(
+                    "Publisher facet value (editora)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Seller city facet value (cidade)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "Category facet value (categoria)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters: {key: value or [values]} with facets[].key and "
+                    "facets[].values[].value of an answer (tipo-de-livro, autor, editora, "
+                    "ano-de-publicacao, cidade, sebos-e-livreiros, promocoes, categoria, "
+                    "idioma, _avaliacao, compra-corporativa). Up to 12 values."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price in BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price in BRL."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-238 (44 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_isbn",
+        namespace="estantevirtual",
+        method="isbn",
+        http="POST",
+        path="/api/v1/estantevirtual/isbn",
+        summary=(
+            "The book for an ISBN on Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. isbn13, isbn10, book {position, kind (book or "
+            "listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, "
+            "url, image, lowest_price, copies {used, new}, department, badges, rating, "
+            "review_count} (the copies grouped under the ISBN), listing_count and listings "
+            "(single copies with the ISBN that the site did not group). The check digit is "
+            "verified first. An ISBN with no copy on sale is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 "
+            "s."
+        ),
+        params=(
+            Param(
+                "isbn",
+                "str",
+                required=True,
+                doc=(
+                    "An ISBN-10 or ISBN-13 (dashes and spaces allowed; the check digit is "
+                    "verified, so a typo is a 400, not charged)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_book",
+        namespace="estantevirtual",
+        method="book",
+        http="POST",
+        path="/api/v1/estantevirtual/book",
+        summary=(
+            "One book of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of used "
+            "and new books from sebos and booksellers, owned by Magalu). Scavio fetches the "
+            "public estantevirtual.com.br data on request; Estante Virtual has no public API. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. By book_id or link: book_id, title, author, publisher, year, "
+            "isbn, url, image, available, currency, lowest_price {used, new}, "
+            "lowest_priced_used and lowest_priced_new {copy_id, price, seller {id, name}, "
+            "year, publisher, has_invoice, condition_notes, installment, url}, rating, "
+            "review_count, percent_recommended, histogram and reviews [{review_id, rating, "
+            "text, date, recommends, photo_count}] (every review the page shows, no reviewer "
+            "names). No synopsis. A book (kind book, book_id ...-BK) is every copy of one "
+            "ISBN; a one-copy listing without an ISBN group is kind listing with a copy_id. "
+            "There is no work level: other editions are separate books. An unknown book is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 4-25 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "book_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The book id (items[].book_id of a search, book.book_id of an ISBN "
+                    "lookup)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An estantevirtual.com.br book link, instead of book_id."
+                ),
+            ),
+        ),
+        one_of=(("book_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_copies",
+        namespace="estantevirtual",
+        method="copies",
+        http="POST",
+        path="/api/v1/estantevirtual/copies",
+        summary=(
+            "Every copy of a book on sale on Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By book_id and condition (used / new), paged "
+            "(up to 50 per page), sorted by price in either direction, filtered by printing "
+            "year, publisher, seller city, seller or price: book_id, condition, sort, page, "
+            "page_size, total, total_pages, has_more, count, items [{copy_id, book_id, title, "
+            "author, publisher, year, isbn, book_language, condition (used / new), "
+            "has_invoice, condition_notes (the seller's own notes on a used copy), price, "
+            "installment, department, image, available, url, badges, seller {id, name} with "
+            "sellers: true, weight_grams}], facets and notes. The list carries no seller per "
+            "copy: sellers: true adds each copy's seller with one extra call per copy, billed "
+            "ceil((1 + copies) / 5) credits (10 copies = 3). Otherwise 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 2-10 s, "
+            "10-60 s with sellers: true; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "book_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The book id (items[].book_id of a search, book.book_id of an ISBN "
+                    "lookup)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An estantevirtual.com.br book link, instead of book_id."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "used (default) or new copies."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["price_asc", "price_desc"]]',
+                doc=(
+                    "price_asc (default) or price_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Copies per page, 1-50 (default 10)."
+                ),
+            ),
+            Param(
+                "sellers",
+                "Optional[bool]",
+                doc=(
+                    "Add each copy's seller (one extra call per copy: ceil((1 + copies) / 5) "
+                    "credits, e.g. 10 copies = 3 credits). Default false (1 credit)."
+                ),
+            ),
+            Param(
+                "year",
+                "Optional[str]",
+                doc=(
+                    "Printing year facet (ano-de-publicacao)."
+                ),
+            ),
+            Param(
+                "publisher",
+                "Optional[str]",
+                doc=(
+                    "Publisher facet value (editora)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Seller city facet value (cidade)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters {key: value or [values]}: ano-de-publicacao, editora, "
+                    "cidade, sebos-e-livreiros, _preco (min-max in cents)."
+                ),
+            ),
+        ),
+        one_of=(("book_id", "url"),),
+        credits=1,
+        credits_note=(
+            "Costs 1 credit; with sellers ceil((1 + copies) / 5) (e.g. 10 copies = 3); "
+            "credits_used in the response is the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_copy",
+        namespace="estantevirtual",
+        method="copy",
+        http="POST",
+        path="/api/v1/estantevirtual/copy",
+        summary=(
+            "One seller's copy on Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By copy_id or link: copy_id, book_id, title, "
+            "author, publisher, year, isbn, book_language, condition (used / new), "
+            "has_invoice, condition_notes (the seller's own notes on a used copy), price, "
+            "installment, department, image, available, url, badges, seller {id, name, "
+            "name_slug}, free_shipping, weight_grams, dimensions_cm and quantity (always 1: "
+            "used copies are unique). An unknown copy is a charged 404. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 4-25 s; "
+            "set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "copy_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The copy id (items[].copy_id of copies, lowest_priced_used.copy_id of a "
+                    "book, copy_id of a one-copy listing)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An estantevirtual.com.br copy link, instead of copy_id."
+                ),
+            ),
+        ),
+        one_of=(("copy_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_shipping",
+        namespace="estantevirtual",
+        method="shipping",
+        http="POST",
+        path="/api/v1/estantevirtual/shipping",
+        summary=(
+            "The delivery quote for one copy of Estante Virtual (estantevirtual.com.br, "
+            "Brazil's marketplace of used and new books from sebos and booksellers, owned by "
+            "Magalu). Scavio fetches the public estantevirtual.com.br data on request; "
+            "Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in "
+            "BRL, as shown to a visitor who is not signed in. By copy_id and CEP: copy_id, "
+            "cep, seller, price, currency, count, options [{type, service, seller_id, cost, "
+            "free, min_days, max_days, min_date, max_date}] (the lowest-cost option the "
+            "seller offers there) and free_shipping_threshold {min_order, missing, reached}. "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-10 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+            Param(
+                "copy_id",
+                "Optional[str]",
+                doc=(
+                    "The copy id (items[].copy_id of copies, lowest_priced_used.copy_id of a "
+                    "book, copy_id of a one-copy listing)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An estantevirtual.com.br copy link, instead of copy_id."
+                ),
+            ),
+        ),
+        one_of=(("copy_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_seller",
+        namespace="estantevirtual",
+        method="seller",
+        http="POST",
+        path="/api/v1/estantevirtual/seller",
+        summary=(
+            "A sebo or bookseller of Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By seller id: seller_id, name (the shop "
+            "name), name_slug, seller_type (private or business), official_store, active, "
+            "member_since, city, state, description (phone numbers and emails removed), "
+            "shipping_methods, url, rating, review_count, reviews_with_comment, "
+            "percent_recommended, histogram, reviews (the newest, no reviewer names), "
+            "catalogue_total and books (a page of 40 from its catalogue). No street address, "
+            "ZIP, document number or contact is returned. An unknown seller is a charged 404. "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 4-25 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id)."
+                ),
+            ),
+            Param(
+                "name",
+                "Optional[str]",
+                doc=(
+                    "The seller's name slug (name_slug), optional."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_seller_books",
+        namespace="estantevirtual",
+        method="seller_books",
+        http="POST",
+        path="/api/v1/estantevirtual/seller-books",
+        summary=(
+            "A sebo's catalogue on Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By seller id, optionally searched by keyword "
+            "and sorted by price, 40 per page: seller_id, query, sort, page, page_size, "
+            "total, total_pages, has_more, count and items [{copy_id, book_id, title, author, "
+            "publisher, year, isbn, book_language, condition (used / new), has_invoice, "
+            "condition_notes (the seller's own notes on a used copy), price, installment, "
+            "department, image, available, url, badges}]. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 3-30 s (up to 70 s "
+            "when the site is busy); set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id)."
+                ),
+            ),
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "Search inside the seller's catalogue."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["price_asc", "price_desc"]]',
+                doc=(
+                    "price_asc or price_desc (default: the site's order)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (40 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_seller_reviews",
+        namespace="estantevirtual",
+        method="seller_reviews",
+        http="POST",
+        path="/api/v1/estantevirtual/seller-reviews",
+        summary=(
+            "Buyers' reviews of a sebo on Estante Virtual (estantevirtual.com.br, Brazil's "
+            "marketplace of used and new books from sebos and booksellers, owned by Magalu). "
+            "Scavio fetches the public estantevirtual.com.br data on request; Estante Virtual "
+            "has no public API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By seller id, 10 per page, newest to oldest, "
+            "optionally positive or negative: seller_id, page, total_pages, has_more, "
+            "total_filtered, count and reviews [{rating, text, date, recommends}]. No "
+            "reviewer names. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 2-10 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "seller_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A seller id (sellers[].seller_id, copies[].seller.id, copy seller.id)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (10 per page)."
+                ),
+            ),
+            Param(
+                "rating",
+                'Optional[Literal["positive", "negative"]]',
+                doc=(
+                    "positive (3 to 5 stars) or negative (0 to 2), as the site's filters."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_sellers",
+        namespace="estantevirtual",
+        method="sellers",
+        http="POST",
+        path="/api/v1/estantevirtual/sellers",
+        summary=(
+            "The sebo and bookseller directory of Estante Virtual (estantevirtual.com.br, "
+            "Brazil's marketplace of used and new books from sebos and booksellers, owned by "
+            "Magalu). Scavio fetches the public estantevirtual.com.br data on request; "
+            "Estante Virtual has no public API. Brazil: Portuguese (pt-BR) text and prices in "
+            "BRL, as shown to a visitor who is not signed in. The whole country, a state (UF) "
+            "or a city of that state (written as the site writes it, with accents), 30 per "
+            "page: state, city, page, total, total_pages, has_more, count, sellers "
+            "[{seller_id, name, active, member_since, city, state, free_shipping, rating, "
+            "percent_recommended, url}], cities and states (the site's counts). City and "
+            "state; no address or contact. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 4-25 s; set a client timeout of at "
+            "least 180 s."
+        ),
+        params=(
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "A Brazilian state code (UF). Leave out for the whole country."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "A city of that state, written as the site writes it, with accents "
+                    "(cities[] of the state's directory)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (30 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_category",
+        namespace="estantevirtual",
+        method="category",
+        http="POST",
+        path="/api/v1/estantevirtual/category",
+        summary=(
+            "One category of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of "
+            "used and new books from sebos and booksellers, owned by Magalu). Scavio fetches "
+            "the public estantevirtual.com.br data on request; Estante Virtual has no public "
+            "API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor "
+            "who is not signed in. By slug (literatura-brasileira, filosofia, livros-raros "
+            "...), sorted and filtered like search. 44 per page, pages 1-238, in the site's 6 "
+            "sorts, filtered by any facet (used / new, author, publisher, year, seller city, "
+            "seller, category, language, rating, a BRL price range). Returns page, page_size, "
+            "total, total_pages, has_more, count, title, items [{position, kind (book or "
+            "listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, "
+            "url, image, lowest_price, copies {used, new}, department, badges, rating, "
+            "review_count}], facets [{key, name, values [{value, label, count}], min, max}], "
+            "sort, filters_applied and notes. A book (kind book, book_id ...-BK) is every "
+            "copy of one ISBN; a one-copy listing without an ISBN group is kind listing with "
+            "a copy_id. There is no work level: other editions are separate books. Also "
+            "category_slug and url. An unknown category is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-30 s (up to 70 s when the site is busy); set a client timeout of at least 180 "
+            "s."
+        ),
+        params=(
+            Param(
+                "category_slug",
+                "str",
+                required=True,
+                doc=(
+                    "A category slug or link: antropologia, artes, auto-ajuda, biografias, "
+                    "ciencia-politica, comunicacao, direito, engenharia, filosofia, "
+                    "historia-do-brasil, historia-geral, infanto-juvenis, "
+                    "literatura-brasileira, literatura-estrangeira, livros-raros, medicina, "
+                    "psicologia, ensino-de-idiomas (the site's menu), or a categoria facet "
+                    "value."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "newest", "best_sellers", "price_plus_shipping"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, newest, best_sellers or "
+                    "price_plus_shipping: the site's 6 sorts."
+                ),
+            ),
+            Param(
+                "condition",
+                'Optional[Literal["used", "new"]]',
+                doc=(
+                    "Books with used or new copies (tipo-de-livro)."
+                ),
+            ),
+            Param(
+                "author",
+                "Optional[str]",
+                doc=(
+                    "Author facet value (autor, facets[].values[].value), e.g. "
+                    "machado-de-assis."
+                ),
+            ),
+            Param(
+                "publisher",
+                "Optional[str]",
+                doc=(
+                    "Publisher facet value (editora)."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "Seller city facet value (cidade)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "Category facet value (categoria)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters: {key: value or [values]} with facets[].key and "
+                    "facets[].values[].value of an answer (tipo-de-livro, autor, editora, "
+                    "ano-de-publicacao, cidade, sebos-e-livreiros, promocoes, categoria, "
+                    "idioma, _avaliacao, compra-corporativa). Up to 12 values."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price in BRL."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price in BRL."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-238 (44 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="estantevirtual_list",
+        namespace="estantevirtual",
+        method="list",
+        http="POST",
+        path="/api/v1/estantevirtual/list",
+        summary=(
+            "A list page of Estante Virtual (estantevirtual.com.br, Brazil's marketplace of "
+            "used and new books from sebos and booksellers, owned by Magalu). Scavio fetches "
+            "the public estantevirtual.com.br data on request; Estante Virtual has no public "
+            "API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor "
+            "who is not signed in. By slug or /lst/ link: black-friday (default), "
+            "livros-baratos, saldao-de-livros, livros-frete-gratis, lancamentos or another "
+            "list of the site, 42 per page in the site's order: slug, url, page, total, "
+            "total_pages, has_more, count, title and items [{position, kind (book or "
+            "listing), book_id, copy_id, title, author, publisher, year, isbn, book_language, "
+            "url, image, lowest_price, copies {used, new}, department, badges, rating, "
+            "review_count}]. An unknown list is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 3-30 s (up to "
+            "70 s when the site is busy); set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "A list slug or /lst/ link: black-friday, livros-baratos, "
+                    "saldao-de-livros, livros-frete-gratis, lancamentos (black-friday is the "
+                    "default)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based (42 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -57179,6 +59496,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_ENJOEI_ENDPOINTS,
     *_ATACADAO_ENDPOINTS,
     *_CARREFOURBR_ENDPOINTS,
+    # ====== batch 7 wave 4 2026-11-27: 4 platforms (Terabyteshop, Cobasi, Netshoes, Estante Virtual) ======
+    *_TERABYTE_ENDPOINTS,
+    *_COBASI_ENDPOINTS,
+    *_NETSHOES_ENDPOINTS,
+    *_ESTANTEVIRTUAL_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -64170,6 +66492,10 @@ NAMESPACES: tuple[str, ...] = (
     "enjoei",
     "atacadao",
     "carrefourbr",
+    "terabyte",
+    "cobasi",
+    "netshoes",
+    "estantevirtual",
 )
 
 

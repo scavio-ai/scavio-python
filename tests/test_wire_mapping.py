@@ -712,6 +712,7 @@ BODY_PRICED_KEYS = {
     "boticario_product",
     "boticario_promotions",
     "boticario_search",
+    "estantevirtual_copies",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -11204,3 +11205,244 @@ def test_batch7w3_1127_credits_wire_and_timeouts():
     brasil = [ep for ep in w3 if ep.namespace == "carrefourbr"]
     assert all(ep.path.startswith("/api/v1/carrefourbr/") for ep in brasil)
     assert all(p.doc for ep in w3 for p in ep.params)
+
+
+# --- batch 7 wave 4 2026-11-27: 4 Brazil namespaces ---
+# (Terabyteshop, Cobasi, Netshoes, Estante Virtual)
+
+BATCH7W4_1127 = {
+    "terabyte": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "coupons": ("coupons", 1, 240.0),
+        "trending_searches": ("trending-searches", 1, 240.0),
+        "pc_builder": ("pc-builder", 1, 240.0),
+    },
+    "cobasi": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "questions": ("questions", 1, 240.0),
+        "availability": ("availability", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+    },
+    "netshoes": {
+        "search": ("search", 1, 240.0),
+        "list": ("list", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+        "inventory": ("inventory", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "questions": ("questions", 1, 240.0),
+        "daily_deal": ("daily-deal", 1, 240.0),
+        "seller": ("seller", 1, 240.0),
+        "popular_searches": ("popular-searches", 1, 240.0),
+    },
+    "estantevirtual": {
+        "search": ("search", 1, 240.0),
+        "isbn": ("isbn", 1, 240.0),
+        "book": ("book", 1, 240.0),
+        "copies": ("copies", 1, 240.0),
+        "copy": ("copy", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+        "seller": ("seller", 1, 240.0),
+        "seller_books": ("seller-books", 1, 240.0),
+        "seller_reviews": ("seller-reviews", 1, 240.0),
+        "sellers": ("sellers", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "list": ("list", 1, 240.0),
+    },
+}
+BATCH7W4_1127_ONE_OF = {
+    "terabyte_product": (("product_id", "url"),),
+    "terabyte_reviews": (("product_id", "url"),),
+    "terabyte_brand": (("brand", "brand_id"),),
+    "cobasi_product": (("product_id", "url"),),
+    "cobasi_reviews": (("product_id", "url"),),
+    "cobasi_questions": (("product_id", "url"),),
+    "cobasi_store": (("slug", "url"),),
+    "netshoes_product": (("product_id", "url"),),
+    "netshoes_reviews": (("product_id", "url"),),
+    "netshoes_questions": (("product_id", "url"),),
+    "estantevirtual_book": (("book_id", "url"),),
+    "estantevirtual_copies": (("book_id", "url"),),
+    "estantevirtual_copy": (("copy_id", "url"),),
+    "estantevirtual_shipping": (("copy_id", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7W4_1127))
+def test_batch7w4_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 4 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7W4_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7W4_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b"
+        assert not re.search(ai, text.lower()), ep.key
+
+
+BATCH7W4_1127_WIRE = [
+    ("terabyte", "search", {"query": "rtx 5060"}, "search"),
+    (
+        "terabyte", "search",
+        {"query": "rtx 5060", "sort": "price_asc", "page": 2, "page_size": 50},
+        "search",
+    ),
+    ("terabyte", "product", {"product_id": "41251"}, "product"),
+    ("terabyte", "reviews", {"product_id": 20782, "page": 2}, "reviews"),
+    (
+        "terabyte", "category",
+        {
+            "category": "hardware/placas-de-video",
+            "sort": "price_asc",
+            "filters": {"modelo": "RTX 5070"},
+        },
+        "category",
+    ),
+    ("terabyte", "brand", {"category": "perifericos/mouse", "brand": "Logitech"}, "brand"),
+    ("terabyte", "brand", {"category": "perifericos/mouse", "brand_id": "39"}, "brand"),
+    ("terabyte", "deals", {}, "deals"),
+    ("terabyte", "deals", {"deal": "open_box", "sort": "price_desc"}, "deals"),
+    ("terabyte", "coupons", {"code": "BLACKDT3"}, "coupons"),
+    ("terabyte", "trending_searches", {"limit": 10}, "trending-searches"),
+    ("terabyte", "pc_builder", {"platform_id": "18613", "group_id": "21065"}, "pc-builder"),
+    ("cobasi", "search", {"query": "ração golden", "filters": ["brand/golden"]}, "search"),
+    ("cobasi", "category", {"category": "cachorro/racao", "sort": "price_asc"}, "category"),
+    ("cobasi", "brand", {"brand": "golden"}, "brand"),
+    ("cobasi", "deals", {"sort": "discount_desc"}, "deals"),
+    ("cobasi", "product", {"product_id": "3934097"}, "product"),
+    ("cobasi", "reviews", {"product_id": "3767590", "page": 2}, "reviews"),
+    ("cobasi", "questions", {"product_id": "3767590"}, "questions"),
+    (
+        "cobasi", "availability",
+        {"sku_id": "934097", "cep": "01310-100", "quantity": 2},
+        "availability",
+    ),
+    ("cobasi", "suggestions", {"query": "areia gato"}, "suggestions"),
+    ("cobasi", "stores", {"state": "SP"}, "stores"),
+    ("cobasi", "store", {"slug": "cobasi-americana"}, "store"),
+    ("netshoes", "search", {"query": "tenis corrida"}, "search"),
+    (
+        "netshoes", "search",
+        {
+            "query": "tenis corrida", "brand": ["nike"], "size": "40",
+            "price_min": 100, "sort": "price_asc",
+        },
+        "search",
+    ),
+    ("netshoes", "list", {}, "list"),
+    ("netshoes", "list", {"slug": "tenis-black-friday", "page": 2}, "list"),
+    ("netshoes", "product", {"product_id": "FBA-82XQ-006"}, "product"),
+    ("netshoes", "offers", {"sku": "I0Y-0011-289-01"}, "offers"),
+    ("netshoes", "inventory", {"sku": "FBA-82XQ-006-38", "seller_id": 0}, "inventory"),
+    ("netshoes", "shipping", {"sku": "FBA-82XQ-006-38", "cep": "01310-100"}, "shipping"),
+    ("netshoes", "reviews", {"product_id": "FBA-82XQ", "rating": "negative"}, "reviews"),
+    (
+        "netshoes", "reviews",
+        {"product_id": "FBA-82XQ", "rating": [3], "with_photos": True},
+        "reviews",
+    ),
+    ("netshoes", "questions", {"product_id": "I0Y-0011"}, "questions"),
+    ("netshoes", "daily_deal", {}, "daily-deal"),
+    ("netshoes", "seller", {"seller_id": "21072"}, "seller"),
+    ("netshoes", "popular_searches", {}, "popular-searches"),
+    ("estantevirtual", "search", {"query": "dom casmurro"}, "search"),
+    (
+        "estantevirtual", "search",
+        {"query": "dom casmurro", "condition": "used", "sort": "price_asc", "price_max": 30},
+        "search",
+    ),
+    ("estantevirtual", "isbn", {"isbn": "9788535914849"}, "isbn"),
+    ("estantevirtual", "book", {"book_id": "017-4778-000-BK"}, "book"),
+    ("estantevirtual", "copies", {"book_id": "017-4778-000-BK"}, "copies"),
+    (
+        "estantevirtual", "copies",
+        {"book_id": "017-4778-000-BK", "condition": "new", "page_size": 10, "sellers": True},
+        "copies",
+    ),
+    ("estantevirtual", "copy", {"copy_id": "GME-2437-000"}, "copy"),
+    ("estantevirtual", "shipping", {"copy_id": "GME-2437-000", "cep": "01310-100"}, "shipping"),
+    ("estantevirtual", "seller", {"seller_id": "1002276"}, "seller"),
+    ("estantevirtual", "seller_books", {"seller_id": 1002276, "query": "orwell"}, "seller-books"),
+    (
+        "estantevirtual", "seller_reviews",
+        {"seller_id": "1002276", "rating": "negative"},
+        "seller-reviews",
+    ),
+    ("estantevirtual", "sellers", {"state": "SP", "city": "São Paulo"}, "sellers"),
+    ("estantevirtual", "category", {"category_slug": "literatura-brasileira"}, "category"),
+    ("estantevirtual", "list", {"slug": "black-friday"}, "list"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7W4_1127_WIRE)
+def test_batch7w4_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7W4_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7W4_1127_ONE_OF))
+def test_batch7w4_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7w4_1127_credits_wire_and_timeouts():
+    """Terabyteshop, Cobasi, Netshoes, Estante Virtual: 1 credit floor, 240 s floor; copies note."""
+    for ns in BATCH7W4_1127:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w4 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W4_1127]
+    assert len(w4) == 43
+    assert {ep.min_timeout for ep in w4} == {240.0}
+    assert [ep.key for ep in w4 if ep.credits_note] == ["estantevirtual_copies"]
+    assert "ceil((1 + copies) / 5)" in ENDPOINTS["estantevirtual_copies"].credits_note
+    assert [p.name for p in ENDPOINTS["cobasi_availability"].required_params] == ["sku_id", "cep"]
+    assert [p.name for p in ENDPOINTS["netshoes_shipping"].required_params] == ["sku", "cep"]
+    assert [p.name for p in ENDPOINTS["estantevirtual_shipping"].required_params] == ["cep"]
+    assert [p.name for p in ENDPOINTS["terabyte_brand"].required_params] == ["category"]
+    category = ENDPOINTS["estantevirtual_category"]
+    assert [p.name for p in category.required_params] == ["category_slug"]
+    assert not ENDPOINTS["netshoes_daily_deal"].params
+    assert not ENDPOINTS["netshoes_popular_searches"].params
+    assert not ENDPOINTS["terabyte_pc_builder"].required_params
+    assert ENDPOINTS["terabyte_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["cobasi_store"].positional_optional_params[0].name == "slug"
+    assert ENDPOINTS["netshoes_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["estantevirtual_copies"].positional_optional_params[0].name == "book_id"
+    assert ENDPOINTS["estantevirtual_copy"].positional_optional_params[0].name == "copy_id"
+    assert "AI assistant" not in ENDPOINTS["netshoes_questions"].summary
+    assert all(p.doc for ep in w4 for p in ep.params)
