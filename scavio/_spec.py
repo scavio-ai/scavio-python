@@ -43117,7 +43117,7 @@ _PICHAU_ENDPOINTS: tuple[Endpoint, ...] = (
         path="/api/v1/pichau/product-live",
         summary=(
             "One product page of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio "
-            "fetches the public Pichau page on request, as a browser shows it after loading. "
+            "fetches the public Pichau page on request as a visitor sees it. "
             "Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed "
             "in. By url_key or link: product_id, sku, name, product_type, available, "
             "stock_status, only_x_left, price, pix_price, list_price, installment, "
@@ -43128,8 +43128,7 @@ _PICHAU_ENDPOINTS: tuple[Endpoint, ...] = (
             "choice_count, choices [{product_id, sku, name, url_key, url, quantity, "
             "is_default, available, image}]}] (a prebuilt PC's or kit's parts), rating and "
             "review_count. An unknown product is a charged 404. 1 credit. A not-found is "
-            "charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the "
-            "page is loaded as a browser does); set a client timeout of at least 240 s."
+            "charged; failed upstream calls and refused inputs are not. Usually 30-160 s; set a client timeout of at least 240 s."
         ),
         params=(
             Param(
@@ -43315,8 +43314,7 @@ _PICHAU_ENDPOINTS: tuple[Endpoint, ...] = (
             "Returns terms [{term, count}] (how many products match), categories [{name, "
             "path, url}] and products [{name, url_key, url, image, price, available, "
             "pre_order}] (up to 10, as the box lists them). 1 credit. A not-found is charged; "
-            "failed upstream calls and refused inputs are not. Usually 30-160 s (the page is "
-            "loaded as a browser does); set a client timeout of at least 240 s."
+            "failed upstream calls and refused inputs are not. Usually 30-160 s; set a client timeout of at least 240 s."
         ),
         params=(
             Param(

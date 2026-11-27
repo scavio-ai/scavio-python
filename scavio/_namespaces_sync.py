@@ -36913,7 +36913,7 @@ class _PichauNamespace:
         url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One product page of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request, as a browser shows it after loading. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By url_key or link: product_id, sku, name, product_type, available, stock_status, only_x_left, price, pix_price, list_price, installment, on_promotion, offer {campaign, ends_at, promo_price, units_left, units_sold} (live), benchmark {overall_score, cpu_score, gpu_score, games [{title, full_hd_fps, ultra_1080p_fps, quad_hd_fps, medium_4k_fps, ultra_4k_fps}]} (the UL benchmark FPS the site shows on PCs), components [{group, required, selected, choice_count, choices [{product_id, sku, name, url_key, url, quantity, is_default, available, image}]}] (a prebuilt PC's or kit's parts), rating and review_count. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the page is loaded as a browser does); set a client timeout of at least 240 s.
+        """One product page of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request as a visitor sees it. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By url_key or link: product_id, sku, name, product_type, available, stock_status, only_x_left, price, pix_price, list_price, installment, on_promotion, offer {campaign, ends_at, promo_price, units_left, units_sold} (live), benchmark {overall_score, cpu_score, gpu_score, games [{title, full_hd_fps, ultra_1080p_fps, quad_hd_fps, medium_4k_fps, ultra_4k_fps}]} (the UL benchmark FPS the site shows on PCs), components [{group, required, selected, choice_count, choices [{product_id, sku, name, url_key, url, quantity, is_default, available, image}]}] (a prebuilt PC's or kit's parts), rating and review_count. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s; set a client timeout of at least 240 s.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -37002,7 +37002,7 @@ class _PichauNamespace:
         query: str,
         **extra: Any,
     ) -> dict[str, Any]:
-        """What the search box of Pichau (pichau.com.br, Brazil's PC-parts store) suggests for what a shopper typed. Scavio fetches the public Pichau page on request. Returns terms [{term, count}] (how many products match), categories [{name, path, url}] and products [{name, url_key, url, image, price, available, pre_order}] (up to 10, as the box lists them). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the page is loaded as a browser does); set a client timeout of at least 240 s.
+        """What the search box of Pichau (pichau.com.br, Brazil's PC-parts store) suggests for what a shopper typed. Scavio fetches the public Pichau page on request. Returns terms [{term, count}] (how many products match), categories [{name, path, url}] and products [{name, url_key, url, image, price, available, pre_order}] (up to 10, as the box lists them). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s; set a client timeout of at least 240 s.
 
         Costs 1 credit. Returns the API response as a dict.
 
