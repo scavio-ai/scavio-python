@@ -8,6 +8,7 @@ from ._exceptions import ScavioError
 from ._extract import AsyncExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, async_request
 from ._namespaces_async import (
+    _AsyncAbercrombieNamespace,
     _AsyncAcademyNamespace,
     _AsyncAcehardwareNamespace,
     _AsyncActionNamespace,
@@ -25,6 +26,8 @@ from ._namespaces_async import (
     _AsyncAutozoneNamespace,
     _AsyncBarnesandnobleNamespace,
     _AsyncBathandbodyworksNamespace,
+    _AsyncBedbathbeyondNamespace,
+    _AsyncBelkNamespace,
     _AsyncBestBuyNamespace,
     _AsyncBjsNamespace,
     _AsyncBolcomNamespace,
@@ -88,6 +91,7 @@ from ._namespaces_async import (
     _AsyncKuaishouNamespace,
     _AsyncLennarNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncLlbeanNamespace,
     _AsyncLookfantasticNamespace,
     _AsyncLowesNamespace,
     _AsyncMacysNamespace,
@@ -137,6 +141,7 @@ from ._namespaces_async import (
     _AsyncSportchekNamespace,
     _AsyncStaplesNamespace,
     _AsyncStreeteasyNamespace,
+    _AsyncSweetwaterNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
     _AsyncThreadsNamespace,
@@ -382,6 +387,11 @@ class AsyncScavioClient:
         self.thriftbooks = _AsyncThriftbooksNamespace(self)
         self.uhaul = _AsyncUhaulNamespace(self)
         self.williamssonoma = _AsyncWilliamssonomaNamespace(self)
+        self.belk = _AsyncBelkNamespace(self)
+        self.abercrombie = _AsyncAbercrombieNamespace(self)
+        self.llbean = _AsyncLlbeanNamespace(self)
+        self.sweetwater = _AsyncSweetwaterNamespace(self)
+        self.bedbathbeyond = _AsyncBedbathbeyondNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.100.0"
-description = "Python SDK for the Scavio Search API - real-time data from 159 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.101.0"
+description = "Python SDK for the Scavio Search API - real-time data from 164 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -177,6 +177,25 @@ keywords = [
     "williams-sonoma-api",
     "pottery-barn-api",
     "west-elm-api",
+    "belk",
+    "belk-api",
+    "department-store",
+    "abercrombie",
+    "abercrombie-api",
+    "hollister",
+    "hollister-api",
+    "gilly-hicks",
+    "llbean",
+    "llbean-api",
+    "l-l-bean",
+    "outdoor-apparel",
+    "sweetwater",
+    "sweetwater-api",
+    "music-gear",
+    "guitar-prices",
+    "bedbathbeyond",
+    "bed-bath-and-beyond-api",
+    "home-goods",
     "rei-api",
     "outdoor-gear",
     "aldi",

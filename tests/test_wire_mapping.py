@@ -691,6 +691,12 @@ BODY_PRICED_KEYS = {
     "expedia_property",
     "expedia_search",
     "expedia_suggestions",
+    "abercrombie_reviews",
+    "bedbathbeyond_deals",
+    "bedbathbeyond_product",
+    "belk_product",
+    "belk_store_availability",
+    "belk_variant",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -10305,3 +10311,245 @@ def test_batch5_1127_credits_wire_and_timeouts():
     assert "sort" not in reviews and "rating" not in reviews
     assert "item_numbers" in {p.name for p in ENDPOINTS["qvc_products"].required_params}
     assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH5_1127 for p in ep.params)
+
+
+# --- batch 6 2026-11-27: 5 namespaces (Belk, A&F + Hollister, L.L.Bean, Sweetwater, BB&B) ---
+
+BATCH6_1127 = {
+    "belk": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "deals": ("deals", 2, 240.0),
+        "categories": ("categories", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "variant": ("variant", 2, 240.0),
+        "store_availability": ("store-availability", 1, 240.0),
+        "stores": ("stores", 2, 240.0),
+        "store": ("store", 2, 240.0),
+        "reviews": ("reviews", 2, 240.0),
+    },
+    "abercrombie": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "store_stock": ("store-stock", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "promotions": ("promotions", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "llbean": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "store_stock": ("store-stock", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "review_summary": ("review-summary", 1, 240.0),
+        "delivery_estimate": ("delivery-estimate", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+    "sweetwater": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "serial_units": ("serial-units", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+    "bedbathbeyond": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "delivery_estimate": ("delivery-estimate", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "questions": ("questions", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+}
+BATCH6_1127_ONE_OF = {
+    "belk_product": (("product_id", "url"),),
+    "belk_store_availability": (("variant_id", "items"),),
+    "belk_reviews": (("product_id", "url"),),
+    "abercrombie_store_stock": (("zip", "latitude"),),
+    "abercrombie_stores": (("zip", "latitude"),),
+    "llbean_store_stock": (("store_ids", "all_stores"),),
+    "llbean_stores": (("zip", "latitude", "city", "store_ids", "all_stores"),),
+    "sweetwater_product": (("item_id", "url"),),
+    "sweetwater_serial_units": (("item_id", "url"),),
+    "sweetwater_reviews": (("item_id", "url"),),
+    "bedbathbeyond_search": (("query", "facet_url"),),
+    "bedbathbeyond_category": (("slug", "url"), ("category_id", "url")),
+    "bedbathbeyond_product": (("product_id", "url"),),
+    "bedbathbeyond_reviews": (("product_id", "url"),),
+    "bedbathbeyond_questions": (("product_id", "url"),),
+}
+BATCH6_1127_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH6_1127))
+def test_batch6_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 5 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH6_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH6_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("super buys", "").replace("super_buys", "")
+        assert not BATCH6_1127_BANNED.search(text), ep.key
+        assert not re.search(r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b", text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH6_1127_WIRE = [
+    ("belk", "search", {"query": "sweater"}, "search"),
+    ("belk", "category", {"category": "women/womens-clothing/sweaters"}, "category"),
+    ("belk", "deals", {}, "deals"),
+    ("belk", "categories", {}, "categories"),
+    ("belk", "product", {"product_id": "18000269151219"}, "product"),
+    ("belk", "variant", {"variant_id": "0480046046048"}, "variant"),
+    (
+        "belk", "store_availability",
+        {
+            "store_ids": ["452", "329", "270"],
+            "variant_id": "0480046046048",
+        },
+        "store-availability",
+    ),
+    ("belk", "stores", {"zip": "28202"}, "stores"),
+    ("belk", "store", {"store_id": "452"}, "store"),
+    ("belk", "reviews", {"product_id": "18000269151219"}, "reviews"),
+    ("abercrombie", "search", {"query": "baggy jeans"}, "search"),
+    ("abercrombie", "product", {"product_id": "59359439"}, "product"),
+    ("abercrombie", "store_stock", {"skus": ["662258406"], "zip": "10001"}, "store-stock"),
+    ("abercrombie", "stores", {"zip": "10001"}, "stores"),
+    ("abercrombie", "store", {"store_number": "11958"}, "store"),
+    ("abercrombie", "category", {"category_id": "12236"}, "category"),
+    ("abercrombie", "categories", {}, "categories"),
+    ("abercrombie", "promotions", {}, "promotions"),
+    ("abercrombie", "reviews", {"product_id": "59359439"}, "reviews"),
+    ("abercrombie", "suggestions", {"query": "hoo"}, "suggestions"),
+    ("llbean", "search", {"query": "fleece jacket"}, "search"),
+    ("llbean", "category", {"category_id": "474"}, "category"),
+    ("llbean", "categories", {}, "categories"),
+    ("llbean", "product", {"product_id": "37037"}, "product"),
+    (
+        "llbean", "store_stock",
+        {
+            "item_id": "112644",
+            "store_ids": ["0040", "1350", "2140"],
+        },
+        "store-stock",
+    ),
+    ("llbean", "stores", {"zip": "04032"}, "stores"),
+    ("llbean", "reviews", {"product_id": "120785"}, "reviews"),
+    ("llbean", "review_summary", {"product_id": "37037"}, "review-summary"),
+    ("llbean", "delivery_estimate", {"item_id": "112644", "zip": "10001"}, "delivery-estimate"),
+    ("llbean", "suggestions", {"query": "fle"}, "suggestions"),
+    ("llbean", "deals", {}, "deals"),
+    ("sweetwater", "search", {"query": "boss delay pedal"}, "search"),
+    ("sweetwater", "category", {"category": "c590--Solid_Body_Guitars"}, "category"),
+    ("sweetwater", "product", {"item_id": "DD8"}, "product"),
+    ("sweetwater", "serial_units", {"item_id": "DD8"}, "serial-units"),
+    ("sweetwater", "reviews", {"item_id": "DD8"}, "reviews"),
+    ("sweetwater", "deals", {}, "deals"),
+    ("bedbathbeyond", "search", {"query": "bath towels"}, "search"),
+    (
+        "bedbathbeyond", "category",
+        {
+            "slug": "bedding/bedding-sets",
+            "category_id": "276",
+        },
+        "category",
+    ),
+    ("bedbathbeyond", "categories", {}, "categories"),
+    ("bedbathbeyond", "product", {"product_id": "5296998"}, "product"),
+    (
+        "bedbathbeyond", "delivery_estimate",
+        {
+            "option_id": "94445783",
+            "zip": "10001",
+        },
+        "delivery-estimate",
+    ),
+    ("bedbathbeyond", "reviews", {"product_id": "5296998"}, "reviews"),
+    ("bedbathbeyond", "questions", {"product_id": "5296998"}, "questions"),
+    ("bedbathbeyond", "stores", {}, "stores"),
+    ("bedbathbeyond", "deals", {}, "deals"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH6_1127_WIRE)
+def test_batch6_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH6_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH6_1127_ONE_OF))
+def test_batch6_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch6_1127_credits_wire_and_timeouts():
+    """Belk 2 (store_availability 1); BB&B search and category 2; the rest 1; 240 s floor."""
+    for ns in ("abercrombie", "llbean", "sweetwater"):
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    belk = {ep.method: ep.credits for ep in ENDPOINTS.values() if ep.namespace == "belk"}
+    assert {m for m, c in belk.items() if c != 2} == {"store_availability"}
+    assert belk["store_availability"] == 1
+    bbb = {ep.method: ep.credits for ep in ENDPOINTS.values() if ep.namespace == "bedbathbeyond"}
+    assert {m for m, c in bbb.items() if c == 2} == {"search", "category"}
+    assert {c for m, c in bbb.items() if m not in ("search", "category")} == {1}
+    assert {ep.min_timeout for ep in ENDPOINTS.values() if ep.namespace in BATCH6_1127} == {240.0}
+    noted = {ep.key for ep in ENDPOINTS.values() if ep.namespace in BATCH6_1127 and ep.credits_note}
+    assert noted == {
+        "belk_product", "belk_variant", "belk_store_availability", "abercrombie_reviews",
+        "bedbathbeyond_deals", "bedbathbeyond_product",
+    }
+    assert "include_color_prices" in ENDPOINTS["belk_variant"].credits_note
+    assert [p.name for p in ENDPOINTS["belk_store_availability"].required_params] == ["store_ids"]
+    assert "radius" not in {p.name for p in ENDPOINTS["belk_stores"].params}
+    reviews = {p.name for p in ENDPOINTS["belk_reviews"].params}
+    assert not reviews & {"page", "sort", "rating"}
+    assert [p.name for p in ENDPOINTS["abercrombie_store_stock"].required_params] == ["skus"]
+    assert [p.name for p in ENDPOINTS["llbean_delivery_estimate"].required_params] == [
+        "item_id", "zip"]
+    assert ENDPOINTS["llbean_stores"].one_of == (
+        ("zip", "latitude", "city", "store_ids", "all_stores"),)
+    assert ENDPOINTS["bedbathbeyond_category"].one_of == (("slug", "url"), ("category_id", "url"))
+    assert ENDPOINTS["bedbathbeyond_search"].params[0].name == "query"
+    assert ENDPOINTS["bedbathbeyond_search"].params[0].wire_field == "query"
+    assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH6_1127 for p in ep.params)

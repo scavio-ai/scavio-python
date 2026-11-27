@@ -168,6 +168,11 @@ __all__ = [
     "_ThriftbooksNamespace",
     "_UhaulNamespace",
     "_WilliamssonomaNamespace",
+    "_BelkNamespace",
+    "_AbercrombieNamespace",
+    "_LlbeanNamespace",
+    "_SweetwaterNamespace",
+    "_BedbathbeyondNamespace",
 ]
 
 class _GoogleNamespace:
@@ -31560,3 +31565,1124 @@ class _WilliamssonomaNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("williamssonoma_reviews", {"product": product, "brand": brand, "market": market, "url": url, "page": page}, extra)
+
+class _BelkNamespace:
+    """Belk (belk.com, the US Southern department store) search, category, deals, categories, product, variant, store_availability, stores, store and reviews endpoints; US only, prices in USD, exact store units, 2 credits per call (product and variant up to 4, store_availability 1 plus 2 per looked-up variant)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sales_promotion: Optional[Union[Literal["doorbusters", "super_buys", "sale", "clearance", "todays_offers", "belk_market"], list[Literal["doorbusters", "super_buys", "sale", "clearance", "todays_offers", "belk_market"]]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low_to_high", "price_high_to_low", "top_rated", "discount", "doorbusters_first"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        coupon_code: Optional[Union[str, list[str]]] = None,
+        min_discount: Optional[int] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Belk (belk.com, the US Southern department store). Scavio fetches Belk's public pages on request; Belk has no public API. US only, USD. Sort by Belk's 7 sorts; filter by brand, colour, size, sales promotion (doorbusters, super buys, sale, clearance, today's offers, Belk Market), coupon code, discount band, price range, free-pickup store and any other facet. 60 items a page: title, page, page_size, total (null past Belk's count), total_is_lower_bound (Belk shows "10,000+"), total_pages, count, sort, applied_filters, items [{position, id (use it in product and reviews), title, brand, url, image, rating, review_count, original_price, sale_price, on_sale, belk_rewards_tier_prices, coupons, promotions, badge, is_doorbuster, is_belk_market, colors [{color_id, name, swatch}]}], facets [{name, id, values [{value, label, count, selected}]; price: min / max; size groups: group}] (any value works in filters) and categories [{name, path, cgid, count, children}]. Prices as belk.com shows them to logged-out visitors: original_price and sale_price {min, max}, on_sale, belk_rewards_tier_prices (Belk's Belk Rewards+ insider / premier / elite prices as shown there, when Belk lists them), coupons [{code, discount_percent, promo_price (Belk's own price with the code), ends (as Belk writes it), requirement}] and promotions [{id, type, message}]. Belk answers a query it cannot match with its closest matches. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            sales_promotion: Items in Belk's Sales & Promotions: doorbusters, super_buys, sale, clearance, todays_offers, belk_market (belk_market = Belk Market, the marketplace). A list matches any of them.
+            page: Page, 1-200 (60 items a page). Defaults to 1.
+            sort: relevance (default), newest, price_low_to_high, price_high_to_low, top_rated, discount (highest percent off at the top) or doorbusters_first: Belk's 7 sorts.
+            brand: Items of these brands, as the Brand facet spells them. A list matches any of them.
+            color: Items in these colour groups (the Color facet: Black, Blue, Red...). A list matches any of them.
+            size: Items in these sizes, as group/size from the size facets (facets[].values[].value where id is hierarchical_sizes, e.g. "Women's Regular/10", "Plus/1X").
+            coupon_code: Items a Belk coupon applies to (the Coupon Eligible facet, e.g. BFISHERE).
+            min_discount: Items at least this percent off: one of Belk's discount bands 20, 30, 40, 50, 60, 70, 80.
+            min_price: Minimum price in USD.
+            max_price: Maximum price in USD.
+            pickup_store_id: Items available for free store pickup at this Belk store (stores[].store_id from /belk/stores).
+            filters: Any other facet from a previous answer's facets: its id to one value or a list (e.g. {"Gender": "Women", "Occasion": "Casual"}). Up to 8.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_search", {"query": query, "sales_promotion": sales_promotion, "page": page, "sort": sort, "brand": brand, "color": color, "size": size, "coupon_code": coupon_code, "min_discount": min_discount, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sales_promotion: Optional[Union[Literal["doorbusters", "super_buys", "sale", "clearance", "todays_offers", "belk_market"], list[Literal["doorbusters", "super_buys", "sale", "clearance", "todays_offers", "belk_market"]]]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low_to_high", "price_high_to_low", "top_rated", "discount", "doorbusters_first"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        coupon_code: Optional[Union[str, list[str]]] = None,
+        min_discount: Optional[int] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Belk category's products by path or link. Sort by Belk's 7 sorts; filter by brand, colour, size, sales promotion (doorbusters, super buys, sale, clearance, today's offers, Belk Market), coupon code, discount band, price range, free-pickup store and any other facet. Returns category {path, cgid, name} and 60 items a page: title, page, page_size, total (null past Belk's count), total_is_lower_bound (Belk shows "10,000+"), total_pages, count, sort, applied_filters, items [{position, id (use it in product and reviews), title, brand, url, image, rating, review_count, original_price, sale_price, on_sale, belk_rewards_tier_prices, coupons, promotions, badge, is_doorbuster, is_belk_market, colors [{color_id, name, swatch}]}], facets [{name, id, values [{value, label, count, selected}]; price: min / max; size groups: group}] (any value works in filters) and categories [{name, path, cgid, count, children}]. Prices as belk.com shows them to logged-out visitors: original_price and sale_price {min, max}, on_sale, belk_rewards_tier_prices (Belk's Belk Rewards+ insider / premier / elite prices as shown there, when Belk lists them), coupons [{code, discount_percent, promo_price (Belk's own price with the code), ends (as Belk writes it), requirement}] and promotions [{id, type, message}]. An unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category: A Belk category path (categories[].path from /belk/categories) or a belk.com category link.
+            sales_promotion: Items in Belk's Sales & Promotions: doorbusters, super_buys, sale, clearance, todays_offers, belk_market (belk_market = Belk Market, the marketplace). A list matches any of them.
+            page: Page, 1-200 (60 items a page). Defaults to 1.
+            sort: relevance (default), newest, price_low_to_high, price_high_to_low, top_rated, discount (highest percent off at the top) or doorbusters_first: Belk's 7 sorts.
+            brand: Items of these brands, as the Brand facet spells them. A list matches any of them.
+            color: Items in these colour groups (the Color facet: Black, Blue, Red...). A list matches any of them.
+            size: Items in these sizes, as group/size from the size facets (facets[].values[].value where id is hierarchical_sizes, e.g. "Women's Regular/10", "Plus/1X").
+            coupon_code: Items a Belk coupon applies to (the Coupon Eligible facet, e.g. BFISHERE).
+            min_discount: Items at least this percent off: one of Belk's discount bands 20, 30, 40, 50, 60, 70, 80.
+            min_price: Minimum price in USD.
+            max_price: Maximum price in USD.
+            pickup_store_id: Items available for free store pickup at this Belk store (stores[].store_id from /belk/stores).
+            filters: Any other facet from a previous answer's facets: its id to one value or a list (e.g. {"Gender": "Women", "Occasion": "Casual"}). Up to 8.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_category", {"category": category, "sales_promotion": sales_promotion, "page": page, "sort": sort, "brand": brand, "color": color, "size": size, "coupon_code": coupon_code, "min_discount": min_discount, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["doorbusters", "super_buys", "clearance", "sale", "todays_offers"]] = None,
+        category: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "newest", "price_low_to_high", "price_high_to_low", "top_rated", "discount", "doorbusters_first"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        color: Optional[Union[str, list[str]]] = None,
+        size: Optional[Union[str, list[str]]] = None,
+        coupon_code: Optional[Union[str, list[str]]] = None,
+        min_discount: Optional[int] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        pickup_store_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Belk's deal listings: Doorbusters, Super Buys, Clearance, Sale Items or Today's Offers, across Belk or inside one category, with the same sorts and filters as search. Returns type, belk_filter, category and 60 items a page: title, page, page_size, total (null past Belk's count), total_is_lower_bound (Belk shows "10,000+"), total_pages, count, sort, applied_filters, items [{position, id (use it in product and reviews), title, brand, url, image, rating, review_count, original_price, sale_price, on_sale, belk_rewards_tier_prices, coupons, promotions, badge, is_doorbuster, is_belk_market, colors [{color_id, name, swatch}]}], facets [{name, id, values [{value, label, count, selected}]; price: min / max; size groups: group}] (any value works in filters) and categories [{name, path, cgid, count, children}]. Prices as belk.com shows them to logged-out visitors: original_price and sale_price {min, max}, on_sale, belk_rewards_tier_prices (Belk's Belk Rewards+ insider / premier / elite prices as shown there, when Belk lists them), coupons [{code, discount_percent, promo_price (Belk's own price with the code), ends (as Belk writes it), requirement}] and promotions [{id, type, message}]. End dates: a variant's sale end date is on /belk/variant (sale_ends), a coupon's in coupons[].ends. Belk's weekly ad and coupon pages are not available. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            type: doorbusters (default), super_buys, clearance, sale (Sale Items) or todays_offers (Today's Offers).
+            category: Deals inside this Belk category (a path from /belk/categories). Without it: all of Belk.
+            page: Page, 1-200 (60 items a page). Defaults to 1.
+            sort: relevance (default), newest, price_low_to_high, price_high_to_low, top_rated, discount (highest percent off at the top) or doorbusters_first: Belk's 7 sorts.
+            brand: Items of these brands, as the Brand facet spells them. A list matches any of them.
+            color: Items in these colour groups (the Color facet: Black, Blue, Red...). A list matches any of them.
+            size: Items in these sizes, as group/size from the size facets (facets[].values[].value where id is hierarchical_sizes, e.g. "Women's Regular/10", "Plus/1X").
+            coupon_code: Items a Belk coupon applies to (the Coupon Eligible facet, e.g. BFISHERE).
+            min_discount: Items at least this percent off: one of Belk's discount bands 20, 30, 40, 50, 60, 70, 80.
+            min_price: Minimum price in USD.
+            max_price: Maximum price in USD.
+            pickup_store_id: Items available for free store pickup at this Belk store (stores[].store_id from /belk/stores).
+            filters: Any other facet from a previous answer's facets: its id to one value or a list (e.g. {"Gender": "Women", "Occasion": "Casual"}). Up to 8.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_deals", {"type": type, "category": category, "page": page, "sort": sort, "brand": brand, "color": color, "size": size, "coupon_code": coupon_code, "min_discount": min_discount, "min_price": min_price, "max_price": max_price, "pickup_store_id": pickup_store_id, "filters": filters}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Belk's department menu (15 departments, about 700 nodes): count, node_count, categories [{name, path (the input of category), url, cgid, children [...]}]. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_categories", {}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Belk product by link (2 credits when it is Belk's canonical link; 4 when Belk redirects to it, as an older or shortened link does) or by product_id (always found through Belk's redirect: 4 credits): requested, redirected, id, name, brand, brand_url, url, style_number, availability, currency, original_price, sale_price, price_label (e.g. Doorbuster), on_sale, belk_rewards_tier_prices, badge, is_doorbuster, coupons, promotions, rating, review_count, breadcrumbs, details [{title, items}] (details, specifications, material and care), images {main, gallery}, size_chart_url, is_belk_market, dropship, default_variant_id, colors [{color_id, name, image, swatch, all_sizes_on_sale}], sizes [{size_id, name}], variant_count and variants [{variant_id, color_id, color, size_id, size, online_units (Belk's online stock), out_of_stock}]. Per-variant UPC, orin and sale end date: /belk/variant. An unknown id is a charged 404. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits by Belk's canonical product link; 4 when Belk redirects to it (an older
+        or shortened link, or a product_id, which always redirects). credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            product_id: Belk product id (items[].id, or the part before .html in a product link).
+            url: A belk.com product link (items[].url), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_product", {"product_id": product_id, "url": url}, extra)
+
+    def variant(
+        self,
+        variant_id: str,
+        *,
+        include_color_prices: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Belk variant (a colour + size of a product): variant_id, product_id, upc, orin (what store-availability takes), color_id, size_id, availability, pickup_eligible, ship_eligible, online_only, dropship, max_buy_quantity, currency, price_type (Belk's: Doorbuster, Sale...), original_price, sale_price, sale_ends (Belk's sale end date), badge, coupons, coupon_excluded, promotions and images. With include_color_prices: color_prices [{color_id, price, price_text, price_type, out_of_stock, all_sizes_on_sale}] for every colour at this size (Belk can price colours of one product differently; 4 credits). An unknown variant is a charged 404. 2 credits (4 with include_color_prices). A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits; 4 with include_color_prices=True (one more call). credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            variant_id: Belk variant id (variants[].variant_id from /belk/product).
+            include_color_prices: Also the price and stock flag of every colour at this variant's size (one more call: 4 credits).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_variant", {"variant_id": variant_id, "include_color_prices": include_color_prices}, extra)
+
+    def store_availability(
+        self,
+        store_ids: Union[list[Union[str, int]], str],
+        *,
+        variant_id: Optional[str] = None,
+        orin: Optional[str] = None,
+        items: Optional[list[dict[str, Any]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Exact store stock for 1-5 Belk variants at 1-10 stores, as Belk's store picker reports it: store_ids, count, variants [{variant_id, orin, orin_source (given or looked_up), in_stock_store_count, stores [{store_id, units, status (in_stock, limited = Belk's "Only N left!" at 1-5, out_of_stock)}]}], plus upc and the national price fields when the variant was looked up. Belk prices are the same in every store. Credits: 1 per call when every orin is given (from /belk/variant), plus 2 per variant whose orin is looked up (one variant: 3). A wrong orin answers 0 at every store, so the orin is never guessed. An unknown variant is a charged 404. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit when every orin is given, plus 2 per variant whose orin is looked up (one
+        variant: 3, two: 5, five: 11). credits_used in the response is the exact charge. Returns
+        the API response as a dict.
+
+        Args:
+            store_ids: 1-10 Belk store ids (stores[].store_id from /belk/stores; array or comma-separated).
+            variant_id: Belk variant id (variants[].variant_id from /belk/product).
+            orin: The variant's orin from /belk/variant. With it: no lookup, 1 credit. A wrong orin answers 0 at every store.
+            items: Up to 5 variants in one call, instead of variant_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_store_availability", {"store_ids": store_ids, "variant_id": variant_id, "orin": orin, "items": items}, extra)
+
+    def stores(
+        self,
+        zip: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Belk stores near a US ZIP code: every store within about 150 miles, nearest at the top, as Belk lists them (Belk takes no radius; a ZIP far from any Belk answers an empty list): zip, count, stores [{store_id, name, address {line1, city, state, zip}, distance_miles, phone, regular_hours, this_week_hours [{day, hours, differs_from_regular (holiday hours Belk flags)}], pickup, closed_today}]. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_stores", {"zip": zip}, extra)
+
+    def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Belk store by id: store_id, name, address, phone, latitude, longitude, this_week_hours [{day, hours, differs_from_regular}], pickup_location (where in the store orders are picked up) and events. An unknown store is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: Belk store id (stores[].store_id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_store", {"store_id": store_id}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 8 newest reviews of one Belk product as Belk shows them (Belk serves no further pages, sort or star filter): product_id, total (the count in Belk's review block; it can differ from the product's review_count), count, reviews [{review_id, rating, title, text, date, incentivized}]. No reviewer names. A product without reviews answers an empty list. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: Belk product id (items[].id, or the part before .html in a product link).
+            url: A belk.com product link (items[].url), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("belk_reviews", {"product_id": product_id, "url": url}, extra)
+
+class _AbercrombieNamespace:
+    """Abercrombie & Fitch Co. (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; hollisterco.com: Hollister, Gilly Hicks; chosen with brand) search, product, store_stock, stores, store, category, categories, promotions, reviews and suggestions endpoints; 16 storefronts in local currency, exact store units, 1 credit each (reviews without a url 2)."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        sort: Optional[Literal["best_match", "newest", "price_asc", "price_desc", "rating", "best_selling"]] = None,
+        facets: Optional[list[str]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search products on Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts). 48 products per page with total and total_pages; 6 sorts; facets. Returns brand, storefront, country, language, currency, converted_currency, query, sort, page, total, total_pages, count, has_more, sort_options, facets [{id, name, values [{name, count, selected, filter}]}], products [product_id, collection_id, name, department, gender, url, online_available, descriptors, badges, price {text, current, original, was, discount_text, flag}, member_price {text, value, label} (the member price the site shows publicly, with its own label, e.g. Black Friday Price), promo_message, image, colors [{name, product_id}]], notes. On wd and wd_es prices are the site's conversion from USD into the ship-to country's currency (converted_currency true) and usd_price carries the USD price. Held: franchise-partner countries (Mexico, Saudi Arabia, Qatar, Indonesia, Taiwan) and local currencies on eu (EUR only). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            sort: best_match (default), newest, price_asc, price_desc, rating or best_selling.
+            facets: Filters as <facet id>:<value> (facets[].values[].filter in answers), e.g. gender:Men's, colorFamily:Black, sizes:M.
+            page: Page, from 1.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_search", {"query": query, "brand": brand, "storefront": storefront, "country": country, "sort": sort, "facets": facets, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        collection_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product on Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts) by product id (collection_id saves a lookup): every color with every size and length SKU. Returns product_id, collection_id, brand_name, currency, converted_currency, is_sold_out, size_headings, sizes, breadcrumbs, reviews_summary {average, count, distribution, fit}, colors [{product_id, name, color, color_family, item_numbers, short_description, fabric, care, measurements, final_sale, max_purchase_qty, badges, price {text, current, original, was, discount_text, flag}, member_price {text, value, label} (the member price the site shows publicly, with its own label, e.g. Black Friday Price), url, images, skus [{sku, size, size_primary, size_secondary, online_units (exact), status, preorder, price, member_price}]}]. No UPC. A sold-out or unpublished product answers is_sold_out true; an unknown product id is a charged 404. On wd and wd_es prices are the site's conversion from USD into the ship-to country's currency (converted_currency true) and usd_price carries the USD price. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A product id (products[].product_id in search answers, or the number at the end of a product link).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            collection_id: The product's collection id (products[].collection_id in search answers); saves a lookup.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_product", {"product_id": product_id, "brand": brand, "storefront": storefront, "country": country, "collection_id": collection_id}, extra)
+
+    def store_stock(
+        self,
+        skus: list[str],
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        country: Optional[str] = None,
+        zip: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        unit: Optional[Literal["mi", "km"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store stock for 1-10 SKUs at the Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks) stores near a US ZIP or a point: exact units per SKU per store and status available, backorderable (with available_date) or unavailable, with each store's address, phone, distance and this week's hours (holiday hours included). Scavio fetches the public store data on request. Returns brand, country, zip, latitude, longitude, radius, unit, skus, total, count, stores [{store_number, name, brand, address, distance, phone, latitude, longitude, hours, stock [{sku, units, status, available_date, available_label}]}]. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1-10 SKUs (colors[].skus[].sku in product answers).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            country: Store country (default US): US, CA, GB, IE, AT, BE, BG, HR, CY, CZ, DK, EE, FI, FR, DE, GR, HU, IT, LV, LT, LU, MT, MC, NL, NO, PL, PT, RO, SK, SI, ES, SE, CH, JP, HK, MO, CN, AE.
+            zip: A US ZIP code (US stores).
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            radius: Search radius (default 50).
+            unit: mi (default in the US) or km (default elsewhere).
+            limit: Stores, 1-25 (default 10), nearest first.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_store_stock", {"skus": skus, "brand": brand, "country": country, "zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius, "unit": unit, "limit": limit}, extra)
+
+    def stores(
+        self,
+        zip: Optional[str] = None,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        country: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        unit: Optional[Literal["mi", "km"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks) stores near a US ZIP or a point (brand anf: Abercrombie & Fitch and abercrombie kids; hol: Hollister and Gilly Hicks), nearest first: store_number, name, brand, address, distance, phone, latitude, longitude, hours (this week, holiday hours included). Scavio fetches the public store data on request. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (US stores).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            country: Store country (default US): US, CA, GB, IE, AT, BE, BG, HR, CY, CZ, DK, EE, FI, FR, DE, GR, HU, IT, LV, LT, LU, MT, MC, NL, NO, PL, PT, RO, SK, SI, ES, SE, CH, JP, HK, MO, CN, AE.
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            radius: Search radius (default 50).
+            unit: mi (default in the US) or km (default elsewhere).
+            limit: Stores, 1-25 (default 10), nearest first.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_stores", {"zip": zip, "brand": brand, "country": country, "latitude": latitude, "longitude": longitude, "radius": radius, "unit": unit, "limit": limit}, extra)
+
+    def store(
+        self,
+        store_number: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks) store by store number: name, address, phone, latitude, longitude, hours dated for the next 7 days (holiday hours included). An unknown store is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_number: A store number (stores[].store_number).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            country: Store country (default US): US, CA, GB, IE, AT, BE, BG, HR, CY, CZ, DK, EE, FI, FR, DE, GR, HU, IT, LV, LT, LU, MT, MC, NL, NO, PL, PT, RO, SK, SI, ES, SE, CH, JP, HK, MO, CN, AE.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_store", {"store_number": store_number, "brand": brand, "country": country}, extra)
+
+    def category(
+        self,
+        category_id: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        sort: Optional[Literal["best_match", "newest", "price_asc", "price_desc", "rating", "best_selling"]] = None,
+        facets: Optional[list[str]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category's products on Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts): 1-90 per page, 6 sorts, facets. Returns category_id, name, breadcrumbs, total, total_pages, count, has_more, facets, products [product_id, collection_id, name, department, gender, url, online_available, descriptors, badges, price {text, current, original, was, discount_text, flag}, member_price {text, value, label} (the member price the site shows publicly, with its own label, e.g. Black Friday Price), promo_message, image, colors [{name, product_id}], social_proof (the site's own message, e.g. 555 people purchased)]. Sale and Black Friday landing categories list no products (use a department's clearance category). An unknown category on the storefront is a charged 404. On wd and wd_es prices are the site's conversion from USD into the ship-to country's currency (converted_currency true) and usd_price carries the USD price. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id from the categories endpoint (ids are per region).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            sort: best_match (default), newest, price_asc, price_desc, rating or best_selling.
+            facets: Filters as <facet id>:<value> (facets[].values[].filter in answers), e.g. gender:Men's, colorFamily:Black, sizes:M.
+            page: Page, from 1.
+            page_size: Products per page, 1-90 (default 90).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_category", {"category_id": category_id, "brand": brand, "storefront": storefront, "country": country, "sort": sort, "facets": facets, "page": page, "page_size": page_size}, extra)
+
+    def categories(
+        self,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of one storefront on Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts): departments, their categories (type regular, clearance or featured) and sub-categories [{category_id, name, url, type, children}]. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_categories", {"brand": brand, "storefront": storefront, "country": country}, extra)
+
+    def promotions(
+        self,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The banner offers one storefront of Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts) shows now, in its own language: offers [{text, markers, valid_from, valid_to, terms}] and terms [{marker, text, dates, valid_from, valid_to}] (footnote text as given; dates read from it where it states full dates). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_promotions", {"brand": brand, "storefront": storefront, "country": country}, extra)
+
+    def reviews(
+        self,
+        product_id: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The 8 newest reviews of a product on Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts) as its product page shows them: total, summary, reviews [{id, rating, title, text, submitted_at, recommended, incentivized, syndicated, language, fit_rating, ratings, helpful_yes, helpful_no, brand_responses}]. No reviewer names. Storefronts: us, ca, uk, eu, eu_de. 1 credit with the product url; 2 credits without it (one extra lookup).
+
+        Costs 1 credit with the product url; 2 without it (one extra lookup). credits_used in
+        the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            product_id: A product id (products[].product_id in search answers, or the number at the end of a product link).
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            url: The product link (url in search or product answers); saves a lookup.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_reviews", {"product_id": product_id, "brand": brand, "storefront": storefront, "country": country, "url": url}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        brand: Optional[Literal["anf", "hol"]] = None,
+        storefront: Optional[Literal["us", "us_es", "ca", "ca_fr", "uk", "eu", "eu_de", "eu_fr", "eu_es", "eu_it", "eu_nl", "am", "am_zh", "am_ja", "wd", "wd_es"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search suggestions one storefront of Abercrombie & Fitch Co. (abercrombie.com and hollisterco.com: Abercrombie & Fitch, abercrombie kids, Hollister, Gilly Hicks). Scavio fetches the public storefront data on request. brand anf or hol; storefront us, us_es, ca, ca_fr, uk, eu, eu_de, eu_fr, eu_es, eu_it, eu_nl, am, am_zh, am_ja, wd, wd_es (country picks the ship-to country on eu and wd storefronts) gives for a few letters: query, count, suggestions. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            brand: anf (abercrombie.com: Abercrombie & Fitch, abercrombie kids, YPB; default) or hol (hollisterco.com: Hollister, Gilly Hicks).
+            storefront: The storefront (default us): us, us_es (US in Spanish), ca, ca_fr, uk, eu (English, EUR), eu_de, eu_fr, eu_es, eu_it, eu_nl, am (Hong Kong, HKD), am_zh (Hong Kong, Traditional Chinese), am_ja (Japan, JPY), wd (worldwide, prices converted from USD), wd_es (worldwide in Spanish).
+            country: Ship-to country on eu, eu_ storefronts and wd / wd_es (two letters, e.g. DE, SE, AU, IL). Other storefronts ship to one country.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("abercrombie_suggestions", {"query": query, "brand": brand, "storefront": storefront, "country": country}, extra)
+
+class _LlbeanNamespace:
+    """L.L.Bean (llbean.com, the US outdoor apparel and gear retailer) search, category, categories, product, store_stock, stores, reviews, review_summary, delivery_estimate, suggestions and deals endpoints; market us, ca (CAD) or intl (12 countries, local currency) for the catalog, US for stores and reviews, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        market: Optional[Literal["us", "ca", "intl"]] = None,
+        country: Optional[Literal["gb", "de", "fr", "nl", "au", "mx", "ch", "se", "cn", "br", "in", "sg"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_selling", "newest", "top_rated"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. By keyword on market us (www.llbean.com, USD), ca (www.llbean.ca, CAD) or intl with a country (global.llbean.com, local currency); prices as shown to a visitor who is not signed in, never a member or card price. Sorted (relevance, price, best selling, newest, top rated), 48 per page, filtered by any facet. A keyword the site sends to a category (e.g. boots) comes back with redirected_to and the sort, page and filters applied. Returns market, country, currency, page, page_size (48), total, total_pages, has_more, count, items [{position, product_id, name, url, image, item_id, price (current lowest), full_price, full_price_max, sale_price and sale_price_max (set when below the full price), on_sale, rating, review_count, stock (in_stock or backorder), stock_text (a backorder date as given), new_arrival, features, colors [{name, family, on_sale, swatch_image}]}; on ca and intl: position, product_id, name, url, image, price, price_max (a range), list_price (the was price, when higher), currency, price_text, on_sale, promotion (offer text as given), rating, review_count, colors], facets [{key, label, values [{value, count}]}] (send to filters), filters_applied and notes. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            market: us (www.llbean.com, USD; the default), ca (www.llbean.ca, CAD, English) or intl (global.llbean.com, local currency; needs country).
+            country: With market intl: gb, de, fr, nl, au, mx, ch, se, cn, br, in, sg. Each answers in that country's currency.
+            page: Results page, 1-based, 48 per page. total_pages reports the last one.
+            sort: relevance (default), price_asc, price_desc, best_selling, newest or top_rated.
+            filters: Facet filters, at most 8 keys: {key: value or [values]} (values of one key are OR-ed). Keys: color, size, brand, gender, and on us sale, price, discount, width, department, category, material, shoe_size, features, new; or any facets[].key of an answer, with values exactly as facets[].values[].value (e.g. {"price": "0 TO 30"} on us, {"color": "Black"} on ca and intl).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_search", {"query": query, "market": market, "country": country, "page": page, "sort": sort, "filters": filters}, extra)
+
+    def category(
+        self,
+        category_id: Union[str, int],
+        *,
+        market: Optional[Literal["us", "ca", "intl"]] = None,
+        country: Optional[Literal["gb", "de", "fr", "nl", "au", "mx", "ch", "se", "cn", "br", "in", "sg"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_selling", "newest", "top_rated"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. By category id on market us (www.llbean.com, USD), ca (www.llbean.ca, CAD) or intl with a country (global.llbean.com, local currency); prices as shown to a visitor who is not signed in, never a member or card price. Sorted and filtered like search. Returns market, country, currency, page, page_size (48), total, total_pages, has_more, count, items [{position, product_id, name, url, image, item_id, price (current lowest), full_price, full_price_max, sale_price and sale_price_max (set when below the full price), on_sale, rating, review_count, stock (in_stock or backorder), stock_text (a backorder date as given), new_arrival, features, colors [{name, family, on_sale, swatch_image}]}; on ca and intl: position, product_id, name, url, image, price, price_max (a range), list_price (the was price, when higher), currency, price_text, on_sale, promotion (offer text as given), rating, review_count, colors], facets [{key, label, values [{value, count}]}] (send to filters), filters_applied and notes. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id: categories[].category_id (us) or a storefront link's /llb/shop/<id> (474 is US Footwear; 32 is Sale on every storefront).
+            market: us (www.llbean.com, USD; the default), ca (www.llbean.ca, CAD, English) or intl (global.llbean.com, local currency; needs country).
+            country: With market intl: gb, de, fr, nl, au, mx, ch, se, cn, br, in, sg. Each answers in that country's currency.
+            page: Results page, 1-based, 48 per page. total_pages reports the last one.
+            sort: relevance (default), price_asc, price_desc, best_selling, newest or top_rated.
+            filters: Facet filters, at most 8 keys: {key: value or [values]} (values of one key are OR-ed). Keys: color, size, brand, gender, and on us sale, price, discount, width, department, category, material, shoe_size, features, new; or any facets[].key of an answer, with values exactly as facets[].values[].value (e.g. {"price": "0 TO 30"} on us, {"color": "Black"} on ca and intl).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_category", {"category_id": category_id, "market": market, "country": country, "page": page, "sort": sort, "filters": filters}, extra)
+
+    def categories(
+        self,
+        *,
+        market: Optional[Literal["us"]] = None,
+        category_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department menu of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). categories [{category_id, name, slug, url, children}] (11 departments, about 570 nodes), or one department with category_id. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: us (the default); this endpoint serves the US storefront.
+            category_id: Optional: return this one department or category with its children.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_categories", {"market": market, "category_id": category_id}, extra)
+
+    def product(
+        self,
+        product_id: Union[str, int],
+        *,
+        market: Optional[Literal["us", "ca", "intl"]] = None,
+        country: Optional[Literal["gb", "de", "fr", "nl", "au", "mx", "ch", "se", "cn", "br", "in", "sg"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. On us: product_id, name, url, rating, review_count, specs, materials, size_fit, items [{item_id, name (Regular, Tall, a size range), colors [{color, price, full_price, sale_price, percent_saved, sold_out}]}] and skus [{sku, item_id, item, color, size, width, stock (in_stock, backorder, out_of_stock), status (as given: In Stock, Limited Quantities, Sold Out or a backorder date), backorder_date, price, full_price, sale_price, percent_saved}] with stock counts. On ca and intl: name, brand, url, image, currency, price, list_price, price_text, availability, promotions (offer text as given), colors [{id, name, price, price_text, selectable}], items and attributes (sizes, widths) for the variant shown; no unit counts. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id (items[].product_id; the number after /llb/shop/ in a product link).
+            market: us (www.llbean.com, USD; the default), ca (www.llbean.ca, CAD, English) or intl (global.llbean.com, local currency; needs country).
+            country: With market intl: gb, de, fr, nl, au, mx, ch, se, cn, br, in, sg. Each answers in that country's currency.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_product", {"product_id": product_id, "market": market, "country": country}, extra)
+
+    def store_stock(
+        self,
+        item_id: Union[str, int],
+        *,
+        market: Optional[Literal["us"]] = None,
+        product_id: Optional[Union[str, int]] = None,
+        store_ids: Optional[list[Union[str, float]]] = None,
+        all_stores: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Exact store units of one item of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). For up to 20 stores or every store: stores [{store_id, units, skus_in_stock}] and skus [{sku, status, units, stores [{store_id, units, status}]}]; with product_id each SKU also carries item, color, size, width and its national price. An unknown item is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: An item id: product items[].item_id (one fit or size range of a product, e.g. Medium of the Boat and Tote).
+            market: us (the default); this endpoint serves the US storefront.
+            product_id: Optional, the item's product: labels each SKU with its color, size and price (one more upstream call, same 1 credit).
+            store_ids: Up to 20 stores (stores[].store_id).
+            all_stores: true: every store, instead of store_ids.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_store_stock", {"item_id": item_id, "market": market, "product_id": product_id, "store_ids": store_ids, "all_stores": all_stores}, extra)
+
+    def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        market: Optional[Literal["us"]] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        city: Optional[str] = None,
+        state: Optional[str] = None,
+        store_ids: Optional[list[Union[str, float]]] = None,
+        all_stores: Optional[bool] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). Near a ZIP, a point (radius) or a city + state, by store ids, or all: store_id, name, shopping_center, type (Retail, Outlet), address, phone, latitude, longitude, distance_miles, time_zone, opened, open, inventory_online, store_pickup, curbside_pickup, url and hours (7 dated days). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: US ZIP: stores ordered by distance.
+            market: us (the default); this endpoint serves the US storefront.
+            latitude: Latitude (with longitude).
+            longitude: Longitude (with latitude).
+            radius: Miles around latitude + longitude, 1-500. Defaults to 100.
+            city: US city (with state).
+            state: 2-letter state code (with city).
+            store_ids: Store ids.
+            all_stores: true: every L.L.Bean store.
+            limit: Stores to return, 1-75. Defaults to 10 near a place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_stores", {"zip": zip, "market": market, "latitude": latitude, "longitude": longitude, "radius": radius, "city": city, "state": state, "store_ids": store_ids, "all_stores": all_stores, "limit": limit}, extra)
+
+    def reviews(
+        self,
+        product_id: Union[str, int],
+        *,
+        market: Optional[Literal["us"]] = None,
+        sort: Optional[Literal["newest", "helpful", "rating_desc", "rating_asc"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Written reviews of one product of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). In 4 sorts, up to 100 per page, filtered by stars, reviewer height or weight band, or words: total, total_pages, reviews [{review_id, rating, title, text, submitted_at, recommended, verified_purchaser, syndicated, helpful_votes, unhelpful_votes, item_id, fit [{label, value, value_label}], size_purchased, size_range, height, weight, used_for, brand_responses}], stats {average_rating, total_reviews, ratings_only_count, rating_distribution, fit averages, context (size purchased, height and weight histograms)} and upcs [{item_id, upcs}]. No reviewer names, nicknames or locations. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id.
+            market: us (the default); this endpoint serves the US storefront.
+            sort: newest (default), helpful, rating_desc or rating_asc.
+            page: Page, 1-based.
+            limit: Reviews per page, 1-100. Defaults to 20.
+            filters: Review filters: rating (star rating 1-5), height and weight (reviewer bands, values from stats.context) and text (words in the review).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_reviews", {"product_id": product_id, "market": market, "sort": sort, "page": page, "limit": limit, "filters": filters}, extra)
+
+    def review_summary(
+        self,
+        product_id: Union[str, int],
+        *,
+        market: Optional[Literal["us"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """L.L.Bean's own summary of the reviews of one product of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). summary, disclaimer and created_at as given. A product without one is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id.
+            market: us (the default); this endpoint serves the US storefront.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_review_summary", {"product_id": product_id, "market": market}, extra)
+
+    def delivery_estimate(
+        self,
+        item_id: Union[str, int],
+        zip: Union[str, int],
+        *,
+        market: Optional[Literal["us"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The standard delivery date of one item of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. US storefront (www.llbean.com, USD). To a US ZIP: standard_delivery_date as given (e.g. Sat, November 28). An invalid ZIP is an unbilled 400. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: An item id (product items[].item_id).
+            zip: US ZIP code.
+            market: us (the default); this endpoint serves the US storefront.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_delivery_estimate", {"item_id": item_id, "zip": zip, "market": market}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. On us: up to 10 keyword suggestions. On ca: suggestions (Do you mean terms), popular_searches, products [{product_id, name}] and categories [{category_id, name, parent}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            market: us (default) or ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_suggestions", {"query": query, "market": market}, extra)
+
+    def deals(
+        self,
+        *,
+        market: Optional[Literal["us", "ca", "intl"]] = None,
+        country: Optional[Literal["gb", "de", "fr", "nl", "au", "mx", "ch", "se", "cn", "br", "in", "sg"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_selling", "newest", "top_rated"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        min_discount: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Sale category of L.L.Bean (llbean.com, the US outdoor apparel and gear retailer). Scavio fetches the public L.L.Bean page on request; L.L.Bean has no public API. On market us (www.llbean.com, USD), ca (www.llbean.ca, CAD) or intl with a country (global.llbean.com, local currency); prices as shown to a visitor who is not signed in, never a member or card price. Sorted and filtered like search; on us also by % Off (min_discount 20-70). The site gives no end dates for sale items. Returns market, country, currency, page, page_size (48), total, total_pages, has_more, count, items [{position, product_id, name, url, image, item_id, price (current lowest), full_price, full_price_max, sale_price and sale_price_max (set when below the full price), on_sale, rating, review_count, stock (in_stock or backorder), stock_text (a backorder date as given), new_arrival, features, colors [{name, family, on_sale, swatch_image}]}; on ca and intl: position, product_id, name, url, image, price, price_max (a range), list_price (the was price, when higher), currency, price_text, on_sale, promotion (offer text as given), rating, review_count, colors], facets [{key, label, values [{value, count}]}] (send to filters), filters_applied and notes. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            market: us (www.llbean.com, USD; the default), ca (www.llbean.ca, CAD, English) or intl (global.llbean.com, local currency; needs country).
+            country: With market intl: gb, de, fr, nl, au, mx, ch, se, cn, br, in, sg. Each answers in that country's currency.
+            page: Results page, 1-based, 48 per page. total_pages reports the last one.
+            sort: relevance (default), price_asc, price_desc, best_selling, newest or top_rated.
+            filters: Facet filters, at most 8 keys: {key: value or [values]} (values of one key are OR-ed). Keys: color, size, brand, gender, and on us sale, price, discount, width, department, category, material, shoe_size, features, new; or any facets[].key of an answer, with values exactly as facets[].values[].value (e.g. {"price": "0 TO 30"} on us, {"color": "Black"} on ca and intl).
+            min_discount: On us: the Sale page's % Off filter, one of 20, 30, 40, 50, 60, 70 (N% & Up).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("llbean_deals", {"market": market, "country": country, "page": page, "sort": sort, "filters": filters, "min_discount": min_discount}, extra)
+
+class _SweetwaterNamespace:
+    """Sweetwater (sweetwater.com, the US music instrument and pro audio retailer) search, category, product, serial_units, reviews and deals endpoints; US only, prices in USD, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer). Scavio fetches the public page on request; Sweetwater has no public API. Free-text keywords show 42 results in Sweetwater's relevance order (the site does not page or sort free-text results): items [position, item_id, name, brand, type, category, url, image, condition, price (the price now), retail_price, base_price, has_price_drop, instant_rebate, mail_in_rebate, bundle_savings, special_offer {title, value}, in_stock, on_hand (units on hand), available (units available to sell; can be negative when more are sold than on hand), on_order (units on order), pre_order, special_order, free_shipping, open_box [{item_id, condition (Demo), price}], rating, review_count]. A keyword that matches a category opens that category instead (landed_on category, e.g. "stratocaster"): items are its listing cards [position, item_id, name, url, image, price, offer (the offer text as shown), rating, review_count, stock (the stock text as shown, e.g. In Stock or Only 6 Left; null when the card shows none), open_box {item_id, price, text}, serial {number, weight} (a serial-numbered instrument), bundle_savings_available] with sort and page applied, plus facets. Returns query, landed_on (search, category, product or page), category {id, name, url}, sort, page, total, total_pages, per_page, count, items, facets, note. Every answer carries store, host, country (us), currency (USD) and language (en). 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            sort: relevance, popular, rating, lightest, newest, price_desc, price_asc, brand. Free-text results come in Sweetwater's relevance order; a sort applies when the keyword opens a category (landed_on category).
+            page: Page, 1-based (default 1). Free-text search shows 42 results on one page (a page past 1 is an empty list); when the keyword opens a category, pages of 42 apply.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_search", {"query": query, "sort": sort, "page": page}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[str] = None,
+        page: Optional[int] = None,
+        facets: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer). Scavio fetches the public page on request; Sweetwater has no public API. 42 products per page with the site's 7 sorts and facet filters: category {id, name, url}, breadcrumbs, sort, page, total (as the site counts it, at most 5,000), total_pages, per_page, requested_facets, applied_facets, count, items [position, item_id, name, url, image, price, offer (the offer text as shown), rating, review_count, stock (the stock text as shown, e.g. In Stock or Only 6 Left; null when the card shows none), open_box {item_id, price, text}, serial {number, weight} (a serial-numbered instrument), bundle_savings_available], facets [{name, values [{value, count, selected}]}] (send back in facets). Every answer carries store, host, country (us), currency (USD) and language (en). An unknown category is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A Sweetwater category: an id (c590), a path (c590--Solid_Body_Guitars) or a link (https://www.sweetwater.com/c590--Solid_Body_Guitars; facets on a pasted link are kept when facets is not sent).
+            sort: popular, rating, lightest, newest, price_desc, price_asc, brand (the site's sort menu: Most Popular, Customer Rating, Lightest Guitar, Newest Arrivals, Price High - Low, Price Low - High, Brand A - Z). popular is the default. The site's own values (low2high, high2low, reviews, name) are accepted too.
+            page: Page, 1-based, 42 products per page (default 1). Sweetwater counts at most 5,000 products in a listing, so the last page is 120.
+            facets: Facet filters as the site names them (facets[].name and values[].value of an answer), several values per facet, up to 12 facets: {"Availability": ["In Stock"], "Brand": ["Fender", "Gibson"], "Price Range": ["$500 - $1,000"]}.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_category", {"category": category, "sort": sort, "page": page, "facets": facets}, extra)
+
+    def product(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer). Scavio fetches the public page on request; Sweetwater has no public API. By item_id or url: item_id, requested, name, full_name, brand, mpn, type, category, breadcrumbs, url, condition (New, or Used for an open-box unit), open_box, serial_number (an open-box or serial-numbered unit), price, currency, was_price, price_drop, instant_savings, new_price (the new price, on an open-box unit), availability (InStock, BackOrder, ... as given), stock_text (as shown, e.g. In Stock! or Backordered - More On The Way!), estimated_by (the backorder date text, e.g. November 30), warehouse_flags {fw, az} (the page's in-stock flags per warehouse, as given), ship_weight_lbs, free_shipping, return_days, rating, review_count, dimensions {height_in, width_in, depth_in, weight_lbs}, images (the page's main image), specs [{name, value}]. Every answer carries store, host, country (us), currency (USD) and language (en). An unknown id is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Sweetwater item id (items[].item_id; the part before -- in a sweetwater.com/store/detail/ link). An open-box unit has its own id (open_box[].item_id, e.g. StratAU2HEUBd2).
+            url: A sweetwater.com product link instead of item_id (a ?cond= open-box link selects that unit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_product", {"item_id": item_id, "url": url}, extra)
+
+    def serial_units(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The serial-numbered units of one item of Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer) (Sweetwater photographs and weighs many guitars and basses one by one): item_id, requested, name, brand, condition, price, parent_item_id, parent_price, url, serial_sold, serial_reserved (the flags of the requested unit, as given), open_box {item_id, condition, price}, count, units [{position, serial_number, item_id, weight_lbs (its shipping weight), url, photos [{view, url}]}], note. An item sold without serial numbers has an empty units list. Every answer carries store, host, country (us), currency (USD) and language (en). An unknown id is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Sweetwater item id (items[].item_id; the part before -- in a sweetwater.com/store/detail/ link). An open-box unit has its own id (open_box[].item_id, e.g. StratAU2HEUBd2).
+            url: A sweetwater.com product link instead of item_id (a ?cond= open-box link selects that unit).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_serial_units", {"item_id": item_id, "url": url}, extra)
+
+    def reviews(
+        self,
+        item_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        stars: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest", "highest", "lowest"]] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer): every review the product has, filtered by stars, sorted newest, oldest, highest or lowest and paged: item_id, requested, name, brand, average_rating, total_reviews, star_percent {"5": 87, ...}, stars, sort, page, limit, total (reviews matching stars), total_pages, count, reviews [{rating, title, text, date}]. No reviewer names, locations or backgrounds. Every answer carries store, host, country (us), currency (USD) and language (en). An unknown id is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_id: A Sweetwater item id (items[].item_id; the part before -- in a sweetwater.com/store/detail/ link). An open-box unit has its own id (open_box[].item_id, e.g. StratAU2HEUBd2).
+            url: A sweetwater.com product link instead of item_id (a ?cond= open-box link selects that unit).
+            stars: Reviews with this many stars (the site's own filter).
+            sort: newest (default), oldest, highest or lowest: the site's review sort menu.
+            page: Reviews page, 1-based (default 1).
+            limit: Reviews per page, 1 to 100 (default 25).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_reviews", {"item_id": item_id, "url": url, "stars": stars, "sort": sort, "page": page, "limit": limit}, extra)
+
+    def deals(
+        self,
+        *,
+        deal: Optional[str] = None,
+        sort: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Deal Zone of Sweetwater (sweetwater.com, the US online music instrument and pro audio retailer). Scavio fetches the public page on request; Sweetwater has no public API. The whole Deal Zone or one of its pages (deal: guitar-deals, price-drops, demos, bundles, ...), 42 per page, with the Deal Zone's sort menu: deal, deal_name, sort, page, total, total_pages, per_page, sale_event {name, starts, ends, time_zone} (the sale window of the page config as given, e.g. Black Friday 2026-11-13 10:00:00 to 2026-11-30 02:59:00; the page states no time zone), count, items [position, item_id, name, brand, type, category, url, image, condition, price (the price now), retail_price, base_price, has_price_drop, instant_rebate, mail_in_rebate, bundle_savings, special_offer {title, value}, in_stock, on_hand (units on hand), available (units available to sell; can be negative when more are sold than on hand), on_order (units on order), pre_order, special_order, free_shipping, open_box [{item_id, condition (Demo), price}], rating, review_count], deal_pages [{slug, name}]. Every answer carries store, host, country (us), currency (USD) and language (en). An unknown deal page is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            deal: A Deal Zone page (deal_pages[].slug of an answer: guitar-deals, price-drops, demos, bundles, rebates-and-promos, ...). Leave out for the whole Deal Zone.
+            sort: featured, popular, best_deals, newest_deals, ending_soon, newest, price_desc, price_asc, brand: the Deal Zone sort menu (featured is its own order, the default; best_deals = Best Deals, newest_deals = Newest Deals, ending_soon = Ending Soon).
+            page: Page, 1-based, 42 products per page (default 1). Sweetwater counts at most 5,000 products in a listing, so the last page is 120.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("sweetwater_deals", {"deal": deal, "sort": sort, "page": page}, extra)
+
+class _BedbathbeyondNamespace:
+    """Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store) search, category, categories, product, delivery_estimate, reviews, questions, stores and deals endpoints; US only, prices in USD, exact online stock (no store stock), 1 credit each, 2 for search, category and deal lists."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        facet_url: Optional[str] = None,
+        sort: Optional[Literal["best_match", "on_sale", "best_selling", "price_asc", "price_desc", "rating", "newest"]] = None,
+        include_out_of_stock: Optional[Union[bool, Literal["true", "false"]]] = None,
+        page: Optional[Union[int, str]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword search on Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. By query (or a facet link from an earlier answer), in the site's sorts, with or without out-of-stock products. Returns total, page, total_pages, has_more, sort_applied, count, items (organic) and sponsored_items (the site's sponsored tiles, kept apart) [{position, product_id, name, url, image, price, price_max (a range across options), price_text (when the site hides the price), price_type (sale, standard), base_price, compare_price, compare_type (msrp, was, compare_at), discount_percent, discount_amount, on_sale, sale_ends (as the site gives it), promo (the promo badge the page shows, e.g. a code), label (e.g. Best Seller), rating, review_count, option_count, fast_delivery, club_o_rewards, sponsored}], facets [{id, name, multi_select, values [{name, id, count, selected, url}]}] and related_searches. Also query, sort, matching_categories [{id, name, count, slug, url}] and redirected_to: a keyword the site sends to a category answers that category's list (redirected_to {type category, category_id, slug, name, url}); one it sends to a product page answers redirected_to {type product, product_id}. The price filter is left out of keyword facets (its tiles lose their prices: use category). 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords.
+            facet_url: Instead of query: a facets[].values[].url from a search answer (a filtered keyword list, e.g. On Sale, a color or a brand). Price filter links are refused (use category price_min / price_max).
+            sort: best_match (default), on_sale, best_selling, price_asc, price_desc, rating or newest.
+            include_out_of_stock: Include out-of-stock products (default false).
+            page: Page, 1-84 (default 1). The site serves at most 84 pages of any list; page size varies (about 63-81 products).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_search", {"query": query, "facet_url": facet_url, "sort": sort, "include_out_of_stock": include_out_of_stock, "page": page}, extra)
+
+    def category(
+        self,
+        slug: Optional[str] = None,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        sort: Optional[str] = None,
+        page: Optional[Union[int, str]] = None,
+        attributes: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        rating: Optional[int] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        promotion: Optional[Union[str, list[str]]] = None,
+        include_out_of_stock: Optional[Union[bool, Literal["true", "false"]]] = None,
+        fast_delivery: Optional[Union[bool, Literal["true", "false"]]] = None,
+        expedited: Optional[Union[bool, Literal["true", "false"]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category's product list on Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. By slug + category_id (or a /c/ link), in the site's category sorts (best_selling, on_sale, price_asc, price_desc, rating, newest) with attribute, price range, rating, brand, promotion, fast delivery, expedited and out-of-stock filters. Returns total, page, total_pages, has_more, sort_applied, count, items (organic) and sponsored_items (the site's sponsored tiles, kept apart) [{position, product_id, name, url, image, price, price_max (a range across options), price_text (when the site hides the price), price_type (sale, standard), base_price, compare_price, compare_type (msrp, was, compare_at), discount_percent, discount_amount, on_sale, sale_ends (as the site gives it), promo (the promo badge the page shows, e.g. a code), label (e.g. Best Seller), rating, review_count, option_count, fast_delivery, club_o_rewards, sponsored}], facets [{id, name, multi_select, values [{name, id, count, selected, url}]}] and related_searches. Also category {id, slug, name, url}, requested_filters, selected_facets [{group, name, id, remove_url}] (what the site applied), breadcrumbs and child_categories [{id, name, count, slug, url}]. An unknown category is a charged 404. 2 credits. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            slug: The category path after /c/ (categories links[].slug, child_categories[].slug), with category_id.
+            category_id: The category id (the t= value of its link; categories links[].category_id).
+            url: Instead of slug + category_id: a bedbathandbeyond.com /c/ link (categories, breadcrumbs, child_categories, a facet value url). Its filters are kept.
+            sort: best_selling, on_sale, price_asc, price_desc, rating, newest (default best_selling). The site's own keys (bestselling, onsale, pricelowhigh, pricehighlow, customerrating, newarrivals) are accepted too.
+            page: Page, 1-84 (default 1). The site serves at most 84 pages of any list; page size varies (about 63-81 products).
+            attributes: Attribute filters: facet id -> value id(s) (facets[].id and facets[].values[].id), e.g. Color Black.
+            price_min: Price range low end in USD (with price_max).
+            price_max: Price range high end in USD (with price_min).
+            rating: Customer rating: this many stars and up (1-4).
+            brand: Brand name(s) as the Brand facet lists them.
+            promotion: Sales and Promotions value(s) as the facet lists them: on sale, top rated, best selling, new products.
+            include_out_of_stock: Include out-of-stock products (default false).
+            fast_delivery: Limit the list to Fast Delivery products.
+            expedited: Limit the list to Expedited Shipping Available products.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_category", {"slug": slug, "category_id": category_id, "url": url, "sort": sort, "page": page, "attributes": attributes, "price_min": price_min, "price_max": price_max, "rating": rating, "brand": brand, "promotion": promotion, "include_out_of_stock": include_out_of_stock, "fast_delivery": fast_delivery, "expedited": expedited}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department menu of Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. Returns count, link_count and departments [{name, url, category_id, slug, filtered, groups [{name, url, category_id, slug, filtered, links [{name, url, category_id, slug, filtered}]}]}]: slug and category_id go into category; filtered marks a link with a filter on top of its category (e.g. Best Sellers). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_categories", {}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. By product id or link: product_id, requested_id, name, brand, brand_id, mpn, sku, url, in_stock, online, discontinued, status_code, price and price_label (the site's lead price, e.g. Sale Starts at), compare_price and compare_label (MSRP or Was), savings, savings_percent, price_min, price_max, on_sale, rating, review_count, rating_histogram, free_shipping, freight (ships by truck), international_shippable, country_of_origin, first_onsite_date, label, breadcrumbs, taxonomy, specs [{group, name, values}], images, option_count, original_option_count and options [{option_id, description, attributes (Size, Color, ...), price, compare_price, compare_type (was, msrp, none), savings, savings_percent, on_sale, sale_start, sale_end, qty_on_hand (exact online stock), max_quantity, in_stock, backorder, sub_sku, image}]. The site leaves out-of-stock options out (original_option_count counts them all). A product no longer sold answers in_stock false with no options (not a 404). No UPC or GTIN; no store stock. 1 credit (occasionally 2 when the page takes a second read). Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit; occasionally 2 when the page takes a second read. credits_used in the
+        response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bed Bath & Beyond product id: the digits before /product.html in a product link (items[].product_id).
+            url: A bedbathandbeyond.com product link, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_product", {"product_id": product_id, "url": url}, extra)
+
+    def delivery_estimate(
+        self,
+        option_id: Union[str, int],
+        zip: Union[str, int],
+        *,
+        quantity: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The delivery date and shipping charge of one product option, for a quantity, to a US ZIP code, on Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. Returns requested_option_id, requested_quantity, option_id, product_id, zip, quantity (as the site answers it), in_stock, can_ship, ship_charge_total, ground_days, one_day, two_day, holiday, options [{level, name, charge, charge_text, estimated_date, estimate_type, estimate_text, freight}] and errors [{type, message}] (e.g. "This item cannot be shipped to your address." as the site gives it). 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            option_id: product's options[].option_id.
+            zip: The US ZIP code to deliver to.
+            quantity: Quantity, 1-99 (default 1).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_delivery_estimate", {"option_id": option_id, "zip": zip, "quantity": quantity}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["newest", "most_helpful", "highest", "lowest"]] = None,
+        rating: Optional[int] = None,
+        search: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. Sorted newest, most_helpful, highest or lowest, with a star filter and a text search: product_id, sort, rating_filter, search, page, page_size, total_pages, total, total_matching, average_rating, rating_count, media_count, rating_histogram, has_more, count and reviews [{review_id, rating, title, text, submitted_at, helpful_votes, unhelpful_votes, verified_purchase, rewards_received, recommended, locale, variation_id, media [{type, url, thumbnail}]}]. No reviewer names or locations. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bed Bath & Beyond product id: the digits before /product.html in a product link (items[].product_id).
+            url: A bedbathandbeyond.com product link, instead of product_id.
+            sort: newest (default), most_helpful, highest or lowest.
+            rating: Reviews with exactly this many stars.
+            search: Reviews containing this text.
+            page: Page, from 1 (default 1).
+            page_size: Reviews per page, 1-50 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_reviews", {"product_id": product_id, "url": url, "sort": sort, "rating": rating, "search": search, "page": page, "page_size": page_size}, extra)
+
+    def questions(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions and answers of one product of Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. 20 questions per page: product_id, page, page_size, total_pages, total_questions, total_answers, has_more, count and questions [{question_id, text, asked_at, type, answer_count, answers [{answer_id, text, answered_at}]}]. No screen names. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: A Bed Bath & Beyond product id: the digits before /product.html in a product link (items[].product_id).
+            url: A bedbathandbeyond.com product link, instead of product_id.
+            page: Page, from 1 (default 1); 20 questions per page.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_questions", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    def stores(
+        self,
+        *,
+        zip: Optional[Union[str, int]] = None,
+        state: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        banner: Optional[Literal["bed_bath_beyond", "kirklands", "container_store"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores of the Bed Bath & Beyond family on Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. (Bed Bath & Beyond / The Container Store co-branded stores, Kirkland's and The Container Store) near a US ZIP code or a point (nearest first, within radius), in a state, or all of them, by banner: total_stores, count and stores [{name, banner, brands, address {street, city, state, zip, full}, phone, latitude, longitude, time_zone, hours {monday_thursday, friday, saturday, sunday}, services, service_callout, distance_miles}]. Bed Bath & Beyond publishes no store stock or store prices. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (placed at its Census center): stores within radius, nearest first.
+            state: A 2-letter US state code: every store in the state.
+            latitude: With longitude: stores within radius of a point.
+            longitude: Longitude (with latitude).
+            radius: Radius in miles, 1-500 (default 50), with zip or latitude / longitude.
+            banner: bed_bath_beyond (the co-branded Bed Bath & Beyond / The Container Store stores), kirklands or container_store (every store carrying The Container Store, co-branded included).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_stores", {"zip": zip, "state": state, "latitude": latitude, "longitude": longitude, "radius": radius, "banner": banner}, extra)
+
+    def deals(
+        self,
+        *,
+        type: Optional[Literal["page", "black_friday", "on_sale", "doorbusters", "holiday_brand_deals"]] = None,
+        sort: Optional[Literal["best_match", "on_sale", "best_selling", "price_asc", "price_desc", "rating", "newest"]] = None,
+        page: Optional[Union[int, str]] = None,
+        include_out_of_stock: Optional[Union[bool, Literal["true", "false"]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deals of Bed Bath & Beyond (bedbathandbeyond.com, the US online home goods store). Scavio fetches the public page on request; Bed Bath & Beyond has no public API. Market: US (en-US, USD); every answer carries market, host, language and currency. type page (default, 1 credit): event {text, ends_at} (the sale countdown), sections [{name (e.g. DOORBUSTERS), items [{position, product_id, option_id, name, url, image, price, compare_price, compare_type, savings, savings_percent, on_sale, sale_end, qty_on_hand, option_count, rating, review_count}]}] and deal_lists. A deal list (black_friday, on_sale, doorbusters, holiday_brand_deals; 2 credits) answers like search: Returns total, page, total_pages, has_more, sort_applied, count, items (organic) and sponsored_items (the site's sponsored tiles, kept apart) [{position, product_id, name, url, image, price, price_max (a range across options), price_text (when the site hides the price), price_type (sale, standard), base_price, compare_price, compare_type (msrp, was, compare_at), discount_percent, discount_amount, on_sale, sale_ends (as the site gives it), promo (the promo badge the page shows, e.g. a code), label (e.g. Best Seller), rating, review_count, option_count, fast_delivery, club_o_rewards, sponsored}], facets [{id, name, multi_select, values [{name, id, count, selected, url}]}] and related_searches. Failed upstream calls and refused inputs are not charged; a not-found is charged. Usually 2-25 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit for the deals page (type page, the default); 2 for a deal list
+        (black_friday, on_sale, doorbusters, holiday_brand_deals). credits_used in the response
+        is the exact charge. Returns the API response as a dict.
+
+        Args:
+            type: page (default: the deals page, its sale countdown and doorbuster grid), or a deal list: black_friday, on_sale, doorbusters, holiday_brand_deals.
+            sort: For a deal list: best_match, on_sale, best_selling, price_asc, price_desc, rating or newest (default: the list's own order).
+            page: Page, 1-84 (default 1). The site serves at most 84 pages of any list; page size varies (about 63-81 products).
+            include_out_of_stock: For a deal list: include out-of-stock products.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("bedbathbeyond_deals", {"type": type, "sort": sort, "page": page, "include_out_of_stock": include_out_of_stock}, extra)

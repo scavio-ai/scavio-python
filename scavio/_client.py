@@ -6,6 +6,7 @@ from ._exceptions import ScavioError
 from ._extract import ExtractNamespace
 from ._http import BASE_URL, DEFAULT_TIMEOUT, _resolve_api_key, sync_request
 from ._namespaces_sync import (
+    _AbercrombieNamespace,
     _AcademyNamespace,
     _AcehardwareNamespace,
     _ActionNamespace,
@@ -23,6 +24,8 @@ from ._namespaces_sync import (
     _AutozoneNamespace,
     _BarnesandnobleNamespace,
     _BathandbodyworksNamespace,
+    _BedbathbeyondNamespace,
+    _BelkNamespace,
     _BestBuyNamespace,
     _BjsNamespace,
     _BolcomNamespace,
@@ -86,6 +89,7 @@ from ._namespaces_sync import (
     _KuaishouNamespace,
     _LennarNamespace,
     _LinkedInNamespace,
+    _LlbeanNamespace,
     _LookfantasticNamespace,
     _LowesNamespace,
     _MacysNamespace,
@@ -135,6 +139,7 @@ from ._namespaces_sync import (
     _SportchekNamespace,
     _StaplesNamespace,
     _StreeteasyNamespace,
+    _SweetwaterNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
     _ThreadsNamespace,
@@ -387,6 +392,11 @@ class ScavioClient:
         self.thriftbooks = _ThriftbooksNamespace(self)
         self.uhaul = _UhaulNamespace(self)
         self.williamssonoma = _WilliamssonomaNamespace(self)
+        self.belk = _BelkNamespace(self)
+        self.abercrombie = _AbercrombieNamespace(self)
+        self.llbean = _LlbeanNamespace(self)
+        self.sweetwater = _SweetwaterNamespace(self)
+        self.bedbathbeyond = _BedbathbeyondNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
