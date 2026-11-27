@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 181 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 185 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -125,6 +125,10 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Cobasi Pet Supply Prices per Size, Subscription Prices, Pickup and Delivery by CEP (Brazil; 11 endpoints) | Yes | No | No | No |
 | Netshoes Sporting Goods Prices per Size, Seller Offers, Online Stock and Shipping by CEP (Brazil; 11 endpoints) | Yes | No | No | No |
 | Estante Virtual Used and New Book Copies, ISBN Lookup, Sebos and Shipping by CEP (Brazil; 12 endpoints) | Yes | No | No | No |
+| C&A Brasil Fashion Prices per Size, Delivery Quotes and Pickup Points by CEP (Brazil; 10 endpoints) | Yes | No | No | No |
+| Lojas Renner Fashion Prices, Stock Levels, Store Card Installments and Stores by CEP (Brazil; 6 endpoints) | Yes | No | No | No |
+| Pichau PC Parts Card and Pix Prices, Deals with Units Left, Benchmarks and Coupons (Brazil; 11 endpoints) | Yes | No | No | No |
+| Dafiti Fashion Marketplace Prices, Units per Size, Delivery Type and Partner Stores (Brazil; 6 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8380,6 +8384,187 @@ for o in quote["options"]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 153. Brazil fashion -- C&A Brasil prices per size, delivery quotes and pickup points by CEP
+
+C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain): keyword
+search, category, brand (the site's Marcas filter: C&A labels such as Clock
+House or Yessica, and partner brands) and promotion collection listings (24 a
+page, up to 50 pages deep, in the site's 8 sorts) with the lowest in-stock
+price, the list price, the Pix price (Pix is Brazil's instant payment), the
+best installment plan and every size with its own price and available_quantity
+(the site's capped figure: a round 100, 10000 or 99999 means plenty, 0 none);
+the filter values with product counts; search suggestions and top searches;
+the department tree; one product by product id, size sku, slug or link with
+each payment method's longest plan (e.g. C&A Pay), every size's seller and the
+specifications; the delivery quote for one size at a CEP (a Brazilian postal
+code): the delivery options with price and estimate, and the stores near the
+CEP that can hand that size over; and the pickup points near a CEP, which
+include third-party pickup lockers and counters (Clique Retire) next to the
+C&A stores. Prices in BRL; promotion collections are given by id only; no
+reviews, EAN or store unit counts. Namespace `cea`, 10 endpoints: `search`,
+`category`, `brand`, `deals`, `facets`, `suggestions`, `categories`,
+`product`, `shipping`, `stores`. Credits: 1 credit each. `credits_used` in the
+response is what was charged. The request timeout is raised to at least 240s.
+See the [C&A Brasil API
+page](https://scavio.dev/cea-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/cea-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cea = client.cea
+res = cea.search("vestido")["data"]
+print(res["total"], res["total_pages"], res["has_more"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["list_price"], it["pix_price"], [(s["size"], s["available_quantity"]) for s in it["sizes"]])
+item = cea.product("4536055")["data"]
+print(item["name"], item["best_installment"]["payment_system"], item["best_installment"]["count"], item["best_installment"]["value"])
+for s in item["sizes"]:
+    print(s["sku"], s["size"], s["available"], s["price"], s["seller"]["name"])
+ship = cea.shipping("6493983", "01310100")["data"]
+for o in ship["delivery_options"]:
+    print(o["name"], o["price"], o["estimate"])
+for st in ship["pickup_stores"]:
+    print(st["name"], st["distance_km"], st["estimate"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 154. Brazil fashion -- Lojas Renner prices, stock levels, store card installments and stores by CEP
+
+Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer): keyword
+search, category and product lists (by default the list of every discounted
+product; 48 a page, pages 1-200, in the site's 8 sorts, filtered by refinement
+ids for category, seller, brand, size, colour, gender and the states with
+stock) with the price, the list price, the installment, the stock level (the
+unit count the site lists for the product), the units sold in the last 15 days
+as the site lists them and the seller (Lojas Renner or a partner store); one
+product with the Cartão Renner plan next to other cards, the aggregate rating
+and each size's availability flags (flags, not unit counts); price and stock
+flags for one size; and the stores for a CEP's (a Brazilian postal code) city
+or region (stores outside the CEP's state that the site returns are left out
+and reported in a note). Prices in BRL; listings are slow at the source
+(usually 30-200 s); no review texts, shipping quotes or search suggestions.
+Namespace `renner`, 6 endpoints: `search`, `category`, `deals`, `product`,
+`sku_price`, `stores`. Credits: 1 credit each. `credits_used` in the response
+is what was charged. The request timeout is raised to at least 300s. See the
+[Lojas Renner API
+page](https://scavio.dev/renner-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/renner-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rn = client.renner
+res = rn.search("camiseta")["data"]
+print(res["total"], res["total_pages"], res["has_more"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["list_price"], it["stock_level"], it["sold_last_15_days"], it["seller"])
+item = rn.product("931758127")["data"]
+print(item["price"], item["installments"]["store_card"], item["installments"]["credit_card"], item["rating"], item["review_count"])
+for s in item["sizes"]:
+    print(s["size"], s["sku"], s["available"], s["omni_stock"])
+one = rn.sku_price("931758135", product_id="931758127")["data"]
+print(one["size"], one["price"], one["list_price"], one["available"], one["max_quantity"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 155. Brazil PC parts -- Pichau card and Pix prices, deals with units left, benchmarks and coupons
+
+Pichau (pichau.com.br, Brazil's PC-parts store): keyword search, category,
+brand and deal listings (black_friday, open_box or another campaign by slug;
+36 a page, in the site's order, by price or by name, filtered by the listing's
+own facets) with the card price, the Pix price (Pix is Brazil's instant
+payment), the list price, installments, stock status, the running offer's end
+time, units left and units sold, EAN and warranty (a keyword the site sends to
+one of its categories returns that category's grid, with redirected_to); one
+product with specs, MPN, EAN, NCM and the distribution center; the live
+product page (slower, usually 30-160 s) with the live offer, the benchmark FPS
+the site shows on PCs and a prebuilt PC's or kit's component list; reviews, 10
+a page, by stars or with photos and videos (no reviewer names); every card
+plan (Pichau discounts short card plans too); the active and upcoming coupons;
+the category menu; and the search box suggestions (also 30-160 s). Prices in
+BRL; no shipping quotes, stores, stock unit counts or PC builder. Namespace
+`pichau`, 11 endpoints: `search`, `category`, `brand`, `deals`, `product`,
+`product_live`, `reviews`, `installments`, `coupons`, `categories`,
+`suggestions`. Credits: 1 credit each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 240s. See the [Pichau
+API
+page](https://scavio.dev/pichau-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/pichau-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+pc = client.pichau
+res = pc.search("rtx 5060")["data"]
+print(res["total"], res["total_pages"], res["redirected_to"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["price"], it["pix_price"], it["list_price"], it["stock_status"], it["ean"])
+item = pc.product("placa-de-video-inno3d-geforce-rtx-5060-twin-x2-8gb-gddr7-128-bit-n50602-08d7-195071n-nac")["data"]
+print(item["name"], item["pix_price"], item["offer"]["ends_at"], item["offer"]["units_left"], item["offer"]["units_sold"])
+live = pc.product_live("pc-gamer-pichau-isis-vi-amd-ryzen-5-5500-geforce-rtx-5060-8gb-16gb-ddr4-ssd-m-2-480gb-57268")["data"]
+print(live["benchmark"]["overall_score"], [(g["title"], g["full_hd_fps"]) for g in live["benchmark"]["games"]])
+for c in live["components"]:
+    print(c["group"], c["choice_count"], c["selected"] and c["selected"]["name"])
+plans = pc.installments(product_id=61004, price=3717.64)["data"]
+for p in plans["installments"]:
+    print(p["count"], p["amount"], p["total"], p["discount_percent"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 156. Brazil fashion marketplace -- Dafiti prices, units per size, delivery type and partner stores
+
+Dafiti (dafiti.com.br, the Brazilian fashion marketplace): keyword search (the
+site matches loosely, so a search with no close match can still list related
+products), department or category, brand and outlet listings (48 a page plus
+the site's sponsored slots, in the site's 5 sorts) with the price, the list
+price, the Pix price where the site shows one, the card price, the most
+installments and whether a partner store sells it; one product by product_id,
+sku or link with the seller by store name, the specs and every size with units
+(exact from 0 to 10; above that the site gives more than 10, not a count) and
+the delivery type (Dafiti's own stock, a partner store's stock delivered by
+Dafiti, or sent by the partner store); and every size of one sku, faster than
+product, for a stock check. Prices in BRL; no review texts, shipping quotes or
+search suggestions. Namespace `dafiti`, 6 endpoints: `search`, `category`,
+`brand`, `deals`, `product`, `sizes`. Credits: 1 credit each. `credits_used`
+in the response is what was charged. The request timeout is raised to at least
+240s. See the [Dafiti API
+page](https://scavio.dev/dafiti-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/dafiti-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+df = client.dafiti
+res = df.search("vestido")["data"]
+print(res["total"], res["total_pages"], res["sponsored_count"])
+for it in res["items"][:5]:
+    print(it["sku"], it["name"], it["brand"], it["price"], it["list_price"], it["card_price"], it["marketplace"])
+item = df.product("15221282")["data"]
+print(item["availability"], item["price"], item["pix_price"], item["seller"]["store_name"])
+for s in item["sizes"]:
+    print(s["size"], s["sku"], s["units"], s["more_than_10"], s["delivery_type"])
+sz = df.sizes("AS296SCU17ARY")["data"]
+print(sz["size_count"], sz["sizes_in_stock"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -8633,6 +8818,10 @@ Scavio works with popular AI/LLM frameworks:
 | Cobasi (`cobasi`) | `search`, `category`, `brand`, `deals`, `product`, `reviews`, `questions`, `availability`, `suggestions`, `stores`, `store`; Brazil; listings 20 a page up to page 50; `search` narrowed by facet `filters`; `product`, `reviews` and `questions` by `product_id` or `url`; `availability` takes a `sku_id` and a `cep`; `stores` by `state` and `city`; `store` by `slug` or `url` | 1 each |
 | Netshoes (`netshoes`) | `search`, `list`, `product`, `offers`, `inventory`, `shipping`, `reviews`, `questions`, `daily_deal`, `seller`, `popular_searches`; Brazil; `search` 100 a page, `list` 45 a page by `slug`, both filtered by `brand`, `gender`, `size`, `seller`, `filters` and a price range; `product`, `reviews` and `questions` by `product_id` or `url`; `offers`, `inventory` and `shipping` by size `sku` (`shipping` with a `cep`); `reviews` by `rating` and `with_photos`; `seller` by `seller_id` | 1 each |
 | Estante Virtual (`estantevirtual`) | `search`, `isbn`, `book`, `copies`, `copy`, `shipping`, `seller`, `seller_books`, `seller_reviews`, `sellers`, `category`, `list`; Brazil; listings 44 a page (`list` 42); `isbn` takes an ISBN-10 or ISBN-13; `book` and `copies` by `book_id` or `url`; `copies` up to 50 a page, `sellers` adds each copy's seller; `copy` and `shipping` by `copy_id` or `url` (`shipping` with a `cep`); `seller`, `seller_books` and `seller_reviews` by `seller_id`; `sellers` by `state` and `city`; `category` by `category_slug` | 1 each; `copies` with `sellers` ceil((1 + copies) / 5) |
+| C&A Brasil (`cea`) | `search`, `category`, `brand`, `deals`, `facets`, `suggestions`, `categories`, `product`, `shipping`, `stores`; Brazil; listings 24 a page up to page 50 in the site's 8 sorts; `category` by `category` path, `brand` by the Marcas `brand` value, `deals` by promotion `collection_id`; `facets` for a `query`, `category`, `brand` or `collection_id`; `product` by `product_id`, `sku`, `slug` or `url`; `shipping` takes a size `sku` and a `cep`; `stores` by `cep` (includes third-party pickup lockers) | 1 each |
+| Lojas Renner (`renner`) | `search`, `category`, `deals`, `product`, `sku_price`, `stores`; Brazil; listings 48 a page, pages 1-200, filtered by refinement `filters`; `category` by navigation id or link, `deals` by `list` (default: every discounted product); `product` by `product_id` or `url` (optional `sku`); `sku_price` takes a `sku` with `product_id` or `url`; `stores` by `cep` | 1 each |
+| Pichau (`pichau`) | `search`, `category`, `brand`, `deals`, `product`, `product_live`, `reviews`, `installments`, `coupons`, `categories`, `suggestions`; Brazil; listings 36 a page filtered by facet `filters`; `category` by path, `brand` by slug, `deals` by `deal` (black_friday, open_box) or `campaign`; `product` and `product_live` by `url_key` or `url`; `reviews` by `product_id`, `rating` and `with_media`; `installments` by `product_id` with `price`, or by `url_key` / `url` | 1 each |
+| Dafiti (`dafiti`) | `search`, `category`, `brand`, `deals`, `product`, `sizes`; Brazil; listings 48 a page plus sponsored slots in the site's 5 sorts; `category` by path or link, `brand` by its link name; `deals` is the outlet; `product` by `product_id`, `sku` or `url`; `sizes` by `sku` (units exact 0-10, more than 10 above) | 1 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
 | Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
@@ -8641,6 +8830,12 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.105.0
+
+- **4 new namespaces** (sync and async), 33 endpoints, Brazil: `cea` (C&A Brasil, 10),
+  `renner` (Lojas Renner, 6), `pichau` (Pichau, 11) and `dafiti` (Dafiti, 6). Credits: 1
+  per call. The request timeout is raised to at least 240s (300s on `renner`).
 
 ### Changed in 0.104.0
 

@@ -44,6 +44,7 @@ from ._namespaces_sync import (
     _CarscomNamespace,
     _CarvanaNamespace,
     _CasasbahiaNamespace,
+    _CeaNamespace,
     _CentauroNamespace,
     _ChatGPTNamespace,
     _ChewyNamespace,
@@ -54,6 +55,7 @@ from ._namespaces_sync import (
     _CostcoNamespace,
     _CultbeautyNamespace,
     _CvsNamespace,
+    _DafitiNamespace,
     _DecathlonNamespace,
     _DepopNamespace,
     _DermstoreNamespace,
@@ -130,6 +132,7 @@ from ._namespaces_sync import (
     _PcexpressNamespace,
     _PetcoNamespace,
     _PetsmartNamespace,
+    _PichauNamespace,
     _PoshmarkNamespace,
     _PublicstorageNamespace,
     _PublixNamespace,
@@ -141,6 +144,7 @@ from ._namespaces_sync import (
     _RedditNamespace,
     _RedfinNamespace,
     _ReiNamespace,
+    _RennerNamespace,
     _RentcafeNamespace,
     _RentcomNamespace,
     _RightmoveNamespace,
@@ -431,6 +435,10 @@ class ScavioClient:
         self.cobasi = _CobasiNamespace(self)
         self.netshoes = _NetshoesNamespace(self)
         self.estantevirtual = _EstantevirtualNamespace(self)
+        self.cea = _CeaNamespace(self)
+        self.renner = _RennerNamespace(self)
+        self.pichau = _PichauNamespace(self)
+        self.dafiti = _DafitiNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

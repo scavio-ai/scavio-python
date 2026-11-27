@@ -190,6 +190,10 @@ __all__ = [
     "_CobasiNamespace",
     "_NetshoesNamespace",
     "_EstantevirtualNamespace",
+    "_CeaNamespace",
+    "_RennerNamespace",
+    "_PichauNamespace",
+    "_DafitiNamespace",
 ]
 
 class _GoogleNamespace:
@@ -36461,3 +36465,668 @@ class _EstantevirtualNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("estantevirtual_list", {"slug": slug, "page": page}, extra)
+
+class _CeaNamespace:
+    """C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain) search, category, brand, deals, facets, suggestions, categories, product, shipping and stores endpoints; Brazil only, prices in BRL per size, delivery quote and pickup points by CEP, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By keyword, sorted by the site's sorts (price, best sellers, newest, discount, name). Returns page, page_size, total, total_pages (the site pages at most 50 pages deep), has_more, count, sort, items [{position, product_id, name, brand, labels (the site's Marcas values: C&A labels such as Clock House or Yessica, and partner brands), reference, url, image, available, price (the lowest price among the sizes in stock), list_price, discount_percent, pix_price, best_installment {payment_system, count, value, total, interest_rate}, colors, sizes [{sku, size, color, available, available_quantity (the site's capped figure: a round 100, 10000 or 99999 = plenty, 0 = none), price, list_price, discount_percent, pix_price}], categories, collection_ids (promotion collections by id) and release_date}] and notes. No results is an empty 200. Also query. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are large: usually 5-100 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese.
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, newest, discount, name_asc, name_desc (best_sellers = most ordered, newest = release date, discount = deepest discount first). Default relevance.
+            page: Results page, 1-50 (default 1; the site pages at most 50 pages deep).
+            page_size: Products per page, 1-24 (default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_search", {"query": query, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One department, category or subcategory listing of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By category path (categories[].path), sorted like search. Returns page, page_size, total, total_pages (the site pages at most 50 pages deep), has_more, count, sort, items [{position, product_id, name, brand, labels (the site's Marcas values: C&A labels such as Clock House or Yessica, and partner brands), reference, url, image, available, price (the lowest price among the sizes in stock), list_price, discount_percent, pix_price, best_installment {payment_system, count, value, total, interest_rate}, colors, sizes [{sku, size, color, available, available_quantity (the site's capped figure: a round 100, 10000 or 99999 = plenty, 0 = none), price, list_price, discount_percent, pix_price}], categories, collection_ids (promotion collections by id) and release_date}] and notes. No results is an empty 200. Also category and url. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are large: usually 5-100 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path of 1 to 3 levels (categories[].path: department, category, subcategory, e.g. moda-feminina, moda-feminina/roupas, moda-feminina/roupas/blusas) or its cea.com.br link.
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, newest, discount, name_asc, name_desc (best_sellers = most ordered, newest = release date, discount = deepest discount first). Default relevance.
+            page: Results page, 1-50 (default 1; the site pages at most 50 pages deep).
+            page_size: Products per page, 1-24 (default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_category", {"category": category, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By the brand value of the site's Marcas filter (C&A's own labels such as Palomino, Clock House, Yessica, Angelo Litrico, and partner brands), sorted like search. Returns page, page_size, total, total_pages (the site pages at most 50 pages deep), has_more, count, sort, items [{position, product_id, name, brand, labels (the site's Marcas values: C&A labels such as Clock House or Yessica, and partner brands), reference, url, image, available, price (the lowest price among the sizes in stock), list_price, discount_percent, pix_price, best_installment {payment_system, count, value, total, interest_rate}, colors, sizes [{sku, size, color, available, available_quantity (the site's capped figure: a round 100, 10000 or 99999 = plenty, 0 = none), price, list_price, discount_percent, pix_price}], categories, collection_ids (promotion collections by id) and release_date}] and notes. No results is an empty 200. Also brand. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are large: usually 5-100 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as the site's Marcas filter writes it (facets: key marcas), e.g. palomino, clock-house, yessica, angelo-litrico, or a partner brand.
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, newest, discount, name_asc, name_desc (best_sellers = most ordered, newest = release date, discount = deepest discount first). Default relevance.
+            page: Results page, 1-50 (default 1; the site pages at most 50 pages deep).
+            page_size: Products per page, 1-24 (default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_brand", {"brand": brand, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    def deals(
+        self,
+        collection_id: Union[str, int],
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One promotion collection of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By collection id (items[].collection_ids, e.g. a Black Friday or free-shipping collection), with list price, sale price and discount_percent; sort discount puts the deepest discounts first. Returns page, page_size, total, total_pages (the site pages at most 50 pages deep), has_more, count, sort, items [{position, product_id, name, brand, labels (the site's Marcas values: C&A labels such as Clock House or Yessica, and partner brands), reference, url, image, available, price (the lowest price among the sizes in stock), list_price, discount_percent, pix_price, best_installment {payment_system, count, value, total, interest_rate}, colors, sizes [{sku, size, color, available, available_quantity (the site's capped figure: a round 100, 10000 or 99999 = plenty, 0 = none), price, list_price, discount_percent, pix_price}], categories, collection_ids (promotion collections by id) and release_date}] and notes. No results is an empty 200. Also collection_id. Collections are given by id only. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are large: usually 5-100 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection_id: A promotion collection id (items[].collection_ids), e.g. 19727.
+            sort: The site's sorts: relevance, price_asc, price_desc, best_sellers, newest, discount, name_asc, name_desc (best_sellers = most ordered, newest = release date, discount = deepest discount first). Default relevance.
+            page: Results page, 1-50 (default 1; the site pages at most 50 pages deep).
+            page_size: Products per page, 1-24 (default 24).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_deals", {"collection_id": collection_id, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    def facets(
+        self,
+        query: Optional[str] = None,
+        *,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        collection_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The filter values of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. For a query, or one category, brand or collection: count and facets [{key, label, param, values [{value, label, count, selected}] or ranges [{from, to, count}]}] (department, category, subcategory, type, gender, size, color, Marcas, material, price range and more, with product counts); param names the request field a value goes back into (category, brand). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (or give one of category, brand or collection_id).
+            category: A category path of 1 to 3 levels (categories[].path: department, category, subcategory, e.g. moda-feminina, moda-feminina/roupas, moda-feminina/roupas/blusas) or its cea.com.br link.
+            brand: A brand as the site's Marcas filter writes it (facets: key marcas), e.g. palomino, clock-house, yessica, angelo-litrico, or a partner brand.
+            collection_id: A promotion collection id (items[].collection_ids), e.g. 19727.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_facets", {"query": query, "category": category, "brand": brand, "collection_id": collection_id}, extra)
+
+    def suggestions(
+        self,
+        *,
+        query: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search box of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. For the start of a search: suggestions [{term, count, attributes [{key, value, label, value_label}]}] and top_searches [{term, count}] (without query: the top searches alone). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: The start of a search. Without it, the top searches alone.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_suggestions", {"query": query}, extra)
+
+    def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The department tree of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. Returns count, node_count and categories [{category_id, name, path, url, children [...]}] over three levels: use path as category. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_categories", {}, extra)
+
+    def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        sku: Optional[Union[str, int]] = None,
+        slug: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By product id, size sku, slug or link: product_id, sku (when asked by sku), name, brand, labels, reference, model_id, url, images, available, price, list_price, discount_percent, pix_price, best_installment, installments [{payment_system, count, value, total, interest_rate}] (each payment method's longest plan, e.g. C&A Pay), colors, sizes [{sku, size, color, available, available_quantity, price, list_price, discount_percent, pix_price, seller {id, name}}] (every size), categories, specifications [{name, value}] (material, fit, sleeve, made in...), collection_ids and release_date. No marketing description, EAN (empty on the site), reviews, Q&A, store units or price history. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id (items[].product_id).
+            sku: The id of one size (sizes[].sku): returns its product.
+            slug: The product slug (the link's path before /p).
+            url: A product link (https://www.cea.com.br/<slug>/p).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_product", {"product_id": product_id, "sku": sku, "slug": slug, "url": url}, extra)
+
+    def shipping(
+        self,
+        sku: Union[str, int],
+        cep: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The delivery quote of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. For one size (sku) and a CEP, as the product page gives it: availability, price, list_price, can_deliver, can_pick_up, delivery_options [{name, price (0 = free), list_price, estimate, business_days, estimated_date}], pickup_stores [{pickup_point_id, store_code, name, distance_km, address, price, estimate, business_days, estimated_date}] (the stores near the CEP that can hand this size over) and messages [{code, text, status}] (e.g. the site's cannot-be-delivered notice). Read-only: nothing is added to a cart or ordered. An unknown sku is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The id of one size (sizes[].sku from product or a listing).
+            cep: A Brazilian CEP (8 digits).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_shipping", {"sku": sku, "cep": cep}, extra)
+
+    def stores(
+        self,
+        cep: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The pickup points near a CEP on C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. Nearest first: total, count and stores [{store_code, pickup_point_ids, name, type (cea_store or partner_point), partner, active, distance_km, address {street, number, complement, neighborhood, city, state, cep}, latitude, longitude, phone, hours [{day, opens, closes}]}]. Includes third-party pickup lockers and counters (Clique Retire, type partner_point) next to the C&A stores. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_stores", {"cep": cep}, extra)
+
+class _RennerNamespace:
+    """Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer) search, category, deals, product, sku price and stores endpoints; Brazil only, prices in BRL with the store card and other card plans, stock levels on listings, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By keyword. 48 per page, pages 1-200, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc, name_asc, name_desc), filtered by refinement ids: category, sold by (Lojas Renner or its partner stores), brand, size, colour, gender and the states with stock. Returns page, page_size, total, total_pages, has_more, count, items [{position, product_id (use it in product), name, brand, url, image, color {id, name, hex}, default_sku, price, list_price, discount_percent, on_sale, installment {count, amount}, stock_level (the unit count the site lists for the product), stock_status (in_stock, in_omni_stock), sold_last_15_days (as the site lists it), marketplace, seller (Lojas Renner or a partner store), gender, categories, colors [{id, name, hex, sku}] and sizes}], refinements [{name, label, multi_select, values [{label, count, filter}]}] with the site's counts, applied (the refinements in force), search_terms, sort, filters_applied and notes. Also query. No results is an empty 200 (charged). Search suggestions are not offered. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are slow at the source: usually 30-200 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese, as a shopper types them).
+            sort: relevance (default), newest, best_selling, discount, price_asc, price_desc, name_asc or name_desc (the site's sorts).
+            filters: Refinement id(s) from a listing (refinements[].values[].filter), up to 10: category, sold by, brand, size, colour, gender or region.
+            page: Results page, 1-200 (48 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_search", {"query": query, "sort": sort, "filters": filters, "page": page}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By navigation id (4zo6za) or a /c/ link, sorted and filtered like search. 48 per page, pages 1-200, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc, name_asc, name_desc), filtered by refinement ids: category, sold by (Lojas Renner or its partner stores), brand, size, colour, gender and the states with stock. Returns page, page_size, total, total_pages, has_more, count, items [{position, product_id (use it in product), name, brand, url, image, color {id, name, hex}, default_sku, price, list_price, discount_percent, on_sale, installment {count, amount}, stock_level (the unit count the site lists for the product), stock_status (in_stock, in_omni_stock), sold_last_15_days (as the site lists it), marketplace, seller (Lojas Renner or a partner store), gender, categories, colors [{id, name, hex, sku}] and sizes}], refinements [{name, label, multi_select, values [{label, count, filter}]}] with the site's counts, applied (the refinements in force), search_terms, sort, filters_applied and notes. Also category. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are slow at the source: usually 30-200 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category by its navigation id (4zo6za is Feminino; breadcrumbs[].url and refinements category filters carry them) or a lojasrenner.com.br /c/ link or path ending in /-/N-<id>.
+            sort: relevance (default), newest, best_selling, discount, price_asc, price_desc, name_asc or name_desc (the site's sorts).
+            filters: Refinement id(s) from a listing (refinements[].values[].filter), up to 10: category, sold by, brand, size, colour, gender or region.
+            page: Results page, 1-200 (48 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_category", {"category": category, "sort": sort, "filters": filters, "page": page}, extra)
+
+    def deals(
+        self,
+        *,
+        list: Optional[str] = None,
+        sort: Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A product list of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The list of every discounted product (default) or another list by navigation id or /lista/ link, sorted and filtered like search. The site publishes no start or end dates for its deals. 48 per page, pages 1-200, in the site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc, name_asc, name_desc), filtered by refinement ids: category, sold by (Lojas Renner or its partner stores), brand, size, colour, gender and the states with stock. Returns page, page_size, total, total_pages, has_more, count, items [{position, product_id (use it in product), name, brand, url, image, color {id, name, hex}, default_sku, price, list_price, discount_percent, on_sale, installment {count, amount}, stock_level (the unit count the site lists for the product), stock_status (in_stock, in_omni_stock), sold_last_15_days (as the site lists it), marketplace, seller (Lojas Renner or a partner store), gender, categories, colors [{id, name, hex, sku}] and sizes}], refinements [{name, label, multi_select, values [{label, count, filter}]}] with the site's counts, applied (the refinements in force), search_terms, sort, filters_applied and notes. Also list. An unknown list is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listings are slow at the source: usually 30-200 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            list: A list by its navigation id or a lojasrenner.com.br /lista/ link; the default 1l95pyv is the site's list of every discounted product.
+            sort: relevance (default), newest, best_selling, discount, price_asc, price_desc, name_asc or name_desc (the site's sorts).
+            filters: Refinement id(s) from a listing (refinements[].values[].filter), up to 10: category, sold by, brand, size, colour, gender or region.
+            page: Results page, 1-200 (48 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_deals", {"list": list, "sort": sort, "filters": filters, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        sku: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id or link, optionally a sku to pick the colour and size: product_id, requested_sku, sku, sku_matched, name, brand, url, color {id, name, hex}, size, currency, price, list_price, on_sale, discount_percent, installments {store_card {count, amount, interest_free} (the Cartão Renner plan), credit_card {count, amount} (other cards)}, rating, review_count, available, purchasable, out_of_stock, omni_stock, back_order, pre_order, pre_launch, discontinued, max_quantity, marketplace, seller, gender, categories, breadcrumbs, composition, details, images, colors [{id, name, hex, sku, sizes [{size, sku}]}], size_count, sizes_available and sizes [{size, sku, available, purchasable, out_of_stock, omni_stock, pre_order, discontinued}] (the sizes of the colour shown, with the site's availability flags: flags, not unit counts). The rating is the aggregate (average and count); review texts, shipping quotes by CEP and the marketing description are not included. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Lojas Renner product id (items[].product_id).
+            url: A lojasrenner.com.br product link (items[].url), instead of product_id.
+            sku: Optional sku to show (colors[].sku or colors[].sizes[].sku): picks the colour and size, as the site's ?sku= does.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_product", {"product_id": product_id, "url": url, "sku": sku}, extra)
+
+    def sku_price(
+        self,
+        sku: str,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Price and stock flags for one size of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id (or link) and sku: product_id, sku, name, color {name, code, hex}, size, currency, price, list_price, on_sale, discount_percent, installments {store_card, credit_card}, available, purchasable, out_of_stock, omni_stock, back_order, pre_order, pre_launch, discontinued, max_quantity and image. An unknown sku is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The size sku (sizes[].sku or colors[].sizes[].sku of the product endpoint).
+            product_id: The Lojas Renner product id (items[].product_id).
+            url: A lojasrenner.com.br product link (items[].url), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_sku_price", {"sku": sku, "product_id": product_id, "url": url}, extra)
+
+    def stores(
+        self,
+        cep: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The physical stores of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The store locator's list for a CEP's city or region: cep, cep_state, count, stores [{store_number, name, address {street, number, complement, city, state}, phone (the chain's shared number: dial it and enter the store_number), hours}], excluded_count and notes. Stores outside the CEP's state that the site returns are left out and reported in a note. No coordinates or distances. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_stores", {"cep": cep}, extra)
+
+class _PichauNamespace:
+    """Pichau (pichau.com.br, Brazil's PC-parts store) search, category, brand, deals, product, product live, reviews, installments, coupons, categories and suggestions endpoints; Brazil only, prices in BRL with the Pix price, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By keyword. 36 per page, in the site's order, by price or by name, filtered by the listing's own facets. Returns url, page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, sku, url_key, url, name, brand, brand_slug, category, category_path, image, price (the card price), pix_price, list_price (the struck-through regular price), discount_percent (Pix vs list), pix_discount_percent, installment {count, amount}, currency, available, stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type (simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets [{key, label, values [{value, label, count}]}] and filters_applied. Some keywords are sent by the site to one of its categories (e.g. cadeira gamer to cadeiras/gamer): the answer is then that category's grid, as the site shows it, with redirected_to {category, url}. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, name_asc or name_desc.
+            page: Results page, 1-based, 36 products each. total_pages reports the last one.
+            filters: Filters, at most 5 keys: {key: value}, exactly as facets[].key and facets[].values[].value of an answer list them (e.g. marcas (brand), price (a range such as 0_1000), rgpu, socket). One value per key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_search", {"query": query, "sort": sort, "page": page, "filters": filters}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By category path. 36 per page, in the site's order, by price or by name, filtered by the listing's own facets. Returns url, page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, sku, url_key, url, name, brand, brand_slug, category, category_path, image, price (the card price), pix_price, list_price (the struck-through regular price), discount_percent (Pix vs list), pix_discount_percent, installment {count, amount}, currency, available, stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type (simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets [{key, label, values [{value, label, count}]}] and filters_applied. Adds category_info {category_id, name, path, product_count, breadcrumbs}. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path as the site writes it (categories[].path, or the path of a category link on www.pichau.com.br), e.g. hardware/placa-de-video, monitores, perifericos/teclado, cadeiras/gamer.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, name_asc or name_desc.
+            page: Results page, 1-based, 36 products each. total_pages reports the last one.
+            filters: Filters, at most 5 keys: {key: value}, exactly as facets[].key and facets[].values[].value of an answer list them (e.g. marcas (brand), price (a range such as 0_1000), rgpu, socket). One value per key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_category", {"category": category, "sort": sort, "page": page, "filters": filters}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By brand slug. 36 per page, in the site's order, by price or by name, filtered by the listing's own facets. Returns url, page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, sku, url_key, url, name, brand, brand_slug, category, category_path, image, price (the card price), pix_price, list_price (the struck-through regular price), discount_percent (Pix vs list), pix_discount_percent, installment {count, amount}, currency, available, stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type (simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets [{key, label, values [{value, label, count}]}] and filters_applied. Adds brand_info {brand_id, name, slug}. An unknown brand is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand slug (items[].brand_slug, or the part after /marca/ in a brand link), e.g. corsair, asus, redragon.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, name_asc or name_desc.
+            page: Results page, 1-based, 36 products each. total_pages reports the last one.
+            filters: Filters, at most 5 keys: {key: value}, exactly as facets[].key and facets[].values[].value of an answer list them (e.g. marcas (brand), price (a range such as 0_1000), rgpu, socket). One value per key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_brand", {"brand": brand, "sort": sort, "page": page, "filters": filters}, extra)
+
+    def deals(
+        self,
+        *,
+        deal: Optional[Literal["black_friday", "open_box"]] = None,
+        campaign: Optional[str] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]] = None,
+        page: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deal listings of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. black_friday (the Black Friday 2026 campaign page), open_box (open-box products) or another campaign by slug. 36 per page, in the site's order, by price or by name, filtered by the listing's own facets. Returns url, page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, sku, url_key, url, name, brand, brand_slug, category, category_path, image, price (the card price), pix_price, list_price (the struck-through regular price), discount_percent (Pix vs list), pix_discount_percent, installment {count, amount}, currency, available, stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type (simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets [{key, label, values [{value, label, count}]}] and filters_applied. Adds campaign_info {campaign_id, slug, title, state, starts_at, ends_at} on a campaign; items[].offer is each product's countdown (ends_at, units_left, units_sold). An unknown campaign is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            deal: black_friday (the default: the site's Black Friday 2026 campaign page) or open_box (open-box products).
+            campaign: Another campaign by slug (items[].offer.campaign_path without promocao/), instead of deal.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, name_asc or name_desc.
+            page: Results page, 1-based, 36 products each. total_pages reports the last one.
+            filters: Filters, at most 5 keys: {key: value}, exactly as facets[].key and facets[].values[].value of an answer list them (e.g. marcas (brand), price (a range such as 0_1000), rgpu, socket). One value per key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_deals", {"deal": deal, "campaign": campaign, "sort": sort, "page": page, "filters": filters}, extra)
+
+    def product(
+        self,
+        url_key: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By url_key or link: product_id, requested_url_key, sku, mpn, ean, ncm, name, url, brand, brand_slug, brand_id, category, category_path, categories [{name, path}], product_set, images, price (card), pix_price, pix_discount_percent, list_price, discount_percent, installment {count, amount}, currency, available, stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, ends_at (Brasilia time), promo_price, discount_percent, units_left, units_sold}, open_box, open_box_state, open_box_condition, pre_order, free_shipping, labels, warranty, distribution_center, club_exclusive, product_type (simple, bundle), rating (0-5), rating_percent, review_count and specs [{name, value}]. Not available: shipping by CEP (Pichau quotes it in the cart), stores (one physical store, no per-store data), stock unit counts (not published) and the PC builder (Monte seu PC saves a draft build on each visit, so it is not used). An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url_key: The product's url_key (items[].url_key; the part after www.pichau.com.br/ in a product link). Send url_key or url.
+            url: A product link on www.pichau.com.br (items[].url), instead of url_key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_product", {"url_key": url_key, "url": url}, extra)
+
+    def product_live(
+        self,
+        url_key: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product page of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request, as a browser shows it after loading. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By url_key or link: product_id, sku, name, product_type, available, stock_status, only_x_left, price, pix_price, list_price, installment, on_promotion, offer {campaign, ends_at, promo_price, units_left, units_sold} (live), benchmark {overall_score, cpu_score, gpu_score, games [{title, full_hd_fps, ultra_1080p_fps, quad_hd_fps, medium_4k_fps, ultra_4k_fps}]} (the UL benchmark FPS the site shows on PCs), components [{group, required, selected, choice_count, choices [{product_id, sku, name, url_key, url, quantity, is_default, available, image}]}] (a prebuilt PC's or kit's parts), rating and review_count. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the page is loaded as a browser does); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url_key: The product's url_key (items[].url_key; the part after www.pichau.com.br/ in a product link). Send url_key or url.
+            url: A product link on www.pichau.com.br (items[].url), instead of url_key.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_product_live", {"url_key": url_key, "url": url}, extra)
+
+    def reviews(
+        self,
+        product_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        rating: Optional[int] = None,
+        with_media: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. By product_id, newest first, 10 per page, filtered by stars or media: average_rating (0-5), rating_percent (0-100), total_reviews, breakdown {5, 4, 3, 2, 1}, page, total_pages, has_more, count and reviews [{title, text, rating, date, verified_purchase, media [{type, url}]}]. No reviewer names. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-8 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Pichau product id (items[].product_id, the product endpoint's product_id).
+            page: Page, 1-based, 10 reviews each (newest first).
+            rating: Only reviews with this many stars (1-5).
+            with_media: Only reviews with photos or videos.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_reviews", {"product_id": product_id, "page": page, "rating": rating, "with_media": with_media}, extra)
+
+    def installments(
+        self,
+        url_key: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        product_id: Optional[Union[str, int]] = None,
+        price: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every card plan of one product of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed in. By product_id and price (fast) or by url_key / link (the product page is read first for its id and price): installments [{count, amount, total, discount_percent, discount_value, interest_free, label}] (Pichau discounts short card plans too), price and product. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-8 s; set a client timeout of at least 60 s. By url_key: 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url_key: The product's url_key (items[].url_key; the part after www.pichau.com.br/ in a product link). Send url_key or url.
+            url: A product link on www.pichau.com.br (items[].url), instead of url_key.
+            product_id: The Pichau product id (items[].product_id), with price: the fastest form.
+            price: With product_id: the product's card price in BRL (items[].price).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_installments", {"url_key": url_key, "url": url, "product_id": product_id, "price": price}, extra)
+
+    def coupons(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The coupons of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. As the coupons page lists them: coupons [{code, percent, kind, applies_to (product, category), valid_until, status, image}] and upcoming (announced, not active yet). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_coupons", {}, extra)
+
+    def categories(
+        self,
+        *,
+        all: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category menu of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the public Pichau page on request. Returns categories [{category_id, name, path, level, children}] as the site's menu shows them (all true: every node), with count and departments. Send a path to category. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            all: Every node of the menu, including campaign and partner pages the site keeps out of its menu. Defaults to false.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_categories", {"all": all}, extra)
+
+    def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What the search box of Pichau (pichau.com.br, Brazil's PC-parts store) suggests for what a shopper typed. Scavio fetches the public Pichau page on request. Returns terms [{term, count}] (how many products match), categories [{name, path, url}] and products [{name, url_key, url, image, price, available, pre_order}] (up to 10, as the box lists them). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the page is loaded as a browser does); set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What a shopper has typed into the search box (2+ characters).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("pichau_suggestions", {"query": query}, extra)
+
+class _DafitiNamespace:
+    """Dafiti (dafiti.com.br, the Brazilian fashion marketplace) search, category, brand, deals, product and sizes endpoints; Brazil only, prices in BRL, units per size, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By keyword. 48 results per page plus the site's sponsored slots, in the site's 5 sorts (popularity, newest, price_asc, price_desc, discount). Returns title, page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, sku (use it in sizes or product), product_id, name, brand, color, url, image, price, list_price, discount_percent, pix_price (where the site shows a Pix price), card_price, max_installments, categories, sponsored and marketplace (a partner store sells it; the store name comes from product or sizes)}] and notes. Also query. The site matches loosely, so a search with no close match can still list related products. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages are slow at the source: usually 15-160 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese, as a shopper types them).
+            sort: popularity (default), newest, price_asc, price_desc or discount (the site's 5 sorts).
+            page: Results page (48 results per page plus the sponsored slots).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_search", {"query": query, "sort": sort, "page": page}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One department or category listing of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By its path (calcados-femininos, calcados-femininos/tenis) or link, sorted like search. 48 results per page plus the site's sponsored slots, in the site's 5 sorts (popularity, newest, price_asc, price_desc, discount). Returns title, page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, sku (use it in sizes or product), product_id, name, brand, color, url, image, price, list_price, discount_percent, pix_price (where the site shows a Pix price), card_price, max_installments, categories, sponsored and marketplace (a partner store sells it; the store name comes from product or sizes)}] and notes. Also category, url and breadcrumbs. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages are slow at the source: usually 15-160 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A department or category path of 1 to 3 levels as the site writes it (calcados-femininos, calcados-femininos/tenis; breadcrumbs[].url), or its dafiti.com.br link.
+            sort: popularity (default), newest, price_asc, price_desc or discount (the site's 5 sorts).
+            page: Results page (48 results per page plus the sponsored slots).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_category", {"category": category, "sort": sort, "page": page}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        sort: Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's listing of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By the brand as the site writes it in its link (asics, nike), sorted like search. 48 results per page plus the site's sponsored slots, in the site's 5 sorts (popularity, newest, price_asc, price_desc, discount). Returns title, page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, sku (use it in sizes or product), product_id, name, brand, color, url, image, price, list_price, discount_percent, pix_price (where the site shows a Pix price), card_price, max_installments, categories, sponsored and marketplace (a partner store sells it; the store name comes from product or sizes)}] and notes. Also brand, url and breadcrumbs. An unknown brand is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages are slow at the source: usually 15-160 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as the site writes it in its link (asics, nike, farm-rio), or its dafiti.com.br link.
+            sort: popularity (default), newest, price_asc, price_desc or discount (the site's 5 sorts).
+            page: Results page (48 results per page plus the sponsored slots).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_brand", {"brand": brand, "sort": sort, "page": page}, extra)
+
+    def deals(
+        self,
+        *,
+        sort: Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The outlet of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The site's own selection of discounted products, sorted like search (discount puts the deepest discounts at the top). The site publishes no start or end dates for it. 48 results per page plus the site's sponsored slots, in the site's 5 sorts (popularity, newest, price_asc, price_desc, discount). Returns title, page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, sku (use it in sizes or product), product_id, name, brand, color, url, image, price, list_price, discount_percent, pix_price (where the site shows a Pix price), card_price, max_installments, categories, sponsored and marketplace (a partner store sells it; the store name comes from product or sizes)}] and notes. Also deal and url. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Listing pages are slow at the source: usually 15-160 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sort: popularity (default), newest, price_asc, price_desc or discount (the site's 5 sorts).
+            page: Results page (48 results per page plus the sponsored slots).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_deals", {"sort": sort, "page": page}, extra)
+
+    def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        sku: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id, sku or link: sku, product_id, name, brand, color, url, availability (in_stock, limited, out_of_stock), price, list_price, discount_percent, pix_price, card_price, max_installments, installment {count, amount}, rating, review_count, seller {store_name, sold_by_dafiti, delivered_by_dafiti}, store_names, size_count, sizes_in_stock, sizes [{size, sku, in_stock, units (exact from 0 to 10), more_than_10 (the site gives more than 10, not a count), stock_message, delivery_type (proprio: Dafiti's own stock, fulfillment: a partner store's stock delivered by Dafiti, drop_shipping: sent by the partner store), sold_by_dafiti, delivered_by_dafiti, store_name}], colors [{sku, product_id, name, color, url, image, price, list_price}] (the other colours), categories, campaigns, breadcrumbs, specs [{name, value}], details [{name, value}] (the short facts at the start of the description: composition, measures) and images. No marketing description, reviews text, shipping quote or price history. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 6-35 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The number at the end of a Dafiti product link (items[].product_id).
+            sku: The Dafiti sku (items[].sku), or one size of it (sizes[].sku), instead of product_id.
+            url: A dafiti.com.br product link, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_product", {"product_id": product_id, "sku": sku, "url": url}, extra)
+
+    def sizes(
+        self,
+        sku: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every size of one product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By sku, with its stock: sku, product_id, name, brand, color, url, price, list_price, discount_percent, installment {count, amount}, store_names, size_count, sizes_in_stock, sizes [{size, sku, in_stock, units (exact from 0 to 10), more_than_10 (the site gives more than 10, not a count), stock_message, delivery_type (proprio: Dafiti's own stock, fulfillment: a partner store's stock delivered by Dafiti, drop_shipping: sent by the partner store), sold_by_dafiti, delivered_by_dafiti, store_name}], colors, categories and campaigns. A size sku also returns requested_size. Faster than product, for a stock check. An unknown sku is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The Dafiti sku (items[].sku), or one size of it (sizes[].sku).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_sizes", {"sku": sku}, extra)

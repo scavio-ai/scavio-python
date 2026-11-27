@@ -41972,6 +41972,1660 @@ _ESTANTEVIRTUAL_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 7 wave 5 2026-11-27: 4 platforms (C&A Brasil, Lojas Renner, Pichau, Dafiti) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 240 s floor on every method, 300 s on renner.
+
+# C&A Brasil: 10 endpoints on /api/v1/cea.
+_CEA_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="cea_search",
+        namespace="cea",
+        method="search",
+        http="POST",
+        path="/api/v1/cea/search",
+        summary=(
+            "Search C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), "
+            "Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page "
+            "on request. By keyword, sorted by the site's sorts (price, best sellers, newest, "
+            "discount, name). Returns page, page_size, total, total_pages (the site pages at "
+            "most 50 pages deep), has_more, count, sort, items [{position, product_id, name, "
+            "brand, labels (the site's Marcas values: C&A labels such as Clock House or "
+            "Yessica, and partner brands), reference, url, image, available, price (the "
+            "lowest price among the sizes in stock), list_price, discount_percent, pix_price, "
+            "best_installment {payment_system, count, value, total, interest_rate}, colors, "
+            "sizes [{sku, size, color, available, available_quantity (the site's capped "
+            "figure: a round 100, 10000 or 99999 = plenty, 0 = none), price, list_price, "
+            "discount_percent, pix_price}], categories, collection_ids (promotion collections "
+            "by id) and release_date}] and notes. No results is an empty 200. Also query. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Listings are large: usually 5-100 s; set a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "newest, discount, name_asc, name_desc (best_sellers = most ordered, "
+                    "newest = release date, discount = deepest discount first). Default "
+                    "relevance."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1; the site pages at most 50 pages deep)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24 (default 24)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_category",
+        namespace="cea",
+        method="category",
+        http="POST",
+        path="/api/v1/cea/category",
+        summary=(
+            "One department, category or subcategory listing of C&A Brasil (cea.com.br, the "
+            "Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. "
+            "Scavio fetches the public C&A Brasil page on request. By category path "
+            "(categories[].path), sorted like search. Returns page, page_size, total, "
+            "total_pages (the site pages at most 50 pages deep), has_more, count, sort, items "
+            "[{position, product_id, name, brand, labels (the site's Marcas values: C&A "
+            "labels such as Clock House or Yessica, and partner brands), reference, url, "
+            "image, available, price (the lowest price among the sizes in stock), list_price, "
+            "discount_percent, pix_price, best_installment {payment_system, count, value, "
+            "total, interest_rate}, colors, sizes [{sku, size, color, available, "
+            "available_quantity (the site's capped figure: a round 100, 10000 or 99999 = "
+            "plenty, 0 = none), price, list_price, discount_percent, pix_price}], categories, "
+            "collection_ids (promotion collections by id) and release_date}] and notes. No "
+            "results is an empty 200. Also category and url. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Listings are large: "
+            "usually 5-100 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path of 1 to 3 levels (categories[].path: department, "
+                    "category, subcategory, e.g. moda-feminina, moda-feminina/roupas, "
+                    "moda-feminina/roupas/blusas) or its cea.com.br link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "newest, discount, name_asc, name_desc (best_sellers = most ordered, "
+                    "newest = release date, discount = deepest discount first). Default "
+                    "relevance."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1; the site pages at most 50 pages deep)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24 (default 24)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_brand",
+        namespace="cea",
+        method="brand",
+        http="POST",
+        path="/api/v1/cea/brand",
+        summary=(
+            "One brand's products on C&A Brasil (cea.com.br, the Brazilian arm of the C&A "
+            "fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public "
+            "C&A Brasil page on request. By the brand value of the site's Marcas filter "
+            "(C&A's own labels such as Palomino, Clock House, Yessica, Angelo Litrico, and "
+            "partner brands), sorted like search. Returns page, page_size, total, total_pages "
+            "(the site pages at most 50 pages deep), has_more, count, sort, items [{position, "
+            "product_id, name, brand, labels (the site's Marcas values: C&A labels such as "
+            "Clock House or Yessica, and partner brands), reference, url, image, available, "
+            "price (the lowest price among the sizes in stock), list_price, discount_percent, "
+            "pix_price, best_installment {payment_system, count, value, total, "
+            "interest_rate}, colors, sizes [{sku, size, color, available, available_quantity "
+            "(the site's capped figure: a round 100, 10000 or 99999 = plenty, 0 = none), "
+            "price, list_price, discount_percent, pix_price}], categories, collection_ids "
+            "(promotion collections by id) and release_date}] and notes. No results is an "
+            "empty 200. Also brand. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Listings are large: usually 5-100 s; set a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand as the site's Marcas filter writes it (facets: key marcas), e.g. "
+                    "palomino, clock-house, yessica, angelo-litrico, or a partner brand."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "newest, discount, name_asc, name_desc (best_sellers = most ordered, "
+                    "newest = release date, discount = deepest discount first). Default "
+                    "relevance."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1; the site pages at most 50 pages deep)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24 (default 24)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_deals",
+        namespace="cea",
+        method="deals",
+        http="POST",
+        path="/api/v1/cea/deals",
+        summary=(
+            "One promotion collection of C&A Brasil (cea.com.br, the Brazilian arm of the C&A "
+            "fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public "
+            "C&A Brasil page on request. By collection id (items[].collection_ids, e.g. a "
+            "Black Friday or free-shipping collection), with list price, sale price and "
+            "discount_percent; sort discount puts the deepest discounts first. Returns page, "
+            "page_size, total, total_pages (the site pages at most 50 pages deep), has_more, "
+            "count, sort, items [{position, product_id, name, brand, labels (the site's "
+            "Marcas values: C&A labels such as Clock House or Yessica, and partner brands), "
+            "reference, url, image, available, price (the lowest price among the sizes in "
+            "stock), list_price, discount_percent, pix_price, best_installment "
+            "{payment_system, count, value, total, interest_rate}, colors, sizes [{sku, size, "
+            "color, available, available_quantity (the site's capped figure: a round 100, "
+            "10000 or 99999 = plenty, 0 = none), price, list_price, discount_percent, "
+            "pix_price}], categories, collection_ids (promotion collections by id) and "
+            "release_date}] and notes. No results is an empty 200. Also collection_id. "
+            "Collections are given by id only. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Listings are large: usually 5-100 s; "
+            "set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "collection_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A promotion collection id (items[].collection_ids), e.g. 19727."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "best_sellers", "newest", "discount", "name_asc", "name_desc"]]',
+                doc=(
+                    "The site's sorts: relevance, price_asc, price_desc, best_sellers, "
+                    "newest, discount, name_asc, name_desc (best_sellers = most ordered, "
+                    "newest = release date, discount = deepest discount first). Default "
+                    "relevance."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-50 (default 1; the site pages at most 50 pages deep)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24 (default 24)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_facets",
+        namespace="cea",
+        method="facets",
+        http="POST",
+        path="/api/v1/cea/facets",
+        summary=(
+            "The filter values of C&A Brasil (cea.com.br, the Brazilian arm of the C&A "
+            "fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public "
+            "C&A Brasil page on request. For a query, or one category, brand or collection: "
+            "count and facets [{key, label, param, values [{value, label, count, selected}] "
+            "or ranges [{from, to, count}]}] (department, category, subcategory, type, "
+            "gender, size, color, Marcas, material, price range and more, with product "
+            "counts); param names the request field a value goes back into (category, brand). "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-15 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Search keywords (or give one of category, brand or collection_id)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A category path of 1 to 3 levels (categories[].path: department, "
+                    "category, subcategory, e.g. moda-feminina, moda-feminina/roupas, "
+                    "moda-feminina/roupas/blusas) or its cea.com.br link."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "A brand as the site's Marcas filter writes it (facets: key marcas), e.g. "
+                    "palomino, clock-house, yessica, angelo-litrico, or a partner brand."
+                ),
+            ),
+            Param(
+                "collection_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A promotion collection id (items[].collection_ids), e.g. 19727."
+                ),
+            ),
+        ),
+        one_of=(("query", "category", "brand", "collection_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_suggestions",
+        namespace="cea",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/cea/suggestions",
+        summary=(
+            "The search box of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion "
+            "chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A "
+            "Brasil page on request. For the start of a search: suggestions [{term, count, "
+            "attributes [{key, value, label, value_label}]}] and top_searches [{term, count}] "
+            "(without query: the top searches alone). 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 2-15 s; set a client "
+            "timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                doc=(
+                    "The start of a search. Without it, the top searches alone."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_categories",
+        namespace="cea",
+        method="categories",
+        http="POST",
+        path="/api/v1/cea/categories",
+        summary=(
+            "The department tree of C&A Brasil (cea.com.br, the Brazilian arm of the C&A "
+            "fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public "
+            "C&A Brasil page on request. Returns count, node_count and categories "
+            "[{category_id, name, path, url, children [...]}] over three levels: use path as "
+            "category. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-15 s; set a client timeout of at least 120 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_product",
+        namespace="cea",
+        method="product",
+        http="POST",
+        path="/api/v1/cea/product",
+        summary=(
+            "One product of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion "
+            "chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A "
+            "Brasil page on request. By product id, size sku, slug or link: product_id, sku "
+            "(when asked by sku), name, brand, labels, reference, model_id, url, images, "
+            "available, price, list_price, discount_percent, pix_price, best_installment, "
+            "installments [{payment_system, count, value, total, interest_rate}] (each "
+            "payment method's longest plan, e.g. C&A Pay), colors, sizes [{sku, size, color, "
+            "available, available_quantity, price, list_price, discount_percent, pix_price, "
+            "seller {id, name}}] (every size), categories, specifications [{name, value}] "
+            "(material, fit, sleeve, made in...), collection_ids and release_date. No "
+            "marketing description, EAN (empty on the site), reviews, Q&A, store units or "
+            "price history. An unknown product is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a "
+            "client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "The product id (items[].product_id)."
+                ),
+            ),
+            Param(
+                "sku",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The id of one size (sizes[].sku): returns its product."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "The product slug (the link's path before /p)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link (https://www.cea.com.br/<slug>/p)."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "sku", "slug", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_shipping",
+        namespace="cea",
+        method="shipping",
+        http="POST",
+        path="/api/v1/cea/shipping",
+        summary=(
+            "The delivery quote of C&A Brasil (cea.com.br, the Brazilian arm of the C&A "
+            "fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public "
+            "C&A Brasil page on request. For one size (sku) and a CEP, as the product page "
+            "gives it: availability, price, list_price, can_deliver, can_pick_up, "
+            "delivery_options [{name, price (0 = free), list_price, estimate, business_days, "
+            "estimated_date}], pickup_stores [{pickup_point_id, store_code, name, "
+            "distance_km, address, price, estimate, business_days, estimated_date}] (the "
+            "stores near the CEP that can hand this size over) and messages [{code, text, "
+            "status}] (e.g. the site's cannot-be-delivered notice). Read-only: nothing is "
+            "added to a cart or ordered. An unknown sku is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-15 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The id of one size (sizes[].sku from product or a listing)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="cea_stores",
+        namespace="cea",
+        method="stores",
+        http="POST",
+        path="/api/v1/cea/stores",
+        summary=(
+            "The pickup points near a CEP on C&A Brasil (cea.com.br, the Brazilian arm of the "
+            "C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the "
+            "public C&A Brasil page on request. Nearest first: total, count and stores "
+            "[{store_code, pickup_point_ids, name, type (cea_store or partner_point), "
+            "partner, active, distance_km, address {street, number, complement, neighborhood, "
+            "city, state, cep}, latitude, longitude, phone, hours [{day, opens, closes}]}]. "
+            "Includes third-party pickup lockers and counters (Clique Retire, type "
+            "partner_point) next to the C&A stores. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout "
+            "of at least 120 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Lojas Renner: 6 endpoints on /api/v1/renner.
+_RENNER_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="renner_search",
+        namespace="renner",
+        method="search",
+        http="POST",
+        path="/api/v1/renner/search",
+        summary=(
+            "Search Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio "
+            "fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese "
+            "(pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By "
+            "keyword. 48 per page, pages 1-200, in the site's sorts (relevance, newest, "
+            "best_selling, discount, price_asc, price_desc, name_asc, name_desc), filtered by "
+            "refinement ids: category, sold by (Lojas Renner or its partner stores), brand, "
+            "size, colour, gender and the states with stock. Returns page, page_size, total, "
+            "total_pages, has_more, count, items [{position, product_id (use it in product), "
+            "name, brand, url, image, color {id, name, hex}, default_sku, price, list_price, "
+            "discount_percent, on_sale, installment {count, amount}, stock_level (the unit "
+            "count the site lists for the product), stock_status (in_stock, in_omni_stock), "
+            "sold_last_15_days (as the site lists it), marketplace, seller (Lojas Renner or a "
+            "partner store), gender, categories, colors [{id, name, hex, sku}] and sizes}], "
+            "refinements [{name, label, multi_select, values [{label, count, filter}]}] with "
+            "the site's counts, applied (the refinements in force), search_terms, sort, "
+            "filters_applied and notes. Also query. No results is an empty 200 (charged). "
+            "Search suggestions are not offered. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Listings are slow at the source: "
+            "usually 30-200 s; set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese, as a shopper types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc, "
+                    "price_desc, name_asc or name_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Refinement id(s) from a listing (refinements[].values[].filter), up to "
+                    "10: category, sold by, brand, size, colour, gender or region."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-200 (48 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="renner_category",
+        namespace="renner",
+        method="category",
+        http="POST",
+        path="/api/v1/renner/category",
+        summary=(
+            "One category listing of Lojas Renner (lojasrenner.com.br, the Brazilian fashion "
+            "retailer). Scavio fetches the public lojasrenner.com.br pages on request. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. By navigation id (4zo6za) or a /c/ link, sorted and filtered like "
+            "search. 48 per page, pages 1-200, in the site's sorts (relevance, newest, "
+            "best_selling, discount, price_asc, price_desc, name_asc, name_desc), filtered by "
+            "refinement ids: category, sold by (Lojas Renner or its partner stores), brand, "
+            "size, colour, gender and the states with stock. Returns page, page_size, total, "
+            "total_pages, has_more, count, items [{position, product_id (use it in product), "
+            "name, brand, url, image, color {id, name, hex}, default_sku, price, list_price, "
+            "discount_percent, on_sale, installment {count, amount}, stock_level (the unit "
+            "count the site lists for the product), stock_status (in_stock, in_omni_stock), "
+            "sold_last_15_days (as the site lists it), marketplace, seller (Lojas Renner or a "
+            "partner store), gender, categories, colors [{id, name, hex, sku}] and sizes}], "
+            "refinements [{name, label, multi_select, values [{label, count, filter}]}] with "
+            "the site's counts, applied (the refinements in force), search_terms, sort, "
+            "filters_applied and notes. Also category. An unknown category is a charged 404. "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Listings are slow at the source: usually 30-200 s; set a client timeout of "
+            "at least 300 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category by its navigation id (4zo6za is Feminino; breadcrumbs[].url "
+                    "and refinements category filters carry them) or a lojasrenner.com.br /c/ "
+                    "link or path ending in /-/N-<id>."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc, "
+                    "price_desc, name_asc or name_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Refinement id(s) from a listing (refinements[].values[].filter), up to "
+                    "10: category, sold by, brand, size, colour, gender or region."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-200 (48 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="renner_deals",
+        namespace="renner",
+        method="deals",
+        http="POST",
+        path="/api/v1/renner/deals",
+        summary=(
+            "A product list of Lojas Renner (lojasrenner.com.br, the Brazilian fashion "
+            "retailer). Scavio fetches the public lojasrenner.com.br pages on request. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. The list of every discounted product (default) or another list by "
+            "navigation id or /lista/ link, sorted and filtered like search. The site "
+            "publishes no start or end dates for its deals. 48 per page, pages 1-200, in the "
+            "site's sorts (relevance, newest, best_selling, discount, price_asc, price_desc, "
+            "name_asc, name_desc), filtered by refinement ids: category, sold by (Lojas "
+            "Renner or its partner stores), brand, size, colour, gender and the states with "
+            "stock. Returns page, page_size, total, total_pages, has_more, count, items "
+            "[{position, product_id (use it in product), name, brand, url, image, color {id, "
+            "name, hex}, default_sku, price, list_price, discount_percent, on_sale, "
+            "installment {count, amount}, stock_level (the unit count the site lists for the "
+            "product), stock_status (in_stock, in_omni_stock), sold_last_15_days (as the site "
+            "lists it), marketplace, seller (Lojas Renner or a partner store), gender, "
+            "categories, colors [{id, name, hex, sku}] and sizes}], refinements [{name, "
+            "label, multi_select, values [{label, count, filter}]}] with the site's counts, "
+            "applied (the refinements in force), search_terms, sort, filters_applied and "
+            "notes. Also list. An unknown list is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Listings are slow at "
+            "the source: usually 30-200 s; set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "list",
+                "Optional[str]",
+                doc=(
+                    "A list by its navigation id or a lojasrenner.com.br /lista/ link; the "
+                    "default 1l95pyv is the site's list of every discounted product."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "newest", "best_selling", "discount", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (default), newest, best_selling, discount, price_asc, "
+                    "price_desc, name_asc or name_desc (the site's sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Refinement id(s) from a listing (refinements[].values[].filter), up to "
+                    "10: category, sold by, brand, size, colour, gender or region."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-200 (48 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="renner_product",
+        namespace="renner",
+        method="product",
+        http="POST",
+        path="/api/v1/renner/product",
+        summary=(
+            "One product of Lojas Renner (lojasrenner.com.br, the Brazilian fashion "
+            "retailer). Scavio fetches the public lojasrenner.com.br pages on request. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. By product_id or link, optionally a sku to pick the colour and "
+            "size: product_id, requested_sku, sku, sku_matched, name, brand, url, color {id, "
+            "name, hex}, size, currency, price, list_price, on_sale, discount_percent, "
+            "installments {store_card {count, amount, interest_free} (the Cartão Renner "
+            "plan), credit_card {count, amount} (other cards)}, rating, review_count, "
+            "available, purchasable, out_of_stock, omni_stock, back_order, pre_order, "
+            "pre_launch, discontinued, max_quantity, marketplace, seller, gender, categories, "
+            "breadcrumbs, composition, details, images, colors [{id, name, hex, sku, sizes "
+            "[{size, sku}]}], size_count, sizes_available and sizes [{size, sku, available, "
+            "purchasable, out_of_stock, omni_stock, pre_order, discontinued}] (the sizes of "
+            "the colour shown, with the site's availability flags: flags, not unit counts). "
+            "The rating is the aggregate (average and count); review texts, shipping quotes "
+            "by CEP and the marketing description are not included. An unknown product is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 5-30 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Lojas Renner product id (items[].product_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A lojasrenner.com.br product link (items[].url), instead of product_id."
+                ),
+            ),
+            Param(
+                "sku",
+                "Optional[str]",
+                doc=(
+                    "Optional sku to show (colors[].sku or colors[].sizes[].sku): picks the "
+                    "colour and size, as the site's ?sku= does."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="renner_sku_price",
+        namespace="renner",
+        method="sku_price",
+        http="POST",
+        path="/api/v1/renner/sku-price",
+        summary=(
+            "Price and stock flags for one size of Lojas Renner (lojasrenner.com.br, the "
+            "Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages "
+            "on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a "
+            "visitor who is not signed in. By product_id (or link) and sku: product_id, sku, "
+            "name, color {name, code, hex}, size, currency, price, list_price, on_sale, "
+            "discount_percent, installments {store_card, credit_card}, available, "
+            "purchasable, out_of_stock, omni_stock, back_order, pre_order, pre_launch, "
+            "discontinued, max_quantity and image. An unknown sku is a charged 404. 1 credit. "
+            "A not-found is charged; failed upstream calls and refused inputs are not. "
+            "Usually 5-30 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "The size sku (sizes[].sku or colors[].sizes[].sku of the product "
+                    "endpoint)."
+                ),
+            ),
+            Param(
+                "product_id",
+                "Optional[str]",
+                doc=(
+                    "The Lojas Renner product id (items[].product_id)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A lojasrenner.com.br product link (items[].url), instead of product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="renner_stores",
+        namespace="renner",
+        method="stores",
+        http="POST",
+        path="/api/v1/renner/stores",
+        summary=(
+            "The physical stores of Lojas Renner (lojasrenner.com.br, the Brazilian fashion "
+            "retailer). Scavio fetches the public lojasrenner.com.br pages on request. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. The store locator's list for a CEP's city or region: cep, "
+            "cep_state, count, stores [{store_number, name, address {street, number, "
+            "complement, city, state}, phone (the chain's shared number: dial it and enter "
+            "the store_number), hours}], excluded_count and notes. Stores outside the CEP's "
+            "state that the site returns are left out and reported in a note. No coordinates "
+            "or distances. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+)
+
+# Pichau: 11 endpoints on /api/v1/pichau.
+_PICHAU_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="pichau_search",
+        namespace="pichau",
+        method="search",
+        http="POST",
+        path="/api/v1/pichau/search",
+        summary=(
+            "Search Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches the "
+            "public Pichau page on request. Brazil: Portuguese text, prices in BRL as shown "
+            "to a visitor who is not signed in. By keyword. 36 per page, in the site's order, "
+            "by price or by name, filtered by the listing's own facets. Returns url, page, "
+            "page_size, sort, total, total_pages, has_more, count, items [{position, "
+            "product_id, sku, url_key, url, name, brand, brand_slug, category, category_path, "
+            "image, price (the card price), pix_price, list_price (the struck-through regular "
+            "price), discount_percent (Pix vs list), pix_discount_percent, installment "
+            "{count, amount}, currency, available, stock_status, only_x_left, on_promotion, "
+            "offer {campaign, campaign_path, ends_at, promo_price, discount_percent, "
+            "units_left, units_sold}, open_box, open_box_state, pre_order, free_shipping, "
+            "labels, ean, warranty, product_type (simple, bundle), rating (0-5), "
+            "rating_percent (0-100), review_count}], facets [{key, label, values [{value, "
+            "label, count}]}] and filters_applied. Some keywords are sent by the site to one "
+            "of its categories (e.g. cadeira gamer to cadeiras/gamer): the answer is then "
+            "that category's grid, as the site shows it, with redirected_to {category, url}. "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in Portuguese as shoppers type them."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc, price_desc, "
+                    "name_asc or name_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 36 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filters, at most 5 keys: {key: value}, exactly as facets[].key and "
+                    "facets[].values[].value of an answer list them (e.g. marcas (brand), "
+                    "price (a range such as 0_1000), rgpu, socket). One value per key."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_category",
+        namespace="pichau",
+        method="category",
+        http="POST",
+        path="/api/v1/pichau/category",
+        summary=(
+            "One category of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches "
+            "the public Pichau page on request. Brazil: Portuguese text, prices in BRL as "
+            "shown to a visitor who is not signed in. By category path. 36 per page, in the "
+            "site's order, by price or by name, filtered by the listing's own facets. Returns "
+            "url, page, page_size, sort, total, total_pages, has_more, count, items "
+            "[{position, product_id, sku, url_key, url, name, brand, brand_slug, category, "
+            "category_path, image, price (the card price), pix_price, list_price (the "
+            "struck-through regular price), discount_percent (Pix vs list), "
+            "pix_discount_percent, installment {count, amount}, currency, available, "
+            "stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, "
+            "ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, "
+            "open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type "
+            "(simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets "
+            "[{key, label, values [{value, label, count}]}] and filters_applied. Adds "
+            "category_info {category_id, name, path, product_count, breadcrumbs}. An unknown "
+            "category is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Listing pages took 5-170 s in Black Friday "
+            "week (2026-11-27); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category path as the site writes it (categories[].path, or the path of "
+                    "a category link on www.pichau.com.br), e.g. hardware/placa-de-video, "
+                    "monitores, perifericos/teclado, cadeiras/gamer."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc, price_desc, "
+                    "name_asc or name_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 36 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filters, at most 5 keys: {key: value}, exactly as facets[].key and "
+                    "facets[].values[].value of an answer list them (e.g. marcas (brand), "
+                    "price (a range such as 0_1000), rgpu, socket). One value per key."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_brand",
+        namespace="pichau",
+        method="brand",
+        http="POST",
+        path="/api/v1/pichau/brand",
+        summary=(
+            "One brand's products on Pichau (pichau.com.br, Brazil's PC-parts store). Scavio "
+            "fetches the public Pichau page on request. Brazil: Portuguese text, prices in "
+            "BRL as shown to a visitor who is not signed in. By brand slug. 36 per page, in "
+            "the site's order, by price or by name, filtered by the listing's own facets. "
+            "Returns url, page, page_size, sort, total, total_pages, has_more, count, items "
+            "[{position, product_id, sku, url_key, url, name, brand, brand_slug, category, "
+            "category_path, image, price (the card price), pix_price, list_price (the "
+            "struck-through regular price), discount_percent (Pix vs list), "
+            "pix_discount_percent, installment {count, amount}, currency, available, "
+            "stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, "
+            "ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, "
+            "open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type "
+            "(simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets "
+            "[{key, label, values [{value, label, count}]}] and filters_applied. Adds "
+            "brand_info {brand_id, name, slug}. An unknown brand is a charged 404. 1 credit. "
+            "A not-found is charged; failed upstream calls and refused inputs are not. "
+            "Listing pages took 5-170 s in Black Friday week (2026-11-27); set a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand slug (items[].brand_slug, or the part after /marca/ in a brand "
+                    "link), e.g. corsair, asus, redragon."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc, price_desc, "
+                    "name_asc or name_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 36 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filters, at most 5 keys: {key: value}, exactly as facets[].key and "
+                    "facets[].values[].value of an answer list them (e.g. marcas (brand), "
+                    "price (a range such as 0_1000), rgpu, socket). One value per key."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_deals",
+        namespace="pichau",
+        method="deals",
+        http="POST",
+        path="/api/v1/pichau/deals",
+        summary=(
+            "The deal listings of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio "
+            "fetches the public Pichau page on request. Brazil: Portuguese text, prices in "
+            "BRL as shown to a visitor who is not signed in. black_friday (the Black Friday "
+            "2026 campaign page), open_box (open-box products) or another campaign by slug. "
+            "36 per page, in the site's order, by price or by name, filtered by the listing's "
+            "own facets. Returns url, page, page_size, sort, total, total_pages, has_more, "
+            "count, items [{position, product_id, sku, url_key, url, name, brand, brand_slug, "
+            "category, category_path, image, price (the card price), pix_price, list_price "
+            "(the struck-through regular price), discount_percent (Pix vs list), "
+            "pix_discount_percent, installment {count, amount}, currency, available, "
+            "stock_status, only_x_left, on_promotion, offer {campaign, campaign_path, "
+            "ends_at, promo_price, discount_percent, units_left, units_sold}, open_box, "
+            "open_box_state, pre_order, free_shipping, labels, ean, warranty, product_type "
+            "(simple, bundle), rating (0-5), rating_percent (0-100), review_count}], facets "
+            "[{key, label, values [{value, label, count}]}] and filters_applied. Adds "
+            "campaign_info {campaign_id, slug, title, state, starts_at, ends_at} on a "
+            "campaign; items[].offer is each product's countdown (ends_at, units_left, "
+            "units_sold). An unknown campaign is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Listing pages took "
+            "5-170 s in Black Friday week (2026-11-27); set a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "deal",
+                'Optional[Literal["black_friday", "open_box"]]',
+                doc=(
+                    "black_friday (the default: the site's Black Friday 2026 campaign page) "
+                    "or open_box (open-box products)."
+                ),
+            ),
+            Param(
+                "campaign",
+                "Optional[str]",
+                doc=(
+                    "Another campaign by slug (items[].offer.campaign_path without "
+                    "promocao/), instead of deal."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "name_asc", "name_desc"]]',
+                doc=(
+                    "relevance (the default, the site's own order), price_asc, price_desc, "
+                    "name_asc or name_desc."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 36 products each. total_pages reports the last "
+                    "one."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Filters, at most 5 keys: {key: value}, exactly as facets[].key and "
+                    "facets[].values[].value of an answer list them (e.g. marcas (brand), "
+                    "price (a range such as 0_1000), rgpu, socket). One value per key."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_product",
+        namespace="pichau",
+        method="product",
+        http="POST",
+        path="/api/v1/pichau/product",
+        summary=(
+            "One product of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches "
+            "the public Pichau page on request. Brazil: Portuguese text, prices in BRL as "
+            "shown to a visitor who is not signed in. By url_key or link: product_id, "
+            "requested_url_key, sku, mpn, ean, ncm, name, url, brand, brand_slug, brand_id, "
+            "category, category_path, categories [{name, path}], product_set, images, price "
+            "(card), pix_price, pix_discount_percent, list_price, discount_percent, "
+            "installment {count, amount}, currency, available, stock_status, only_x_left, "
+            "on_promotion, offer {campaign, campaign_path, ends_at (Brasilia time), "
+            "promo_price, discount_percent, units_left, units_sold}, open_box, "
+            "open_box_state, open_box_condition, pre_order, free_shipping, labels, warranty, "
+            "distribution_center, club_exclusive, product_type (simple, bundle), rating "
+            "(0-5), rating_percent, review_count and specs [{name, value}]. Not available: "
+            "shipping by CEP (Pichau quotes it in the cart), stores (one physical store, no "
+            "per-store data), stock unit counts (not published) and the PC builder (Monte seu "
+            "PC saves a draft build on each visit, so it is not used). An unknown product is "
+            "a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 5-60 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "url_key",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product's url_key (items[].url_key; the part after "
+                    "www.pichau.com.br/ in a product link). Send url_key or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on www.pichau.com.br (items[].url), instead of url_key."
+                ),
+            ),
+        ),
+        one_of=(("url_key", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_product_live",
+        namespace="pichau",
+        method="product_live",
+        http="POST",
+        path="/api/v1/pichau/product-live",
+        summary=(
+            "One product page of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio "
+            "fetches the public Pichau page on request, as a browser shows it after loading. "
+            "Brazil: Portuguese text, prices in BRL as shown to a visitor who is not signed "
+            "in. By url_key or link: product_id, sku, name, product_type, available, "
+            "stock_status, only_x_left, price, pix_price, list_price, installment, "
+            "on_promotion, offer {campaign, ends_at, promo_price, units_left, units_sold} "
+            "(live), benchmark {overall_score, cpu_score, gpu_score, games [{title, "
+            "full_hd_fps, ultra_1080p_fps, quad_hd_fps, medium_4k_fps, ultra_4k_fps}]} (the "
+            "UL benchmark FPS the site shows on PCs), components [{group, required, selected, "
+            "choice_count, choices [{product_id, sku, name, url_key, url, quantity, "
+            "is_default, available, image}]}] (a prebuilt PC's or kit's parts), rating and "
+            "review_count. An unknown product is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 30-160 s (the "
+            "page is loaded as a browser does); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "url_key",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product's url_key (items[].url_key; the part after "
+                    "www.pichau.com.br/ in a product link). Send url_key or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on www.pichau.com.br (items[].url), instead of url_key."
+                ),
+            ),
+        ),
+        one_of=(("url_key", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_reviews",
+        namespace="pichau",
+        method="reviews",
+        http="POST",
+        path="/api/v1/pichau/reviews",
+        summary=(
+            "Customer reviews of one product of Pichau (pichau.com.br, Brazil's PC-parts "
+            "store). Scavio fetches the public Pichau page on request. By product_id, newest "
+            "first, 10 per page, filtered by stars or media: average_rating (0-5), "
+            "rating_percent (0-100), total_reviews, breakdown {5, 4, 3, 2, 1}, page, "
+            "total_pages, has_more, count and reviews [{title, text, rating, date, "
+            "verified_purchase, media [{type, url}]}]. No reviewer names. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "2-8 s; set a client timeout of at least 60 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "The Pichau product id (items[].product_id, the product endpoint's "
+                    "product_id)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based, 10 reviews each (newest first)."
+                ),
+            ),
+            Param(
+                "rating",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this many stars (1-5)."
+                ),
+            ),
+            Param(
+                "with_media",
+                "Optional[bool]",
+                doc=(
+                    "Only reviews with photos or videos."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_installments",
+        namespace="pichau",
+        method="installments",
+        http="POST",
+        path="/api/v1/pichau/installments",
+        summary=(
+            "Every card plan of one product of Pichau (pichau.com.br, Brazil's PC-parts "
+            "store). Scavio fetches the public Pichau page on request. Brazil: Portuguese "
+            "text, prices in BRL as shown to a visitor who is not signed in. By product_id "
+            "and price (fast) or by url_key / link (the product page is read first for its id "
+            "and price): installments [{count, amount, total, discount_percent, "
+            "discount_value, interest_free, label}] (Pichau discounts short card plans too), "
+            "price and product. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 2-8 s; set a client timeout of at least 60 s. By "
+            "url_key: 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 5-60 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "url_key",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product's url_key (items[].url_key; the part after "
+                    "www.pichau.com.br/ in a product link). Send url_key or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on www.pichau.com.br (items[].url), instead of url_key."
+                ),
+            ),
+            Param(
+                "product_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "The Pichau product id (items[].product_id), with price: the fastest "
+                    "form."
+                ),
+            ),
+            Param(
+                "price",
+                "Optional[float]",
+                doc=(
+                    "With product_id: the product's card price in BRL (items[].price)."
+                ),
+            ),
+        ),
+        one_of=(("url_key", "url", "product_id"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_coupons",
+        namespace="pichau",
+        method="coupons",
+        http="POST",
+        path="/api/v1/pichau/coupons",
+        summary=(
+            "The coupons of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio fetches "
+            "the public Pichau page on request. As the coupons page lists them: coupons "
+            "[{code, percent, kind, applies_to (product, category), valid_until, status, "
+            "image}] and upcoming (announced, not active yet). 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a "
+            "client timeout of at least 240 s."
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_categories",
+        namespace="pichau",
+        method="categories",
+        http="POST",
+        path="/api/v1/pichau/categories",
+        summary=(
+            "The category menu of Pichau (pichau.com.br, Brazil's PC-parts store). Scavio "
+            "fetches the public Pichau page on request. Returns categories [{category_id, "
+            "name, path, level, children}] as the site's menu shows them (all true: every "
+            "node), with count and departments. Send a path to category. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "5-60 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "all",
+                "Optional[bool]",
+                doc=(
+                    "Every node of the menu, including campaign and partner pages the site "
+                    "keeps out of its menu. Defaults to false."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="pichau_suggestions",
+        namespace="pichau",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/pichau/suggestions",
+        summary=(
+            "What the search box of Pichau (pichau.com.br, Brazil's PC-parts store) suggests "
+            "for what a shopper typed. Scavio fetches the public Pichau page on request. "
+            "Returns terms [{term, count}] (how many products match), categories [{name, "
+            "path, url}] and products [{name, url_key, url, image, price, available, "
+            "pre_order}] (up to 10, as the box lists them). 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 30-160 s (the page is "
+            "loaded as a browser does); set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper has typed into the search box (2+ characters)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Dafiti: 6 endpoints on /api/v1/dafiti.
+_DAFITI_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="dafiti_search",
+        namespace="dafiti",
+        method="search",
+        http="POST",
+        path="/api/v1/dafiti/search",
+        summary=(
+            "Search Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches "
+            "the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and "
+            "prices in BRL, as shown to a visitor who is not signed in. By keyword. 48 "
+            "results per page plus the site's sponsored slots, in the site's 5 sorts "
+            "(popularity, newest, price_asc, price_desc, discount). Returns title, page, "
+            "page_size, total, total_pages, has_more, count, sponsored_count, sort, items "
+            "[{position, sku (use it in sizes or product), product_id, name, brand, color, "
+            "url, image, price, list_price, discount_percent, pix_price (where the site shows "
+            "a Pix price), card_price, max_installments, categories, sponsored and "
+            "marketplace (a partner store sells it; the store name comes from product or "
+            "sizes)}] and notes. Also query. The site matches loosely, so a search with no "
+            "close match can still list related products. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Listing pages are slow at the "
+            "source: usually 15-160 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese, as a shopper types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "popularity (default), newest, price_asc, price_desc or discount (the "
+                    "site's 5 sorts)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (48 results per page plus the sponsored slots)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dafiti_category",
+        namespace="dafiti",
+        method="category",
+        http="POST",
+        path="/api/v1/dafiti/category",
+        summary=(
+            "One department or category listing of Dafiti (dafiti.com.br, the Brazilian "
+            "fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. "
+            "Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is "
+            "not signed in. By its path (calcados-femininos, calcados-femininos/tenis) or "
+            "link, sorted like search. 48 results per page plus the site's sponsored slots, "
+            "in the site's 5 sorts (popularity, newest, price_asc, price_desc, discount). "
+            "Returns title, page, page_size, total, total_pages, has_more, count, "
+            "sponsored_count, sort, items [{position, sku (use it in sizes or product), "
+            "product_id, name, brand, color, url, image, price, list_price, discount_percent, "
+            "pix_price (where the site shows a Pix price), card_price, max_installments, "
+            "categories, sponsored and marketplace (a partner store sells it; the store name "
+            "comes from product or sizes)}] and notes. Also category, url and breadcrumbs. An "
+            "unknown category is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Listing pages are slow at the source: "
+            "usually 15-160 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A department or category path of 1 to 3 levels as the site writes it "
+                    "(calcados-femininos, calcados-femininos/tenis; breadcrumbs[].url), or "
+                    "its dafiti.com.br link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "popularity (default), newest, price_asc, price_desc or discount (the "
+                    "site's 5 sorts)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (48 results per page plus the sponsored slots)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dafiti_brand",
+        namespace="dafiti",
+        method="brand",
+        http="POST",
+        path="/api/v1/dafiti/brand",
+        summary=(
+            "One brand's listing of Dafiti (dafiti.com.br, the Brazilian fashion "
+            "marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: "
+            "Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not "
+            "signed in. By the brand as the site writes it in its link (asics, nike), sorted "
+            "like search. 48 results per page plus the site's sponsored slots, in the site's "
+            "5 sorts (popularity, newest, price_asc, price_desc, discount). Returns title, "
+            "page, page_size, total, total_pages, has_more, count, sponsored_count, sort, "
+            "items [{position, sku (use it in sizes or product), product_id, name, brand, "
+            "color, url, image, price, list_price, discount_percent, pix_price (where the "
+            "site shows a Pix price), card_price, max_installments, categories, sponsored and "
+            "marketplace (a partner store sells it; the store name comes from product or "
+            "sizes)}] and notes. Also brand, url and breadcrumbs. An unknown brand is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Listing pages are slow at the source: usually 15-160 s; set a "
+            "client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand as the site writes it in its link (asics, nike, farm-rio), or "
+                    "its dafiti.com.br link."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "popularity (default), newest, price_asc, price_desc or discount (the "
+                    "site's 5 sorts)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (48 results per page plus the sponsored slots)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dafiti_deals",
+        namespace="dafiti",
+        method="deals",
+        http="POST",
+        path="/api/v1/dafiti/deals",
+        summary=(
+            "The outlet of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio "
+            "fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. The site's "
+            "own selection of discounted products, sorted like search (discount puts the "
+            "deepest discounts at the top). The site publishes no start or end dates for it. "
+            "48 results per page plus the site's sponsored slots, in the site's 5 sorts "
+            "(popularity, newest, price_asc, price_desc, discount). Returns title, page, "
+            "page_size, total, total_pages, has_more, count, sponsored_count, sort, items "
+            "[{position, sku (use it in sizes or product), product_id, name, brand, color, "
+            "url, image, price, list_price, discount_percent, pix_price (where the site shows "
+            "a Pix price), card_price, max_installments, categories, sponsored and "
+            "marketplace (a partner store sells it; the store name comes from product or "
+            "sizes)}] and notes. Also deal and url. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Listing pages are slow at the source: "
+            "usually 15-160 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "sort",
+                'Optional[Literal["popularity", "newest", "price_asc", "price_desc", "discount"]]',
+                doc=(
+                    "popularity (default), newest, price_asc, price_desc or discount (the "
+                    "site's 5 sorts)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (48 results per page plus the sponsored slots)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dafiti_product",
+        namespace="dafiti",
+        method="product",
+        http="POST",
+        path="/api/v1/dafiti/product",
+        summary=(
+            "One product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio "
+            "fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By "
+            "product_id, sku or link: sku, product_id, name, brand, color, url, availability "
+            "(in_stock, limited, out_of_stock), price, list_price, discount_percent, "
+            "pix_price, card_price, max_installments, installment {count, amount}, rating, "
+            "review_count, seller {store_name, sold_by_dafiti, delivered_by_dafiti}, "
+            "store_names, size_count, sizes_in_stock, sizes [{size, sku, in_stock, units "
+            "(exact from 0 to 10), more_than_10 (the site gives more than 10, not a count), "
+            "stock_message, delivery_type (proprio: Dafiti's own stock, fulfillment: a "
+            "partner store's stock delivered by Dafiti, drop_shipping: sent by the partner "
+            "store), sold_by_dafiti, delivered_by_dafiti, store_name}], colors [{sku, "
+            "product_id, name, color, url, image, price, list_price}] (the other colours), "
+            "categories, campaigns, breadcrumbs, specs [{name, value}], details [{name, "
+            "value}] (the short facts at the start of the description: composition, measures) "
+            "and images. No marketing description, reviews text, shipping quote or price "
+            "history. An unknown product is a charged 404. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 6-35 s; set a client "
+            "timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The number at the end of a Dafiti product link (items[].product_id)."
+                ),
+            ),
+            Param(
+                "sku",
+                "Optional[str]",
+                doc=(
+                    "The Dafiti sku (items[].sku), or one size of it (sizes[].sku), instead "
+                    "of product_id."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A dafiti.com.br product link, instead of product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "sku", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="dafiti_sizes",
+        namespace="dafiti",
+        method="sizes",
+        http="POST",
+        path="/api/v1/dafiti/sizes",
+        summary=(
+            "Every size of one product of Dafiti (dafiti.com.br, the Brazilian fashion "
+            "marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: "
+            "Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not "
+            "signed in. By sku, with its stock: sku, product_id, name, brand, color, url, "
+            "price, list_price, discount_percent, installment {count, amount}, store_names, "
+            "size_count, sizes_in_stock, sizes [{size, sku, in_stock, units (exact from 0 to "
+            "10), more_than_10 (the site gives more than 10, not a count), stock_message, "
+            "delivery_type (proprio: Dafiti's own stock, fulfillment: a partner store's stock "
+            "delivered by Dafiti, drop_shipping: sent by the partner store), sold_by_dafiti, "
+            "delivered_by_dafiti, store_name}], colors, categories and campaigns. A size sku "
+            "also returns requested_size. Faster than product, for a stock check. An unknown "
+            "sku is a charged 404. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 "
+            "s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "The Dafiti sku (items[].sku), or one size of it (sizes[].sku)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -59501,6 +61155,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_COBASI_ENDPOINTS,
     *_NETSHOES_ENDPOINTS,
     *_ESTANTEVIRTUAL_ENDPOINTS,
+    # ====== batch 7 wave 5 2026-11-27: 4 platforms (C&A Brasil, Lojas Renner, Pichau, Dafiti) ======
+    *_CEA_ENDPOINTS,
+    *_RENNER_ENDPOINTS,
+    *_PICHAU_ENDPOINTS,
+    *_DAFITI_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -66496,6 +68155,10 @@ NAMESPACES: tuple[str, ...] = (
     "cobasi",
     "netshoes",
     "estantevirtual",
+    "cea",
+    "renner",
+    "pichau",
+    "dafiti",
 )
 
 

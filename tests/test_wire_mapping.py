@@ -11446,3 +11446,218 @@ def test_batch7w4_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["estantevirtual_copy"].positional_optional_params[0].name == "copy_id"
     assert "AI assistant" not in ENDPOINTS["netshoes_questions"].summary
     assert all(p.doc for ep in w4 for p in ep.params)
+
+
+# --- batch 7 wave 5 2026-11-27: 4 Brazil namespaces ---
+# (C&A Brasil, Lojas Renner, Pichau, Dafiti)
+
+BATCH7W5_1127 = {
+    "cea": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "facets": ("facets", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+    },
+    "renner": {
+        "search": ("search", 1, 300.0),
+        "category": ("category", 1, 300.0),
+        "deals": ("deals", 1, 300.0),
+        "product": ("product", 1, 300.0),
+        "sku_price": ("sku-price", 1, 300.0),
+        "stores": ("stores", 1, 300.0),
+    },
+    "pichau": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "product_live": ("product-live", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "installments": ("installments", 1, 240.0),
+        "coupons": ("coupons", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "dafiti": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "brand": ("brand", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "sizes": ("sizes", 1, 240.0),
+    },
+}
+BATCH7W5_1127_ONE_OF = {
+    "cea_facets": (("query", "category", "brand", "collection_id"),),
+    "cea_product": (("product_id", "sku", "slug", "url"),),
+    "renner_product": (("product_id", "url"),),
+    "renner_sku_price": (("product_id", "url"),),
+    "pichau_product": (("url_key", "url"),),
+    "pichau_product_live": (("url_key", "url"),),
+    "pichau_installments": (("url_key", "url", "product_id"),),
+    "dafiti_product": (("product_id", "sku", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7W5_1127))
+def test_batch7w5_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 4 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7W5_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7W5_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b"
+        assert not re.search(ai, text.lower()), ep.key
+
+
+BATCH7W5_1127_WIRE = [
+    ("cea", "search", {"query": "vestido"}, "search"),
+    (
+        "cea", "search",
+        {"query": "vestido", "sort": "price_asc", "page": 2, "page_size": 12},
+        "search",
+    ),
+    ("cea", "category", {"category": "moda-feminina", "sort": "newest"}, "category"),
+    ("cea", "brand", {"brand": "clock-house"}, "brand"),
+    ("cea", "deals", {"collection_id": 19727, "sort": "discount"}, "deals"),
+    ("cea", "facets", {"query": "jeans"}, "facets"),
+    ("cea", "facets", {"collection_id": "19727"}, "facets"),
+    ("cea", "suggestions", {"query": "vest"}, "suggestions"),
+    ("cea", "suggestions", {}, "suggestions"),
+    ("cea", "categories", {}, "categories"),
+    ("cea", "product", {"product_id": "4536055"}, "product"),
+    ("cea", "product", {"sku": "6493983"}, "product"),
+    ("cea", "shipping", {"sku": "6493983", "cep": "01310100"}, "shipping"),
+    ("cea", "stores", {"cep": "01310100"}, "stores"),
+    ("renner", "search", {"query": "camiseta"}, "search"),
+    (
+        "renner", "search",
+        {"query": "camiseta", "sort": "price_asc", "filters": ["4zo6za"], "page": 2},
+        "search",
+    ),
+    ("renner", "category", {"category": "4zo6za", "filters": "xv9uau"}, "category"),
+    ("renner", "deals", {}, "deals"),
+    ("renner", "deals", {"list": "1l95pyv", "sort": "discount"}, "deals"),
+    ("renner", "product", {"product_id": "931758127"}, "product"),
+    ("renner", "product", {"product_id": "931758127", "sku": "931758135"}, "product"),
+    ("renner", "sku_price", {"sku": "931758135", "product_id": "931758127"}, "sku-price"),
+    ("renner", "stores", {"cep": "01310-100"}, "stores"),
+    ("pichau", "search", {"query": "rtx 5060"}, "search"),
+    (
+        "pichau", "search",
+        {"query": "rtx 5060", "sort": "price_asc", "page": 2, "filters": {"brand": "gainward"}},
+        "search",
+    ),
+    ("pichau", "category", {"category": "hardware/placa-de-video"}, "category"),
+    ("pichau", "brand", {"brand": "corsair", "sort": "price_desc"}, "brand"),
+    ("pichau", "deals", {}, "deals"),
+    ("pichau", "deals", {"deal": "open_box"}, "deals"),
+    ("pichau", "deals", {"campaign": "blackfriday"}, "deals"),
+    (
+        "pichau", "product",
+        {
+            "url_key": (
+                "placa-de-video-inno3d-geforce-rtx-5060-twin-x2-8gb-gddr7-128-bit-"
+                "n50602-08d7-195071n-nac"
+            ),
+        },
+        "product",
+    ),
+    (
+        "pichau", "product_live",
+        {
+            "url_key": (
+                "pc-gamer-pichau-isis-vi-amd-ryzen-5-5500-geforce-rtx-5060-8gb-16gb-ddr4-"
+                "ssd-m-2-480gb-57268"
+            ),
+        },
+        "product-live",
+    ),
+    (
+        "pichau", "reviews",
+        {"product_id": 31201, "page": 2, "rating": 5, "with_media": True},
+        "reviews",
+    ),
+    ("pichau", "installments", {"product_id": 61004, "price": 3717.64}, "installments"),
+    ("pichau", "coupons", {}, "coupons"),
+    ("pichau", "categories", {"all": True}, "categories"),
+    ("pichau", "suggestions", {"query": "rtx"}, "suggestions"),
+    ("dafiti", "search", {"query": "vestido"}, "search"),
+    ("dafiti", "search", {"query": "vestido", "sort": "discount", "page": 2}, "search"),
+    ("dafiti", "category", {"category": "calcados-femininos/tenis"}, "category"),
+    ("dafiti", "brand", {"brand": "asics"}, "brand"),
+    ("dafiti", "deals", {}, "deals"),
+    ("dafiti", "deals", {"sort": "price_asc"}, "deals"),
+    ("dafiti", "product", {"product_id": "15221282"}, "product"),
+    ("dafiti", "product", {"sku": "AS296SCU17ARY"}, "product"),
+    ("dafiti", "sizes", {"sku": "AS296SCU17ARY"}, "sizes"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7W5_1127_WIRE)
+def test_batch7w5_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7W5_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7W5_1127_ONE_OF))
+def test_batch7w5_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7w5_1127_credits_wire_and_timeouts():
+    """C&A Brasil, Lojas Renner, Pichau, Dafiti: 1 credit, 240 s floor (300 s on renner)."""
+    for ns in BATCH7W5_1127:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w5 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W5_1127]
+    assert len(w5) == 33
+    assert {ep.min_timeout for ep in w5 if ep.namespace != "renner"} == {240.0}
+    assert {ep.min_timeout for ep in w5 if ep.namespace == "renner"} == {300.0}
+    assert not [ep.key for ep in w5 if ep.credits_note]
+    assert [p.name for p in ENDPOINTS["cea_shipping"].required_params] == ["sku", "cep"]
+    assert [p.name for p in ENDPOINTS["cea_stores"].required_params] == ["cep"]
+    assert [p.name for p in ENDPOINTS["cea_deals"].required_params] == ["collection_id"]
+    assert [p.name for p in ENDPOINTS["renner_sku_price"].required_params] == ["sku"]
+    assert [p.name for p in ENDPOINTS["pichau_reviews"].required_params] == ["product_id"]
+    assert [p.name for p in ENDPOINTS["dafiti_sizes"].required_params] == ["sku"]
+    assert not ENDPOINTS["cea_categories"].params
+    assert not ENDPOINTS["pichau_coupons"].params
+    assert not ENDPOINTS["renner_deals"].required_params
+    assert not ENDPOINTS["dafiti_deals"].required_params
+    assert ENDPOINTS["cea_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["cea_facets"].positional_optional_params[0].name == "query"
+    assert ENDPOINTS["renner_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["pichau_product_live"].positional_optional_params[0].name == "url_key"
+    assert ENDPOINTS["pichau_installments"].positional_optional_params[0].name == "url_key"
+    assert ENDPOINTS["dafiti_product"].positional_optional_params[0].name == "product_id"

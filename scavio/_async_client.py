@@ -46,6 +46,7 @@ from ._namespaces_async import (
     _AsyncCarscomNamespace,
     _AsyncCarvanaNamespace,
     _AsyncCasasbahiaNamespace,
+    _AsyncCeaNamespace,
     _AsyncCentauroNamespace,
     _AsyncChatGPTNamespace,
     _AsyncChewyNamespace,
@@ -56,6 +57,7 @@ from ._namespaces_async import (
     _AsyncCostcoNamespace,
     _AsyncCultbeautyNamespace,
     _AsyncCvsNamespace,
+    _AsyncDafitiNamespace,
     _AsyncDecathlonNamespace,
     _AsyncDepopNamespace,
     _AsyncDermstoreNamespace,
@@ -132,6 +134,7 @@ from ._namespaces_async import (
     _AsyncPcexpressNamespace,
     _AsyncPetcoNamespace,
     _AsyncPetsmartNamespace,
+    _AsyncPichauNamespace,
     _AsyncPoshmarkNamespace,
     _AsyncPublicstorageNamespace,
     _AsyncPublixNamespace,
@@ -143,6 +146,7 @@ from ._namespaces_async import (
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncReiNamespace,
+    _AsyncRennerNamespace,
     _AsyncRentcafeNamespace,
     _AsyncRentcomNamespace,
     _AsyncRightmoveNamespace,
@@ -426,6 +430,10 @@ class AsyncScavioClient:
         self.cobasi = _AsyncCobasiNamespace(self)
         self.netshoes = _AsyncNetshoesNamespace(self)
         self.estantevirtual = _AsyncEstantevirtualNamespace(self)
+        self.cea = _AsyncCeaNamespace(self)
+        self.renner = _AsyncRennerNamespace(self)
+        self.pichau = _AsyncPichauNamespace(self)
+        self.dafiti = _AsyncDafitiNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
