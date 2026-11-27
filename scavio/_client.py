@@ -31,6 +31,7 @@ from ._namespaces_sync import (
     _BolcomNamespace,
     _BookingNamespace,
     _BootsNamespace,
+    _BoticarioNamespace,
     _BringatrailerNamespace,
     _BuscapeNamespace,
     _CanadianTireNamespace,
@@ -41,6 +42,7 @@ from ._namespaces_sync import (
     _CarscomNamespace,
     _CarvanaNamespace,
     _CasasbahiaNamespace,
+    _CentauroNamespace,
     _ChatGPTNamespace,
     _ChewyNamespace,
     _CompaniesHouseNamespace,
@@ -108,6 +110,7 @@ from ._namespaces_sync import (
     _MichaelsNamespace,
     _MicroCenterNamespace,
     _MovotoNamespace,
+    _NaturaNamespace,
     _NellisNamespace,
     _NeweggNamespace,
     _NikeNamespace,
@@ -411,6 +414,9 @@ class ScavioClient:
         self.rdsaude = _RdsaudeNamespace(self)
         self.reclameaqui = _ReclameaquiNamespace(self)
         self.leroymerlin = _LeroymerlinNamespace(self)
+        self.natura = _NaturaNamespace(self)
+        self.boticario = _BoticarioNamespace(self)
+        self.centauro = _CentauroNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

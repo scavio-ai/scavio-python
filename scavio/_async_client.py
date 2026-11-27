@@ -33,6 +33,7 @@ from ._namespaces_async import (
     _AsyncBolcomNamespace,
     _AsyncBookingNamespace,
     _AsyncBootsNamespace,
+    _AsyncBoticarioNamespace,
     _AsyncBringatrailerNamespace,
     _AsyncBuscapeNamespace,
     _AsyncCanadianTireNamespace,
@@ -43,6 +44,7 @@ from ._namespaces_async import (
     _AsyncCarscomNamespace,
     _AsyncCarvanaNamespace,
     _AsyncCasasbahiaNamespace,
+    _AsyncCentauroNamespace,
     _AsyncChatGPTNamespace,
     _AsyncChewyNamespace,
     _AsyncCompaniesHouseNamespace,
@@ -110,6 +112,7 @@ from ._namespaces_async import (
     _AsyncMichaelsNamespace,
     _AsyncMicroCenterNamespace,
     _AsyncMovotoNamespace,
+    _AsyncNaturaNamespace,
     _AsyncNellisNamespace,
     _AsyncNeweggNamespace,
     _AsyncNikeNamespace,
@@ -406,6 +409,9 @@ class AsyncScavioClient:
         self.rdsaude = _AsyncRdsaudeNamespace(self)
         self.reclameaqui = _AsyncReclameaquiNamespace(self)
         self.leroymerlin = _AsyncLeroymerlinNamespace(self)
+        self.natura = _AsyncNaturaNamespace(self)
+        self.boticario = _AsyncBoticarioNamespace(self)
+        self.centauro = _AsyncCentauroNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

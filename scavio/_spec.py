@@ -36086,6 +36086,1793 @@ _LEROYMERLIN_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 7 wave 2 2026-11-27: 3 platforms (Natura, O Boticario + Eudora, Centauro) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 240 s floor on every method.
+
+# Natura: 7 endpoints on /api/v1/natura.
+_NATURA_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="natura_search",
+        namespace="natura",
+        method="search",
+        http="POST",
+        path="/api/v1/natura/search",
+        summary=(
+            "Search Natura (the Brazilian beauty brand of Natura &Co), on its own storefronts "
+            "in Brazil, Argentina, Chile, Colombia, Mexico and Peru (country br, ar, cl, co, "
+            "mx, pe). Scavio fetches the public Natura page on request; Natura has no public "
+            "product API. Text in the market's language, prices in its currency as shown to a "
+            "visitor who is not signed in (no consultant prices, no regional prices by CEP / "
+            "postal code). Natura's US store is not covered (its catalog lists no products). "
+            "By keyword, sorted by the market's own sorts and filtered by the site's "
+            "refinements (brand, product type, gender, fragrance family, skin type...) and "
+            "price range. Returns country, host, currency, language, page, page_size, total "
+            "(the site's result count), total_pages, has_more, count, sort, filters_applied, "
+            "items [{position, product_id (use it in product), name, url, image, price and "
+            "price_display (the sale price, or the lowest shade price when price_range is "
+            "true), price_max and price_max_display (the highest shade price), price_range, "
+            "list_price and list_price_display (the struck-through price), discount_percent "
+            "(computed from the two), rating and currency}], facets [{attribute, label, "
+            "values [{value, label} or {min_price, max_price, label}]}] (use attribute and "
+            "value in filters), sort_options [{sort, label, selected}] and notes. A card "
+            "carries no review count, stock flag or promotion text (read the product). Also "
+            "query. No results is an empty 200. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-30 s, up to a minute for "
+            "pages of 100; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords, in the market's language."
+                ),
+            ),
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_sellers", "relevance", "price_asc", "price_desc", "name_asc", "name_desc", "discount", "brand", "most_popular"]]',
+                doc=(
+                    "The market's own sorts (not every market offers every sort): br: "
+                    "best_sellers, relevance, name_asc, name_desc, price_asc, price_desc, "
+                    "discount; ar: best_sellers, relevance, price_asc, price_desc, name_asc, "
+                    "name_desc, brand, most_popular, discount; cl: best_sellers, discount, "
+                    "price_asc, price_desc; co: best_sellers, name_asc, name_desc, price_asc, "
+                    "price_desc, discount; mx: best_sellers, price_asc, price_desc, "
+                    "relevance, name_asc, name_desc, brand, most_popular; pe: best_sellers, "
+                    "discount, name_asc, name_desc, price_asc, price_desc. Default: the "
+                    "site's order."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Refinements as the site names them: attribute -> value(s), from "
+                    "facets[].attribute and facets[].values[].value (e.g. {\"brand\": \"Kaiak\", "
+                    "\"natg_gender\": \"masculino\"}). Up to 5 attributes."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price, whole units of the market's currency (the site's price "
+                    "filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price, whole units of the market's currency."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-100 (default 24). Pages of 100 can take up to a "
+                    "minute."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_category",
+        namespace="natura",
+        method="category",
+        http="POST",
+        path="/api/v1/natura/category",
+        summary=(
+            "One category listing of Natura (the Brazilian beauty brand of Natura &Co), on "
+            "its own storefronts in Brazil, Argentina, Chile, Colombia, Mexico and Peru "
+            "(country br, ar, cl, co, mx, pe). Scavio fetches the public Natura page on "
+            "request; Natura has no public product API. Text in the market's language, prices "
+            "in its currency as shown to a visitor who is not signed in (no consultant "
+            "prices, no regional prices by CEP / postal code). Natura's US store is not "
+            "covered (its catalog lists no products). By category id or /c/ link, sorted and "
+            "filtered like search. Returns country, host, currency, language, page, "
+            "page_size, total (the site's result count), total_pages, has_more, count, sort, "
+            "filters_applied, items [{position, product_id (use it in product), name, url, "
+            "image, price and price_display (the sale price, or the lowest shade price when "
+            "price_range is true), price_max and price_max_display (the highest shade price), "
+            "price_range, list_price and list_price_display (the struck-through price), "
+            "discount_percent (computed from the two), rating and currency}], facets "
+            "[{attribute, label, values [{value, label} or {min_price, max_price, label}]}] "
+            "(use attribute and value in filters), sort_options [{sort, label, selected}] and "
+            "notes. A card carries no review count, stock flag or promotion text (read the "
+            "product). Also category_id, category_name and url. An unknown category is a "
+            "charged 404; in ar the top-level departments (maquillaje, perfumeria, "
+            "cabello...) have no listing page and answer that 404 too: use a subcategory. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-30 s, up to a minute for pages of 100; set a client timeout of at "
+            "least 120 s."
+        ),
+        params=(
+            Param(
+                "category_id",
+                "str",
+                required=True,
+                doc=(
+                    "A category id (categories[].category_id, e.g. maquiagem, perfumaria, "
+                    "refis) or the market's /c/<id> link."
+                ),
+            ),
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_sellers", "relevance", "price_asc", "price_desc", "name_asc", "name_desc", "discount", "brand", "most_popular"]]',
+                doc=(
+                    "The market's own sorts (not every market offers every sort): br: "
+                    "best_sellers, relevance, name_asc, name_desc, price_asc, price_desc, "
+                    "discount; ar: best_sellers, relevance, price_asc, price_desc, name_asc, "
+                    "name_desc, brand, most_popular, discount; cl: best_sellers, discount, "
+                    "price_asc, price_desc; co: best_sellers, name_asc, name_desc, price_asc, "
+                    "price_desc, discount; mx: best_sellers, price_asc, price_desc, "
+                    "relevance, name_asc, name_desc, brand, most_popular; pe: best_sellers, "
+                    "discount, name_asc, name_desc, price_asc, price_desc. Default: the "
+                    "site's order."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Refinements as the site names them: attribute -> value(s), from "
+                    "facets[].attribute and facets[].values[].value (e.g. {\"brand\": \"Kaiak\", "
+                    "\"natg_gender\": \"masculino\"}). Up to 5 attributes."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price, whole units of the market's currency (the site's price "
+                    "filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price, whole units of the market's currency."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-100 (default 24). Pages of 100 can take up to a "
+                    "minute."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_categories",
+        namespace="natura",
+        method="categories",
+        http="POST",
+        path="/api/v1/natura/categories",
+        summary=(
+            "The category menu of Natura (the Brazilian beauty brand of Natura &Co), on its "
+            "own storefronts in Brazil, Argentina, Chile, Colombia, Mexico and Peru (country "
+            "br, ar, cl, co, mx, pe). Scavio fetches the public Natura page on request; "
+            "Natura has no public product API. Text in the market's language, prices in its "
+            "currency as shown to a visitor who is not signed in (no consultant prices, no "
+            "regional prices by CEP / postal code). Natura's US store is not covered (its "
+            "catalog lists no products). Returns count, node_count and categories "
+            "[{category_id, name, menu_count, url, subcategories [...]}]. menu_count is the "
+            "menu's own count and can differ from a listing's total. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-30 s, up to "
+            "a minute for pages of 100; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_product",
+        namespace="natura",
+        method="product",
+        http="POST",
+        path="/api/v1/natura/product",
+        summary=(
+            "One product of Natura (the Brazilian beauty brand of Natura &Co), on its own "
+            "storefronts in Brazil, Argentina, Chile, Colombia, Mexico and Peru (country br, "
+            "ar, cl, co, mx, pe). Scavio fetches the public Natura page on request; Natura "
+            "has no public product API. Text in the market's language, prices in its currency "
+            "as shown to a visitor who is not signed in (no consultant prices, no regional "
+            "prices by CEP / postal code). Natura's US store is not covered (its catalog "
+            "lists no products). By id or link: product_id, requested_id, name, brand, url, "
+            "category {category_id, name}, in_stock, max_quantity, low_stock and "
+            "low_stock_badge (the site's \"ultimas unidades\" badge), price, list_price, "
+            "discount_percent, discount_amount (each with a *_display string in the market's "
+            "format), price_min and price_max (shade masters), currency, installments "
+            "{max_count, min_amount}, tags (e.g. oferta relampago), stamps [{label, date}], "
+            "promotional_tag, is_kit, kit_contents [{product_id, quantity}], shade_count, "
+            "shades [{product_id, shade, shade_code, swatch_image, image, price, list_price, "
+            "discount_percent, in_stock, orderable, max_quantity, low_stock, "
+            "low_stock_badge}], ingredients (the list as written), images, rating, "
+            "review_count and latest_reviews [{rating, text, date}] (the 3 latest the page "
+            "carries, no names). No marketing description. Stock is a flag, not a unit count; "
+            "refills are their own products with no link to the product they refill; full "
+            "review paging, store stock and regional prices are not available. An unknown "
+            "product is a charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-30 s, up to a minute for pages of "
+            "100; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A product id (items[].product_id, shades[].product_id), e.g. "
+                    "NATBRA-194225 or a shade master NATBRA-PAI3379; the bare number (194225) "
+                    "takes the market's prefix."
+                ),
+            ),
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link (https://www.natura.com.br/p/<name>/<id>) instead of "
+                    "product_id; it sets the market."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_suggestions",
+        namespace="natura",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/natura/suggestions",
+        summary=(
+            "The search suggestions of Natura (the Brazilian beauty brand of Natura &Co), on "
+            "its own storefronts in Brazil, Argentina, Chile, Colombia, Mexico and Peru "
+            "(country br, ar, cl, co, mx, pe). Scavio fetches the public Natura page on "
+            "request; Natura has no public product API. Text in the market's language, prices "
+            "in its currency as shown to a visitor who is not signed in (no consultant "
+            "prices, no regional prices by CEP / postal code). Natura's US store is not "
+            "covered (its catalog lists no products). For the start of a search: query, "
+            "count, did_you_mean, products [{product_id, name, image, url}] (up to 3), "
+            "brands, popular_searches and categories, as the site's suggestion box shows "
+            "them. Nothing to suggest is an empty 200. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 2-30 s, up to a minute "
+            "for pages of 100; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a search."
+                ),
+            ),
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_stores",
+        namespace="natura",
+        method="stores",
+        http="POST",
+        path="/api/v1/natura/stores",
+        summary=(
+            "The physical Natura stores in Brazil (natura.com.br store list, 1,093 stores on "
+            "2026-11-27), filtered by state, city, CEP prefix and store type: total_listed, "
+            "total, page, page_size, total_pages, has_more, count, filters_applied and stores "
+            "[{store_code, name, type (own, franchise, athena, kiosk), site_type, address, "
+            "neighborhood, city, state, cep, phone, email, delivery}]. email is the store's "
+            "@natura.net mailbox, null otherwise. No coordinates, no opening hours, no store "
+            "stock. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-30 s, up to a minute for pages of 100; set a client "
+            "timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "country",
+                'Optional[Literal["br"]]',
+                doc=(
+                    "br (the store list is published on natura.com.br)."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Brazilian state code (UF): ac, al, am, ap, ba, ce, df, es, go, ma, mg, "
+                    "ms, mt, pa, pb, pe, pi, pr, rj, rn, ro, rr, rs, sc, se, sp, to."
+                ),
+            ),
+            Param(
+                "city",
+                "Optional[str]",
+                doc=(
+                    "City (accents and case ignored)."
+                ),
+            ),
+            Param(
+                "cep",
+                "Optional[str]",
+                doc=(
+                    "A CEP or its leading digits (a CEP prefix)."
+                ),
+            ),
+            Param(
+                "type",
+                'Optional[Literal["own", "franchise", "athena", "kiosk"]]',
+                doc=(
+                    "own (aurora), franchise (franquia), athena or kiosk (quiosque), as the "
+                    "site labels them."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Stores per page, 1-200 (default 50)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="natura_deals",
+        namespace="natura",
+        method="deals",
+        http="POST",
+        path="/api/v1/natura/deals",
+        summary=(
+            "The Black Friday campaign listing of Natura (the Brazilian beauty brand of "
+            "Natura &Co), on its own storefronts in Brazil, Argentina, Chile, Colombia, "
+            "Mexico and Peru (country br, ar, cl, co, mx, pe). Scavio fetches the public "
+            "Natura page on request; Natura has no public product API. Text in the market's "
+            "language, prices in its currency as shown to a visitor who is not signed in (no "
+            "consultant prices, no regional prices by CEP / postal code). Natura's US store "
+            "is not covered (its catalog lists no products). The market's campaign category "
+            "(natura-friday in br, ar, cl, co; promociones in mx and pe), sorted by discount "
+            "where the market offers that sort (mx does not), filtered like search. Returns "
+            "country, host, currency, language, page, page_size, total (the site's result "
+            "count), total_pages, has_more, count, sort, filters_applied, items [{position, "
+            "product_id (use it in product), name, url, image, price and price_display (the "
+            "sale price, or the lowest shade price when price_range is true), price_max and "
+            "price_max_display (the highest shade price), price_range, list_price and "
+            "list_price_display (the struck-through price), discount_percent (computed from "
+            "the two), rating and currency}], facets [{attribute, label, values [{value, "
+            "label} or {min_price, max_price, label}]}] (use attribute and value in filters), "
+            "sort_options [{sort, label, selected}] and notes. A card carries no review "
+            "count, stock flag or promotion text (read the product). Also category_id, "
+            "category_name, url and campaign_dates (the sentences of the campaign page that "
+            "state its dates, as written, e.g. \"A Natura Friday 2026 acontece de 16 a 27 de "
+            "novembro ... estendidos ate 30/11\"; [] when the page states none, null when it "
+            "could not be read). An unknown category is a charged 404. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 2-30 s, up "
+            "to a minute for pages of 100; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "country",
+                'Optional[Literal["br", "ar", "cl", "co", "mx", "pe"]]',
+                doc=(
+                    "The storefront: br (www.natura.com.br, BRL), ar "
+                    "(www.naturacosmeticos.com.ar, ARS), cl (www.natura.cl, CLP), co "
+                    "(www.natura.com.co, COP), mx (www.natura.com.mx, MXN), pe "
+                    "(www.natura.com.pe, PEN). Default br."
+                ),
+            ),
+            Param(
+                "category_id",
+                "Optional[str]",
+                doc=(
+                    "Another campaign category instead of the market's Black Friday category "
+                    "(natura-friday in br, ar, cl, co; promociones in mx and pe)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_sellers", "relevance", "price_asc", "price_desc", "name_asc", "name_desc", "discount", "brand", "most_popular"]]',
+                doc=(
+                    "The market's own sorts (not every market offers every sort): br: "
+                    "best_sellers, relevance, name_asc, name_desc, price_asc, price_desc, "
+                    "discount; ar: best_sellers, relevance, price_asc, price_desc, name_asc, "
+                    "name_desc, brand, most_popular, discount; cl: best_sellers, discount, "
+                    "price_asc, price_desc; co: best_sellers, name_asc, name_desc, price_asc, "
+                    "price_desc, discount; mx: best_sellers, price_asc, price_desc, "
+                    "relevance, name_asc, name_desc, brand, most_popular; pe: best_sellers, "
+                    "discount, name_asc, name_desc, price_asc, price_desc. Default: the "
+                    "site's order."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Refinements as the site names them: attribute -> value(s), from "
+                    "facets[].attribute and facets[].values[].value (e.g. {\"brand\": \"Kaiak\", "
+                    "\"natg_gender\": \"masculino\"}). Up to 5 attributes."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price, whole units of the market's currency (the site's price "
+                    "filter)."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price, whole units of the market's currency."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page (default 1)."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-100 (default 24). Pages of 100 can take up to a "
+                    "minute."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# O Boticario + Eudora: 11 endpoints on /api/v1/boticario.
+_BOTICARIO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="boticario_search",
+        namespace="boticario",
+        method="search",
+        http="POST",
+        path="/api/v1/boticario/search",
+        summary=(
+            "Search O Boticario and Eudora (boticario.com.br, eudora.com.br, the beauty "
+            "brands of Grupo Boticario). Scavio fetches the public page on request; neither "
+            "brand has a public API. brand picks the storefront (boticario or eudora). Brazil "
+            "only, prices in Brazilian reais (BRL), data in Portuguese, as shown to a visitor "
+            "who is not signed in. By keyword. 36 per page in 7 sorts, filtered by product "
+            "brand, line, category, rating, price and any other facet the listing offers. "
+            "Returns page, page_size, total, total_pages, has_more, count, sort, title, "
+            "redirected_to, items [{position, sku (use it in product, prices and pickup), "
+            "name, product_brand, url, slug, image, price (card price), pix_price, was_price, "
+            "discount_percent, installments {count, amount}, badges (deal text as given), "
+            "available, free_shipping, deal_ends_at (the item's countdown end), rating, "
+            "review_count}], facets [{key, name, values [{name, value, count, selected}]}], "
+            "price_ranges [{range, count}], filters_applied and notes. A keyword the site "
+            "sends to a category landing (Eudora does this for broad terms) is followed as "
+            "the site does it (redirected_to), with the sort, filters and page applied there. "
+            "1 credit, 2 when the page needs a second route (credits_used says which). Pages "
+            "come from the site's own cache: prices can be up to about 15 minutes old. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. The "
+            "site's pages are slow: usually 10-130 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount", "rating", "best_sellers", "newest"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, discount, rating, "
+                    "best_sellers or newest."
+                ),
+            ),
+            Param(
+                "product_brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product brand slug(s) as the site writes them (facets key marca, e.g. "
+                    "egeo, floratta, lily)."
+                ),
+            ),
+            Param(
+                "line",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product line slug(s) (facets key linha)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Category slug(s) (facets key categoria)."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[int]",
+                doc=(
+                    "1-4: that many stars or more; 5: 5 stars."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in BRL."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "facets",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet the listing offers, by facets[].key: {\"<key>\": value or "
+                    "[values]} (values from facets[].values[].value)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_category",
+        namespace="boticario",
+        method="category",
+        http="POST",
+        path="/api/v1/boticario/category",
+        summary=(
+            "One listing of O Boticario and Eudora (boticario.com.br, eudora.com.br, the "
+            "beauty brands of Grupo Boticario). Scavio fetches the public page on request; "
+            "neither brand has a public API. brand picks the storefront (boticario or "
+            "eudora). Brazil only, prices in Brazilian reais (BRL), data in Portuguese, as "
+            "shown to a visitor who is not signed in. A department, category or product-brand "
+            "page by path or link, sorted and filtered like search. 36 per page in 7 sorts, "
+            "filtered by product brand, line, category, rating, price and any other facet the "
+            "listing offers. Returns page, page_size, total, total_pages, has_more, count, "
+            "sort, title, redirected_to, items [{position, sku (use it in product, prices and "
+            "pickup), name, product_brand, url, slug, image, price (card price), pix_price, "
+            "was_price, discount_percent, installments {count, amount}, badges (deal text as "
+            "given), available, free_shipping, deal_ends_at (the item's countdown end), "
+            "rating, review_count}], facets [{key, name, values [{name, value, count, "
+            "selected}]}], price_ranges [{range, count}], filters_applied and notes. Also "
+            "path and url. An unknown path is a charged 404. 1 credit, 2 when the page needs "
+            "a second route (credits_used says which). Pages come from the site's own cache: "
+            "prices can be up to about 15 minutes old. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. The site's pages are slow: usually "
+            "10-130 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "path",
+                "str",
+                required=True,
+                doc=(
+                    "A listing path or link: a department (/perfumaria/), a category "
+                    "(/maquiagem/boca/batom/), a product brand (/egeo/) or a categories[] "
+                    "path."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount", "rating", "best_sellers", "newest"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, discount, rating, "
+                    "best_sellers or newest."
+                ),
+            ),
+            Param(
+                "product_brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product brand slug(s) as the site writes them (facets key marca, e.g. "
+                    "egeo, floratta, lily)."
+                ),
+            ),
+            Param(
+                "line",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product line slug(s) (facets key linha)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Category slug(s) (facets key categoria)."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[int]",
+                doc=(
+                    "1-4: that many stars or more; 5: 5 stars."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in BRL."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "facets",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet the listing offers, by facets[].key: {\"<key>\": value or "
+                    "[values]} (values from facets[].values[].value)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_categories",
+        namespace="boticario",
+        method="categories",
+        http="POST",
+        path="/api/v1/boticario/categories",
+        summary=(
+            "The category menu of O Boticario and Eudora (boticario.com.br, eudora.com.br, "
+            "the beauty brands of Grupo Boticario). Scavio fetches the public page on "
+            "request; neither brand has a public API. brand picks the storefront (boticario "
+            "or eudora). Brazil only, prices in Brazilian reais (BRL), data in Portuguese, as "
+            "shown to a visitor who is not signed in. departments [{name, path, groups "
+            "[{name, path, links [{name, path}]}]}] (every path works in category). 1 credit, "
+            "2 when the page needs a second route (credits_used says which). Pages come from "
+            "the site's own cache: prices can be up to about 15 minutes old. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. The site's pages are "
+            "slow: usually 10-130 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_deals",
+        namespace="boticario",
+        method="deals",
+        http="POST",
+        path="/api/v1/boticario/deals",
+        summary=(
+            "The deal listings of O Boticario and Eudora (boticario.com.br, eudora.com.br, "
+            "the beauty brands of Grupo Boticario). Scavio fetches the public page on "
+            "request; neither brand has a public API. brand picks the storefront (boticario "
+            "or eudora). Brazil only, prices in Brazilian reais (BRL), data in Portuguese, as "
+            "shown to a visitor who is not signed in. type beauty_week (the site's Black "
+            "Friday event, Beauty Week) or promotions (the promotions hub), optionally one "
+            "section (/beauty-week/perfumaria/, /promocao/menor-preco-do-mes/), sorted and "
+            "filtered like search; each item carries its own countdown end (deal_ends_at) and "
+            "its deal badges. 36 per page in 7 sorts, filtered by product brand, line, "
+            "category, rating, price and any other facet the listing offers. Returns page, "
+            "page_size, total, total_pages, has_more, count, sort, title, redirected_to, "
+            "items [{position, sku (use it in product, prices and pickup), name, "
+            "product_brand, url, slug, image, price (card price), pix_price, was_price, "
+            "discount_percent, installments {count, amount}, badges (deal text as given), "
+            "available, free_shipping, deal_ends_at (the item's countdown end), rating, "
+            "review_count}], facets [{key, name, values [{name, value, count, selected}]}], "
+            "price_ranges [{range, count}], filters_applied and notes. Also type, section, "
+            "path and url. 1 credit, 2 when the page needs a second route (credits_used says "
+            "which). Pages come from the site's own cache: prices can be up to about 15 "
+            "minutes old. A not-found is charged; failed upstream calls and refused inputs "
+            "are not. The site's pages are slow: usually 10-130 s; set a client timeout of at "
+            "least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "type",
+                'Optional[Literal["beauty_week", "promotions"]]',
+                doc=(
+                    "beauty_week (default: the site's Black Friday event, /beauty-week/) or "
+                    "promotions (the promotions hub, /promocao/)."
+                ),
+            ),
+            Param(
+                "section",
+                "Optional[str]",
+                doc=(
+                    "Optional sub-page as the site's links write it: a department "
+                    "(perfumaria, maquiagem, cabelos) or a promotion (menor-preco-do-mes, "
+                    "leve-x-pague-y, desconto-progressivo, cashback)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "price_asc", "price_desc", "discount", "rating", "best_sellers", "newest"]]',
+                doc=(
+                    "relevance (default), price_asc, price_desc, discount, rating, "
+                    "best_sellers or newest."
+                ),
+            ),
+            Param(
+                "product_brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product brand slug(s) as the site writes them (facets key marca, e.g. "
+                    "egeo, floratta, lily)."
+                ),
+            ),
+            Param(
+                "line",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Product line slug(s) (facets key linha)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Category slug(s) (facets key categoria)."
+                ),
+            ),
+            Param(
+                "min_rating",
+                "Optional[int]",
+                doc=(
+                    "1-4: that many stars or more; 5: 5 stars."
+                ),
+            ),
+            Param(
+                "min_price",
+                "Optional[int]",
+                doc=(
+                    "Minimum price in BRL."
+                ),
+            ),
+            Param(
+                "max_price",
+                "Optional[int]",
+                doc=(
+                    "Maximum price in BRL."
+                ),
+            ),
+            Param(
+                "facets",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Any other facet the listing offers, by facets[].key: {\"<key>\": value or "
+                    "[values]} (values from facets[].values[].value)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 per page)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_promotions",
+        namespace="boticario",
+        method="promotions",
+        http="POST",
+        path="/api/v1/boticario/promotions",
+        summary=(
+            "The promotions conditions page of O Boticario and Eudora (boticario.com.br, "
+            "eudora.com.br, the beauty brands of Grupo Boticario). Scavio fetches the public "
+            "page on request; neither brand has a public API. brand picks the storefront "
+            "(boticario or eudora). Brazil only, prices in Brazilian reais (BRL), data in "
+            "Portuguese, as shown to a visitor who is not signed in. valid_from, valid_to and "
+            "campaigns [{name, section, valid_from, valid_to, coupons}]: each campaign's "
+            "validity dates and coupon codes as written on the page. 1 credit, 2 when the "
+            "page needs a second route (credits_used says which). Pages come from the site's "
+            "own cache: prices can be up to about 15 minutes old. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. The site's pages are slow: "
+            "usually 10-130 s; set a client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_product",
+        namespace="boticario",
+        method="product",
+        http="POST",
+        path="/api/v1/boticario/product",
+        summary=(
+            "One product of O Boticario and Eudora (boticario.com.br, eudora.com.br, the "
+            "beauty brands of Grupo Boticario). Scavio fetches the public page on request; "
+            "neither brand has a public API. brand picks the storefront (boticario or "
+            "eudora). Brazil only, prices in Brazilian reais (BRL), data in Portuguese, as "
+            "shown to a visitor who is not signed in. By slug, link or SKU: sku, requested, "
+            "name, product_brand, url, slug, gtin, image, price (card price), pix_price, "
+            "pix_discount_percent, was_price, discount_percent, installments {count, amount}, "
+            "price_text (the site's price sentence), availability (in_stock / out_of_stock), "
+            "stock_units (the site's online stock count, as given), seller {id, name}, "
+            "categories, breadcrumbs, specs [{name, values}] (the datasheet), "
+            "product_group_id, varies_by, variants [{sku, name, color, size, url, image, "
+            "price, availability, selected}] (every shade / size), kit_components [{sku, "
+            "name, slug, url, quantity_in_kit, price, was_price, discount_percent, "
+            "installments, stock_units}], kits_containing and review_summary {average_rating, "
+            "count, histogram, recommend_percent, ai_summary (the site's own summary of the "
+            "reviews, as given)}. Per-store stock and loyalty prices are not published. An "
+            "unknown product is a charged 404. 1 credit, 2 when the page needs a second route "
+            "(credits_used says which). Pages come from the site's own cache: prices can be "
+            "up to about 15 minutes old. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. The site's pages are slow: usually 10-130 s; set a "
+            "client timeout of at least 240 s."
+        ),
+        params=(
+            Param(
+                "slug",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The product slug (items[].slug)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A boticario.com.br or eudora.com.br product link, instead of slug (names "
+                    "the brand too)."
+                ),
+            ),
+            Param(
+                "sku",
+                "Optional[str]",
+                doc=(
+                    "A product SKU (items[].sku), instead of slug: resolved through the "
+                    "site's SKU lookup."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url", "sku"),),
+        credits=1,
+        credits_note=(
+            "1 credit, 2 when the page needs a second route; credits_used in the response is "
+            "the exact charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_prices",
+        namespace="boticario",
+        method="prices",
+        http="POST",
+        path="/api/v1/boticario/prices",
+        summary=(
+            "Current prices of up to 10 SKUs on O Boticario and Eudora (boticario.com.br, "
+            "eudora.com.br, the beauty brands of Grupo Boticario). Scavio fetches the public "
+            "page on request; neither brand has a public API. brand picks the storefront "
+            "(boticario or eudora). Brazil only, prices in Brazilian reais (BRL), data in "
+            "Portuguese, as shown to a visitor who is not signed in. One SKU lookup per SKU: "
+            "items [{sku, found, name, slug, url, product_brand, department, price, "
+            "was_price, discount_percent, pix_price, installments, shade, presentation, "
+            "image, seller}], count and found. 1 credit per 5 SKUs (ceil(skus / 5)). Unknown "
+            "SKUs come back found false; if none is found, a charged 404. Usually 2-25 s; set "
+            "a client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "skus",
+                "Union[list[str], str]",
+                required=True,
+                doc=(
+                    "1-10 SKUs (an array or comma-separated)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+        ),
+        credits=1,
+        credits_note=(
+            "1 credit per 5 SKUs (2 for 6-10 SKUs); credits_used in the response is the exact "
+            "charge."
+        ),
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_reviews",
+        namespace="boticario",
+        method="reviews",
+        http="POST",
+        path="/api/v1/boticario/reviews",
+        summary=(
+            "Reviews of one product of O Boticario and Eudora (boticario.com.br, "
+            "eudora.com.br, the beauty brands of Grupo Boticario). Scavio fetches the public "
+            "page on request; neither brand has a public API. brand picks the storefront "
+            "(boticario or eudora). Brazil only, prices in Brazilian reais (BRL), data in "
+            "Portuguese, as shown to a visitor who is not signed in. By SKU or by "
+            "product_group_id (every shade together: the count the product page shows): "
+            "product_id, sort, stars, page, page_size, total, total_pages, has_more, count "
+            "and reviews [{review_id, rating, text, created_at, modified_at, most_useful, "
+            "upvotes, downvotes, reviewer_state, reviewer_type, sku, product_name, variant, "
+            "photo_count}]. Up to 50 per page, sorted most_recent, most_useful or oldest, "
+            "filtered by stars. No reviewer names, cities or gender. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-25 s; set a "
+            "client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "str",
+                required=True,
+                doc=(
+                    "A SKU (that shade's reviews) or the product endpoint's product_group_id "
+                    "(every shade together: the count the product page shows)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Reviews per page, 1-50 (default 20)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["most_recent", "most_useful", "oldest"]]',
+                doc=(
+                    "most_recent, most_useful or oldest (default: the site's order)."
+                ),
+            ),
+            Param(
+                "stars",
+                "Optional[int]",
+                doc=(
+                    "Only reviews with this many stars."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_stores",
+        namespace="boticario",
+        method="stores",
+        http="POST",
+        path="/api/v1/boticario/stores",
+        summary=(
+            "The stores of O Boticario and Eudora (boticario.com.br, eudora.com.br, the "
+            "beauty brands of Grupo Boticario). Scavio fetches the public page on request; "
+            "neither brand has a public API. brand picks the storefront (boticario or "
+            "eudora). Brazil only, prices in Brazilian reais (BRL), data in Portuguese, as "
+            "shown to a visitor who is not signed in. that offer pickup of online orders near "
+            "a CEP, nearest first: cep, page, page_size, total, total_pages, has_more, count "
+            "and stores [{store_id, name, pickup_time, distance_m, distance_km, hours "
+            "{weekday, weekend}, address {street, number, district, postal_code, city, "
+            "state}}]. Store stock and prices are not published. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-25 s; set a "
+            "client timeout of at least 90 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Page, 1-based."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Stores per page, 1-50 (default 20)."
+                ),
+            ),
+            Param(
+                "radius_km",
+                "Optional[int]",
+                doc=(
+                    "Optional radius around the CEP in km."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_pickup",
+        namespace="boticario",
+        method="pickup",
+        http="POST",
+        path="/api/v1/boticario/pickup",
+        summary=(
+            "Delivery and pickup for one product of O Boticario and Eudora (boticario.com.br, "
+            "eudora.com.br, the beauty brands of Grupo Boticario). Scavio fetches the public "
+            "page on request; neither brand has a public API. brand picks the storefront "
+            "(boticario or eudora). Brazil only, prices in Brazilian reais (BRL), data in "
+            "Portuguese, as shown to a visitor who is not signed in. at a CEP: available, "
+            "seller_id, delivery [{type, description, expected_days, shipping_cost}] (the "
+            "delivery time as the site words it) and click_and_collect (whether the site "
+            "offers pickup at a store near the CEP: yes / no). Which store and per-store "
+            "stock are not published. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Usually 2-25 s; set a client timeout of at least 90 "
+            "s. By SKU it is a lookup and the quote (2 calls, still 1 credit)."
+        ),
+        params=(
+            Param(
+                "cep",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "The product slug (items[].slug)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A boticario.com.br or eudora.com.br product link, instead of slug (names "
+                    "the brand too)."
+                ),
+            ),
+            Param(
+                "sku",
+                "Optional[str]",
+                doc=(
+                    "A product SKU (items[].sku), instead of slug: resolved through the "
+                    "site's SKU lookup."
+                ),
+            ),
+        ),
+        one_of=(("slug", "url", "sku"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="boticario_suggestions",
+        namespace="boticario",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/boticario/suggestions",
+        summary=(
+            "The search suggestions of O Boticario and Eudora (boticario.com.br, "
+            "eudora.com.br, the beauty brands of Grupo Boticario). Scavio fetches the public "
+            "page on request; neither brand has a public API. brand picks the storefront "
+            "(boticario or eudora). Brazil only, prices in Brazilian reais (BRL), data in "
+            "Portuguese, as shown to a visitor who is not signed in. query, terms [{term, "
+            "departments}] and up to 5 products [{sku, name, slug, url, product_brand, "
+            "department, price, was_price, discount_percent, pix_price, installments, shade, "
+            "presentation, image, seller}]. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not. Usually 2-25 s; set a client timeout of at "
+            "least 90 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper types (a SKU works too)."
+                ),
+            ),
+            Param(
+                "brand",
+                'Optional[Literal["boticario", "eudora"]]',
+                doc=(
+                    "boticario (O Boticario, www.boticario.com.br; default) or eudora "
+                    "(Eudora, www.eudora.com.br)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Centauro: 7 endpoints on /api/v1/centauro.
+_CENTAURO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="centauro_search",
+        namespace="centauro",
+        method="search",
+        http="POST",
+        path="/api/v1/centauro/search",
+        summary=(
+            "Search Centauro (centauro.com.br, the sporting-goods retailer of Grupo SBF). "
+            "Scavio fetches the public centauro.com.br data on request; Centauro has no "
+            "public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By keyword. 36 per page, pages 1-278, in the "
+            "site's 4 sorts (relevance, discount, price_asc, price_desc), filtered by any "
+            "facet value: brand, size, gender, product type, price band, sport, colour, "
+            "discount band, promotion, store (loja: the products a physical store carries) "
+            "and sold-by (vendidopor: Centauro or a marketplace seller). Returns page, "
+            "page_size, total (the site caps it at 10000: total_capped), total_pages, "
+            "has_more, count, items [{position, product_id (model + colour: use it in "
+            "product), model, color_code, name, brand, url, image, available, price, "
+            "list_price, discount_percent, pix_price (the Pix price, where the site shows "
+            "one), installment {count, amount}, has_different_prices (sizes can differ in "
+            "price or seller), seller {name, is_centauro}, categories, badges (Mega Oferta, "
+            "Preco Online ...), rating, review_count, color_count, size_count, size_skus (use "
+            "one in freight) and variants [{product_id, color, url, image, price, list_price, "
+            "discount_percent, pix_price, installment}] (the other colours)}], facets [{name, "
+            "key, values [{label, filter, count, selected}]}] with the site's counts, "
+            "breadcrumbs, sort, filters_applied and notes. Also query. No results is an empty "
+            "200 (charged). 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 10-45 s; set a client timeout of at least 150 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords (Portuguese, as a shopper types them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), discount, price_asc or price_desc (the site's 4 "
+                    "sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Facet value(s) as key:value (facets[].values[].filter), up to 10. Keys: "
+                    "marca, tamanho, genero, produto, preco, esportes, modalidade, "
+                    "categorias, cor, desconto, idade, linha, promocao, loja, vendidopor."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand facet value(s) (marca), e.g. nike or asics."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Store facet value(s) (loja): the products a physical store carries "
+                    "(stores[].filter or facets loja values)."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Sold-by facet value(s) (vendidopor): centauro or a marketplace seller "
+                    "such as nikecombr or adidas."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-278 (36 per page; the site caps the total at 10000)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_category",
+        namespace="centauro",
+        method="category",
+        http="POST",
+        path="/api/v1/centauro/category",
+        summary=(
+            "One category listing of Centauro (centauro.com.br, the sporting-goods retailer "
+            "of Grupo SBF). Scavio fetches the public centauro.com.br data on request; "
+            "Centauro has no public product API. Brazil: Portuguese (pt-BR) text and prices "
+            "in BRL, as shown to a visitor who is not signed in. By its /nav/ path or link "
+            "(/nav/categorias/calcados/produto/tenis) or a facet value (categorias:calcados), "
+            "sorted and filtered like search. 36 per page, pages 1-278, in the site's 4 sorts "
+            "(relevance, discount, price_asc, price_desc), filtered by any facet value: "
+            "brand, size, gender, product type, price band, sport, colour, discount band, "
+            "promotion, store (loja: the products a physical store carries) and sold-by "
+            "(vendidopor: Centauro or a marketplace seller). Returns page, page_size, total "
+            "(the site caps it at 10000: total_capped), total_pages, has_more, count, items "
+            "[{position, product_id (model + colour: use it in product), model, color_code, "
+            "name, brand, url, image, available, price, list_price, discount_percent, "
+            "pix_price (the Pix price, where the site shows one), installment {count, "
+            "amount}, has_different_prices (sizes can differ in price or seller), seller "
+            "{name, is_centauro}, categories, badges (Mega Oferta, Preco Online ...), rating, "
+            "review_count, color_count, size_count, size_skus (use one in freight) and "
+            "variants [{product_id, color, url, image, price, list_price, discount_percent, "
+            "pix_price, installment}] (the other colours)}], facets [{name, key, values "
+            "[{label, filter, count, selected}]}] with the site's counts, breadcrumbs, sort, "
+            "filters_applied and notes. Also path, url and category_filters. An unknown "
+            "category, or one with no products for the filters, is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "10-45 s; set a client timeout of at least 150 s."
+        ),
+        params=(
+            Param(
+                "path",
+                "str",
+                required=True,
+                doc=(
+                    "A category as its centauro.com.br /nav/ path or link (key / value pairs, "
+                    "as the site's breadcrumb links write them), or one facet value such as "
+                    "categorias:calcados."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), discount, price_asc or price_desc (the site's 4 "
+                    "sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Facet value(s) as key:value (facets[].values[].filter), up to 10. Keys: "
+                    "marca, tamanho, genero, produto, preco, esportes, modalidade, "
+                    "categorias, cor, desconto, idade, linha, promocao, loja, vendidopor."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand facet value(s) (marca), e.g. nike or asics."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Store facet value(s) (loja): the products a physical store carries "
+                    "(stores[].filter or facets loja values)."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Sold-by facet value(s) (vendidopor): centauro or a marketplace seller "
+                    "such as nikecombr or adidas."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-278 (36 per page; the site caps the total at 10000)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_deals",
+        namespace="centauro",
+        method="deals",
+        http="POST",
+        path="/api/v1/centauro/deals",
+        summary=(
+            "A deal list of Centauro (centauro.com.br, the sporting-goods retailer of Grupo "
+            "SBF). Scavio fetches the public centauro.com.br data on request; Centauro has no "
+            "public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. The Black Friday hotsite (black-friday, "
+            "default), the outlet or the Mega Oferta promotion, or another hotsite slug, "
+            "sorted and filtered like search. The site publishes no start or end dates for "
+            "its deals. 36 per page, pages 1-278, in the site's 4 sorts (relevance, discount, "
+            "price_asc, price_desc), filtered by any facet value: brand, size, gender, "
+            "product type, price band, sport, colour, discount band, promotion, store (loja: "
+            "the products a physical store carries) and sold-by (vendidopor: Centauro or a "
+            "marketplace seller). Returns page, page_size, total (the site caps it at 10000: "
+            "total_capped), total_pages, has_more, count, items [{position, product_id (model "
+            "+ colour: use it in product), model, color_code, name, brand, url, image, "
+            "available, price, list_price, discount_percent, pix_price (the Pix price, where "
+            "the site shows one), installment {count, amount}, has_different_prices (sizes "
+            "can differ in price or seller), seller {name, is_centauro}, categories, badges "
+            "(Mega Oferta, Preco Online ...), rating, review_count, color_count, size_count, "
+            "size_skus (use one in freight) and variants [{product_id, color, url, image, "
+            "price, list_price, discount_percent, pix_price, installment}] (the other "
+            "colours)}], facets [{name, key, values [{label, filter, count, selected}]}] with "
+            "the site's counts, breadcrumbs, sort, filters_applied and notes. Also deal and "
+            "url. An unknown deal list is a charged 404. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 10-45 s; set a client "
+            "timeout of at least 150 s."
+        ),
+        params=(
+            Param(
+                "deal",
+                "Optional[str]",
+                doc=(
+                    "black-friday, outlet, mega-oferta (black-friday is the default), or "
+                    "another /hotsite/ slug or link of the site."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["relevance", "discount", "price_asc", "price_desc"]]',
+                doc=(
+                    "relevance (default), discount, price_asc or price_desc (the site's 4 "
+                    "sorts)."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Facet value(s) as key:value (facets[].values[].filter), up to 10. Keys: "
+                    "marca, tamanho, genero, produto, preco, esportes, modalidade, "
+                    "categorias, cor, desconto, idade, linha, promocao, loja, vendidopor."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Brand facet value(s) (marca), e.g. nike or asics."
+                ),
+            ),
+            Param(
+                "store",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Store facet value(s) (loja): the products a physical store carries "
+                    "(stores[].filter or facets loja values)."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Sold-by facet value(s) (vendidopor): centauro or a marketplace seller "
+                    "such as nikecombr or adidas."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-278 (36 per page; the site caps the total at 10000)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_product",
+        namespace="centauro",
+        method="product",
+        http="POST",
+        path="/api/v1/centauro/product",
+        summary=(
+            "One product of Centauro (centauro.com.br, the sporting-goods retailer of Grupo "
+            "SBF). Scavio fetches the public centauro.com.br data on request; Centauro has no "
+            "public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown "
+            "to a visitor who is not signed in. By product_id (model + colour), model + color "
+            "or link: product_id, requested_id, model, color {code, name}, name, brand, url, "
+            "available, in_stock, low_stock, purchase_limit, group, sub_group, category, "
+            "gender, age_group, collection, category_path, breadcrumbs, currency, price_min, "
+            "price_max, has_different_prices, sellers, split_sellers (a Centauro offer and a "
+            "brand seller can split the sizes), installments [{count, amount}], size_count, "
+            "sizes_in_stock, sizes [{size, size_code, sku, ean, in_stock, available, "
+            "marketplace, price, list_price, discount_percent, pix_price, "
+            "pix_discount_percent, installment, seller {name, code, is_centauro, "
+            "own_delivery}}], colors [{product_id, color_code, name, url, image}], images, "
+            "badges, specs [{group, name, values}], rating, review_count and reviews "
+            "[{rating, date, text, highlights}] (up to 3, as the product page carries them; "
+            "no reviewer names). Stock is a flag per size, not a unit count. No marketing "
+            "description, no full review list, no Q&A. An unknown product is a charged 404. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 2-20 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Centauro product id: model + colour (items[].product_id, "
+                    "colors[].product_id)."
+                ),
+            ),
+            Param(
+                "model",
+                "Optional[str]",
+                doc=(
+                    "The model code, with color, instead of product_id."
+                ),
+            ),
+            Param(
+                "color",
+                "Optional[str]",
+                doc=(
+                    "The colour code (colors[].color_code), with model."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A centauro.com.br product link with its ?cor= colour, instead of "
+                    "product_id."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "model", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_freight",
+        namespace="centauro",
+        method="freight",
+        http="POST",
+        path="/api/v1/centauro/freight",
+        summary=(
+            "Delivery and store pickup for one size of Centauro (centauro.com.br, the "
+            "sporting-goods retailer of Grupo SBF). Scavio fetches the public centauro.com.br "
+            "data on request; Centauro has no public product API. Brazil: Portuguese (pt-BR) "
+            "text and prices in BRL, as shown to a visitor who is not signed in. By size sku "
+            "and CEP: sku, product_name, cep, destination {city, state, neighborhood, "
+            "street}, currency, count, delivery_options [{type (pickUpInStore, normal, "
+            "scheduled, clickUpMarketplace ...), label, cost, free, origin (store, warehouse, "
+            "marketplace), deadline, estimated_date, estimated_text, same_day}], store_count, "
+            "stores_with_stock and stores [{store_code, name, distance_km, hours, address "
+            "{full, street, number, neighborhood, city, state, cep, latitude, longitude}, "
+            "pickup_available, in_store_stock (the store has the size now: pickup the same "
+            "day or in 1 business day), pickup_days, transfer_days (otherwise: business days "
+            "to send it to the store), pickup_text, pickup_cost, estimated_date, same_day, "
+            "filter}]. Stock flags, not unit counts. An unknown or out-of-stock sku is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Usually 2-20 s; set a client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "sku",
+                "str",
+                required=True,
+                doc=(
+                    "A size sku (sizes[].sku of the product endpoint, or items[].size_skus)."
+                ),
+            ),
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_stores",
+        namespace="centauro",
+        method="stores",
+        http="POST",
+        path="/api/v1/centauro/stores",
+        summary=(
+            "The physical stores of Centauro (centauro.com.br, the sporting-goods retailer of "
+            "Grupo SBF). Scavio fetches the public centauro.com.br data on request; Centauro "
+            "has no public product API. Brazil: Portuguese (pt-BR) text and prices in BRL, as "
+            "shown to a visitor who is not signed in. Near a CEP, by distance: cep, count and "
+            "stores [{store_code, name, city, state, label, distance_km, latitude, longitude, "
+            "filter (send it to search as store)}]. Hours, street address and per-store stock "
+            "flags for one product come from the freight endpoint. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a "
+            "client timeout of at least 120 s."
+        ),
+        params=(
+            Param(
+                "cep",
+                "str",
+                required=True,
+                doc=(
+                    "A Brazilian CEP (8 digits)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="centauro_suggestions",
+        namespace="centauro",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/centauro/suggestions",
+        summary=(
+            "The search suggestions of Centauro (centauro.com.br, the sporting-goods retailer "
+            "of Grupo SBF). Scavio fetches the public centauro.com.br data on request; "
+            "Centauro has no public product API. Brazil: Portuguese (pt-BR) text and prices "
+            "in BRL, as shown to a visitor who is not signed in. For the start of a search: "
+            "query, count, suggestions [{position, term}] and top_searches [{position, term}] "
+            "(the site's most searched terms). 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout "
+            "of at least 120 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "The start of a search, as a shopper types it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -53602,6 +55389,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_RDSAUDE_ENDPOINTS,
     *_RECLAMEAQUI_ENDPOINTS,
     *_LEROYMERLIN_ENDPOINTS,
+    # ====== batch 7 wave 2 2026-11-27: 3 platforms (Natura, O Boticario + Eudora, Centauro) ======
+    *_NATURA_ENDPOINTS,
+    *_BOTICARIO_ENDPOINTS,
+    *_CENTAURO_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -60587,6 +62378,9 @@ NAMESPACES: tuple[str, ...] = (
     "rdsaude",
     "reclameaqui",
     "leroymerlin",
+    "natura",
+    "boticario",
+    "centauro",
 )
 
 

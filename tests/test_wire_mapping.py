@@ -705,6 +705,13 @@ BODY_PRICED_KEYS = {
     "leroymerlin_stores",
     "leroymerlin_suggestions",
     "reclameaqui_complaints",
+    "boticario_categories",
+    "boticario_category",
+    "boticario_deals",
+    "boticario_prices",
+    "boticario_product",
+    "boticario_promotions",
+    "boticario_search",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -10859,3 +10866,162 @@ def test_batch7_1127_credits_wire_and_timeouts():
             assert "keyed price service" not in ep.summary, ep.key
             assert "upstream / 5" not in ep.summary, ep.key
     assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH7_1127 for p in ep.params)
+
+
+# --- batch 7 wave 2 2026-11-27: 3 Brazil namespaces (Natura, O Boticario + Eudora, Centauro) ---
+
+BATCH7W2_1127 = {
+    "natura": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+    "boticario": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "promotions": ("promotions", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "prices": ("prices", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "pickup": ("pickup", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "centauro": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "freight": ("freight", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+}
+BATCH7W2_1127_ONE_OF = {
+    "natura_product": (("product_id", "url"),),
+    "boticario_product": (("slug", "url", "sku"),),
+    "boticario_pickup": (("slug", "url", "sku"),),
+    "centauro_product": (("product_id", "model", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7W2_1127))
+def test_batch7w2_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 3 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7W2_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7W2_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b"
+        assert not re.search(ai, text.lower()), ep.key
+
+
+BATCH7W2_1127_WIRE = [
+    ("natura", "search", {"query": "perfume"}, "search"),
+    (
+        "natura", "search",
+        {"query": "perfume", "country": "mx", "filters": {"brand": "Kaiak"}},
+        "search",
+    ),
+    ("natura", "category", {"category_id": "maquiagem"}, "category"),
+    ("natura", "categories", {}, "categories"),
+    ("natura", "product", {"product_id": "NATBRA-194225"}, "product"),
+    ("natura", "suggestions", {"query": "kaiak"}, "suggestions"),
+    ("natura", "stores", {"state": "sp", "type": "franchise"}, "stores"),
+    ("natura", "deals", {}, "deals"),
+    ("boticario", "search", {"query": "perfume"}, "search"),
+    (
+        "boticario", "search",
+        {"query": "perfume", "brand": "eudora", "product_brand": ["egeo", "lily"]},
+        "search",
+    ),
+    ("boticario", "category", {"path": "/perfumaria/"}, "category"),
+    ("boticario", "categories", {}, "categories"),
+    ("boticario", "deals", {"type": "promotions", "section": "cashback"}, "deals"),
+    ("boticario", "promotions", {}, "promotions"),
+    ("boticario", "product", {"slug": "base-liquida-cor-330-make-b-mate-salicylic-30g"}, "product"),
+    ("boticario", "prices", {"skus": ["B01863", "B48734", "B2022081233"]}, "prices"),
+    ("boticario", "reviews", {"product_id": "B2022081233"}, "reviews"),
+    ("boticario", "stores", {"cep": "01310-100"}, "stores"),
+    ("boticario", "pickup", {"cep": "01310-100", "sku": "B01863"}, "pickup"),
+    ("boticario", "suggestions", {"query": "perfume"}, "suggestions"),
+    ("centauro", "search", {"query": "tenis corrida"}, "search"),
+    (
+        "centauro", "search",
+        {"query": "tenis corrida", "filters": ["marca:nike", "genero:masculino"]},
+        "search",
+    ),
+    ("centauro", "category", {"path": "/nav/categorias/calcados/produto/tenis"}, "category"),
+    ("centauro", "deals", {}, "deals"),
+    ("centauro", "product", {"product_id": "9976EA51"}, "product"),
+    ("centauro", "product", {"model": "9976EA", "color": "51"}, "product"),
+    ("centauro", "freight", {"sku": "9976EA510375", "cep": "01310-100"}, "freight"),
+    ("centauro", "stores", {"cep": "01310-100"}, "stores"),
+    ("centauro", "suggestions", {"query": "tenis"}, "suggestions"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7W2_1127_WIRE)
+def test_batch7w2_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7W2_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7W2_1127_ONE_OF))
+def test_batch7w2_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7w2_1127_credits_wire_and_timeouts():
+    """Natura, Centauro 1 flat; O Boticario 1, 2 when a page needs a second route, prices per 5."""
+    for ns in BATCH7W2_1127:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    assert {ep.min_timeout for ep in ENDPOINTS.values() if ep.namespace in BATCH7W2_1127} == {240.0}
+    w2 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W2_1127]
+    noted = {ep.key for ep in w2 if ep.credits_note}
+    assert noted == {
+        "boticario_search", "boticario_category", "boticario_categories", "boticario_deals",
+        "boticario_promotions", "boticario_product", "boticario_prices",
+    }
+    assert "second route" in ENDPOINTS["boticario_product"].credits_note
+    assert "per 5 SKUs" in ENDPOINTS["boticario_prices"].credits_note
+    assert [p.name for p in ENDPOINTS["boticario_pickup"].required_params] == ["cep"]
+    assert [p.name for p in ENDPOINTS["boticario_prices"].required_params] == ["skus"]
+    assert [p.name for p in ENDPOINTS["centauro_freight"].required_params] == ["sku", "cep"]
+    assert [p.name for p in ENDPOINTS["natura_search"].required_params] == ["query"]
+    assert not ENDPOINTS["natura_stores"].required_params
+    assert ENDPOINTS["natura_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["centauro_product"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["boticario_product"].positional_optional_params[0].name == "slug"
+    assert "AI summary" not in ENDPOINTS["boticario_product"].summary
+    assert all(p.doc for ep in w2 for p in ep.params)
