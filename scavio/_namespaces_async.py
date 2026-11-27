@@ -163,6 +163,11 @@ __all__ = [
     "_AsyncZapposNamespace",
     "_AsyncNeweggNamespace",
     "_AsyncReiNamespace",
+    "_AsyncQvcNamespace",
+    "_AsyncBarnesandnobleNamespace",
+    "_AsyncThriftbooksNamespace",
+    "_AsyncUhaulNamespace",
+    "_AsyncWilliamssonomaNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -30479,3 +30484,1079 @@ class _AsyncReiNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("rei_suggestions", {"query": query, "limit": limit}, extra)
+
+class _AsyncQvcNamespace:
+    """QVC (qvc.com, qvcuk.com, qvc.de, qvc.it, qvc.jp) and HSN (hsn.com), the video shopping networks, chosen with site: search, product, products, todays_special, on_air, program_guide, recently_aired, category, suggestions and reviews endpoints; QVC market us, uk, de, it or jp (local currency), HSN US only, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        sort: Optional[Literal["relevance", "newest", "top_sellers", "rating", "recently_on_air", "price_desc", "price_asc", "featured", "best_selling"]] = None,
+        filters: Optional[Union[list[str], str]] = None,
+        department: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. By keyword. qvc: 7 sorts, 1-96 per page, facet filters on us, uk and de (filters: facets[].values[].filter tokens: brand, price band, rating, category...); returns page, page_size, total, total_pages, has_more, count, sort, filters_applied, facets [{id, name, multi_select, values [{name, count, filter, selected}]}] and items [{position, item_number (use it in product, products and reviews), title, brand, url, image, currency, price and price_max (current), qvc_price (QVC's everyday price), price_with_shipping and qvc_price_with_shipping (uk, as given), special_price {code, description, badge, starts_at, ends_at} (TSV, SPB Black Friday Sale...), comparison_price (it), easy_pay [{code, installments, installment_amount, text}], shipping_charge, rating, review_count, added_to_cart_last_week (as given), stock (in_stock, sold_out or waitlist), promo_text, colors and last_on_air (when given)}]. hsn: 6 sorts, 60 per page, the department filter; returns the same paging fields, departments [{code, name, count}] and items [{position, item_number (use it in product and reviews), sku, title, brand, url, image, currency, price, original_price, percent_off, flexpay {payments, amount}, shipping_charge, note (Free Shipping...), flag (Customer Pick, Clearance, Today's Special...), todays_special {today, presale, post_sale}, badge, on_air_today, available and categories}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in the market's language.
+            site: qvc (default) or hsn.
+            market: QVC market: us, uk, de, it or jp. Defaults to us. HSN serves the US.
+            sort: qvc: relevance, newest, top_sellers, rating, recently_on_air, price_desc, price_asc (relevance is the default; QVC Japan has no recently_on_air). hsn: featured, best_selling, rating, newest, price_desc, price_asc (featured is the default).
+            filters: qvc us, uk, de: facet tokens from a previous answer's facets[].values[].filter (a brand, price band, rating, category...), up to 10.
+            department: hsn: a department code from a previous answer's departments[].code (j Jewelry, fa Fashion, ho Home...).
+            page: Results page, 1-based. Defaults to 1; total_pages reports the last one.
+            page_size: qvc: 1-96 per page, default 24. hsn: 60 (fixed).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_search", {"query": query, "site": site, "market": market, "sort": sort, "filters": filters, "department": department, "page": page, "page_size": page_size}, extra)
+
+    async def product(
+        self,
+        item_number: Optional[str] = None,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. By item number or link. qvc: the item fields plus brand_id, description, bullets, retail_value with retail_value_reason as given (e.g. If Purchased Separately), price_excluding_tax and tax (jp), shipping_text, auto_delivery {text} for Auto-Delivery items, first_available, sold_last_30_days (as given), max_order_quantity, categories, images, promotions, protection_plans and variants [{color_code, color, size_code, size, stock (in_stock, sold_out, waitlist), buyable, price, qvc_price, retail_value, price_with_shipping, delivery_days}]. hsn: item_number, sku, item_code, title, brand, url, price, original_price, shipping_charge, flexpay, flexpay_options [{text, payments, amount, card_only}], flag, todays_special, sale_time_remaining (as given), on_air_today, rating, review_count, has_warranty, primary_category, description, images and variants [{item_number, sku, color_code, color, size_code, size, plus_size, stock (available, low_inventory, sold_out), units_left (when HSN shows it)}]. An unknown item is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: The item number: items[].item_number (QVC US letter + digits, e.g. K341654; QVC UK, DE, IT and JP digits, e.g. 833632; HSN product id, e.g. 23550176).
+            site: qvc (default) or hsn.
+            market: QVC market: us, uk, de, it or jp. Defaults to us. HSN serves the US.
+            url: A product link (qvc.com /p/<name>/<item>, qvcuk.com, qvc.de, qvc.it, qvc.jp, or hsn.com /products/<name>/<id>), instead of item_number.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_product", {"item_number": item_number, "site": site, "market": market, "url": url}, extra)
+
+    async def products(
+        self,
+        item_numbers: Union[list[str], str],
+        *,
+        site: Optional[Literal["qvc"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Up to 20 products of QVC (qvc.com, us; or qvc.it, it) in one call: requested, count, items [{item_number, title, brand, url, image, currency, price, price_max, qvc_price, retail_value, special_price {code, description, starts_at, ends_at}, easy_pay, rating, review_count, stock}] in the order asked, and not_found. QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_numbers: Up to 20 item numbers (array or comma-separated).
+            site: qvc (the default; HSN has none).
+            market: QVC market: us or it. Defaults to us. HSN serves the US.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_products", {"item_numbers": item_numbers, "site": site, "market": market}, extra)
+
+    async def todays_special(
+        self,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Today's special of QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. qvc (us): the Today's Special Value item with headline, item_number, window {code, description, starts_at, ends_at} as QVC gives it and the full product as product returns it (price, qvc_price, retail_value, easy_pay, variants...). hsn: current {item_number, title, price, original_price, flexpay, sale_time_remaining (as given), url, image}, item (the current item as product returns it), the Today's Specials list items [{position, item_number (use it in product and reviews), sku, title, brand, url, image, currency, price, original_price, percent_off, flexpay {payments, amount}, shipping_charge, note (Free Shipping...), flag (Customer Pick, Clearance, Today's Special...), todays_special {today, presale, post_sale}, badge, on_air_today, available and categories}] (about 9, each flagged today, presale or post_sale) and list_complete (false when the list could not be read this time). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: qvc (default) or hsn.
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_todays_special", {"site": site, "market": market}, extra)
+
+    async def on_air(
+        self,
+        *,
+        site: Optional[Literal["qvc"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """What is on air now on each QVC channel (QVC, QVC2, QVC3, QVC Home): channels [{channel_code, channel, item_number, item {title, price, qvc_price, special_price, easy_pay, url, image...}}]. QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: qvc (the default; HSN has none).
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_on_air", {"site": site, "market": market}, extra)
+
+    async def program_guide(
+        self,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        date: Optional[str] = None,
+        time_zone: Optional[Literal["eastern", "central", "mountain", "pacific"]] = None,
+        channel: Optional[str] = None,
+        network: Optional[Literal["hsn", "hsn2", 1, 4]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The TV program guide of QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. qvc (us): one day for every channel (or one), in Eastern, Central, Mountain or Pacific time: channels [{channel_code, channel, shows [{start, end, duration_hours, show_name, show_code, source_code, description}]}]. hsn: one day of HSN or HSN2, hourly: shows [{time, start, hour, show_name, network, items_aired {date, hour, network}}] (items_aired is the input for recently-aired). Show names are kept as given; on-air host and guest names are not included. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: qvc (default) or hsn.
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            date: YYYY-MM-DD (US Eastern day). Defaults to today. qvc: 14 days back to 17 ahead, as QVC's guide offers.
+            time_zone: qvc: eastern (default), central, mountain or pacific.
+            channel: qvc: one channel by code or name (QVC, 2CH / QVC2, STA / QVC3, ONQ / QVC Home, ...). Defaults to all.
+            network: hsn: hsn (1, default) or hsn2 (4).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_program_guide", {"site": site, "market": market, "date": date, "time_zone": time_zone, "channel": channel, "network": network}, extra)
+
+    async def recently_aired(
+        self,
+        site: Literal["hsn"],
+        *,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        date: Optional[str] = None,
+        hour: Optional[int] = None,
+        network: Optional[Literal["hsn", "hsn2", 1, 4]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The items HSN presented in one show hour (HSN or HSN2, Eastern time): show {time, start, hour, show_name}, count, items [{position, item_number (use it in product and reviews), sku, title, brand, url, image, currency, price, original_price, percent_off, flexpay {payments, amount}, shipping_charge, note (Free Shipping...), flag (Customer Pick, Clearance, Today's Special...), todays_special {today, presale, post_sale}, badge, on_air_today, available and categories}] and shows (the day's other hours). QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: hsn (QVC is not offered here).
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            date: YYYY-MM-DD (Eastern). Defaults to today.
+            hour: Show hour 0-23 (Eastern), with date: a program guide row's items_aired.hour. Defaults to the latest show.
+            network: hsn (1, default) or hsn2 (4).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_recently_aired", {"site": site, "market": market, "date": date, "hour": hour, "network": network}, extra)
+
+    async def category(
+        self,
+        url: Optional[str] = None,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        path: Optional[str] = None,
+        sort: Optional[Literal["relevance", "newest", "top_sellers", "rating", "recently_on_air", "price_desc", "price_asc"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category or collection grid of QVC (qvc.com, us): a qvc.com category (/c/...) or collection (/collections/deals-clearance.html...) link, 96 per page in the site's sorts: title, page, total, total_pages, has_more, count, sort and items [{position, item_number, title, url, image, currency, price, was_price, price_code, easy_pay_count, promo_text, rating, review_count, added_to_cart_last_week}]. HSN categories are not offered yet (search with department covers HSN's departments). An unknown link is a charged 404. QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A qvc.com category or collection link: /c/<name>/-/<group>/c.html or /collections/<name>.html.
+            site: qvc (default) or hsn.
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            path: The same link's path, instead of url.
+            sort: relevance, newest, top_sellers, rating, recently_on_air, price_desc, price_asc (relevance is the default).
+            page: Results page, 1-based. Defaults to 1; total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_category", {"url": url, "site": site, "market": market, "path": path, "sort": sort, "page": page}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["qvc"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The QVC search-box suggestions for a partial query (us, uk, de): suggestions (search terms) and products (the suggested items, with the search item fields). HSN suggestions are not offered. QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            site: qvc (the default; HSN has none).
+            market: QVC market: us, uk or de. Defaults to us. HSN serves the US.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_suggestions", {"query": query, "site": site, "market": market}, extra)
+
+    async def reviews(
+        self,
+        item_number: Optional[str] = None,
+        *,
+        site: Optional[Literal["qvc", "hsn"]] = None,
+        market: Optional[Literal["us", "uk", "de", "it", "jp"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The first page of reviews of one product of QVC (qvc.com) and HSN (hsn.com), the video shopping networks of QVC Group. Scavio fetches the public QVC or HSN page on request; neither has a public API. site picks qvc (default) or hsn; market picks the QVC storefront: us (qvc.com, USD), uk (qvcuk.com, GBP), de (qvc.de, EUR), it (qvc.it, EUR) or jp (qvc.jp, JPY; QVC Japan is a joint venture). HSN is US only. Data comes in each storefront's language and currency. As the product page shows it: qvc (us) the 8 newest, hsn the 12 highest rated. Returns total, average_rating, review_count, ratings_only_count, rating_distribution, recommended_count, not_recommended_count, reviews [{review_id, rating, title, text, submitted_at, recommended, syndicated, syndicated_from, helpful_votes, unhelpful_votes, pros, cons, verified_purchaser, badges, secondary_ratings, language, photo_count}] and the product's questions [{question, submitted_at, answer_count, answers [{answer, submitted_at, is_brand_answer}]}]. No paging, sort or star filter; no reviewer names. Takes 20-60 s. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item_number: The item number: items[].item_number (QVC US letter + digits, e.g. K341654; QVC UK, DE, IT and JP digits, e.g. 833632; HSN product id, e.g. 23550176).
+            site: qvc (default) or hsn.
+            market: QVC market: us. Defaults to us. HSN serves the US.
+            url: A product link (qvc.com /p/<name>/<item>, qvcuk.com, qvc.de, qvc.it, qvc.jp, or hsn.com /products/<name>/<id>), instead of item_number.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("qvc_reviews", {"item_number": item_number, "site": site, "market": market, "url": url}, extra)
+
+class _AsyncBarnesandnobleNamespace:
+    """Barnes & Noble (barnesandnoble.com, the US bookseller) search, product, store_availability, stores, store, suggestions, bestsellers, category, categories and deals endpoints; US only, prices in USD, store pickup flags (no unit counts), 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "bestselling", "newest", "oldest", "price_asc", "price_desc", "title"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. By keyword (title, author, series, ISBN), sorted with the site's sort menu and filtered by format, availability, price band, subject, age and language. Returns query, total (the site's count for the whole list), count, page_size (24), has_more, sort, sort_label, filters, items [{position, ean (the input of product and store-availability), work_id, title, contributors [{name, role}], format, format_detail, edition, series {title, number}, publication_date, sales_rank, price (what Barnes & Noble charges now), original_price (the struck-through price when on sale), on_sale, currency, availability (as given: IN_STOCK, OUT_OF_STOCK, PREORDER ...), rating, rating_count (empty in lists), badges (the site's badges: $3 OFF, Best Seller ...), image, url}], facets [{filter, title, values [{value, label, count}]}] and notes. Barnes & Noble shows 24 results per page and this answer holds that first page: narrow with sort and filters. Member prices are not shown to visitors and are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords: title, author, series, ISBN or subject.
+            sort: The site's sort menu: relevance (Top Matches, default), bestselling, newest, oldest, price_asc, price_desc, title (A to Z). price_asc puts free eBooks first.
+            filters: The site's own filters: format, availability, price, subject, age, language; a value or a list of values each (at most 10 in all). facets in an answer lists the values with their counts.
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_search", {"query": query, "sort": sort, "filters": filters, "country": country}, extra)
+
+    async def product(
+        self,
+        ean: Optional[Union[str, int]] = None,
+        *,
+        isbn: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One title of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. By EAN / ISBN-13 or ISBN-10 (converted to its 978 EAN): requested_ean, ean, work_id, title, contributors, format, parent_format, edition, publisher, imprint, publication_date, pages, dimensions {height, width, depth} as the site lists them, language, series, audience_age, run_time, sales_rank, price, original_price, on_sale, currency, available_for_sale, inventory {in_stock, preorder, backorder} (the page's online stock flags), rating, rating_scale_max, rating_count, member_offers (the member offer text the page shows, as given; never a member price), badges, collections [{name, url, path}], categories [{name, url, path}], image, images, url, overview (a short excerpt of the page's overview, the publisher's copy: at most 300 characters, cut at a word and ending with ...; overview_truncated says when it was cut; never book excerpts or sample text) and formats [{format, ean, title, price, original_price, on_sale, available_for_sale, requested}] (one EAN per format the page links: hardcover, paperback, eBook, audiobook, B&N Exclusive ...). Review text is not available. An unknown EAN is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            ean: The book's EAN / ISBN-13 (items[].ean, formats[].ean; 978, 979 or Barnes & Noble's 2940 digital EANs), or an ISBN-10 (converted to its 978 EAN). Check digits are verified.
+            isbn: Alternative to ean: an ISBN-10 or ISBN-13 (dashes allowed).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_product", {"ean": ean, "isbn": isbn, "country": country}, extra)
+
+    async def store_availability(
+        self,
+        near: str,
+        *,
+        ean: Optional[Union[str, int]] = None,
+        isbn: Optional[Union[str, int]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store pickup availability of one title at the Barnes & Noble stores near a ZIP code, a city or a store number (usually 16-32 stores, nearest first): ean, near, near_type, count, available_count and stores [{store_id, name, address {street, location_name (the shopping center the store sits in, when the site names one), city, state, zip}, phone, hours, distance_miles, ean, eligible, available}]. eligible and available are the site's own pickup flags, not unit counts; prices are national (the product price). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            near: Where to check: a US ZIP code (60611), a city and state ("Austin, TX") or a Barnes & Noble store number (2234).
+            ean: The book's EAN / ISBN-13 (items[].ean, formats[].ean; 978, 979 or Barnes & Noble's 2940 digital EANs), or an ISBN-10 (converted to its 978 EAN). Check digits are verified.
+            isbn: Alternative to ean: an ISBN-10 or ISBN-13 (dashes allowed).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_store_availability", {"near": near, "ean": ean, "isbn": isbn, "country": country}, extra)
+
+    async def stores(
+        self,
+        near: Optional[str] = None,
+        *,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Barnes & Noble stores near a US ZIP code, a city and state or a point, nearest first: count and stores [{store_id, name, address {street, location_name (the shopping center the store sits in, when the site names one), city, state, zip}, phone, latitude, longitude, distance_miles, time_zone, hours, hours_by_day [{day, open, close, text}], holiday_hours [{name, date, open, close, text}], services {cafe, toys_games, vinyl, used_books, electronics}, open_date, events_count, url}]. Each store's public listing. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            near: A US ZIP code or a city and state ("Austin, TX").
+            latitude: Latitude (with longitude), instead of near.
+            longitude: Longitude (with latitude).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_stores", {"near": near, "latitude": latitude, "longitude": longitude, "country": country}, extra)
+
+    async def store(
+        self,
+        store_id: Union[str, int],
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Barnes & Noble store by id: the stores fields plus corp_name and holiday_hours_text (the store's holiday hours line, e.g. Thanksgiving: Closed). An unknown store is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Barnes & Noble store id (stores[].store_id).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_store", {"store_id": store_id, "country": country}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. For a partial query: total, count, products (up to 10, the search item fields) and topics [{label, path, url}] (subjects; send path to category). The answer carries no keyword completions. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 60 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_suggestions", {"query": query, "country": country}, extra)
+
+    async def bestsellers(
+        self,
+        *,
+        list: Optional[Literal["top", "books", "nyt", "stores"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A bestseller list of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. The Bestsellers page (top, default), Bestselling Books, The New York Times Best Sellers or B&N Stores Bestsellers: list, title, url, total, count, items [{rank, ...search item fields}] (the first page of 20-24 titles) and lists [{heading, link, link_path, count, items [{rank, ean, title, format, contributors, price, original_price, on_sale, available_for_sale, image}]}] for a list page that shows its titles as separate lists (The New York Times Best Sellers: Hardcover Fiction, Paperback Nonfiction ...; items is then empty). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Collection pages are large: usually 8-35 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            list: top (default: the site's Bestsellers page), books (Bestselling Books), nyt (The New York Times Best Sellers), stores (B&N Stores Bestsellers, hardcover fiction and nonfiction).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_bestsellers", {"list": list, "country": country}, extra)
+
+    async def category(
+        self,
+        path: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["relevance", "bestselling", "newest", "oldest", "price_asc", "price_desc", "title"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One collection of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. By path or link (Mystery & Thriller, New Releases, Kids ages 3-5 ...), sorted and filtered like search: path, url, title, breadcrumbs [{name, url, path}], total (the site's count for the whole list), count, page_size (24), has_more, sort, sort_label, filters, items [{position, ean (the input of product and store-availability), work_id, title, contributors [{name, role}], format, format_detail, edition, series {title, number}, publication_date, sales_rank, price (what Barnes & Noble charges now), original_price (the struck-through price when on sale), on_sale, currency, availability (as given: IN_STOCK, OUT_OF_STOCK, PREORDER ...), rating, rating_count (empty in lists), badges (the site's badges: $3 OFF, Best Seller ...), image, url}], facets [{filter, title, values [{value, label, count}]}] and notes. Barnes & Noble shows 24 results per page and this answer holds that first page: narrow with sort and filters. Member prices are not shown to visitors and are not returned. A collection page that shows shelves instead of a product list answers items [] and shelves [{heading, group, link, link_path, count, items}] as the page shows them. An unknown collection is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Collection pages are large: usually 8-35 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A collection path (categories[].path, topics[].path; /collections/ optional).
+            url: A barnesandnoble.com/collections/ link, instead of path (its query string is not read: send sort and filters).
+            sort: The site's sort menu: relevance (Top Matches, default), bestselling, newest, oldest, price_asc, price_desc, title (A to Z). price_asc puts free eBooks first.
+            filters: The site's own filters: format, availability, price, subject, age, language; a value or a list of values each (at most 10 in all). facets in an answer lists the values with their counts.
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_category", {"path": path, "url": url, "sort": sort, "filters": filters, "country": country}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The header navigation of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. As the site shows it: count, group_count, link_count and departments [{name, url, path, groups [{name, url, path, links [{name, url, path}]}]}]. path is the input of category. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Collection pages are large: usually 8-35 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_categories", {"country": country}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["black_friday", "coupons", "kids", "ebooks", "audiobooks"]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A deals page of Barnes & Noble (barnesandnoble.com, the US bookseller). Scavio fetches the public barnesandnoble.com page on request; Barnes & Noble has no public API. US storefront, prices in US dollars. The Black Friday and Cyber Monday deals (default, while the site runs it), Coupons & Deals, Book Deals for Kids, eBook or audiobook deals: type, title, url, count, item_count and sections [{heading, group, link, link_path, count, items [{ean, title, format, contributors, price, original_price, on_sale, available_for_sale, image}]}] as the page shows its deal shelves. The page gives no end date per deal. A deals page the site does not run is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Collection pages are large: usually 8-35 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: black_friday (default: the Black Friday and Cyber Monday deals page while it runs), coupons (Coupons & Deals), kids (Book Deals for Kids), ebooks (eBook deals), audiobooks (audiobook deals).
+            country: us (default and the only market: barnesandnoble.com serves the United States, prices in USD). Anything else is a 400, not charged.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("barnesandnoble_deals", {"type": type, "country": country}, extra)
+
+class _AsyncThriftbooksNamespace:
+    """ThriftBooks (thriftbooks.com, the US online used-book seller) search, isbn, work, edition, copies, editions, reviews and suggestions endpoints; US storefront, prices in USD per format and condition, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        *,
+        query: Optional[str] = None,
+        list: Optional[Literal["bestsellers", "deals", "new_releases"]] = None,
+        sort: Optional[Literal["most_popular", "relevance", "bestsellers", "title_asc", "title_desc", "newest", "oldest"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        format: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        condition: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        language: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        genre: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        deals: Optional[bool] = None,
+        new_releases: Optional[bool] = None,
+        collectible: Optional[bool] = None,
+        signed: Optional[bool] = None,
+        first_edition: Optional[bool] = None,
+        large_print: Optional[bool] = None,
+        include_out_of_stock: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. Keywords or the whole catalog, with the presets bestsellers, deals (ThriftBooks Deals) and new_releases; filters for format, condition, language, genre, price, deals, new releases, collectible, signed, first edition and large print; the site's 7 sorts; up to 50 works per page. Returns query, list, sort, page, page_size, total, total_pages, did_you_mean, applied_filters, count, items [{position, work_id, title, authors [{id, name}], series [{id, name, number}], in_stock, buy_now {price, condition, condition_id, format, format_id, edition_id, copy_id, isbn, publisher, release_date, ex_library, no_dust_jacket, no_cd}, low_price, high_price (the work's price range as given), list_price, available_copies, edition_count, collectible_count, collectible_low_price, thrift_deal, backorder, book_language, rating, review_count, image, edition_image}], facets {genres, age_ranges, product_types [{id, name, count, selected}], formats, conditions, languages [{id, name, selected}]} (ids to send back as filters), notes. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (title, author, subject). Leave out to browse the whole catalog with list, genre or other filters. An ISBN is a 400 that points to /isbn (ThriftBooks search does not match ISBNs).
+            list: A preset: bestsellers (the site's bestseller order), deals (ThriftBooks Deals) or new_releases (New Releases). Combines with query and the filters.
+            sort: most_popular (default; bestsellers with list bestsellers), relevance (top matches), bestsellers, title_asc, title_desc, newest or oldest (publication date): the site's sort menu.
+            page: Results page, 1-based (default 1). page x page_size must stay within 10000 (the site's search depth).
+            page_size: Works per page, 1 to 50 (default 25).
+            format: Formats, one or a list: paperback, hardcover, mass_market_paperback, library_binding, audio_cd, mp3_cd, audio_cassette, perfect_paperback, board_book, comic, dvd, blu_ray, 4k_ultra_hd, or a format id an answer lists (format_id).
+            condition: Conditions, one or a list: new, like_new, very_good, good, acceptable.
+            language: Languages, one or a list: english, spanish, french, german, italian, chinese, russian, portuguese, polish, japanese, dutch, turkish, korean, greek, or a language id an answer lists in facets.languages.
+            genre: Genre ids, one or a list, as an answer lists them in facets.genres[].id (13207 Fiction, 13564 Horror, 15013 Science Fiction & Fantasy) or facets.age_ranges[].id.
+            min_price: Lowest price in whole US dollars.
+            max_price: Highest price in whole US dollars.
+            deals: ThriftBooks Deals only (the same as list deals).
+            new_releases: New Releases only (the same as list new_releases).
+            collectible: Collectibles only.
+            signed: Signed books only.
+            first_edition: First editions only.
+            large_print: Large print only.
+            include_out_of_stock: Also list works with no copy for sale now (default false, as the site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_search", {"query": query, "list": list, "sort": sort, "page": page, "page_size": page_size, "format": format, "condition": condition, "language": language, "genre": genre, "min_price": min_price, "max_price": max_price, "deals": deals, "new_releases": new_releases, "collectible": collectible, "signed": signed, "first_edition": first_edition, "large_print": large_print, "include_out_of_stock": include_out_of_stock}, extra)
+
+    async def isbn(
+        self,
+        isbn: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Look a book up on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. by ISBN-10 or ISBN-13 (check digit verified; an ISBN-10 is converted to ISBN-13): the work and edition ThriftBooks matches, then the work's format x condition table. Returns isbn, isbn13, isbn10, work_id, edition_id, format_count, in_stock, low_price, high_price, formats [{format, format_id, in_stock, low_price, high_price, default_edition {edition_id, isbn, ean}, conditions [{condition, condition_id, in_stock, price, list_price, quantity (a New quantity of 500 means 500 or more), edition_id, copy_id, format_id, isbn, ean, ex_library, no_dust_jacket, no_cd, thrift_deal, promotion, loyalty_bonus_points (ReadingRewards bonus points shown on the copy), shipping_surcharge, est_days_to_ship, ship_country_restriction, image}]}], notes (requested_edition marks the rows of the matched edition). Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. An ISBN ThriftBooks does not carry is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            isbn: An ISBN-10 or ISBN-13 (dashes and spaces allowed; the check digit is verified, so a typo is a 400, not charged).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_isbn", {"isbn": isbn}, extra)
+
+    async def work(
+        self,
+        work_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The format x condition table of one work on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. By work_id: for each format (Hardcover, Paperback, Audio CD, ...) the price, quantity and copy details of each condition (New, Like New, Very Good, Good, Acceptable), as the work's page shows them. Returns work_id, format_count, in_stock, low_price, high_price, formats [{format, format_id, in_stock, low_price, high_price, default_edition {edition_id, isbn, ean}, conditions [{condition, condition_id, in_stock, price, list_price, quantity (a New quantity of 500 means 500 or more), edition_id, copy_id, format_id, isbn, ean, ex_library, no_dust_jacket, no_cd, thrift_deal, promotion, loyalty_bonus_points (ReadingRewards bonus points shown on the copy), shipping_surcharge, est_days_to_ship, ship_country_restriction, image}]}], notes. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. An unknown work is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            work_id: A ThriftBooks work id (items[].work_id of a search, work_id of an ISBN lookup). A work is the book across all its editions.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_work", {"work_id": work_id}, extra)
+
+    async def edition(
+        self,
+        edition_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One edition of a book on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. By edition_id: edition_id, title, authors (as given), format, isbn, isbn13, upc, publisher, release_date, pages, book_language, large_print, age_range, grade_range, list_price, in_stock, buy_now {price, condition, copy_id}, low_price, high_price, lowest_new_price, lowest_used_price, has_new_copies, has_used_copies, available_copies, backorder, thriftbooks_sales_rank, description (the short overview the page gives, as given), image, copies [{copy_id, edition_id, condition, condition_id, price, quantity, ex_library, no_dust_jacket, no_cd, backorder}], notes. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. An unknown edition is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            edition_id: A ThriftBooks edition id (edition_id of an ISBN lookup, conditions[].edition_id of a work, editions[].edition_id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_edition", {"edition_id": edition_id}, extra)
+
+    async def copies(
+        self,
+        edition_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every copy for sale of one edition on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. By edition_id, one row per condition and copy type: edition_id, count, copies [{copy_id, edition_id, condition, condition_id, price, quantity, ex_library, no_dust_jacket, no_cd, backorder}], notes. A New quantity of 500 means 500 or more. An empty list means no copy is in stock (or no edition has the id). Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            edition_id: A ThriftBooks edition id (edition_id of an ISBN lookup, conditions[].edition_id of a work, editions[].edition_id).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_copies", {"edition_id": edition_id}, extra)
+
+    async def editions(
+        self,
+        work_id: Union[str, int],
+        *,
+        format: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        condition: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        sort: Optional[Literal["bestselling", "newest", "oldest", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        in_stock_only: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """All editions of one work on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. 25 per page, filtered by format and condition, in stock only (default) or every edition, sorted bestselling, newest, oldest or by price: work_id, sort, in_stock_only, applied_filters, page, per_page, total, total_pages, count, editions [{edition_id, title, edition_description, authors [{id, name}], format, isbn, ean, upc, publisher, release_date, pages, book_language, large_print, age_range, grade_range, list_price, in_stock, low_price, others_watching, image, copies [{copy_id, edition_id, condition, condition_id, price, quantity, ex_library, no_dust_jacket, no_cd, backorder, thrift_deal}]}], top_formats [{format, format_id}], notes. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            work_id: A ThriftBooks work id (items[].work_id of a search, work_id of an ISBN lookup). A work is the book across all its editions.
+            format: Formats, one or a list: paperback, hardcover, mass_market_paperback, library_binding, audio_cd, mp3_cd, audio_cassette, perfect_paperback, board_book, comic, dvd, blu_ray, 4k_ultra_hd, or a format id an answer lists (format_id).
+            condition: Conditions, one or a list: new, like_new, very_good, good, acceptable.
+            sort: bestselling (default), newest, oldest (publication date), price_asc or price_desc: the site's sort menu.
+            page: Editions page, 1-based, 25 per page (total_pages says how many).
+            in_stock_only: Editions with a copy for sale now only (default true, as the site). false lists every edition.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_editions", {"work_id": work_id, "format": format, "condition": condition, "sort": sort, "page": page, "in_stock_only": in_stock_only}, extra)
+
+    async def reviews(
+        self,
+        work_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """ThriftBooks customer reviews of one work on ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. 10 per page in the site's order: work_id, page, per_page, has_next, count, reviews [{review_id, rating, headline, text, date, verified_purchase, likes, dislikes}], notes. No reviewer names. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            work_id: A ThriftBooks work id (items[].work_id of a search, work_id of an ISBN lookup). A work is the book across all its editions.
+            page: Reviews page, 1-based, 10 per page (has_next says if there is another).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_reviews", {"work_id": work_id, "page": page}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search-box suggestions of ThriftBooks (thriftbooks.com, the US online used-book seller). Scavio fetches the public page on request; ThriftBooks has no public API. Title and author completions for a partial query, as given: query, count, suggestions. Every answer carries store (thriftbooks), host, country (us), currency (USD) and language (en). Prices are ThriftBooks' own in USD as a visitor who is not signed in sees them. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: A partial search query.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("thriftbooks_suggestions", {"query": query}, extra)
+
+class _AsyncUhaulNamespace:
+    """U-Haul (uhaul.com, the US and Canada truck rental and self-storage company) truck_quote, locations, location, storage_search, storage_facility, reviews, suggestions and supplies endpoints; US and Canada (English, Spanish or French site), 1 credit each. Truck quotes are U-Haul's public quote form, never a reservation."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def truck_quote(
+        self,
+        pickup: str,
+        date: str,
+        *,
+        dropoff: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """U-Haul's own truck rental rates for a move on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Pickup and optional drop-off (empty = in-town) and a date, US or Canada, in English, Spanish or French. Returns language, country, currency, distance_unit, move_type (one_way or in_town), pickup {query, city, state}, dropoff, date, includes {days, distance, distance_unit, text} (one-way), allowed_miles, ubox_from, count, available_count, trucks [model_code, name, moving_type, available, availability_text, inventory_note, rate, rate_with_fees (Canada), rate_kind (one_way_total or in_town_base), per_distance_rate, per_distance_unit, per_distance_text, inside_dimensions, specs], truck_with_labor {truck_rate, truck_rate_with_fees, labor_from, labor_text, estimated_total_from}, notes. No pickup location (U-Haul picks it in its reservation step, which Scavio does not open); nothing is reserved. Trailer, towing and U-Box quotes are not covered. Takes about 25 s. A move U-Haul will not quote is a charged 404 with U-Haul's own message. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            pickup: Pickup: a city with its state or province (Dallas, TX; Toronto, ON), a US ZIP or a Canadian postal code.
+            date: Pickup day, YYYY-MM-DD: today or later, up to 330 days ahead (U-Haul quotes up to 11 months out).
+            dropoff: Drop-off for a one-way move. Leave it out for an in-town quote (return to the same area).
+            language: en (default, www.uhaul.com), es (es.uhaul.com, U-Haul's Spanish site) or fr (fr.uhaul.com, U-Haul's French site). The market (US or Canada) follows the place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_truck_quote", {"pickup": pickup, "date": date, "dropoff": dropoff, "language": language}, extra)
+
+    async def locations(
+        self,
+        near: str,
+        *,
+        service: Optional[Literal["truck_rentals", "trailer_rentals", "moving_supplies", "self_storage"]] = None,
+        page: Optional[int] = None,
+        language: Optional[Literal["en", "es", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """U-Haul locations near a city, ZIP or postal code on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. For truck rentals, trailer rentals, moving supplies or self-storage. Returns language, near, service, country, distance_unit, heading, layout (paged: 6 a page; single: every location on page 1), page, per_page, has_more, count, locations [rank, location_id (the input of location and reviews), name, location_type (as given: U-Haul Neighborhood Dealer, ...; none = a U-Haul company location), url, address {street, city, state, postal_code, country}, phone (paged layout), rating, review_count, distance, distance_text, open_today, hours [{days, hours}], special_hours [{date, hours}], services, flags (24 hour customer return, habla espanol, ...), latitude, longitude], notes. A place U-Haul cannot find is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            near: A city with its state or province (Dallas, TX), a ZIP or a postal code (M5V 2T6).
+            service: truck_rentals (default), trailer_rentals, moving_supplies or self_storage.
+            page: Page from 1 (6 locations a page where U-Haul pages; some places list every location on page 1).
+            language: en (default, www.uhaul.com), es (es.uhaul.com, U-Haul's Spanish site) or fr (fr.uhaul.com, U-Haul's French site). The market (US or Canada) follows the place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_locations", {"near": near, "service": service, "page": page, "language": language}, extra)
+
+    async def location(
+        self,
+        location_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One U-Haul location by id or link on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Returns language, country, currency, location_id, name, url, address, latitude, longitude, phone, hours, payment_accepted, rating, review_count, image, rate_card (Canadian locations: per truck the weekday and weekend day and per-km rates and the daily / weekly / monthly plans with kilometers included, in CAD), listed_from_prices (US dealers: the page's own 'from' prices, which are not quotes), notes. An unknown id is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location_id: A U-Haul location id (locations[].location_id).
+            url: Or the location link (locations[].url), e.g. https://www.uhaul.com/Locations/Truck-Rentals-near-Dallas-TX-75206/741028/.
+            language: en (default, www.uhaul.com), es (es.uhaul.com, U-Haul's Spanish site) or fr (fr.uhaul.com, U-Haul's French site). The market (US or Canada) follows the place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_location", {"location_id": location_id, "url": url, "language": language}, extra)
+
+    async def storage_search(
+        self,
+        near: str,
+        *,
+        sort: Optional[Literal["distance", "price", "rating"]] = None,
+        features: Optional[list[Literal["climate_control", "indoor", "drive_up", "portable", "rent_now_online", "vehicle"]]] = None,
+        language: Optional[Literal["en", "es", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Self-storage facilities near a city, ZIP or postal code on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Up to 18 facilities, sorted by distance, starting rate or rating and filtered by features in Scavio. Returns language, near, country, currency, distance_unit, sort, features, listed, count, facilities [rank, facility_id (the input of storage_facility), name, url, affiliate (U-Haul Self-Storage Affiliate), address, distance, distance_text, starting_rate, rating, review_count, price_lock, features (as given), feature_keys, office_hours_today, access_hours_today, special_hours], notes. A place U-Haul cannot find is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            near: A city with its state or province (Phoenix, AZ), a ZIP or a postal code.
+            sort: distance (default), price (starting rate, low to high) or rating (high to low).
+            features: Facilities with every one of these features: climate_control (Climate Control), indoor (Indoor Storage), drive_up (Outdoor/Drive Up), portable (Portable Storage), rent_now_online (Online Move-In/Rent Now), vehicle (RV/Boat/Vehicle Storage).
+            language: en (default, www.uhaul.com), es (es.uhaul.com, U-Haul's Spanish site) or fr (fr.uhaul.com, U-Haul's French site). The market (US or Canada) follows the place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_storage_search", {"near": near, "sort": sort, "features": features, "language": language}, extra)
+
+    async def storage_facility(
+        self,
+        facility_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        language: Optional[Literal["en", "es", "fr"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One U-Haul self-storage facility in full by id or link on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Returns language, country, currency, facility_id, name, url, affiliate, address, latitude, longitude, phone, rating, review_count, units_count, vacant_units_total, units [unit_id, section, size_class, dimensions, width_ft, length_ft, use, attributes, monthly_rate, rent_now, reserve_only, vacant_units, reserve_from, reserve_until, free_lock_with_rent_now], sections, promotions [{name, text}], office_hours, access_hours, special_hours, features, amenities, notes. An unknown id is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            facility_id: A U-Haul storage facility id (facilities[].facility_id).
+            url: Or the facility link (facilities[].url), e.g. https://www.uhaul.com/Locations/Self-Storage-near-Dallas-TX-75231/741065/.
+            language: en (default, www.uhaul.com), es (es.uhaul.com, U-Haul's Spanish site) or fr (fr.uhaul.com, U-Haul's French site). The market (US or Canada) follows the place.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_storage_facility", {"facility_id": facility_id, "url": url, "language": language}, extra)
+
+    async def reviews(
+        self,
+        location_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        sort: Optional[Literal["newest", "highest", "lowest"]] = None,
+        stars: Optional[int] = None,
+        service: Optional[Literal["all", "trucks", "storage", "ubox"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """U-Haul's own customer reviews of one location on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Every text review the location's page shows, filtered by service and stars, sorted newest, highest or lowest and paged in Scavio. Returns location_id, location_name, overall_rating, counts {all, trucks, storage, ubox}, service, stars, sort, total, page, page_size, pages, has_more, count, reviews [{rating, date, review_type, service, text}], notes. No reviewer name is returned. An unknown id is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            location_id: A U-Haul location or storage facility id.
+            url: Or the location link.
+            page: Page from 1.
+            page_size: Reviews per page, 1-100 (default 20).
+            sort: newest (default), highest or lowest rating.
+            stars: Reviews with this many stars (1-5).
+            service: all (default), trucks, storage or ubox.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_reviews", {"location_id": location_id, "url": url, "page": page, "page_size": page_size, "sort": sort, "stars": stars, "service": service}, extra)
+
+    async def suggestions(
+        self,
+        term: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """U-Haul's own place suggestions for the start of a city, ZIP or postal code (US and Canada) on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. Returns term, count, suggestions [{label, value, kind (place or postal_code)}], notes. value is the input for pickup, dropoff and near. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            term: The start of a city, a ZIP or a postal code.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_suggestions", {"term": term}, extra)
+
+    async def supplies(
+        self,
+        category: Optional[str] = None,
+        *,
+        country: Optional[Literal["us", "ca"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """U-Haul moving supplies prices, US (USD) or Canada (CAD), by category or product link on U-Haul (uhaul.com, the US and Canada truck rental and self-storage company). Scavio fetches U-Haul's public page on request. A category returns country, currency, kind, category, name, count, products [product_id, name, url, price, price_text, as_low_as, pickup_only, free_in_store_pickup, next_day_delivery]; a product returns country, currency, kind, product_id, name, url, category, description, brand, image, sku, price, as_low_as_price, bundle {quantity, price, unit_price, text}, availability, rating, review_count, dimensions, sizes, notes. An unknown category or product is a charged 404. 1 credit. Failed upstream calls and refused inputs are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A moving supplies category as U-Haul's link writes it: Boxes, Packing-Supplies, Tape, Boxes/Standard-Sized-Moving-Boxes.
+            country: us (default, USD) or ca (U-Haul's CAD prices).
+            url: Or a moving supplies category or product link (products[].url), e.g. https://www.uhaul.com/MovingSupplies/Boxes/Standard-Sized-Moving-Boxes/Medium-Moving-Box/?id=2793.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("uhaul_supplies", {"category": category, "country": country, "url": url}, extra)
+
+class _AsyncWilliamssonomaNamespace:
+    """Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham, chosen with brand) product, configurator, delivery_estimate, stock, store_pickup, stores, floor_samples, categories, category, search, popular_searches and reviews endpoints; market us (ca for product), 1 credit each, 5 for search and category."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def product(
+        self,
+        product: Optional[str] = None,
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. By brand + product id or a product link, us or ca (Williams Sonoma, Pottery Barn and West Elm in Canada, in CAD): product_id, name, url, page_type (simple, complex, configured, guided), available, category_id, breadcrumbs, price {min, max, regular_min, regular_max, discount_type (sale or special)}, on_sale, rating and review_count (Williams Sonoma; the other brands show no ratings), flags, messages (promotion messages valid today, as given), dimensions [{section, lines}] (the dimension lines as given), materials, configurator_base_skus, sku_count and skus [{sku, name, options (size, color, ...), price, regular_price, on_sale, discount_type, personalization_price, surcharge, stock (on_hand, back_ordered, not_available), back_ordered_date, ship_mode, delivery_services (standard, rush, white_glove, doorstep, room_of_choice), white_glove, pickup_services, furniture, direct_ship, special_order, materials, width_in, height_in, depth_in}] (up to 500). No UPC. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product: The product id: the part after /products/ in a product link (items[].product_id).
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: every brand; ca: williams_sonoma, pottery_barn, west_elm. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default; USD) or ca (the brand's Canadian site, English, CAD; Williams Sonoma, Pottery Barn and West Elm, on product).
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_product", {"product": product, "brand": brand, "market": market, "url": url}, extra)
+
+    async def configurator(
+        self,
+        base_sku: Optional[str] = None,
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        product: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The fabric configurator of a made-to-order piece of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. By base SKU (product configurator_base_skus) or product: base_sku, name, price {min, max, regular_min, regular_max, discount_percent_max, discount_type, currency} across fabrics, production_lead_time {min, max} as given, dimensions_in {width, depth, height} and fabrics [{id, name, color, fabric, features, content (fiber content), rub_count, price_tier}]. A product with no configurator is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            base_sku: A configurator base SKU (product configurator_base_skus).
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: pottery_barn. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            product: The product id: the part after /products/ in a product link (items[].product_id).
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_configurator", {"base_sku": base_sku, "brand": brand, "market": market, "product": product, "url": url}, extra)
+
+    async def delivery_estimate(
+        self,
+        zip: Union[str, int],
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        product: Optional[str] = None,
+        url: Optional[str] = None,
+        skus: Optional[Union[str, list[str]]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Standard-delivery dates to a US ZIP code for every SKU of a product, or for up to 20 SKUs, of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. Returns zip, count and skus [{sku, ship_mode, availability (in_stock_ready_to_ship, special_order, coming_soon, ...), special_order, service_level, earliest_date, latest_date, min_days, max_days, message, holiday {name, order_cutoff, delivery_dates} when the brand publishes a holiday cutoff}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: The US ZIP code to deliver to.
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: every brand. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            product: The product id: the part after /products/ in a product link (items[].product_id).
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            skus: Up to 20 SKU ids (product skus[].sku), instead of product.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_delivery_estimate", {"zip": zip, "brand": brand, "market": market, "product": product, "url": url, "skus": skus}, extra)
+
+    async def stock(
+        self,
+        product: Optional[str] = None,
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        url: Optional[str] = None,
+        skus: Optional[Union[str, list[str]]] = None,
+        zip: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Online stock ranges per SKU of one product of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. Returns product_id, regions, count and skus [{sku, available_now (a unit range as given, e.g. 1-10 or 401+), available_now_min, available_now_max, within_2_weeks, regional (in_stock, quick_ship, not_available)}]. Ranges are national. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product: The product id (required, or url).
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: every brand. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            skus: Optional: limits the answer to these SKU ids of the product.
+            zip: Optional US ZIP code for the regional in-stock lists (default 10001). The unit ranges are national.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_stock", {"product": product, "brand": brand, "market": market, "url": url, "skus": skus, "zip": zip}, extra)
+
+    async def store_pickup(
+        self,
+        brand: Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"],
+        skus: Union[str, list[str]],
+        stores: Union[str, list[str]],
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store pickup per SKU per store of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. For up to 20 SKUs at up to 10 stores (store codes from stores): skus [{sku, ship_mode, stores [{pickup_location_code, available_for_pickup (yes / no, no unit counts), ship_to_store {earliest_date, latest_date, min_days, max_days}}]}]. Prices are national (the same at every store). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            skus: Up to 20 SKU ids (product skus[].sku).
+            stores: Up to 10 store codes (stores[].pickup_location_code, e.g. ST:0859).
+            market: us (default); ca is not served on this endpoint.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_store_pickup", {"brand": brand, "skus": skus, "stores": stores, "market": market}, extra)
+
+    async def stores(
+        self,
+        zip: Optional[Union[str, int]] = None,
+        *,
+        brands: Optional[Union[str, list[str]]] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        include_outlets: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. Near a US ZIP code or a point, every brand in one call (or the brands asked for), by distance: store_number, pickup_location_code (for store-pickup), name, brand, store_type, address, latitude, longitude, phone, distance_miles, pickup, ship_to_store and hours (this week's hours per day, holiday closures as given). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code (placed at its Census centroid). Pass zip or latitude + longitude.
+            brands: Brands to list (default every brand with stores: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation). Mark and Graham has no stores.
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            radius: Radius in miles, 1-200 (default 25).
+            include_outlets: Include outlet stores (default false).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_stores", {"zip": zip, "brands": brands, "latitude": latitude, "longitude": longitude, "radius": radius, "include_outlets": include_outlets}, extra)
+
+    async def floor_samples(
+        self,
+        product: Optional[str] = None,
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        url: Optional[str] = None,
+        sku: Optional[str] = None,
+        zip: Optional[Union[str, int]] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        radius: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The stores showing one furniture piece on their floor, for the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. By product or SKU near a US ZIP code or a point: radius_miles, radius_extended and stores [{store_number, brand, name, address, phone, latitude, longitude, distance_miles, hours}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product: The product id: the part after /products/ in a product link (items[].product_id).
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            sku: A SKU id, instead of product.
+            zip: A US ZIP code. Pass zip or latitude + longitude.
+            latitude: Latitude (with longitude), instead of zip.
+            longitude: Longitude (with latitude).
+            radius: Radius in miles, 1-200 (default 50).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_floor_samples", {"product": product, "brand": brand, "market": market, "url": url, "sku": sku, "zip": zip, "latitude": latitude, "longitude": longitude, "radius": radius}, extra)
+
+    async def categories(
+        self,
+        brand: Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"],
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of one brand of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. Including the Sale and Black Friday listings. Without category: the top-level categories [{id, name, type, path, child_count}]; with category (an id): category and children [{id, name, type (topcat, subcat, header, linkcat, ...), path (use it in category), children}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: every brand. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            category: A top-level category id (categories[].id): returns its full subtree. Leave out for the top-level list.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_categories", {"brand": brand, "market": market, "category": category}, extra)
+
+    async def category(
+        self,
+        brand: Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"],
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        path: Optional[str] = None,
+        url: Optional[str] = None,
+        sort: Optional[Literal["featured", "price_asc", "price_desc", "newest", "best_selling"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. By path or category link, in the site's sorts (featured, price_asc, price_desc, newest, best_selling). Sale and Black Friday listings are category paths. Returns page (1), page_size, total, count, items [{position, product_id (use it in product), name, url, leader_sku, image, price_min, price_max, regular_price_min, regular_price_max, sale_price_min, sale_price_max, price_type (regular, limited_time_offer or set_savings), max_discount_percent, flags, more_swatches}], facets [{name, label, type, options [{value, label, count}], min / max on a price range}], sort_options and related_searches. Page 1 (20 products) as the site shows it. Also path and sort. An unknown category is a charged 404 (5 credits). 5 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-60 s; set a client timeout of at least 150 s.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: pottery_barn. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            path: A category path under /shop/ (categories[].path without /shop/), e.g. furniture/sofas or a sale path.
+            url: A category link on the brand site, instead of path.
+            sort: featured (default), price_asc, price_desc, newest or best_selling (the site's category sorts).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_category", {"brand": brand, "market": market, "path": path, "url": url, "sort": sort}, extra)
+
+    async def search(
+        self,
+        brand: Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"],
+        query: str,
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Keyword search on one brand of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. Returns page (1), page_size, total, count, items [{position, product_id (use it in product), name, url, leader_sku, image, price_min, price_max, regular_price_min, regular_price_max, sale_price_min, sale_price_max, price_type (regular, limited_time_offer or set_savings), max_discount_percent, flags, more_swatches}], facets [{name, label, type, options [{value, label, count}], min / max on a price range}], sort_options and related_searches. Page 1 (20 products) as the site shows it. Also query. Results come in the site's relevance order. 5 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-60 s; set a client timeout of at least 150 s.
+
+        Costs 5 credits. Returns the API response as a dict.
+
+        Args:
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: williams_sonoma, pottery_barn. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            query: Search keywords.
+            market: us (default); ca is not served on this endpoint.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_search", {"brand": brand, "query": query, "market": market}, extra)
+
+    async def popular_searches(
+        self,
+        brand: Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"],
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The day's most searched terms on one brand of the Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn Kids, Pottery Barn Teen, West Elm, Rejuvenation, Mark and Graham). Scavio fetches the brand's public page on request; the brands have no public API. Every answer carries brand, brand_name, market, currency, language and host. The list the brand's own search box shows: date, count and terms [{rank, term, count}] (counts as given). The newest published list is returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-20 s (product pages up to 50 s); set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: every brand. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_popular_searches", {"brand": brand, "market": market}, extra)
+
+    async def reviews(
+        self,
+        product: Optional[str] = None,
+        *,
+        brand: Optional[Literal["williams_sonoma", "pottery_barn", "pottery_barn_kids", "pottery_barn_teen", "west_elm", "rejuvenation", "mark_and_graham"]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one Williams Sonoma product (the other brands show no reviews), newest to oldest: page, offset, page_size, total, total_pages, has_more, statistics {average_rating, review_count, recommended_count, not_recommended_count, rating_distribution} and reviews [{review_id, rating, title, text, submitted_at, recommended, verified_purchaser, badges, syndicated, syndication_source, helpful_votes, unhelpful_votes, secondary_ratings, product_name}]. Page 1 holds 8 reviews, pages 2-5 30 each; no sort or star filter. No reviewer names, locations or photos. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 25-60 s; set a client timeout of at least 150 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product: A Williams Sonoma product id.
+            brand: The brand: williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation, mark_and_graham. Served on this endpoint: us: williams_sonoma. Any other brand / market answers 400 "not available for this brand / market" before anything is charged.
+            market: us (default); ca is not served on this endpoint.
+            url: A product link on the brand site, instead of product (brand and market are read from it).
+            page: Page, 1-5: page 1 holds 8 reviews, every later page 30 (newest to oldest).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("williamssonoma_reviews", {"product": product, "brand": brand, "market": market, "url": url, "page": page}, extra)

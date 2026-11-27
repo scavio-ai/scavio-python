@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 154 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Academy Sports + Outdoors, REI, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Bath & Body Works, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 159 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Dick's Sporting Goods, Academy Sports + Outdoors, REI, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -46,6 +46,8 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Macy's Products, Prices, Deals, Reviews, Brand Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Gap, Old Navy, Banana Republic and Athleta Prices, Promotion and Markdown Prices, Batch Prices, In, Low or Out Store Stock by Size, Stores and Deals (US and Canada; 11 endpoints) | Yes | No | No | No |
 | Bath & Body Works Prices, Product Promotions with Dates, Current Offers, Store Pickup Purchase Limits, Stores and Review Summaries (US and Canada; 10 endpoints) | Yes | No | No | No |
+| Williams Sonoma, Pottery Barn and West Elm Prices, Online Stock Ranges, Delivery Dates, Store Pickup, Floor Samples, Stores and Categories (7 brands, US and Canada; 12 endpoints) | Yes | No | No | No |
+| QVC and HSN Prices, Special Prices, Today's Special, On Air Now, Program Guide, Recently Aired Items and Reviews (QVC US, UK, DE, IT, JP; HSN US; 10 endpoints) | Yes | No | No | No |
 | Saks Fifth Avenue Designer Sale Prices, Products, Stock, Designer Pages and Store Pickup (9 endpoints) | Yes | No | No | No |
 | Kohl's Clearance, Sale Prices, Kohl's Cash, Coupon Codes and Store Pickup Units (9 endpoints) | Yes | No | No | No |
 | Rakuten Cash Back Rates and Was Rates by Store, Rate Checks for 100 Stores, Store Coupons, Event Deals and In-Store Offers (US, UK and Canada; 9 endpoints) | Yes | No | No | No |
@@ -98,6 +100,8 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
 | Goodreads Book Ratings and Rating Distribution, Reader Reviews by Star and Language, Authors, Series, Editions, Lists, Quotes and New Releases (14 endpoints) | Yes | No | No | No |
+| Barnes & Noble Book Prices and Formats by EAN or ISBN, Bestseller Lists, Store Pickup Flags, Stores, Collections and Deals (US; 10 endpoints) | Yes | No | No | No |
+| ThriftBooks Used Book Prices per Format and Condition, ISBN Lookup, Editions, Copies for Sale and Reviews (US; 8 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
@@ -121,6 +125,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Lennar New-Home Prices and Was Prices by Market, Communities, Plans, Homesites, Promotions and Monthly Payment Estimates (US; 11 endpoints) | Yes | No | No | No |
 | Extra Space Storage Unit Prices by Size near a ZIP or Point, Promotions, Facility Units, Reviews and City Storage Prices (US; 5 endpoints) | Yes | No | No | No |
 | Public Storage Unit Prices (Online and In-Store), Promotions and Move-In Costs, Facilities and Reviews (US and Canada; 3 endpoints) | Yes | No | No | No |
+| U-Haul Truck Rental Rates for a Move, Locations, Self-Storage Facilities and Starting Rates, Reviews and Moving Supplies (US and Canada; 8 endpoints) | Yes | No | No | No |
 | Travel (Booking + Airbnb + Tripadvisor, 10 endpoints) | Yes | No | No | No |
 | Vrbo Vacation Rental Nightly Prices and Stay Totals for Your Dates, Deals, Ratings, Property Details and House Rules (20 market-languages; 3 endpoints) | Yes | No | No | No |
 | Expedia Hotel Prices for Your Dates (Nightly, Total, Was Price), Property Details and Fees, Daily Price Calendars (51 market-languages; 4 endpoints) | Yes | No | No | No |
@@ -7276,6 +7281,192 @@ for row in stock["stores"][:5]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 126. Video shopping -- QVC and HSN prices, today's special, program guide and reviews
+
+QVC (qvc.com, qvcuk.com, qvc.de, qvc.it, qvc.jp) and HSN (hsn.com), the video
+shopping networks (site): keyword search with the price, QVC's everyday price,
+the special price (Today's Special Value, Black Friday Sale), easy pay, rating
+and stock; one product in full and up to 20 products in one call; today's
+special with its start and end times; what is on air now; the program guide by
+day and channel; the items HSN presented in one show hour; a qvc.com category
+or collection; search suggestions; and the first page of a product's reviews
+and questions as the product page shows it (no paging, no reviewer names). QVC
+market us, uk, de, it or jp in its own language and currency; HSN US only.
+Show names are kept as given; host and guest names are not included. Namespace
+`qvc`, 10 endpoints: `search`, `product`, `products`, `todays_special`,
+`on_air`, `program_guide`, `recently_aired`, `category`, `suggestions`,
+`reviews`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 240s.
+See the [QVC + HSN API
+page](https://scavio.dev/qvc-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/qvc-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+qvc = client.qvc
+res = qvc.search("blender")["data"]
+print(res["total"], res["total_pages"], res["currency"])
+for it in res["items"][:5]:
+    print(it["title"], it["price"], it["qvc_price"], it["special_price"], it["stock"])
+tsv = qvc.todays_special()["data"]
+print(tsv["headline"], tsv["window"]["starts_at"], tsv["window"]["ends_at"])
+print(tsv["item"]["title"], tsv["item"]["price"], tsv["item"]["qvc_price"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 127. Books -- Barnes & Noble prices, formats, bestsellers and store pickup
+
+Barnes & Noble (barnesandnoble.com, the US bookseller): keyword search and
+collection listings (24 results, as the site shows them) with the format,
+price, original price, sale flag, sales rank and rating, sorted and filtered
+by the site's own filters; one title by EAN or ISBN with every format the page
+links and a short overview excerpt; store pickup flags for a title at the
+stores near a ZIP, a city or a store (eligible and available, no unit counts);
+stores near a place or a point and one store with hours; search suggestions;
+the bestseller lists; the category menu; and the deal pages. Member offers are
+given as the page's offer text, never a member price. US only, prices in USD.
+Namespace `barnesandnoble`, 10 endpoints: `search`, `product`,
+`store_availability`, `stores`, `store`, `suggestions`, `bestsellers`,
+`category`, `categories`, `deals`. Credits: 1 credit each. `credits_used` in
+the response is what was charged. The request timeout is raised to at least
+240s.
+See the [Barnes & Noble API
+page](https://scavio.dev/barnesandnoble-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/barnesandnoble-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bn = client.barnesandnoble
+res = bn.search("project hail mary")["data"]
+print(res["total"], res["count"])
+for it in res["items"][:5]:
+    print(it["title"], it["format"], it["price"], it["original_price"], it["on_sale"])
+pickup = bn.store_availability("60611", ean="9780439023528")["data"]
+print(pickup["count"], pickup["available_count"])
+for st in pickup["stores"][:5]:
+    print(st["name"], st["distance_miles"], st["eligible"], st["available"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 128. Used books -- ThriftBooks prices per format and condition, editions and copies
+
+ThriftBooks (thriftbooks.com, the US online used-book seller): keyword search
+or a catalog browse with the bestseller, deals and new release lists, filtered
+by format, condition, language, genre and price; an ISBN lookup with the price
+of every format and condition; a work's format x condition table with the
+price, list price and quantity of each condition (a New quantity of 500 means
+500 or more); one edition with a short overview excerpt; every copy for sale
+of an edition; all editions of a work; customer reviews; and search
+suggestions. US storefront, prices in USD as a visitor who is not signed in
+sees them. Namespace `thriftbooks`, 8 endpoints: `search`, `isbn`, `work`,
+`edition`, `copies`, `editions`, `reviews`, `suggestions`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 240s.
+See the [ThriftBooks API
+page](https://scavio.dev/thriftbooks-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/thriftbooks-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+tb = client.thriftbooks
+book = tb.isbn("9780593135204")["data"]
+print(book["work_id"], book["low_price"], book["high_price"])
+table = tb.work(book["work_id"])["data"]
+for fmt in table["formats"]:
+    print(fmt["format"], [(c["condition"], c["price"], c["quantity"]) for c in fmt["conditions"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 129. Moving and storage -- U-Haul truck rental rates, locations and self-storage
+
+U-Haul (uhaul.com, the US and Canada truck rental and self-storage company):
+U-Haul's own truck rental rates for a one-way or in-town move on a date, from
+U-Haul's public quote form (nothing is reserved, and the quote names no pickup
+location); U-Haul locations near a place by service; one location;
+self-storage facilities near a place with the starting rate, rating and
+features, and one facility; customer reviews of a location or facility; place
+suggestions; and moving supplies prices in USD or CAD. US and Canada, on
+U-Haul's English, Spanish or French site. Namespace `uhaul`, 8 endpoints:
+`truck_quote`, `locations`, `location`, `storage_search`, `storage_facility`,
+`reviews`, `suggestions`, `supplies`. Credits: 1 credit each. `credits_used`
+in the response is what was charged. The request timeout is raised to at least
+240s.
+See the [U-Haul API
+page](https://scavio.dev/uhaul-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/uhaul-truck-quote?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+uh = client.uhaul
+quote = uh.truck_quote("Dallas, TX", "2026-12-11", dropoff="Austin, TX")["data"]
+print(quote["move_type"], quote["allowed_miles"], quote["available_count"])
+for t in quote["trucks"]:
+    print(t["name"], t["available"], t["rate"], t["rate_kind"])
+storage = uh.storage_search("Phoenix, AZ 85004", sort="price")["data"]
+for f in storage["facilities"][:5]:
+    print(f["name"], f["distance_text"], f["starting_rate"], f["rating"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 130. Home and kitchen -- Williams Sonoma, Pottery Barn and West Elm prices, stock and stores
+
+Williams-Sonoma, Inc. brands (Williams Sonoma, Pottery Barn, Pottery Barn
+Kids, Pottery Barn Teen, West Elm, Rejuvenation and Mark and Graham; brand):
+one product in full with every SKU, its price, regular price and stock state
+(us, and ca for Williams Sonoma, Pottery Barn and West Elm in CAD); the fabric
+configurator of a configured piece; standard delivery dates to a ZIP; online
+stock ranges per SKU; store pickup per SKU at up to 10 stores; the brands'
+stores near a ZIP or a point; the stores showing a product as a floor sample;
+the category tree and one category listing; keyword search (page 1, 20
+products); the day's popular searches; and Williams Sonoma customer reviews.
+West Elm US search is not served. Namespace `williamssonoma`, 12 endpoints:
+`product`, `configurator`, `delivery_estimate`, `stock`, `store_pickup`,
+`stores`, `floor_samples`, `categories`, `category`, `search`,
+`popular_searches`, `reviews`. Credits: 1 credit each, 5 for `search` and
+`category`. `credits_used` in the response is what was charged. The request
+timeout is raised to at least 240s.
+See the [Williams-Sonoma API
+page](https://scavio.dev/williamssonoma-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/williamssonoma-product?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ws = client.williamssonoma
+item = ws.product("wusthof-classic-chefs-knife", brand="williams_sonoma")["data"]
+print(item["name"], item["price"]["min"], item["price"]["regular_min"], item["on_sale"])
+for sku in item["skus"][:5]:
+    print(sku["sku"], sku["name"], sku["price"], sku["regular_price"], sku["stock"])
+pickup = ws.store_pickup("williams_sonoma", ["1468824", "2600435"], ["ST:0859", "ST:6016"])["data"]
+for sku in pickup["skus"]:
+    print(sku["sku"], [(s["pickup_location_code"], s["available_for_pickup"]) for s in sku["stores"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -7385,6 +7576,7 @@ Scavio works with popular AI/LLM frameworks:
 | Lennar (`lennar`) | `search`, `community`, `plan`, `home`, `master_planned`, `markets`, `market`, `suggestions`, `resolve`, `promotions`, `payment`; US; `search` by `market`, `state`, `city`, `text`, a point or `bounds`; `payment` takes a homesite and its community, a down payment and an interest rate | 1 each |
 | Extra Space Storage (`extraspace`) | `search`, `facility`, `reviews`, `city_prices`, `locations`; US; `search` by `term` (ZIP, city or place) or a point; `facility` and `reviews` by `store_id` or `url` | 1 each |
 | Public Storage (`publicstorage`) | `search`, `facility`, `reviews`; `market` us or ca, `language` en or fr; `search` by `location` or `slug`; `reviews` US facilities | 1 each |
+| U-Haul (`uhaul`) | `truck_quote`, `locations`, `location`, `storage_search`, `storage_facility`, `reviews`, `suggestions`, `supplies`; US and Canada, `language` en, es or fr; `truck_quote` takes `pickup`, `date` and an optional `dropoff` (never a reservation); `location`, `storage_facility` and `reviews` by id or `url`; `supplies` by `category` or `url`, `country` us or ca | 1 each |
 | Booking.com | `search`, `hotel`, `reviews` | 1 each |
 | Tripadvisor | `locations` (start here), `search`, `location`, `reviews` | 2 each |
 | Airbnb | `search`, `listing`, `reviews` | 1 each |
@@ -7433,6 +7625,8 @@ Scavio works with popular AI/LLM frameworks:
 | Macy's (`macys`) | `search`, `product`, `reviews`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions` | 1 each |
 | Gap Inc. (`gap`) | `search`, `category`, `categories`, `product`, `prices`, `stores`, `store`, `store_stock`, `suggestions`, `trending`, `deals`; `brand` gap, old_navy, banana_republic, athleta, gap_factory or banana_republic_factory; `country` us or ca, `language` en or fr; `store_stock` takes 1 to 10 `store_ids` and `sku_ids` or a `style_id` | 1 each |
 | Bath & Body Works (`bathandbodyworks`) | `search`, `category`, `categories`, `product`, `promotions`, `offers`, `store_availability`, `store`, `stores`, `reviews_summary`; `country` us or ca; `search` and `category` show 48 results (no page 2); `product`, `promotions`, `store_availability` and `reviews_summary` by `product_id` or `url` | 1 each |
+| Williams-Sonoma (`williamssonoma`) | `product`, `configurator`, `delivery_estimate`, `stock`, `store_pickup`, `stores`, `floor_samples`, `categories`, `category`, `search`, `popular_searches`, `reviews`; `brand` williams_sonoma, pottery_barn, pottery_barn_kids, pottery_barn_teen, west_elm, rejuvenation or mark_and_graham; `market` us (ca on `product`); `product`, `stock` and `reviews` by `product` or `url`; `store_pickup` takes up to 20 `skus` and 10 `stores` | 1 each, `search` and `category` 5 |
+| QVC + HSN (`qvc`) | `search`, `product`, `products`, `todays_special`, `on_air`, `program_guide`, `recently_aired`, `category`, `suggestions`, `reviews`; `site` qvc or hsn; QVC `market` us, uk, de, it or jp (each endpoint lists the markets it serves), HSN us; `product` and `reviews` by `item_number` or `url`; `products` takes up to 20 `item_numbers`; `recently_aired` hsn only; `reviews` is the first page | 1 each |
 | Saks Fifth Avenue (`saks`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `designers` | 2 each |
 | Kohl's (`kohls`) | `search`, `product`, `category`, `brand`, `deals`, `stores`, `store_availability`, `suggestions`, `coupons` | `stores` 1, the rest 2 each |
 | Rakuten (`rakuten`) | `stores`, `store`, `store_coupons`, `rates`, `search`, `suggestions`, `category`, `deals`, `in_store`; `country` us, gb or ca (`language` en or fr on ca); `rates` checks up to 100 `store_ids`; `store` and `store_coupons` by store slug or id | 1 each |
@@ -7501,6 +7695,8 @@ Scavio works with popular AI/LLM frameworks:
 | Maisons du Monde (`maisonsdumonde`) | `search`, `product`, `category`, `deals`, `reviews`, `stores`, `store`, `availability`, `seller`; markets fr, be (fr / nl), lu, nl, de, es, it, pt, ch (fr / de / it) via `country` and `language` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
 | Goodreads (`goodreads`) | `search`, `book`, `reviews`, `suggestions`, `author`, `author_books`, `series`, `editions`, `list`, `book_lists`, `list_search`, `quotes`, `genre`, `new_releases`; one global English site; `reviews` reads up to 4 pages of one view per call; `book` by `book_id`, `url` or `isbn` | 1 each |
+| Barnes & Noble (`barnesandnoble`) | `search`, `product`, `store_availability`, `stores`, `store`, `suggestions`, `bestsellers`, `category`, `categories`, `deals`; US; `search` and `category` show 24 results; `product` by `ean` or `isbn`; `store_availability` takes `near` (a ZIP, a city or a store) and `ean` or `isbn`; `stores` by `near` or a point | 1 each |
+| ThriftBooks (`thriftbooks`) | `search`, `isbn`, `work`, `edition`, `copies`, `editions`, `reviews`, `suggestions`; US; `search` by `query` or a `list` (bestsellers, deals, new_releases); `isbn` takes an ISBN-10 or ISBN-13; `work`, `editions` and `reviews` by `work_id`; `edition` and `copies` by `edition_id` | 1 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
@@ -7510,6 +7706,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.100.0
+
+- **5 new namespaces** (sync and async), 48 endpoints: `qvc` (QVC and HSN, 10),
+  `barnesandnoble` (Barnes & Noble, 10), `thriftbooks` (ThriftBooks, 8), `uhaul`
+  (U-Haul, 8) and `williamssonoma` (Williams Sonoma, Pottery Barn, West Elm and the
+  other Williams-Sonoma, Inc. brands, 12). Credits: 1 per call except
+  `williamssonoma.search` and `williamssonoma.category` (5). The request timeout is
+  raised to at least 240s.
 
 ### Changed in 0.99.0
 

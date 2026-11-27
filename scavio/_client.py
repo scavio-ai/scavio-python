@@ -21,6 +21,7 @@ from ._namespaces_sync import (
     _AsosNamespace,
     _AutotraderNamespace,
     _AutozoneNamespace,
+    _BarnesandnobleNamespace,
     _BathandbodyworksNamespace,
     _BestBuyNamespace,
     _BjsNamespace,
@@ -114,6 +115,7 @@ from ._namespaces_sync import (
     _PoshmarkNamespace,
     _PublicstorageNamespace,
     _PublixNamespace,
+    _QvcNamespace,
     _RakutenNamespace,
     _RealtorNamespace,
     _RedditNamespace,
@@ -137,6 +139,7 @@ from ._namespaces_sync import (
     _TcgplayerNamespace,
     _ThreadsNamespace,
     _ThredupNamespace,
+    _ThriftbooksNamespace,
     _TikTokNamespace,
     _TikTokShopNamespace,
     _TractorsupplyNamespace,
@@ -145,6 +148,7 @@ from ._namespaces_sync import (
     _TruecarNamespace,
     _TruliaNamespace,
     _TrustpilotNamespace,
+    _UhaulNamespace,
     _UltaNamespace,
     _UniqloNamespace,
     _VevorNamespace,
@@ -154,6 +158,7 @@ from ._namespaces_sync import (
     _WalmartNamespace,
     _WayfairNamespace,
     _WholeFoodsNamespace,
+    _WilliamssonomaNamespace,
     _XNamespace,
     _YelpNamespace,
     _YesstyleNamespace,
@@ -377,6 +382,11 @@ class ScavioClient:
         self.zappos = _ZapposNamespace(self)
         self.newegg = _NeweggNamespace(self)
         self.rei = _ReiNamespace(self)
+        self.qvc = _QvcNamespace(self)
+        self.barnesandnoble = _BarnesandnobleNamespace(self)
+        self.thriftbooks = _ThriftbooksNamespace(self)
+        self.uhaul = _UhaulNamespace(self)
+        self.williamssonoma = _WilliamssonomaNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

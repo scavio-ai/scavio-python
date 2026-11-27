@@ -23,6 +23,7 @@ from ._namespaces_async import (
     _AsyncAsosNamespace,
     _AsyncAutotraderNamespace,
     _AsyncAutozoneNamespace,
+    _AsyncBarnesandnobleNamespace,
     _AsyncBathandbodyworksNamespace,
     _AsyncBestBuyNamespace,
     _AsyncBjsNamespace,
@@ -116,6 +117,7 @@ from ._namespaces_async import (
     _AsyncPoshmarkNamespace,
     _AsyncPublicstorageNamespace,
     _AsyncPublixNamespace,
+    _AsyncQvcNamespace,
     _AsyncRakutenNamespace,
     _AsyncRealtorNamespace,
     _AsyncRedditNamespace,
@@ -139,6 +141,7 @@ from ._namespaces_async import (
     _AsyncTcgplayerNamespace,
     _AsyncThreadsNamespace,
     _AsyncThredupNamespace,
+    _AsyncThriftbooksNamespace,
     _AsyncTikTokNamespace,
     _AsyncTikTokShopNamespace,
     _AsyncTractorsupplyNamespace,
@@ -147,6 +150,7 @@ from ._namespaces_async import (
     _AsyncTruecarNamespace,
     _AsyncTruliaNamespace,
     _AsyncTrustpilotNamespace,
+    _AsyncUhaulNamespace,
     _AsyncUltaNamespace,
     _AsyncUniqloNamespace,
     _AsyncVevorNamespace,
@@ -156,6 +160,7 @@ from ._namespaces_async import (
     _AsyncWalmartNamespace,
     _AsyncWayfairNamespace,
     _AsyncWholeFoodsNamespace,
+    _AsyncWilliamssonomaNamespace,
     _AsyncXNamespace,
     _AsyncYelpNamespace,
     _AsyncYesstyleNamespace,
@@ -372,6 +377,11 @@ class AsyncScavioClient:
         self.zappos = _AsyncZapposNamespace(self)
         self.newegg = _AsyncNeweggNamespace(self)
         self.rei = _AsyncReiNamespace(self)
+        self.qvc = _AsyncQvcNamespace(self)
+        self.barnesandnoble = _AsyncBarnesandnobleNamespace(self)
+        self.thriftbooks = _AsyncThriftbooksNamespace(self)
+        self.uhaul = _AsyncUhaulNamespace(self)
+        self.williamssonoma = _AsyncWilliamssonomaNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

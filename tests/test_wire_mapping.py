@@ -10017,3 +10017,291 @@ def test_batch4_1126_credits_wire_and_timeouts():
     assert ENDPOINTS["gap_store_stock"].one_of == (("sku_ids", "style_id"),)
     assert "items" in {p.name for p in ENDPOINTS["gap_prices"].required_params}
     assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH4_1126 for p in ep.params)
+
+
+# --- batch 5 2026-11-27: 5 namespaces (QVC + HSN, B&N, ThriftBooks, U-Haul, Williams-Sonoma) ---
+
+BATCH5_1127 = {
+    "qvc": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "products": ("products", 1, 240.0),
+        "todays_special": ("todays-special", 1, 240.0),
+        "on_air": ("on-air", 1, 240.0),
+        "program_guide": ("program-guide", 1, 240.0),
+        "recently_aired": ("recently-aired", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+    },
+    "barnesandnoble": {
+        "search": ("search", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "store_availability": ("store-availability", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "bestsellers": ("bestsellers", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+    },
+    "thriftbooks": {
+        "search": ("search", 1, 240.0),
+        "isbn": ("isbn", 1, 240.0),
+        "work": ("work", 1, 240.0),
+        "edition": ("edition", 1, 240.0),
+        "copies": ("copies", 1, 240.0),
+        "editions": ("editions", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "uhaul": {
+        "truck_quote": ("truck-quote", 1, 240.0),
+        "locations": ("locations", 1, 240.0),
+        "location": ("location", 1, 240.0),
+        "storage_search": ("storage-search", 1, 240.0),
+        "storage_facility": ("storage-facility", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "supplies": ("supplies", 1, 240.0),
+    },
+    "williamssonoma": {
+        "product": ("product", 1, 240.0),
+        "configurator": ("configurator", 1, 240.0),
+        "delivery_estimate": ("delivery-estimate", 1, 240.0),
+        "stock": ("stock", 1, 240.0),
+        "store_pickup": ("store-pickup", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "floor_samples": ("floor-samples", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "category": ("category", 5, 240.0),
+        "search": ("search", 5, 240.0),
+        "popular_searches": ("popular-searches", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+    },
+}
+BATCH5_1127_ONE_OF = {
+    "qvc_product": (("item_number", "url"),),
+    "qvc_category": (("url", "path"),),
+    "qvc_reviews": (("item_number", "url"),),
+    "barnesandnoble_product": (("ean", "isbn"),),
+    "barnesandnoble_store_availability": (("ean", "isbn"),),
+    "barnesandnoble_stores": (("near", "latitude"),),
+    "barnesandnoble_category": (("path", "url"),),
+    "uhaul_location": (("location_id", "url"),),
+    "uhaul_storage_facility": (("facility_id", "url"),),
+    "uhaul_reviews": (("location_id", "url"),),
+    "uhaul_supplies": (("category", "url"),),
+    "williamssonoma_product": (("product", "url"), ("brand", "url")),
+    "williamssonoma_configurator": (("base_sku", "product", "url"), ("brand", "url")),
+    "williamssonoma_delivery_estimate": (("product", "url", "skus"), ("brand", "url")),
+    "williamssonoma_stock": (("product", "url"), ("brand", "url")),
+    "williamssonoma_stores": (("zip", "latitude"),),
+    "williamssonoma_floor_samples": (
+        ("product", "url", "sku"), ("brand", "url"), ("zip", "latitude"),
+    ),
+    "williamssonoma_category": (("path", "url"),),
+    "williamssonoma_reviews": (("product", "url"), ("brand", "url")),
+}
+BATCH5_1127_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH5_1127))
+def test_batch5_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 5 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH5_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH5_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("is_fallback", "").replace("unrelated fallback", "")
+        assert not BATCH5_1127_BANNED.search(text), ep.key
+        if namespace == "williamssonoma":
+            assert not re.search(r"\b(ai|agents?|agentic|mcp|llms?|chatbots?)\b", text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH5_1127_WIRE = [
+    ("qvc", "search", {"query": "blender"}, "search"),
+    ("qvc", "product", {"item_number": "K341654"}, "product"),
+    ("qvc", "products", {"item_numbers": ["K341654", "K82223", "A700206"]}, "products"),
+    ("qvc", "todays_special", {}, "todays-special"),
+    ("qvc", "on_air", {}, "on-air"),
+    ("qvc", "program_guide", {}, "program-guide"),
+    ("qvc", "recently_aired", {"site": "hsn"}, "recently-aired"),
+    (
+        "qvc", "category",
+        {
+            "url": "https://www.qvc.com/c/beauty/hair-care/hair-styling-tools/-/1ajqy/c.html",
+        },
+        "category",
+    ),
+    ("qvc", "suggestions", {"query": "blen"}, "suggestions"),
+    ("qvc", "reviews", {"item_number": "K341654"}, "reviews"),
+    ("barnesandnoble", "search", {"query": "project hail mary"}, "search"),
+    ("barnesandnoble", "product", {"ean": "9780593135204"}, "product"),
+    (
+        "barnesandnoble", "store_availability",
+        {
+            "near": "60611",
+            "ean": "9780593135204",
+        },
+        "store-availability",
+    ),
+    ("barnesandnoble", "stores", {"near": "10001"}, "stores"),
+    ("barnesandnoble", "store", {"store_id": "2234"}, "store"),
+    ("barnesandnoble", "suggestions", {"query": "hunger"}, "suggestions"),
+    ("barnesandnoble", "bestsellers", {}, "bestsellers"),
+    ("barnesandnoble", "category", {"path": "books/mystery-thrillers"}, "category"),
+    ("barnesandnoble", "categories", {}, "categories"),
+    ("barnesandnoble", "deals", {}, "deals"),
+    ("thriftbooks", "search", {}, "search"),
+    ("thriftbooks", "isbn", {"isbn": "9780593135204"}, "isbn"),
+    ("thriftbooks", "work", {"work_id": "26830049"}, "work"),
+    ("thriftbooks", "edition", {"edition_id": "49364660"}, "edition"),
+    ("thriftbooks", "copies", {"edition_id": "49364660"}, "copies"),
+    ("thriftbooks", "editions", {"work_id": "26830049"}, "editions"),
+    ("thriftbooks", "reviews", {"work_id": "26830049"}, "reviews"),
+    ("thriftbooks", "suggestions", {"query": "hunger"}, "suggestions"),
+    ("uhaul", "truck_quote", {"pickup": "Dallas, TX", "date": "2026-12-10"}, "truck-quote"),
+    ("uhaul", "locations", {"near": "75201"}, "locations"),
+    ("uhaul", "location", {"location_id": "741028"}, "location"),
+    ("uhaul", "storage_search", {"near": "Dallas, TX 75201"}, "storage-search"),
+    ("uhaul", "storage_facility", {"facility_id": "741065"}, "storage-facility"),
+    ("uhaul", "reviews", {"location_id": "741028"}, "reviews"),
+    ("uhaul", "suggestions", {"term": "dall"}, "suggestions"),
+    ("uhaul", "supplies", {"category": "Boxes"}, "supplies"),
+    (
+        "williamssonoma", "product",
+        {
+            "product": "gabrielle-upholstered-sofa",
+            "brand": "pottery_barn",
+        },
+        "product",
+    ),
+    (
+        "williamssonoma", "configurator",
+        {
+            "base_sku": "4889446",
+            "brand": "pottery_barn",
+        },
+        "configurator",
+    ),
+    (
+        "williamssonoma", "delivery_estimate",
+        {
+            "zip": "94103",
+            "brand": "pottery_barn",
+            "product": "gabrielle-upholstered-sofa",
+        },
+        "delivery-estimate",
+    ),
+    (
+        "williamssonoma", "stock",
+        {
+            "product": "wusthof-classic-chefs-knife",
+            "brand": "pottery_barn",
+        },
+        "stock",
+    ),
+    (
+        "williamssonoma", "store_pickup",
+        {
+            "brand": "williams_sonoma",
+            "skus": ["1468824", "2600435"],
+            "stores": ["ST:0859", "ST:6016"],
+        },
+        "store-pickup",
+    ),
+    ("williamssonoma", "stores", {"zip": "60611"}, "stores"),
+    (
+        "williamssonoma", "floor_samples",
+        {
+            "product": "gabrielle-upholstered-sofa",
+            "brand": "pottery_barn",
+            "zip": "94103",
+        },
+        "floor-samples",
+    ),
+    ("williamssonoma", "categories", {"brand": "pottery_barn"}, "categories"),
+    (
+        "williamssonoma", "category",
+        {
+            "brand": "pottery_barn",
+            "path": "furniture/sofas",
+        },
+        "category",
+    ),
+    ("williamssonoma", "search", {"brand": "williams_sonoma", "query": "chef knife"}, "search"),
+    ("williamssonoma", "popular_searches", {"brand": "williams_sonoma"}, "popular-searches"),
+    (
+        "williamssonoma", "reviews",
+        {
+            "product": "shun-classic-chefs-knife",
+            "brand": "williams_sonoma",
+        },
+        "reviews",
+    ),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH5_1127_WIRE)
+def test_batch5_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH5_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH5_1127_ONE_OF))
+def test_batch5_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch5_1127_credits_wire_and_timeouts():
+    """1 credit per call except Williams-Sonoma search and category (5); 240 s floor everywhere."""
+    for ns in ("qvc", "barnesandnoble", "thriftbooks", "uhaul"):
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    ws = {ep.method: ep.credits for ep in ENDPOINTS.values() if ep.namespace == "williamssonoma"}
+    assert {m for m, c in ws.items() if c == 5} == {"search", "category"}
+    assert {c for m, c in ws.items() if m not in ("search", "category")} == {1}
+    assert {ep.min_timeout for ep in ENDPOINTS.values() if ep.namespace in BATCH5_1127} == {240.0}
+    assert not [
+        ep.key for ep in ENDPOINTS.values() if ep.namespace in BATCH5_1127 and ep.credits_note
+    ]
+    assert ENDPOINTS["barnesandnoble_categories"].params[0].name == "country"
+    assert [p.name for p in ENDPOINTS["uhaul_truck_quote"].required_params] == ["pickup", "date"]
+    assert [p.name for p in ENDPOINTS["williamssonoma_store_pickup"].required_params] == [
+        "brand", "skus", "stores"]
+    assert ENDPOINTS["williamssonoma_floor_samples"].one_of == (
+        ("product", "url", "sku"), ("brand", "url"), ("zip", "latitude"))
+    reviews = {p.name for p in ENDPOINTS["williamssonoma_reviews"].params}
+    assert "sort" not in reviews and "rating" not in reviews
+    assert "item_numbers" in {p.name for p in ENDPOINTS["qvc_products"].required_params}
+    assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH5_1127 for p in ep.params)
