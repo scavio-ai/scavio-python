@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scavio"
-version = "0.101.0"
-description = "Python SDK for the Scavio Search API - real-time data from 164 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
+version = "0.102.0"
+description = "Python SDK for the Scavio Search API - real-time data from 171 sources (Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, Nintendo, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Argos, Media Expert, Action, HEMA, AutoZone, O'Reilly, Ace Hardware, Tractor Supply, Michaels, Nike, Instacart, Macy's, IKEA, Lowe's, Nordstrom, Sephora, Ulta, ALDI, CVS, HEB, Kroger, eBay, Zillow, Booking, Airbnb, Trustpilot, SEC EDGAR, Meta Ad Library and more) plus URL extraction, site map, crawl and batch extract"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
@@ -196,6 +196,32 @@ keywords = [
     "bedbathbeyond",
     "bed-bath-and-beyond-api",
     "home-goods",
+    "kabum",
+    "kabum-api",
+    "brazil-ecommerce",
+    "magalu",
+    "magazine-luiza",
+    "magalu-api",
+    "casas-bahia",
+    "casasbahia-api",
+    "extra-com-br",
+    "pontofrio",
+    "buscape",
+    "buscape-api",
+    "zoom-com-br",
+    "price-comparison-brazil",
+    "drogasil",
+    "droga-raia",
+    "rd-saude",
+    "pharmacy-prices-brazil",
+    "reclame-aqui",
+    "reclameaqui-api",
+    "company-reputation",
+    "consumer-complaints",
+    "leroy-merlin",
+    "leroymerlin-api",
+    "home-improvement",
+    "brl-prices",
     "rei-api",
     "outdoor-gear",
     "aldi",

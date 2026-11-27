@@ -34,6 +34,7 @@ from ._namespaces_async import (
     _AsyncBookingNamespace,
     _AsyncBootsNamespace,
     _AsyncBringatrailerNamespace,
+    _AsyncBuscapeNamespace,
     _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
     _AsyncCargurusNamespace,
@@ -41,6 +42,7 @@ from ._namespaces_async import (
     _AsyncCarrefourNamespace,
     _AsyncCarscomNamespace,
     _AsyncCarvanaNamespace,
+    _AsyncCasasbahiaNamespace,
     _AsyncChatGPTNamespace,
     _AsyncChewyNamespace,
     _AsyncCompaniesHouseNamespace,
@@ -85,16 +87,19 @@ from ._namespaces_async import (
     _AsyncInstacartNamespace,
     _AsyncInstagramNamespace,
     _AsyncJcpenneyNamespace,
+    _AsyncKabumNamespace,
     _AsyncKbbNamespace,
     _AsyncKohlsNamespace,
     _AsyncKrogerNamespace,
     _AsyncKuaishouNamespace,
     _AsyncLennarNamespace,
+    _AsyncLeroymerlinNamespace,
     _AsyncLinkedInNamespace,
     _AsyncLlbeanNamespace,
     _AsyncLookfantasticNamespace,
     _AsyncLowesNamespace,
     _AsyncMacysNamespace,
+    _AsyncMagaluNamespace,
     _AsyncMaisonsDuMondeNamespace,
     _AsyncMarksNamespace,
     _AsyncMediaExpertNamespace,
@@ -123,7 +128,9 @@ from ._namespaces_async import (
     _AsyncPublixNamespace,
     _AsyncQvcNamespace,
     _AsyncRakutenNamespace,
+    _AsyncRdsaudeNamespace,
     _AsyncRealtorNamespace,
+    _AsyncReclameaquiNamespace,
     _AsyncRedditNamespace,
     _AsyncRedfinNamespace,
     _AsyncReiNamespace,
@@ -392,6 +399,13 @@ class AsyncScavioClient:
         self.llbean = _AsyncLlbeanNamespace(self)
         self.sweetwater = _AsyncSweetwaterNamespace(self)
         self.bedbathbeyond = _AsyncBedbathbeyondNamespace(self)
+        self.kabum = _AsyncKabumNamespace(self)
+        self.magalu = _AsyncMagaluNamespace(self)
+        self.casasbahia = _AsyncCasasbahiaNamespace(self)
+        self.buscape = _AsyncBuscapeNamespace(self)
+        self.rdsaude = _AsyncRdsaudeNamespace(self)
+        self.reclameaqui = _AsyncReclameaquiNamespace(self)
+        self.leroymerlin = _AsyncLeroymerlinNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

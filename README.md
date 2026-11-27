@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 164 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 171 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -104,10 +104,17 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | OLX Europe Classifieds: Listings, Ads, Sellers, Category Filters and Similar Ads (7 markets; 9 endpoints) | Yes | No | No | No |
 | Trendyol Seller Prices, Buy Box, Reviews, Q&A, Coupons and Rankings (35 markets; 12 endpoints) | Yes | No | No | No |
 | Trustpilot Businesses and Reviews (6 endpoints) | Yes | No | No | No |
+| Reclame Aqui Company Reputation, Complaints, Rankings and Segments (Brazil; 8 endpoints) | Yes | No | No | No |
 | Goodreads Book Ratings and Rating Distribution, Reader Reviews by Star and Language, Authors, Series, Editions, Lists, Quotes and New Releases (14 endpoints) | Yes | No | No | No |
 | Barnes & Noble Book Prices and Formats by EAN or ISBN, Bestseller Lists, Store Pickup Flags, Stores, Collections and Deals (US; 10 endpoints) | Yes | No | No | No |
 | ThriftBooks Used Book Prices per Format and Condition, ISBN Lookup, Editions, Copies for Sale and Reviews (US; 8 endpoints) | Yes | No | No | No |
 | Mercado Libre Listings, Reviews and Best Sellers (MX, BR, AR, CO; 5 endpoints) | Yes | No | No | No |
+| KaBuM! Card and Pix Prices, Offers with Units Left, Marketplace Sellers, Shipping by CEP and Reviews (Brazil; 7 endpoints) | Yes | No | No | No |
+| Magazine Luiza Prices, Pix Prices, Coupons, Deal End Times, Reviews and Stores (Brazil; 8 endpoints) | Yes | No | No | No |
+| Casas Bahia, Extra and Ponto Products with Every Seller's Price, Pix Price and Installments (Brazil; 4 endpoints) | Yes | No | No | No |
+| Buscape and Zoom Store Offers, Daily Lowest Price History, Store Coupons and Shipping Estimates (Brazil; 12 endpoints) | Yes | No | No | No |
+| Drogasil and Droga Raia Prices, Deals, Coupons, Store Pickup and Stores (Brazil; 11 endpoints) | Yes | No | No | No |
+| Leroy Merlin Prices in 7 Markets, Brazil Regional Prices and Exact Store Units, Reviews and Stores (13 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -7664,6 +7671,271 @@ for o in eta["options"]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 136. Brazil electronics -- KaBuM! card and Pix prices, offers with units left, sellers and shipping by CEP
+
+KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer):
+keyword search and category listings (up to 100 a page, 5 sorts, facets) with
+the card price, the Pix price (Pix is Brazil's instant payment) and the
+running offer with its units left; the department and category tree; one
+product with its spec sheet and, for a marketplace item, the seller's business
+name, CNPJ and score; shipping options and dates to a CEP (a Brazilian postal
+code); reviews with KaBuM!'s own summary (no reviewer names); and the Black
+Friday and standing offers campaigns. Prices in BRL as shown to a visitor who
+is not signed in, never a Prime price. Namespace `kabum`, 7 endpoints:
+`search`, `category`, `categories`, `product`, `shipping`, `reviews`,
+`offers`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 240s.
+See the [KaBuM! API
+page](https://scavio.dev/kabum-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/kabum-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+kabum = client.kabum
+res = kabum.search("cadeira gamer")["data"]
+print(res["total"], res["total_pages"], res["currency"])
+for it in res["items"][:5]:
+    print(it["name"], it["price"], it["cash_price"], it["list_price"], it["stock"])
+deals = kabum.offers(campaign="blackfriday")["data"]
+print(deals["campaign"]["name"], deals["campaign"]["ends_at"])
+for it in deals["items"][:5]:
+    print(it["name"], it["cash_price"], it["offer_units_left"], it["ends_at"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 137. Brazil retail -- Magazine Luiza prices, Pix prices, coupons, deal timers and stores
+
+Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer and
+marketplace): keyword search, category and deal listings (40 a page, 8 sorts,
+brand, seller, price, rating and attribute filters) with the price, the Pix
+price (Pix is Brazil's instant payment), the coupon, the deal end time and the
+seller; one product with installments, coupons, the seller's business data,
+variants, specs and questions; reviews (no reviewer names); search
+suggestions; Magalu stores by state and city; and one store with its address
+and phone. Prices in BRL; shipping by CEP and store stock are not published.
+Namespace `magalu`, 8 endpoints: `search`, `category`, `deals`, `product`,
+`reviews`, `suggestions`, `stores`, `store`. Credits: 2 credits each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Magazine Luiza API
+page](https://scavio.dev/magalu-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/magalu-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+magalu = client.magalu
+res = magalu.search("geladeira frost free")["data"]
+print(res["total"], res["total_pages"], res["currency"])
+for it in res["items"][:5]:
+    print(it["title"], it["price"], it["pix_price"], it["coupon"], it["deal_ends_at"], it["seller"]["name"])
+item = magalu.product("238058800")["data"]
+print(item["title"], item["price"], item["pix_price"], item["pix_discount_percent"])
+print(item["best_installment"]["description"], item["seller"]["name"], item["coupons"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 138. Brazil retail -- Casas Bahia, Extra and Ponto products, every seller's price and Pix price
+
+Casas Bahia (casasbahia.com.br) and its Extra (extra.com.br) and Ponto
+(pontofrio.com.br) storefronts, chosen with site: keyword search and category
+listings (20 a page, 5 sorts, facet filters, own-store filter) with brand,
+rating and status; list items carry no prices, so read product with an item's
+sku; one product with the price, the Pix price (Pix is Brazil's instant
+payment), installment plans and every seller's offer, specs, dimensions and
+the page's reviews and questions; and the category menu. Prices in BRL.
+Namespace `casasbahia`, 4 endpoints: `search`, `category`, `product`,
+`categories`. Credits: 2 credits each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 240s.
+See the [Casas Bahia API
+page](https://scavio.dev/casasbahia-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/casasbahia-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+cb = client.casasbahia
+res = cb.search("geladeira frost free", site="casasbahia")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["sku"], it["title"], it["brand"], it["status"])  # list items carry no prices
+item = cb.product("55066339")["data"]
+print(item["name"], item["price"], item["pix_price"], item["offer_count"])
+for s in item["sellers"]:
+    print(s)
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 139. Brazil price comparison -- Buscape and Zoom store offers, price history and coupons
+
+Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison
+sites; one catalog, chosen with site): keyword search, category and deal
+listings with each product's lowest price and stores; one product with its
+specs, the editors' pros and cons and store reviews (no reviewer names); every
+store's offer for a product with cash and installment prices; up to 12 months
+of the daily lowest price; the current lowest price; the campaign landing
+pages; a store's coupons; search suggestions; and shipping estimates to a CEP
+(a Brazilian postal code). Prices in BRL; store and coupon links are not
+returned. Namespace `buscape`, 12 endpoints: `search`, `category`,
+`categories`, `product`, `offers`, `price_history`, `lowest_price`, `deals`,
+`deal_landing`, `store`, `suggestions`, `shipping`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Buscape API
+page](https://scavio.dev/buscape-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/buscape-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bp = client.buscape
+offers = bp.offers("13994006", sort="price_asc")["data"]
+print(offers["total"], offers["store_count"], offers["best_offer"]["price"])
+for o in offers["offers"][:5]:
+    print(o["store"]["name"], o["price"], o["installment_total"], o["stock"])
+hist = bp.price_history("12755140")["data"]
+print(hist["lowest"]["price"], hist["lowest"]["date"], hist["latest"]["price"])
+for p in hist["points"][-7:]:
+    print(p["date"], p["price"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 140. Brazil pharmacy retail -- Drogasil and Droga Raia prices, deals and store pickup
+
+Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy
+chains of RD Saude, chosen with site): keyword, product code or EAN search,
+category and deal listings (Oferta do Dia, % Especial, coupons, Black Friday)
+with the price, list price and discount; the category tree; one product with
+its variants and kits; prices for up to 48 product codes in one call; store
+pickup yes or no for up to 5 product x store checks; stores near a CEP (a
+Brazilian postal code) or by state, city and services; reviews with the site's
+own summary (no reviewer names); and search suggestions. Regulatory flags are
+returned exactly as the site gives them. Prices in BRL, the site's default
+online price. Namespace `rdsaude`, 11 endpoints: `search`, `category`,
+`categories`, `product`, `prices`, `store_availability`, `stores`,
+`stores_search`, `reviews`, `deals`, `suggestions`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Drogasil and Droga Raia API
+page](https://scavio.dev/rdsaude-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rdsaude-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rd = client.rdsaude
+res = rd.search("protetor solar")["data"]
+print(res["site_name"], res["total"], res["currency"])
+for it in res["items"][:5]:
+    print(it["name"], it["brand"], it["price"], it["list_price"], it["in_stock"])
+pickup = rd.store_availability(["38155"], ["200", "210"], site="drogaraia")["data"]
+for sku in pickup["skus"]:
+    print(sku["name"], [(s["store_id"], s["pickup_available"]) for s in sku["stores"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 141. Company reputation -- Reclame Aqui scores, complaints and rankings (Brazil)
+
+Reclame Aqui (reclameaqui.com.br, Brazil's consumer complaint and company
+reputation site): company search; one company's reputation by period
+(complaints, answered and solved percent, would-do-business-again percent,
+score and status), its main problems and segment position; the company's
+complaints filtered by status, category, product, problem or words; one
+complaint with its replies; complaint search across every company; the site's
+11 ranking lists; and the segments with their best and worst companies. Text
+in Portuguese as published; consumer names, emails and phones are never
+returned. Namespace `reclameaqui`, 8 endpoints: `company_search`, `company`,
+`complaints`, `complaint`, `complaint_search`, `rankings`, `segments`,
+`segment_ranking`. Credits: 1 credit each; `complaints` 2 by `shortname` (the
+company id is looked up first; 3 when the company page is read too).
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s.
+See the [Reclame Aqui API
+page](https://scavio.dev/reclameaqui-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/reclameaqui-company-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ra = client.reclameaqui
+co = ra.company("nubank")["data"]
+print(co["name"], co["id"], co["verified"])
+for r in co["reputation"]:
+    print(r["period"], r["status_label"], r["final_score"], r["solved_percent"], r["complaints"])
+res = ra.complaints(company_id=co["id"], status="resolved")["data"]
+print(res["total"], res["total_pages"])
+for c in res["complaints"][:5]:
+    print(c["id"], c["title"], c["status"], c["solved"], c["score"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 142. Home improvement -- Leroy Merlin prices in 7 markets and exact store units in Brazil
+
+Leroy Merlin (the home improvement retailer) in Brazil, Italy, Spain,
+Portugal, Poland, Romania and France (country br, it, es, pt, pl, ro or fr):
+keyword search (not France) and category listings with the price, original
+price and promotion; one product with its specs, deliveries and marketplace
+offers; exact store units with the aisle (Brazil only); stores and one store
+with its hours; reviews (no reviewer names); and, for Brazil, shipping quotes
+to a CEP (a Brazilian postal code), CEP lookup, the 28 price regions and the
+department tree; search suggestions (it, es, pt, pl) and the Italian offers
+listing. Brazil prices are set per region (region required). European listings
+carry full details for the products the page shows in full and the rest as
+ids. Prices in BRL, EUR, PLN or RON. Namespace `leroymerlin`, 13 endpoints:
+`search`, `category`, `product`, `store_stock`, `stores`, `store`, `reviews`,
+`shipping`, `cep`, `regions`, `categories`, `suggestions`, `offers`. Credits:
+billed on what the request spent in its market: 1 credit in Brazil, Italy and
+Romania (Italian product and category pages 2), 2 in Spain, Portugal and
+Poland, 5 in France. `credits_used` in the response is what was charged. The
+request timeout is raised to at least 240s.
+See the [Leroy Merlin API
+page](https://scavio.dev/leroymerlin-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/leroymerlin-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+lm = client.leroymerlin
+res = lm.search("br", "furadeira", region="grande_sao_paulo")["data"]
+print(res["total"], res["total_pages"], res["currency"])
+for p in res["products"][:5]:
+    print(p["id"], p["name"], p["price"], p["original_price"], p["unit"], p["in_stock"])
+stock = lm.store_stock("br", id="85277934", region="rio_de_janeiro")["data"]
+print(stock["unit"], stock["total_units"], stock["in_stock_count"])
+for st in stock["stores"]:
+    print(st["name"], st["units"], st["aisle"], st["pickup_in_store"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -7896,10 +8168,17 @@ Scavio works with popular AI/LLM frameworks:
 | Ashley Furniture (`ashley`) | `search`, `product`, `category`, `deals`, `stores`, `store`; `search` and `product` also on ca, mx, ph, sa, tr via `country` (`product` by `handle` there) | `search` and `product` 2 on us and mx, 1 on ca, ph, sa, tr; the rest (us only) 2 each |
 | Maisons du Monde (`maisonsdumonde`) | `search`, `product`, `category`, `deals`, `reviews`, `stores`, `store`, `availability`, `seller`; markets fr, be (fr / nl), lu, nl, de, es, it, pt, ch (fr / de / it) via `country` and `language` | 1 each |
 | Trustpilot | `search`, `business`, `reviews`, `categories`, `category`, `review` | 2 each |
+| Reclame Aqui (`reclameaqui`) | `company_search`, `company`, `complaints`, `complaint`, `complaint_search`, `rankings`, `segments`, `segment_ranking`; Brazil; `company` by `shortname` or `url`; `complaints` by `company_id` or `shortname`, filtered by status, category, product, problem and words; `complaint` by `url` or `company` + `complaint_id`; `segment_ranking` by `main_segment` + `segment` or `url` | 1 each, `complaints` by `shortname` 2 |
 | Goodreads (`goodreads`) | `search`, `book`, `reviews`, `suggestions`, `author`, `author_books`, `series`, `editions`, `list`, `book_lists`, `list_search`, `quotes`, `genre`, `new_releases`; one global English site; `reviews` reads up to 4 pages of one view per call; `book` by `book_id`, `url` or `isbn` | 1 each |
 | Barnes & Noble (`barnesandnoble`) | `search`, `product`, `store_availability`, `stores`, `store`, `suggestions`, `bestsellers`, `category`, `categories`, `deals`; US; `search` and `category` show 24 results; `product` by `ean` or `isbn`; `store_availability` takes `near` (a ZIP, a city or a store) and `ean` or `isbn`; `stores` by `near` or a point | 1 each |
 | ThriftBooks (`thriftbooks`) | `search`, `isbn`, `work`, `edition`, `copies`, `editions`, `reviews`, `suggestions`; US; `search` by `query` or a `list` (bestsellers, deals, new_releases); `isbn` takes an ISBN-10 or ISBN-13; `work`, `editions` and `reviews` by `work_id`; `edition` and `copies` by `edition_id` | 1 each |
 | Mercado Libre | `search`, `product`, `reviews`, `questions`, `best_sellers` | `reviews` 1, the rest 2 each |
+| KaBuM! (`kabum`) | `search`, `category`, `categories`, `product`, `shipping`, `reviews`, `offers`; Brazil; `search` and `category` up to 100 a page with 5 sorts and facet `filters`; `product`, `shipping` and `reviews` by `product_id` or `url`; `shipping` takes a `cep`; `offers` by `campaign` (blackfriday or ofertaskabum) | 1 each |
+| Magazine Luiza (`magalu`) | `search`, `category`, `deals`, `product`, `reviews`, `suggestions`, `stores`, `store`; Brazil; `search`, `category` and `deals` 40 a page, filtered by brand, seller, price, rating, Black Friday, promotion and attributes; `product` and `reviews` by `product_id` or `url`; `stores` by `state` (and `city`); `store` by `store_id` or `url` | 2 each |
+| Casas Bahia (`casasbahia`) | `search`, `category`, `product`, `categories`; `site` casasbahia, extra or pontofrio; `search` and `category` 20 a page (list items carry no prices); `product` by `sku` or `url` with every seller's price | 2 each |
+| Buscape (`buscape`) | `search`, `category`, `categories`, `product`, `offers`, `price_history`, `lowest_price`, `deals`, `deal_landing`, `store`, `suggestions`, `shipping`; `site` buscape or zoom; `offers`, `price_history`, `lowest_price` and `shipping` by `product_id`; `price_history` 40 days or 3-12 months; `shipping` takes `cep`, `state` and `city`; `store` by `store_id` or `store` | 1 each |
+| Drogasil and Droga Raia (`rdsaude`) | `search`, `category`, `categories`, `product`, `prices`, `store_availability`, `stores`, `stores_search`, `reviews`, `deals`, `suggestions`; `site` drogasil or drogaraia; `search`, `category` and `deals` 24, 36 or 48 a page; `prices` up to 48 `skus`; `store_availability` up to 5 product x store checks; `stores` by `cep`, `stores_search` by state, city and services | 1 each |
+| Leroy Merlin (`leroymerlin`) | `search`, `category`, `product`, `store_stock`, `stores`, `store`, `reviews`, `shipping`, `cep`, `regions`, `categories`, `suggestions`, `offers`; `country` br, it, es, pt, pl, ro or fr (no `search` on fr); Brazil needs `region` on priced calls; `store_stock`, `shipping`, `cep`, `regions` and `categories` Brazil only; `suggestions` it, es, pt, pl; `offers` it | billed per market: 1 in br, it, ro (it product and category 2), 2 in es, pt, pl, 5 in fr |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
 | Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
@@ -7908,6 +8187,17 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.102.0
+
+- **7 new namespaces** (sync and async), 63 endpoints, Brazil: `kabum` (KaBuM!, 7),
+  `magalu` (Magazine Luiza, 8), `casasbahia` (Casas Bahia, Extra and Ponto, 4),
+  `buscape` (Buscape and Zoom, 12), `rdsaude` (Drogasil and Droga Raia, 11),
+  `reclameaqui` (Reclame Aqui, 8) and `leroymerlin` (Leroy Merlin in Brazil, Italy,
+  Spain, Portugal, Poland, Romania and France, 13). Credits: 1 per call except
+  `magalu` and `casasbahia` (2), `reclameaqui.complaints` by `shortname` (2) and
+  `leroymerlin`, billed per market (1 in Brazil, Italy and Romania, 2 in Spain,
+  Portugal and Poland, 5 in France). The request timeout is raised to at least 240s.
 
 ### Changed in 0.101.0
 

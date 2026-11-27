@@ -32,6 +32,7 @@ from ._namespaces_sync import (
     _BookingNamespace,
     _BootsNamespace,
     _BringatrailerNamespace,
+    _BuscapeNamespace,
     _CanadianTireNamespace,
     _CapterraNamespace,
     _CargurusNamespace,
@@ -39,6 +40,7 @@ from ._namespaces_sync import (
     _CarrefourNamespace,
     _CarscomNamespace,
     _CarvanaNamespace,
+    _CasasbahiaNamespace,
     _ChatGPTNamespace,
     _ChewyNamespace,
     _CompaniesHouseNamespace,
@@ -83,16 +85,19 @@ from ._namespaces_sync import (
     _InstacartNamespace,
     _InstagramNamespace,
     _JcpenneyNamespace,
+    _KabumNamespace,
     _KbbNamespace,
     _KohlsNamespace,
     _KrogerNamespace,
     _KuaishouNamespace,
     _LennarNamespace,
+    _LeroymerlinNamespace,
     _LinkedInNamespace,
     _LlbeanNamespace,
     _LookfantasticNamespace,
     _LowesNamespace,
     _MacysNamespace,
+    _MagaluNamespace,
     _MaisonsDuMondeNamespace,
     _MarksNamespace,
     _MediaExpertNamespace,
@@ -121,7 +126,9 @@ from ._namespaces_sync import (
     _PublixNamespace,
     _QvcNamespace,
     _RakutenNamespace,
+    _RdsaudeNamespace,
     _RealtorNamespace,
+    _ReclameaquiNamespace,
     _RedditNamespace,
     _RedfinNamespace,
     _ReiNamespace,
@@ -397,6 +404,13 @@ class ScavioClient:
         self.llbean = _LlbeanNamespace(self)
         self.sweetwater = _SweetwaterNamespace(self)
         self.bedbathbeyond = _BedbathbeyondNamespace(self)
+        self.kabum = _KabumNamespace(self)
+        self.magalu = _MagaluNamespace(self)
+        self.casasbahia = _CasasbahiaNamespace(self)
+        self.buscape = _BuscapeNamespace(self)
+        self.rdsaude = _RdsaudeNamespace(self)
+        self.reclameaqui = _ReclameaquiNamespace(self)
+        self.leroymerlin = _LeroymerlinNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

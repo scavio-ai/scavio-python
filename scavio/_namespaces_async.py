@@ -173,6 +173,13 @@ __all__ = [
     "_AsyncLlbeanNamespace",
     "_AsyncSweetwaterNamespace",
     "_AsyncBedbathbeyondNamespace",
+    "_AsyncKabumNamespace",
+    "_AsyncMagaluNamespace",
+    "_AsyncCasasbahiaNamespace",
+    "_AsyncBuscapeNamespace",
+    "_AsyncRdsaudeNamespace",
+    "_AsyncReclameaquiNamespace",
+    "_AsyncLeroymerlinNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -32686,3 +32693,1539 @@ class _AsyncBedbathbeyondNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("bedbathbeyond_deals", {"type": type, "sort": sort, "page": page, "include_out_of_stock": include_out_of_stock}, extra)
+
+class _AsyncKabumNamespace:
+    """KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer) search, category, categories, product, shipping, reviews and offers endpoints; Brazil only, prices in BRL (card and Pix price), shipping by CEP, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["most_searched", "price_asc", "price_desc", "most_reviewed", "newest"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. Brazil only: Portuguese text, prices in BRL as shown to a visitor who is not signed in (never a Prime-member price). By keyword, up to 100 per page, sorted (most searched, price, most reviewed, newest) and filtered by brand, any facet, offers, KaBuM!-sold or a price range. Returns page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, name, url, image, brand, category_path, price (card price), cash_price (Pix / boleto), list_price (the regular price when lower prices apply), cash_discount_percent, installment_text (e.g. 10x de R$ 43,33), offer {offer_id, name, campaign, price, cash_price, discount_percent, starts_at, ends_at, units_left}, currency, available, stock (units), buy_limit, seller {sold_by, is_marketplace, seller_id, company, cnpj, state}, rating, review_count, stamps, free_shipping, open_box, pre_order}], facets [{key, label, type (list, boolean, range), values}] (send to filters) and filters_applied. site_category names the category KaBuM!'s search page sends the keyword to. A keyword with no products returns total 0. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            sort: most_searched (the default, KaBuM!'s own order), price_asc, price_desc, most_reviewed or newest.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Products per page, 1-100. Defaults to 20.
+            filters: Facet filters, at most 8 keys: {key: value or [values]}. Keys and values exactly as facets[].key and facets[].values of an answer list them (e.g. manufacturer, Cor, highlighted_stamp such as "BLACK FRIDAY"); boolean facets (has_offer, kabum_product, has_open_box, has_flash) take true. Prime-member filters are not offered.
+            price_min: Lowest card price in BRL.
+            price_max: Highest card price in BRL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_search", {"query": query, "sort": sort, "page": page, "page_size": page_size, "filters": filters, "price_min": price_min, "price_max": price_max}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        sort: Optional[Literal["most_searched", "price_asc", "price_desc", "most_reviewed", "newest"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. Brazil only: Portuguese text, prices in BRL as shown to a visitor who is not signed in (never a Prime-member price). By category path, sorted and filtered like search, with its breadcrumb [{id, name, path}]. Returns page, page_size, sort, total, total_pages, has_more, count, items [{position, product_id, name, url, image, brand, category_path, price (card price), cash_price (Pix / boleto), list_price (the regular price when lower prices apply), cash_discount_percent, installment_text (e.g. 10x de R$ 43,33), offer {offer_id, name, campaign, price, cash_price, discount_percent, starts_at, ends_at, units_left}, currency, available, stock (units), buy_limit, seller {sold_by, is_marketplace, seller_id, company, cnpj, state}, rating, review_count, stamps, free_shipping, open_box, pre_order}], facets [{key, label, type (list, boolean, range), values}] (send to filters) and filters_applied. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A category path (categories[].path, or a category link's path on www.kabum.com.br), e.g. tv or hardware/placa-de-video-vga.
+            sort: most_searched (the default, KaBuM!'s own order), price_asc, price_desc, most_reviewed or newest.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Products per page, 1-100. Defaults to 20.
+            filters: Facet filters, at most 8 keys: {key: value or [values]}. Keys and values exactly as facets[].key and facets[].values of an answer list them (e.g. manufacturer, Cor, highlighted_stamp such as "BLACK FRIDAY"); boolean facets (has_offer, kabum_product, has_open_box, has_flash) take true. Prime-member filters are not offered.
+            price_min: Lowest card price in BRL.
+            price_max: Highest card price in BRL.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_category", {"category": category, "sort": sort, "page": page, "page_size": page_size, "filters": filters, "price_min": price_min, "price_max": price_max}, extra)
+
+    async def categories(
+        self,
+        *,
+        department: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The departments of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. departments [{slug, path, url}] (about 30), or with department its category tree categories [{slug, path, url, children}]. Paths go to the category endpoint. An unknown department is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            department: A department slug (departments[].slug): returns its category tree. Without it, the departments.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_categories", {"department": department}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. Brazil only: Portuguese text, prices in BRL as shown to a visitor who is not signed in (never a Prime-member price). product_id, name, url, brand, categories, images, price, cash_price, list_price, cash_discount_percent, installment_text, offer (with start, end and units left), payment_methods [{category (boleto, pix, cartao, nupay), method, installments [{installments, amount, total, interest, discount_percent, terms, interest_text}]}], available, discontinued, stock (units), buy_limit, pre_order, open_box, free_shipping, weight_grams, warranty, rating, review_count, stamps, seller {type (1P, 2P, 3P), sold_by, is_marketplace, seller_id, company, cnpj, state, score {rating, nps, delivery_rating, orders, period_start, period_end}}, specs [{section, items [{name, value}], lines}], anatel_code and inmetro_code. A discontinued product returns available false and stock 0. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The KaBuM! product code (items[].product_id; the number after /produto/ in a product link). Send product_id or url.
+            url: A product link on www.kabum.com.br, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_product", {"product_id": product_id, "url": url}, extra)
+
+    async def shipping(
+        self,
+        cep: Union[str, int],
+        *,
+        product_id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The delivery options of one product of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. to a Brazilian CEP, for one unit, as KaBuM! quotes them: address {state, city, district, street} of the CEP, sold_by and options [{name, type, price (BRL), max_days, arrival_date, arrival_text, arrives_tomorrow, carrier, flash, seller}]. Marketplace sellers quote their own options. A product KaBuM! does not sell now returns available false and no options. An invalid CEP is an unbilled 400; an unknown product a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: The Brazilian CEP to deliver to (8 digits).
+            product_id: The KaBuM! product code (items[].product_id; the number after /produto/ in a product link). Send product_id or url.
+            url: A product link on www.kabum.com.br, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_shipping", {"cep": cep, "product_id": product_id, "url": url}, extra)
+
+    async def reviews(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        rating: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. Newest or oldest first, up to 50 per page, filtered by stars: average_rating, total_reviews, total (matching), total_pages, summary (KaBuM!'s own summary of the reviews, as given) and reviews [{review_id, rating, title, text, date, likes, media [{type, url}]}]. No reviewer names. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The KaBuM! product code (items[].product_id; the number after /produto/ in a product link). Send product_id or url.
+            url: A product link on www.kabum.com.br, instead of product_id.
+            rating: Only reviews with this many stars (1-5).
+            sort: newest (the default) or oldest.
+            page: Page, 1-based.
+            page_size: Reviews per page, 1-50. Defaults to 10.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_reviews", {"product_id": product_id, "url": url, "rating": rating, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    async def offers(
+        self,
+        *,
+        campaign: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The offers of one campaign of KaBuM! (kabum.com.br, the Brazilian computer and electronics retailer, part of Magalu). Scavio fetches the public KaBuM! page on request; KaBuM! has no public product API. Brazil only: Portuguese text, prices in BRL as shown to a visitor who is not signed in (never a Prime-member price). campaign {slug, name, title, starts_at, ends_at, rules_url} (blackfriday: 2026-11-25 08:00 to 2026-11-30 11:00 Brasília time), total, total_pages and items [{position, product_id, name, url, image, brand, department, category, price, cash_price, list_price, discount_percent, installment_text, offer_id, offer_units_left, offer_units_sold, stock, starts_at, ends_at, available, seller {sold_by, is_marketplace, seller_id}, stamp, free_shipping, open_box, rating, review_count}], up to 100 per page. A campaign that is not running is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 90 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            campaign: A KaBuM! campaign: blackfriday (Black Friday 2026, the default) or ofertaskabum (KaBuM!'s standing offers).
+            page: Page, 1-based.
+            page_size: Offers per page, 1-100. Defaults to 20.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("kabum_offers", {"campaign": campaign, "page": page, "page_size": page_size}, extra)
+
+class _AsyncMagaluNamespace:
+    """Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer and marketplace) search, category, deals, product, reviews, suggestions, stores and store endpoints; Brazil only, prices in BRL (Pix price, coupons, deal end times), 2 credits each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["relevance", "fastest_delivery", "price_with_shipping", "price_asc", "price_desc", "best_sellers", "top_rated", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[int] = None,
+        black_friday: Optional[bool] = None,
+        promotion: Optional[Union[str, list[str]]] = None,
+        attributes: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By keyword. 40 per page (sponsored cards mixed in by the site are flagged), pages 1-25, in the site's 8 sorts, filtered by brand, seller (Magalu or a marketplace seller), price range, minimum rating, Black Friday promotion and attribute facets (voltage, colour, capacity...). Returns page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, product_id (use it in product and reviews), title, reference, brand, url, image, available, sponsored, price, list_price, discount_percent, pix_price and pix_discount_percent (the Pix price), installment {count, amount, total, interest, description}, currency, seller {id, name, is_magalu}, rating, review_count, coupon {code, message, discount_type, discount_value, starts_at, ends_at}, deal_starts_at, deal_ends_at, badges, tags, category_id, subcategory_id and variants [{name, type, current, options [{value, variation_id, available, url}]}]}], facets [{slug, label, param, values [{value, label, count, selected}]}] with the site's counts, price_range, rating_range, filters_applied and notes. Also query, term and url. No results is an empty 200. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; deal pages took 127-161 s on Black Friday 2026. Set a client timeout of at least 180 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords (Portuguese, as a shopper types them).
+            sort: relevance (default), fastest_delivery, price_with_shipping, price_asc, price_desc, best_sellers, top_rated or newest (the site's 8 sorts).
+            brand: Brand slug(s) as the site writes them (facets brand values[].value).
+            seller: magalu (Magalu's own offers) or marketplace seller id(s) (facets seller values[].value).
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL (the site's price filter).
+            min_rating: Minimum star rating, 1-5.
+            black_friday: true: items in the site's Black Friday promotion (Ofertas Black).
+            promotion: Promotion id(s) (facets promotion values[].value, e.g. promocao_sazonal_3 Ofertas do Dia).
+            attributes: Attribute facets: facet slug -> value slug(s), e.g. {"voltagem": "220v", "cor": ["branco", "inox"]} (facets[].slug and values[].value).
+            page: Results page, 1-25 (40 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_search", {"query": query, "sort": sort, "brand": brand, "seller": seller, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "black_friday": black_friday, "promotion": promotion, "attributes": attributes, "page": page}, extra)
+
+    async def category(
+        self,
+        path: str,
+        *,
+        sort: Optional[Literal["relevance", "fastest_delivery", "price_with_shipping", "price_asc", "price_desc", "best_sellers", "top_rated", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[int] = None,
+        black_friday: Optional[bool] = None,
+        promotion: Optional[Union[str, list[str]]] = None,
+        attributes: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category listing of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. A department or subcategory by path or link, sorted and filtered like search. 40 per page (sponsored cards mixed in by the site are flagged), pages 1-25, in the site's 8 sorts, filtered by brand, seller (Magalu or a marketplace seller), price range, minimum rating, Black Friday promotion and attribute facets (voltage, colour, capacity...). Returns page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, product_id (use it in product and reviews), title, reference, brand, url, image, available, sponsored, price, list_price, discount_percent, pix_price and pix_discount_percent (the Pix price), installment {count, amount, total, interest, description}, currency, seller {id, name, is_magalu}, rating, review_count, coupon {code, message, discount_type, discount_value, starts_at, ends_at}, deal_starts_at, deal_ends_at, badges, tags, category_id, subcategory_id and variants [{name, type, current, options [{value, variation_id, available, url}]}]}], facets [{slug, label, param, values [{value, label, count, selected}]}] with the site's counts, price_range, rating_range, filters_applied and notes. Also path, url and category {name, canonical_url, breadcrumbs}. An unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; deal pages took 127-161 s on Black Friday 2026. Set a client timeout of at least 180 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A category path or magazineluiza.com.br link: a department (/eletrodomesticos/l/ed/) or a subcategory (/geladeira-refrigerador/eletrodomesticos/s/ed/refr/).
+            sort: relevance (default), fastest_delivery, price_with_shipping, price_asc, price_desc, best_sellers, top_rated or newest (the site's 8 sorts).
+            brand: Brand slug(s) as the site writes them (facets brand values[].value).
+            seller: magalu (Magalu's own offers) or marketplace seller id(s) (facets seller values[].value).
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL (the site's price filter).
+            min_rating: Minimum star rating, 1-5.
+            black_friday: true: items in the site's Black Friday promotion (Ofertas Black).
+            promotion: Promotion id(s) (facets promotion values[].value, e.g. promocao_sazonal_3 Ofertas do Dia).
+            attributes: Attribute facets: facet slug -> value slug(s), e.g. {"voltagem": "220v", "cor": ["branco", "inox"]} (facets[].slug and values[].value).
+            page: Results page, 1-25 (40 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_category", {"path": path, "sort": sort, "brand": brand, "seller": seller, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "black_friday": black_friday, "promotion": promotion, "attributes": attributes, "page": page}, extra)
+
+    async def deals(
+        self,
+        *,
+        selection: Optional[str] = None,
+        sort: Optional[Literal["relevance", "fastest_delivery", "price_with_shipping", "price_asc", "price_desc", "best_sellers", "top_rated", "newest"]] = None,
+        brand: Optional[Union[str, list[str]]] = None,
+        seller: Optional[Union[str, list[str]]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        min_rating: Optional[int] = None,
+        black_friday: Optional[bool] = None,
+        promotion: Optional[Union[str, list[str]]] = None,
+        attributes: Optional[dict[str, Any]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """A deal selection of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. The daily deals (ofertasdodia, default) or a campaign selection (blackfriday2026, blackfriday2026_celulares ...), sorted and filtered like search; each card carries its own deal timer (deal_starts_at, deal_ends_at, e.g. 2026-11-27T00:00:00-03:00 to 2026-11-30T09:59:59-03:00) where the site shows one. 40 per page (sponsored cards mixed in by the site are flagged), pages 1-25, in the site's 8 sorts, filtered by brand, seller (Magalu or a marketplace seller), price range, minimum rating, Black Friday promotion and attribute facets (voltage, colour, capacity...). Returns page, page_size, total, total_pages, has_more, count, sponsored_count, sort, items [{position, product_id (use it in product and reviews), title, reference, brand, url, image, available, sponsored, price, list_price, discount_percent, pix_price and pix_discount_percent (the Pix price), installment {count, amount, total, interest, description}, currency, seller {id, name, is_magalu}, rating, review_count, coupon {code, message, discount_type, discount_value, starts_at, ends_at}, deal_starts_at, deal_ends_at, badges, tags, category_id, subcategory_id and variants [{name, type, current, options [{value, variation_id, available, url}]}]}], facets [{slug, label, param, values [{value, label, count, selected}]}] with the site's counts, price_range, rating_range, filters_applied and notes. Also selection, url and selection_info {label, description, ends_at}. An unknown selection is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; deal pages took 127-161 s on Black Friday 2026. Set a client timeout of at least 180 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            selection: A deal selection id or /selecao/ link: ofertasdodia (default, the daily deals), blackfriday2026, blackfriday2026_celulares, blackfriday2026_eletro, blackfriday2026_games, blackfriday2026_info ...
+            sort: relevance (default), fastest_delivery, price_with_shipping, price_asc, price_desc, best_sellers, top_rated or newest (the site's 8 sorts).
+            brand: Brand slug(s) as the site writes them (facets brand values[].value).
+            seller: magalu (Magalu's own offers) or marketplace seller id(s) (facets seller values[].value).
+            min_price: Minimum price in BRL (the site's price filter).
+            max_price: Maximum price in BRL (the site's price filter).
+            min_rating: Minimum star rating, 1-5.
+            black_friday: true: items in the site's Black Friday promotion (Ofertas Black).
+            promotion: Promotion id(s) (facets promotion values[].value, e.g. promocao_sazonal_3 Ofertas do Dia).
+            attributes: Attribute facets: facet slug -> value slug(s), e.g. {"voltagem": "220v", "cor": ["branco", "inox"]} (facets[].slug and values[].value).
+            page: Results page, 1-25 (40 per page).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_deals", {"selection": selection, "sort": sort, "brand": brand, "seller": seller, "min_price": min_price, "max_price": max_price, "min_rating": min_rating, "black_friday": black_friday, "promotion": promotion, "attributes": attributes, "page": page}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By id or link: product_id, requested_id, title, reference, brand, entity, url, category, subcategory, breadcrumbs, available (the site's flag; no stock units), price, list_price, discount_percent, pix_price, pix_discount_percent, best_installment, payment_methods [{method (luiza_ouro, a card brand, pix), plans [{count, amount, total, interest, discount_percent}]}], currency, coupons [{code, message, discount_type, discount_value, starts_at, ends_at}], deal_starts_at, deal_ends_at, max_checkout_quantity, minimum_order_quantity, badges, tags, seller {id, name, legal_name, cnpj, is_magalu, seller_since, score, total_sales, delivery_rate, answer_rate, city, state}, rating, review_count, variants [{name, type, current, options [{value, variation_id, available, url}]}] (colour, voltage...), images, specs [{group, name, value}] and questions {total, count, items [{question_id, question, answer, asked_at, answered_at}]} (no names). No GTIN, no marketing description. Shipping by CEP and store pickup are not available. An unknown product is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; deal pages took 127-161 s on Black Friday 2026. Set a client timeout of at least 180 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: The Magazine Luiza product id (items[].product_id or variants[].options[].variation_id, e.g. 238058800 or ffh7ah372g).
+            url: A magazineluiza.com.br product link, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_product", {"product_id": product_id, "url": url}, extra)
+
+    async def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["most_relevant", "most_recent", "most_positive", "most_negative"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Reviews of one product of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By id or link, in 4 sorts, up to 50 per page: product_id, rating, review_count, comment_count, star_distribution [{stars, count}], aspect_ratings [{id, label, rating}], summary (Magalu's own summary of the reviews, as given), page, page_size, total, total_pages, count, sort and reviews [{review_id, rating, title, text, submitted_at, variant [{label, value}], aspects, sku, images, videos}]. No reviewer names; a star filter is not available. An unknown product is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            product_id: The Magazine Luiza product id (items[].product_id or variants[].options[].variation_id, e.g. 238058800 or ffh7ah372g).
+            url: A magazineluiza.com.br product link, instead of product_id.
+            sort: most_relevant (default), most_recent, most_positive or most_negative.
+            page: Reviews page (default 1).
+            page_size: Reviews per page, 1-50 (default 10).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_reviews", {"product_id": product_id, "url": url, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search suggestions of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. For the start of a search: query, count and suggestions [{position, term}] (up to 10, as the site asks for them). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: The start of a search, as a shopper types it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_suggestions", {"query": query}, extra)
+
+    async def stores(
+        self,
+        state: str,
+        *,
+        city: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The physical stores of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. In one state (UF), optionally one city: state, city, state_total, city_count, count and stores [{store_id, name, city, neighborhood, state, url}] in the site's order. Address, CEP and phone come from the store endpoint; store hours, coordinates, search by CEP, store pickup and store stock are not published. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            state: Brazilian state code (UF): ac, al, am, ap, ba, ce, df, es, go, ma, mg, ms, mt, pa, pb, pe, pi, pr, rj, rn, ro, rr, rs, sc, se, sp, to.
+            city: Optional city: the stores in that city (accents and case ignored).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_stores", {"state": state, "city": city}, extra)
+
+    async def store(
+        self,
+        store_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store page of Magazine Luiza (magazineluiza.com.br, Magalu, the Brazilian retailer). Scavio fetches the public magazineluiza.com.br page on request; Magazine Luiza has no public product API (it runs an affiliate program). Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By store number or link: store_id, name, street_address, city, state, cep, phone, url and opening_hours (empty on the store pages: null). No coordinates. An unknown store is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 3-15 s; set a client timeout of at least 90 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            store_id: A store number (stores[].store_id).
+            url: A lojas.magazineluiza.com.br store link, instead of store_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("magalu_store", {"store_id": store_id, "url": url}, extra)
+
+class _AsyncCasasbahiaNamespace:
+    """Casas Bahia (casasbahia.com.br, with Extra and Ponto; chosen with site) search, category, product and categories endpoints; Brazil only, prices in BRL on product (every seller, Pix and installments; list items carry no prices), 2 credits each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["casasbahia", "extra", "pontofrio"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_asc", "price_desc", "best_selling"]] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        own_store: Optional[bool] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Casas Bahia (casasbahia.com.br, the Brazilian retailer of Grupo Casas Bahia, with its Extra and Ponto stores). Scavio fetches the storefront's public page on request; Casas Bahia has no public API. Brazil, pt-BR, prices in BRL. site picks casasbahia, extra or pontofrio: one catalog, but each storefront's own-store price and review counts can differ. Sort by the storefront's 5 sorts; filter by any facet value (brand, price band, discount band, rating, seller, features), own_store and a price range. Returns site, store, query, filters, page_type and 20 items a page: total, total_is_capped (the storefront counts up to 10,000), total_pages, page, page_size, sort, count, items [{position, product_id, sku (the input of product), title, brand, brand_id, rating, review_count, image, url, path, status, seller_type, category {id, name, subcategories}}], sponsored_count and sponsored [the storefront's sponsored placements ("Patrocinado"), kept apart from items, same fields plus seller_id and their position on the page], facets [{id, name, type, values [{label, count, filter (the input of filters), selected, min, max, children}]}], notes. List items carry no prices: read /casasbahia/product with an item's sku for its prices. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; set a client timeout of at least 120 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            site: casasbahia (default, casasbahia.com.br), extra (extra.com.br) or pontofrio (pontofrio.com.br, the Ponto store). One catalog; each storefront's own-store price and review counts can differ.
+            page: Page, 1-500 (20 items a page; the storefront counts up to 10,000 results). Defaults to 1.
+            sort: relevance (default), popularity, price_asc, price_desc or best_selling: the storefront's 5 sorts.
+            filters: Up to 10 filter values from a previous answer's facets[].values[].filter (brand marca-m19, rating avaliacao-r5, discount band desconto-10to19, seller lojistas-l15, features such as caracteristica-tipo-de-degelo-frost-free). Values combine.
+            own_store: Items sold and delivered by the storefront itself (Casas Bahia, Extra or Pontofrio), not by marketplace sellers.
+            min_price: Minimum price in whole reais (BRL).
+            max_price: Maximum price in whole reais (BRL).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("casasbahia_search", {"query": query, "site": site, "page": page, "sort": sort, "filters": filters, "own_store": own_store, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def category(
+        self,
+        path: str,
+        *,
+        site: Optional[Literal["casasbahia", "extra", "pontofrio"]] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "popularity", "price_asc", "price_desc", "best_selling"]] = None,
+        filters: Optional[Union[str, list[str]]] = None,
+        own_store: Optional[bool] = None,
+        min_price: Optional[int] = None,
+        max_price: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Casas Bahia category, a deal collection (/c?Filtro=D<id>, such as the coupon and campaign lists) or a seller's list (/c?filtro=L<seller id>), by path or link. Sort by the storefront's 5 sorts; filter by any facet value (brand, price band, discount band, rating, seller, features), own_store and a price range. Returns category {path, category_ids, collection_id, collection_name, seller_id} and 20 items a page: total, total_is_capped (the storefront counts up to 10,000), total_pages, page, page_size, sort, count, items [{position, product_id, sku (the input of product), title, brand, brand_id, rating, review_count, image, url, path, status, seller_type, category {id, name, subcategories}}], sponsored_count and sponsored [the storefront's sponsored placements ("Patrocinado"), kept apart from items, same fields plus seller_id and their position on the page], facets [{id, name, type, values [{label, count, filter (the input of filters), selected, min, max, children}]}], notes. Collections carry no start or end dates. List items carry no prices: read /casasbahia/product with an item's sku for its prices. An unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; set a client timeout of at least 120 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A category path from /casasbahia/categories (categories[].path, e.g. /c/tv-e-video/televisores/smart-tv?filtro=categoria-c1_c2_c1588), a deal collection (/c?Filtro=D69331) or such a link on one of the three storefronts.
+            site: casasbahia (default, casasbahia.com.br), extra (extra.com.br) or pontofrio (pontofrio.com.br, the Ponto store). One catalog; each storefront's own-store price and review counts can differ.
+            page: Page, 1-500 (20 items a page; the storefront counts up to 10,000 results). Defaults to 1.
+            sort: relevance (default), popularity, price_asc, price_desc or best_selling: the storefront's 5 sorts.
+            filters: Up to 10 filter values from a previous answer's facets[].values[].filter (brand marca-m19, rating avaliacao-r5, discount band desconto-10to19, seller lojistas-l15, features such as caracteristica-tipo-de-degelo-frost-free). Values combine.
+            own_store: Items sold and delivered by the storefront itself (Casas Bahia, Extra or Pontofrio), not by marketplace sellers.
+            min_price: Minimum price in whole reais (BRL).
+            max_price: Maximum price in whole reais (BRL).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("casasbahia_category", {"path": path, "site": site, "page": page, "sort": sort, "filters": filters, "own_store": own_store, "min_price": min_price, "max_price": max_price}, extra)
+
+    async def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["casasbahia", "extra", "pontofrio"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product on Casas Bahia, Extra or Ponto by sku or link: requested, sku, product_id, name, brand, url, ean, categories, price (regular price, card in one payment), list_price (the "De" price when shown), pix_price and pix_discount_percent (when the storefront offers a Pix discount), discount_percent, currency, price_seller_id, price_sold_by_store, payment {pix, boleto}, installment_plans [{type, plans [{parcels, parcel_value, total, monthly_interest_percent, interest_free, text}]}], best_installments, store_card (the store card plan), offer_count, offer_price_range, sellers [{seller_id, name (business name), buy_box, price, list_price, buy_button_enabled, is_store, pickup_available}], availability {status, buy_button_enabled, pickup_available} (flags, no unit counts), highlights, specs [{group, name, value}], dimensions, images, selection_fields, variants [{sku, label, attributes, active, selected, image}] (each variant is its own sku: read it for its price and sellers), reviews {rating, count, recommend_percent, stars, site_summary (the storefront's own summary of its reviews, as given), items (the 3 reviews on the page, no reviewer names)} and questions {total, items (the 3 questions on the page with their answers, answered_by store / customer / other, no names)}. Not available: reviews past the page's 3, freight by CEP, store lists. The storefront gives no answer for an unknown sku: an uncharged 502 after about 80 s that says to check the sku (a charged 404 when the storefront answers with its not-found page). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; set a client timeout of at least 120 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            sku: The SKU id (items[].sku, or the number after /p/ in a product link).
+            site: casasbahia (default, casasbahia.com.br), extra (extra.com.br) or pontofrio (pontofrio.com.br, the Ponto store). One catalog; each storefront's own-store price and review counts can differ.
+            url: A product link on any of the three storefronts, instead of sku (the link's storefront is the site).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("casasbahia_product", {"sku": sku, "site": site, "url": url}, extra)
+
+    async def categories(
+        self,
+        *,
+        site: Optional[Literal["casasbahia", "extra", "pontofrio"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The storefront's category menu as its header lists it: group_count, count, groups [{name, categories [{name, path (the input of category; null for a landing page that is not a product list), url, category_id, collection_id, seller_id}]}], featured (the department shortcuts) and menu (the top bar links, a deal collection included). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 10-60 s; set a client timeout of at least 120 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            site: casasbahia (default, casasbahia.com.br), extra (extra.com.br) or pontofrio (pontofrio.com.br, the Ponto store). One catalog; each storefront's own-store price and review counts can differ.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("casasbahia_categories", {"site": site}, extra)
+
+class _AsyncBuscapeNamespace:
+    """Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites; chosen with site) search, category, categories, product, offers, price_history, lowest_price, deals, deal_landing, store, suggestions and shipping endpoints; Brazil only, prices in BRL, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "price_drop"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        marketplace: Optional[bool] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. Brazil: Portuguese text, prices in BRL. By keyword, up to 100 per page, sorted (relevance, price, rating, price drop) and filtered by any facet (brand, capacity...), price range, category, marketplace or best-selling store. Returns page, page_size, sort, total (the site caps it at 10000: total_capped), total_pages, has_more, count, items [{position, type (product: compared across stores; offer: a single-store listing), product_id, offer_id, name, url (the product page; null on an offer), image, category {id, name, slug}, price (the lowest cash price, BRL), installments {months, amount, total}, has_interest, store_count, stores [{id, name}], best_offer {offer_id, store_id, store_name}, price_drop_percent, competitiveness_index (0-1), rating, rating_count, review_count, marketplace, stamps}], facets [{key, values [{value, count, selected}]}] (send to filters), categories [{id, name, count, selected}], price_range {min, max, buckets} and filters_applied. Some pages hold fewer items than page_size, with gaps in position, as on the site. category_suggestion {id, name, applied} is the category the site narrows the keyword to. Store links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Search keywords, in Portuguese as shoppers type them.
+            category_id: Category id(s) to search in (items[].category.id; categories lists them).
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, rating or price_drop.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Items per page, 1-100. Defaults to 30.
+            filters: Facet filters, at most 8: {key: value or [values]}, keys and values exactly as facets[].key and facets[].values[].value of an answer list them (e.g. Marca, Capacidade Total).
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            marketplace: true: marketplace sellers; false: the stores' own offers.
+            store: Products whose best-selling store is this one (a store name as items[].stores[].name gives it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_search", {"query": query, "category_id": category_id, "site": site, "sort": sort, "page": page, "page_size": page_size, "filters": filters, "price_min": price_min, "price_max": price_max, "marketplace": marketplace, "store": store}, extra)
+
+    async def category(
+        self,
+        category_id: Optional[Union[str, int]] = None,
+        *,
+        category: Optional[str] = None,
+        query: Optional[str] = None,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "price_drop"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        marketplace: Optional[bool] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. Brazil: Portuguese text, prices in BRL. By id or slug, sorted and filtered like search: category {id, name, slug, type, url}, breadcrumb [{id, name, slug, type}] (branch to category). Returns page, page_size, sort, total (the site caps it at 10000: total_capped), total_pages, has_more, count, items [{position, type (product: compared across stores; offer: a single-store listing), product_id, offer_id, name, url (the product page; null on an offer), image, category {id, name, slug}, price (the lowest cash price, BRL), installments {months, amount, total}, has_interest, store_count, stores [{id, name}], best_offer {offer_id, store_id, store_name}, price_drop_percent, competitiveness_index (0-1), rating, rating_count, review_count, marketplace, stamps}], facets [{key, values [{value, count, selected}]}] (send to filters), categories [{id, name, count, selected}], price_range {min, max, buckets} and filters_applied. Some pages hold fewer items than page_size, with gaps in position, as on the site. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: The category id (items[].category.id; categories[].id). Send category_id or category.
+            category: The category slug or its link (https://www.buscape.com.br/geladeira), instead of category_id.
+            query: Optional keywords inside the category.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, rating or price_drop.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Items per page, 1-100. Defaults to 30.
+            filters: Facet filters, at most 8: {key: value or [values]}, keys and values exactly as facets[].key and facets[].values[].value of an answer list them (e.g. Marca, Capacidade Total).
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            marketplace: true: marketplace sellers; false: the stores' own offers.
+            store: Products whose best-selling store is this one (a store name as items[].stores[].name gives it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_category", {"category_id": category_id, "category": category, "query": query, "site": site, "sort": sort, "page": page, "page_size": page_size, "filters": filters, "price_min": price_min, "price_max": price_max, "marketplace": marketplace, "store": store}, extra)
+
+    async def categories(
+        self,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        branch: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The category tree of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. branches [{slug, url}] (the site's top-level branches), or with branch the branch {id, name, slug, url} and its categories [{id, name, slug, type (product_leaf, offer_leaf), url}]. Ids go to category. An unknown branch is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 80 s when busy; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            branch: A branch slug (branches[].slug): returns its categories with ids. Without it, the branches.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_categories", {"site": site, "branch": branch}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. Brazil: Portuguese text, prices in BRL. By product_id or page url: product_id, name, url, status, rating, review_count, category, breadcrumb, category_rank, stamps, images, specs [{group, items [{name, value}]}], offer_count, store_count, best_offer, priciest_offer and offers [{offer_id, name, image, store {id, name, logo, is_marketplace}, price, installment_total, installments, has_interest, price_drop_percent, competitiveness_index, stock, variants}] as the page shows them, variant_filters, price_history_40_days [{date, price, store_id}], price_tip {label (good_price, regular_price, best_history_price, not_enough_history), price, median_price, start, end} as given, expert {pros, cons, date} (the site editors' pros and cons as given) and reviews [{rating, title, text, date, positive, likes, dislikes, source}] (up to 10 store reviews as the page shows them, no reviewer names). An unknown product is a charged 404. Store links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 80 s when busy; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id: items[].product_id of search, category or deals.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            url: A product page on www.buscape.com.br or www.zoom.com.br (items[].url of search) or its path, instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_product", {"product_id": product_id, "site": site, "url": url}, extra)
+
+    async def offers(
+        self,
+        product_id: Union[str, int],
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        sort: Optional[Literal["default", "price_asc", "price_desc", "installment_price_asc", "discount_desc", "cashback_price_asc"]] = None,
+        variant_id: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every store offer for one product of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. Brazil: Portuguese text, prices in BRL. Sorted by cash price, installment total, discount or cashback price, filtered by variant (e.g. voltage), up to 50 per page: product_id, total, store_count, total_pages, has_more, count, offers [{position, offer_id, sku_id, name, image, store {id, name, logo, is_marketplace}, price (the cash price the site labels 'a vista'), installment_total, installments [{months, amount, total}], has_interest, price_drop_percent, competitiveness_index, stock, condition (new, used), cross_border, variants [{name, value}]}], best_offer, priciest_offer and variant_filters [{id, label, values [{variant_id, label, selected, count}]}]. A product with no offers (or unknown) is a charged 404. Store links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id: items[].product_id of search, category or deals.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            sort: default (the default), price_asc (cash price), price_desc, installment_price_asc (installment total), discount_desc or cashback_price_asc (the site's product page order).
+            variant_id: A variant (variant_filters[].values[].variant_id, e.g. a voltage): offers of that variant.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Offers per page, 1-50. Defaults to 20.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_offers", {"product_id": product_id, "site": site, "sort": sort, "variant_id": variant_id, "page": page, "page_size": page_size}, extra)
+
+    async def price_history(
+        self,
+        product_id: Union[str, int],
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        period: Optional[Literal["days", "months"]] = None,
+        months: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The price history of one product of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. The day's lowest price in BRL and its store, for 40 days (period days) or 3 to 12 months (period months): product_id, period, months, count, lowest, highest, latest and points [{date, price, store_id}]. A product without history (or unknown) is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id: items[].product_id of search, category or deals.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            period: days (the default: 40 daily points) or months (with months).
+            months: With period months: 3 to 12 months of daily points.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_price_history", {"product_id": product_id, "site": site, "period": period, "months": months}, extra)
+
+    async def lowest_price(
+        self,
+        product_id: Union[str, int],
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The lowest current price of one product of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. product_id, offer_id, store_id, price, list_price (as given), price_drop_percent, stock, active, updated_at. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id: items[].product_id of search, category or deals.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_lowest_price", {"product_id": product_id, "site": site}, extra)
+
+    async def deals(
+        self,
+        *,
+        query: Optional[str] = None,
+        category_id: Optional[Union[str, int, list[Union[str, int]]]] = None,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc", "rating", "price_drop"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        filters: Optional[dict[str, Any]] = None,
+        price_min: Optional[float] = None,
+        price_max: Optional[float] = None,
+        marketplace: Optional[bool] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deals list of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. Brazil: Portuguese text, prices in BRL. As the site's Ofertas page builds it (products scoring 0.8 or more on its competitiveness index), by category or keyword, sorted and filtered like search. Returns page, page_size, sort, total (the site caps it at 10000: total_capped), total_pages, has_more, count, items [{position, type (product: compared across stores; offer: a single-store listing), product_id, offer_id, name, url (the product page; null on an offer), image, category {id, name, slug}, price (the lowest cash price, BRL), installments {months, amount, total}, has_interest, store_count, stores [{id, name}], best_offer {offer_id, store_id, store_name}, price_drop_percent, competitiveness_index (0-1), rating, rating_count, review_count, marketplace, stamps}], facets [{key, values [{value, count, selected}]}] (send to filters), categories [{id, name, count, selected}], price_range {min, max, buckets} and filters_applied. Some pages hold fewer items than page_size, with gaps in position, as on the site. Store links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Optional keywords inside the deals.
+            category_id: Category id(s) to list the deals of.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            sort: relevance (the default, the site's own order), price_asc, price_desc, rating or price_drop.
+            page: Results page, 1-based. total_pages reports the last one.
+            page_size: Items per page, 1-100. Defaults to 30.
+            filters: Facet filters, at most 8: {key: value or [values]}, keys and values exactly as facets[].key and facets[].values[].value of an answer list them (e.g. Marca, Capacidade Total).
+            price_min: Lowest price in BRL.
+            price_max: Highest price in BRL.
+            marketplace: true: marketplace sellers; false: the stores' own offers.
+            store: Products whose best-selling store is this one (a store name as items[].stores[].name gives it).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_deals", {"query": query, "category_id": category_id, "site": site, "sort": sort, "page": page, "page_size": page_size, "filters": filters, "price_min": price_min, "price_max": price_max, "marketplace": marketplace, "store": store}, extra)
+
+    async def deal_landing(
+        self,
+        slug: str,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One campaign landing of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. (black-friday, oferta-do-dia-buscape, black-friday-zoom ...): slug, title, brand, updated_at, url and sections [{kind (featured_offers, search_items, product_highlight), title, subtitle, from, to, count, items}] as the site's editors arrange them; featured offers carry from / to dates as given. An unknown landing is a charged 404. Store links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 80 s when busy; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            slug: A campaign landing slug or link, e.g. black-friday, oferta-do-dia-buscape (Buscape) or black-friday-zoom (Zoom).
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_deal_landing", {"slug": slug, "site": site}, extra)
+
+    async def store(
+        self,
+        store_id: Optional[Union[str, int]] = None,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One store on Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. store {id, name, store_ids, logo, cashback_percent, url}, coupon_count and coupons [{coupon_id, store_id, type, discount_type (value, percent), value, code, description, starts_at, expires_at, status, product_id, category_id, devices, brands}] as the store page lists them. The sites publish no store ratings. An unknown store is a charged 404. Coupon links are not returned. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s, up to about 80 s when busy; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: The store id (items[].stores[].id, offers[].store.id). Send store_id or store.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            store: The store page path <slug>-<id> or its link (https://www.buscape.com.br/cupom-de-desconto/kabum!-21), instead of store_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_store", {"store_id": store_id, "site": site, "store": store}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        limit: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search suggestions of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. as its search box shows them: query, count, suggestions [{query, position, category {id, name}}]. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What the shopper has typed so far.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            limit: Suggestions, 1-20. Defaults to 8.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_suggestions", {"query": query, "site": site, "limit": limit}, extra)
+
+    async def shipping(
+        self,
+        product_id: Union[str, int],
+        cep: Union[str, int],
+        state: str,
+        city: str,
+        *,
+        site: Optional[Literal["buscape", "zoom"]] = None,
+        sort: Optional[Literal["default", "price_asc", "price_desc", "installment_price_asc", "discount_desc", "cashback_price_asc"]] = None,
+        page_size: Optional[int] = None,
+        variant_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Freight estimates for one product of Buscape and Zoom (buscape.com.br, zoom.com.br, Brazil's price comparison sites). Scavio fetches the public page on request; the sites have no public API. site picks buscape (the default) or zoom: one catalog, the same ids. to a Brazilian CEP: per store offer (up to 50), freight [{type, price (BRL), delivery_days, text}] and the store's coupon promotions [{code, description, starts_at, ends_at}], as the product page shows them. Send the CEP's state and city. Stores that publish no estimate have an empty freight list. A product with no offers (or unknown) is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 1-9 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id: items[].product_id of search, category or deals.
+            cep: The Brazilian CEP to deliver to (8 digits).
+            state: The CEP's state, a two-letter UF: AC, AL, AP, AM, BA, CE, DF, ES, GO, MA, MT, MS, MG, PA, PB, PR, PE, PI, RJ, RN, RS, RO, RR, SC, SP, SE, TO.
+            city: The CEP's city, as written in Portuguese.
+            site: buscape (the default, www.buscape.com.br) or zoom (www.zoom.com.br). Both sites share one catalog; site sets the site of the page links returned.
+            sort: Which offers to estimate: price_asc (the default) or another offers sort.
+            page_size: Offers to estimate, 1-50. Defaults to 10.
+            variant_id: A variant (variant_filters[].values[].variant_id, e.g. a voltage): offers of that variant.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("buscape_shipping", {"product_id": product_id, "cep": cep, "state": state, "city": city, "site": site, "sort": sort, "page_size": page_size, "variant_id": variant_id}, extra)
+
+class _AsyncRdsaudeNamespace:
+    """Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude; chosen with site) search, category, categories, product, prices, store_availability, stores, stores_search, reviews, deals and suggestions endpoints; Brazil only, prices in BRL, store pickup yes or no, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[24, 36, 48]] = None,
+        brand: Optional[str] = None,
+        seller: Optional[Literal["own", "partner"]] = None,
+        highlight: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        store_id: Optional[Union[str, int]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        facets: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. Brazil: Portuguese text, prices in BRL as the site's default online price (a reference price, not a per-store price). By keyword, product code or EAN; sorted by relevance or price; filtered by brand, own or partner store, highlight (Oferta do Dia, % Especial, coupons, Black Friday), category, store pickup, a price range and any facet; 24, 36 or 48 per page. Returns sort, page, page_size, total, total_pages, reachable_pages, has_more, count, items [{position, sku, ean, name, brand, manufacturer, url, image, type (MEDICATION, PRODUCT), status, in_stock, price, list_price, discount_percent, price_type, quantity_discount {min_quantity, unit_price}, index_price, currency, labels, categories, quantity, active_ingredients, variant_count, variant_attributes, is_kit, sold_by, delivered_by, regulatory}], facets [{name, values [{value, count}]}] and filters_applied. regulatory {anvisa_registration, tarja, tarja_code, is_controlled, is_antibiotic, is_psychotropic, is_thermolabile} exactly as the site gives them. The site's search reaches about 2016 results by relevance and about 1008 sorted by price; the price sort and range use the index price. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a product code or an EAN, in Portuguese as shoppers type them.
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            sort: relevance (the default), price_asc or price_desc. The price sort uses the search index's price (index_price), which can differ from the live price.
+            page: Results page, from 1. reachable_pages reports the last page the site's search reaches.
+            page_size: 24 (the default), 36 or 48, the site's own page sizes.
+            brand: A brand as facets[name=filters.Marca].values lists it.
+            seller: own (sold by Drogasil / Droga Raia) or partner (marketplace partner stores).
+            highlight: A highlight as facets[name=filters.Destaques].values lists it: "Oferta do Dia", "% Especial", "Black Friday", a coupon such as "Cupom NIVEABRAND", ...
+            category_id: Products of this category (categories[].id or items[].categories[].id).
+            store_id: Products offered for pickup at this store (stores[].store_id).
+            min_price: Lowest index price in BRL.
+            max_price: Highest index price in BRL.
+            facets: Other filters, at most 8: {facet name: value} exactly as facets[].name and facets[].values[].value of an answer list them.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_search", {"query": query, "site": site, "sort": sort, "page": page, "page_size": page_size, "brand": brand, "seller": seller, "highlight": highlight, "category_id": category_id, "store_id": store_id, "min_price": min_price, "max_price": max_price, "facets": facets}, extra)
+
+    async def category(
+        self,
+        category_id: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[24, 36, 48]] = None,
+        brand: Optional[str] = None,
+        seller: Optional[Literal["own", "partner"]] = None,
+        highlight: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        facets: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. by category id or category page link, sorted and filtered like search. category_id, name, url (link input). Returns sort, page, page_size, total, total_pages, reachable_pages, has_more, count, items [{position, sku, ean, name, brand, manufacturer, url, image, type (MEDICATION, PRODUCT), status, in_stock, price, list_price, discount_percent, price_type, quantity_discount {min_quantity, unit_price}, index_price, currency, labels, categories, quantity, active_ingredients, variant_count, variant_attributes, is_kit, sold_by, delivered_by, regulatory}], facets [{name, values [{value, count}]}] and filters_applied. regulatory {anvisa_registration, tarja, tarja_code, is_controlled, is_antibiotic, is_psychotropic, is_thermolabile} exactly as the site gives them. An unknown or empty category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id (categories[].id). Send category_id or url.
+            url: Or a category page link (its host sets site).
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            sort: relevance (the default), price_asc or price_desc. The price sort uses the search index's price (index_price), which can differ from the live price.
+            page: Results page, from 1. reachable_pages reports the last page the site's search reaches.
+            page_size: 24 (the default), 36 or 48, the site's own page sizes.
+            brand: A brand as facets[name=filters.Marca].values lists it.
+            seller: own (sold by Drogasil / Droga Raia) or partner (marketplace partner stores).
+            highlight: A highlight as facets[name=filters.Destaques].values lists it: "Oferta do Dia", "% Especial", "Black Friday", a coupon such as "Cupom NIVEABRAND", ...
+            store_id: Products offered for pickup at this store (stores[].store_id).
+            min_price: Lowest index price in BRL.
+            max_price: Highest index price in BRL.
+            facets: Other filters, at most 8: {facet name: value} exactly as facets[].name and facets[].values[].value of an answer list them.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_category", {"category_id": category_id, "url": url, "site": site, "sort": sort, "page": page, "page_size": page_size, "brand": brand, "seller": seller, "highlight": highlight, "store_id": store_id, "min_price": min_price, "max_price": max_price, "facets": facets}, extra)
+
+    async def categories(
+        self,
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The menu tree of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. department_count, category_count, categories [{id, name, url, level, children}], three levels. Ids go to category. Category ids differ per banner. Usually 10-30 s. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_categories", {"site": site}, extra)
+
+    async def product(
+        self,
+        sku: Optional[Union[str, int]] = None,
+        *,
+        url: Optional[str] = None,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. Brazil: Portuguese text, prices in BRL as the site's default online price (a reference price, not a per-store price). By sku or product page link: sku, name, url, ean, brand, manufacturer, breadcrumb, images, labels, in_stock, price, list_price, discount_percent, price_ladder {list_price, offers [{description, price, discount_percent}], quantity_discount {min_quantity, unit_price, discount_percent} (leve mais pague menos), lab_program {program, prices} (as given), payment_discounts, price_hierarchy}, quantity, dosage, active_ingredient, weight_kg, refrigerated, regulatory {anvisa_registration, tarja, tarja_code, controlled_type_code, psychotropic_list_code, therapeutic_class} (as given), seller {is_partner, seller_id, name} (the marketplace business name), variants [{sku, name, url, ean, attributes, price, discount_percent, in_stock}], kit {products, available_in_kits}. No descriptions or package-insert text. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A product code (items[].sku). Send sku or url.
+            url: Or a product page link on either site (its host sets site).
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_product", {"sku": sku, "url": url, "site": site}, extra)
+
+    async def prices(
+        self,
+        skus: list[Union[str, int]],
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Current prices of up to 48 products of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. in one call: requested, found, items [{sku, found, name, in_stock, price, list_price, discount_percent, price_type, quantity_discount, variant_count, variant_attributes}]. Brazil: Portuguese text, prices in BRL as the site's default online price (a reference price, not a per-store price). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: 1 to 48 product codes.
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_prices", {"skus": skus, "site": site}, extra)
+
+    async def store_availability(
+        self,
+        skus: list[Union[str, int]],
+        store_ids: list[Union[str, int]],
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Store pickup availability at Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. for products (codes or EANs) at stores, up to 5 product x store checks: skus [{code, code_type, sku, name, stores [{store_id, pickup_available}]}]. A yes / no from the site's own store-pickup filter: no unit counts, and the price is the same at every store. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            skus: Product codes or EANs.
+            store_ids: Store ids (stores[].store_id). At most 5 product x store checks per call.
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_store_availability", {"skus": skus, "store_ids": store_ids, "site": site}, extra)
+
+    async def stores(
+        self,
+        cep: Union[str, int],
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The nearest stores (up to 6) of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. to a Brazilian CEP: stores [{store_id, banner, name, address {street, number, district, city, state, cep}, latitude, longitude, distance_km, phone, open_24h, parking, farmacia_popular, hours {weekdays, saturday, sunday}, active}]. An empty list: no store of that banner near the CEP. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_stores", {"cep": cep, "site": site}, extra)
+
+    async def stores_search(
+        self,
+        *,
+        state: Optional[str] = None,
+        city: Optional[str] = None,
+        neighborhood: Optional[str] = None,
+        query: Optional[str] = None,
+        open_24h: Optional[bool] = None,
+        parking: Optional[bool] = None,
+        farmacia_popular: Optional[bool] = None,
+        page: Optional[int] = None,
+        page_size: Optional[int] = None,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The store locator of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. by state, city, neighborhood or free text, filtered by open 24 hours, parking and Farmacia Popular, up to 50 per page: total, total_pages, stores [{store_id, banner, name, address, latitude, longitude, phone, open_24h, parking, farmacia_popular, hours}]. Usually 10-35 s. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            state: A state: UF code (SP, RJ, RS, ...) or name.
+            city: A city (needs state).
+            neighborhood: A neighborhood (needs state and city).
+            query: The locator's free-text search (fuzzy).
+            open_24h: Stores open 24 hours.
+            parking: Stores with parking.
+            farmacia_popular: Stores in the Farmacia Popular program.
+            page: Results page, from 1.
+            page_size: Stores per page, 1-50 (default 20).
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_stores_search", {"state": state, "city": city, "neighborhood": neighborhood, "query": query, "open_24h": open_24h, "parking": parking, "farmacia_popular": farmacia_popular, "page": page, "page_size": page_size, "site": site}, extra)
+
+    async def reviews(
+        self,
+        sku: Union[str, int],
+        *,
+        rating: Optional[int] = None,
+        page_size: Optional[int] = None,
+        cursor: Optional[str] = None,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product on Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. up to 50 per page, by stars: total, average_rating, recommended_by, rating_distribution, summary, top_tags, tags, use_cases (the site's own summary, as given), reviews [{review_id, rating, text, date, verified, incentivized, likely_incentivized, helpful, unhelpful, replies}], next_cursor. No reviewer names. Each banner has its own reviews; medicines show none. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: A product code (items[].sku).
+            rating: Reviews with this many stars.
+            page_size: Reviews per page, 1-50 (default 20).
+            cursor: next_cursor of the previous page.
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_reviews", {"sku": sku, "rating": rating, "page_size": page_size, "cursor": cursor, "site": site}, extra)
+
+    async def deals(
+        self,
+        *,
+        type: Optional[Literal["oferta_do_dia", "especial", "coupons", "black_friday"]] = None,
+        coupon: Optional[str] = None,
+        brand: Optional[str] = None,
+        category_id: Optional[Union[str, int]] = None,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[24, 36, 48]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The deals of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. Brazil: Portuguese text, prices in BRL as the site's default online price (a reference price, not a per-store price). type oferta_do_dia (Oferta do Dia), especial (% Especial), black_friday, or coupons (the running coupons [{code, label, count}], or with coupon its products). Returns sort, page, page_size, total, total_pages, reachable_pages, has_more, count, items [{position, sku, ean, name, brand, manufacturer, url, image, type (MEDICATION, PRODUCT), status, in_stock, price, list_price, discount_percent, price_type, quantity_discount {min_quantity, unit_price}, index_price, currency, labels, categories, quantity, active_ingredients, variant_count, variant_attributes, is_kit, sold_by, delivered_by, regulatory}], facets [{name, values [{value, count}]}] and filters_applied. regulatory {anvisa_registration, tarja, tarja_code, is_controlled, is_antibiotic, is_psychotropic, is_thermolabile} exactly as the site gives them. The site gives no start or end dates for deals. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: oferta_do_dia (the default, Oferta do Dia), especial (% Especial), coupons or black_friday.
+            coupon: With type coupons: a coupon code (coupons[].code). Without it, the running coupons.
+            brand: A brand as facets[name=filters.Marca].values lists it.
+            category_id: Products of this category (categories[].id or items[].categories[].id).
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            sort: relevance (the default), price_asc or price_desc. The price sort uses the search index's price (index_price), which can differ from the live price.
+            page: Results page, from 1. reachable_pages reports the last page the site's search reaches.
+            page_size: 24 (the default), 36 or 48, the site's own page sizes.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_deals", {"type": type, "coupon": coupon, "brand": brand, "category_id": category_id, "site": site, "sort": sort, "page": page, "page_size": page_size}, extra)
+
+    async def suggestions(
+        self,
+        query: str,
+        *,
+        site: Optional[Literal["drogasil", "drogaraia"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The search box suggestions of Drogasil and Droga Raia (drogasil.com.br, drogaraia.com.br, the pharmacy chains of RD Saude). Scavio fetches the public Drogasil / Droga Raia page on request; neither has a public API. site picks the banner. for what has been typed: suggestions, quick_filters [{name, query}], product_count. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: What has been typed so far.
+            site: drogasil (the default, www.drogasil.com.br) or drogaraia (www.drogaraia.com.br). Prices, category ids, stores and reviews differ per banner.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("rdsaude_suggestions", {"query": query, "site": site}, extra)
+
+class _AsyncReclameaquiNamespace:
+    """Reclame Aqui (reclameaqui.com.br, Brazil's consumer complaint and company reputation site) company_search, company, complaints, complaint, complaint_search, rankings, segments and segment_ranking endpoints; Brazil, Portuguese text as published, consumer names removed, 1 credit each (complaints by shortname 2)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def company_search(
+        self,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Find companies on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site). Scavio fetches the public page on request. Reclame Aqui's own API (RA API / Hugme) is paid and covers only a company's own complaints. The site's own company search (about 7 matches, no paging): query, count, companies [position, id, shortname, name, company_name, fantasy_name, url, reputation (RA1000, GREAT, GOOD, REGULAR, BAD, NOT_RECOMMENDED, NO_INDEX, ...), final_score, solved_percent, complaints_6_months, cnpj, documents, city, state, website, logo, main_segment, segment, verified, previous_names, sub_brands]. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Company name or brand.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_company_search", {"query": query}, extra)
+
+    async def company(
+        self,
+        shortname: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One company's reputation on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site). Scavio fetches the public page on request. Reclame Aqui's own API (RA API / Hugme) is paid and covers only a company's own complaints. By shortname or url: id, legacy_id, shortname, name, url, known_as, description, cnpj, cnpj_validated, plan, account_status, verified, website, logo, city, state, phones [{number, country_code}] (the company's published numbers), social_networks, on_platform_since, time_on_platform, page_views, segments {main, secondary [{id, shortname, name, complaints, has_page}]}, reputation [for each of the 5 periods (6_months, 12_months, last_year, year_before_last, 3_years): period, site_period, main, start, end, complaints, answered, unanswered, ratings, answered_percent, solved_percent, would_do_business_again_percent, consumer_score, final_score, average_answer_time_seconds, status (RA1000 ... NOT_RECOMMENDED), status_label], main_problems [{id, name, complaints, percent}] (ids work as the complaints category filter), segment_ranking {position, list (best or worst), segment_name, main_segment, segment}, reputation_history [{month, status}] (6 months), notice {title, text} (a notice the company posted), related_companies. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. An unknown shortname is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            shortname: A company shortname (shortname of company_search; the part after /empresa/ in a reclameaqui.com.br link).
+            url: A reclameaqui.com.br/empresa/<shortname>/ link instead of shortname.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_company", {"shortname": shortname, "url": url}, extra)
+
+    async def complaints(
+        self,
+        company_id: Optional[str] = None,
+        *,
+        shortname: Optional[str] = None,
+        status: Optional[Literal["latest", "unanswered", "answered", "evaluated", "resolved", "not_resolved"]] = None,
+        category: Optional[str] = None,
+        product: Optional[str] = None,
+        problem: Optional[str] = None,
+        black_friday: Optional[bool] = None,
+        query: Optional[str] = None,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[5, 10]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One company's complaints on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site), newest first (the site has no other order), with the site's tabs (status), category / product / problem filters, Black Friday purchases and a keyword inside the company. 5 or 10 per page, up to 51 pages of 10 per filter combination, with the exact total: company_id, shortname, company_name, status, category, product, problem, black_friday, query, sort (newest), page, page_size, total, total_pages, reachable_pages, count, complaints [position, id, legacy_id, title, excerpt (the site's short excerpt), url, status (unanswered, answered, resolved, not_resolved), site_status, solved, evaluated, score (0-10, once evaluated), would_deal_again, evaluation (the consumer's closing words), created, modified, first_answer_at, interaction_count, category {id, name}, product {id, name}, problem {id, name}, other_product, other_problem, special (blackfriday, ...), state, company {id, shortname, name}, frozen, in_moderation], filters {categories, products, problems [{id, name, complaints}]} (send the ids back as filters), note. Consumer names, emails, IPs, user ids, phones and cities are never returned (the consumer's state is); the consumer's name in a company's greeting is replaced with [nome]. Every answer carries note: text is as the consumer published it; Scavio removes names it can detect. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. 1 credit by company_id, 2 by shortname (the id is looked up first). A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit by company_id; 2 by shortname (the company id is looked up first; 3 when
+        the company page is read too). credits_used in the response is the exact charge. Returns
+        the API response as a dict.
+
+        Args:
+            company_id: The company id (id of company_search or company). 1 credit.
+            shortname: The company shortname instead of company_id: looked up first, 2 credits.
+            status: latest (default, every complaint), unanswered, answered (answered, not yet evaluated), evaluated, resolved or not_resolved (as the consumer evaluated it): the site's complaint tabs.
+            category: Only complaints with this category: an id from filters.categories of an answer (e.g. 0000000000000003).
+            product: Only complaints with this product: an id from filters.products of an answer (e.g. 0000000000000003).
+            problem: Only complaints with this problem: an id from filters.problems of an answer (e.g. 0000000000000003).
+            black_friday: Only complaints the consumer marked as Black Friday purchases.
+            query: Only complaints of this company that match these words.
+            page: Page, 1-based (default 1). Reclame Aqui serves up to offset 500 per filter combination: page 51 at 10 per page, page 101 at 5. A later page is refused before any call.
+            page_size: Complaints per page: 5 or 10 (default 10), the two sizes Reclame Aqui serves.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_complaints", {"company_id": company_id, "shortname": shortname, "status": status, "category": category, "product": product, "problem": problem, "black_friday": black_friday, "query": query, "page": page, "page_size": page_size}, extra)
+
+    async def complaint(
+        self,
+        url: Optional[str] = None,
+        *,
+        company: Optional[str] = None,
+        complaint_id: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One complaint on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site) with its whole thread. By url, or company with complaint_id: id, legacy_id, title, text, url, status, site_status, solved, evaluated, score, would_deal_again, created, category {id, name}, problem {id, name}, product {name}, special, state, company {id, shortname, name, url}, segment_ranking, interaction_count, interactions [{position, id, type (company_answer, consumer_reply, company_reply, final_evaluation), site_type, author (company or consumer), created, text}], names_masked, similar [{id, title, url, created, status}], note. Consumer names, emails, IPs, user ids, phones and cities are never returned (the consumer's state is); the consumer's name in a company's greeting is replaced with [nome]. Every answer carries note: text is as the consumer published it; Scavio removes names it can detect. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. An unknown complaint is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            url: A complaint link (url of a complaints answer).
+            company: The company shortname, with complaint_id, instead of url.
+            complaint_id: The 16-character complaint id (id of a complaints answer), with company.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_complaint", {"url": url, "company": company, "complaint_id": complaint_id}, extra)
+
+    async def complaint_search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        page_size: Optional[Literal[5, 10]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Complaints across every company on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site) that match some words, 5 or 10 per page, up to 51 pages of 10: query, page, page_size, total, total_pages, reachable_pages, count, complaints [position, id, legacy_id, title, excerpt (the site's short excerpt), url, status (unanswered, answered, resolved, not_resolved), site_status, solved, evaluated, score (0-10, once evaluated), would_deal_again, evaluation (the consumer's closing words), created, modified, first_answer_at, interaction_count, category {id, name}, product {id, name}, problem {id, name}, other_product, other_problem, special (blackfriday, ...), state, company {id, shortname, name}, frozen, in_moderation], companies [{id, shortname, name, complaints}] (the companies the matches are about), note. Consumer names, emails, IPs, user ids, phones and cities are never returned (the consumer's state is); the consumer's name in a company's greeting is replaced with [nome]. Every answer carries note: text is as the consumer published it; Scavio removes names it can detect. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Words to find in complaints across every company.
+            page: Page, 1-based (default 1). Reclame Aqui serves up to offset 500 per filter combination: page 51 at 10 per page, page 101 at 5. A later page is refused before any call.
+            page_size: Complaints per page: 5 or 10 (default 10), the two sizes Reclame Aqui serves.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_complaint_search", {"query": query, "page": page, "page_size": page_size}, extra)
+
+    async def rankings(
+        self,
+        *,
+        list: Optional[Literal["best_resolution_rate", "would_do_business_again", "best_rating", "most_resolved_30_days", "most_resolved_6_months", "most_complained_yesterday", "most_complained_7_days", "most_complained_30_days", "most_complained_6_months", "worst", "newly_registered"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The site-wide company rankings of Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site): 11 lists of 20 as the site shows them (best_resolution_rate, would_do_business_again, best_rating, most_resolved_30_days, most_resolved_6_months, most_complained_yesterday, most_complained_7_days, most_complained_30_days, most_complained_6_months, worst (worst companies of the last 30 days), newly_registered). list, count, lists [{list, name (the site's title), period, url, count, companies [{position, name, shortname, url, logo, reputation_label, value (the list's measure: percent, score or complaints), value_text}]}]. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            list: One of the site's 11 ranking lists (best_resolution_rate, would_do_business_again, best_rating, most_resolved_30_days, most_resolved_6_months, most_complained_yesterday, most_complained_7_days, most_complained_30_days, most_complained_6_months, worst, newly_registered). Leave out for all 11.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_rankings", {"list": list}, extra)
+
+    async def segments(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Every ranked segment of Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site) (165 under 15 main segments, measured 2026-11-27), for segment_ranking: main_segments, count, segments [{main_segment, main_segment_name, segment, name, url}]. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_segments", {}, extra)
+
+    async def segment_ranking(
+        self,
+        main_segment: Optional[str] = None,
+        *,
+        segment: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The best and worst companies of one segment on Reclame Aqui (reclameaqui.com.br, Brazil's company complaint and reputation site), as the segment page ranks them. Page 1: best and worst, 10 each; page 2 and on: the next 10 best. main_segment, segment, url, page, segment_name, main_segment_name, best {total, pages, count, companies}, worst {total, pages, count, companies} (page 1 only, else null), note; companies [{position, shortname, name, url, website, logo, verified, reputation, final_score, solved_percent, answered_percent, complaints, solved_complaints, unsolved_complaints, balance}]. Every answer carries site, host, country (br) and language (pt-BR); text is in Portuguese as published. An unknown segment is a charged 404. 1 credit. A not-found is charged; refused inputs and upstream failures are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            main_segment: Main segment shortname (main_segment of the segments endpoint).
+            segment: Segment shortname (segment of the segments endpoint).
+            url: A reclameaqui.com.br/segmentos/<main>/<segment>/ link instead.
+            page: Page of the best list, 10 per page (default 1). Page 1 also carries the 10 worst.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("reclameaqui_segment_ranking", {"main_segment": main_segment, "segment": segment, "url": url, "page": page}, extra)
+
+class _AsyncLeroymerlinNamespace:
+    """Leroy Merlin (the home improvement retailer; country br, it, es, pt, pl, ro or fr) search, category, product, store_stock, stores, store, reviews, shipping, cep, regions, categories, suggestions and offers endpoints; local currency, Brazil priced per region with store stock, billed on actual cost per market (1 credit in Brazil, Italy and Romania, 2 in Spain, Portugal and Poland, 5 in France)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        country: str,
+        query: str,
+        *,
+        region: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Leroy Merlin (the home improvement retailer of the ADEO group). Scavio fetches the public Leroy Merlin page on request. Brazil (region required, priced for the region, promotion dates and Black Friday flags) and Italy, Spain, Portugal, Poland and Romania (sorted, filtered, paged). Not available for France (400). Returns site, country, language, currency, query, redirected_to {type (category or product), url} (Europe sends some queries to a category or product page), Brazil: region, sort, page, page_size (36), total, total_pages, count, products (position, id, name, short_name, brand, url, image, unit (cada, m2, rolo ...), price, original_price, currency (BRL), discount_type, payment_discount, promotion_start, promotion_end, offer {label, percent}, black_friday, free_shipping, express_shipping, in_stock, available, sellers, eans), notes. Every price is the region's. Europe: page, page_size (48), total, total_pages, count, products_on_page, products (position, id, name, brand, url, image, price, price_excluding_vat, original_price, discount_percent, currency, unit_price (as the page gives it, e.g. 3,56 EUR / Litro), price_validity (the page's promotion dates line), promotion, rating, review_count, seller {name, type (leroy_merlin or marketplace)}, offer_count, marketing_tags, sponsored, delivery), other_products [{position, id, sponsored}] (Leroy Merlin's page carries full details for the first products of each page only: 18 of 48 in most markets, all 48 in Romania; the others come as ids for product), sorts, applied_filters, filters_available [{code, label, type, values [{value, count, applied}]}], notes Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged. Set a client timeout of at least 120 s (240 s for Brazil search and category).
+
+        Billed on what the request spent in its market: 1 credit in Brazil, Italy and Romania; 2
+        in Spain, Portugal and Poland (France has no search). credits_used in the response is
+        the exact charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            query: Keywords or a reference number (Europe sends a reference number to its product page: redirected_to).
+            region: Brazil only, and required there: the price region (Leroy Merlin Brasil prices per region). One of acre, alagoas, bahia, baixada_santista, bauru, belo_horizonte, brasilia, campinas, ceara, curitiba, espirito_santo, goiania, grande_porto_alegre, grande_sao_paulo, joinville, londrina, mato_grosso, mato_grosso_do_sul, outros, rib_preto, rio_de_janeiro, rio_grande_do_norte, rondonia, santa_catarina, sao_jose_do_rio_preto, sorocaba, uberlandia, vale_do_paraiba; regions lists them with names.
+            page: Page (1-based). Search: up to 10 pages in Europe (48 a page), 28 in Brazil (36 a page).
+            sort: relevance (default), price_asc, price_desc. Brazil: category only (keyword search keeps the site's order).
+            filters: Europe only: {code: value or [values]} from an earlier answer's filters_available (code, values[].value).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_search", {"country": country, "query": query, "region": region, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def category(
+        self,
+        country: str,
+        category: str,
+        *,
+        region: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Leroy Merlin category's products by slug, path or link, sorted and paged, in any of the seven markets. Returns site, country, language, currency, category, url, Brazil: region, sort, page, page_size (36), total, total_pages, count, products (position, id, name, short_name, brand, url, image, unit (cada, m2, rolo ...), price, original_price, currency (BRL), discount_type, payment_discount, promotion_start, promotion_end, offer {label, percent}, black_friday, free_shipping, express_shipping, in_stock, available, sellers, eans), notes. Every price is the region's. Europe: listing, page, page_size (48), total, total_pages, count, products_on_page, products (position, id, name, brand, url, image, price, price_excluding_vat, original_price, discount_percent, currency, unit_price (as the page gives it, e.g. 3,56 EUR / Litro), price_validity (the page's promotion dates line), promotion, rating, review_count, seller {name, type (leroy_merlin or marketplace)}, offer_count, marketing_tags, sponsored, delivery), other_products [{position, id, sponsored}] (Leroy Merlin's page carries full details for the first products of each page only: 18 of 48 in most markets, all 48 in Romania; the others come as ids for product), sorts, applied_filters, filters_available [{code, label, type, values [{value, count, applied}]}], notes, subcategories [{name, url, path}] (a landing page without a product list answers its subcategories). A wrong path is a charged 404. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged. Set a client timeout of at least 120 s (240 s for Brazil search and category).
+
+        Billed on what the request spent in its market: 1 credit in Brazil and Romania; 2 in
+        Italy, Spain, Portugal and Poland; 5 in France. credits_used in the response is the
+        exact charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            category: Brazil: a category slug or link (categories lists them, e.g. furadeiras). Europe: a category path or link (e.g. /prodotti/utensileria/elettroutensili/trapani-e-avvitatori/).
+            region: Brazil only, and required there: the price region (Leroy Merlin Brasil prices per region). One of acre, alagoas, bahia, baixada_santista, bauru, belo_horizonte, brasilia, campinas, ceara, curitiba, espirito_santo, goiania, grande_porto_alegre, grande_sao_paulo, joinville, londrina, mato_grosso, mato_grosso_do_sul, outros, rib_preto, rio_de_janeiro, rio_grande_do_norte, rondonia, santa_catarina, sao_jose_do_rio_preto, sorocaba, uberlandia, vale_do_paraiba; regions lists them with names.
+            page: Page (1-based). Search: up to 10 pages in Europe (48 a page), 28 in Brazil (36 a page).
+            sort: relevance (default), price_asc, price_desc. Brazil: category only (keyword search keeps the site's order).
+            filters: Europe only: {code: value or [values]} from an earlier answer's filters_available (code, values[].value).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_category", {"country": country, "category": category, "region": region, "page": page, "sort": sort, "filters": filters}, extra)
+
+    async def product(
+        self,
+        country: str,
+        *,
+        id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        region: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Leroy Merlin product by reference number or link. Brazil (region required): site, country, language, currency, id, name, short_name, brand, ean, url, region, priced_for_region, price, original_price, unit (the unit the price is for: cada, m2 ...), package {quantity, unit, label, price} (a box sold by the m2), discount {percent, type, condition}, installments {count, value, total}, tag (e.g. Black Friday), sold_out, available_online, seller, pickup_in_store, category_path, images, specifications [{name, value}], store_stock {unit, count, in_stock_count, stores [{store_id, name, units, in_stock, aisle, pickup_in_store, address}]}, marketplace_offers [{seller, price, original_price, discount, installments, free_shipping}]. Europe: site, country, language, currency, id, name, brand, gtin, url, price, price_excluding_vat, original_price, discount_percent, sold_by_unit, unit_price (as given, e.g. 3,56 EUR / Litro), price_validity (the promotion dates line), availability, rating, review_count, seller {name, type}, deliveries [{type, price, stock_status, lead_time}], marketplace_offer_count, marketplace_offers [{seller, price, original_price, discount_percent, deliveries}], marketing_tags, breadcrumbs, images, specifications. An unknown product is a charged 404. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged. Set a client timeout of at least 120 s (240 s for Brazil search and category).
+
+        Billed on what the request spent in its market: 1 credit in Brazil and Romania; 2 in
+        Italy, Spain, Portugal and Poland; 5 in France. credits_used in the response is the
+        exact charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            id: The product reference number (products[].id). France needs url instead.
+            url: A product link on the market's site (products[].url), instead of id.
+            region: Brazil only, and required there: the price region (Leroy Merlin Brasil prices per region). One of acre, alagoas, bahia, baixada_santista, bauru, belo_horizonte, brasilia, campinas, ceara, curitiba, espirito_santo, goiania, grande_porto_alegre, grande_sao_paulo, joinville, londrina, mato_grosso, mato_grosso_do_sul, outros, rib_preto, rio_de_janeiro, rio_grande_do_norte, rondonia, santa_catarina, sao_jose_do_rio_preto, sorocaba, uberlandia, vale_do_paraiba; regions lists them with names.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_product", {"country": country, "id": id, "url": url, "region": region}, extra)
+
+    async def store_stock(
+        self,
+        country: str,
+        *,
+        id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        region: Optional[str] = None,
+        store: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Units in store as Leroy Merlin Brasil reports them, for every store of a price region (or one): exact units, the aisle and pickup. Returns site, country, language, currency, product_id, region, unit, count, in_stock_count, total_units, stores [{store_id, store_code, name, units, in_stock, message, aisle, pickup_in_store, address, pickup_hours}]. Prices are set per region, not per store. Brazil only (the European sites did not hold a chosen store). Stock as reported; Scavio makes no promise of its accuracy. 1 credit. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: br (store stock is available for Brazil).
+            id: The product reference number (products[].id). France needs url instead.
+            url: A product link on the market's site (products[].url), instead of id.
+            region: Required: the price region whose stores are listed.
+            store: Optional: one store of the region (stores[].store_id); without it every store of the region.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_store_stock", {"country": country, "id": id, "url": url, "region": region, "store": store}, extra)
+
+    async def stores(
+        self,
+        country: str,
+        *,
+        place: Optional[str] = None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+        region: Optional[str] = None,
+        state: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Leroy Merlin stores. Brazil: the store list (optionally the stores of a region's state or a state, or sorted by distance from latitude / longitude, computed by Scavio): site, country, language, currency, count, stores [{position, store_id, name, hours_text, address, state, cep, latitude, longitude, distance_km}]. Italy, Portugal, Poland, Romania, France (not Spain): the stores nearest a place (city or postcode) or a point, as the store chooser lists them (up to 10): site, country, language, currency, place, matched_place, latitude, longitude, count, stores [{position, store_id, name, city, distance_km, open_now_text, hours_text, address_lines, url (the input of store)}]. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Billed on what the request spent in its market: 1 credit in Brazil, Italy and Romania; 2
+        in Spain, Portugal and Poland; 5 in France. credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            place: Europe: a city or postcode (the nearest stores to the first place the site matches).
+            latitude: Latitude (with longitude), instead of place.
+            longitude: Longitude (with latitude).
+            region: Brazil only: the stores in the state of this price region.
+            state: Brazil only: a state code (SP, RJ, RS ...).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_stores", {"country": country, "place": place, "latitude": latitude, "longitude": longitude, "region": region, "state": state}, extra)
+
+    async def store(
+        self,
+        country: str,
+        *,
+        store: Optional[str] = None,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Leroy Merlin store. Brazil by store id: site, country, language, currency, store_id, name, hours_text, address, state, cep, latitude, longitude. Europe by store page link: site, country, language, currency, store_id, name, url, address {street, postal_code, city, country}, phone, latitude, longitude, hours [{day, open, close}], special_hours [{from, to, open, close}]. An unknown store is a charged 404. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Billed on what the request spent in its market: 1 credit in Brazil, Italy and Romania; 2
+        in Spain, Portugal and Poland; 5 in France. credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            store: Brazil: the store id (stores[].store_id).
+            url: Europe: the store page link (stores[].url).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_store", {"country": country, "store": store, "url": url}, extra)
+
+    async def reviews(
+        self,
+        country: str,
+        *,
+        id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        sort: Optional[Literal["newest", "oldest", "highest_rating", "lowest_rating", "most_helpful"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One page of a product's reviews and its rating summary. Brazil (6 a page, most helpful first): site, country, language, currency, product_id, average_rating, total_reviews, rating_distribution, page, total_pages, count, reviews [{id, rating, title, text, date, recommended, helpful_count, not_helpful_count, photos}]. Italy, Portugal, Poland, Romania (8 a page, 4 sorts, a star filter; not available for Spain and France): site, country, language, currency, product_id, sort, rating, average_rating, total_reviews, rating_distribution, page, total_pages, count, reviews [{id, rating, title, text, translated_title, translated_text, date_text, recommended, verified_purchase, badge, experience, usage, helpful_count, not_helpful_count, syndicated, source_site}]. Reviewer names are never returned. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Billed on what the request spent in its market: 1 credit in Brazil, Italy and Romania; 2
+        in Spain, Portugal and Poland; 5 in France. credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            country: Market: br, it, es, pt, pl, ro, fr (Brazil, Italy, Spain, Portugal, Poland, Romania, France). Required. Data comes in the market's language and currency (BRL, EUR, PLN, RON). Ukraine and Greece are not supported.
+            id: The product reference number (products[].id). France needs url instead.
+            url: A product link on the market's site (products[].url), instead of id.
+            page: Page (1-based). Search: up to 10 pages in Europe (48 a page), 28 in Brazil (36 a page).
+            sort: Europe: newest, oldest, highest_rating, lowest_rating (default: the site's order). Brazil: most_helpful only (the default).
+            rating: Europe only: only reviews with this many stars.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_reviews", {"country": country, "id": id, "url": url, "page": page, "sort": sort, "rating": rating}, extra)
+
+    async def shipping(
+        self,
+        cep: str,
+        *,
+        country: Optional[str] = None,
+        id: Optional[Union[str, int]] = None,
+        url: Optional[str] = None,
+        region: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Delivery quote for one Leroy Merlin Brasil product to a CEP in a price region: site, country, language, currency, product_id, cep, region, address {cep, street, district, city, state}, currency, standard / scheduled / express {cost, deadline_days}, pickup_in_store {cost, ready_in_hours, store_id}. 1 credit. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            country: br (default and the only market for this endpoint).
+            id: The product reference number (products[].id). France needs url instead.
+            url: A product link on the market's site (products[].url), instead of id.
+            region: Required: the price region.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_shipping", {"cep": cep, "country": country, "id": id, "url": url, "region": region}, extra)
+
+    async def cep(
+        self,
+        cep: str,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The address Leroy Merlin Brasil holds for a CEP: site, country, language, currency, cep, street, district, city, state, ibge_code. 1 credit. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            cep: A Brazilian CEP (8 digits).
+            country: br (default and the only market for this endpoint).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_cep", {"cep": cep, "country": country}, extra)
+
+    async def regions(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Leroy Merlin Brasil's 28 price regions (the region input of every priced Brazil call): site, country, language, currency, count, regions [{region, name, state}]. 1 credit.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: br (default and the only market for this endpoint).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_regions", {"country": country}, extra)
+
+    async def categories(
+        self,
+        *,
+        country: Optional[str] = None,
+        category: Optional[str] = None,
+        depth: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Leroy Merlin Brasil's department tree, or one category's subtree: site, country, language, currency, root, depth, count, categories [{name, url, category (the input of category), child_count, children}]. 1 credit.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: br (default and the only market for this endpoint).
+            category: A category slug or link: its subtree. Without it: every department.
+            depth: Levels returned (1-4, default 2).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_categories", {"country": country, "category": category, "depth": depth}, extra)
+
+    async def suggestions(
+        self,
+        country: str,
+        query: str,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search suggestions as Leroy Merlin's search box gives them (Italy, Spain, Portugal, Poland): site, country, language, currency, query, count, suggestions [{type (category, standard ...), type_label, label, url}]. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Billed on what the request spent in its market: 1 credit in Italy; 2 in Spain, Portugal
+        and Poland. credits_used in the response is the exact charge. Returns the API response
+        as a dict.
+
+        Args:
+            country: it, es, pt or pl.
+            query: What the shopper has typed so far (2 characters or more).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_suggestions", {"country": country, "query": query}, extra)
+
+    async def offers(
+        self,
+        country: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[Literal["relevance", "price_asc", "price_desc"]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Leroy Merlin Italia's offers page as a product list (offerte), sorted, filtered and paged: site, country, language, currency, category, url, page, page_size (48), total, total_pages, count, products_on_page, products (position, id, name, brand, url, image, price, price_excluding_vat, original_price, discount_percent, currency, unit_price (as the page gives it, e.g. 3,56 EUR / Litro), price_validity (the page's promotion dates line), promotion, rating, review_count, seller {name, type (leroy_merlin or marketplace)}, offer_count, marketing_tags, sponsored, delivery), other_products [{position, id, sponsored}] (Leroy Merlin's page carries full details for the first products of each page only: 18 of 48 in most markets, all 48 in Romania; the others come as ids for product), sorts, applied_filters, filters_available [{code, label, type, values [{value, count, applied}]}], notes 1 credit. Billed on what the request spent in its market (credits_used): Brazil 1; Italy 1 (product and category pages 2); Romania 1; Spain, Portugal and Poland 2; France 5. Refused inputs and upstream failures are not charged; a not-found is charged.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            country: it (the market whose offers page is a product list).
+            page: Page (1-based). Search: up to 10 pages in Europe (48 a page), 28 in Brazil (36 a page).
+            sort: relevance (default), price_asc, price_desc. Brazil: category only (keyword search keeps the site's order).
+            filters: Europe only: {code: value or [values]} from an earlier answer's filters_available (code, values[].value).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("leroymerlin_offers", {"country": country, "page": page, "sort": sort, "filters": filters}, extra)

@@ -697,6 +697,14 @@ BODY_PRICED_KEYS = {
     "belk_product",
     "belk_store_availability",
     "belk_variant",
+    "leroymerlin_category",
+    "leroymerlin_product",
+    "leroymerlin_reviews",
+    "leroymerlin_search",
+    "leroymerlin_store",
+    "leroymerlin_stores",
+    "leroymerlin_suggestions",
+    "reclameaqui_complaints",
     "pcexpress_product",
     "home_depot_search",
     "home_depot_product",
@@ -10553,3 +10561,301 @@ def test_batch6_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["bedbathbeyond_search"].params[0].name == "query"
     assert ENDPOINTS["bedbathbeyond_search"].params[0].wire_field == "query"
     assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH6_1127 for p in ep.params)
+
+
+# --- batch 7 2026-11-27: 7 Brazil namespaces (KaBuM!, Magalu, Casas Bahia, Buscape, RD Saude,
+# Reclame Aqui, Leroy Merlin) ---
+
+BATCH7_1127 = {
+    "kabum": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+    },
+    "magalu": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "deals": ("deals", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "reviews": ("reviews", 2, 240.0),
+        "suggestions": ("suggestions", 2, 240.0),
+        "stores": ("stores", 2, 240.0),
+        "store": ("store", 2, 240.0),
+    },
+    "casasbahia": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "categories": ("categories", 2, 240.0),
+    },
+    "buscape": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+        "price_history": ("price-history", 1, 240.0),
+        "lowest_price": ("lowest-price", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "deal_landing": ("deal-landing", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+    },
+    "rdsaude": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "prices": ("prices", 1, 240.0),
+        "store_availability": ("store-availability", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "stores_search": ("stores/search", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "deals": ("deals", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+    },
+    "reclameaqui": {
+        "company_search": ("company-search", 1, 240.0),
+        "company": ("company", 1, 240.0),
+        "complaints": ("complaints", 1, 240.0),
+        "complaint": ("complaint", 1, 240.0),
+        "complaint_search": ("complaint-search", 1, 240.0),
+        "rankings": ("rankings", 1, 240.0),
+        "segments": ("segments", 1, 240.0),
+        "segment_ranking": ("segment-ranking", 1, 240.0),
+    },
+    "leroymerlin": {
+        "search": ("search", 1, 240.0),
+        "category": ("category", 1, 240.0),
+        "product": ("product", 1, 240.0),
+        "store_stock": ("store-stock", 1, 240.0),
+        "stores": ("stores", 1, 240.0),
+        "store": ("store", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+        "shipping": ("shipping", 1, 240.0),
+        "cep": ("cep", 1, 240.0),
+        "regions": ("regions", 1, 240.0),
+        "categories": ("categories", 1, 240.0),
+        "suggestions": ("suggestions", 1, 240.0),
+        "offers": ("offers", 1, 240.0),
+    },
+}
+BATCH7_1127_ONE_OF = {
+    "kabum_product": (("product_id", "url"),),
+    "kabum_shipping": (("product_id", "url"),),
+    "kabum_reviews": (("product_id", "url"),),
+    "magalu_product": (("product_id", "url"),),
+    "magalu_reviews": (("product_id", "url"),),
+    "magalu_store": (("store_id", "url"),),
+    "casasbahia_product": (("sku", "url"),),
+    "buscape_category": (("category_id", "category"),),
+    "buscape_product": (("product_id", "url"),),
+    "buscape_store": (("store_id", "store"),),
+    "rdsaude_category": (("category_id", "url"),),
+    "rdsaude_product": (("sku", "url"),),
+    "reclameaqui_company": (("shortname", "url"),),
+    "reclameaqui_complaints": (("company_id", "shortname"),),
+    "reclameaqui_complaint": (("url", "company"), ("url", "complaint_id")),
+    "reclameaqui_segment_ranking": (("main_segment", "url"), ("segment", "url")),
+    "leroymerlin_product": (("id", "url"),),
+    "leroymerlin_store_stock": (("id", "url"),),
+    "leroymerlin_reviews": (("id", "url"),),
+    "leroymerlin_shipping": (("id", "url"),),
+    "leroymerlin_store": (("store", "url"),),
+}
+BATCH7_1127_BANNED = re.compile(
+    r"\b(collect(s|ed|ing)?|data collection|scrap\w*|prox(y|ies)|bots?|render\w*|"
+    r"retr(y|ies|ied)|cheapest|robots?|graphql|cookies?|cloudflare|firewall|fallback|"
+    r"harvest\w*|crawl\w*|akamai|datadome|bazaarvoice|algolia|hybris|demandware|"
+    r"wordpress|geocode|super|plain pool|residential|only api|first api)\b"
+)
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH7_1127))
+def test_batch7_1127_credits_paths_timeouts(namespace):
+    """Every endpoint of the 7 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH7_1127[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH7_1127_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        text = text.lower().replace("super buys", "").replace("super_buys", "")
+        assert not BATCH7_1127_BANNED.search(text), ep.key
+        assert not re.search(r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag)\b", text), ep.key
+        assert not [p.name for p in ep.params if p.doc.startswith(("Not offered", "Not supp"))]
+
+
+BATCH7_1127_WIRE = [
+    ("kabum", "search", {"query": "cadeira gamer"}, "search"),
+    ("kabum", "category", {"category": "hardware/placa-de-video-vga"}, "category"),
+    ("kabum", "categories", {}, "categories"),
+    ("kabum", "product", {"product_id": "311424"}, "product"),
+    ("kabum", "shipping", {"cep": "01310-100", "product_id": "311424"}, "shipping"),
+    ("kabum", "reviews", {"product_id": "311424"}, "reviews"),
+    ("kabum", "offers", {}, "offers"),
+    ("magalu", "search", {"query": "geladeira frost free"}, "search"),
+    (
+        "magalu", "category",
+        {
+            "path": "/geladeira-refrigerador/eletrodomesticos/s/ed/refr/",
+        },
+        "category",
+    ),
+    ("magalu", "deals", {}, "deals"),
+    ("magalu", "product", {"product_id": "238058800"}, "product"),
+    ("magalu", "reviews", {"product_id": "238058800"}, "reviews"),
+    ("magalu", "suggestions", {"query": "geladeira"}, "suggestions"),
+    ("magalu", "stores", {"state": "sp"}, "stores"),
+    ("magalu", "store", {"store_id": "1000"}, "store"),
+    ("casasbahia", "search", {"query": "geladeira frost free"}, "search"),
+    ("casasbahia", "category", {"path": "/c/eletroportateis?filtro=categoria-c73"}, "category"),
+    ("casasbahia", "product", {"sku": "55066339"}, "product"),
+    ("casasbahia", "categories", {}, "categories"),
+    ("buscape", "search", {"query": "geladeira"}, "search"),
+    ("buscape", "category", {"category_id": "8"}, "category"),
+    ("buscape", "categories", {}, "categories"),
+    ("buscape", "product", {"product_id": "12755140"}, "product"),
+    ("buscape", "offers", {"product_id": "12755140"}, "offers"),
+    ("buscape", "price_history", {"product_id": "12755140"}, "price-history"),
+    ("buscape", "lowest_price", {"product_id": "12755140"}, "lowest-price"),
+    ("buscape", "deals", {}, "deals"),
+    ("buscape", "deal_landing", {"slug": "black-friday"}, "deal-landing"),
+    ("buscape", "store", {"store_id": "21"}, "store"),
+    ("buscape", "suggestions", {"query": "geladeira"}, "suggestions"),
+    (
+        "buscape", "shipping",
+        {
+            "product_id": "12755140",
+            "cep": "01310-100",
+            "state": "SP",
+            "city": "São Paulo",
+        },
+        "shipping",
+    ),
+    ("rdsaude", "search", {"query": "protetor solar"}, "search"),
+    ("rdsaude", "category", {"category_id": "515"}, "category"),
+    ("rdsaude", "categories", {}, "categories"),
+    ("rdsaude", "product", {"sku": "331137"}, "product"),
+    ("rdsaude", "prices", {"skus": ["331137", "38155", "24216"]}, "prices"),
+    (
+        "rdsaude", "store_availability",
+        {
+            "skus": ["331137"],
+            "store_ids": ["1156", "200"],
+        },
+        "store-availability",
+    ),
+    ("rdsaude", "stores", {"cep": "01310-100"}, "stores"),
+    ("rdsaude", "stores_search", {}, "stores/search"),
+    ("rdsaude", "reviews", {"sku": "38155"}, "reviews"),
+    ("rdsaude", "deals", {}, "deals"),
+    ("rdsaude", "suggestions", {"query": "shamp"}, "suggestions"),
+    ("reclameaqui", "company_search", {"query": "nubank"}, "company-search"),
+    ("reclameaqui", "company", {"shortname": "nubank"}, "company"),
+    ("reclameaqui", "complaints", {"company_id": "88850"}, "complaints"),
+    (
+        "reclameaqui", "complaint",
+        {
+            "url": ("https://www.reclameaqui.com.br/nubank/quero-aumentar-meu-li"
+                "mite-no-cartao-pois-o-atual-e-insuficiente_NhIy-6O6osFhQdJ-/"),
+        },
+        "complaint",
+    ),
+    ("reclameaqui", "complaint_search", {"query": "iphone quebrado"}, "complaint-search"),
+    ("reclameaqui", "rankings", {}, "rankings"),
+    ("reclameaqui", "segments", {}, "segments"),
+    (
+        "reclameaqui", "segment_ranking",
+        {
+            "main_segment": "bancos-e-financeiras",
+            "segment": "bancos-digitais",
+        },
+        "segment-ranking",
+    ),
+    ("leroymerlin", "search", {"country": "br", "query": "furadeira"}, "search"),
+    ("leroymerlin", "category", {"country": "br", "category": "furadeiras"}, "category"),
+    ("leroymerlin", "product", {"country": "br", "id": "92450351"}, "product"),
+    ("leroymerlin", "store_stock", {"country": "br", "id": "92450351"}, "store-stock"),
+    ("leroymerlin", "stores", {"country": "br"}, "stores"),
+    ("leroymerlin", "store", {"country": "br", "store": "raposo_tav"}, "store"),
+    ("leroymerlin", "reviews", {"country": "br", "id": "92450351"}, "reviews"),
+    ("leroymerlin", "shipping", {"cep": "01310-100", "id": "92450351"}, "shipping"),
+    ("leroymerlin", "cep", {"cep": "01310-100"}, "cep"),
+    ("leroymerlin", "regions", {}, "regions"),
+    ("leroymerlin", "categories", {}, "categories"),
+    ("leroymerlin", "suggestions", {"country": "it", "query": "trapano"}, "suggestions"),
+    ("leroymerlin", "offers", {"country": "it"}, "offers"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH7_1127_WIRE)
+def test_batch7_1127_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH7_1127[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH7_1127_ONE_OF))
+def test_batch7_1127_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch7_1127_credits_wire_and_timeouts():
+    """KaBuM!, Buscape, RD Saude, Reclame Aqui 1; Magalu, Casas Bahia 2; Leroy Merlin per market."""
+    for ns, credits in (("kabum", 1), ("buscape", 1), ("rdsaude", 1), ("reclameaqui", 1),
+                        ("magalu", 2), ("casasbahia", 2), ("leroymerlin", 1)):
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {credits}, ns
+    assert {ep.min_timeout for ep in ENDPOINTS.values() if ep.namespace in BATCH7_1127} == {240.0}
+    noted = {ep.key for ep in ENDPOINTS.values() if ep.namespace in BATCH7_1127 and ep.credits_note}
+    assert noted == {
+        "reclameaqui_complaints", "leroymerlin_search", "leroymerlin_category",
+        "leroymerlin_product", "leroymerlin_stores", "leroymerlin_store", "leroymerlin_reviews",
+        "leroymerlin_suggestions",
+    }
+    assert "France 5" not in ENDPOINTS["leroymerlin_search"].credits_note
+    assert "5 in France" in ENDPOINTS["leroymerlin_product"].credits_note
+    assert "2 by shortname" in ENDPOINTS["reclameaqui_complaints"].credits_note
+    rd = ENDPOINTS["rdsaude_stores_search"]
+    assert rd.path == "/api/v1/rdsaude/stores/search" and rd.method == "stores_search"
+    assert [p.name for p in ENDPOINTS["rdsaude_store_availability"].required_params] == [
+        "skus", "store_ids"]
+    assert [p.name for p in ENDPOINTS["buscape_shipping"].required_params] == [
+        "product_id", "cep", "state", "city"]
+    assert [p.name for p in ENDPOINTS["leroymerlin_search"].required_params] == ["country", "query"]
+    assert [p.name for p in ENDPOINTS["kabum_shipping"].required_params] == ["cep"]
+    assert ENDPOINTS["reclameaqui_complaint"].one_of == (
+        ("url", "company"), ("url", "complaint_id"))
+    assert not ENDPOINTS["reclameaqui_segments"].params
+    assert {p.name for p in ENDPOINTS["casasbahia_search"].params} >= {"site", "own_store"}
+    assert "carry no prices" in ENDPOINTS["casasbahia_search"].summary
+    for ep in ENDPOINTS.values():
+        if ep.namespace in BATCH7_1127:
+            assert "keyed price service" not in ep.summary, ep.key
+            assert "upstream / 5" not in ep.summary, ep.key
+    assert all(p.doc for ep in ENDPOINTS.values() if ep.namespace in BATCH7_1127 for p in ep.params)
