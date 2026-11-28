@@ -63,6 +63,7 @@ from ._namespaces_async import (
     _AsyncDepopNamespace,
     _AsyncDermstoreNamespace,
     _AsyncDicksNamespace,
+    _AsyncDigikeyNamespace,
     _AsyncDiscountTireNamespace,
     _AsyncDollarGeneralNamespace,
     _AsyncDollarTreeNamespace,
@@ -123,6 +124,7 @@ from ._namespaces_async import (
     _AsyncMetaAdsNamespace,
     _AsyncMichaelsNamespace,
     _AsyncMicroCenterNamespace,
+    _AsyncMouserNamespace,
     _AsyncMovotoNamespace,
     _AsyncMscNamespace,
     _AsyncNaturaNamespace,
@@ -160,6 +162,7 @@ from ._namespaces_async import (
     _AsyncRightmoveNamespace,
     _AsyncRockautoNamespace,
     _AsyncRonaNamespace,
+    _AsyncRscomponentsNamespace,
     _AsyncSaksNamespace,
     _AsyncSallybeautyNamespace,
     _AsyncSamsClubNamespace,
@@ -456,6 +459,9 @@ class AsyncScavioClient:
         self.liquidation = _AsyncLiquidationNamespace(self)
         self.ferguson = _AsyncFergusonNamespace(self)
         self.supplyhouse = _AsyncSupplyhouseNamespace(self)
+        self.digikey = _AsyncDigikeyNamespace(self)
+        self.mouser = _AsyncMouserNamespace(self)
+        self.rscomponents = _AsyncRscomponentsNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

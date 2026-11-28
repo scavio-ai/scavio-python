@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 196 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, Ferguson, SupplyHouse.com, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 199 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, Ferguson, SupplyHouse.com, DigiKey, Mouser Electronics, RS Components, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -140,6 +140,9 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Liquidation.com Auction Lots, Manifests and Closed Results (US; 4 endpoints) | Yes | No | No | No |
 | Ferguson Plumbing, HVAC and Waterworks Products, Prices and Specs (US; 3 endpoints) | Yes | No | No | No |
 | SupplyHouse.com Plumbing, HVAC and Electrical Supply Prices, Lead Times, Reviews and Q&A (US; 7 endpoints) | Yes | No | No | No |
+| DigiKey Electronic Component Prices, Price Breaks, Stock and Lead Times (US, Canada, Germany; 3 endpoints) | Yes | No | No | No |
+| Mouser Electronics Component Prices, Stock, On-Order Dates and Lead Times (US, UK; 4 endpoints) | Yes | No | No | No |
+| RS Components Component Prices, Pack Prices and Stock per Market (UK, Germany, Australia; 4 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -9047,6 +9050,131 @@ for q in qa["questions"][:3]:
 
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
+
+### 168. Electronic component distribution -- DigiKey prices, price breaks, stock and lead times
+
+DigiKey (digikey.com, the electronic component distributor) in three markets:
+us (USD), ca (CAD) and de (EUR, German labels, prices without VAT). Search by
+keyword or part number: DigiKey answers with exact part matches and the
+categories holding them; with a leaf `category_id` it returns that category's
+first 25 rows (DigiKey's page 1 only, so narrow with keywords and DigiKey's own
+`filters`; `filter_check` says per filter whether the page shows it applied),
+with price breaks per packaging, stock, lifecycle status, datasheet and specs.
+One product by link or DigiKey part number adds the manufacturer's standard
+lead time, RoHS / REACH / MSL / ECCN / HTSUS, documents, related parts and the
+substitutes DigiKey's page lists. Stock is one number for every market, as the
+page shows it when fetched. Search serves us and de (digikey.ca through
+`product` and `categories`). Namespace `digikey`, 3 endpoints: `search`,
+`product`, `categories`. Credits: 2 per call; a product looked up by DigiKey
+part number is held at 4 (2 when it lands straight on a digikey.com product
+page). `credits_used` in the response is what was charged. The request timeout
+is raised to at least 300s. See the [DigiKey API
+page](https://scavio.dev/digikey-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/digikey-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+dk = client.digikey
+res = dk.search("LM7805")["data"]
+print(res["result_type"], [(c["id"], c["name"], c["product_count"]) for c in res["categories"]])
+rows = dk.search("LM317", category_id="699", filters={"-1": ["296"], "-2": ["5"]})["data"]
+print(rows["total"], rows["filter_check"])
+for it in rows["items"][:5]:
+    breaks = it["pricing"][0]["price_breaks"][:3]
+    print(it["digikey_part_number"], it["mpn"], it["quantity_available"], breaks)
+part = dk.product(digikey_part_number="497-1575-5-ND")["data"]
+print(part["mpn"], part["lifecycle_status"], part["standard_lead_time_weeks"], part["quantity_available"])
+print([(s["mpn"], s["substitute_type"]) for s in part["substitutes"][:3]])
+```
+
+Captured 2026-11-28: LM317 in category 699 with Manufacturer Texas Instruments
+and In Stock matched 62 parts; DigiKey part number 497-1575-5-ND (STMicroelectronics
+LM317T) was 1.19 USD at 1 piece, Active, with a 30-week standard lead time.
+Failed calls and refused inputs are not charged; a not-found is charged what it
+spent.
+
+### 169. Electronic component distribution -- Mouser Electronics prices, stock, on-order dates and lead times
+
+Mouser Electronics (mouser.com, the electronic component distributor) in two
+markets: us (USD) and uk (mouser.co.uk, GBP). Search by keyword or part number,
+across the catalog or within a category (25 parts a page in Mouser's own order,
+no sort), with price breaks per packaging, stock, on-order quantities and
+dates, factory lead time and lifecycle; one part by Mouser part number or the
+search row's `url` (a Mouser part number with a "/" needs the url) with the
+full price table, specifications, documents, trade codes and country of
+origin; the category tree (us; its paths work in a uk search); and a
+manufacturer's profile. Stock as the page shows it when fetched. Namespace
+`mouser`, 4 endpoints: `search`, `product`, `categories`, `manufacturer`.
+Credits: 2 per call. `credits_used` in the response is what was charged. The
+request timeout is raised to at least 300s. See the [Mouser Electronics API
+page](https://scavio.dev/mouser-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/mouser-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+ms = client.mouser
+res = ms.search("LM7805")["data"]
+print(res["total"], res["total_pages"], [m["name"] for m in res["manufacturers"]])
+for it in res["items"][:5]:
+    print(it["mouser_part_number"], it["mfr_part_number"], it["availability"], it["in_stock_quantity"])
+part = ms.product("595-NE555P")["data"]
+print(part["price"], part["in_stock_quantity"], part["factory_lead_time_weeks"], part["compliance"]["eccn"])
+for group in part["price_table"]:
+    print(group["heading"], [(b["quantity"], b["unit_price"]) for b in group["breaks"]])
+tree = ms.categories()["data"]
+print(tree["count"], tree["subcategory_count"])
+```
+
+Captured 2026-11-28: LM7805 matched 33 parts on 2 pages; 595-NE555P (Texas
+Instruments NE555P) was 0.59 USD at 1 piece with a 26-week factory lead time.
+Failed calls and refused inputs are not charged; a not-found is charged.
+
+### 170. Electronic and industrial component distribution -- RS Components prices and stock per market
+
+RS Components (rs-online.com, RS Group's electronic and industrial component
+distributor) in three markets: uk (GBP), de (EUR, German text) and au (AUD).
+Search by keyword, MPN or RS stock number, category and brand listings (20 a
+page, no sort) with the unit price and the pack price labelled, pack size,
+stock status and the site's filters listed with counts (RS applies them in the
+browser, so they are not sent back as filters); one product by stock number or
+link with price breaks, the VAT-inclusive unit price, the market's own stock
+with its ship-date schedule, RoHS, country of origin, datasheets and specs.
+Prices exclude VAT; stock differs per market, as the page shows it when
+fetched. RS Americas (us.rs-online.com) is a different site and is not
+covered. Namespace `rscomponents`, 4 endpoints: `search`, `product`,
+`category`, `brand`. Credits: 2 per call. `credits_used` in the response is
+what was charged. The request timeout is raised to at least 240s. See the [RS
+Components API
+page](https://scavio.dev/rscomponents-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/rscomponents-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+rs = client.rscomponents
+res = rs.search("BC547")["data"]
+for it in res["items"][:5]:
+    print(it["stock_number"], it["mpn"], it["unit_price"], it["pack_price"], it["pack_size"], it["stock_status"])
+item = rs.product("221-5535")["data"]
+print(item["unit_price"], item["unit_price_inc_vat"], item["uom_message"])
+for s in item["availability"]["schedule"]:
+    print(s["quantity"], s["ship_date"])
+cat = rs.category("semiconductors/power-management-ics/voltage-regulators", page=2)["data"]
+print(cat["total"], [f["name"] for f in cat["facets"][:5]])
+```
+
+Captured 2026-11-28 on uk.rs-online.com: BC547 matched 10 products; stock
+number 221-5535 (Texas Instruments NE555P) was 0.304 GBP a unit (0.365 with
+VAT) in packs of 50. Failed calls and refused inputs are not charged; a
+not-found is charged.
 
 ## Error Handling
 

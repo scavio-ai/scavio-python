@@ -727,6 +727,7 @@ BODY_PRICED_KEYS = {
     "best_buy_prices",
     "ferguson_search",
     "ferguson_product",
+    "digikey_product",
 }
 
 
@@ -12322,3 +12323,148 @@ def test_batch8w3_1128_credits_notes_and_params():
     assert "signed-in customers only" in ENDPOINTS["ferguson_product"].summary
     assert "No reviewer names" in ENDPOINTS["supplyhouse_reviews"].summary
     assert "price_hidden" in ENDPOINTS["supplyhouse_product"].summary
+
+
+# --- batch 8 wave 4 2026-11-28: DigiKey, Mouser Electronics, RS Components ---
+
+BATCH8W4_1128 = {
+    "digikey": {
+        "search": ("search", 2, 300.0),
+        "product": ("product", 4, 300.0),
+        "categories": ("categories", 2, 300.0),
+    },
+    "mouser": {
+        "search": ("search", 2, 300.0),
+        "product": ("product", 2, 300.0),
+        "categories": ("categories", 2, 300.0),
+        "manufacturer": ("manufacturer", 2, 300.0),
+    },
+    "rscomponents": {
+        "search": ("search", 2, 240.0),
+        "product": ("product", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "brand": ("brand", 2, 240.0),
+    },
+}
+BATCH8W4_1128_ONE_OF = {
+    "digikey_search": (("query", "category_id"),),
+    "digikey_product": (("url", "digikey_part_number"),),
+    "mouser_search": (("query", "category"),),
+    "mouser_product": (("mouser_part_number", "url"),),
+    "mouser_manufacturer": (("manufacturer", "url"),),
+    "rscomponents_product": (("stock_number", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH8W4_1128))
+def test_batch8w4_1128_credits_paths_timeouts(namespace):
+    """Every endpoint of the 3 new namespaces: path, credits, timeout floor, one-of, copy rules."""
+    want = BATCH8W4_1128[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH8W4_1128_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag|training|grounding)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "real-time" not in text.lower() and "real time" not in text.lower(), ep.key
+        assert "country" in [p.name for p in ep.params], ep.key
+
+
+BATCH8W4_1128_WIRE = [
+    ("digikey", "search", {"query": "LM7805"}, "search"),
+    (
+        "digikey", "search",
+        {
+            "query": "LM317",
+            "category_id": "699",
+            "filters": {"-1": ["296"], "-2": ["5"]},
+            "country": "de",
+        },
+        "search",
+    ),
+    (
+        "digikey", "product",
+        {"url": "https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT02N/376866"},
+        "product",
+    ),
+    ("digikey", "product", {"digikey_part_number": "497-1575-5-ND", "country": "ca"}, "product"),
+    ("digikey", "categories", {}, "categories"),
+    ("digikey", "categories", {"category_id": 32}, "categories"),
+    ("mouser", "search", {"query": "LM7805", "page": 2, "country": "uk"}, "search"),
+    ("mouser", "search", {"category": "semiconductors/integrated-circuits-ics"}, "search"),
+    ("mouser", "product", {"mouser_part_number": "595-NE555P"}, "product"),
+    ("mouser", "categories", {}, "categories"),
+    ("mouser", "manufacturer", {"manufacturer": "texas-instruments"}, "manufacturer"),
+    ("rscomponents", "search", {"query": "BC547", "page": 2}, "search"),
+    ("rscomponents", "product", {"stock_number": "221-5535", "country": "de"}, "product"),
+    (
+        "rscomponents", "product",
+        {"url": "https://uk.rs-online.com/web/p/timer-circuits/2215535"},
+        "product",
+    ),
+    (
+        "rscomponents", "category",
+        {"path": "semiconductors/power-management-ics/voltage-regulators"},
+        "category",
+    ),
+    ("rscomponents", "brand", {"brand": "texas-instruments", "country": "au"}, "brand"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH8W4_1128_WIRE)
+def test_batch8w4_1128_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH8W4_1128[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH8W4_1128_ONE_OF))
+def test_batch8w4_1128_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch8w4_1128_credits_notes_and_params():
+    """DigiKey: 2 / 4 (part number) / 2, note on product; Mouser and RS: 2 credits each."""
+    w4 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH8W4_1128]
+    assert len(w4) == 11
+    assert {ep.credits for ep in w4 if ep.namespace != "digikey"} == {2}
+    assert [ep.key for ep in w4 if ep.credits_note] == ["digikey_product"]
+    note = ENDPOINTS["digikey_product"].credits_note
+    assert "2 credits by link" in note and "held at 4" in note
+    assert all(p.doc for ep in w4 for p in ep.params)
+    assert [p.name for p in ENDPOINTS["rscomponents_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["rscomponents_category"].required_params] == ["path"]
+    assert [p.name for p in ENDPOINTS["rscomponents_brand"].required_params] == ["brand"]
+    assert ENDPOINTS["digikey_search"].positional_optional_params[0].name == "query"
+    assert ENDPOINTS["digikey_product"].positional_optional_params[0].name == "url"
+    assert ENDPOINTS["mouser_product"].positional_optional_params[0].name == "mouser_part_number"
+    assert ENDPOINTS["rscomponents_product"].positional_optional_params[0].name == "stock_number"
+    assert "25 rows" in ENDPOINTS["digikey_search"].summary
+    assert "filter_check" in ENDPOINTS["digikey_search"].summary
+    assert "substitutes" in ENDPOINTS["digikey_product"].summary
+    assert "does not open by number" in ENDPOINTS["mouser_product"].summary
+    assert "us.rs-online.com" in ENDPOINTS["rscomponents_search"].summary
+    assert "unit_price_inc_vat" in ENDPOINTS["rscomponents_product"].summary
+    assert "not applicable as filters" in ENDPOINTS["rscomponents_category"].summary

@@ -205,6 +205,9 @@ __all__ = [
     "_LiquidationNamespace",
     "_FergusonNamespace",
     "_SupplyhouseNamespace",
+    "_DigikeyNamespace",
+    "_MouserNamespace",
+    "_RscomponentsNamespace",
 ]
 
 class _GoogleNamespace:
@@ -38452,3 +38455,242 @@ class _SupplyhouseNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("supplyhouse_categories", {}, extra)
+
+class _DigikeyNamespace:
+    """DigiKey (digikey.com, the electronic component distributor) search, product and categories endpoints; us (USD), ca (CAD, product and categories) and de (EUR, German labels, prices without VAT); price breaks per packaging and one global stock number. 2 credits per call; a product looked up by DigiKey part number is held at 4."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        category_id: Optional[Union[str, int]] = None,
+        filters: Optional[dict[str, Any]] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search DigiKey (digikey.com, the electronic component distributor; digikey.ca and digikey.de by country). Scavio fetches the public DigiKey page on request. Markets: us (USD) and de (EUR; German labels and specs, prices without VAT); digikey.ca is served by product and categories. Stock is one number for every market. With query alone DigiKey answers with its category view (result_type categories): exact_matches [{product_id, mpn, manufacturer, description, url, image, unit_price}] (parts whose manufacturer part number matches) and categories [{id, name, parent, product_count, url}]; an exact part number can land on one product (result_type product, product as in the product endpoint). With category_id (a leaf category) it returns that category's product rows (result_type products): page 1 of DigiKey's listing, 25 rows in DigiKey's order (later pages are not offered; narrow with query and filters), total, has_more, items [{position, product_id, digikey_part_number, digikey_part_number_packaging, mpn, manufacturer, manufacturer_id, description, url, image, datasheet_url, rohs_compliant, quantity_available, stock [{label, quantity}] (DigiKey stock, factory stock, marketplace stock as the row lists them), unit_price, pricing [{packaging, price_breaks [{quantity, unit_price, extended_price}] per packaging, min_order_quantity, unit_price}], product_status, series, packaging, tariff_note, specs [{id, name, value}]}], facets and common_filters [{id, name, type, options [{id, name, product_count}]}] (the values filters takes), category, breadcrumbs, applied and filter_check ({<filter id>: applied | not_applied | unknown}). Also country, currency, language, query, category_id, filters, note. 2 credits. A not-found is charged what it spent; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about 200 s when DigiKey is slow; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a manufacturer part number or a DigiKey part number, e.g. LM7805. Send query, category_id or both.
+            category_id: A leaf category id (categories[].id of a search or of categories, where leaf is true, e.g. 699) or a DigiKey category link; returns that category's product rows, narrowed by query and filters.
+            filters: With category_id: {<facet id>: [<option id>, ...]} from facets[] and common_filters[] of a category search, e.g. {"-1": ["296"]} for Manufacturer Texas Instruments, {"-2": ["5"]} for In Stock. Up to 10 filters.
+            country: us (default: digikey.com, USD) or de (digikey.de, EUR, German labels, prices without VAT). ca is refused (not charged): use product and categories for digikey.ca.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("digikey_search", {"query": query, "category_id": category_id, "filters": filters, "country": country}, extra)
+
+    def product(
+        self,
+        url: Optional[str] = None,
+        *,
+        digikey_part_number: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of DigiKey (digikey.com, the electronic component distributor; digikey.ca and digikey.de by country). Scavio fetches the public DigiKey page on request. Markets: us (USD), ca (CAD), de (EUR; German labels and specs, prices without VAT). Stock is one number for every market, as the page shows it when fetched. By DigiKey product link (items[].url) or DigiKey part number. Returns country, currency, language, requested, product_id, digikey_part_numbers, mpn, manufacturer, manufacturer_id, description, detailed_description, url, images, datasheet_url, lifecycle_status (DigiKey's Part Status), series, is_new_product, normally_stocking, quantity_available, standard_lead_time and standard_lead_time_weeks (the manufacturer's standard lead time as the page states it), pricing [{digikey_part_number, packaging, min_order_quantity, order_multiple, price_breaks [{quantity, unit_price, extended_price}]}], unit_price, vat (de: unit price with and without VAT), standard_package_quantity (the manufacturer standard package), marketplace {is_marketplace_only, ships_from_note}, notes, environmental {rohs_status, reach_status, moisture_sensitivity_level, eccn, htsus}, specs [{id, name, value}], part_number_aliases, category, breadcrumbs, documents [{type, title, url}] (datasheets, PCNs, models), related_parts (DigiKey's "You May Also Be Interested In" list) and substitutes (when DigiKey's page lists them, with DigiKey's substitute type), note. An unknown product is a charged 404. A not-found is charged what it spent; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about 200 s when DigiKey is slow; set a client timeout of at least 300 s.
+
+        Costs 2 credits by link; a DigiKey part number is held at 4 (DigiKey resolves it through
+        a search page, then the market's product page; 2 when it lands straight on a digikey.com
+        product page). credits_used in the response is the exact charge. Returns the API
+        response as a dict.
+
+        Args:
+            url: A DigiKey product link (items[].url) on digikey.com, digikey.ca or digikey.de, e.g. https://www.digikey.com/en/products/detail/texas-instruments/SN74HCT02N/376866; the link's site sets the market.
+            digikey_part_number: A DigiKey part number (items[].digikey_part_number, digikey_part_numbers[]), e.g. 497-1575-5-ND, instead of url.
+            country: us (default: digikey.com, USD), ca (digikey.ca, CAD) or de (digikey.de, EUR, German labels, prices without VAT).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("digikey_product", {"url": url, "digikey_part_number": digikey_part_number, "country": country}, extra)
+
+    def categories(
+        self,
+        category_id: Optional[Union[str, int]] = None,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The product categories of DigiKey (digikey.com, the electronic component distributor; digikey.ca and digikey.de by country). Scavio fetches the public DigiKey page on request. Markets: us (USD), ca (CAD), de (EUR; German labels and specs, prices without VAT). Stock is one number for every market, as the page shows it when fetched. Without category_id: the top-level categories as DigiKey's product index lists them (total_categories, count, categories [{id, name, url, product_count, new_product_count, leaf, subcategories_listed, subcategories [...]}]; the index carries the full subtree with counts for some of them). With category_id: that category with its subcategories and product counts (category, categories, breadcrumbs). leaf true marks a category whose rows search returns (search with category_id). Also country, currency, language, note. An unknown category id is a charged 404. 2 credits. A not-found is charged what it spent; failed upstream calls and refused inputs are not. Usually 10-40 s, up to about 200 s when DigiKey is slow; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category_id: A category id (categories[].id, e.g. 32) to read its subcategories and product counts; leave out for the top-level categories.
+            country: us (default: digikey.com, USD), ca (digikey.ca, CAD) or de (digikey.de, EUR, German labels, prices without VAT).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("digikey_categories", {"category_id": category_id, "country": country}, extra)
+
+class _MouserNamespace:
+    """Mouser Electronics (mouser.com, the electronic component distributor) search, product, categories and manufacturer endpoints; us (USD) and uk (GBP); price breaks per packaging, stock, on-order quantities and factory lead time. 2 credits each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: Optional[str] = None,
+        *,
+        category: Optional[str] = None,
+        page: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Mouser Electronics (mouser.com, the electronic component distributor). Scavio fetches the public Mouser page on request. Markets: us (mouser.com, USD, default) and uk (mouser.co.uk, GBP). Prices as the storefront shows them to a visitor who is not signed in, per piece; stock as the page shows it when fetched. By keyword, manufacturer part number or Mouser part number, within a category or across the catalog, 25 parts per page in Mouser's own order (no sort). Returns country, currency, query, category, redirected_to ({type: product, mouser_part_number, url} when Mouser answers with a product page; then items holds that part), page, page_size, heading, total, total_pages, has_more, count, items [{position, mouser_part_number, mfr_part_number, manufacturer, manufacturer_slug (the input of manufacturer), description, url (the input of product), image, datasheet_url, currency, availability (In Stock, On Order, Non-Stocked, Not Available ...), in_stock_quantity, on_order_quantity, on_order [{quantity, expected, expected_date}], factory_lead_time_weeks, lifecycle (e.g. End of Life, when Mouser marks it), price_breaks [{packaging (Cut Tape, Reel, MouseReel or null), quantity, unit_price}], minimum_order_quantity, order_multiple, reel_quantity, mousereel_available, has_alternative_packaging}], categories [{name, category, url, subcategories [{name, category, url, product_count}]}] (keyword searches), manufacturers [{name, count}] (keyword searches), facets [{name, values}] (category listings), breadcrumbs, note. A keyword with no parts returns total 0; an unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Mouser pages are slow: usually 30-160 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a manufacturer part number or a Mouser part number, e.g. LM7805. Send query, category or both.
+            category: A Mouser category path (categories[].category of the categories endpoint, or of a keyword search, e.g. semiconductors/integrated-circuits-ics/power-management-ics/voltage-regulators-voltage-controllers/linear-voltage-regulators) or a Mouser category link, to list or narrow a category.
+            page: Results page, 1-based, 25 parts per page, up to page 200.
+            country: us (default: mouser.com, prices in USD) or uk (mouser.co.uk, prices in GBP; gb is accepted too).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mouser_search", {"query": query, "category": category, "page": page, "country": country}, extra)
+
+    def product(
+        self,
+        mouser_part_number: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One part of Mouser Electronics (mouser.com, the electronic component distributor). Scavio fetches the public Mouser page on request. Markets: us (mouser.com, USD, default) and uk (mouser.co.uk, GBP). Prices as the storefront shows them to a visitor who is not signed in, per piece; stock as the page shows it when fetched. By Mouser part number or the url of a search row (a Mouser part number with a / does not open by number: pass the row's url). Returns country, currency, mouser_part_number, requested_mouser_part_number, mfr_part_number, manufacturer, manufacturer_slug, name, description, url, image, datasheet_url, price (unit price at the lowest quantity break), availability, in_stock, in_stock_quantity, stock_note, on_order_quantity, on_order [{quantity, expected, expected_date}], factory_lead_time_weeks, minimum_order_quantity, order_multiple, full_reel_quantity, price_table [{heading (e.g. Full Reel (Order in multiples of 2500), null for the leading group), order_multiple, breaks [{quantity, unit_price, extended_price}]}], packaging, rohs_compliant, lifecycle, specifications [{name, value}], documents [{type, title, url}] (datasheets, product change notices), compliance {ushts, mxhts, eccn}, country_of_origin, assembly_country_of_origin, country_of_diffusion, breadcrumbs, category, note. An unknown part number is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Mouser pages are slow: usually 30-160 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            mouser_part_number: The Mouser part number (items[].mouser_part_number), e.g. 595-NE555P.
+            url: The exact Mouser product link of a search row (items[].url, with its qs= part), instead of mouser_part_number.
+            country: us (default: mouser.com, prices in USD) or uk (mouser.co.uk, prices in GBP; gb is accepted too).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mouser_product", {"mouser_part_number": mouser_part_number, "url": url, "country": country}, extra)
+
+    def categories(
+        self,
+        *,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The electronic components category tree of Mouser Electronics (mouser.com, the electronic component distributor). Scavio fetches the public Mouser page on request. Returns country, currency, count, subcategory_count, categories [{name, category, url, groups [{name, category, url, subcategories [{name, category, url, product_count}]}]}], note. Any category value is the input of search, in either market. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Mouser pages are slow: usually 30-160 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            country: us (the default and the only value served: the tree is read from mouser.com, and its category paths work unchanged in a uk search).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mouser_categories", {"country": country}, extra)
+
+    def manufacturer(
+        self,
+        manufacturer: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One manufacturer's profile on Mouser Electronics (mouser.com, the electronic component distributor). Scavio fetches the public Mouser page on request. By Mouser slug or link. Returns country, currency, name, slug, url, logo, ecia_authorized, sections [{name, url}], products_url, newest_products_url, categories [{name, category (the input of search), url}], note. An unknown slug is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Mouser pages are slow: usually 30-160 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            manufacturer: The manufacturer's Mouser slug (items[].manufacturer_slug), e.g. texas-instruments.
+            url: A Mouser manufacturer link (https://www.mouser.com/manufacturer/<slug>/), instead of manufacturer.
+            country: us (default: mouser.com, prices in USD) or uk (mouser.co.uk, prices in GBP; gb is accepted too).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("mouser_manufacturer", {"manufacturer": manufacturer, "url": url, "country": country}, extra)
+
+class _RscomponentsNamespace:
+    """RS Components (rs-online.com, RS Group's electronic and industrial component distributor) search, product, category and brand endpoints; uk (GBP), de (EUR) and au (AUD), stock per market, unit and pack prices with the VAT-inclusive figure. RS Americas (us.rs-online.com) is not covered. 2 credits each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search RS Components (rs-online.com, RS Group's electronic and industrial component distributor). Scavio fetches the public rs-online.com page on request. Markets: uk (uk.rs-online.com, GBP, default), de (de.rs-online.com, EUR, German text) and au (au.rs-online.com, AUD); stock differs per market, as the page shows it when fetched. RS Americas (us.rs-online.com) is a different site and is not covered. Prices exclude VAT, as shown to a visitor who is not signed in. By keyword, MPN or stock number. 20 per page: page, page_size, total, total_pages, has_more, count, items [{position, stock_number (use it in product), title, mpn, brand, url, image, category, currency, unit_price (one base_unit), price_display, pack_price (one sales_unit), pack_size, pack_type, sales_unit (EA, PK pack, TU tube, RL reel), base_unit, unit_priced, first_break_qty, stock_status (the site's code: IN_STOCK, OUT_OF_STOCK, CURRENTLY_UNAVAILABLE ...), in_stock, lifecycle (being_discontinued, being_removed or null), last_stock, has_datasheets and specs [{name, value}] (key specifications)}] and facets [{name, key, type, values [{value, count}]}] (the site's filters with counts: listed, not applicable as filters, since RS applies them in the browser). No sort. Also query, spell_corrected_to and redirected_to (a search the site sends straight to a product, category or brand page returns that page's rows). No results is an empty 200 (charged). 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-120 s; set a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a manufacturer part number (MPN) or an RS stock number, e.g. BC547.
+            page: Results page, 1-500 (20 per page; total_pages says how many the site has).
+            country: The RS market: uk (uk.rs-online.com, GBP; default), de (de.rs-online.com, EUR, German text) or au (au.rs-online.com, AUD). A link sent as url / path / brand picks its own market.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rscomponents_search", {"query": query, "page": page, "country": country}, extra)
+
+    def product(
+        self,
+        stock_number: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of RS Components (rs-online.com, RS Group's electronic and industrial component distributor). Scavio fetches the public rs-online.com page on request. Markets: uk (uk.rs-online.com, GBP, default), de (de.rs-online.com, EUR, German text) and au (au.rs-online.com, AUD); stock differs per market, as the page shows it when fetched. RS Americas (us.rs-online.com) is a different site and is not covered. Prices exclude VAT, as shown to a visitor who is not signed in. By stock number or link: stock_number, rs_stock_number, title, mpn, brand, brand_slug, brand_url, url, currency, prices_include_vat (false), vat_rate_percent, unit_price, unit_price_inc_vat, pack_price, price_breaks [{quantity, unit_price, unit_price_inc_vat, pack_price}], was_price, uom_message ("Each (In a Pack of 50)"), minimum_order_qty, pack_size, pack_type, sales_unit, base_unit, unit_priced, has_pack_variants, pack_variant {stock_number, url}, rohs_status, country_of_origin, is_new, availability {status, status_code, in_stock, lifecycle, last_stock, quantity, total_available, ship_date, schedule [{quantity, ship_date}], backorder_allowed, orderable} (the market's own stock; no lead time in weeks), documents [{title, type, url}], datasheet_url, specs [{name, value}], categories [{name, level, path, url}] and images. Alternative products are not on the page and are not returned. An unknown stock number is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-120 s; set a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            stock_number: The RS stock number (items[].stock_number), with or without the dash: 221-5535, 2215535, 197-7393P.
+            url: An RS product link (uk, de or au), e.g. https://uk.rs-online.com/web/p/timer-circuits/2215535, instead of stock_number.
+            country: The RS market: uk (uk.rs-online.com, GBP; default), de (de.rs-online.com, EUR, German text) or au (au.rs-online.com, AUD). A link sent as url / path / brand picks its own market.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rscomponents_product", {"stock_number": stock_number, "url": url, "country": country}, extra)
+
+    def category(
+        self,
+        path: str,
+        *,
+        page: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of RS Components (rs-online.com, RS Group's electronic and industrial component distributor). Scavio fetches the public rs-online.com page on request. Markets: uk (uk.rs-online.com, GBP, default), de (de.rs-online.com, EUR, German text) and au (au.rs-online.com, AUD); stock differs per market, as the page shows it when fetched. RS Americas (us.rs-online.com) is a different site and is not covered. Prices exclude VAT, as shown to a visitor who is not signed in. By path or link: path, category {name, breadcrumbs [{name, level, path, url}], is_last_level}, child_categories [{name, path, url, children}], indexable_filters [{name, slug, url}] (the site's own curated filtered listings) and its listing: 20 per page: page, page_size, total, total_pages, has_more, count, items [{position, stock_number (use it in product), title, mpn, brand, url, image, category, currency, unit_price (one base_unit), price_display, pack_price (one sales_unit), pack_size, pack_type, sales_unit (EA, PK pack, TU tube, RL reel), base_unit, unit_priced, first_break_qty, stock_status (the site's code: IN_STOCK, OUT_OF_STOCK, CURRENTLY_UNAVAILABLE ...), in_stock, lifecycle (being_discontinued, being_removed or null), last_stock, has_datasheets and specs [{name, value}] (key specifications)}] and facets [{name, key, type, values [{value, count}]}] (the site's filters with counts: listed, not applicable as filters, since RS applies them in the browser). No sort. An unknown category is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-120 s; set a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            path: A category path as the market writes it (child_categories[].path, categories[].path), e.g. semiconductors/power-management-ics/voltage-regulators, or its /web/c/ link.
+            page: Results page, 1-500 (20 per page; total_pages says how many the site has).
+            country: The RS market: uk (uk.rs-online.com, GBP; default), de (de.rs-online.com, EUR, German text) or au (au.rs-online.com, AUD). A link sent as url / path / brand picks its own market.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rscomponents_category", {"path": path, "page": page, "country": country}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The brand page of RS Components (rs-online.com, RS Group's electronic and industrial component distributor). Scavio fetches the public rs-online.com page on request. Markets: uk (uk.rs-online.com, GBP, default), de (de.rs-online.com, EUR, German text) and au (au.rs-online.com, AUD); stock differs per market, as the page shows it when fetched. RS Americas (us.rs-online.com) is a different site and is not covered. Prices exclude VAT, as shown to a visitor who is not signed in. By brand slug or link: brand {name, slug, logo, url} and its listing: 20 per page: page, page_size, total, total_pages, has_more, count, items [{position, stock_number (use it in product), title, mpn, brand, url, image, category, currency, unit_price (one base_unit), price_display, pack_price (one sales_unit), pack_size, pack_type, sales_unit (EA, PK pack, TU tube, RL reel), base_unit, unit_priced, first_break_qty, stock_status (the site's code: IN_STOCK, OUT_OF_STOCK, CURRENTLY_UNAVAILABLE ...), in_stock, lifecycle (being_discontinued, being_removed or null), last_stock, has_datasheets and specs [{name, value}] (key specifications)}] and facets [{name, key, type, values [{value, count}]}] (the site's filters with counts: listed, not applicable as filters, since RS applies them in the browser). No sort. An unknown brand is a charged 404. 2 credits. A not-found is charged; failed upstream calls and refused inputs are not. Usually 15-120 s; set a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            brand: A brand slug (product brand_slug, the end of a /web/b/ link), e.g. texas-instruments, or its /web/b/ link.
+            page: Results page, 1-500 (20 per page; total_pages says how many the site has).
+            country: The RS market: uk (uk.rs-online.com, GBP; default), de (de.rs-online.com, EUR, German text) or au (au.rs-online.com, AUD). A link sent as url / path / brand picks its own market.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("rscomponents_brand", {"brand": brand, "page": page, "country": country}, extra)

@@ -61,6 +61,7 @@ from ._namespaces_sync import (
     _DepopNamespace,
     _DermstoreNamespace,
     _DicksNamespace,
+    _DigikeyNamespace,
     _DiscountTireNamespace,
     _DollarGeneralNamespace,
     _DollarTreeNamespace,
@@ -121,6 +122,7 @@ from ._namespaces_sync import (
     _MetaAdsNamespace,
     _MichaelsNamespace,
     _MicroCenterNamespace,
+    _MouserNamespace,
     _MovotoNamespace,
     _MscNamespace,
     _NaturaNamespace,
@@ -158,6 +160,7 @@ from ._namespaces_sync import (
     _RightmoveNamespace,
     _RockautoNamespace,
     _RonaNamespace,
+    _RscomponentsNamespace,
     _SaksNamespace,
     _SallybeautyNamespace,
     _SamsClubNamespace,
@@ -461,6 +464,9 @@ class ScavioClient:
         self.liquidation = _LiquidationNamespace(self)
         self.ferguson = _FergusonNamespace(self)
         self.supplyhouse = _SupplyhouseNamespace(self)
+        self.digikey = _DigikeyNamespace(self)
+        self.mouser = _MouserNamespace(self)
+        self.rscomponents = _RscomponentsNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
