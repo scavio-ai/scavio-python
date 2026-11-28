@@ -12091,7 +12091,7 @@ class _HebNamespace:
         return self._client._call("heb_stores", {"zip": zip, "city": city}, extra)
 
 class _KrogerNamespace:
-    """Kroger, QFC and Fred Meyer grocery search, product detail, store-level prices, store locator, category, weekly digital deals, digital coupons and search suggestion endpoints."""
+    """Kroger, QFC, Fred Meyer and Jay C Food Stores grocery search, product detail, store-level prices, store locator, category, weekly digital deals, digital coupons and search suggestion endpoints."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -12100,17 +12100,17 @@ class _KrogerNamespace:
         self,
         query: str,
         *,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Search Kroger, QFC or Fred Meyer products by keyword (banner): price, list and promo price with end date, n-for deals, unit price, size, UPC, stock (in_stock null without a stock record), SNAP eligibility, dietary info, category and rating (average, count, star distribution; no review text), plus total and the store that priced the results (a store the site chooses; use prices() for a specific store). Prices are integer cents. Only the first page (up to 24 products), no sort.
+        """Search Kroger, QFC, Fred Meyer or Jay C Food Stores products by keyword (banner): price, list and promo price with end date, n-for deals, unit price, size, UPC, stock (in_stock null without a stock record), SNAP eligibility, dietary info, category and rating (average, count, star distribution; no review text), plus total and the store that priced the results (a store the site chooses; use prices() for a specific store). Prices are integer cents. Only the first page (up to 24 products), no sort.
 
         Costs 2 credits. Returns the API response as a dict.
 
         Args:
             query: Search keywords (1-200 characters).
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Defaults to kroger. Prices differ by banner and by store.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Defaults to kroger. Prices differ by banner and by store.
             page: Results page. Only page 1 is available (up to 24 products); page above 1 is refused with a 400 before any charge.
             extra: Additional wire parameters passed through verbatim.
         """
@@ -12122,18 +12122,18 @@ class _KrogerNamespace:
         product_url: Optional[str] = None,
         upc: Optional[str] = None,
         slug: Optional[str] = None,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One Kroger, QFC or Fred Meyer product by URL or UPC: the search fields plus description, nutrition facts, ingredients, allergens, images, country of origin, dimensions, weight, dietary flags, the aisle at the store (store_location), breadcrumbs, banner and store (a store the site chooses). Prices are integer cents. An unknown UPC is a charged 404.
+        """One Kroger, QFC, Fred Meyer or Jay C Food Stores product by URL or UPC: the search fields plus description, nutrition facts, ingredients, allergens, images, country of origin, dimensions, weight, dietary flags, the aisle at the store (store_location), breadcrumbs, banner and store (a store the site chooses). Prices are integer cents. An unknown UPC is a charged 404.
 
         Costs 2 credits. Returns the API response as a dict.
 
         Args:
-            product_url: Full or relative product URL on kroger.com, qfc.com or fredmeyer.com (products[].url of search()). An absolute URL sets the banner; a banner that contradicts its host is a 400.
+            product_url: Full or relative product URL on kroger.com, qfc.com, fredmeyer.com or jaycfoods.com (products[].url of search()). An absolute URL sets the banner; a banner that contradicts its host is a 400.
             upc: The product's UPC (products[].upc of search(), or the digits at the end of a product URL: /p/{slug}/{upc}), e.g. '0001111050438'.
             slug: Product slug (the readable part of the product URL). Optional with upc.
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Defaults to kroger. Prices differ by banner and by store.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Defaults to kroger. Prices differ by banner and by store.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("kroger_product", {"product_url": product_url, "upc": upc, "slug": slug, "banner": banner}, extra)
@@ -12143,17 +12143,17 @@ class _KrogerNamespace:
         store_id: str,
         upcs: list[str],
         *,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Price, promotion, stock and aisle for 1 to 25 UPCs at one Kroger, QFC or Fred Meyer store you choose (store_id from stores()). Per UPC: price, promo_price, promo_ends_at, on_sale, price_display, unit_price_display, in_stock, stock_level, quantity (the site's available estimate, not a shelf count), aisle (description, number, side, bay, shelf), fulfillment and priced_at. Unknown UPCs are listed in not_found. Prices are integer cents. An unknown store_id is a charged 404.
+        """Price, promotion, stock and aisle for 1 to 25 UPCs at one Kroger, QFC, Fred Meyer or Jay C Food Stores store you choose (store_id from stores()). The same item is priced differently by banner and by store (Folgers Classic Roast ground coffee: $15.69 at Jay C Food Stores Seymour, IN, $16.99 at Kroger Cincinnati on 2026-11-28). Per UPC: price, promo_price, promo_ends_at, on_sale, price_display, unit_price_display, in_stock, stock_level, quantity (the site's available estimate, not a shelf count), aisle (description, number, side, bay, shelf), fulfillment and priced_at. Unknown UPCs are listed in not_found. Prices are integer cents. An unknown store_id is a charged 404.
 
         Costs 3 credits. Returns the API response as a dict.
 
         Args:
             store_id: A store's 8-digit location_id: stores[].location_id of stores(), e.g. '70500847'.
             upcs: 1 to 25 13-digit UPCs as the site writes them (products[].upc of search() or category()), e.g. ['0001111050438'].
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701, anything else is kroger.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701; 024 ids are Jay C Food Stores or Kroger stores, told apart by the store's own record; anything else is kroger.
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("kroger_prices", {"store_id": store_id, "upcs": upcs, "banner": banner}, extra)
@@ -12164,12 +12164,12 @@ class _KrogerNamespace:
         zip: Optional[str] = None,
         query: Optional[str] = None,
         store_id: Optional[str] = None,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         limit: Optional[int] = None,
         include_other_banners: Optional[bool] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Kroger, QFC or Fred Meyer stores near a ZIP or a city / address (nearest first), or one store by store_id; pass exactly one. Each store: location_id (the store_id for prices(), coupons() and suggestions()), banner, type (store or fuel_center), name, store_number, address, coordinates, phone, timezone, hours, open_24_hours, departments, has_pharmacy, has_fuel_center, pickup, delivery and distance_miles. No fuel prices. An unknown store_id is a charged 404.
+        """Kroger, QFC, Fred Meyer or Jay C Food Stores stores near a ZIP or a city / address (nearest first), or one store by store_id; pass exactly one. Each store: location_id (the store_id for prices(), coupons() and suggestions()), banner, type (store or fuel_center), name, store_number, address, coordinates, phone, timezone, hours, open_24_hours, departments, has_pharmacy, has_fuel_center, pickup, delivery and distance_miles. No fuel prices. An unknown store_id is a charged 404.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -12177,7 +12177,7 @@ class _KrogerNamespace:
             zip: A 5-digit US ZIP code, e.g. '98101'.
             query: A city or address, as typed in the site's store finder, e.g. 'Portland, OR'.
             store_id: One store's 8-digit location_id, e.g. '70100011'.
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701, anything else is kroger.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701; 024 ids are Jay C Food Stores or Kroger stores, told apart by the store's own record; anything else is kroger.
             limit: Stores to return, 1-50. Defaults to 10.
             include_other_banners: Also return nearby stores of other Kroger banners (for example Fred Meyer stores near a QFC search). Defaults to False.
             extra: Additional wire parameters passed through verbatim.
@@ -12190,19 +12190,19 @@ class _KrogerNamespace:
         url: Optional[str] = None,
         taxonomy_id: Optional[str] = None,
         slug: Optional[str] = None,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """A Kroger, QFC or Fred Meyer category listing by /pl/ URL or taxonomy_id (not both): category (id, name, url) and the search fields (total, count, products, the store the site chose). Prices are integer cents. Only the first page (up to 24 products), no sort.
+        """A Kroger, QFC, Fred Meyer or Jay C Food Stores category listing by /pl/ URL or taxonomy_id (not both): category (id, name, url) and the search fields (total, count, products, the store the site chose). Prices are integer cents. Only the first page (up to 24 products), no sort.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            url: A category listing URL (/pl/<name>/<id>) on kroger.com, qfc.com or fredmeyer.com. The URL's host sets the banner.
+            url: A category listing URL (/pl/<name>/<id>) on kroger.com, qfc.com, fredmeyer.com or jaycfoods.com. The URL's host sets the banner.
             taxonomy_id: The digits at the end of a /pl/ URL, e.g. '08190'. Category ids are shared across banners.
             slug: The name part of a /pl/ URL, e.g. 'Import-Beer'. Optional with taxonomy_id; without it category.name is None.
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Defaults to kroger. Prices differ by banner and by store.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Defaults to kroger. Prices differ by banner and by store.
             page: Results page. Only page 1 is available; page above 1 is an unbilled 400.
             extra: Additional wire parameters passed through verbatim.
         """
@@ -12211,16 +12211,16 @@ class _KrogerNamespace:
     def deals(
         self,
         *,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         page: Optional[int] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """This week's weekly digital deals of Kroger, QFC or Fred Meyer: deals_week (id, ends_at) and the search fields. Store promotions carry promo_price and promo_ends_at; digital-coupon deals show the shelf price (the coupon is in coupons(), tag Weekly Digital Deals). Prices are integer cents. Only the first page (up to 24 products). The printed weekly ad circular is not available.
+        """This week's weekly digital deals of Kroger, QFC, Fred Meyer or Jay C Food Stores: deals_week (id, ends_at) and the search fields. Store promotions carry promo_price and promo_ends_at; digital-coupon deals show the shelf price (the coupon is in coupons(), tag Weekly Digital Deals). Prices are integer cents. Only the first page (up to 24 products). The printed weekly ad circular is not available.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Defaults to kroger. Prices differ by banner and by store.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Defaults to kroger. Prices differ by banner and by store.
             page: Results page. Only page 1 is available; page above 1 is an unbilled 400.
             extra: Additional wire parameters passed through verbatim.
         """
@@ -12231,20 +12231,20 @@ class _KrogerNamespace:
         *,
         store_id: Optional[str] = None,
         zip: Optional[str] = None,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         page: Optional[int] = None,
         category: Optional[str] = None,
         query: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """The digital coupons at one Kroger, QFC or Fred Meyer store (store_id, or the banner's store nearest a zip; not both), 24 per page, optionally one department (category) or a text match (query). Each coupon: id, brand, title, description, details, savings (type, amount in cents, percent), tags, valid_for, starts_at, clip_by, expires_at and image; plus total_at_store, has_more and categories. Listing only: coupons are not clipped.
+        """The digital coupons at one Kroger, QFC, Fred Meyer or Jay C Food Stores store (store_id, or the banner's store nearest a zip; not both), 24 per page, optionally one department (category) or a text match (query). Each coupon: id, brand, title, description, details, savings (type, amount in cents, percent), tags, valid_for, starts_at, clip_by, expires_at and image; plus total_at_store, has_more and categories. Listing only: coupons are not clipped.
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             store_id: A store's 8-digit location_id from stores(), e.g. '70500847'.
             zip: A 5-digit ZIP: the banner's nearest store is used.
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701, anything else is kroger.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701; 024 ids are Jay C Food Stores or Kroger stores, told apart by the store's own record; anything else is kroger.
             page: Page of coupons, 24 per page, 1-50. Defaults to 1. Follow has_more.
             category: Only coupons in one department: a name from the response's categories, e.g. 'Dairy'.
             query: Only coupons whose brand or text matches, e.g. 'coffee'.
@@ -12256,17 +12256,17 @@ class _KrogerNamespace:
         self,
         query: str,
         *,
-        banner: Optional[Literal["kroger", "qfc", "fred_meyer"]] = None,
+        banner: Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]] = None,
         store_id: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Kroger, QFC or Fred Meyer search box suggestions for a partial query: suggestions (text, type), count and the store they were asked for. Without store_id the banner's store nearest a representative ZIP is used (Kroger 45202, QFC 98101, Fred Meyer 97201).
+        """Kroger, QFC, Fred Meyer or Jay C Food Stores search box suggestions for a partial query: suggestions (text, type), count and the store they were asked for. Without store_id the banner's store nearest a representative ZIP is used (Kroger 45202, QFC 98101, Fred Meyer 97201, Jay C Food Stores 47274 Seymour, IN).
 
         Costs 1 credit. Returns the API response as a dict.
 
         Args:
             query: What a shopper has typed so far (2-100 characters), e.g. 'almond mi'.
-            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701, anything else is kroger.
+            banner: The store banner: kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer (Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods (Jay C Food Stores, jaycfoods.com: southern Indiana). Optional with store_id: QFC ids start with 705, Fred Meyer ids with 701; 024 ids are Jay C Food Stores or Kroger stores, told apart by the store's own record; anything else is kroger.
             store_id: A store's 8-digit location_id from stores(). Optional.
             extra: Additional wire parameters passed through verbatim.
         """

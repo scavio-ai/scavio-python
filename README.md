@@ -2594,14 +2594,15 @@ counts, phone numbers, messaging, delivery prices, checkout, average prices,
 notifications or price history: to watch for new listings or track prices,
 poll `sort="newest"` and store your own.
 
-### 43. Grocery -- Kroger, QFC and Fred Meyer
+### 43. Grocery -- Kroger, QFC, Fred Meyer and Jay C Food Stores
 
 Kroger grocery data, namespace `kroger`, 8 endpoints: `search`, `product`,
 `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`. Every
 method takes `banner`: `kroger` (kroger.com, default), `qfc` (QFC, qfc.com:
-Washington and Oregon) or `fred_meyer` (Fred Meyer, fredmeyer.com: the
+Washington and Oregon), `fred_meyer` (Fred Meyer, fredmeyer.com: the
 Pacific Northwest and Alaska, grocery plus general merchandise, apparel and
-home). Other Kroger banners (Ralphs, King Soopers, Fry's, Harris Teeter,
+home) or `jaycfoods` (Jay C Food Stores, jaycfoods.com: southern Indiana).
+Other Kroger banners (Ralphs, King Soopers, Fry's, Harris Teeter,
 Smith's...) are not supported yet. Prices are integer cents (`price` 399 =
 $3.99) and differ by banner and by store. Every method raises the request
 timeout to at least 120s.
@@ -2644,7 +2645,9 @@ print(kroger.suggestions("almond mi", banner="qfc")["data"]["suggestions"])
 stock and aisle of a store the site chooses for the request (`store`: it can
 change between calls and cannot be picked). For one store's price, stock and
 aisle, take a `location_id` from `stores()` and pass it as `store_id` to
-`prices()`; QFC store ids start with 705, Fred Meyer ids with 701. `search`,
+`prices()`; QFC store ids start with 705, Fred Meyer ids with 701, and 024
+ids are Jay C Food Stores or Kroger stores, told apart by the store's own
+record (a Jay C `store_id` works without `banner`). `search`,
 `category` and `deals` serve the first page only (up to 24 products) and
 cannot be sorted: `page` above 1 is a 400 and is not charged. `in_stock` is
 None when the store has no stock record for the item. Ratings are average,
@@ -9401,7 +9404,7 @@ Scavio works with popular AI/LLM frameworks:
 | EstateSales.net (`estatesales`) | `sales`, `sale`, `companies`, `company`, `search`, `item`; US; `sales` by `zip`, or `city` with `state`; `companies` by `state` and metro; `sale`, `company` and `item` by id or `url` | 1 each |
 | thredUP (`thredup`) | `search`, `sold`, `product`, `category`, `brand`, `deals`, `rescue_boxes`, `categories`, `brands`, `suggestions`, `trending`, `similar`; thredUP's US store (no `country`) | 1 each |
 | bol.com (`bolcom`) | `search`, `product`, `offers`, `seller`, `seller_products`, `category`, `brand`, `deals`, `campaign`; storefronts nl-nl, be-nl, be-fr via `country` and `language` | 2 each; `product` by `ean` 4 |
-| Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc or fred_meyer | `search` and `product` 2, `prices` 3, the rest 1 each |
+| Kroger (`kroger`) | `search`, `product`, `prices`, `stores`, `category`, `deals`, `coupons`, `suggestions`; `banner` kroger, qfc, fred_meyer or jaycfoods | `search` and `product` 2, `prices` 3, the rest 1 each |
 | Publix (`publix`) | `search`, `product`, `category`, `categories`, `weekly_ad`, `extra_savings`, `coupons`, `savings_search`, `order_ahead`, `stores`, `suggestions`; `store_id` from `stores` | 1 each |
 | IKEA (`ikea`) | `search`, `product`, `reviews`, `category`, `categories`, `deals`, `suggestions`, `stores`, `stock`, `items`, `compare`, `as_is`; 55 markets via `country` | 1 each; `compare` 1 per market that answered |
 | Wayfair (`wayfair`) | `search`, `product`, `category`, `deals`; markets us, ca (en / fr), gb, ie via `country`; `site` allmodern, birchlane, jossandmain or perigold | 1 each |
@@ -9446,6 +9449,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.111.0
+
+- **`kroger`: Jay C Food Stores banner.** `banner` accepts `jaycfoods`
+  (Jay C Food Stores, jaycfoods.com: southern Indiana) on all 8 methods, at
+  the same credits. Jay C store ids start with 024, a prefix Kroger stores in
+  the same division share; the store's own record decides, so a Jay C
+  `store_id` works without `banner`. Without a store, Jay C uses its store
+  nearest ZIP 47274 (Seymour, IN). No other method changed.
 
 ### Changed in 0.107.0
 

@@ -1077,10 +1077,11 @@ _CARREFOUR_CHARGE = (
 _CARREFOUR_FR_NOTE = " fr only (carrefour.fr)."
 
 
-_KROGER_BANNERS = ("kroger", "qfc", "fred_meyer")
+_KROGER_BANNERS = ("kroger", "qfc", "fred_meyer", "jaycfoods")
 _KROGER_BANNER_TEXT = (
-    "kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon) or fred_meyer "
-    "(Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska)"
+    "kroger (kroger.com, default), qfc (QFC, qfc.com: Washington and Oregon), fred_meyer "
+    "(Fred Meyer, fredmeyer.com: the Pacific Northwest and Alaska) or jaycfoods "
+    "(Jay C Food Stores, jaycfoods.com: southern Indiana)"
 )
 _KROGER_BANNER = _lit(
     "banner",
@@ -1091,7 +1092,8 @@ _KROGER_STORE_BANNER = _lit(
     "banner",
     _KROGER_BANNERS,
     f"The store banner: {_KROGER_BANNER_TEXT}. Optional with store_id: QFC ids start with 705, "
-    "Fred Meyer ids with 701, anything else is kroger.",
+    "Fred Meyer ids with 701; 024 ids are Jay C Food Stores or Kroger stores, told apart by "
+    "the store's own record; anything else is kroger.",
 )
 
 
@@ -53904,8 +53906,9 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         credits=2,
     ),
     # ================================ Kroger ===============================
-    # 8 endpoints on /api/v1/kroger: kroger.com plus the QFC (qfc.com) and Fred
-    # Meyer (fredmeyer.com) banners via `banner` on every endpoint. search and
+    # 8 endpoints on /api/v1/kroger: kroger.com plus the QFC (qfc.com), Fred
+    # Meyer (fredmeyer.com) and Jay C Food Stores (jaycfoods.com) banners via
+    # `banner` on every endpoint. search and
     # product 2 credits, prices 3, the rest 1. Prices are integer cents.
     # search / product / category / deals price at a store the site chooses
     # (returned in `store`); prices() takes the store you pick. search,
@@ -53921,7 +53924,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/search",
         summary=(
-            "Search Kroger, QFC or Fred Meyer products by keyword (banner): price, list and "
+            "Search Kroger, QFC, Fred Meyer or Jay C Food Stores products by keyword (banner): price, list and "
             "promo price with end date, n-for deals, unit price, size, UPC, stock (in_stock "
             "null without a stock record), SNAP eligibility, dietary info, category and rating "
             "(average, count, star distribution; no review text), plus total and the store "
@@ -53947,7 +53950,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/product",
         summary=(
-            "One Kroger, QFC or Fred Meyer product by URL or UPC: the search fields plus "
+            "One Kroger, QFC, Fred Meyer or Jay C Food Stores product by URL or UPC: the search fields plus "
             "description, nutrition facts, ingredients, allergens, images, country of origin, "
             "dimensions, weight, dietary flags, the aisle at the store (store_location), "
             "breadcrumbs, banner and store (a store the site chooses). Prices are integer "
@@ -53956,7 +53959,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(
             _str(
                 "product_url",
-                "Full or relative product URL on kroger.com, qfc.com or fredmeyer.com "
+                "Full or relative product URL on kroger.com, qfc.com, fredmeyer.com or jaycfoods.com "
                 "(products[].url of search()). An absolute URL sets the banner; a banner that "
                 "contradicts its host is a 400.",
             ),
@@ -53979,8 +53982,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/prices",
         summary=(
-            "Price, promotion, stock and aisle for 1 to 25 UPCs at one Kroger, QFC or Fred "
-            "Meyer store you choose (store_id from stores()). Per UPC: price, promo_price, "
+            "Price, promotion, stock and aisle for 1 to 25 UPCs at one Kroger, QFC, Fred "
+            "Meyer or Jay C Food Stores store you choose (store_id from stores()). The same "
+            "item is priced differently by banner and by store (Folgers Classic Roast ground "
+            "coffee: $15.69 at Jay C Food Stores Seymour, IN, $16.99 at Kroger Cincinnati on "
+            "2026-11-28). Per UPC: price, promo_price, "
             "promo_ends_at, on_sale, price_display, unit_price_display, in_stock, stock_level, "
             "quantity (the site's available estimate, not a shelf count), aisle (description, "
             "number, side, bay, shelf), fulfillment and priced_at. Unknown UPCs are listed in "
@@ -54006,7 +54012,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/stores",
         summary=(
-            "Kroger, QFC or Fred Meyer stores near a ZIP or a city / address (nearest first), "
+            "Kroger, QFC, Fred Meyer or Jay C Food Stores stores near a ZIP or a city / address (nearest first), "
             "or one store by store_id; pass exactly one. Each store: location_id (the store_id "
             "for prices(), coupons() and suggestions()), banner, type (store or fuel_center), "
             "name, store_number, address, coordinates, phone, timezone, hours, open_24_hours, "
@@ -54036,7 +54042,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/category",
         summary=(
-            "A Kroger, QFC or Fred Meyer category listing by /pl/ URL or taxonomy_id (not both): "
+            "A Kroger, QFC, Fred Meyer or Jay C Food Stores category listing by /pl/ URL or taxonomy_id (not both): "
             "category (id, name, url) and the search fields (total, count, products, the store "
             "the site chose). Prices are integer cents. Only the first page (up to 24 "
             "products), no sort."
@@ -54044,8 +54050,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         params=(
             _str(
                 "url",
-                "A category listing URL (/pl/<name>/<id>) on kroger.com, qfc.com or "
-                "fredmeyer.com. The URL's host sets the banner.",
+                "A category listing URL (/pl/<name>/<id>) on kroger.com, qfc.com, "
+                "fredmeyer.com or jaycfoods.com. The URL's host sets the banner.",
             ),
             _str(
                 "taxonomy_id",
@@ -54071,7 +54077,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/deals",
         summary=(
-            "This week's weekly digital deals of Kroger, QFC or Fred Meyer: deals_week (id, "
+            "This week's weekly digital deals of Kroger, QFC, Fred Meyer or Jay C Food Stores: deals_week (id, "
             "ends_at) and the search fields. Store promotions carry promo_price and "
             "promo_ends_at; digital-coupon deals show the shelf price (the coupon is in "
             "coupons(), tag Weekly Digital Deals). Prices are integer cents. Only the first "
@@ -54091,7 +54097,7 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/coupons",
         summary=(
-            "The digital coupons at one Kroger, QFC or Fred Meyer store (store_id, or the "
+            "The digital coupons at one Kroger, QFC, Fred Meyer or Jay C Food Stores store (store_id, or the "
             "banner's store nearest a zip; not both), 24 per page, optionally one department "
             "(category) or a text match (query). Each coupon: id, brand, title, description, "
             "details, savings (type, amount in cents, percent), tags, valid_for, starts_at, "
@@ -54117,10 +54123,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         http="POST",
         path="/api/v1/kroger/suggestions",
         summary=(
-            "Kroger, QFC or Fred Meyer search box suggestions for a partial query: suggestions "
+            "Kroger, QFC, Fred Meyer or Jay C Food Stores search box suggestions for a partial query: suggestions "
             "(text, type), count and the store they were asked for. Without store_id the "
             "banner's store nearest a representative ZIP is used (Kroger 45202, QFC 98101, "
-            "Fred Meyer 97201)."
+            "Fred Meyer 97201, Jay C Food Stores 47274 Seymour, IN)."
         ),
         params=(
             _req("query", "What a shopper has typed so far (2-100 characters), e.g. 'almond mi'."),

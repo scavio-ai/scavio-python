@@ -3619,7 +3619,8 @@ def test_olx_credits_paths_and_wire(monkeypatch):
 def test_kroger_banners_credits_paths_and_wire(monkeypatch):
     """kroger (0.54.0): 8 endpoints on /api/v1/kroger, banner on every one.
 
-    banner is kroger (default), qfc or fred_meyer. search and product 2 credits,
+    banner is kroger (default), qfc, fred_meyer or jaycfoods (0.111.0). search and
+    product 2 credits,
     prices 3, the rest 1. prices needs store_id + upcs; stores takes zip, query
     or store_id; category url or taxonomy_id; coupons store_id or zip. 120 s
     timeout floor everywhere.
@@ -3629,7 +3630,7 @@ def test_kroger_banners_credits_paths_and_wire(monkeypatch):
         ["search", "product", "prices", "stores", "category", "deals", "coupons", "suggestions"]
     )
     credits = {"search": 2, "product": 2, "prices": 3}
-    banners = 'Optional[Literal["kroger", "qfc", "fred_meyer"]]'
+    banners = 'Optional[Literal["kroger", "qfc", "fred_meyer", "jaycfoods"]]'
     for m, ep in eps.items():
         assert ep.credits == credits.get(m, 1), ep.key
         assert ep.credits_note is None, ep.key
@@ -3712,6 +3713,33 @@ def test_kroger_banners_credits_paths_and_wire(monkeypatch):
     with pytest.raises(ScavioError):
         k.coupons(banner="fred_meyer")
 
+
+
+def test_kroger_jaycfoods_banner_wire(monkeypatch):
+    """kroger (0.111.0): jaycfoods (Jay C Food Stores) passes through as sent.
+
+    A Jay C store_id (024 prefix) works without banner: the server reads the
+    store's own record.
+    """
+    seen: list[tuple[str, dict]] = []
+
+    def fake_request(method, path, *, timeout, json=None, **_):
+        seen.append((path, json))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    k = ScavioClient(api_key="sk_test").kroger
+    k.search("coffee", banner="jaycfoods")
+    k.prices("02400073", ["0002550030407"])
+    k.stores(zip="47274", banner="jaycfoods")
+    k.deals(banner="jaycfoods")
+    base = "/api/v1/kroger/"
+    assert seen == [
+        (base + "search", {"query": "coffee", "banner": "jaycfoods"}),
+        (base + "prices", {"store_id": "02400073", "upcs": ["0002550030407"]}),
+        (base + "stores", {"zip": "47274", "banner": "jaycfoods"}),
+        (base + "deals", {"banner": "jaycfoods"}),
+    ]
 
 def test_publix_credits_paths_and_wire(monkeypatch):
     """publix (0.55.0): 11 endpoints on /api/v1/publix, 1 credit each.

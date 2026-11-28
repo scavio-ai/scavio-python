@@ -311,7 +311,8 @@ _NS_META = {
     ),
     "kroger": (
         "Kroger",
-        "Kroger, QFC and Fred Meyer grocery search, product detail, store-level prices, store "
+        "Kroger, QFC, Fred Meyer and Jay C Food Stores grocery search, product detail, "
+        "store-level prices, store "
         "locator, category, weekly digital deals, digital coupons and search suggestion endpoints.",
     ),
     "publix": (
