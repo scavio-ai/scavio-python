@@ -1001,15 +1001,15 @@ _NS_META = {
     "cea": (
         "Cea",
         "C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain) search, category, "
-        "brand, deals, facets, suggestions, categories, product, shipping and stores endpoints; "
-        "Brazil only, prices in BRL per size, delivery quote and pickup points by CEP, 1 credit "
-        "each."
+        "brand, deals, facets, suggestions, categories, product, shipping, stores and reviews "
+        "endpoints; Brazil only, prices in BRL per size, delivery quote and pickup points by "
+        "CEP, 1 credit each."
     ),
     "renner": (
         "Renner",
         "Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer) search, category, "
-        "deals, product, sku price and stores endpoints; Brazil only, prices in BRL with the "
-        "store card and other card plans, stock levels on listings, 1 credit each."
+        "deals, product, sku price, stores and reviews endpoints; Brazil only, prices in BRL "
+        "with the store card and other card plans, stock levels on listings, 1 credit each."
     ),
     "pichau": (
         "Pichau",
@@ -1020,8 +1020,8 @@ _NS_META = {
     "dafiti": (
         "Dafiti",
         "Dafiti (dafiti.com.br, the Brazilian fashion marketplace) search, category, brand, "
-        "deals, product and sizes endpoints; Brazil only, prices in BRL, units per size, 1 "
-        "credit each."
+        "deals, product, sizes and reviews endpoints; Brazil only, prices in BRL, units per "
+        "size, 1 credit each."
     ),
     "riachuelo": (
         "Riachuelo",

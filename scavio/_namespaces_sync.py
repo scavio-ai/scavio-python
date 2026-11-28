@@ -36469,7 +36469,7 @@ class _EstantevirtualNamespace:
         return self._client._call("estantevirtual_list", {"slug": slug, "page": page}, extra)
 
 class _CeaNamespace:
-    """C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain) search, category, brand, deals, facets, suggestions, categories, product, shipping and stores endpoints; Brazil only, prices in BRL per size, delivery quote and pickup points by CEP, 1 credit each."""
+    """C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain) search, category, brand, deals, facets, suggestions, categories, product, shipping, stores and reviews endpoints; Brazil only, prices in BRL per size, delivery quote and pickup points by CEP, 1 credit each."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -36622,7 +36622,7 @@ class _CeaNamespace:
         url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One product of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By product id, size sku, slug or link: product_id, sku (when asked by sku), name, brand, labels, reference, model_id, url, images, available, price, list_price, discount_percent, pix_price, best_installment, installments [{payment_system, count, value, total, interest_rate}] (each payment method's longest plan, e.g. C&A Pay), colors, sizes [{sku, size, color, available, available_quantity, price, list_price, discount_percent, pix_price, seller {id, name}}] (every size), categories, specifications [{name, value}] (material, fit, sleeve, made in...), collection_ids and release_date. No marketing description, EAN (empty on the site), reviews, Q&A, store units or price history. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
+        """One product of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain), Brazil only, pt-BR text, BRL prices. Scavio fetches the public C&A Brasil page on request. By product id, size sku, slug or link: product_id, sku (when asked by sku), name, brand, labels, reference, model_id, url, images, available, price, list_price, discount_percent, pix_price, best_installment, installments [{payment_system, count, value, total, interest_rate}] (each payment method's longest plan, e.g. C&A Pay), colors, sizes [{sku, size, color, available, available_quantity, price, list_price, discount_percent, pix_price, seller {id, name}}] (every size), categories, specifications [{name, value}] (material, fit, sleeve, made in...), collection_ids and release_date. No marketing description, EAN (empty on the site), Q&A, store units or price history; the reviews come from reviews. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-15 s; set a client timeout of at least 120 s.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -36667,8 +36667,34 @@ class _CeaNamespace:
         """
         return self._client._call("cea_stores", {"cep": cep}, extra)
 
+    def reviews(
+        self,
+        product_id: Union[str, int],
+        *,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
+        sort: Optional[Literal["newest", "most_helpful"]] = None,
+        filter: Optional[Literal["all", "positive", "negative", "with_photos"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The customer reviews of one product of C&A Brasil (cea.com.br, the Brazilian arm of the C&A fashion chain). Scavio fetches the public C&A Brasil page on request. Brazil: Portuguese (pt-BR) text. By product_id, as the product page shows them: product_id, page, per_page, sort, filter, rating_filter, total (the reviews matching the request, from the rating summary), has_more, count, product_name, rating {average, count, histogram {1-5}}, review_counts {total, positive (ratings 3-5), negative (ratings 1-2), with_photos}, reviews [{id, rating, title, text (null when the review has stars but no text), date, purchase_date (the date of the order the review is linked to), recommends, helpful_votes, unhelpful_votes, photos [{image, thumbnail}], attributes [{name, answer}] (the store's follow-up questions, such as size, fit and height), store_reply, imported, influencer, purchased {sku, size, color} (the size bought, where the review carries it)}] and notes. Sorted newest (default) or most_helpful; filter all, positive, negative or with_photos, or rating for one star rating. Reviews can lag the page by up to 4 hours. Review text is the customer's own; reviewer names are never returned. No questions and answers. A product id the reviews do not know answers with no reviews (count 0, charged), or a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The product id (items[].product_id or product_id of the product endpoint), not a size sku or the reference.
+            page: Reviews page, 1-200 (default 1).
+            per_page: Reviews per page, 1-100 (default 20).
+            sort: newest (default) or most_helpful (the most helpful votes at the top).
+            filter: all (default), positive (ratings 3-5), negative (ratings 1-2) or with_photos.
+            rating: Reviews with this star rating (1-5). Not combined with filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("cea_reviews", {"product_id": product_id, "page": page, "per_page": per_page, "sort": sort, "filter": filter, "rating": rating}, extra)
+
 class _RennerNamespace:
-    """Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer) search, category, deals, product, sku price and stores endpoints; Brazil only, prices in BRL with the store card and other card plans, stock levels on listings, 1 credit each."""
+    """Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer) search, category, deals, product, sku price, stores and reviews endpoints; Brazil only, prices in BRL with the store card and other card plans, stock levels on listings, 1 credit each."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -36747,7 +36773,7 @@ class _RennerNamespace:
         sku: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One product of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id or link, optionally a sku to pick the colour and size: product_id, requested_sku, sku, sku_matched, name, brand, url, color {id, name, hex}, size, currency, price, list_price, on_sale, discount_percent, installments {store_card {count, amount, interest_free} (the Cartão Renner plan), credit_card {count, amount} (other cards)}, rating, review_count, available, purchasable, out_of_stock, omni_stock, back_order, pre_order, pre_launch, discontinued, max_quantity, marketplace, seller, gender, categories, breadcrumbs, composition, details, images, colors [{id, name, hex, sku, sizes [{size, sku}]}], size_count, sizes_available and sizes [{size, sku, available, purchasable, out_of_stock, omni_stock, pre_order, discontinued}] (the sizes of the colour shown, with the site's availability flags: flags, not unit counts). The rating is the aggregate (average and count); review texts, shipping quotes by CEP and the marketing description are not included. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
+        """One product of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id or link, optionally a sku to pick the colour and size: product_id, requested_sku, sku, sku_matched, name, brand, url, color {id, name, hex}, size, currency, price, list_price, on_sale, discount_percent, installments {store_card {count, amount, interest_free} (the Cartão Renner plan), credit_card {count, amount} (other cards)}, rating, review_count, available, purchasable, out_of_stock, omni_stock, back_order, pre_order, pre_launch, discontinued, max_quantity, marketplace, seller, gender, categories, breadcrumbs, composition, details, images, colors [{id, name, hex, sku, sizes [{size, sku}]}], size_count, sizes_available and sizes [{size, sku, available, purchasable, out_of_stock, omni_stock, pre_order, discontinued}] (the sizes of the colour shown, with the site's availability flags: flags, not unit counts). The rating is the aggregate (average and count); the reviews themselves come from reviews. Shipping quotes by CEP and the marketing description are not included. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -36793,6 +36819,34 @@ class _RennerNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("renner_stores", {"cep": cep}, extra)
+
+    def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
+        sort: Optional[Literal["newest", "most_helpful"]] = None,
+        filter: Optional[Literal["all", "positive", "negative", "with_photos"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The customer reviews of one product of Lojas Renner (lojasrenner.com.br, the Brazilian fashion retailer). Scavio fetches the public lojasrenner.com.br pages on request. Brazil: Portuguese (pt-BR) text. By product_id or link, as the product page shows them: product_id, page, per_page, sort, filter, rating_filter, total (the product's review count; null with a filter or rating, which the store gives no count for), has_more, count, product_name, rating {average, count} (the store shows no star histogram), reviews [{id, rating, title, text (null when the review has stars but no text), date, purchase_date (the date of the order the review is linked to), recommends, helpful_votes, unhelpful_votes, photos [{image, thumbnail}], attributes [{name, answer}] (the store's follow-up questions, such as size and fit), store_reply, imported, influencer}] and notes. Sorted newest (default) or most_helpful; filter all, positive, negative or with_photos, or rating for one star rating. Reviews can lag the page by up to 4 hours. Review text is the customer's own; reviewer names are never returned. No questions and answers. A product id the reviews do not know is a charged 404, or answers with no reviews (count 0, charged). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 2-20 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The Lojas Renner product id (items[].product_id).
+            url: A lojasrenner.com.br product link (items[].url), instead of product_id.
+            page: Reviews page, 1-200 (default 1).
+            per_page: Reviews per page, 1-100 (default 20).
+            sort: newest (default) or most_helpful (the most helpful votes at the top).
+            filter: all (default), positive (ratings 3-5), negative (ratings 1-2) or with_photos.
+            rating: Reviews with this star rating (1-5). Not combined with filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("renner_reviews", {"product_id": product_id, "url": url, "page": page, "per_page": per_page, "sort": sort, "filter": filter, "rating": rating}, extra)
 
 class _PichauNamespace:
     """Pichau (pichau.com.br, Brazil's PC-parts store) search, category, brand, deals, product, product live, reviews, installments, coupons, categories and suggestions endpoints; Brazil only, prices in BRL with the Pix price, 1 credit each."""
@@ -37015,7 +37069,7 @@ class _PichauNamespace:
         return self._client._call("pichau_suggestions", {"query": query}, extra)
 
 class _DafitiNamespace:
-    """Dafiti (dafiti.com.br, the Brazilian fashion marketplace) search, category, brand, deals, product and sizes endpoints; Brazil only, prices in BRL, units per size, 1 credit each."""
+    """Dafiti (dafiti.com.br, the Brazilian fashion marketplace) search, category, brand, deals, product, sizes and reviews endpoints; Brazil only, prices in BRL, units per size, 1 credit each."""
 
     def __init__(self, client: "ScavioClient") -> None:
         self._client = client
@@ -37106,7 +37160,7 @@ class _DafitiNamespace:
         url: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """One product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id, sku or link: sku, product_id, name, brand, color, url, availability (in_stock, limited, out_of_stock), price, list_price, discount_percent, pix_price, card_price, max_installments, installment {count, amount}, rating, review_count, seller {store_name, sold_by_dafiti, delivered_by_dafiti}, store_names, size_count, sizes_in_stock, sizes [{size, sku, in_stock, units (exact from 0 to 10), more_than_10 (the site gives more than 10, not a count), stock_message, delivery_type (proprio: Dafiti's own stock, fulfillment: a partner store's stock delivered by Dafiti, drop_shipping: sent by the partner store), sold_by_dafiti, delivered_by_dafiti, store_name}], colors [{sku, product_id, name, color, url, image, price, list_price}] (the other colours), categories, campaigns, breadcrumbs, specs [{name, value}], details [{name, value}] (the short facts at the start of the description: composition, measures) and images. No marketing description, reviews text, shipping quote or price history. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 6-35 s; set a client timeout of at least 240 s.
+        """One product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public dafiti.com.br pages on request. Brazil: Portuguese (pt-BR) text and prices in BRL, as shown to a visitor who is not signed in. By product_id, sku or link: sku, product_id, name, brand, color, url, availability (in_stock, limited, out_of_stock), price, list_price, discount_percent, pix_price, card_price, max_installments, installment {count, amount}, rating, review_count, seller {store_name, sold_by_dafiti, delivered_by_dafiti}, store_names, size_count, sizes_in_stock, sizes [{size, sku, in_stock, units (exact from 0 to 10), more_than_10 (the site gives more than 10, not a count), stock_message, delivery_type (proprio: Dafiti's own stock, fulfillment: a partner store's stock delivered by Dafiti, drop_shipping: sent by the partner store), sold_by_dafiti, delivered_by_dafiti, store_name}], colors [{sku, product_id, name, color, url, image, price, list_price}] (the other colours), categories, campaigns, breadcrumbs, specs [{name, value}], details [{name, value}] (the short facts at the start of the description: composition, measures) and images. No marketing description, shipping quote or price history; the reviews come from reviews. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 6-35 s; set a client timeout of at least 240 s.
 
         Costs 1 credit. Returns the API response as a dict.
 
@@ -37132,6 +37186,36 @@ class _DafitiNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("dafiti_sizes", {"sku": sku}, extra)
+
+    def reviews(
+        self,
+        sku: Optional[str] = None,
+        *,
+        product_id: Optional[str] = None,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        per_page: Optional[int] = None,
+        sort: Optional[Literal["newest", "most_helpful"]] = None,
+        filter: Optional[Literal["all", "positive", "negative", "with_photos"]] = None,
+        rating: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The customer reviews of one product of Dafiti (dafiti.com.br, the Brazilian fashion marketplace). Scavio fetches the public Dafiti page on request. Brazil: Portuguese (pt-BR) text. By sku (or product_id / link, slower: the product page is read for the sku), as the product page shows them: requested, sku, page, per_page, sort, filter, rating_filter, total (the reviews matching the request, from the rating summary), has_more, count, product_name, rating {average, count, histogram {1-5}}, review_counts {total, positive (ratings 3-5), negative (ratings 1-2), with_photos}, reviews [{id, rating, title, text (null when the review has stars but no text), date, purchase_date (the date of the order the review is linked to), recommends, helpful_votes, unhelpful_votes, photos [{image, thumbnail}], attributes [{name, answer}] (the store's follow-up questions, such as size and comfort), store_reply, imported, influencer}] and notes. Sorted newest (default) or most_helpful; filter all, positive, negative or with_photos, or rating for one star rating. Reviews can lag the page by up to 4 hours. Review text is the customer's own; reviewer names are never returned. No questions and answers. An unknown sku or product is a charged 404, or answers with no reviews (count 0, charged). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. By sku usually 2-20 s; by product_id or link 10-70 s; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            sku: The Dafiti sku (items[].sku; a size sku works too). The fastest way in.
+            product_id: The number at the end of a Dafiti product link (items[].product_id), instead of sku: the product page is read for the sku (slower, same credit).
+            url: A dafiti.com.br product link, instead of sku (slower, same credit).
+            page: Reviews page, 1-200 (default 1).
+            per_page: Reviews per page, 1-100 (default 20).
+            sort: newest (default) or most_helpful (the most helpful votes at the top).
+            filter: all (default), positive (ratings 3-5), negative (ratings 1-2) or with_photos.
+            rating: Reviews with this star rating (1-5). Not combined with filter.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("dafiti_reviews", {"sku": sku, "product_id": product_id, "url": url, "page": page, "per_page": per_page, "sort": sort, "filter": filter, "rating": rating}, extra)
 
 class _RiachueloNamespace:
     """Riachuelo (riachuelo.com.br, the Brazilian fashion retailer) search, category, deals and product endpoints; Brazil only, prices in BRL, sold-out flags and units per size on listings, 1 credit each."""

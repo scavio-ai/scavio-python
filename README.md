@@ -125,10 +125,10 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Cobasi Pet Supply Prices per Size, Subscription Prices, Pickup and Delivery by CEP (Brazil; 11 endpoints) | Yes | No | No | No |
 | Netshoes Sporting Goods Prices per Size, Seller Offers, Online Stock and Shipping by CEP (Brazil; 11 endpoints) | Yes | No | No | No |
 | Estante Virtual Used and New Book Copies, ISBN Lookup, Sebos and Shipping by CEP (Brazil; 12 endpoints) | Yes | No | No | No |
-| C&A Brasil Fashion Prices per Size, Delivery Quotes and Pickup Points by CEP (Brazil; 10 endpoints) | Yes | No | No | No |
-| Lojas Renner Fashion Prices, Stock Levels, Store Card Installments and Stores by CEP (Brazil; 6 endpoints) | Yes | No | No | No |
+| C&A Brasil Fashion Prices per Size, Delivery Quotes, Pickup Points by CEP and Reviews (Brazil; 11 endpoints) | Yes | No | No | No |
+| Lojas Renner Fashion Prices, Stock Levels, Store Card Installments, Stores by CEP and Reviews (Brazil; 7 endpoints) | Yes | No | No | No |
 | Pichau PC Parts Card and Pix Prices, Deals with Units Left, Benchmarks and Coupons (Brazil; 11 endpoints) | Yes | No | No | No |
-| Dafiti Fashion Marketplace Prices, Units per Size, Delivery Type and Partner Stores (Brazil; 6 endpoints) | Yes | No | No | No |
+| Dafiti Fashion Marketplace Prices, Units per Size, Delivery Type, Partner Stores and Reviews (Brazil; 7 endpoints) | Yes | No | No | No |
 | Riachuelo Fashion Prices, Sold-Out Flags and Units per Size, Campaign Deals and Reviews (Brazil; 4 endpoints) | Yes | No | No | No |
 | Petz Pet Supply Prices, Subscription and Clubz Member Prices, Stock Units and Stores (Brazil; 7 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
@@ -8402,10 +8402,14 @@ specifications; the delivery quote for one size at a CEP (a Brazilian postal
 code): the delivery options with price and estimate, and the stores near the
 CEP that can hand that size over; and the pickup points near a CEP, which
 include third-party pickup lockers and counters (Clique Retire) next to the
-C&A stores. Prices in BRL; promotion collections are given by id only; no
-reviews, EAN or store unit counts. Namespace `cea`, 10 endpoints: `search`,
-`category`, `brand`, `deals`, `facets`, `suggestions`, `categories`,
-`product`, `shipping`, `stores`. Credits: 1 credit each. `credits_used` in the
+C&A stores; and one product's customer reviews by product id, as the product
+page shows them (up to 100 a page, newest or most helpful, positive, negative,
+with photos or one star rating), with the star histogram, the size and colour
+bought, fit answers, photos and the store's reply (reviewer names are never
+returned; reviews can lag the page by up to 4 hours). Prices in BRL; promotion
+collections are given by id only; no EAN or store unit counts. Namespace
+`cea`, 11 endpoints: `search`, `category`, `brand`, `deals`, `facets`,
+`suggestions`, `categories`, `product`, `shipping`, `stores`, `reviews`. Credits: 1 credit each. `credits_used` in the
 response is what was charged. The request timeout is raised to at least 240s.
 See the [C&A Brasil API
 page](https://scavio.dev/cea-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
@@ -8430,6 +8434,10 @@ for o in ship["delivery_options"]:
     print(o["name"], o["price"], o["estimate"])
 for st in ship["pickup_stores"]:
     print(st["name"], st["distance_km"], st["estimate"])
+rv = cea.reviews("3700395", filter="negative")["data"]
+print(rv["rating"]["average"], rv["rating"]["histogram"], rv["review_counts"]["negative"])
+for r in rv["reviews"]:
+    print(r["rating"], r["date"], r["purchase_date"], r["attributes"], r["purchased"])
 ```
 
 Failed calls and refused inputs are not charged; a not-found is charged.
@@ -8448,10 +8456,14 @@ product with the Cartão Renner plan next to other cards, the aggregate rating
 and each size's availability flags (flags, not unit counts); price and stock
 flags for one size; and the stores for a CEP's (a Brazilian postal code) city
 or region (stores outside the CEP's state that the site returns are left out
-and reported in a note). Prices in BRL; listings are slow at the source
-(usually 30-200 s); no review texts, shipping quotes or search suggestions.
-Namespace `renner`, 6 endpoints: `search`, `category`, `deals`, `product`,
-`sku_price`, `stores`. Credits: 1 credit each. `credits_used` in the response
+and reported in a note); and one product's customer reviews by product id or
+link, as the product page shows them (up to 100 a page, newest or most
+helpful, positive, negative, with photos or one star rating), with size and
+fit answers, photos and the store's reply (the store's average and count, no
+star histogram; reviewer names are never returned; reviews can lag the page by
+up to 4 hours). Prices in BRL; listings are slow at the source (usually 30-200
+s); no shipping quotes or search suggestions. Namespace `renner`, 7 endpoints:
+`search`, `category`, `deals`, `product`, `sku_price`, `stores`, `reviews`. Credits: 1 credit each. `credits_used` in the response
 is what was charged. The request timeout is raised to at least 300s. See the
 [Lojas Renner API
 page](https://scavio.dev/renner-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
@@ -8473,6 +8485,10 @@ for s in item["sizes"]:
     print(s["size"], s["sku"], s["available"], s["omni_stock"])
 one = rn.sku_price("931758135", product_id="931758127")["data"]
 print(one["size"], one["price"], one["list_price"], one["available"], one["max_quantity"])
+rv = rn.reviews("846044605", sort="most_helpful")["data"]
+print(rv["total"], rv["rating"]["average"], rv["rating"]["count"], rv["has_more"])
+for r in rv["reviews"]:
+    print(r["rating"], r["date"], r["recommends"], r["helpful_votes"], len(r["photos"]))
 ```
 
 Failed calls and refused inputs are not charged; a not-found is charged.
@@ -8538,9 +8554,14 @@ sku or link with the seller by store name, the specs and every size with units
 (exact from 0 to 10; above that the site gives more than 10, not a count) and
 the delivery type (Dafiti's own stock, a partner store's stock delivered by
 Dafiti, or sent by the partner store); and every size of one sku, faster than
-product, for a stock check. Prices in BRL; no review texts, shipping quotes or
-search suggestions. Namespace `dafiti`, 6 endpoints: `search`, `category`,
-`brand`, `deals`, `product`, `sizes`. Credits: 1 credit each. `credits_used`
+product, for a stock check; and one product's customer reviews by sku (or
+product_id or link, slower), as the product page shows them (up to 100 a page,
+newest or most helpful, positive, negative, with photos or one star rating),
+with the star histogram, size and comfort answers, photos and the store's
+reply (reviewer names are never returned; reviews can lag the page by up to 4
+hours). Prices in BRL; no shipping quotes or search suggestions. Namespace
+`dafiti`, 7 endpoints: `search`, `category`, `brand`, `deals`, `product`,
+`sizes`, `reviews`. Credits: 1 credit each. `credits_used`
 in the response is what was charged. The request timeout is raised to at least
 240s. See the [Dafiti API
 page](https://scavio.dev/dafiti-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
@@ -8562,6 +8583,10 @@ for s in item["sizes"]:
     print(s["size"], s["sku"], s["units"], s["more_than_10"], s["delivery_type"])
 sz = df.sizes("AS296SCU17ARY")["data"]
 print(sz["size_count"], sz["sizes_in_stock"])
+rv = df.reviews("SA232SHF08PKSX", rating=1)["data"]
+print(rv["rating"]["histogram"], rv["review_counts"])
+for r in rv["reviews"]:
+    print(r["rating"], r["title"], r["date"], r["store_reply"])
 ```
 
 Failed calls and refused inputs are not charged; a not-found is charged.
@@ -8904,10 +8929,10 @@ Scavio works with popular AI/LLM frameworks:
 | Cobasi (`cobasi`) | `search`, `category`, `brand`, `deals`, `product`, `reviews`, `questions`, `availability`, `suggestions`, `stores`, `store`; Brazil; listings 20 a page up to page 50; `search` narrowed by facet `filters`; `product`, `reviews` and `questions` by `product_id` or `url`; `availability` takes a `sku_id` and a `cep`; `stores` by `state` and `city`; `store` by `slug` or `url` | 1 each |
 | Netshoes (`netshoes`) | `search`, `list`, `product`, `offers`, `inventory`, `shipping`, `reviews`, `questions`, `daily_deal`, `seller`, `popular_searches`; Brazil; `search` 100 a page, `list` 45 a page by `slug`, both filtered by `brand`, `gender`, `size`, `seller`, `filters` and a price range; `product`, `reviews` and `questions` by `product_id` or `url`; `offers`, `inventory` and `shipping` by size `sku` (`shipping` with a `cep`); `reviews` by `rating` and `with_photos`; `seller` by `seller_id` | 1 each |
 | Estante Virtual (`estantevirtual`) | `search`, `isbn`, `book`, `copies`, `copy`, `shipping`, `seller`, `seller_books`, `seller_reviews`, `sellers`, `category`, `list`; Brazil; listings 44 a page (`list` 42); `isbn` takes an ISBN-10 or ISBN-13; `book` and `copies` by `book_id` or `url`; `copies` up to 50 a page, `sellers` adds each copy's seller; `copy` and `shipping` by `copy_id` or `url` (`shipping` with a `cep`); `seller`, `seller_books` and `seller_reviews` by `seller_id`; `sellers` by `state` and `city`; `category` by `category_slug` | 1 each; `copies` with `sellers` ceil((1 + copies) / 5) |
-| C&A Brasil (`cea`) | `search`, `category`, `brand`, `deals`, `facets`, `suggestions`, `categories`, `product`, `shipping`, `stores`; Brazil; listings 24 a page up to page 50 in the site's 8 sorts; `category` by `category` path, `brand` by the Marcas `brand` value, `deals` by promotion `collection_id`; `facets` for a `query`, `category`, `brand` or `collection_id`; `product` by `product_id`, `sku`, `slug` or `url`; `shipping` takes a size `sku` and a `cep`; `stores` by `cep` (includes third-party pickup lockers) | 1 each |
-| Lojas Renner (`renner`) | `search`, `category`, `deals`, `product`, `sku_price`, `stores`; Brazil; listings 48 a page, pages 1-200, filtered by refinement `filters`; `category` by navigation id or link, `deals` by `list` (default: every discounted product); `product` by `product_id` or `url` (optional `sku`); `sku_price` takes a `sku` with `product_id` or `url`; `stores` by `cep` | 1 each |
+| C&A Brasil (`cea`) | `search`, `category`, `brand`, `deals`, `facets`, `suggestions`, `categories`, `product`, `shipping`, `stores`, `reviews`; Brazil; listings 24 a page up to page 50 in the site's 8 sorts; `category` by `category` path, `brand` by the Marcas `brand` value, `deals` by promotion `collection_id`; `facets` for a `query`, `category`, `brand` or `collection_id`; `product` by `product_id`, `sku`, `slug` or `url`; `shipping` takes a size `sku` and a `cep`; `stores` by `cep` (includes third-party pickup lockers); `reviews` by `product_id`, up to 100 a page, `sort`, `filter` or `rating` | 1 each |
+| Lojas Renner (`renner`) | `search`, `category`, `deals`, `product`, `sku_price`, `stores`, `reviews`; Brazil; listings 48 a page, pages 1-200, filtered by refinement `filters`; `category` by navigation id or link, `deals` by `list` (default: every discounted product); `product` by `product_id` or `url` (optional `sku`); `sku_price` takes a `sku` with `product_id` or `url`; `stores` by `cep`; `reviews` by `product_id` or `url`, up to 100 a page, `sort`, `filter` or `rating` | 1 each |
 | Pichau (`pichau`) | `search`, `category`, `brand`, `deals`, `product`, `product_live`, `reviews`, `installments`, `coupons`, `categories`, `suggestions`; Brazil; listings 36 a page filtered by facet `filters`; `category` by path, `brand` by slug, `deals` by `deal` (black_friday, open_box) or `campaign`; `product` and `product_live` by `url_key` or `url`; `reviews` by `product_id`, `rating` and `with_media`; `installments` by `product_id` with `price`, or by `url_key` / `url` | 1 each |
-| Dafiti (`dafiti`) | `search`, `category`, `brand`, `deals`, `product`, `sizes`; Brazil; listings 48 a page plus sponsored slots in the site's 5 sorts; `category` by path or link, `brand` by its link name; `deals` is the outlet; `product` by `product_id`, `sku` or `url`; `sizes` by `sku` (units exact 0-10, more than 10 above) | 1 each |
+| Dafiti (`dafiti`) | `search`, `category`, `brand`, `deals`, `product`, `sizes`, `reviews`; Brazil; listings 48 a page plus sponsored slots in the site's 5 sorts; `category` by path or link, `brand` by its link name; `deals` is the outlet; `product` by `product_id`, `sku` or `url`; `sizes` by `sku` (units exact 0-10, more than 10 above); `reviews` by `sku`, `product_id` or `url`, up to 100 a page, `sort`, `filter` or `rating` | 1 each |
 | Riachuelo (`riachuelo`) | `search`, `category`, `deals`, `product`; Brazil; listings 24 a page, pages 1-500, in the site's 6 sorts, filtered by the listing's own `filters`; `category` by path or link; `deals` by `department` (its Black Friday page, seasonal; default feminino) or another `campaign` path; `product` by `sku` or `url` | 1 each |
 | Petz (`petz`) | `search`, `category`, `brand`, `deals`, `product`, `stores`, `store`; Brazil; listings 20 a page, pages 1-50, by relevance, price or newest (a search counts at most 1,000 products); `category` by path, `brand` by slug, `deals` by `collection` (default: the Promoções page); `product` by `product_id` or `url`; `stores` by `state` and `city`; `store` by `slug` or `url` | 1 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
@@ -8918,6 +8943,18 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.106.0
+
+- **3 new methods** (sync and async): `renner.reviews`, `cea.reviews` and
+  `dafiti.reviews`, a product's customer reviews as the store's product page
+  shows them, up to 100 a page, `sort` newest or most_helpful, `filter`
+  positive, negative or with_photos, or `rating` for one star rating. `cea` and
+  `dafiti` add the star histogram and positive, negative and with-photo counts;
+  `cea` adds the size and colour bought. Reviewer names are never returned;
+  reviews can lag the page by up to 4 hours. Credits: 1 per call. The request
+  timeout is raised to at least 240s (300s on `renner`). No existing method
+  changed.
 
 ### Changed in 0.105.0
 

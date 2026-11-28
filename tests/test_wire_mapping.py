@@ -11463,6 +11463,7 @@ BATCH7W5_1127 = {
         "product": ("product", 1, 240.0),
         "shipping": ("shipping", 1, 240.0),
         "stores": ("stores", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
     },
     "renner": {
         "search": ("search", 1, 300.0),
@@ -11471,6 +11472,7 @@ BATCH7W5_1127 = {
         "product": ("product", 1, 300.0),
         "sku_price": ("sku-price", 1, 300.0),
         "stores": ("stores", 1, 300.0),
+        "reviews": ("reviews", 1, 300.0),
     },
     "pichau": {
         "search": ("search", 1, 240.0),
@@ -11492,6 +11494,7 @@ BATCH7W5_1127 = {
         "deals": ("deals", 1, 240.0),
         "product": ("product", 1, 240.0),
         "sizes": ("sizes", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
     },
 }
 BATCH7W5_1127_ONE_OF = {
@@ -11503,6 +11506,8 @@ BATCH7W5_1127_ONE_OF = {
     "pichau_product_live": (("url_key", "url"),),
     "pichau_installments": (("url_key", "url", "product_id"),),
     "dafiti_product": (("product_id", "sku", "url"),),
+    "renner_reviews": (("product_id", "url"),),
+    "dafiti_reviews": (("sku", "product_id", "url"),),
 }
 
 
@@ -11606,6 +11611,25 @@ BATCH7W5_1127_WIRE = [
     ("dafiti", "product", {"product_id": "15221282"}, "product"),
     ("dafiti", "product", {"sku": "AS296SCU17ARY"}, "product"),
     ("dafiti", "sizes", {"sku": "AS296SCU17ARY"}, "sizes"),
+    # reviews, added 2026-11-28
+    ("renner", "reviews", {"product_id": "846044605"}, "reviews"),
+    (
+        "renner", "reviews",
+        {
+            "url": "https://www.lojasrenner.com.br/p/x/-/A-846044605-br.lr",
+            "sort": "most_helpful",
+            "page": 2,
+        },
+        "reviews",
+    ),
+    ("cea", "reviews", {"product_id": "3700395"}, "reviews"),
+    (
+        "cea", "reviews",
+        {"product_id": 3700395, "filter": "with_photos", "per_page": 100},
+        "reviews",
+    ),
+    ("dafiti", "reviews", {"sku": "SA232SHF08PKSX"}, "reviews"),
+    ("dafiti", "reviews", {"product_id": "15221282", "rating": 1}, "reviews"),
 ]
 
 
@@ -11641,7 +11665,7 @@ def test_batch7w5_1127_credits_wire_and_timeouts():
     for ns in BATCH7W5_1127:
         assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
     w5 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH7W5_1127]
-    assert len(w5) == 33
+    assert len(w5) == 36
     assert {ep.min_timeout for ep in w5 if ep.namespace != "renner"} == {240.0}
     assert {ep.min_timeout for ep in w5 if ep.namespace == "renner"} == {300.0}
     assert not [ep.key for ep in w5 if ep.credits_note]
@@ -11661,6 +11685,17 @@ def test_batch7w5_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["pichau_product_live"].positional_optional_params[0].name == "url_key"
     assert ENDPOINTS["pichau_installments"].positional_optional_params[0].name == "url_key"
     assert ENDPOINTS["dafiti_product"].positional_optional_params[0].name == "product_id"
+    # reviews, added 2026-11-28
+    assert [p.name for p in ENDPOINTS["cea_reviews"].required_params] == ["product_id"]
+    assert ENDPOINTS["renner_reviews"].positional_optional_params[0].name == "product_id"
+    assert ENDPOINTS["dafiti_reviews"].positional_optional_params[0].name == "sku"
+    for key in ("renner_reviews", "cea_reviews", "dafiti_reviews"):
+        names = [p.name for p in ENDPOINTS[key].params]
+        assert names[-5:] == ["page", "per_page", "sort", "filter", "rating"], key
+        text = ENDPOINTS[key].summary.lower()
+        assert "verified" not in text and "trustvox" not in text, key
+        assert "reviewer names are never returned" in text, key
+        assert "up to 4 hours" in text, key
 
 
 # --- batch 7 wave 6 2026-11-27: 2 Brazil namespaces (Riachuelo, Petz) ---
