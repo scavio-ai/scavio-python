@@ -11840,7 +11840,7 @@ def test_batch7w6_1127_credits_wire_and_timeouts():
     assert all(p.doc for ep in w6 for p in ep.params)
 
 
-# --- batch 8 wave 1 2026-11-28: 3 US industrial supply namespaces (Global Industrial, MSC, Zoro) ---
+# --- batch 8 wave 1: Global Industrial, MSC, Zoro ---
 
 BATCH8W1_1128 = {
     "globalindustrial": {
