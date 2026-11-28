@@ -76,6 +76,7 @@ from ._namespaces_async import (
     _AsyncExtraspaceNamespace,
     _AsyncFanaticsNamespace,
     _AsyncFashionnovaNamespace,
+    _AsyncFergusonNamespace,
     _AsyncFootlockerNamespace,
     _AsyncG2Namespace,
     _AsyncGapNamespace,
@@ -169,6 +170,7 @@ from ._namespaces_async import (
     _AsyncSportchekNamespace,
     _AsyncStaplesNamespace,
     _AsyncStreeteasyNamespace,
+    _AsyncSupplyhouseNamespace,
     _AsyncSweetwaterNamespace,
     _AsyncTargetNamespace,
     _AsyncTcgplayerNamespace,
@@ -452,6 +454,8 @@ class AsyncScavioClient:
         self.mcmaster = _AsyncMcmasterNamespace(self)
         self.sallybeauty = _AsyncSallybeautyNamespace(self)
         self.liquidation = _AsyncLiquidationNamespace(self)
+        self.ferguson = _AsyncFergusonNamespace(self)
+        self.supplyhouse = _AsyncSupplyhouseNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

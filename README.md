@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 194 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 196 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, Ferguson, SupplyHouse.com, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -138,6 +138,8 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | McMaster-Carr Industrial Supply Pack and Per-Piece Prices, Specs and Catalogue Pages (US; 3 endpoints) | Yes | No | No | No |
 | Sally Beauty and CosmoProf Beauty Supply Prices, Online Units, Store Stock and Reviews (US and Canada; 9 endpoints) | Yes | No | No | No |
 | Liquidation.com Auction Lots, Manifests and Closed Results (US; 4 endpoints) | Yes | No | No | No |
+| Ferguson Plumbing, HVAC and Waterworks Products, Prices and Specs (US; 3 endpoints) | Yes | No | No | No |
+| SupplyHouse.com Plumbing, HVAC and Electrical Supply Prices, Lead Times, Reviews and Q&A (US; 7 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8960,6 +8962,87 @@ print([c["header"] for c in man["columns"]], man["row_count"])
 closed = lq.closed("Titan Electronics")["data"]
 for it in closed["results"][:5]:
     print(it["title"], it["final_bid"], it["bids"], it["est_retail"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 166. US plumbing and HVAC distribution -- Ferguson products, prices and specs
+
+Ferguson (ferguson.com, the US plumbing, HVAC and waterworks distributor), US
+only, prices in USD as shown to a visitor who is not signed in: keyword search
+and category listings (24 a page, best match or best selling) with item
+numbers, Ferguson and manufacturer part numbers, brands, ratings and shipping
+flags, and one product by item number or link with the price, list price,
+price per unit, package quantities, variants, specs, certifications and
+documents. Search and category results carry no prices: the product endpoint
+has them. Items Ferguson prices for signed-in customers only answer price null
+with a note. Ferguson prices by region, so the same item can read a different
+price on another read. No store stock, reviews or questions. Namespace
+`ferguson`, 3 endpoints: `search`, `category`, `product`. Credits: search and
+category 2, product 4 (2 when the page names no price); a keyword Ferguson
+sends to a category, asked for a later page or best_selling, can cost 4.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 240s on `search` and `category` and 180s on `product`. See
+the [Ferguson API
+page](https://scavio.dev/ferguson-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/ferguson-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+fg = client.ferguson
+res = fg.search("pex tubing")["data"]
+print(res["total"], res["total_pages"], [c["path"] for c in res["categories"][:3]])
+for it in res["items"][:5]:
+    print(it["item"], it["name"], it["brand"], it["part_number"], it["price_shown"])
+cat = fg.category("water-heaters/tankless-water-heaters", sort="best_selling")["data"]
+print(cat["name"], cat["total"])
+item = fg.product("4606091")["data"]
+print(item["name"], item["price"], item["list_price"], item["unit_of_measure"], item["note"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged (2
+credits).
+
+### 167. US plumbing, HVAC and electrical supply -- SupplyHouse.com prices, lead times, reviews and Q&A
+
+SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical
+supply store), United States, prices in USD: keyword, part number or SKU
+search, category pages and brand listings (48 a page) with the unit price and
+box price labelled, quantity-break prices and SupplyHouse's Total Available;
+one product with lead times per warehouse, specs, documents, alternatives and
+accessories; customer reviews and questions (10 a page, newest first, no
+names); and the top-level departments. Prices SupplyHouse does not show on the
+page answer null with price_hidden. Pages are slow (usually 20-120 s, up to
+about 240). Namespace `supplyhouse`, 7 endpoints: `search`, `category`,
+`brand`, `product`, `reviews`, `questions`, `categories`. Credits: 1 credit
+each. `credits_used` in the response is what was charged. The request timeout
+is raised to at least 250s (180s on `categories`). See the [SupplyHouse.com API
+page](https://scavio.dev/supplyhouse-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/supplyhouse-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+sh = client.supplyhouse
+res = sh.search("hot surface igniter")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["unit_price"], it["box_price"], it["total_available"])
+item = sh.product("PXLE038")["data"]
+print(item["unit_price"], item["box_price"], item["box_quantity"], item["total_available"])
+for lt in item["lead_times"]:
+    print(lt["quantity"], lt["promise_date"], [s["source_id"] for s in lt["sources"]])
+rv = sh.reviews("PXLE038")["data"]
+print(rv["average_rating"], rv["rating_count"], rv["rating_histogram"])
+qa = sh.questions("007-F5")["data"]
+for q in qa["questions"][:3]:
+    print(q["question"][:60], [a["is_expert"] for a in q["answers"]])
 ```
 
 Failed calls and refused inputs are not charged; a not-found is charged.

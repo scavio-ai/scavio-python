@@ -203,6 +203,8 @@ __all__ = [
     "_AsyncMcmasterNamespace",
     "_AsyncSallybeautyNamespace",
     "_AsyncLiquidationNamespace",
+    "_AsyncFergusonNamespace",
+    "_AsyncSupplyhouseNamespace",
 ]
 
 class _AsyncGoogleNamespace:
@@ -38252,3 +38254,201 @@ class _AsyncLiquidationNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return await self._client._call("liquidation_closed", {"seller": seller, "category": category, "page": page, "per_page": per_page}, extra)
+
+class _AsyncFergusonNamespace:
+    """Ferguson (ferguson.com, the US plumbing, HVAC and waterworks distributor) search, category and product endpoints; US only, prices in USD on the product endpoint (search and category results carry none). Search and category 2 credits, product 4 (2 when the page names no price)."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        q: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Ferguson (ferguson.com, the US plumbing, HVAC and waterworks distributor). Scavio fetches the public ferguson.com page on request. US only: English, prices in USD as shown to a visitor who is not signed in (never Pro or account pricing). Ferguson prices by region: the price is the one Ferguson shows for the region it assigns, so the same item can read a different price on another read. By keyword, 24 products a page, best match or best selling. Returns page, page_size (24), sort, total, total_pages, has_more, count, items [{position, item, name, brand, collection, url, image, part_number (Ferguson's part number), manufacturer_part_number, family_id, rating, variant_attribute {name, values, selected}, unit_of_measure, price_shown (false: price and availability for signed-in customers only), availability {can_ship, has_shipping_inventory, shipping_restricted, ready_to_order, tariff_applies}, compliance}] and notes. Results carry no prices (Ferguson adds them after its page loads): use the product endpoint for an item's price. Store pickup counts depend on the store Ferguson picks for the visitor and are not returned. categories [{name, path, count}] are the matching categories (send path to the category endpoint). A keyword Ferguson sends straight to a category answers that category's products with redirected_to {category_path, name, url}. A keyword with no products returns total 0. A not-found is charged (2 credits); failed upstream calls and refused inputs are not. Usually 30-60 s (Ferguson's results pages are large); set a client timeout of at least 240 s.
+
+        Costs 2 credits (4 when a keyword Ferguson sends to a category is asked for a later page
+        or best_selling and needs a second page read). credits_used in the response is the exact
+        charge. Returns the API response as a dict.
+
+        Args:
+            q: Search keywords, as a buyer types them on ferguson.com (product type, brand, part or item number), e.g. pex tubing.
+            page: Results page, 1-100 (24 products a page; default 1). total_pages reports the last one.
+            sort: best_match (the default, Ferguson's own order) or best_selling.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ferguson_search", {"q": q, "page": page, "sort": sort}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        sort: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Ferguson (ferguson.com, the US plumbing, HVAC and waterworks distributor). Scavio fetches the public ferguson.com page on request. US only: English, prices in USD as shown to a visitor who is not signed in (never Pro or account pricing). Ferguson prices by region: the price is the one Ferguson shows for the region it assigns, so the same item can read a different price on another read. By category path, paged and sorted like search, with name, url, breadcrumbs [{name, path}] and subcategories [{name, path, count}]. Returns page, page_size (24), sort, total, total_pages, has_more, count, items [{position, item, name, brand, collection, url, image, part_number (Ferguson's part number), manufacturer_part_number, family_id, rating, variant_attribute {name, values, selected}, unit_of_measure, price_shown (false: price and availability for signed-in customers only), availability {can_ship, has_shipping_inventory, shipping_restricted, ready_to_order, tariff_applies}, compliance}] and notes. Results carry no prices (Ferguson adds them after its page loads): use the product endpoint for an item's price. Store pickup counts depend on the store Ferguson picks for the visitor and are not returned. An unknown category is a charged 404. A not-found is charged (2 credits); failed upstream calls and refused inputs are not. Usually 30-60 s (Ferguson's results pages are large); set a client timeout of at least 240 s.
+
+        Costs 2 credits. Returns the API response as a dict.
+
+        Args:
+            category: A Ferguson category path (categories[].path of a search answer, subcategories[].path of a category answer, or the part after /category/ in a ferguson.com link, e.g. water-heaters/tankless-water-heaters), or a ferguson.com /category/ link.
+            page: Results page, 1-100 (24 products a page; default 1). total_pages reports the last one.
+            sort: best_match (the default, Ferguson's own order) or best_selling.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ferguson_category", {"category": category, "page": page, "sort": sort}, extra)
+
+    async def product(
+        self,
+        item: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Ferguson (ferguson.com, the US plumbing, HVAC and waterworks distributor). Scavio fetches the public ferguson.com page on request. US only: English, prices in USD as shown to a visitor who is not signed in (never Pro or account pricing). Ferguson prices by region: the price is the one Ferguson shows for the region it assigns, so the same item can read a different price on another read. By item number or link. Returns item, name, brand, collection, url, part_number, manufacturer_part_number, upc, family_id, rating, breadcrumbs, images, price, list_price, price_per_unit, currency, call_for_pricing, note (why price is null: signed-in customers only, or Call for Pricing), unit_of_measure, order_multiple, max_order_quantity, package_quantities [{package (Each, Inner Pack, Case, Pallet), quantity}], variants [{item, attribute, value, selected, price}], specs [{group, items [{name, value}]}], certifications, documents [{type, url}] (specification, installation, warranty sheets), has_parts_or_replacements, prop65_warning and notes. price is per unit_of_measure; package prices are not computed. Items Ferguson prices for signed-in customers only answer price null with a note. Reviews, questions and store pickup counts are not returned. An unknown item is a charged 404 (2 credits). A not-found is charged (2 credits); failed upstream calls and refused inputs are not. Usually 10-25 s; set a client timeout of at least 180 s.
+
+        Costs 4 credits (the product page and its price; 2 when the page names no price).
+        credits_used in the response is the exact charge. Returns the API response as a dict.
+
+        Args:
+            item: A Ferguson item number (items[].item: the digits after Item # on ferguson.com, e.g. 4606091). Send item or url.
+            url: A ferguson.com /product/ link, instead of item.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("ferguson_product", {"item": item, "url": url}, extra)
+
+class _AsyncSupplyhouseNamespace:
+    """SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store) search, category, brand, product, reviews, questions and categories endpoints; United States, prices in USD with the unit price and the box price labelled, 1 credit each."""
+
+    def __init__(self, client: "AsyncScavioClient") -> None:
+        self._client = client
+
+    async def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. United States: English, prices in USD as supplyhouse.com shows them to a visitor who is not signed in. By keyword, part number or SKU, 48 per page in SupplyHouse's order. SupplyHouse sends a keyword that names a category to that category page and an exact part number to its product page: redirected_to {type (category, brand, product), product_id, url, category {id, name, path, url, type}} says where, and the answer is that page's (a product redirect returns that one product as items[0]). Returns query, redirected_to, did_you_mean, page_type (search, products, subcategories, groups), breadcrumbs [{id, name, path, url}], total, page, page_size (48), total_pages, has_more, count, items [{position, product_id (SKU), name, brand, brand_path, url, image, unit_price, unit_special_price, box_price, box_special_price, box_quantity, price_tiers, discount_reason, price_hidden, currency, in_stock, inventory_status, total_available (SupplyHouse's Total Available), rating, reviews_count, questions_count, key_specs [{name, values}], discontinued, replacement_product_id, ships_by_freight, call_to_order}], subcategories [{id, name, path, url, image, product_count}] (a category page that lists subcategories), groups [{id, name, path, url, product_count, count, has_more, items}] (a category page that shows a few products per sub-type), facets [{name, values [{value, count, selected, category_path}]}] (SupplyHouse's filters with counts), notes. unit_price is the price of one piece (each); box_price the price of one box of box_quantity pieces; *_special_price a sale price when SupplyHouse shows one (discount_reason says why); price_tiers [{tier, quantity_break, price, special_price}] SupplyHouse's quantity-break prices as given; price_hidden true when SupplyHouse does not show the price on the page (no price returned). A keyword without products returns total 0. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a part number or a SupplyHouse SKU, e.g. hot surface igniter.
+            page: Results page, 1-100 (48 products per page, as SupplyHouse lists them; default 1). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_search", {"query": query, "page": page}, extra)
+
+    async def category(
+        self,
+        category: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category page of SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. United States: English, prices in USD as supplyhouse.com shows them to a visitor who is not signed in. By category link or path. A department or category page lists its subcategories (page_type subcategories); a category of sub-types shows a few products per sub-type (page_type groups); a product category lists its products, 48 per page (page_type products). SupplyHouse serves some category pages either as sub-type groups or as the full product list (measured on the same page on the same day): page_type says which. Returns category {id, name, path, url, type}, page_type (search, products, subcategories, groups), breadcrumbs [{id, name, path, url}], total, page, page_size (48), total_pages, has_more, count, items [{position, product_id (SKU), name, brand, brand_path, url, image, unit_price, unit_special_price, box_price, box_special_price, box_quantity, price_tiers, discount_reason, price_hidden, currency, in_stock, inventory_status, total_available (SupplyHouse's Total Available), rating, reviews_count, questions_count, key_specs [{name, values}], discontinued, replacement_product_id, ships_by_freight, call_to_order}], subcategories [{id, name, path, url, image, product_count}] (a category page that lists subcategories), groups [{id, name, path, url, product_count, count, has_more, items}] (a category page that shows a few products per sub-type), facets [{name, values [{value, count, selected, category_path}]}] (SupplyHouse's filters with counts), notes. unit_price is the price of one piece (each); box_price the price of one box of box_quantity pieces; *_special_price a sale price when SupplyHouse shows one (discount_reason says why); price_tiers [{tier, quantity_break, price, special_price}] SupplyHouse's quantity-break prices as given; price_hidden true when SupplyHouse does not show the price on the page (no price returned). An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A supplyhouse.com category link or path (e.g. PEX-Fittings-525000, categories[].path, subcategories[].path, groups[].path or a breadcrumb path).
+            page: Results page, 1-100 (48 products per page, as SupplyHouse lists them; default 1). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_category", {"category": category, "page": page}, extra)
+
+    async def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. United States: English, prices in USD as supplyhouse.com shows them to a visitor who is not signed in. By brand path or link, 48 per page in SupplyHouse's order. Returns brand {id, name, path, url}, page_type (search, products, subcategories, groups), breadcrumbs [{id, name, path, url}], total, page, page_size (48), total_pages, has_more, count, items [{position, product_id (SKU), name, brand, brand_path, url, image, unit_price, unit_special_price, box_price, box_special_price, box_quantity, price_tiers, discount_reason, price_hidden, currency, in_stock, inventory_status, total_available (SupplyHouse's Total Available), rating, reviews_count, questions_count, key_specs [{name, values}], discontinued, replacement_product_id, ships_by_freight, call_to_order}], subcategories [{id, name, path, url, image, product_count}] (a category page that lists subcategories), groups [{id, name, path, url, product_count, count, has_more, items}] (a category page that shows a few products per sub-type), facets [{name, values [{value, count, selected, category_path}]}] (SupplyHouse's filters with counts), notes. unit_price is the price of one piece (each); box_price the price of one box of box_quantity pieces; *_special_price a sale price when SupplyHouse shows one (discount_reason says why); price_tiers [{tier, quantity_break, price, special_price}] SupplyHouse's quantity-break prices as given; price_hidden true when SupplyHouse does not show the price on the page (no price returned). An unknown brand is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as its supplyhouse.com path names it (items[].brand_path, e.g. Taco, PVI, Bluefin) or a brand link (https://www.supplyhouse.com/Taco).
+            page: Results page, 1-100 (48 products per page, as SupplyHouse lists them; default 1). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_brand", {"brand": brand, "page": page}, extra)
+
+    async def product(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. United States: English, prices in USD as supplyhouse.com shows them to a visitor who is not signed in. By SKU or link. Returns requested, product_id (SKU), name, brand, brand_path, model_number, url, breadcrumbs, unit_price, unit_special_price, box_price, box_special_price, box_quantity, price_tiers, discount_reason, price_hidden, currency, in_stock, inventory_status, total_available, lead_times [{quantity, promise_date, date_from, date_to, message, sources [{source_id, quantity, is_warehouse}]}] (how many ship by when, from which warehouse), out_of_stock_lead_time, temporarily_unavailable, call_to_order, limit_order_quantity, discontinued, discontinuation_reason, sales_discontinuation_date, replacement_product_id, replacement_type, replacement_product, out_of_stock_substitute, variants {family_name, attributes [{name, options [{product_id, name, value, url, selected}]}]}, alternatives, accessories and replacement_parts [{product_id, name, brand, url, image, unit_price, unit_special_price, price_hidden}], specifications [{name, values}], key_specs, images, videos [{title, url}], documents [{name, file_name, url}] (spec sheets, install instructions, warranty PDFs), shipping {width, height, depth, weight, freight_class, ships_by_freight}, returnable, contains_lead, california_prop65, rating, reviews_count, questions_count, notes. unit_price is the price of one piece (each); box_price the price of one box of box_quantity pieces; *_special_price a sale price when SupplyHouse shows one (discount_reason says why); price_tiers [{tier, quantity_break, price, special_price}] SupplyHouse's quantity-break prices as given; price_hidden true when SupplyHouse does not show the price on the page (no price returned). Delivery dates for a ZIP code are not returned. An unknown SKU is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The SupplyHouse SKU (items[].product_id; the part number on a product page, e.g. PXLE038 or 007-F5). Send product_id or url.
+            url: A supplyhouse.com product link or path (items[].url), instead of product_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_product", {"product_id": product_id, "url": url}, extra)
+
+    async def reviews(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. By SKU or link, 10 per page, newest first: product_id, name, brand, url, average_rating, rating_count, recommended_ratio, rating_histogram {1-5}, sort, page, page_size, total, total_pages, has_more, count, reviews [{review_id, rating, headline, comments, created_at, verified_buyer, helpful_votes, not_helpful_votes, photos, merchant_response, merchant_response_date}], notes. No reviewer names or locations. An unknown SKU is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The SupplyHouse SKU (items[].product_id; the part number on a product page, e.g. PXLE038 or 007-F5). Send product_id or url.
+            url: A supplyhouse.com product link or path (items[].url), instead of product_id.
+            page: Page, 1-200 (10 per page, newest first; default 1). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_reviews", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    async def questions(
+        self,
+        product_id: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer questions and answers of one product of SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. By SKU or link, 10 per page, newest first: product_id, name, brand, url, sort, page, page_size, total, total_pages, has_more, count, questions [{question_id, question, created_at, answer_count, answers [{answer_id, answer, created_at, is_expert (SupplyHouse staff), verified_buyer, helpful_votes, not_helpful_votes}]}], notes. No asker or answerer names or locations. An unknown SKU is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. SupplyHouse pages are slow: usually 20-120 s, up to about 240 s. Set a client timeout of at least 250 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            product_id: The SupplyHouse SKU (items[].product_id; the part number on a product page, e.g. PXLE038 or 007-F5). Send product_id or url.
+            url: A supplyhouse.com product link or path (items[].url), instead of product_id.
+            page: Page, 1-200 (10 per page, newest first; default 1). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_questions", {"product_id": product_id, "url": url, "page": page}, extra)
+
+    async def categories(
+        self,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The top-level departments of SupplyHouse.com (supplyhouse.com, the US online plumbing, HVAC and electrical supply store). Scavio fetches the public supplyhouse.com page on request. as its menu lists them: count, total_nodes, categories [{id, name, menu_name, path, url, image, documents, children}], notes. Ask category with a path for a department's subcategories and products. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-30 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return await self._client._call("supplyhouse_categories", {}, extra)

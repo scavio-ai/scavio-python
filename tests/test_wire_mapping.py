@@ -725,6 +725,8 @@ BODY_PRICED_KEYS = {
     "best_buy_deals",
     "best_buy_availability",
     "best_buy_prices",
+    "ferguson_search",
+    "ferguson_product",
 }
 
 
@@ -12194,3 +12196,129 @@ def test_batch8w2_1128_credits_wire_and_timeouts():
         assert ENDPOINTS[f"sallybeauty_{m}"].positional_optional_params[0].name == "product_id"
     assert "full manifest needs a signed-in buyer account" in ENDPOINTS["bstock_lot"].summary
     assert "Bidder identities are not returned" in ENDPOINTS["liquidation_lot"].summary
+
+
+# --- batch 8 wave 3 2026-11-28: Ferguson, SupplyHouse.com ---
+
+BATCH8W3_1128 = {
+    "ferguson": {
+        "search": ("search", 2, 240.0),
+        "category": ("category", 2, 240.0),
+        "product": ("product", 4, 180.0),
+    },
+    "supplyhouse": {
+        "search": ("search", 1, 250.0),
+        "category": ("category", 1, 250.0),
+        "brand": ("brand", 1, 250.0),
+        "product": ("product", 1, 250.0),
+        "reviews": ("reviews", 1, 250.0),
+        "questions": ("questions", 1, 250.0),
+        "categories": ("categories", 1, 180.0),
+    },
+}
+BATCH8W3_1128_ONE_OF = {
+    "ferguson_product": (("item", "url"),),
+    "supplyhouse_product": (("product_id", "url"),),
+    "supplyhouse_reviews": (("product_id", "url"),),
+    "supplyhouse_questions": (("product_id", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH8W3_1128))
+def test_batch8w3_1128_credits_paths_timeouts(namespace):
+    """Every endpoint of the 2 new namespaces: path, credits, timeout floor, one-of."""
+    want = BATCH8W3_1128[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH8W3_1128_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag|training|grounding)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "as a browser" not in text, ep.key
+        # Both are US-only storefronts: the refused-only country input is not exposed
+        assert "country" not in [p.name for p in ep.params], ep.key
+        # Ferguson: never Build.com / Ferguson Home
+        assert "build.com" not in text.lower() and "ferguson home" not in text.lower(), ep.key
+
+
+BATCH8W3_1128_WIRE = [
+    ("ferguson", "search", {"q": "pex tubing"}, "search"),
+    ("ferguson", "search", {"q": "1/2 ball valve", "page": 2, "sort": "best_selling"}, "search"),
+    ("ferguson", "category", {"category": "water-heaters/tankless-water-heaters"}, "category"),
+    ("ferguson", "product", {"item": "4606091"}, "product"),
+    (
+        "ferguson", "product",
+        {"url": "https://www.ferguson.com/product/fnw-figure-x432-ball-valve/4606091.html"},
+        "product",
+    ),
+    ("supplyhouse", "search", {"query": "hot surface igniter", "page": 2}, "search"),
+    ("supplyhouse", "category", {"category": "PEX-Fittings-525000"}, "category"),
+    ("supplyhouse", "brand", {"brand": "PVI"}, "brand"),
+    ("supplyhouse", "product", {"product_id": "PXLE038"}, "product"),
+    (
+        "supplyhouse", "product",
+        {"url": "https://www.supplyhouse.com/Bluefin-PXLE038-3-8-Poly-PEX-Crimp-Elbow"},
+        "product",
+    ),
+    ("supplyhouse", "reviews", {"product_id": "PXLE038", "page": 2}, "reviews"),
+    ("supplyhouse", "questions", {"product_id": "007-F5"}, "questions"),
+    ("supplyhouse", "categories", {}, "categories"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH8W3_1128_WIRE)
+def test_batch8w3_1128_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH8W3_1128[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH8W3_1128_ONE_OF))
+def test_batch8w3_1128_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch8w3_1128_credits_notes_and_params():
+    """Ferguson: 2 / 2 / 4 with notes on search and product; SupplyHouse: 1 credit everywhere."""
+    w3 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH8W3_1128]
+    assert len(w3) == 10
+    assert {ep.credits for ep in w3 if ep.namespace == "supplyhouse"} == {1}
+    assert sorted(ep.key for ep in w3 if ep.credits_note) == ["ferguson_product", "ferguson_search"]
+    assert "2 when the page names no price" in ENDPOINTS["ferguson_product"].credits_note
+    assert "4 when" in ENDPOINTS["ferguson_search"].credits_note
+    assert all(p.doc for ep in w3 for p in ep.params)
+    assert [p.name for p in ENDPOINTS["ferguson_search"].required_params] == ["q"]
+    assert [p.name for p in ENDPOINTS["ferguson_category"].required_params] == ["category"]
+    assert [p.name for p in ENDPOINTS["supplyhouse_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["supplyhouse_category"].required_params] == ["category"]
+    assert [p.name for p in ENDPOINTS["supplyhouse_brand"].required_params] == ["brand"]
+    assert ENDPOINTS["ferguson_product"].positional_optional_params[0].name == "item"
+    for m in ("product", "reviews", "questions"):
+        assert ENDPOINTS[f"supplyhouse_{m}"].positional_optional_params[0].name == "product_id"
+    assert not ENDPOINTS["supplyhouse_categories"].params
+    assert "carry no prices" in ENDPOINTS["ferguson_search"].summary
+    assert "signed-in customers only" in ENDPOINTS["ferguson_product"].summary
+    assert "No reviewer names" in ENDPOINTS["supplyhouse_reviews"].summary
+    assert "price_hidden" in ENDPOINTS["supplyhouse_product"].summary

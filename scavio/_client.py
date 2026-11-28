@@ -74,6 +74,7 @@ from ._namespaces_sync import (
     _ExtraspaceNamespace,
     _FanaticsNamespace,
     _FashionnovaNamespace,
+    _FergusonNamespace,
     _FootlockerNamespace,
     _G2Namespace,
     _GapNamespace,
@@ -167,6 +168,7 @@ from ._namespaces_sync import (
     _SportchekNamespace,
     _StaplesNamespace,
     _StreeteasyNamespace,
+    _SupplyhouseNamespace,
     _SweetwaterNamespace,
     _TargetNamespace,
     _TcgplayerNamespace,
@@ -457,6 +459,8 @@ class ScavioClient:
         self.mcmaster = _McmasterNamespace(self)
         self.sallybeauty = _SallybeautyNamespace(self)
         self.liquidation = _LiquidationNamespace(self)
+        self.ferguson = _FergusonNamespace(self)
+        self.supplyhouse = _SupplyhouseNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------
