@@ -12024,3 +12024,173 @@ def test_batch8w1_1128_credits_wire_and_timeouts():
         assert ENDPOINTS[f"zoro_{m}"].positional_optional_params[0].name == "zoro_no"
     assert '"See price in cart"' in ENDPOINTS["globalindustrial_product"].summary
     assert "a Grainger company" in ENDPOINTS["zoro_search"].summary
+
+
+# --- batch 8 wave 2 2026-11-28: B-Stock, McMaster-Carr, Sally Beauty, Liquidation.com ---
+
+BATCH8W2_1128 = {
+    "bstock": {
+        "search": ("search", 1, 180.0),
+        "lot": ("lot", 1, 180.0),
+        "storefronts": ("storefronts", 1, 180.0),
+        "filters": ("filters", 1, 180.0),
+    },
+    "mcmaster": {
+        "product": ("product", 1, 180.0),
+        "search": ("search", 1, 300.0),
+        "categories": ("categories", 1, 180.0),
+    },
+    "sallybeauty": {
+        "search": ("search", 1, 180.0),
+        "category": ("category", 1, 180.0),
+        "clearance": ("clearance", 1, 180.0),
+        "product": ("product", 1, 180.0),
+        "stores": ("stores", 1, 180.0),
+        "store_stock": ("store-stock", 1, 180.0),
+        "suggestions": ("suggestions", 1, 180.0),
+        "brands": ("brands", 1, 180.0),
+        "reviews": ("reviews", 1, 240.0),
+    },
+    "liquidation": {
+        "search": ("search", 1, 180.0),
+        "lot": ("lot", 1, 180.0),
+        "manifest": ("manifest", 1, 180.0),
+        "closed": ("closed", 1, 180.0),
+    },
+}
+BATCH8W2_1128_ONE_OF = {
+    "bstock_lot": (("id", "url"),),
+    "mcmaster_product": (("part_number", "url"),),
+    "mcmaster_search": (("query", "category"),),
+    "sallybeauty_product": (("product_id", "url"),),
+    "sallybeauty_store_stock": (("product_id", "url"),),
+    "sallybeauty_reviews": (("product_id", "url"),),
+    "liquidation_lot": (("id", "url"),),
+    "liquidation_manifest": (("id", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH8W2_1128))
+def test_batch8w2_1128_credits_paths_timeouts(namespace):
+    """Every endpoint of the 4 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH8W2_1128[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH8W2_1128_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag|training|grounding)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "as a browser" not in text, ep.key
+        # McMaster-Carr has one US storefront: the refused-only country input is not exposed
+        if namespace == "mcmaster":
+            assert "country" not in [p.name for p in ep.params], ep.key
+
+
+BATCH8W2_1128_WIRE = [
+    ("bstock", "search", {"q": "laptop"}, "search"),
+    (
+        "bstock", "search",
+        {"storefront": ["Target", "Walmart"], "condition": "Like New", "sort": "end_time",
+         "limit": 50, "offset": 50},
+        "search",
+    ),
+    ("bstock", "lot", {"id": "6b05cd6821e9e20881d2a998"}, "lot"),
+    (
+        "bstock", "lot",
+        {"url": "https://bstock.com/buy/listings/details/6b05cd6821e9e20881d2a998"},
+        "lot",
+    ),
+    ("bstock", "storefronts", {}, "storefronts"),
+    ("bstock", "filters", {}, "filters"),
+    ("mcmaster", "product", {"part_number": "91251A540"}, "product"),
+    ("mcmaster", "product", {"url": "https://www.mcmaster.com/91251A540/"}, "product"),
+    ("mcmaster", "search", {"query": "hose clamps", "per_page": 10}, "search"),
+    ("mcmaster", "search", {"category": "hose-clamps/worm-drive-clamps~~", "offset": 10}, "search"),
+    ("mcmaster", "categories", {}, "categories"),
+    ("sallybeauty", "search", {"query": "purple shampoo"}, "search"),
+    (
+        "sallybeauty", "search",
+        {"query": "shampoo", "site": "cosmoprof-us", "sort": "newest", "page": 2,
+         "filters": {"brandcustom": "Redken"}},
+        "search",
+    ),
+    ("sallybeauty", "category", {"category": "hair-color", "sort": "price_asc"}, "category"),
+    ("sallybeauty", "clearance", {"department": "nails", "price_max": 10}, "clearance"),
+    ("sallybeauty", "product", {"product_id": "SBS-302313"}, "product"),
+    ("sallybeauty", "stores", {"postal_code": "75201", "radius": 30}, "stores"),
+    (
+        "sallybeauty", "store_stock",
+        {"product_id": "SBS-302313", "postal_code": "90012"},
+        "store-stock",
+    ),
+    ("sallybeauty", "suggestions", {"query": "wahl"}, "suggestions"),
+    ("sallybeauty", "brands", {"site": "sally-ca"}, "brands"),
+    ("sallybeauty", "reviews", {"product_id": "SBS-345331"}, "reviews"),
+    ("liquidation", "search", {"q": "laptop"}, "search"),
+    (
+        "liquidation", "search",
+        {"condition": "returns", "lot_size": ["pallet", "truckload"], "sort": "current_bid",
+         "order": "desc", "page": 2},
+        "search",
+    ),
+    ("liquidation", "lot", {"id": "21648824"}, "lot"),
+    ("liquidation", "manifest", {"id": "21648824"}, "manifest"),
+    ("liquidation", "closed", {"seller": "Titan Electronics", "category": "1004"}, "closed"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH8W2_1128_WIRE)
+def test_batch8w2_1128_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH8W2_1128[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH8W2_1128_ONE_OF))
+def test_batch8w2_1128_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch8w2_1128_credits_wire_and_timeouts():
+    """B-Stock, McMaster-Carr, Sally Beauty, Liquidation.com: 1 credit; 300 s / 240 s floors."""
+    for ns in BATCH8W2_1128:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w2 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH8W2_1128]
+    assert len(w2) == 20
+    assert not [ep.key for ep in w2 if ep.credits_note]
+    assert all(p.doc for ep in w2 for p in ep.params)
+    assert [p.name for p in ENDPOINTS["sallybeauty_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["sallybeauty_category"].required_params] == ["category"]
+    assert [p.name for p in ENDPOINTS["sallybeauty_suggestions"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["liquidation_closed"].required_params] == ["seller"]
+    assert not ENDPOINTS["bstock_search"].required_params
+    assert not ENDPOINTS["liquidation_search"].required_params
+    assert ENDPOINTS["bstock_lot"].positional_optional_params[0].name == "id"
+    assert ENDPOINTS["mcmaster_product"].positional_optional_params[0].name == "part_number"
+    assert ENDPOINTS["mcmaster_search"].positional_optional_params[0].name == "query"
+    for m in ("product", "store_stock", "reviews"):
+        assert ENDPOINTS[f"sallybeauty_{m}"].positional_optional_params[0].name == "product_id"
+    assert "full manifest needs a signed-in buyer account" in ENDPOINTS["bstock_lot"].summary
+    assert "Bidder identities are not returned" in ENDPOINTS["liquidation_lot"].summary

@@ -34,6 +34,7 @@ from ._namespaces_sync import (
     _BootsNamespace,
     _BoticarioNamespace,
     _BringatrailerNamespace,
+    _BstockNamespace,
     _BuscapeNamespace,
     _CanadianTireNamespace,
     _CapterraNamespace,
@@ -103,6 +104,7 @@ from ._namespaces_sync import (
     _LennarNamespace,
     _LeroymerlinNamespace,
     _LinkedInNamespace,
+    _LiquidationNamespace,
     _LlbeanNamespace,
     _LookfantasticNamespace,
     _LowesNamespace,
@@ -110,6 +112,7 @@ from ._namespaces_sync import (
     _MagaluNamespace,
     _MaisonsDuMondeNamespace,
     _MarksNamespace,
+    _McmasterNamespace,
     _MediaExpertNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
@@ -155,6 +158,7 @@ from ._namespaces_sync import (
     _RockautoNamespace,
     _RonaNamespace,
     _SaksNamespace,
+    _SallybeautyNamespace,
     _SamsClubNamespace,
     _SECNamespace,
     _SephoraNamespace,
@@ -449,6 +453,10 @@ class ScavioClient:
         self.globalindustrial = _GlobalindustrialNamespace(self)
         self.msc = _MscNamespace(self)
         self.zoro = _ZoroNamespace(self)
+        self.bstock = _BstockNamespace(self)
+        self.mcmaster = _McmasterNamespace(self)
+        self.sallybeauty = _SallybeautyNamespace(self)
+        self.liquidation = _LiquidationNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

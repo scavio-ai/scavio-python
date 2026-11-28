@@ -36,6 +36,7 @@ from ._namespaces_async import (
     _AsyncBootsNamespace,
     _AsyncBoticarioNamespace,
     _AsyncBringatrailerNamespace,
+    _AsyncBstockNamespace,
     _AsyncBuscapeNamespace,
     _AsyncCanadianTireNamespace,
     _AsyncCapterraNamespace,
@@ -105,6 +106,7 @@ from ._namespaces_async import (
     _AsyncLennarNamespace,
     _AsyncLeroymerlinNamespace,
     _AsyncLinkedInNamespace,
+    _AsyncLiquidationNamespace,
     _AsyncLlbeanNamespace,
     _AsyncLookfantasticNamespace,
     _AsyncLowesNamespace,
@@ -112,6 +114,7 @@ from ._namespaces_async import (
     _AsyncMagaluNamespace,
     _AsyncMaisonsDuMondeNamespace,
     _AsyncMarksNamespace,
+    _AsyncMcmasterNamespace,
     _AsyncMediaExpertNamespace,
     _AsyncMenardsNamespace,
     _AsyncMercadoLibreNamespace,
@@ -157,6 +160,7 @@ from ._namespaces_async import (
     _AsyncRockautoNamespace,
     _AsyncRonaNamespace,
     _AsyncSaksNamespace,
+    _AsyncSallybeautyNamespace,
     _AsyncSamsClubNamespace,
     _AsyncSECNamespace,
     _AsyncSephoraNamespace,
@@ -444,6 +448,10 @@ class AsyncScavioClient:
         self.globalindustrial = _AsyncGlobalindustrialNamespace(self)
         self.msc = _AsyncMscNamespace(self)
         self.zoro = _AsyncZoroNamespace(self)
+        self.bstock = _AsyncBstockNamespace(self)
+        self.mcmaster = _AsyncMcmasterNamespace(self)
+        self.sallybeauty = _AsyncSallybeautyNamespace(self)
+        self.liquidation = _AsyncLiquidationNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 190 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 194 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -134,6 +134,10 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Global Industrial MRO and Equipment Prices, Per-Piece Unit Prices, Quantity Breaks and Clearance (US and Canada; 5 endpoints) | Yes | No | No | No |
 | MSC Industrial Supply Metalworking and MRO Prices, Per-Quantity and Unit Prices, Clearance and Locations (US; 5 endpoints) | Yes | No | No | No |
 | Zoro Industrial Supply Unit and Order-Multiple Prices, Availability and Review Summaries (US; 6 endpoints) | Yes | No | No | No |
+| B-Stock Liquidation Lots, Current Bids, Retail Value and Manifest Previews (4 endpoints) | Yes | No | No | No |
+| McMaster-Carr Industrial Supply Pack and Per-Piece Prices, Specs and Catalogue Pages (US; 3 endpoints) | Yes | No | No | No |
+| Sally Beauty and CosmoProf Beauty Supply Prices, Online Units, Store Stock and Reviews (US and Canada; 9 endpoints) | Yes | No | No | No |
+| Liquidation.com Auction Lots, Manifests and Closed Results (US; 4 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8798,6 +8802,164 @@ rv = zo.reviews("G2426514")["data"]
 print(rv["average_rating"], rv["review_count"], rv["rating_histogram"])
 for r in rv["reviews"]:
     print(r["rating"], r["headline"], r["created_at"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 162. US liquidation -- B-Stock open lots, current bids, retail value and manifest previews
+
+B-Stock (bstock.com, the liquidation marketplace where retailers sell returns
+and overstock): search the open lots by keyword, storefront, category,
+condition, inventory type, buying format, region, shipment type and
+manufacturer (up to 200 a call, paged with offset); one lot with its auction
+state, current bid, next minimum bid, the seller's stated retail value, units,
+pallets, shipping and the public manifest preview (the first 10 rows and the
+total; the full manifest needs a signed-in buyer account); the storefronts
+with open listings; and the search filters with their counts. Open listings
+only: closed and sold lots are not available. Amounts are in each listing's
+currency (USD, EUR or GBP). No bidder data. Namespace `bstock`, 4 endpoints:
+`search`, `lot`, `storefronts`, `filters`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 180s. See the [B-Stock API
+page](https://scavio.dev/bstock-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/bstock-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+bs = client.bstock
+res = bs.search(q="laptop")["data"]
+print(res["total"], res["has_more"])
+for it in res["listings"][:5]:
+    print(it["listing_id"], it["title"], it["current_bid"], it["bids"], it["retail_value"], it["units"], it["end_time"])
+lot = bs.lot("6b05cd6821e9e20881d2a998")["data"]
+print(lot["title"], lot["auction"]["current_bid"], lot["auction"]["next_minimum_bid"], lot["retail_value"], lot["units"])
+print(lot["manifest"]["items_total"], [(r["description"], r["quantity"], r["unit_retail"]) for r in lot["manifest"]["preview"][:3]])
+for sf in bs.storefronts()["data"]["storefronts"][:5]:
+    print(sf["name"], sf["open_listings"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 163. US industrial supply -- McMaster-Carr pack and per-piece prices, specs and catalogue pages
+
+McMaster-Carr (mcmaster.com, the US industrial-supply catalog), United States,
+prices in USD: one part by McMaster-Carr part number or link with the price
+for one order unit, the pack price and the per-piece price labelled, quantity
+breaks, the delivery promise the page shows, specifications and compliance; a
+keyword or category page with the part-number rows (price, price basis Pkg. or
+Each, per-piece price, specs), the product families with their counts and
+slugs, and the facets; and the top-level categories. McMaster-Carr sells under
+its own part numbers: no manufacturer part numbers, UPCs, reviews, stores or
+deals. Large families can be slow (up to about 3 minutes): narrow them with a
+category slug. A part number the site does not know is an unbilled error after
+about 2 minutes. Namespace `mcmaster`, 3 endpoints: `product`, `search`,
+`categories`. Credits: 1 credit each. `credits_used` in the response is what
+was charged. The request timeout is raised to at least 180s (300s on
+`search`). See the [McMaster-Carr API
+page](https://scavio.dev/mcmaster-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/mcmaster-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mc = client.mcmaster
+part = mc.product("91251A540")["data"]
+print(part["title"], part["unit_of_measure"], part["package_price"], part["unit_price"], part["delivery_message"])
+res = mc.search("hose clamps", per_page=10)["data"]
+print(res["heading"], res["total"], res["rows_on_page"], res["has_more"])
+for it in res["items"]:
+    print(it["part_number"], it["price"], it["price_basis"], it["package_quantity"], it["unit_price"])
+for fam in res["product_families"][:5]:
+    print(fam["name"], fam["product_count"], fam["slug"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 164. US and Canada beauty supply -- Sally Beauty prices, online units, store stock and CosmoProf catalogue
+
+Sally Beauty (sallybeauty.com, the US and Canadian beauty supply chain) and
+CosmoProf (its professional beauty distributor), chosen by `site` (`sally-us`,
+`sally-ca`, `cosmoprof-us`, `cosmoprof-ca`): keyword search, category and
+clearance listings (24 a page, sorted and filtered by facet or price), one
+product with price, regular price, promotions, sizes and the exact online
+units, the exact units per Sally Beauty store near a ZIP or postal code, store
+locations, the search box suggestions, the brand directory, and reviews (the
+first 8 with the totals and questions, no reviewer names). CosmoProf prices,
+availability and store stock are for licensed professionals, so they are null;
+store stock and reviews are Sally Beauty only. Sally Beauty UK and Ireland are
+not covered. Namespace `sallybeauty`, 9 endpoints: `search`, `category`,
+`clearance`, `product`, `stores`, `store_stock`, `suggestions`, `brands`,
+`reviews`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 180s (240s on `reviews`).
+See the [Sally Beauty API
+page](https://scavio.dev/sallybeauty-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/sallybeauty-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+sb = client.sallybeauty
+res = sb.search("purple shampoo")["data"]
+print(res["total"], res["total_pages"])
+for it in res["items"][:5]:
+    print(it["product_id"], it["name"], it["brand"], it["price"], it["price_min"], it["price_max"], it["rating"])
+item = sb.product("SBS-302313")["data"]
+print(item["name"], item["price"], item["list_price"], item["availability"]["online_units"])
+stock = sb.store_stock("SBS-302313", postal_code="90012")["data"]
+for st in stock["stores"][:5]:
+    print(st["name"], st["distance_miles"], st["stock"]["units"])
+rv = sb.reviews("SBS-345331")["data"]
+print(rv["average_rating"], rv["total_reviews"], [r["rating"] for r in rv["reviews"]])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 165. US liquidation auctions -- Liquidation.com open lots, manifests and a seller's closed lots
+
+Liquidation.com (liquidation.com, the US online liquidation auction site of
+Liquidity Services): search the open auctions by keyword, category, lot size,
+condition, US region, auction type and seller (at least one), sorted by close
+time, current bid, items or title; one open auction with the current and
+minimum bid, buyer's premium, quantity, condition, shipping terms and the
+seller's handle and statistics; the item manifest with its columns as the
+seller lists them (price columns keep the seller's label); and a seller's
+closed auctions with their final bids (the site shows no close date and
+ignores keywords on closed lots). Amounts in USD, or CAD for lots in the
+Brampton, ON warehouse. Bidder identities are never returned. Namespace
+`liquidation`, 4 endpoints: `search`, `lot`, `manifest`, `closed`. Credits: 1
+credit each. `credits_used` in the response is what was charged. The request
+timeout is raised to at least 180s. See the [Liquidation.com API
+page](https://scavio.dev/liquidation-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/liquidation-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+lq = client.liquidation
+res = lq.search(q="laptop")["data"]
+print(res["total"], res["has_more"])
+for it in res["results"][:5]:
+    print(it["id"], it["title"], it["seller"], it["current_bid"], it["bids"], it["est_retail"], it["closes_at"])
+lot = lq.lot("21648824")["data"]
+print(lot["title"], lot["current_bid"], lot["minimum_bid"], lot["buyers_premium_pct"], lot["quantity"], lot["seller"]["handle"])
+man = lq.manifest("21648824")["data"]
+print([c["header"] for c in man["columns"]], man["row_count"])
+closed = lq.closed("Titan Electronics")["data"]
+for it in closed["results"][:5]:
+    print(it["title"], it["final_bid"], it["bids"], it["est_retail"])
 ```
 
 Failed calls and refused inputs are not charged; a not-found is charged.

@@ -45362,6 +45362,1311 @@ _ZORO_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 8 wave 2 2026-11-28: 4 platforms (B-Stock, McMaster-Carr, Sally Beauty, Liquidation.com) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 300 s floor on mcmaster search, 240 s on sallybeauty reviews, 180 s on the rest.
+
+# B-Stock: 4 endpoints on /api/v1/bstock.
+_BSTOCK_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="bstock_search",
+        namespace="bstock",
+        method="search",
+        http="POST",
+        path="/api/v1/bstock/search",
+        summary=(
+            "Search the open liquidation lots of B-Stock (bstock.com, the liquidation "
+            "marketplace where retailers and brands such as Target, Walmart, Amazon, The Home "
+            "Depot and Best Buy sell customer returns and overstock by the pallet or "
+            "truckload). Scavio fetches the public B-Stock pages on request, as a visitor who "
+            "is not signed in sees them. By keyword (or none: every open lot), filtered by "
+            "storefront, category, subcategory, condition, inventory type, buying format, "
+            "region, shipment type and manufacturer, sorted recommended, end_time or "
+            "relevance, 20 per call by default (up to 200), paged with offset. Returns query, "
+            "sort, limit, offset, total, count, has_more, filters_applied, listings "
+            "[{position, listing_id (use it in lot), title, url, lot_source (marketplace or "
+            "amazon_europe), storefront {id, name}, currency, current_bid, bids, "
+            "unique_bidders, retail_value, buy_now {available, ends_at}, pricing_strategy, "
+            "listing_type, start_time, end_time, condition, inventory_type, categories, "
+            "lot_categories [{category, percent_by_quantity, percent_by_retail_value}], "
+            "units, pallets, manufacturers, models, shipment_type, transport_mode, "
+            "allowed_shipment_types, has_manifest, deal (B-Stock's Great / Good / Fair Price "
+            "badge), location {city, state, country, region}, image}] and notes. Amounts are "
+            "in each listing's currency. Open listings: closed and sold lots and their final "
+            "prices are not available. Search suggestions are not offered. No results is an "
+            "empty 200 (charged). 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 1-10 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "q",
+                "Optional[str]",
+                doc=(
+                    "Keywords. Omitted: every open listing (filters and sort still apply)."
+                ),
+            ),
+            Param(
+                "storefront",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "A retailer marketplace on B-Stock: storefronts[].id, storefronts[].value "
+                    "or storefronts[].name from the storefronts endpoint (e.g. Target, "
+                    "Walmart, The Home Depot, Amazon Europe). One value or a list of up to 10 "
+                    "(any of them)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Top-level category: categories[].value from the filters endpoint (e.g. "
+                    "Electronics, Cell Phones, Home & Garden). One value or a list of up to "
+                    "10 (any of them)."
+                ),
+            ),
+            Param(
+                "subcategory",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Second-level category: subcategories[].value from the filters endpoint "
+                    "(e.g. Laptops, Accessories). One value or a list of up to 10 (any of "
+                    "them)."
+                ),
+            ),
+            Param(
+                "condition",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Lot condition: conditions[].value (New, Like New, Used Good, Used Fair, "
+                    "Mixed, Salvage ...). One value or a list of up to 10 (any of them)."
+                ),
+            ),
+            Param(
+                "inventory_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Inventory type: inventory_types[].value (Customer Returns, Overstock, "
+                    "Shelf Pulls, Mixed/Other ...). One value or a list of up to 10 (any of "
+                    "them)."
+                ),
+            ),
+            Param(
+                "buying_format",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "How the lot is sold: AUCTION, BUY_NOW, MAKE_AN_OFFER. One value or a "
+                    "list of up to 10 (any of them)."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Where the lot ships from: regions[].value from the filters endpoint "
+                    "(\"GA/US\" a US state, \"ON/CA\" a Canadian province, \"/ES\" a European "
+                    "country). One value or a list of up to 10 (any of them)."
+                ),
+            ),
+            Param(
+                "shipment_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Shipment size: LTL, PARCEL, Truckload. One value or a list of up to 10 "
+                    "(any of them)."
+                ),
+            ),
+            Param(
+                "manufacturer",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Manufacturer as B-Stock lists it: manufacturers[].value from the filters "
+                    "endpoint. One value or a list of up to 10 (any of them)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["recommended", "end_time", "relevance"]]',
+                doc=(
+                    "recommended (B-Stock's default order; the default without q), end_time "
+                    "(soonest closing at the top) or relevance (needs q; the default with q)."
+                ),
+            ),
+            Param(
+                "limit",
+                "Optional[int]",
+                doc=(
+                    "Listings per call, 1-200 (default 20)."
+                ),
+            ),
+            Param(
+                "offset",
+                "Optional[int]",
+                doc=(
+                    "Listings to skip, 0-10000 (default 0): offset + limit pages through "
+                    "total."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="bstock_lot",
+        namespace="bstock",
+        method="lot",
+        http="POST",
+        path="/api/v1/bstock/lot",
+        summary=(
+            "One lot of B-Stock (bstock.com, the liquidation marketplace where retailers and "
+            "brands such as Target, Walmart, Amazon, The Home Depot and Best Buy sell "
+            "customer returns and overstock by the pallet or truckload). Scavio fetches the "
+            "public B-Stock pages on request, as a visitor who is not signed in sees them. By "
+            "listing id or link: requested_id, listing_id, listing_number, title, url, "
+            "lot_source, status, storefront {id, name, slug}, currency, pricing_strategy, "
+            "listing_type, purchasing_starts, purchasing_ends, auction {state, start_price, "
+            "current_bid, next_minimum_bid, bids, unique_bidders, start_time, end_time, "
+            "initial_end_time, extended, closed, canceled, buying_format_sequence, buy_now "
+            "{enabled, price, starts_at, ends_at}}, views, deal, retail_value, units, "
+            "pallets, condition, conditions, inventory_types, packaging, categories, "
+            "manufacturers, models (the seller's breakdown with quantity and shares), "
+            "description, location {city, state, state_code, country, country_code}, shipping "
+            "{transport_mode, allowed_shipment_types, truck_count, hazmat, note}, images, "
+            "seller_terms_url, manifest {items_total, preview_count, full_manifest, preview "
+            "[{description, quantity, unit_retail, ext_retail, condition, categories, "
+            "seller_category, brand, model, ids, attributes, seller_grade, comments}]} and "
+            "notes. The manifest preview is the manifest rows B-Stock shows publicly (up to "
+            "10); the full manifest needs a signed-in buyer account. An Amazon Europe lot (a "
+            "numeric id) returns what its public page shows: title, currency, status, "
+            "current_bid, bids, next_minimum_bid, retail_value, units and end_time; the rest "
+            "needs a buyer account. Make-an-offer listings (pricing_strategy MAKE_AN_OFFER) "
+            "show their details to signed-in buyers: lot answers them, like an unknown id, "
+            "with a charged 404 (their search listing carries the summary). An unknown lot is "
+            "a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 3-45 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "listings[].listing_id: a B-Stock listing id (24 hex characters), or the "
+                    "number of an Amazon Europe lot (lot_source amazon_europe)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A bstock.com listing link (listings[].url) instead of id."
+                ),
+            ),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="bstock_storefronts",
+        namespace="bstock",
+        method="storefronts",
+        http="POST",
+        path="/api/v1/bstock/storefronts",
+        summary=(
+            "The retailer and brand marketplaces of B-Stock (bstock.com, the liquidation "
+            "marketplace where retailers and brands such as Target, Walmart, Amazon, The Home "
+            "Depot and Best Buy sell customer returns and overstock by the pallet or "
+            "truckload). Scavio fetches the public B-Stock pages on request, as a visitor who "
+            "is not signed in sees them. The storefronts with open listings right now: count, "
+            "total_open_listings, storefronts [{id, name, value, open_listings, lot_source}] "
+            "and notes. id, value or name is search's storefront input. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 1-10 s; "
+            "set a client timeout of at least 180 s."
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="bstock_filters",
+        namespace="bstock",
+        method="filters",
+        http="POST",
+        path="/api/v1/bstock/filters",
+        summary=(
+            "The search filters of B-Stock (bstock.com, the liquidation marketplace where "
+            "retailers and brands such as Target, Walmart, Amazon, The Home Depot and Best "
+            "Buy sell customer returns and overstock by the pallet or truckload). Scavio "
+            "fetches the public B-Stock pages on request, as a visitor who is not signed in "
+            "sees them. with B-Stock's counts of open listings: total_open_listings, "
+            "categories, subcategories, conditions, inventory_types, buying_formats, "
+            "shipment_types, regions [{value, path, count}], manufacturers, listing_types and "
+            "deals ([{value, count}] each), storefront_count and notes. Each value is the "
+            "input of the search field of the same name. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 1-10 s; set a client "
+            "timeout of at least 180 s."
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
+# McMaster-Carr: 3 endpoints on /api/v1/mcmaster.
+_MCMASTER_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="mcmaster_product",
+        namespace="mcmaster",
+        method="product",
+        http="POST",
+        path="/api/v1/mcmaster/product",
+        summary=(
+            "One part of McMaster-Carr (mcmaster.com, the US industrial-supply catalog). "
+            "Scavio fetches the public McMaster-Carr page on request. United States, prices "
+            "in USD as the site shows them to a visitor who is not signed in. By part number "
+            "or part link. Returns country, currency, part_number, requested_part_number, "
+            "title, name, detail, url, product_family, part_family, catalog_page, "
+            "catalog_status, unit_of_measure (Each or Pack of N), package_quantity, price, "
+            "price_text and price_unit (the price as shown, for one order unit), "
+            "package_price (that price when sold in a pack), unit_price (the price of one "
+            "piece: the price when sold Each, else the per-piece price the site shows), "
+            "per_piece_price_text, price_levels [{quantity, price, price_text}] (quantity "
+            "breaks when listed), delivery_message, stock_message (the delivery promise "
+            "shown; no stock counts are published), discontinued, discontinued_message, "
+            "replacement_part_number, specifications [{name, value, group}], compliance "
+            "{country_of_origin, dfars, eccn, schedule_b, rohs, reach, usmca_qualifying}, "
+            "images, breadcrumbs [{name, slug, url}], compatible_products [{group, name, "
+            "part_number, description, price, price_text, unit_of_measure, product_count}], "
+            "note. When the specification table does not arrive, specifications and "
+            "compliance are null and the note says so. McMaster-Carr sells under its own part "
+            "numbers: no manufacturer part numbers or UPCs are shown, and it has no reviews, "
+            "stores, store stock or deals. CAD and PDF files are not returned. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "8-30 s; a part number the site does not know is not answered (an unbilled 502 "
+            "after about 2 minutes); set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "part_number",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A McMaster-Carr part number (items[].part_number of a search, e.g. "
+                    "91251A540)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A mcmaster.com part link (https://www.mcmaster.com/<part number>/), "
+                    "instead of part_number."
+                ),
+            ),
+        ),
+        one_of=(("part_number", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="mcmaster_search",
+        namespace="mcmaster",
+        method="search",
+        http="POST",
+        path="/api/v1/mcmaster/search",
+        summary=(
+            "A keyword page or a category page of McMaster-Carr (mcmaster.com, the US "
+            "industrial-supply catalog). Scavio fetches the public McMaster-Carr page on "
+            "request. United States, prices in USD as the site shows them to a visitor who is "
+            "not signed in. By query or category slug. Returns country, currency, query, "
+            "category, url, redirected_to ({type: product, part_number, url} when the "
+            "keywords are a part number; product then holds that part), heading, total (the "
+            "products the site counts for the page), rows_on_page, offset, per_page, count, "
+            "has_more, items [{position, part_number, url, currency, presentation, groups, "
+            "price, price_basis (Pkg. or Each, as the table labels the price), "
+            "package_quantity, package_price, unit_price (for Pkg. rows package_price / "
+            "package_quantity, computed by Scavio), prices [{label, price}] (further price "
+            "columns), specs [{name, value}]}] (the part-number rows of the product tables "
+            "the page opens on load, per_page at a time), breadcrumbs, product_families "
+            "[{name, product_count, slug, url}] (the family tiles: a slug is the category "
+            "input of the next call), related_categories, presentations [{name, row_count}], "
+            "facets [{name, value_count, values [{value, product_count, slug}]}] (up to 50 "
+            "values each), note. Search-box suggestions are not returned. The largest "
+            "families (socket head screws, about 29,000 products on one page) can exceed the "
+            "time limit: narrow them with a family tile or facet slug. McMaster-Carr sells "
+            "under its own part numbers: no manufacturer part numbers or UPCs are shown, and "
+            "it has no reviews, stores, store stock or deals. CAD and PDF files are not "
+            "returned. 1 credit. A not-found is charged; failed upstream calls and refused "
+            "inputs are not. Listing pages are large and slow: usually 10-80 s, up to about "
+            "240 s; set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "Keywords, as typed into the McMaster-Carr search box (a part number "
+                    "answers with that part)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A category slug instead of query: categories[].slug, or a result's "
+                    "product_families[].slug, related_categories[].slug, "
+                    "facets[].values[].slug or breadcrumbs[].slug (e.g. "
+                    "hose-clamps/worm-drive-clamps~~), or a mcmaster.com/products/ link."
+                ),
+            ),
+            Param(
+                "per_page",
+                "Optional[int]",
+                doc=(
+                    "Part-number rows per answer, 1 to 100 (default 50)."
+                ),
+            ),
+            Param(
+                "offset",
+                "Optional[int]",
+                doc=(
+                    "Rows to skip on the page (default 0): the next answer starts at offset + "
+                    "count while has_more is true."
+                ),
+            ),
+        ),
+        one_of=(("query", "category"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="mcmaster_categories",
+        namespace="mcmaster",
+        method="categories",
+        http="POST",
+        path="/api/v1/mcmaster/categories",
+        summary=(
+            "The top level of the catalogue of McMaster-Carr (mcmaster.com, the US "
+            "industrial-supply catalog). Scavio fetches the public McMaster-Carr page on "
+            "request. As the home page lists it: count, categories [{name, slug, url}]; slug "
+            "is the category input of the search endpoint, which returns the deeper levels "
+            "(product families with product counts). 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 3-40 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
+# Sally Beauty: 9 endpoints on /api/v1/sallybeauty.
+_SALLYBEAUTY_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="sallybeauty_search",
+        namespace="sallybeauty",
+        method="search",
+        http="POST",
+        path="/api/v1/sallybeauty/search",
+        summary=(
+            "Search Sally Beauty (sallybeauty.com, the US beauty supply chain, and "
+            "sallybeauty.ca) or its licensed-professional arm CosmoProf (cosmoprofbeauty.com, "
+            "cosmoprofbeauty.ca), chosen by site. Scavio fetches the public page on request. "
+            "Sally Beauty UK / Ireland is a separate storefront and is not covered. Sally "
+            "Beauty prices in USD (sally-us) or CAD (sally-ca) as shown to a visitor who is "
+            "not signed in; CosmoProf prices and stock are for signed-in licensed "
+            "professionals, so they are null. By keyword, up to 24 per page, sorted and "
+            "filtered by any facet (brand, product type, benefits, color, rating, clearance) "
+            "or a price range. Returns page, page_size, sort, total, total_pages, has_more, "
+            "count, items [{position, product_id, master_product_id (CosmoProf), name, brand, "
+            "category, url, image, price, list_price (the regular price when a lower price "
+            "applies), price_min / price_max (a range across sizes), currency, on_sale, "
+            "clearance, promotions (callouts such as 20% off), rating, review_count, "
+            "variation_count, variation_type (size, color), sizes (CosmoProf), "
+            "pickup_eligible, same_day_delivery_eligible (CosmoProf)}], facets [{name, "
+            "attribute_id, values [{value, count, selected}]}] (send to filters), "
+            "price_ranges [{label, min, max, count}] and filters_applied. When the site sends "
+            "a keyword to one of its categories or straight to a product, redirected_to "
+            "{type, category or product_id, url} says so (a category is then listed with your "
+            "paging and sort). 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 3-20 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Search keywords."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_asc", "price_desc", "top_rated", "brand", "newest"]]',
+                doc=(
+                    "best_match (the default, the site's Top Sellers), price_asc, price_desc; "
+                    "top_rated on Sally Beauty; brand and newest on CosmoProf."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based. total_pages reports the last one."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24. Defaults to 24."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters, at most 6: {attribute_id: value or [values]}, exactly as "
+                    "facets[].attribute_id and facets[].values[].value list them (e.g. "
+                    "ValueBrand, ProductType, Features, onClearance on Sally Beauty; "
+                    "brandcustom, productLine on CosmoProf)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the site's currency (Sally Beauty sites; CosmoProf "
+                    "shows no prices)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price (Sally Beauty sites)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_category",
+        namespace="sallybeauty",
+        method="category",
+        http="POST",
+        path="/api/v1/sallybeauty/category",
+        summary=(
+            "One category of Sally Beauty (sallybeauty.com, the US beauty supply chain, and "
+            "sallybeauty.ca) or its licensed-professional arm CosmoProf (cosmoprofbeauty.com, "
+            "cosmoprofbeauty.ca), chosen by site. Scavio fetches the public page on request. "
+            "Sally Beauty UK / Ireland is a separate storefront and is not covered. Sally "
+            "Beauty prices in USD (sally-us) or CAD (sally-ca) as shown to a visitor who is "
+            "not signed in; CosmoProf prices and stock are for signed-in licensed "
+            "professionals, so they are null. By category id, sorted and filtered like "
+            "search, with category_name. Returns page, page_size, sort, total, total_pages, "
+            "has_more, count, items [{position, product_id, master_product_id (CosmoProf), "
+            "name, brand, category, url, image, price, list_price (the regular price when a "
+            "lower price applies), price_min / price_max (a range across sizes), currency, "
+            "on_sale, clearance, promotions (callouts such as 20% off), rating, review_count, "
+            "variation_count, variation_type (size, color), sizes (CosmoProf), "
+            "pickup_eligible, same_day_delivery_eligible (CosmoProf)}], facets [{name, "
+            "attribute_id, values [{value, count, selected}]}] (send to filters), "
+            "price_ranges [{label, min, max, count}] and filters_applied. An unknown category "
+            "id is a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. Usually 3-20 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A category id as the site's menu names it, e.g. hair-color, shampoo, "
+                    "nails-clearance (Sally Beauty) or shampoo (CosmoProf)."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_asc", "price_desc", "top_rated", "brand", "newest"]]',
+                doc=(
+                    "best_match (the default, the site's Top Sellers), price_asc, price_desc; "
+                    "top_rated on Sally Beauty; brand and newest on CosmoProf."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based. total_pages reports the last one."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24. Defaults to 24."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters, at most 6: {attribute_id: value or [values]}, exactly as "
+                    "facets[].attribute_id and facets[].values[].value list them (e.g. "
+                    "ValueBrand, ProductType, Features, onClearance on Sally Beauty; "
+                    "brandcustom, productLine on CosmoProf)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the site's currency (Sally Beauty sites; CosmoProf "
+                    "shows no prices)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price (Sally Beauty sites)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_clearance",
+        namespace="sallybeauty",
+        method="clearance",
+        http="POST",
+        path="/api/v1/sallybeauty/clearance",
+        summary=(
+            "Clearance products of Sally Beauty (sallybeauty.com, the US beauty supply chain, "
+            "and sallybeauty.ca) or its licensed-professional arm CosmoProf "
+            "(cosmoprofbeauty.com, cosmoprofbeauty.ca), chosen by site. Scavio fetches the "
+            "public page on request. Sally Beauty UK / Ireland is a separate storefront and "
+            "is not covered. Sally Beauty prices in USD (sally-us) or CAD (sally-ca) as shown "
+            "to a visitor who is not signed in; CosmoProf prices and stock are for signed-in "
+            "licensed professionals, so they are null. Sally Beauty by department (hair_care, "
+            "hair_color, nails, tools, beauty), CosmoProf in one list; sorted and filtered "
+            "like search. On clearance items price is the clearance price and list_price the "
+            "regular price. Returns page, page_size, sort, total, total_pages, has_more, "
+            "count, items [{position, product_id, master_product_id (CosmoProf), name, brand, "
+            "category, url, image, price, list_price (the regular price when a lower price "
+            "applies), price_min / price_max (a range across sizes), currency, on_sale, "
+            "clearance, promotions (callouts such as 20% off), rating, review_count, "
+            "variation_count, variation_type (size, color), sizes (CosmoProf), "
+            "pickup_eligible, same_day_delivery_eligible (CosmoProf)}], facets [{name, "
+            "attribute_id, values [{value, count, selected}]}] (send to filters), "
+            "price_ranges [{label, min, max, count}] and filters_applied. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "3-20 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "department",
+                'Optional[Literal["hair_care", "hair_color", "nails", "tools", "beauty"]]',
+                doc=(
+                    "Sally Beauty sites: hair_care (the default), hair_color, nails, tools or "
+                    "beauty. CosmoProf has one clearance category: leave it out."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["best_match", "price_asc", "price_desc", "top_rated", "brand", "newest"]]',
+                doc=(
+                    "best_match (the default, the site's Top Sellers), price_asc, price_desc; "
+                    "top_rated on Sally Beauty; brand and newest on CosmoProf."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based. total_pages reports the last one."
+                ),
+            ),
+            Param(
+                "page_size",
+                "Optional[int]",
+                doc=(
+                    "Products per page, 1-24. Defaults to 24."
+                ),
+            ),
+            Param(
+                "filters",
+                "Optional[dict[str, Any]]",
+                doc=(
+                    "Facet filters, at most 6: {attribute_id: value or [values]}, exactly as "
+                    "facets[].attribute_id and facets[].values[].value list them (e.g. "
+                    "ValueBrand, ProductType, Features, onClearance on Sally Beauty; "
+                    "brandcustom, productLine on CosmoProf)."
+                ),
+            ),
+            Param(
+                "price_min",
+                "Optional[float]",
+                doc=(
+                    "Lowest price, in the site's currency (Sally Beauty sites; CosmoProf "
+                    "shows no prices)."
+                ),
+            ),
+            Param(
+                "price_max",
+                "Optional[float]",
+                doc=(
+                    "Highest price (Sally Beauty sites)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_product",
+        namespace="sallybeauty",
+        method="product",
+        http="POST",
+        path="/api/v1/sallybeauty/product",
+        summary=(
+            "One product of Sally Beauty (sallybeauty.com, the US beauty supply chain, and "
+            "sallybeauty.ca) or its licensed-professional arm CosmoProf (cosmoprofbeauty.com, "
+            "cosmoprofbeauty.ca), chosen by site. Scavio fetches the public page on request. "
+            "Sally Beauty UK / Ireland is a separate storefront and is not covered. Sally "
+            "Beauty prices in USD (sally-us) or CAD (sally-ca) as shown to a visitor who is "
+            "not signed in; CosmoProf prices and stock are for signed-in licensed "
+            "professionals, so they are null. Sally Beauty: product_id, master_product_id, "
+            "type (master, variant, standard), name, brand, short_description, url, "
+            "breadcrumb, images, price, list_price, price_range {min, max} (a product with "
+            "sizes), on_sale, clearance {is_clearance, original_price}, availability "
+            "{in_stock, message, out_of_stock_label, online_units (the site's exact count of "
+            "units it can sell online), in_stock_date}, min_order_quantity, "
+            "max_order_quantity, unit, promotions [{id, name, callout, details, type}], "
+            "manufacturer_sku, manufacturer_name, rating, review_count, variations "
+            "[{attribute, values [{sku, label, selectable, selected}]}], specs [{group, name, "
+            "values}], pickup_eligible, same_day_delivery_eligible, ship_to_home and "
+            "no_ship_states. Send a size's sku for that size's price and units. CosmoProf: "
+            "the catalogue facts (name, brand_url, upc, manufacturer, rating, variations with "
+            "each size's sku and upc, ingredients, prop65_warning, badges) with price and "
+            "availability null. An unknown product is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 3-20 s; set a "
+            "client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A product id as items[].product_id lists it, or a size's "
+                    "variations[].values[].sku. Send product_id or url."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on the site (ending in /<product id>.html), instead of "
+                    "product_id; it also sets site."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_stores",
+        namespace="sallybeauty",
+        method="stores",
+        http="POST",
+        path="/api/v1/sallybeauty/stores",
+        summary=(
+            "Stores of Sally Beauty (sallybeauty.com, the US beauty supply chain, and "
+            "sallybeauty.ca) or its licensed-professional arm CosmoProf (cosmoprofbeauty.com, "
+            "cosmoprofbeauty.ca), chosen by site. Scavio fetches the public page on request. "
+            "Sally Beauty UK / Ireland is a separate storefront and is not covered. near a "
+            "ZIP / postal code or a point, within 15, 30, 50 or 100 miles, ordered by "
+            "distance: store_id, name, address {line1, line2, city, state, postal_code, "
+            "country}, latitude, longitude, distance_miles, phone, hours [{day, hours}], "
+            "pickup_eligible and url. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Usually 3-20 s; set a client timeout of at least 180 "
+            "s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "postal_code",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A 5-digit ZIP code (US sites) or a Canadian postal code (Canadian "
+                    "sites); placed on its area's center. Or send latitude + longitude."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "Latitude of the point to search around, with longitude (instead of "
+                    "postal_code)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "Longitude of the point to search around, with latitude."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles: 15, 30, 50, 100 (the site's own choices). Defaults to 15."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_store_stock",
+        namespace="sallybeauty",
+        method="store_stock",
+        http="POST",
+        path="/api/v1/sallybeauty/store-stock",
+        summary=(
+            "In-store stock of one product at the Sally Beauty stores near a ZIP / postal "
+            "code or a point (sally-us, sally-ca): product {product_id, name, brand, url, "
+            "price, currency, online_units}, count, in_stock_count and stores [{store_id, "
+            "name, address, distance_miles, phone, hours, pickup_eligible, url, stock {units "
+            "(the store's exact count), in_stock, status}}], ordered by distance. A product "
+            "with sizes is stocked per size: send a size's sku (a product with sizes is an "
+            "unbilled 400 listing them). CosmoProf sites are refused (400): their store stock "
+            "is for signed-in professionals. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A product id as items[].product_id lists it, or a size's "
+                    "variations[].values[].sku. Send product_id or url."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on the site (ending in /<product id>.html), instead of "
+                    "product_id; it also sets site."
+                ),
+            ),
+            Param(
+                "postal_code",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A 5-digit ZIP code (US sites) or a Canadian postal code (Canadian "
+                    "sites); placed on its area's center. Or send latitude + longitude."
+                ),
+            ),
+            Param(
+                "latitude",
+                "Optional[float]",
+                doc=(
+                    "Latitude of the point to search around, with longitude (instead of "
+                    "postal_code)."
+                ),
+            ),
+            Param(
+                "longitude",
+                "Optional[float]",
+                doc=(
+                    "Longitude of the point to search around, with latitude."
+                ),
+            ),
+            Param(
+                "radius",
+                "Optional[int]",
+                doc=(
+                    "Miles: 15, 30, 50, 100 (the site's own choices). Defaults to 15."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_suggestions",
+        namespace="sallybeauty",
+        method="suggestions",
+        http="POST",
+        path="/api/v1/sallybeauty/suggestions",
+        summary=(
+            "The search box suggestions of Sally Beauty (sallybeauty.com, the US beauty "
+            "supply chain, and sallybeauty.ca) or its licensed-professional arm CosmoProf "
+            "(cosmoprofbeauty.com, cosmoprofbeauty.ca), chosen by site. Scavio fetches the "
+            "public page on request. Sally Beauty UK / Ireland is a separate storefront and "
+            "is not covered. for what a shopper has typed: phrases, products [{product_id, "
+            "name, brand, category, url, image, price, currency, rating, review_count, "
+            "in_stock}], brands and popular_searches. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not. Usually 3-20 s; set a client "
+            "timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "What a shopper has typed so far."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_brands",
+        namespace="sallybeauty",
+        method="brands",
+        http="POST",
+        path="/api/v1/sallybeauty/brands",
+        summary=(
+            "The brand directory of Sally Beauty (sallybeauty.com, the US beauty supply "
+            "chain, and sallybeauty.ca) or its licensed-professional arm CosmoProf "
+            "(cosmoprofbeauty.com, cosmoprofbeauty.ca), chosen by site. Scavio fetches the "
+            "public page on request. Sally Beauty UK / Ireland is a separate storefront and "
+            "is not covered. brands [{name, slug, url}] (about 370 on Sally Beauty, 140 on "
+            "CosmoProf). List a brand's products with search filters (ValueBrand on Sally "
+            "Beauty, brandcustom on CosmoProf). 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 3-20 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        params=(
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="sallybeauty_reviews",
+        namespace="sallybeauty",
+        method="reviews",
+        http="POST",
+        path="/api/v1/sallybeauty/reviews",
+        summary=(
+            "Customer reviews and questions of one product of Sally Beauty (sally-us, "
+            "sally-ca; CosmoProf sites are refused with a 400). Scavio fetches the public "
+            "page on request. Page 1 as the product page shows it: average_rating, "
+            "total_reviews, rating_distribution {1-5}, recommended {yes, no}, total, count, "
+            "reviews [{review_id, rating, title, text, submitted_at, recommended, "
+            "helpful_votes, unhelpful_votes, verified_purchaser, incentivized, syndicated, "
+            "syndication_source, photos, secondary_ratings, brand_response}] (8), "
+            "total_questions, total_answers and questions [{question_id, question, details, "
+            "submitted_at, answer_count, answers [{answer_id, text, submitted_at, by_brand, "
+            "best_answer, helpful_votes, unhelpful_votes}]}] (up to 10). No further pages. No "
+            "reviewer or answerer names, locations or personal details. An unknown product is "
+            "a charged 404. 1 credit. Usually 30-120 s; set a client timeout of at least 240 "
+            "s."
+        ),
+        params=(
+            Param(
+                "product_id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A product id as items[].product_id lists it, or a size's "
+                    "variations[].values[].sku. Send product_id or url."
+                ),
+            ),
+            Param(
+                "site",
+                'Optional[Literal["sally-us", "sally-ca", "cosmoprof-us", "cosmoprof-ca"]]',
+                doc=(
+                    "sally-us (sallybeauty.com, USD, the default), sally-ca (sallybeauty.ca, "
+                    "CAD), cosmoprof-us (cosmoprofbeauty.com) or cosmoprof-ca "
+                    "(cosmoprofbeauty.ca). CosmoProf sells to licensed professionals: no "
+                    "prices or stock."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link on the site (ending in /<product id>.html), instead of "
+                    "product_id; it also sets site."
+                ),
+            ),
+        ),
+        one_of=(("product_id", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+# Liquidation.com: 4 endpoints on /api/v1/liquidation.
+_LIQUIDATION_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="liquidation_search",
+        namespace="liquidation",
+        method="search",
+        http="POST",
+        path="/api/v1/liquidation/search",
+        summary=(
+            "Search the open auctions of Liquidation.com (the US online auction marketplace "
+            "of Liquidity Services where retailers, brands and marketplace sellers sell "
+            "customer returns, overstock and shelf pulls by the package, pallet or "
+            "truckload). Scavio fetches the public Liquidation.com pages on request, as a "
+            "visitor who is not signed in sees them. By keyword, category, lot size, "
+            "condition, US region, auction type and seller (at least one), sorted by "
+            "close_time, current_bid, items, title (asc / desc) or relevance, 27 per page by "
+            "default (up to 100), paged with page. Returns query, filters_applied, sort, "
+            "order, page, per_page, total, count, has_more, results [{position, id (use it in "
+            "lot and manifest), title, url, image, seller, closing_text, closes_at, "
+            "location_state, condition, packages {count, unit}, items, currency, current_bid, "
+            "sealed_bid, bids, watchers, views, est_retail}], facets (the site's counts by "
+            "category, condition, region, state, lot_size, warehouse, seller, retail_price, "
+            "number_of_bids, shipping, auction_type and lot_price) and notes. Amounts in USD, "
+            "or CAD for lots in Canadian warehouses. Search suggestions are not offered. No "
+            "results is an empty 200 (charged). 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 3-60 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        params=(
+            Param(
+                "q",
+                "Optional[str]",
+                doc=(
+                    "Keywords (title and description)."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "A top category: id or name (Appliances 1700, Clothing & Accessories "
+                    "1001, Computers & Networking 1002, Consumer Electronics 1004, Furniture "
+                    "1600, General Merchandise 1005, Health & Beauty 1800, Holiday & Seasonal "
+                    "1045, Home Improvement 1900, Housewares 1006, Jewelry & Watches 1011, "
+                    "Mystery Box 1017, Tools & Machinery 1003). Up to 8. One value or a list "
+                    "(any of them)."
+                ),
+            ),
+            Param(
+                "lot_size",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Lot size: package, pallet, truckload, large_item. One value or a list "
+                    "(any of them)."
+                ),
+            ),
+            Param(
+                "condition",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Condition: new, used, refurbished, returns, shelf_pulls, salvage, "
+                    "damaged, scratch_and_dent. One value or a list (any of them)."
+                ),
+            ),
+            Param(
+                "region",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "US region of the warehouse: northeast, midwest, west, south. One value "
+                    "or a list (any of them)."
+                ),
+            ),
+            Param(
+                "auction_type",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Auction type: standard, fixed_price, sealed_bid, mixed_format. One value "
+                    "or a list (any of them)."
+                ),
+            ),
+            Param(
+                "seller",
+                "Optional[str]",
+                doc=(
+                    "A seller handle as Liquidation.com shows it (results[].seller, lot "
+                    "seller.handle or facets.seller[].value), e.g. Amazon FBA, "
+                    "Newegg_Business, Titan Electronics."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["close_time", "current_bid", "items", "relevance", "title"]]',
+                doc=(
+                    "close_time (soonest closing at the top by default), current_bid (highest "
+                    "at the top), items (items per lot, most at the top), title (A-Z) or "
+                    "relevance (needs q; the site's order with q). Omitted: the site's "
+                    "default order."
+                ),
+            ),
+            Param(
+                "order",
+                'Optional[Literal["asc", "desc"]]',
+                doc=(
+                    "With sort (not relevance): asc or desc (default asc for close_time and "
+                    "title, desc for current_bid and items)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-500 (default 1)."
+                ),
+            ),
+            Param(
+                "per_page",
+                "Optional[int]",
+                doc=(
+                    "Lots per page, 1-100 (default 27, the site's default)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="liquidation_lot",
+        namespace="liquidation",
+        method="lot",
+        http="POST",
+        path="/api/v1/liquidation/lot",
+        summary=(
+            "One open auction of Liquidation.com (the US online auction marketplace of "
+            "Liquidity Services where retailers, brands and marketplace sellers sell customer "
+            "returns, overstock and shelf pulls by the package, pallet or truckload). Scavio "
+            "fetches the public Liquidation.com pages on request, as a visitor who is not "
+            "signed in sees them. By auction id or link: requested_id, id, title, url, "
+            "status, closes_at (ISO 8601 with the America/New_York offset), closes_text, "
+            "time_left, currency, current_bid, minimum_bid, buy_now_price, sealed_bid, bids, "
+            "bidders, watchers, views, auction_type, buyers_premium_pct, seller {handle, "
+            "marketplace_seller, selling_for, lifetime_completed_transactions, past_90_days "
+            "{completed_transactions, cancelled_transactions_pct, average_days_to_ship, "
+            "honored_disputes_pct}}, fulfilled_by, location {city, state}, condition, "
+            "condition_definition, category, subcategories, quantity, quantity_variance_pct, "
+            "est_retail_per_unit, bid_price_per_unit, size_class, packages {count, unit}, "
+            "available_lots, shipping {terms, minimum_fee, weight_lbs, "
+            "dimensional_weight_lbs, weight_text, ship_from_zip3, restrictions}, "
+            "has_manifest, images, description (plain text), attributes and notes. Bidder "
+            "identities are not returned. A closed or unknown auction is a charged 404 "
+            "(closed lists a seller's closed lots). 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 3-60 s; set a client timeout "
+            "of at least 180 s."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "results[].id: a Liquidation.com auction id (digits)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A liquidation.com auction link (/auction/view?id=<id>) instead of id."
+                ),
+            ),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="liquidation_manifest",
+        namespace="liquidation",
+        method="manifest",
+        http="POST",
+        path="/api/v1/liquidation/manifest",
+        summary=(
+            "The item manifest of one auction of Liquidation.com (the US online auction "
+            "marketplace of Liquidity Services where retailers, brands and marketplace "
+            "sellers sell customer returns, overstock and shelf pulls by the package, pallet "
+            "or truckload). Scavio fetches the public Liquidation.com pages on request, as a "
+            "visitor who is not signed in sees them. By auction id or link: id, lot_url, "
+            "columns [{header (as the seller wrote it), key}], row_count, truncated, rows "
+            "(one object per item, keyed by columns[].key: description, quantity, brand, "
+            "model, category, upc, asin, lpn and the seller's price columns such as "
+            "retail_price, ext_retail_price, total_retail_price) and notes. Columns differ by "
+            "seller. A lot without a manifest is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Usually 1-10 s; set a "
+            "client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "id",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "results[].id: a Liquidation.com auction id (digits)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A liquidation.com auction link (/auction/view?id=<id>) instead of id."
+                ),
+            ),
+        ),
+        one_of=(("id", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="liquidation_closed",
+        namespace="liquidation",
+        method="closed",
+        http="POST",
+        path="/api/v1/liquidation/closed",
+        summary=(
+            "Closed auctions of one seller on Liquidation.com (the US online auction "
+            "marketplace of Liquidity Services where retailers, brands and marketplace "
+            "sellers sell customer returns, overstock and shelf pulls by the package, pallet "
+            "or truckload). Scavio fetches the public Liquidation.com pages on request, as a "
+            "visitor who is not signed in sees them. By seller (required), optionally "
+            "narrowed by category, 27 per page by default (up to 100): filters_applied, page, "
+            "per_page, total, count, has_more, results [{position, id, title, url, image, "
+            "seller, location_state, condition, packages, items, currency, final_bid, "
+            "sealed_bid, bids, views, est_retail}], facets and notes. The site shows no close "
+            "date for closed lots and does not apply keywords to them. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 3-60 s; "
+            "set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "seller",
+                "str",
+                required=True,
+                doc=(
+                    "Required. A seller handle as Liquidation.com shows it (results[].seller, "
+                    "lot seller.handle or facets.seller[].value), e.g. Amazon FBA, "
+                    "Newegg_Business, Titan Electronics."
+                ),
+            ),
+            Param(
+                "category",
+                "Optional[Union[str, list[str]]]",
+                doc=(
+                    "Narrows the seller's closed lots. A top category: id or name (Appliances "
+                    "1700, Clothing & Accessories 1001, Computers & Networking 1002, Consumer "
+                    "Electronics 1004, Furniture 1600, General Merchandise 1005, Health & "
+                    "Beauty 1800, Holiday & Seasonal 1045, Home Improvement 1900, Housewares "
+                    "1006, Jewelry & Watches 1011, Mystery Box 1017, Tools & Machinery 1003). "
+                    "Up to 8. One value or a list (any of them)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-500 (default 1)."
+                ),
+            ),
+            Param(
+                "per_page",
+                "Optional[int]",
+                doc=(
+                    "Lots per page, 1-100 (default 27, the site's default)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -62903,6 +64208,11 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_GLOBALINDUSTRIAL_ENDPOINTS,
     *_MSC_ENDPOINTS,
     *_ZORO_ENDPOINTS,
+    # ====== batch 8 wave 2 2026-11-28: 4 platforms (B-Stock, McMaster-Carr, Sally Beauty, Liquidation.com) ======
+    *_BSTOCK_ENDPOINTS,
+    *_MCMASTER_ENDPOINTS,
+    *_SALLYBEAUTY_ENDPOINTS,
+    *_LIQUIDATION_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -69907,6 +71217,10 @@ NAMESPACES: tuple[str, ...] = (
     "globalindustrial",
     "msc",
     "zoro",
+    "bstock",
+    "mcmaster",
+    "sallybeauty",
+    "liquidation",
 )
 
 
