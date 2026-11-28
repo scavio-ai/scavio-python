@@ -5597,19 +5597,24 @@ class _CostcoNamespace:
         *,
         item_ids: Optional[list[str]] = None,
         country: Optional[Literal["us", "ca", "uk", "au", "mx", "jp", "kr", "tw"]] = None,
+        include_online_stock: Optional[bool] = None,
+        zip: Optional[str] = None,
         **extra: Any,
     ) -> dict[str, Any]:
-        """Full details for up to 20 Costco items: description, features, specifications, variants, member-only and purchase limits, delivery fee, and promotions with start and end dates. Pass item_id for one item or item_ids for several.
+        """Full details for up to 20 Costco items: description, features, specifications, variants, member-only and purchase limits, delivery fee, and promotions with start and end dates. Pass item_id for one item or item_ids for several. With include_online_stock, each item adds online_stock: the live ship-to-home status (in_stock, low_stock, out_of_stock, back_order, presell, ship_restricted, or no_record) and estimated_delivery_date for zip, including items search does not return.
 
-        Costs 1 credit. Returns the API response as a dict.
+        1 credit per call. With include_online_stock, 1 credit per 5 lookups counting the
+        product call: 1-4 ids = 1, 9 = 2, 20 = 5. Returns the API response as a dict.
 
         Args:
             item_id: Costco item number or product id, or a costco.com product URL.
             item_ids: Up to 20 item numbers / product ids in one call (us and ca only; the other countries look up one product per call).
             country: Costco site ('us' default). us and ca support every filter; uk, au, mx, jp, kr and tw support keyword, sort and paging only.
+            include_online_stock: Add each item's live ship-to-home stock and estimated delivery date as online_stock (us and ca only). buyable is a catalog flag, not stock.
+            zip: Delivery destination for include_online_stock: a 5-digit US ZIP, or a Canadian postal code with country 'ca'. Defaults to 98101 (us) / M5V 2T6 (ca). Only with include_online_stock.
             extra: Additional wire parameters passed through verbatim.
         """
-        return self._client._call("costco_product", {"item_id": item_id, "item_ids": item_ids, "country": country}, extra)
+        return self._client._call("costco_product", {"item_id": item_id, "item_ids": item_ids, "country": country, "include_online_stock": include_online_stock, "zip": zip}, extra)
 
     def prices(
         self,

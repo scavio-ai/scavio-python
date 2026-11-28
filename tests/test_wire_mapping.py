@@ -614,6 +614,7 @@ BODY_PRICED = {"walmart", "threads", "kuaishou", "instagram", "zara", "_core"}
 # Namespaces priced per endpoint: only these keys scale with the body
 # (warehouse count, or country "ca"); the rest of the namespace is flat.
 BODY_PRICED_KEYS = {
+    "costco_product",
     "costco_prices",
     "costco_availability",
     "costco_warehouses",
@@ -968,7 +969,7 @@ def test_costco_clearance_price_codes_are_a_list(monkeypatch):
         client.costco.clearance("1062")
 
 
-@pytest.mark.parametrize("method", ["prices", "availability", "warehouses", "gas"])
+@pytest.mark.parametrize("method", ["product", "prices", "availability", "warehouses", "gas"])
 def test_costco_body_priced_docstrings_do_not_claim_a_flat_price(method):
     from scavio._namespaces_sync import _CostcoNamespace
 
@@ -12496,3 +12497,9 @@ def test_batch8w4_1128_credits_notes_and_params():
     assert "us.rs-online.com" in ENDPOINTS["rscomponents_search"].summary
     assert "unit_price_inc_vat" in ENDPOINTS["rscomponents_product"].summary
     assert "not applicable as filters" in ENDPOINTS["rscomponents_category"].summary
+
+
+
+def test_costco_product_carries_the_online_stock_params():
+    params = {p.name for p in ENDPOINTS["costco_product"].params}
+    assert {"include_online_stock", "zip"} <= params

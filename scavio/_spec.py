@@ -53583,7 +53583,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
         summary=(
             "Full details for up to 20 Costco items: description, features, specifications, "
             "variants, member-only and purchase limits, delivery fee, and promotions with start "
-            "and end dates. Pass item_id for one item or item_ids for several."
+            "and end dates. Pass item_id for one item or item_ids for several. With "
+            "include_online_stock, each item adds online_stock: the live ship-to-home status "
+            "(in_stock, low_stock, out_of_stock, back_order, presell, ship_restricted, or no_record) "
+            "and estimated_delivery_date for zip, including items search does not return."
         ),
         params=(
             # item_id stays positional (with a None default) so the common
@@ -53600,9 +53603,24 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
                 "countries look up one product per call).",
             ),
             _COSTCO_ANY_COUNTRY,
+            _bool(
+                "include_online_stock",
+                "Add each item's live ship-to-home stock and estimated delivery date as online_stock "
+                "(us and ca only). buyable is a catalog flag, not stock.",
+            ),
+            _str(
+                "zip",
+                "Delivery destination for include_online_stock: a 5-digit US ZIP, or a Canadian postal "
+                "code with country 'ca'. Defaults to 98101 (us) / M5V 2T6 (ca). Only with "
+                "include_online_stock.",
+            ),
         ),
         one_of=(("item_id", "item_ids"),),
         credits=1,
+        credits_note=(
+            "1 credit per call. With include_online_stock, 1 credit per 5 lookups counting the "
+            "product call: 1-4 ids = 1, 9 = 2, 20 = 5."
+        ),
     ),
     Endpoint(
         key="costco_prices",
