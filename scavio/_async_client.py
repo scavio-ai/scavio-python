@@ -118,6 +118,7 @@ from ._namespaces_async import (
     _AsyncMarksNamespace,
     _AsyncMcmasterNamespace,
     _AsyncMediaExpertNamespace,
+    _AsyncMeijerNamespace,
     _AsyncMenardsNamespace,
     _AsyncMercadoLibreNamespace,
     _AsyncMercariNamespace,
@@ -462,6 +463,7 @@ class AsyncScavioClient:
         self.digikey = _AsyncDigikeyNamespace(self)
         self.mouser = _AsyncMouserNamespace(self)
         self.rscomponents = _AsyncRscomponentsNamespace(self)
+        self.meijer = _AsyncMeijerNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

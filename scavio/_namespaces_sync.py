@@ -208,6 +208,7 @@ __all__ = [
     "_DigikeyNamespace",
     "_MouserNamespace",
     "_RscomponentsNamespace",
+    "_MeijerNamespace",
 ]
 
 class _GoogleNamespace:
@@ -38699,3 +38700,184 @@ class _RscomponentsNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("rscomponents_brand", {"brand": brand, "page": page, "country": country}, extra)
+
+class _MeijerNamespace:
+    """Meijer (meijer.com, the Midwest grocery and general-merchandise chain; US only, USD) search, product, category, categories, deals, stores, store, weekly ad, mPerks coupons and reviews endpoints; prices, stock and aisles at the store you choose. 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Keywords or a Meijer item id, priced at the store you choose, with Meijer's filter counts and department counts. Meijer prices by store: send store_id for the store you choose. store_requested is the store asked for, store_used {store_id, name} the store the page used, store_matches whether they agree (without store_id Meijer picks a store by location and store_used names it). Returns query, country, currency, store_requested, store_used, store_matches, total, page, max_page, count, has_more, items [{position, meijer_id (the input of product and reviews), upc, ean13, product_id, name, url, image, Prices are US dollars as numbers (3.99 = $3.99): price (per pricing_unit: EA each, LB pound), regular_price, clearance_price, price_per_sold_by_unit, regular_price_per_sold_by_unit and clearance_price_per_sold_by_unit (what one item costs, per sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text (as the page shows it, e.g. $3.99 or Buy 4 for $5.00), multi_buy {quantity, total} (only when price_text says it; price is then the price of one), on_sale, on_clearance, savings_text, price_ends, deposit, currency (USD), priced, stock_status (inStock, lowStock, outOfStock), promotions, mperks, mperks_offer_ids, wic_eligible, sold_by_weight, alcohol, age_restricted, pickup_eligible, pickup_within_3_hours, home_delivery, marketplace, ships_from_third_party, max_order_quantity, sponsored}], facets [{name, label, values [{label, value, count}]}] (brand, price, promotions, ways to save incl. mPerks and On Sale, EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. departments [{group_id, name, count}]. Page 1 lists 52 items, page 2 the next 48 (page 2 is slower; max_page 2). 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords or a Meijer item id, e.g. large eggs.
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN). Prices, stock and aisles are that store's. Without it Meijer picks a store by location: store_used names it.
+            page: 1 (52 items, default) or 2 (the next 48; slower).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_search", {"query": query, "store_id": store_id, "page": page}, extra)
+
+    def product(
+        self,
+        meijer_id: Optional[Union[str, int]] = None,
+        *,
+        upc: Optional[Union[str, int]] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Meijer item by Meijer id or UPC / EAN (converted; both are returned), priced at the store you choose, with its stock and aisle at that store. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Meijer prices by store: send store_id for the store you choose. store_requested is the store asked for, store_used {store_id, name} the store the page used, store_matches whether they agree (without store_id Meijer picks a store by location and store_used names it). Returns country, currency, store_requested, store_used, store_matches, meijer_id, upc, ean13 (computed by Scavio from the Meijer id), product_id, name, brand, short_description, url, image, images, Prices are US dollars as numbers (3.99 = $3.99): price (per pricing_unit: EA each, LB pound), regular_price, clearance_price, price_per_sold_by_unit, regular_price_per_sold_by_unit and clearance_price_per_sold_by_unit (what one item costs, per sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text (as the page shows it, e.g. $3.99 or Buy 4 for $5.00), multi_buy {quantity, total} (only when price_text says it; price is then the price of one), on_sale, on_clearance, savings_text, price_ends, deposit, currency (USD), priced, price_displayed, stock_status, aisle (the item's main shelf location at the store), aisle_locations, promotions, mperks, snap_eligible, wic_eligible, sold_by_weight, unit_of_measure_quantity, alcohol, age_restricted, choking_hazard, pickup_eligible, pickup_within_3_hours, home_delivery, ships_from_third_party, marketplace_offers, max_order_quantity, ingredients, nutrition (null: not on the page), allergens (null: not on the page), breadcrumbs [{group_id, name}], variations [{name, options [{name, meijer_id, selected, disabled, image, price_per_sold_by_unit, regular_price_per_sold_by_unit, stock_status}]}] (each size or kind with its own price at the store), notes. An unknown item or store number is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            meijer_id: A Meijer item id (items[].meijer_id: the UPC without its check digit, leading zeros dropped), e.g. 4125010200. Send meijer_id or upc.
+            upc: A 12-digit UPC-A or 13-digit EAN as printed under the barcode, e.g. 041250102007, instead of meijer_id.
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN). Prices, stock and aisles are that store's. Without it Meijer picks a store by location: store_used names it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_product", {"meijer_id": meijer_id, "upc": upc, "store_id": store_id}, extra)
+
+    def category(
+        self,
+        category: str,
+        *,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Meijer department's items by path, priced at the store you choose. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Meijer prices by store: send store_id for the store you choose. store_requested is the store asked for, store_used {store_id, name} the store the page used, store_matches whether they agree (without store_id Meijer picks a store by location and store_used names it). Returns category, group {group_id, name, count}, country, currency, store_requested, store_used, store_matches, total, page, max_page, count, has_more, items [{position, meijer_id (the input of product and reviews), upc, ean13, product_id, name, url, image, Prices are US dollars as numbers (3.99 = $3.99): price (per pricing_unit: EA each, LB pound), regular_price, clearance_price, price_per_sold_by_unit, regular_price_per_sold_by_unit and clearance_price_per_sold_by_unit (what one item costs, per sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text (as the page shows it, e.g. $3.99 or Buy 4 for $5.00), multi_buy {quantity, total} (only when price_text says it; price is then the price of one), on_sale, on_clearance, savings_text, price_ends, deposit, currency (USD), priced, stock_status (inStock, lowStock, outOfStock), promotions, mperks, mperks_offer_ids, wic_eligible, sold_by_weight, alcohol, age_restricted, pickup_eligible, pickup_within_3_hours, home_delivery, marketplace, ships_from_third_party, max_order_quantity, sponsored}], facets [{name, label, values [{label, value, count}]}] (brand, price, promotions, ways to save incl. mPerks and On Sale, EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. subcategories [{group_id, name, count, path}], subcategory_links [{name, path}] (the category links the page shows: send a path as category). The first 52 items of the department (total counts them all; narrow with a subcategory path). An unknown department is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A department path as Meijer writes it (categories()[].path, e.g. fresh/produce/fruit or grocery/pantry) or a meijer.com department link.
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN). Prices, stock and aisles are that store's. Without it Meijer picks a store by location: store_used names it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_category", {"category": category, "store_id": store_id}, extra)
+
+    def categories(
+        self,
+        *,
+        category: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Meijer's departments and collections as the site navigation lists them. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Returns country, category, count, categories [{name, type (department, collection), path (the input of category, or of collection in deals), group_id, collection_id, parent, url}], notes. With category (a department path): that department's subcategories [{group_id, name, count, path}] and subcategory_links [{name, path}]. An unknown department is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A department path, e.g. grocery/pantry: its subcategories. Leave out for Meijer's departments and collections.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_categories", {"category": category}, extra)
+
+    def deals(
+        self,
+        *,
+        collection: Optional[str] = None,
+        store_id: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Meijer collection of deals (default grocery/grocery-sale, the grocery sale; categories() lists the collections), priced at the store you choose. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Meijer has no clearance collection: clearance shows per item as clearance_price. Meijer prices by store: send store_id for the store you choose. store_requested is the store asked for, store_used {store_id, name} the store the page used, store_matches whether they agree (without store_id Meijer picks a store by location and store_used names it). Returns collection, collection_name, collection_id, country, currency, store_requested, store_used, store_matches, total, page, max_page, count, has_more, items [{position, meijer_id (the input of product and reviews), upc, ean13, product_id, name, url, image, Prices are US dollars as numbers (3.99 = $3.99): price (per pricing_unit: EA each, LB pound), regular_price, clearance_price, price_per_sold_by_unit, regular_price_per_sold_by_unit and clearance_price_per_sold_by_unit (what one item costs, per sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text (as the page shows it, e.g. $3.99 or Buy 4 for $5.00), multi_buy {quantity, total} (only when price_text says it; price is then the price of one), on_sale, on_clearance, savings_text, price_ends, deposit, currency (USD), priced, stock_status (inStock, lowStock, outOfStock), promotions, mperks, mperks_offer_ids, wic_eligible, sold_by_weight, alcohol, age_restricted, pickup_eligible, pickup_within_3_hours, home_delivery, marketplace, ships_from_third_party, max_order_quantity, sponsored}], facets [{name, label, values [{label, value, count}]}] (brand, price, promotions, ways to save incl. mPerks and On Sale, EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. departments [{group_id, name, count}]. The first 52 items of the collection (total counts them all). An unknown collection is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            collection: A collection path as Meijer writes it (default grocery/grocery-sale; categories() lists the collections, e.g. black-friday) or a meijer.com collection link.
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN). Prices, stock and aisles are that store's. Without it Meijer picks a store by location: store_used names it.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_deals", {"collection": collection, "store_id": store_id}, extra)
+
+    def stores(
+        self,
+        zip: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Meijer stores within 50 miles of a US ZIP code (up to 50), in the store finder's order. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Returns country, zip, radius_miles, count, stores [{position, store_id (the input of store_id everywhere), name, address {street, city, state, zip}, latitude, longitude, time_zone, store_type, format, pickup, delivery, url}], notes. Meijer Express gas stations are not listed. A ZIP with no store within 50 miles is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zip: A US ZIP code, e.g. 47274.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_stores", {"zip": zip}, extra)
+
+    def store(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One Meijer store by store number. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Returns country, store_id, name, store_type, address, phone, latitude, longitude, features, hours {store, pharmacy, delivery, pickup, deli, bakery, gas_station: {title, phone, hours [{days, hours}], amenities}} as the store's page shows them, other_sections, services, nearby_stores, url, notes. No fuel prices are shown on store pages. An unknown store number is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_store", {"store_id": store_id}, extra)
+
+    def weekly_ad(
+        self,
+        store_id: Union[str, int],
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The current weekly ad of the Meijer store you choose, as its page shows it. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Returns country, store_requested, store_used, store_matches, region (the regional edition the store belongs to, e.g. GRR, CIN), flyer_url, ad {ad_id, name, valid_from, valid_to, available_from, available_to, page_count}, ads [{ad_id, name, valid_from, valid_to, image}] (every ad running, weekly and seasonal), page_count, block_count, pages [{page, image, starts, ends, blocks [{id, item, label, price_text, multi_buy, has_coupons}]}], notes. price_text is the one price a block's label carries, kept as written (2/$6, $3.99); null when the label has no single price (discounts, BOGO, mPerks, ranges). multi_buy {quantity, total} is filled for an N/$X price. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_weekly_ad", {"store_id": store_id}, extra)
+
+    def coupons(
+        self,
+        store_id: Union[str, int],
+        *,
+        department: Optional[str] = None,
+        full_list: Optional[bool] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The mPerks coupons of the Meijer store you choose, as the coupons page lists them to a visitor without an account (listed, never clipped). Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Default: the first 48 with the total and each department's count; full_list true: every coupon of the store (slower). Returns country, store_requested, store_used, store_matches, full_list, department, total, count, coupons [{position, offer_id, title, description, discount, discount_type (amount, percent), minimum_quantity, starts, ends, manufacturer_coupon, label, departments [{department_id, name, subcategory}], image, terms, new_this_week, expiring_soon, clippable}], departments [{department_id, name, count, special, subcategories [{subcategory_id, name, count}]}], notes. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            store_id: A Meijer store number (stores()[].store_id, e.g. 295 Franklin IN).
+            department: Only coupons in this department: departments[].department_id or a department or subcategory name, e.g. Baby.
+            full_list: True: every coupon of the store (slower, up to about 2 minutes). Default False: the first 48 with the total and department counts.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_coupons", {"store_id": store_id, "department": department, "full_list": full_list}, extra)
+
+    def reviews(
+        self,
+        meijer_id: Optional[Union[str, int]] = None,
+        *,
+        upc: Optional[Union[str, int]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The first page of written reviews of one Meijer item as its product page shows it, with the rating summary. Meijer (meijer.com, the Midwest grocery and general-merchandise chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches the public Meijer page on request. Returns country, meijer_id, upc, ean13, url, name, rating {average, ratings_count (every rating), review_count (written reviews), distribution, recommended {yes, no}}, questions {questions, answers}, total, page_size, offset, page, reviews [{position, review_id, rating, rating_range, title, text, submitted_at, recommended, helpful_yes, helpful_no, badges, syndicated, photos, store_responses [{department, date, response}]}], notes. First page only. Reviewer nicknames, locations and ids are not returned. An unknown item is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            meijer_id: A Meijer item id (items[].meijer_id: the UPC without its check digit, leading zeros dropped), e.g. 4125010200. Send meijer_id or upc.
+            upc: A 12-digit UPC-A or 13-digit EAN as printed under the barcode, e.g. 041250102007, instead of meijer_id.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("meijer_reviews", {"meijer_id": meijer_id, "upc": upc}, extra)

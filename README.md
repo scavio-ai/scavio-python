@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 199 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, Ferguson, SupplyHouse.com, DigiKey, Mouser Electronics, RS Components, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 200 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, Meijer, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, B-Stock, McMaster-Carr, Sally Beauty, CosmoProf, Liquidation.com, Ferguson, SupplyHouse.com, DigiKey, Mouser Electronics, RS Components, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -143,6 +143,7 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | DigiKey Electronic Component Prices, Price Breaks, Stock and Lead Times (US, Canada, Germany; 3 endpoints) | Yes | No | No | No |
 | Mouser Electronics Component Prices, Stock, On-Order Dates and Lead Times (US, UK; 4 endpoints) | Yes | No | No | No |
 | RS Components Component Prices, Pack Prices and Stock per Market (UK, Germany, Australia; 4 endpoints) | Yes | No | No | No |
+| Meijer Store Prices, Stock, Aisles, Weekly Ad and mPerks Coupons (US; 10 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -9178,6 +9179,56 @@ Captured 2026-11-28 on uk.rs-online.com: BC547 matched 10 products; stock
 number 221-5535 (Texas Instruments NE555P) was 0.304 GBP a unit (0.365 with
 VAT) in packs of 50. Failed calls and refused inputs are not charged; a
 not-found is charged.
+
+### 171. US grocery -- Meijer store prices, stock, aisles, weekly ad and mPerks coupons
+
+Meijer (meijer.com, the Midwest grocery and general-merchandise chain:
+Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Search,
+item lookup by Meijer id or UPC / EAN (converted; both are returned),
+department listings and deals collections, all priced at the store you choose
+(`store_id` from `stores`) with stock status and aisle; the departments and
+collections; stores within 50 miles of a ZIP and one store's hours and
+services; a store's current weekly ad page by page; its mPerks coupons (listed,
+never clipped); and an item's first page of reviews with the rating summary
+(no reviewer names). Prices differ by store: `store_used` names the store the
+page used, and without `store_id` Meijer picks a store by location. Search
+lists 52 items on page 1 and the next 48 on page 2; departments and
+collections return their first 52 items with the total. Nutrition and
+allergens are not on the page (null). Not covered: search suggestions, gas
+prices, prescription prices and Meijer Express stations. Namespace `meijer`, 10
+endpoints: `search`, `product`, `category`, `categories`, `deals`, `stores`,
+`store`, `weekly_ad`, `coupons`, `reviews`. Credits: 1 per call. The request
+timeout is raised to at least 240s. See the [Meijer API
+page](https://scavio.dev/meijer-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/meijer-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+mj = client.meijer
+stores = mj.stores("47274")["data"]
+print([(s["store_id"], s["name"], s["address"]["city"]) for s in stores["stores"]])
+res = mj.search("large eggs", store_id=295)["data"]
+print(res["store_used"], res["total"])
+for it in res["items"][:5]:
+    print(it["meijer_id"], it["name"], it["price"], it["regular_price"], it["stock_status"])
+milk = mj.product(upc="041250102007", store_id=167)["data"]
+print(milk["name"], milk["price"], milk["aisle"], milk["stock_status"], milk["store_used"])
+ad = mj.weekly_ad(224)["data"]
+print(ad["region"], ad["ad"]["valid_from"], ad["ad"]["valid_to"], ad["block_count"])
+for block in ad["pages"][0]["blocks"][:3]:
+    print(block["item"], block["price_text"], block["multi_buy"])
+coupons = mj.coupons(295)["data"]
+print(coupons["total"], [(c["title"], c["ends"]) for c in coupons["coupons"][:3]])
+```
+
+Captured 2026-11-28: Meijer Whole Milk, Gallon (Meijer id 4125010200) was 2.99
+USD at Jeffersonville IN (#167), aisle B-16-52-4, and 2.88 USD at Franklin IN
+(#295); the Cincinnati OH (#224) weekly ad (region CIN) had 35 pages and 339
+offers; Franklin listed 425 mPerks coupons. Failed calls and refused inputs are
+not charged; a not-found is charged.
 
 ## Error Handling
 

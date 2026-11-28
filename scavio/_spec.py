@@ -47916,6 +47916,559 @@ _RSCOMPONENTS_ENDPOINTS: tuple[Endpoint, ...] = (
 )
 
 
+# ====== batch 9 2026-11-28: Meijer ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 1 credit on every endpoint; 240 s floor (search, category,
+# deals, coupons and reviews can take minutes).
+
+# Meijer: 10 endpoints on /api/v1/meijer.
+_MEIJER_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="meijer_search",
+        namespace="meijer",
+        method="search",
+        http="POST",
+        path="/api/v1/meijer/search",
+        summary=(
+            "Search Meijer (meijer.com, the Midwest grocery and "
+            "general-merchandise chain: Michigan, Ohio, Indiana, Illinois, "
+            "Kentucky, Wisconsin; US only, USD). Scavio fetches the public "
+            "Meijer page on request. Keywords or a Meijer item id, priced "
+            "at the store you choose, with Meijer's filter counts and "
+            "department counts. Meijer prices by store: send store_id for "
+            "the store you choose. store_requested is the store asked for, "
+            "store_used {store_id, name} the store the page used, "
+            "store_matches whether they agree (without store_id Meijer "
+            "picks a store by location and store_used names it). Returns "
+            "query, country, currency, store_requested, store_used, "
+            "store_matches, total, page, max_page, count, has_more, items "
+            "[{position, meijer_id (the input of product and reviews), upc, "
+            "ean13, product_id, name, url, image, Prices are US dollars as "
+            "numbers (3.99 = $3.99): price (per pricing_unit: EA each, LB "
+            "pound), regular_price, clearance_price, "
+            "price_per_sold_by_unit, regular_price_per_sold_by_unit and "
+            "clearance_price_per_sold_by_unit (what one item costs, per "
+            "sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text "
+            "(as the page shows it, e.g. $3.99 or Buy 4 for $5.00), "
+            "multi_buy {quantity, total} (only when price_text says it; "
+            "price is then the price of one), on_sale, on_clearance, "
+            "savings_text, price_ends, deposit, currency (USD), priced, "
+            "stock_status (inStock, lowStock, outOfStock), promotions, "
+            "mperks, mperks_offer_ids, wic_eligible, sold_by_weight, "
+            "alcohol, age_restricted, pickup_eligible, "
+            "pickup_within_3_hours, home_delivery, marketplace, "
+            "ships_from_third_party, max_order_quantity, sponsored}], "
+            "facets [{name, label, values [{label, value, count}]}] (brand, "
+            "price, promotions, ways to save incl. mPerks and On Sale, "
+            "EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. "
+            "departments [{group_id, name, count}]. Page 1 lists 52 items, "
+            "page 2 the next 48 (page 2 is slower; max_page 2). 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs "
+            "are not. Set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords or a Meijer item id, e.g. large eggs."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN). Prices, stock and aisles are that "
+                    "store's. Without it Meijer picks a store by location: "
+                    "store_used names it."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "1 (52 items, default) or 2 (the next 48; slower)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_product",
+        namespace="meijer",
+        method="product",
+        http="POST",
+        path="/api/v1/meijer/product",
+        summary=(
+            "One Meijer item by Meijer id or UPC / EAN (converted; both are "
+            "returned), priced at the store you choose, with its stock and "
+            "aisle at that store. Meijer (meijer.com, the Midwest grocery "
+            "and general-merchandise chain: Michigan, Ohio, Indiana, "
+            "Illinois, Kentucky, Wisconsin; US only, USD). Scavio fetches "
+            "the public Meijer page on request. Meijer prices by store: "
+            "send store_id for the store you choose. store_requested is the "
+            "store asked for, store_used {store_id, name} the store the "
+            "page used, store_matches whether they agree (without store_id "
+            "Meijer picks a store by location and store_used names it). "
+            "Returns country, currency, store_requested, store_used, "
+            "store_matches, meijer_id, upc, ean13 (computed by Scavio from "
+            "the Meijer id), product_id, name, brand, short_description, "
+            "url, image, images, Prices are US dollars as numbers (3.99 = "
+            "$3.99): price (per pricing_unit: EA each, LB pound), "
+            "regular_price, clearance_price, price_per_sold_by_unit, "
+            "regular_price_per_sold_by_unit and "
+            "clearance_price_per_sold_by_unit (what one item costs, per "
+            "sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text "
+            "(as the page shows it, e.g. $3.99 or Buy 4 for $5.00), "
+            "multi_buy {quantity, total} (only when price_text says it; "
+            "price is then the price of one), on_sale, on_clearance, "
+            "savings_text, price_ends, deposit, currency (USD), priced, "
+            "price_displayed, stock_status, aisle (the item's main shelf "
+            "location at the store), aisle_locations, promotions, mperks, "
+            "snap_eligible, wic_eligible, sold_by_weight, "
+            "unit_of_measure_quantity, alcohol, age_restricted, "
+            "choking_hazard, pickup_eligible, pickup_within_3_hours, "
+            "home_delivery, ships_from_third_party, marketplace_offers, "
+            "max_order_quantity, ingredients, nutrition (null: not on the "
+            "page), allergens (null: not on the page), breadcrumbs "
+            "[{group_id, name}], variations [{name, options [{name, "
+            "meijer_id, selected, disabled, image, price_per_sold_by_unit, "
+            "regular_price_per_sold_by_unit, stock_status}]}] (each size or "
+            "kind with its own price at the store), notes. An unknown item "
+            "or store number is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not."
+        ),
+        params=(
+            Param(
+                "meijer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Meijer item id (items[].meijer_id: the UPC without "
+                    "its check digit, leading zeros dropped), e.g. "
+                    "4125010200. Send meijer_id or upc."
+                ),
+            ),
+            Param(
+                "upc",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A 12-digit UPC-A or 13-digit EAN as printed under the "
+                    "barcode, e.g. 041250102007, instead of meijer_id."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN). Prices, stock and aisles are that "
+                    "store's. Without it Meijer picks a store by location: "
+                    "store_used names it."
+                ),
+            ),
+        ),
+        one_of=(("meijer_id", "upc"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_category",
+        namespace="meijer",
+        method="category",
+        http="POST",
+        path="/api/v1/meijer/category",
+        summary=(
+            "One Meijer department's items by path, priced at the store you "
+            "choose. Meijer (meijer.com, the Midwest grocery and "
+            "general-merchandise chain: Michigan, Ohio, Indiana, Illinois, "
+            "Kentucky, Wisconsin; US only, USD). Scavio fetches the public "
+            "Meijer page on request. Meijer prices by store: send store_id "
+            "for the store you choose. store_requested is the store asked "
+            "for, store_used {store_id, name} the store the page used, "
+            "store_matches whether they agree (without store_id Meijer "
+            "picks a store by location and store_used names it). Returns "
+            "category, group {group_id, name, count}, country, currency, "
+            "store_requested, store_used, store_matches, total, page, "
+            "max_page, count, has_more, items [{position, meijer_id (the "
+            "input of product and reviews), upc, ean13, product_id, name, "
+            "url, image, Prices are US dollars as numbers (3.99 = $3.99): "
+            "price (per pricing_unit: EA each, LB pound), regular_price, "
+            "clearance_price, price_per_sold_by_unit, "
+            "regular_price_per_sold_by_unit and "
+            "clearance_price_per_sold_by_unit (what one item costs, per "
+            "sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text "
+            "(as the page shows it, e.g. $3.99 or Buy 4 for $5.00), "
+            "multi_buy {quantity, total} (only when price_text says it; "
+            "price is then the price of one), on_sale, on_clearance, "
+            "savings_text, price_ends, deposit, currency (USD), priced, "
+            "stock_status (inStock, lowStock, outOfStock), promotions, "
+            "mperks, mperks_offer_ids, wic_eligible, sold_by_weight, "
+            "alcohol, age_restricted, pickup_eligible, "
+            "pickup_within_3_hours, home_delivery, marketplace, "
+            "ships_from_third_party, max_order_quantity, sponsored}], "
+            "facets [{name, label, values [{label, value, count}]}] (brand, "
+            "price, promotions, ways to save incl. mPerks and On Sale, "
+            "EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. "
+            "subcategories [{group_id, name, count, path}], "
+            "subcategory_links [{name, path}] (the category links the page "
+            "shows: send a path as category). The first 52 items of the "
+            "department (total counts them all; narrow with a subcategory "
+            "path). An unknown department is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs "
+            "are not. Set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "str",
+                required=True,
+                doc=(
+                    "A department path as Meijer writes it "
+                    "(categories()[].path, e.g. fresh/produce/fruit or "
+                    "grocery/pantry) or a meijer.com department link."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN). Prices, stock and aisles are that "
+                    "store's. Without it Meijer picks a store by location: "
+                    "store_used names it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_categories",
+        namespace="meijer",
+        method="categories",
+        http="POST",
+        path="/api/v1/meijer/categories",
+        summary=(
+            "Meijer's departments and collections as the site navigation "
+            "lists them. Meijer (meijer.com, the Midwest grocery and "
+            "general-merchandise chain: Michigan, Ohio, Indiana, Illinois, "
+            "Kentucky, Wisconsin; US only, USD). Scavio fetches the public "
+            "Meijer page on request. Returns country, category, count, "
+            "categories [{name, type (department, collection), path (the "
+            "input of category, or of collection in deals), group_id, "
+            "collection_id, parent, url}], notes. With category (a "
+            "department path): that department's subcategories [{group_id, "
+            "name, count, path}] and subcategory_links [{name, path}]. An "
+            "unknown department is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not."
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A department path, e.g. grocery/pantry: its "
+                    "subcategories. Leave out for Meijer's departments and "
+                    "collections."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_deals",
+        namespace="meijer",
+        method="deals",
+        http="POST",
+        path="/api/v1/meijer/deals",
+        summary=(
+            "One Meijer collection of deals (default grocery/grocery-sale, "
+            "the grocery sale; categories() lists the collections), priced "
+            "at the store you choose. Meijer (meijer.com, the Midwest "
+            "grocery and general-merchandise chain: Michigan, Ohio, "
+            "Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio "
+            "fetches the public Meijer page on request. Meijer has no "
+            "clearance collection: clearance shows per item as "
+            "clearance_price. Meijer prices by store: send store_id for the "
+            "store you choose. store_requested is the store asked for, "
+            "store_used {store_id, name} the store the page used, "
+            "store_matches whether they agree (without store_id Meijer "
+            "picks a store by location and store_used names it). Returns "
+            "collection, collection_name, collection_id, country, currency, "
+            "store_requested, store_used, store_matches, total, page, "
+            "max_page, count, has_more, items [{position, meijer_id (the "
+            "input of product and reviews), upc, ean13, product_id, name, "
+            "url, image, Prices are US dollars as numbers (3.99 = $3.99): "
+            "price (per pricing_unit: EA each, LB pound), regular_price, "
+            "clearance_price, price_per_sold_by_unit, "
+            "regular_price_per_sold_by_unit and "
+            "clearance_price_per_sold_by_unit (what one item costs, per "
+            "sold_by_unit), avg_pricing_units_per_sold_by_unit, price_text "
+            "(as the page shows it, e.g. $3.99 or Buy 4 for $5.00), "
+            "multi_buy {quantity, total} (only when price_text says it; "
+            "price is then the price of one), on_sale, on_clearance, "
+            "savings_text, price_ends, deposit, currency (USD), priced, "
+            "stock_status (inStock, lowStock, outOfStock), promotions, "
+            "mperks, mperks_offer_ids, wic_eligible, sold_by_weight, "
+            "alcohol, age_restricted, pickup_eligible, "
+            "pickup_within_3_hours, home_delivery, marketplace, "
+            "ships_from_third_party, max_order_quantity, sponsored}], "
+            "facets [{name, label, values [{label, value, count}]}] (brand, "
+            "price, promotions, ways to save incl. mPerks and On Sale, "
+            "EBT-SNAP and WIC, fulfillment, sold by), notes. No sort. "
+            "departments [{group_id, name, count}]. The first 52 items of "
+            "the collection (total counts them all). An unknown collection "
+            "is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Set a client "
+            "timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "collection",
+                "Optional[str]",
+                doc=(
+                    "A collection path as Meijer writes it (default "
+                    "grocery/grocery-sale; categories() lists the "
+                    "collections, e.g. black-friday) or a meijer.com "
+                    "collection link."
+                ),
+            ),
+            Param(
+                "store_id",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN). Prices, stock and aisles are that "
+                    "store's. Without it Meijer picks a store by location: "
+                    "store_used names it."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_stores",
+        namespace="meijer",
+        method="stores",
+        http="POST",
+        path="/api/v1/meijer/stores",
+        summary=(
+            "The Meijer stores within 50 miles of a US ZIP code (up to 50), "
+            "in the store finder's order. Meijer (meijer.com, the Midwest "
+            "grocery and general-merchandise chain: Michigan, Ohio, "
+            "Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio "
+            "fetches the public Meijer page on request. Returns country, "
+            "zip, radius_miles, count, stores [{position, store_id (the "
+            "input of store_id everywhere), name, address {street, city, "
+            "state, zip}, latitude, longitude, time_zone, store_type, "
+            "format, pickup, delivery, url}], notes. Meijer Express gas "
+            "stations are not listed. A ZIP with no store within 50 miles "
+            "is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not."
+        ),
+        params=(
+            Param(
+                "zip",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A US ZIP code, e.g. 47274."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_store",
+        namespace="meijer",
+        method="store",
+        http="POST",
+        path="/api/v1/meijer/store",
+        summary=(
+            "One Meijer store by store number. Meijer (meijer.com, the "
+            "Midwest grocery and general-merchandise chain: Michigan, Ohio, "
+            "Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio "
+            "fetches the public Meijer page on request. Returns country, "
+            "store_id, name, store_type, address, phone, latitude, "
+            "longitude, features, hours {store, pharmacy, delivery, pickup, "
+            "deli, bakery, gas_station: {title, phone, hours [{days, "
+            "hours}], amenities}} as the store's page shows them, "
+            "other_sections, services, nearby_stores, url, notes. No fuel "
+            "prices are shown on store pages. An unknown store number is a "
+            "charged 404. 1 credit. A not-found is charged; failed upstream "
+            "calls and refused inputs are not."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_weekly_ad",
+        namespace="meijer",
+        method="weekly_ad",
+        http="POST",
+        path="/api/v1/meijer/weekly-ad",
+        summary=(
+            "The current weekly ad of the Meijer store you choose, as its "
+            "page shows it. Meijer (meijer.com, the Midwest grocery and "
+            "general-merchandise chain: Michigan, Ohio, Indiana, Illinois, "
+            "Kentucky, Wisconsin; US only, USD). Scavio fetches the public "
+            "Meijer page on request. Returns country, store_requested, "
+            "store_used, store_matches, region (the regional edition the "
+            "store belongs to, e.g. GRR, CIN), flyer_url, ad {ad_id, name, "
+            "valid_from, valid_to, available_from, available_to, "
+            "page_count}, ads [{ad_id, name, valid_from, valid_to, image}] "
+            "(every ad running, weekly and seasonal), page_count, "
+            "block_count, pages [{page, image, starts, ends, blocks [{id, "
+            "item, label, price_text, multi_buy, has_coupons}]}], notes. "
+            "price_text is the one price a block's label carries, kept as "
+            "written (2/$6, $3.99); null when the label has no single price "
+            "(discounts, BOGO, mPerks, ranges). multi_buy {quantity, total} "
+            "is filled for an N/$X price. 1 credit. A not-found is charged; "
+            "failed upstream calls and refused inputs are not."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_coupons",
+        namespace="meijer",
+        method="coupons",
+        http="POST",
+        path="/api/v1/meijer/coupons",
+        summary=(
+            "The mPerks coupons of the Meijer store you choose, as the "
+            "coupons page lists them to a visitor without an account "
+            "(listed, never clipped). Meijer (meijer.com, the Midwest "
+            "grocery and general-merchandise chain: Michigan, Ohio, "
+            "Indiana, Illinois, Kentucky, Wisconsin; US only, USD). Scavio "
+            "fetches the public Meijer page on request. Default: the first "
+            "48 with the total and each department's count; full_list true: "
+            "every coupon of the store (slower). Returns country, "
+            "store_requested, store_used, store_matches, full_list, "
+            "department, total, count, coupons [{position, offer_id, title, "
+            "description, discount, discount_type (amount, percent), "
+            "minimum_quantity, starts, ends, manufacturer_coupon, label, "
+            "departments [{department_id, name, subcategory}], image, "
+            "terms, new_this_week, expiring_soon, clippable}], departments "
+            "[{department_id, name, count, special, subcategories "
+            "[{subcategory_id, name, count}]}], notes. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs "
+            "are not. Set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "store_id",
+                "Union[str, int]",
+                required=True,
+                doc=(
+                    "A Meijer store number (stores()[].store_id, e.g. 295 "
+                    "Franklin IN)."
+                ),
+            ),
+            Param(
+                "department",
+                "Optional[str]",
+                doc=(
+                    "Only coupons in this department: "
+                    "departments[].department_id or a department or "
+                    "subcategory name, e.g. Baby."
+                ),
+            ),
+            Param(
+                "full_list",
+                "Optional[bool]",
+                doc=(
+                    "True: every coupon of the store (slower, up to about 2 "
+                    "minutes). Default False: the first 48 with the total "
+                    "and department counts."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="meijer_reviews",
+        namespace="meijer",
+        method="reviews",
+        http="POST",
+        path="/api/v1/meijer/reviews",
+        summary=(
+            "The first page of written reviews of one Meijer item as its "
+            "product page shows it, with the rating summary. Meijer "
+            "(meijer.com, the Midwest grocery and general-merchandise "
+            "chain: Michigan, Ohio, Indiana, Illinois, Kentucky, Wisconsin; "
+            "US only, USD). Scavio fetches the public Meijer page on "
+            "request. Returns country, meijer_id, upc, ean13, url, name, "
+            "rating {average, ratings_count (every rating), review_count "
+            "(written reviews), distribution, recommended {yes, no}}, "
+            "questions {questions, answers}, total, page_size, offset, "
+            "page, reviews [{position, review_id, rating, rating_range, "
+            "title, text, submitted_at, recommended, helpful_yes, "
+            "helpful_no, badges, syndicated, photos, store_responses "
+            "[{department, date, response}]}], notes. First page only. "
+            "Reviewer nicknames, locations and ids are not returned. An "
+            "unknown item is a charged 404. 1 credit. A not-found is "
+            "charged; failed upstream calls and refused inputs are not. Set "
+            "a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "meijer_id",
+                "Optional[Union[str, int]]",
+                positional=True,
+                doc=(
+                    "A Meijer item id (items[].meijer_id: the UPC without "
+                    "its check digit, leading zeros dropped), e.g. "
+                    "4125010200. Send meijer_id or upc."
+                ),
+            ),
+            Param(
+                "upc",
+                "Optional[Union[str, int]]",
+                doc=(
+                    "A 12-digit UPC-A or 13-digit EAN as printed under the "
+                    "barcode, e.g. 041250102007, instead of meijer_id."
+                ),
+            ),
+        ),
+        one_of=(("meijer_id", "upc"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
+
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -65491,6 +66044,8 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     *_DIGIKEY_ENDPOINTS,
     *_MOUSER_ENDPOINTS,
     *_RSCOMPONENTS_ENDPOINTS,
+    # ====== batch 9 2026-11-28: Meijer ======
+    *_MEIJER_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -72504,6 +73059,7 @@ NAMESPACES: tuple[str, ...] = (
     "digikey",
     "mouser",
     "rscomponents",
+    "meijer",
 )
 
 

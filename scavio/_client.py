@@ -116,6 +116,7 @@ from ._namespaces_sync import (
     _MarksNamespace,
     _McmasterNamespace,
     _MediaExpertNamespace,
+    _MeijerNamespace,
     _MenardsNamespace,
     _MercadoLibreNamespace,
     _MercariNamespace,
@@ -467,6 +468,7 @@ class ScavioClient:
         self.digikey = _DigikeyNamespace(self)
         self.mouser = _MouserNamespace(self)
         self.rscomponents = _RscomponentsNamespace(self)
+        self.meijer = _MeijerNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

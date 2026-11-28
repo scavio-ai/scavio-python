@@ -12503,3 +12503,115 @@ def test_batch8w4_1128_credits_notes_and_params():
 def test_costco_product_carries_the_online_stock_params():
     params = {p.name for p in ENDPOINTS["costco_product"].params}
     assert {"include_online_stock", "zip"} <= params
+
+
+# --- batch 9 2026-11-28: Meijer ---
+
+MEIJER_1128 = {
+    "search": "search",
+    "product": "product",
+    "category": "category",
+    "categories": "categories",
+    "deals": "deals",
+    "stores": "stores",
+    "store": "store",
+    "weekly_ad": "weekly-ad",
+    "coupons": "coupons",
+    "reviews": "reviews",
+}
+MEIJER_1128_ONE_OF = {
+    "meijer_product": (("meijer_id", "upc"),),
+    "meijer_reviews": (("meijer_id", "upc"),),
+}
+
+
+def test_meijer_1128_credits_paths_timeouts():
+    """All 10 Meijer endpoints: path, 1 credit, 240 s floor, one-of, copy rules."""
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == "meijer"}
+    assert sorted(eps) == sorted(MEIJER_1128)
+    for method, segment in MEIJER_1128.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/meijer/{segment}", ep.key
+        assert ep.credits == 1 and ep.credits_note is None, ep.key
+        assert ep.min_timeout == 240.0, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == MEIJER_1128_ONE_OF.get(ep.key, ()), ep.key
+        assert all(p.doc for p in ep.params), ep.key
+        text = " ".join([ep.summary] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag|training|grounding)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "real-time" not in text.lower() and "real time" not in text.lower(), ep.key
+    assert [p.name for p in eps["search"].required_params] == ["query"]
+    assert [p.name for p in eps["category"].required_params] == ["category"]
+    assert [p.name for p in eps["stores"].required_params] == ["zip"]
+    for method in ("store", "weekly_ad", "coupons"):
+        assert [p.name for p in eps[method].required_params] == ["store_id"], method
+    assert eps["product"].positional_optional_params[0].name == "meijer_id"
+    assert eps["reviews"].positional_optional_params[0].name == "meijer_id"
+    assert "Reviewer nicknames, locations and ids are not returned" in eps["reviews"].summary
+    assert "never clipped" in eps["coupons"].summary
+
+
+MEIJER_1128_WIRE = [
+    ("search", {"query": "large eggs", "store_id": 295}, "search"),
+    ("search", {"query": "milk", "page": 2}, "search"),
+    ("product", {"meijer_id": "4125010200", "store_id": "167"}, "product"),
+    ("product", {"upc": "715141514643", "store_id": 224}, "product"),
+    ("category", {"category": "fresh/produce/fruit", "store_id": 220}, "category"),
+    ("categories", {}, "categories"),
+    ("categories", {"category": "grocery/pantry"}, "categories"),
+    ("deals", {}, "deals"),
+    ("deals", {"collection": "black-friday", "store_id": 295}, "deals"),
+    ("stores", {"zip": "47274"}, "stores"),
+    ("store", {"store_id": 295}, "store"),
+    ("weekly_ad", {"store_id": 224}, "weekly-ad"),
+    ("coupons", {"store_id": 295, "department": "Baby", "full_list": True}, "coupons"),
+    ("reviews", {"meijer_id": "4125010200"}, "reviews"),
+    ("reviews", {"upc": "041250102007"}, "reviews"),
+]
+
+
+@pytest.mark.parametrize(("method", "kwargs", "segment"), MEIJER_1128_WIRE)
+def test_meijer_1128_wire(method, kwargs, segment, monkeypatch):
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(client.meijer, method)(**kwargs)
+    assert seen == [(f"/api/v1/meijer/{segment}", kwargs, 240.0)]
+
+
+def test_meijer_1128_positional_calls(monkeypatch):
+    seen: list[tuple[str, dict]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    mj = ScavioClient(api_key="sk_test").meijer
+    mj.search("large eggs", store_id=295)
+    mj.product("4125010200")
+    mj.stores("47274")
+    mj.weekly_ad(224)
+    mj.coupons(295)
+    assert seen == [
+        ("/api/v1/meijer/search", {"query": "large eggs", "store_id": 295}),
+        ("/api/v1/meijer/product", {"meijer_id": "4125010200"}),
+        ("/api/v1/meijer/stores", {"zip": "47274"}),
+        ("/api/v1/meijer/weekly-ad", {"store_id": 224}),
+        ("/api/v1/meijer/coupons", {"store_id": 295}),
+    ]
+
+
+@pytest.mark.parametrize("key", sorted(MEIJER_1128_ONE_OF))
+def test_meijer_1128_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    with pytest.raises(ScavioError):
+        getattr(client.meijer, ep.method)()
