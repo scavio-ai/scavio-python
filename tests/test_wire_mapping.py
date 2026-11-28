@@ -11838,3 +11838,189 @@ def test_batch7w6_1127_credits_wire_and_timeouts():
     assert ENDPOINTS["petz_store"].positional_optional_params[0].name == "slug"
     assert "Grupo Petz Cobasi) or one of its collections" in ENDPOINTS["petz_deals"].summary
     assert all(p.doc for ep in w6 for p in ep.params)
+
+
+# --- batch 8 wave 1 2026-11-28: 3 US industrial supply namespaces (Global Industrial, MSC, Zoro) ---
+
+BATCH8W1_1128 = {
+    "globalindustrial": {
+        "search": ("search", 1, 180.0),
+        "category": ("category", 1, 180.0),
+        "brand": ("brand", 1, 180.0),
+        "product": ("product", 1, 180.0),
+        "clearance": ("clearance", 1, 180.0),
+    },
+    "msc": {
+        "search": ("search", 1, 300.0),
+        "category": ("category", 1, 300.0),
+        "product": ("product", 1, 300.0),
+        "clearance": ("clearance", 1, 180.0),
+        "locations": ("locations", 1, 180.0),
+    },
+    "zoro": {
+        "search": ("search", 1, 180.0),
+        "category": ("category", 1, 180.0),
+        "brand": ("brand", 1, 180.0),
+        "product": ("product", 1, 180.0),
+        "availability": ("availability", 1, 240.0),
+        "reviews": ("reviews", 1, 240.0),
+    },
+}
+BATCH8W1_1128_ONE_OF = {
+    "globalindustrial_product": (("url", "item"),),
+    "msc_category": (("navid", "url"),),
+    "msc_product": (("msc_number", "url"),),
+    "zoro_category": (("category", "code"),),
+    "zoro_product": (("zoro_no", "url"),),
+    "zoro_availability": (("zoro_no", "url"),),
+    "zoro_reviews": (("zoro_no", "url"),),
+}
+
+
+@pytest.mark.parametrize("namespace", sorted(BATCH8W1_1128))
+def test_batch8w1_1128_credits_paths_timeouts(namespace):
+    """Every endpoint of the 3 new namespaces: path, credits floor, timeout floor, one-of."""
+    want = BATCH8W1_1128[namespace]
+    eps = {ep.method: ep for ep in ENDPOINTS.values() if ep.namespace == namespace}
+    assert sorted(eps) == sorted(want)
+    for method, (segment, credits, timeout) in want.items():
+        ep = eps[method]
+        assert ep.http == "POST", ep.key
+        assert ep.path == f"/api/v1/{namespace}/{segment}", ep.key
+        assert ep.credits == credits, ep.key
+        assert ep.min_timeout == timeout, ep.key
+        assert tuple(tuple(g) for g in ep.one_of) == BATCH8W1_1128_ONE_OF.get(ep.key, ()), ep.key
+        text = " ".join([ep.summary, ep.credits_note or ""] + [p.doc for p in ep.params])
+        assert not BATCH7_1127_BANNED.search(text.lower()), ep.key
+        ai = r"\b(ai|agents?|agentic|mcp|llms?|chatbots?|rag|training|grounding)\b"
+        assert not re.search(ai, text.lower()), ep.key
+        assert "as a browser" not in text, ep.key
+        # us-only markets: the refused-only country input is not in the signature
+        if namespace in ("msc", "zoro"):
+            assert "country" not in [p.name for p in ep.params], ep.key
+
+
+BATCH8W1_1128_WIRE = [
+    ("globalindustrial", "search", {"query": "nitrile gloves"}, "search"),
+    (
+        "globalindustrial", "search",
+        {"query": "drum truck", "brand": "Wesco", "market": "ca"},
+        "search",
+    ),
+    (
+        "globalindustrial", "category",
+        {"path": "/c/carts-trucks/hand_trucks/drum_trucks_cradles"},
+        "category",
+    ),
+    (
+        "globalindustrial", "category",
+        {
+            "path": "/c/carts-trucks/hand_trucks/drum_trucks_cradles",
+            "brand": "Wesco", "group": 42311,
+        },
+        "category",
+    ),
+    (
+        "globalindustrial", "category",
+        {"path": "/t/carts-trucks", "group": "42311", "market": "ca"},
+        "category",
+    ),
+    ("globalindustrial", "brand", {"brand": "Wesco"}, "brand"),
+    ("globalindustrial", "brand", {"brand": "Valley Craft", "market": "ca"}, "brand"),
+    ("globalindustrial", "product", {"item": "652508"}, "product"),
+    (
+        "globalindustrial", "product",
+        {"url": "https://www.globalindustrial.com/p/dispenser-truck-poly-drums"},
+        "product",
+    ),
+    ("globalindustrial", "product", {"item": "652508", "market": "ca"}, "product"),
+    ("globalindustrial", "clearance", {}, "clearance"),
+    (
+        "globalindustrial", "clearance",
+        {"category": "PRIME30", "brand": "Global Industrial"},
+        "clearance",
+    ),
+    ("msc", "search", {"query": "drill bit"}, "search"),
+    ("msc", "search", {"query": "drill bit", "sort": "price_desc", "page": 3}, "search"),
+    ("msc", "category", {"navid": "2106186"}, "category"),
+    ("msc", "category", {"navid": 2106186, "sort": "rating", "page": 2}, "category"),
+    ("msc", "category", {"url": "https://www.mscdirect.com/browse/tn?navid=2106186"}, "category"),
+    ("msc", "product", {"msc_number": "00647354"}, "product"),
+    ("msc", "product", {"url": "https://www.mscdirect.com/product/details/00647354"}, "product"),
+    ("msc", "clearance", {}, "clearance"),
+    ("msc", "clearance", {"list": "web_specials"}, "clearance"),
+    ("msc", "locations", {}, "locations"),
+    (
+        "msc", "locations",
+        {"type": "Customer Fulfillment Center", "state": "PA", "location_country": "United States"},
+        "locations",
+    ),
+    ("zoro", "search", {"query": "3m n95 respirator"}, "search"),
+    ("zoro", "search", {"query": "safety glasses", "page": 2}, "search"),
+    ("zoro", "category", {"category": "safety-glasses/c/6214"}, "category"),
+    ("zoro", "category", {"slug": "safety-glasses", "code": "6214", "page": 3}, "category"),
+    ("zoro", "brand", {"brand": "Mcr Safety"}, "brand"),
+    ("zoro", "brand", {"brand": "https://www.zoro.com/b/3M/", "page": 2}, "brand"),
+    ("zoro", "product", {"zoro_no": "G2426514"}, "product"),
+    (
+        "zoro", "product",
+        {"url": "https://www.zoro.com/mcr-safety-bearkat-bk1-safety-glasses-duramass-hard-coat-clear-lens-non-slip-temple-frameless-bk110/i/G2426514/"},
+        "product",
+    ),
+    ("zoro", "availability", {"zoro_no": "G2426514"}, "availability"),
+    ("zoro", "reviews", {"zoro_no": "G2426514"}, "reviews"),
+]
+
+
+@pytest.mark.parametrize(("namespace", "method", "kwargs", "segment"), BATCH8W1_1128_WIRE)
+def test_batch8w1_1128_wire(namespace, method, kwargs, segment, monkeypatch):
+    ep = ENDPOINTS[f"{namespace}_{method}"]
+    wire = {p.name: p.wire_field for p in ep.params}
+    body = {wire[k]: v for k, v in kwargs.items()}
+    seen: list[tuple[str, dict, float]] = []
+
+    def fake_request(http, path, *, timeout, json=None, **_):
+        seen.append((path, json, timeout))
+        return {"ok": True}
+
+    monkeypatch.setattr("scavio._client.sync_request", fake_request)
+    client = ScavioClient(api_key="sk_test")
+    getattr(getattr(client, namespace), method)(**kwargs)
+    timeout = BATCH8W1_1128[namespace][method][2]
+    assert seen == [(f"/api/v1/{namespace}/{segment}", body, timeout)]
+
+
+@pytest.mark.parametrize("key", sorted(BATCH8W1_1128_ONE_OF))
+def test_batch8w1_1128_one_of_is_enforced(key):
+    ep = ENDPOINTS[key]
+    client = ScavioClient(api_key="sk_test")
+    required = {p.name: "x" for p in ep.params if p.required}
+    with pytest.raises(ScavioError):
+        getattr(getattr(client, ep.namespace), ep.method)(**required)
+
+
+def test_batch8w1_1128_credits_wire_and_timeouts():
+    """Global Industrial, MSC and Zoro: 1 credit; 300 s on slow MSC pages, 240 s on Zoro pages."""
+    for ns in BATCH8W1_1128:
+        assert {ep.credits for ep in ENDPOINTS.values() if ep.namespace == ns} == {1}, ns
+    w1 = [ep for ep in ENDPOINTS.values() if ep.namespace in BATCH8W1_1128]
+    assert len(w1) == 16
+    assert not [ep.key for ep in w1 if ep.credits_note]
+    assert all(p.doc for ep in w1 for p in ep.params)
+    assert [p.name for p in ENDPOINTS["globalindustrial_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["globalindustrial_category"].required_params] == ["path"]
+    assert [p.name for p in ENDPOINTS["globalindustrial_brand"].required_params] == ["brand"]
+    assert not ENDPOINTS["globalindustrial_clearance"].required_params
+    assert [p.name for p in ENDPOINTS["msc_search"].required_params] == ["query"]
+    assert not ENDPOINTS["msc_clearance"].required_params
+    assert not ENDPOINTS["msc_locations"].required_params
+    assert [p.name for p in ENDPOINTS["zoro_search"].required_params] == ["query"]
+    assert [p.name for p in ENDPOINTS["zoro_brand"].required_params] == ["brand"]
+    assert ENDPOINTS["globalindustrial_product"].positional_optional_params[0].name == "item"
+    assert ENDPOINTS["msc_category"].positional_optional_params[0].name == "navid"
+    assert ENDPOINTS["msc_product"].positional_optional_params[0].name == "msc_number"
+    assert ENDPOINTS["zoro_category"].positional_optional_params[0].name == "category"
+    for m in ("product", "availability", "reviews"):
+        assert ENDPOINTS[f"zoro_{m}"].positional_optional_params[0].name == "zoro_no"
+    assert '"See price in cart"' in ENDPOINTS["globalindustrial_product"].summary
+    assert "a Grainger company" in ENDPOINTS["zoro_search"].summary

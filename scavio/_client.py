@@ -78,6 +78,7 @@ from ._namespaces_sync import (
     _GapNamespace,
     _GeminiNamespace,
     _GlassdoorNamespace,
+    _GlobalindustrialNamespace,
     _GoodreadsNamespace,
     _GoogleAdsNamespace,
     _GoogleNamespace,
@@ -117,6 +118,7 @@ from ._namespaces_sync import (
     _MichaelsNamespace,
     _MicroCenterNamespace,
     _MovotoNamespace,
+    _MscNamespace,
     _NaturaNamespace,
     _NellisNamespace,
     _NetshoesNamespace,
@@ -194,6 +196,7 @@ from ._namespaces_sync import (
     _ZapposNamespace,
     _ZaraNamespace,
     _ZillowNamespace,
+    _ZoroNamespace,
 )
 from ._params import build_body
 from ._ratelimit import MAX_REQUESTS_PER_SECOND, SyncRateLimiter
@@ -443,6 +446,9 @@ class ScavioClient:
         self.dafiti = _DafitiNamespace(self)
         self.riachuelo = _RiachueloNamespace(self)
         self.petz = _PetzNamespace(self)
+        self.globalindustrial = _GlobalindustrialNamespace(self)
+        self.msc = _MscNamespace(self)
+        self.zoro = _ZoroNamespace(self)
         self._extract = ExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

@@ -80,6 +80,7 @@ from ._namespaces_async import (
     _AsyncGapNamespace,
     _AsyncGeminiNamespace,
     _AsyncGlassdoorNamespace,
+    _AsyncGlobalindustrialNamespace,
     _AsyncGoodreadsNamespace,
     _AsyncGoogleAdsNamespace,
     _AsyncGoogleNamespace,
@@ -119,6 +120,7 @@ from ._namespaces_async import (
     _AsyncMichaelsNamespace,
     _AsyncMicroCenterNamespace,
     _AsyncMovotoNamespace,
+    _AsyncMscNamespace,
     _AsyncNaturaNamespace,
     _AsyncNellisNamespace,
     _AsyncNetshoesNamespace,
@@ -196,6 +198,7 @@ from ._namespaces_async import (
     _AsyncZapposNamespace,
     _AsyncZaraNamespace,
     _AsyncZillowNamespace,
+    _AsyncZoroNamespace,
 )
 from ._params import build_body
 from ._ratelimit import MAX_REQUESTS_PER_SECOND, AsyncRateLimiter
@@ -438,6 +441,9 @@ class AsyncScavioClient:
         self.dafiti = _AsyncDafitiNamespace(self)
         self.riachuelo = _AsyncRiachueloNamespace(self)
         self.petz = _AsyncPetzNamespace(self)
+        self.globalindustrial = _AsyncGlobalindustrialNamespace(self)
+        self.msc = _AsyncMscNamespace(self)
+        self.zoro = _AsyncZoroNamespace(self)
         self._extract = AsyncExtractNamespace(self)
 
     # -- transport ---------------------------------------------------------

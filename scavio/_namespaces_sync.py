@@ -196,6 +196,9 @@ __all__ = [
     "_DafitiNamespace",
     "_RiachueloNamespace",
     "_PetzNamespace",
+    "_GlobalindustrialNamespace",
+    "_MscNamespace",
+    "_ZoroNamespace",
 ]
 
 class _GoogleNamespace:
@@ -37448,3 +37451,329 @@ class _PetzNamespace:
             extra: Additional wire parameters passed through verbatim.
         """
         return self._client._call("petz_store", {"slug": slug, "url": url}, extra)
+
+class _GlobalindustrialNamespace:
+    """Global Industrial (globalindustrial.com, the US industrial-equipment and MRO supplier; Global Industrial Canada at globalindustrial.ca) search, category, brand, product and clearance endpoints; market us (USD) or ca (CAD), pack price, per-piece unit price and quantity breaks, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        brand: Optional[str] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Global Industrial (globalindustrial.com, the US supplier of industrial equipment, MRO and facility supplies; Global Industrial Canada at globalindustrial.ca with market ca). Scavio fetches the public Global Industrial page on request. Prices as shown to a visitor who is not signed in, in USD (us) or CAD (ca). By keyword, item number or part number, optionally one brand. Global Industrial answers a keyword with a search listing, or sends it to a category or straight to the product page: landed_on (search, category, product) and redirected_to (the site path it opened) say which. Returns total, count, items [{position, item_number, item_key, legacy_number, name, url, slug, image, brand, manufacturer_part_number, distributor_part_number, unspsc, product_group {group_id, name}, category, category_path, currency, price (one selling unit), price_type (regular, promotional, clearance), was_price, savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, map_price, call_for_price, package_quantity (pieces per selling unit), unit_price (per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, non_returnable, clearance, best_seller, new_arrival, rating, review_count, highlights [{name, value}], variants {name, options [{value, item_key}]}}], groups [{group_id, name, count, shown, attributes}] (a leaf category lists products by product group, at most 10 each), subcategories [{name, path, url, total, leaf}] (when the keyword maps to a broad category: items are then that page's Top Selling products), category, facets [{key, name, type (field, range, category), values}] and notes. Up to 42 products of a search listing; total is the full count. A keyword with no products returns total 0. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a Global Industrial item number (e.g. 652508) or a manufacturer part number (e.g. 240083).
+            brand: A brand as Global Industrial writes it (items[].brand or a brand facet value, e.g. Wesco, Global Industrial, Valley Craft).
+            market: us (default: www.globalindustrial.com, prices in USD) or ca (www.globalindustrial.ca, Global Industrial Canada, prices in CAD, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("globalindustrial_search", {"query": query, "brand": brand, "market": market}, extra)
+
+    def category(
+        self,
+        path: str,
+        *,
+        brand: Optional[str] = None,
+        group: Optional[Union[int, str]] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Global Industrial (globalindustrial.com, the US supplier of industrial equipment, MRO and facility supplies; Global Industrial Canada at globalindustrial.ca with market ca). Scavio fetches the public Global Industrial page on request. Prices as shown to a visitor who is not signed in, in USD (us) or CAD (ca). By category path (/c/...), optionally one brand or one product group. A leaf category returns its products grouped by product group: groups [{group_id, name, count (the group's full count), shown, attributes}] and items [{position, item_number, item_key, legacy_number, name, url, slug, image, brand, manufacturer_part_number, distributor_part_number, unspsc, product_group {group_id, name}, category, category_path, currency, price (one selling unit), price_type (regular, promotional, clearance), was_price, savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, map_price, call_for_price, package_quantity (pieces per selling unit), unit_price (per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, non_returnable, clearance, best_seller, new_arrival, rating, review_count, highlights [{name, value}], variants {name, options [{value, item_key}]}}] (at most 10 per group; group lists every product of one group). A broader category or a department (/t/...) returns subcategories [{name, path, url, total, leaf}]. Also category {name, path, url, leaf, breadcrumbs}, total, facets [{key, name, type (field, range, category), values}], filters_selected and notes. Results come in the site's default order. An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            path: A category path (/c/..., as subcategories[].path, items[].category_path or a category link give it) or a department path (/t/carts-trucks), or a link to one.
+            brand: Limit the category to this brand's products (as Global Industrial writes the brand).
+            group: A product group of a leaf category (groups[].group_id): every product of that group.
+            market: us (default: www.globalindustrial.com, prices in USD) or ca (www.globalindustrial.ca, Global Industrial Canada, prices in CAD, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("globalindustrial_category", {"path": path, "brand": brand, "group": group, "market": market}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The products of one brand on Global Industrial (globalindustrial.com, the US supplier of industrial equipment, MRO and facility supplies; Global Industrial Canada at globalindustrial.ca with market ca). Scavio fetches the public Global Industrial page on request. Prices as shown to a visitor who is not signed in, in USD (us) or CAD (ca). brand (as matched), total (the brand's full product count), count, items [{position, item_number, item_key, legacy_number, name, url, slug, image, brand, manufacturer_part_number, distributor_part_number, unspsc, product_group {group_id, name}, category, category_path, currency, price (one selling unit), price_type (regular, promotional, clearance), was_price, savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, map_price, call_for_price, package_quantity (pieces per selling unit), unit_price (per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, non_returnable, clearance, best_seller, new_arrival, rating, review_count, highlights [{name, value}], variants {name, options [{value, item_key}]}}] (up to 42, as the brand page lists them) and facets (the brand's product count per top-level category). Brand names are matched as Global Industrial writes them; an all-lowercase or all-uppercase name is also tried with the usual capitalisation. A brand with no products is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as Global Industrial writes it (items[].brand or a brand facet value, e.g. Wesco, Global Industrial, Valley Craft).
+            market: us (default: www.globalindustrial.com, prices in USD) or ca (www.globalindustrial.ca, Global Industrial Canada, prices in CAD, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("globalindustrial_brand", {"brand": brand, "market": market}, extra)
+
+    def product(
+        self,
+        item: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Global Industrial (globalindustrial.com, the US supplier of industrial equipment, MRO and facility supplies; Global Industrial Canada at globalindustrial.ca with market ca). Scavio fetches the public Global Industrial page on request. Prices as shown to a visitor who is not signed in, in USD (us) or CAD (ca). By product link or slug, or by item number or manufacturer part number. Returns the item fields (position, item_number, item_key, legacy_number, name, url, slug, image, brand, manufacturer_part_number, distributor_part_number, unspsc, product_group {group_id, name}, category, category_path, currency, price (one selling unit), price_type (regular, promotional, clearance), was_price, savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, map_price, call_for_price, package_quantity (pieces per selling unit), unit_price (per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, non_returnable, clearance, best_seller, new_arrival, rating, review_count, highlights [{name, value}], variants {name, options [{value, item_key}]}) plus summary (a one-line description), breadcrumbs [{name, path, url}], images, specs [{group, name, value, unit}], documents [{type, title, url}] (manuals and spec sheets) and launch_date. Price breaks are the site's volume prices: quantities count selling units, unit_price is per piece and package_price per selling unit. A MAP-priced item shows "See price in cart" instead of a price: its price fields are null and map_pricing is true. Reviews and questions are not included. An unknown product is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            item: A Global Industrial item number (items[].item_number) or a manufacturer part number, instead of url.
+            url: A product link or path (items[].url, /p/<name>) or its slug (items[].slug). Send url or item.
+            market: us (default: www.globalindustrial.com, prices in USD) or ca (www.globalindustrial.ca, Global Industrial Canada, prices in CAD, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("globalindustrial_product", {"item": item, "url": url, "market": market}, extra)
+
+    def clearance(
+        self,
+        *,
+        category: Optional[str] = None,
+        brand: Optional[str] = None,
+        market: Optional[Literal["us", "ca"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The clearance section of Global Industrial (globalindustrial.com, the US supplier of industrial equipment, MRO and facility supplies; Global Industrial Canada at globalindustrial.ca with market ca). Scavio fetches the public Global Industrial page on request. Prices as shown to a visitor who is not signed in, in USD (us) or CAD (ca). Without filters: total (all clearance products), categories [{id, name, count}] (clearance count per category), sections [{title, count}] and items [{position, item_number, item_key, legacy_number, name, url, slug, image, brand, manufacturer_part_number, distributor_part_number, unspsc, product_group {group_id, name}, category, category_path, currency, price (one selling unit), price_type (regular, promotional, clearance), was_price, savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, map_price, call_for_price, package_quantity (pieces per selling unit), unit_price (per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, non_returnable, clearance, best_seller, new_arrival, rating, review_count, highlights [{name, value}], variants {name, options [{value, item_key}]}, section}] (the page's New to Clearance and Bestsellers products). With category (categories[].id) and / or brand: up to 42 matching clearance products, total, the sub-category counts in categories and facets [{key, name, type (field, range, category), values}]. Clearance items carry price_type clearance, clearance_price, was_price and, where the site limits it, max_order_quantity. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A clearance category id (categories[].id of a clearance answer, e.g. PRIME30 for Carts & Trucks).
+            brand: Limit the clearance listing to this brand.
+            market: us (default: www.globalindustrial.com, prices in USD) or ca (www.globalindustrial.ca, Global Industrial Canada, prices in CAD, English).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("globalindustrial_clearance", {"category": category, "brand": brand, "market": market}, extra)
+
+class _MscNamespace:
+    """MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor) search, category, product, clearance and locations endpoints; United States, prices in USD with the per-quantity price, unit price, minimum and order multiple, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        sort: Optional[Literal["bestmatch", "price", "price_desc", "itemnumber", "itemnumber_desc", "rating"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor). Scavio fetches the public MSC page on request. United States, prices in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing may differ). By keyword, manufacturer part number or MSC#, sorted by best match, price, MSC# or rating. 24 products per page, up to page 400. Returns country, currency, page, page_size, sort, total, total_pages, has_more, count, items [{position, msc_number, name, subtitle, brand, mfr_number, url, image, currency, price (the Web Price as MSC shows it), price_text, price_unit (ea. or per 100), price_per_quantity (the quantity price is for: 1 or 100), unit_price (price / price_per_quantity, computed by Scavio), order_unit (what one order unit is where MSC states it, e.g. (1) 100 Pack), minimum_order_quantity, order_multiple (Enter in multiples of N), minimum_order_price (the order price for minimum_order_quantity units), availability, in_stock, rating, review_count (aggregates), alternative_msc_numbers}], categories [{name, navid (the input of category), count}], brands [{value, count}] (the 50 with the most items), brand_count, filters {in_stock, made_in_usa, clearance, new_additions, eco_friendly} (item counts), ratings [{stars, count}], attributes [{name, value_count, values [{value, count}]}] (up to 50 values each), note. Also query and redirected_to ({type: product, msc_number, url} when MSC answers an MSC# search with the product page; then items holds that product). A keyword with no products returns total 0. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a manufacturer part number or an MSC# (a search for an MSC# returns that product).
+            sort: MSC's sort menu: bestmatch (default, Best Match), price (low to high), price_desc (high to low), itemnumber, itemnumber_desc (by MSC#) or rating.
+            page: Results page, 1-based, 24 products per page, up to page 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("msc_search", {"query": query, "sort": sort, "page": page}, extra)
+
+    def category(
+        self,
+        navid: Optional[Union[int, str]] = None,
+        *,
+        url: Optional[str] = None,
+        sort: Optional[Literal["bestmatch", "price", "price_desc", "itemnumber", "itemnumber_desc", "rating"]] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor). Scavio fetches the public MSC page on request. United States, prices in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing may differ). By navid (categories[].navid of a search, breadcrumbs[].navid of a product) or a category link, sorted by best match, price, MSC# or rating. 24 products per page, up to page 400. Returns country, currency, page, page_size, sort, total, total_pages, has_more, count, items [{position, msc_number, name, subtitle, brand, mfr_number, url, image, currency, price (the Web Price as MSC shows it), price_text, price_unit (ea. or per 100), price_per_quantity (the quantity price is for: 1 or 100), unit_price (price / price_per_quantity, computed by Scavio), order_unit (what one order unit is where MSC states it, e.g. (1) 100 Pack), minimum_order_quantity, order_multiple (Enter in multiples of N), minimum_order_price (the order price for minimum_order_quantity units), availability, in_stock, rating, review_count (aggregates), alternative_msc_numbers}], categories [{name, navid (the input of category), count}], brands [{value, count}] (the 50 with the most items), brand_count, filters {in_stock, made_in_usa, clearance, new_additions, eco_friendly} (item counts), ratings [{stars, count}], attributes [{name, value_count, values [{value, count}]}] (up to 50 values each), note. Also navid, category {name, navid, url} and breadcrumbs [{name, navid, url}] (from the top level down). An unknown navid is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            navid: An MSC category id (navid): categories[].navid of a search, or breadcrumbs[].navid of a product.
+            url: An mscdirect.com category link carrying navid= (e.g. https://www.mscdirect.com/browse/tn?navid=2106186), instead of navid.
+            sort: MSC's sort menu: bestmatch (default, Best Match), price (low to high), price_desc (high to low), itemnumber, itemnumber_desc (by MSC#) or rating.
+            page: Results page, 1-based, 24 products per page, up to page 400.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("msc_category", {"navid": navid, "url": url, "sort": sort, "page": page}, extra)
+
+    def product(
+        self,
+        msc_number: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor). Scavio fetches the public MSC page on request. United States, prices in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing may differ). Returns country, currency, msc_number, requested_msc_number, mfr_number, big_book_page (the item's page in MSC's Big Book catalog), name, subtitle, brand, brand_logo, url, images, price (the Web Price as MSC shows it), price_text, price_unit (ea. or per 100), price_per_quantity (the quantity price is for: 1 or 100), unit_price (price / price_per_quantity, computed by Scavio), order_unit (what one order unit is where MSC states it, e.g. (1) 100 Pack), minimum_order_quantity, order_multiple (Enter in multiples of N), minimum_order_total (the Total MSC shows for minimum_order_quantity units), availability, in_stock, purchasable, rating, review_count (aggregates), breadcrumbs [{name, navid, url}], category {name, navid}, specifications [{name, value}], country_of_origin, documents [{title, url, format, size}] (manuals, data sheets), compliance {prop65, prop65_warning, notices}, alternative_msc_numbers (the alternates MSC lists), note. Review text, account pricing, delivery estimates and per-branch stock (MSC does not publish it) are not returned. An unknown MSC# is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 s; set a client timeout of at least 300 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            msc_number: The MSC# (8 digits with its leading zeros: items[].msc_number).
+            url: An mscdirect.com product link (https://www.mscdirect.com/product/details/<MSC#>), instead of msc_number.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("msc_product", {"msc_number": msc_number, "url": url}, extra)
+
+    def clearance(
+        self,
+        *,
+        list: Optional[Literal["clearance", "web_specials"]] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The Clearance Specials list (list clearance, default) or the Web Specials list (list web_specials) of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor). Scavio fetches the public MSC page on request. Curated lists as MSC publishes them (about 60 items each), not a feed of every discounted item. Returns country, currency, list, name, url, heading, count, items [{position, msc_number, order_number (MSC's order number for the offer), name, label, sale_price, currency, image, url}], note. MSC publishes no end dates on these lists. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-40 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            list: clearance (default): MSC's Clearance Specials list; web_specials: its Web Specials list.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("msc_clearance", {"list": list}, extra)
+
+    def locations(
+        self,
+        *,
+        type: Optional[str] = None,
+        state: Optional[str] = None,
+        location_country: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The locations of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor). Scavio fetches the public MSC page on request. Customer fulfillment centers, regional inventory centers, warehouses, customer care and support centers, offices, manufacturing facilities and affiliated companies with their published business phone numbers, narrowed by type, state and location_country. MSC has no customer pickup branches by ZIP and publishes no per-branch stock in this data. Returns country, total, type, state, location_country, count, location_types [{type, count}], locations [{name, types, affiliate, address {line1, line2, city, state, zip, country}, phones {toll_free, local, fax, other [{label, number}]}, website}], note. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-40 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            type: Narrows the list to one location type, as MSC names it: Customer Fulfillment Center, Regional Inventory Center, Warehouse, Customer Care Center, Customer Support Center, Shared Services Center, Procurement Office, Manufacturing Facility or Affiliated Company.
+            state: Narrows the list to one US state (2-letter code).
+            location_country: Narrows the list to one country, as MSC lists it (United States, Canada, Mexico, United Kingdom, Ireland, Asia).
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("msc_locations", {"type": type, "state": state, "location_country": location_country}, extra)
+
+class _ZoroNamespace:
+    """Zoro (zoro.com, the US online industrial and business supply store, part of Grainger) search, category, brand, product, availability and reviews endpoints; United States, prices in USD with the unit price and the order-multiple price, 1 credit each."""
+
+    def __init__(self, client: "ScavioClient") -> None:
+        self._client = client
+
+    def search(
+        self,
+        query: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Search Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. United States only: English, prices in USD as zoro.com lists them to a visitor who is not signed in. By keyword, part number or Zoro number, 36 per page in Zoro's order. Zoro sends some keywords to a category or brand page and some part numbers to a product page: redirected_to {type (category, brand, product, page), zoro_no, url, category {code, slug, name}, brand} says where, and the list is that page's (page 2+ pages it); a product redirect returns no items, ask product. Returns query, redirected_to, did_you_mean, total, page, page_size (36), total_pages, has_more, count, items [{position, zoro_no, name, brand, mfr_no, url, image, categories [{code, name}], unit_price, price_unit, price_unit_name, package_qty, order_multiple, order_multiple_price, order_multiple_price_source (computed), was_price, currency, key_specs [{name, value}], variant_attributes, lead_time, drop_ship_direct, ltl_freight, freight_cost, restricted_states, commercial_shipping_restriction, discontinued, marked_out_of_stock}]. Zoro's filters are not returned (facets []). unit_price is the price of one selling unit (price_unit EA each, PK pack, PR pair...; package_qty pieces in it); order_multiple is the number of selling units Zoro sells the item in multiples of, order_multiple_price the price of one such multiple (order_multiple_price_source: page, as the product page gives it, or computed, unit_price x order_multiple). A keyword without products returns total 0. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            query: Keywords, a part number or a Zoro number.
+            page: Results page, 1-100 (36 products per page, as Zoro lists them). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_search", {"query": query, "page": page}, extra)
+
+    def category(
+        self,
+        category: Optional[str] = None,
+        *,
+        slug: Optional[str] = None,
+        code: Optional[str] = None,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One category of Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. United States only: English, prices in USD as zoro.com lists them to a visitor who is not signed in. By category link, path or slug + code, 36 per page in Zoro's order. Returns category {code, slug, name, url}, total, page, page_size (36), total_pages, has_more, count, items [{position, zoro_no, name, brand, mfr_no, url, image, categories [{code, name}], unit_price, price_unit, price_unit_name, package_qty, order_multiple, order_multiple_price, order_multiple_price_source (computed), was_price, currency, key_specs [{name, value}], variant_attributes, lead_time, drop_ship_direct, ltl_freight, freight_cost, restricted_states, commercial_shipping_restriction, discontinued, marked_out_of_stock}]. Zoro's filters are not returned (facets []). unit_price is the price of one selling unit (price_unit EA each, PK pack, PR pair...; package_qty pieces in it); order_multiple is the number of selling units Zoro sells the item in multiples of, order_multiple_price the price of one such multiple (order_multiple_price_source: page, as the product page gives it, or computed, unit_price x order_multiple). An unknown category is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            category: A zoro.com category link or path (https://www.zoro.com/safety-glasses/c/6214/ or safety-glasses/c/6214), e.g. redirected_to.url of a search. Or send slug + code.
+            slug: The category's slug (with code).
+            code: The category's code (categories[].code of an item, e.g. 6214 or z1), with slug.
+            page: Results page, 1-100 (36 products per page, as Zoro lists them). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_category", {"category": category, "slug": slug, "code": code, "page": page}, extra)
+
+    def brand(
+        self,
+        brand: str,
+        *,
+        page: Optional[int] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One brand's products on Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. United States only: English, prices in USD as zoro.com lists them to a visitor who is not signed in. By brand name or brand link, 36 per page in Zoro's order. Returns brand, url, total, page, page_size (36), total_pages, has_more, count, items [{position, zoro_no, name, brand, mfr_no, url, image, categories [{code, name}], unit_price, price_unit, price_unit_name, package_qty, order_multiple, order_multiple_price, order_multiple_price_source (computed), was_price, currency, key_specs [{name, value}], variant_attributes, lead_time, drop_ship_direct, ltl_freight, freight_cost, restricted_states, commercial_shipping_restriction, discontinued, marked_out_of_stock}]. Zoro's filters are not returned (facets []). unit_price is the price of one selling unit (price_unit EA each, PK pack, PR pair...; package_qty pieces in it); order_multiple is the number of selling units Zoro sells the item in multiples of, order_multiple_price the price of one such multiple (order_multiple_price_source: page, as the product page gives it, or computed, unit_price x order_multiple). A brand without products is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            brand: A brand as Zoro names it (items[].brand, e.g. 3M, Mcr Safety, Zoro Select) or a zoro.com brand link (https://www.zoro.com/b/3M/).
+            page: Results page, 1-100 (36 products per page, as Zoro lists them). total_pages reports the last one.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_brand", {"brand": brand, "page": page}, extra)
+
+    def product(
+        self,
+        zoro_no: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """One product of Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. United States only: English, prices in USD as zoro.com lists them to a visitor who is not signed in. By Zoro number or link: requested_zoro_no, zoro_no, name, brand, mfr_no (manufacturer part number), upc, url, categories [{code, name, slug, url}], unit_price, price_unit, price_unit_name, package_qty, order_multiple, order_multiple_price (order_multiple_price_source page: as the product page gives it), was_price, currency, availability (in_stock, out_of_stock, ...), images, documents [{name, url}] (technical guides and other PDFs of the Documents & Resources section), specifications [{name, value}] (every attribute, with Country of Origin), variant_attributes and variants [{zoro_no, name, mfr_no, url, unit_price, price_unit, order_multiple, order_multiple_price, was_price, attributes, marked_out_of_stock}], lead_time, drop_ship_direct, ltl_freight, freight_cost, restricted_states (states Zoro does not ship the item to), commercial_shipping_restriction, discontinued, marked_out_of_stock, hazmat, expeditable. unit_price is the price of one selling unit (price_unit EA each, PK pack, PR pair...; package_qty pieces in it); order_multiple is the number of selling units Zoro sells the item in multiples of, order_multiple_price the price of one such multiple (order_multiple_price_source: page, as the product page gives it, or computed, unit_price x order_multiple). An unknown Zoro number is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zoro_no: The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed by digits). Send zoro_no or url.
+            url: A zoro.com product link, instead of zoro_no.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_product", {"zoro_no": zoro_no, "url": url}, extra)
+
+    def availability(
+        self,
+        zoro_no: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """The availability of one product of Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. as its product page shows it: zoro_no, name, brand, mfr_no, url, status (e.g. In Stock), status_type, delivery_estimate (Zoro's delivery-time text), can_back_order, orderable, min_order_qty, inventory_units (Zoro does not show unit counts: null), price {unit_price, price_unit, package_qty, order_multiple, order_multiple_price, currency}. An unknown Zoro number is a charged 404. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 60-120 s, up to about 230 s when Zoro is slow; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zoro_no: The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed by digits). Send zoro_no or url.
+            url: A zoro.com product link, instead of zoro_no.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_availability", {"zoro_no": zoro_no, "url": url}, extra)
+
+    def reviews(
+        self,
+        zoro_no: Optional[str] = None,
+        *,
+        url: Optional[str] = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
+        """Customer reviews of one product of Zoro (zoro.com, the US industrial and business supply store, a Grainger company). Scavio fetches the public zoro.com page on request. The rollup and page 1 of the reviews as the product page shows it (5, newest first): zoro_no, name, average_rating, rating_count, review_count, recommended_ratio, rating_histogram {1-5}, properties [{name (Pros, Cons, Best Uses), values [{label, count}]}], answered_questions, page, page_size, total, total_pages, has_more, count, reviews [{review_id, rating, headline, comments, bottom_line, created_at, updated_at, verified_buyer, verified_reviewer, staff_reviewer, disclosure, helpful_votes, not_helpful_votes, media_count}]. Deeper pages are not offered. No reviewer names or locations. 1 credit. A not-found is charged; failed upstream calls and refused inputs are not. Usually 60-120 s, up to about 230 s when Zoro is slow; set a client timeout of at least 240 s.
+
+        Costs 1 credit. Returns the API response as a dict.
+
+        Args:
+            zoro_no: The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed by digits). Send zoro_no or url.
+            url: A zoro.com product link, instead of zoro_no.
+            extra: Additional wire parameters passed through verbatim.
+        """
+        return self._client._call("zoro_reviews", {"zoro_no": zoro_no, "url": url}, extra)

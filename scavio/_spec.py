@@ -44467,6 +44467,901 @@ _PETZ_ENDPOINTS: tuple[Endpoint, ...] = (
     ),
 )
 
+# ====== batch 8 wave 1 2026-11-28: 3 platforms (Global Industrial, MSC, Zoro) ======
+# Generated from the backend routes (OpenAPI descriptions are the source of every
+# summary and param doc). 300 s floor on msc search, category and product; 240 s on
+# zoro availability and reviews; 180 s on the rest.
+
+# Global Industrial: 5 endpoints on /api/v1/globalindustrial.
+_GLOBALINDUSTRIAL_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="globalindustrial_search",
+        namespace="globalindustrial",
+        method="search",
+        http="POST",
+        path="/api/v1/globalindustrial/search",
+        summary=(
+            "Search Global Industrial (globalindustrial.com, the US supplier of industrial "
+            "equipment, MRO and facility supplies; Global Industrial Canada at "
+            "globalindustrial.ca with market ca). Scavio fetches the public Global Industrial "
+            "page on request. Prices as shown to a visitor who is not signed in, in USD (us) or "
+            "CAD (ca). By keyword, item number or part number, optionally one brand. Global "
+            "Industrial answers a keyword with a search listing, or sends it to a category or "
+            "straight to the product page: landed_on (search, category, product) and "
+            "redirected_to (the site path it opened) say which. Returns total, count, items "
+            "[{position, item_number, item_key, legacy_number, name, url, slug, image, brand, "
+            "manufacturer_part_number, distributor_part_number, unspsc, product_group "
+            "{group_id, name}, category, category_path, currency, price (one selling unit), "
+            "price_type (regular, promotional, clearance), was_price, savings_percent, msrp, "
+            "clearance_price, sale_price, map_pricing, price_in_cart, map_price, "
+            "call_for_price, package_quantity (pieces per selling unit), unit_price (per "
+            "piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, "
+            "qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 "
+            "Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, "
+            "non_returnable, clearance, best_seller, new_arrival, rating, review_count, "
+            "highlights [{name, value}], variants {name, options [{value, item_key}]}}], groups "
+            "[{group_id, name, count, shown, attributes}] (a leaf category lists products by "
+            "product group, at most 10 each), subcategories [{name, path, url, total, leaf}] "
+            "(when the keyword maps to a broad category: items are then that page's Top Selling "
+            "products), category, facets [{key, name, type (field, range, category), values}] "
+            "and notes. Up to 42 products of a search listing; total is the full count. A "
+            "keyword with no products returns total 0. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of "
+            "at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords, a Global Industrial item number (e.g. 652508) or a manufacturer "
+                    "part number (e.g. 240083)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "A brand as Global Industrial writes it (items[].brand or a brand facet "
+                    "value, e.g. Wesco, Global Industrial, Valley Craft)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default: www.globalindustrial.com, prices in USD) or ca "
+                    "(www.globalindustrial.ca, Global Industrial Canada, prices in CAD, "
+                    "English)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="globalindustrial_category",
+        namespace="globalindustrial",
+        method="category",
+        http="POST",
+        path="/api/v1/globalindustrial/category",
+        summary=(
+            "One category of Global Industrial (globalindustrial.com, the US supplier of "
+            "industrial equipment, MRO and facility supplies; Global Industrial Canada at "
+            "globalindustrial.ca with market ca). Scavio fetches the public Global Industrial "
+            "page on request. Prices as shown to a visitor who is not signed in, in USD (us) or "
+            "CAD (ca). By category path (/c/...), optionally one brand or one product group. A "
+            "leaf category returns its products grouped by product group: groups [{group_id, "
+            "name, count (the group's full count), shown, attributes}] and items [{position, "
+            "item_number, item_key, legacy_number, name, url, slug, image, brand, "
+            "manufacturer_part_number, distributor_part_number, unspsc, product_group "
+            "{group_id, name}, category, category_path, currency, price (one selling unit), "
+            "price_type (regular, promotional, clearance), was_price, savings_percent, msrp, "
+            "clearance_price, sale_price, map_pricing, price_in_cart, map_price, "
+            "call_for_price, package_quantity (pieces per selling unit), unit_price (per "
+            "piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, "
+            "qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 "
+            "Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, "
+            "non_returnable, clearance, best_seller, new_arrival, rating, review_count, "
+            "highlights [{name, value}], variants {name, options [{value, item_key}]}}] (at "
+            "most 10 per group; group lists every product of one group). A broader category or "
+            "a department (/t/...) returns subcategories [{name, path, url, total, leaf}]. Also "
+            "category {name, path, url, leaf, breadcrumbs}, total, facets [{key, name, type "
+            "(field, range, category), values}], filters_selected and notes. Results come in "
+            "the site's default order. An unknown category is a charged 404. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "5-60 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "path",
+                "str",
+                required=True,
+                doc=(
+                    "A category path (/c/..., as subcategories[].path, items[].category_path or "
+                    "a category link give it) or a department path (/t/carts-trucks), or a link "
+                    "to one."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "Limit the category to this brand's products (as Global Industrial writes "
+                    "the brand)."
+                ),
+            ),
+            Param(
+                "group",
+                "Optional[Union[int, str]]",
+                doc=(
+                    "A product group of a leaf category (groups[].group_id): every product of "
+                    "that group."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default: www.globalindustrial.com, prices in USD) or ca "
+                    "(www.globalindustrial.ca, Global Industrial Canada, prices in CAD, "
+                    "English)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="globalindustrial_brand",
+        namespace="globalindustrial",
+        method="brand",
+        http="POST",
+        path="/api/v1/globalindustrial/brand",
+        summary=(
+            "The products of one brand on Global Industrial (globalindustrial.com, the US "
+            "supplier of industrial equipment, MRO and facility supplies; Global Industrial "
+            "Canada at globalindustrial.ca with market ca). Scavio fetches the public Global "
+            "Industrial page on request. Prices as shown to a visitor who is not signed in, in "
+            "USD (us) or CAD (ca). brand (as matched), total (the brand's full product count), "
+            "count, items [{position, item_number, item_key, legacy_number, name, url, slug, "
+            "image, brand, manufacturer_part_number, distributor_part_number, unspsc, "
+            "product_group {group_id, name}, category, category_path, currency, price (one "
+            "selling unit), price_type (regular, promotional, clearance), was_price, "
+            "savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, "
+            "map_price, call_for_price, package_quantity (pieces per selling unit), unit_price "
+            "(per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, "
+            "qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 "
+            "Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, "
+            "non_returnable, clearance, best_seller, new_arrival, rating, review_count, "
+            "highlights [{name, value}], variants {name, options [{value, item_key}]}}] (up to "
+            "42, as the brand page lists them) and facets (the brand's product count per "
+            "top-level category). Brand names are matched as Global Industrial writes them; an "
+            "all-lowercase or all-uppercase name is also tried with the usual capitalisation. A "
+            "brand with no products is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of "
+            "at least 180 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand as Global Industrial writes it (items[].brand or a brand facet "
+                    "value, e.g. Wesco, Global Industrial, Valley Craft)."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default: www.globalindustrial.com, prices in USD) or ca "
+                    "(www.globalindustrial.ca, Global Industrial Canada, prices in CAD, "
+                    "English)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="globalindustrial_product",
+        namespace="globalindustrial",
+        method="product",
+        http="POST",
+        path="/api/v1/globalindustrial/product",
+        summary=(
+            "One product of Global Industrial (globalindustrial.com, the US supplier of "
+            "industrial equipment, MRO and facility supplies; Global Industrial Canada at "
+            "globalindustrial.ca with market ca). Scavio fetches the public Global Industrial "
+            "page on request. Prices as shown to a visitor who is not signed in, in USD (us) or "
+            "CAD (ca). By product link or slug, or by item number or manufacturer part number. "
+            "Returns the item fields (position, item_number, item_key, legacy_number, name, "
+            "url, slug, image, brand, manufacturer_part_number, distributor_part_number, "
+            "unspsc, product_group {group_id, name}, category, category_path, currency, price "
+            "(one selling unit), price_type (regular, promotional, clearance), was_price, "
+            "savings_percent, msrp, clearance_price, sale_price, map_pricing, price_in_cart, "
+            "map_price, call_for_price, package_quantity (pieces per selling unit), unit_price "
+            "(per piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, "
+            "qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 "
+            "Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, "
+            "non_returnable, clearance, best_seller, new_arrival, rating, review_count, "
+            "highlights [{name, value}], variants {name, options [{value, item_key}]}) plus "
+            "summary (a one-line description), breadcrumbs [{name, path, url}], images, specs "
+            "[{group, name, value, unit}], documents [{type, title, url}] (manuals and spec "
+            "sheets) and launch_date. Price breaks are the site's volume prices: quantities "
+            "count selling units, unit_price is per piece and package_price per selling unit. A "
+            "MAP-priced item shows \"See price in cart\" instead of a price: its price fields are "
+            "null and map_pricing is true. Reviews and questions are not included. An unknown "
+            "product is a charged 404. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. Usually 5-60 s; set a client timeout of at least 180 "
+            "s."
+        ),
+        params=(
+            Param(
+                "item",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A Global Industrial item number (items[].item_number) or a manufacturer "
+                    "part number, instead of url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A product link or path (items[].url, /p/<name>) or its slug "
+                    "(items[].slug). Send url or item."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default: www.globalindustrial.com, prices in USD) or ca "
+                    "(www.globalindustrial.ca, Global Industrial Canada, prices in CAD, "
+                    "English)."
+                ),
+            ),
+        ),
+        one_of=(("url", "item"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="globalindustrial_clearance",
+        namespace="globalindustrial",
+        method="clearance",
+        http="POST",
+        path="/api/v1/globalindustrial/clearance",
+        summary=(
+            "The clearance section of Global Industrial (globalindustrial.com, the US supplier "
+            "of industrial equipment, MRO and facility supplies; Global Industrial Canada at "
+            "globalindustrial.ca with market ca). Scavio fetches the public Global Industrial "
+            "page on request. Prices as shown to a visitor who is not signed in, in USD (us) or "
+            "CAD (ca). Without filters: total (all clearance products), categories [{id, name, "
+            "count}] (clearance count per category), sections [{title, count}] and items "
+            "[{position, item_number, item_key, legacy_number, name, url, slug, image, brand, "
+            "manufacturer_part_number, distributor_part_number, unspsc, product_group "
+            "{group_id, name}, category, category_path, currency, price (one selling unit), "
+            "price_type (regular, promotional, clearance), was_price, savings_percent, msrp, "
+            "clearance_price, sale_price, map_pricing, price_in_cart, map_price, "
+            "call_for_price, package_quantity (pieces per selling unit), unit_price (per "
+            "piece), min_order_quantity, max_order_quantity, quantity_breaks [{qty_start, "
+            "qty_end, unit_price, package_price}], in_stock, availability (e.g. Ships in 5 "
+            "Business Days), lead_time_days, ships_ltl_freight, free_shipping, hazardous, "
+            "non_returnable, clearance, best_seller, new_arrival, rating, review_count, "
+            "highlights [{name, value}], variants {name, options [{value, item_key}]}, "
+            "section}] (the page's New to Clearance and Bestsellers products). With category "
+            "(categories[].id) and / or brand: up to 42 matching clearance products, total, the "
+            "sub-category counts in categories and facets [{key, name, type (field, range, "
+            "category), values}]. Clearance items carry price_type clearance, clearance_price, "
+            "was_price and, where the site limits it, max_order_quantity. 1 credit. A not-found "
+            "is charged; failed upstream calls and refused inputs are not. Usually 5-60 s; set "
+            "a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                doc=(
+                    "A clearance category id (categories[].id of a clearance answer, e.g. "
+                    "PRIME30 for Carts & Trucks)."
+                ),
+            ),
+            Param(
+                "brand",
+                "Optional[str]",
+                doc=(
+                    "Limit the clearance listing to this brand."
+                ),
+            ),
+            Param(
+                "market",
+                'Optional[Literal["us", "ca"]]',
+                doc=(
+                    "us (default: www.globalindustrial.com, prices in USD) or ca "
+                    "(www.globalindustrial.ca, Global Industrial Canada, prices in CAD, "
+                    "English)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
+# MSC Industrial Supply: 5 endpoints on /api/v1/msc.
+_MSC_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="msc_search",
+        namespace="msc",
+        method="search",
+        http="POST",
+        path="/api/v1/msc/search",
+        summary=(
+            "Search MSC Industrial Supply (mscdirect.com, the US metalworking and MRO "
+            "distributor). Scavio fetches the public MSC page on request. United States, prices "
+            "in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing "
+            "may differ). By keyword, manufacturer part number or MSC#, sorted by best match, "
+            "price, MSC# or rating. 24 products per page, up to page 400. Returns country, "
+            "currency, page, page_size, sort, total, total_pages, has_more, count, items "
+            "[{position, msc_number, name, subtitle, brand, mfr_number, url, image, currency, "
+            "price (the Web Price as MSC shows it), price_text, price_unit (ea. or per 100), "
+            "price_per_quantity (the quantity price is for: 1 or 100), unit_price (price / "
+            "price_per_quantity, computed by Scavio), order_unit (what one order unit is where "
+            "MSC states it, e.g. (1) 100 Pack), minimum_order_quantity, order_multiple (Enter "
+            "in multiples of N), minimum_order_price (the order price for "
+            "minimum_order_quantity units), availability, in_stock, rating, review_count "
+            "(aggregates), alternative_msc_numbers}], categories [{name, navid (the input of "
+            "category), count}], brands [{value, count}] (the 50 with the most items), "
+            "brand_count, filters {in_stock, made_in_usa, clearance, new_additions, "
+            "eco_friendly} (item counts), ratings [{stars, count}], attributes [{name, "
+            "value_count, values [{value, count}]}] (up to 50 values each), note. Also query "
+            "and redirected_to ({type: product, msc_number, url} when MSC answers an MSC# "
+            "search with the product page; then items holds that product). A keyword with no "
+            "products returns total 0. 1 credit. A not-found is charged; failed upstream calls "
+            "and refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 "
+            "s; set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords, a manufacturer part number or an MSC# (a search for an MSC# "
+                    "returns that product)."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestmatch", "price", "price_desc", "itemnumber", "itemnumber_desc", "rating"]]',
+                doc=(
+                    "MSC's sort menu: bestmatch (default, Best Match), price (low to high), "
+                    "price_desc (high to low), itemnumber, itemnumber_desc (by MSC#) or rating."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 24 products per page, up to page 400."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="msc_category",
+        namespace="msc",
+        method="category",
+        http="POST",
+        path="/api/v1/msc/category",
+        summary=(
+            "One category of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO "
+            "distributor). Scavio fetches the public MSC page on request. United States, prices "
+            "in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing "
+            "may differ). By navid (categories[].navid of a search, breadcrumbs[].navid of a "
+            "product) or a category link, sorted by best match, price, MSC# or rating. 24 "
+            "products per page, up to page 400. Returns country, currency, page, page_size, "
+            "sort, total, total_pages, has_more, count, items [{position, msc_number, name, "
+            "subtitle, brand, mfr_number, url, image, currency, price (the Web Price as MSC "
+            "shows it), price_text, price_unit (ea. or per 100), price_per_quantity (the "
+            "quantity price is for: 1 or 100), unit_price (price / price_per_quantity, computed "
+            "by Scavio), order_unit (what one order unit is where MSC states it, e.g. (1) 100 "
+            "Pack), minimum_order_quantity, order_multiple (Enter in multiples of N), "
+            "minimum_order_price (the order price for minimum_order_quantity units), "
+            "availability, in_stock, rating, review_count (aggregates), "
+            "alternative_msc_numbers}], categories [{name, navid (the input of category), "
+            "count}], brands [{value, count}] (the 50 with the most items), brand_count, "
+            "filters {in_stock, made_in_usa, clearance, new_additions, eco_friendly} (item "
+            "counts), ratings [{stars, count}], attributes [{name, value_count, values [{value, "
+            "count}]}] (up to 50 values each), note. Also navid, category {name, navid, url} "
+            "and breadcrumbs [{name, navid, url}] (from the top level down). An unknown navid "
+            "is a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 s; "
+            "set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "navid",
+                "Optional[Union[int, str]]",
+                positional=True,
+                doc=(
+                    "An MSC category id (navid): categories[].navid of a search, or "
+                    "breadcrumbs[].navid of a product."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An mscdirect.com category link carrying navid= (e.g. "
+                    "https://www.mscdirect.com/browse/tn?navid=2106186), instead of navid."
+                ),
+            ),
+            Param(
+                "sort",
+                'Optional[Literal["bestmatch", "price", "price_desc", "itemnumber", "itemnumber_desc", "rating"]]',
+                doc=(
+                    "MSC's sort menu: bestmatch (default, Best Match), price (low to high), "
+                    "price_desc (high to low), itemnumber, itemnumber_desc (by MSC#) or rating."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-based, 24 products per page, up to page 400."
+                ),
+            ),
+        ),
+        one_of=(("navid", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="msc_product",
+        namespace="msc",
+        method="product",
+        http="POST",
+        path="/api/v1/msc/product",
+        summary=(
+            "One product of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO "
+            "distributor). Scavio fetches the public MSC page on request. United States, prices "
+            "in USD: the Web Price MSC shows to a visitor who is not signed in (account pricing "
+            "may differ). Returns country, currency, msc_number, requested_msc_number, "
+            "mfr_number, big_book_page (the item's page in MSC's Big Book catalog), name, "
+            "subtitle, brand, brand_logo, url, images, price (the Web Price as MSC shows it), "
+            "price_text, price_unit (ea. or per 100), price_per_quantity (the quantity price is "
+            "for: 1 or 100), unit_price (price / price_per_quantity, computed by Scavio), "
+            "order_unit (what one order unit is where MSC states it, e.g. (1) 100 Pack), "
+            "minimum_order_quantity, order_multiple (Enter in multiples of N), "
+            "minimum_order_total (the Total MSC shows for minimum_order_quantity units), "
+            "availability, in_stock, purchasable, rating, review_count (aggregates), "
+            "breadcrumbs [{name, navid, url}], category {name, navid}, specifications [{name, "
+            "value}], country_of_origin, documents [{title, url, format, size}] (manuals, data "
+            "sheets), compliance {prop65, prop65_warning, notices}, alternative_msc_numbers "
+            "(the alternates MSC lists), note. Review text, account pricing, delivery estimates "
+            "and per-branch stock (MSC does not publish it) are not returned. An unknown MSC# "
+            "is a charged 404. 1 credit. A not-found is charged; failed upstream calls and "
+            "refused inputs are not. MSC pages are slow: usually 30-120 s, up to about 240 s; "
+            "set a client timeout of at least 300 s."
+        ),
+        params=(
+            Param(
+                "msc_number",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The MSC# (8 digits with its leading zeros: items[].msc_number)."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "An mscdirect.com product link "
+                    "(https://www.mscdirect.com/product/details/<MSC#>), instead of msc_number."
+                ),
+            ),
+        ),
+        one_of=(("msc_number", "url"),),
+        credits=1,
+        min_timeout=300.0,
+    ),
+    Endpoint(
+        key="msc_clearance",
+        namespace="msc",
+        method="clearance",
+        http="POST",
+        path="/api/v1/msc/clearance",
+        summary=(
+            "The Clearance Specials list (list clearance, default) or the Web Specials list "
+            "(list web_specials) of MSC Industrial Supply (mscdirect.com, the US metalworking "
+            "and MRO distributor). Scavio fetches the public MSC page on request. Curated lists "
+            "as MSC publishes them (about 60 items each), not a feed of every discounted item. "
+            "Returns country, currency, list, name, url, heading, count, items [{position, "
+            "msc_number, order_number (MSC's order number for the offer), name, label, "
+            "sale_price, currency, image, url}], note. MSC publishes no end dates on these "
+            "lists. 1 credit. A not-found is charged; failed upstream calls and refused inputs "
+            "are not. Usually 5-40 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "list",
+                'Optional[Literal["clearance", "web_specials"]]',
+                doc=(
+                    "clearance (default): MSC's Clearance Specials list; web_specials: its Web "
+                    "Specials list."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="msc_locations",
+        namespace="msc",
+        method="locations",
+        http="POST",
+        path="/api/v1/msc/locations",
+        summary=(
+            "The locations of MSC Industrial Supply (mscdirect.com, the US metalworking and MRO "
+            "distributor). Scavio fetches the public MSC page on request. Customer fulfillment "
+            "centers, regional inventory centers, warehouses, customer care and support "
+            "centers, offices, manufacturing facilities and affiliated companies with their "
+            "published business phone numbers, narrowed by type, state and location_country. "
+            "MSC has no customer pickup branches by ZIP and publishes no per-branch stock in "
+            "this data. Returns country, total, type, state, location_country, count, "
+            "location_types [{type, count}], locations [{name, types, affiliate, address "
+            "{line1, line2, city, state, zip, country}, phones {toll_free, local, fax, other "
+            "[{label, number}]}, website}], note. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 5-40 s; set a client timeout of "
+            "at least 180 s."
+        ),
+        params=(
+            Param(
+                "type",
+                "Optional[str]",
+                doc=(
+                    "Narrows the list to one location type, as MSC names it: Customer "
+                    "Fulfillment Center, Regional Inventory Center, Warehouse, Customer Care "
+                    "Center, Customer Support Center, Shared Services Center, Procurement "
+                    "Office, Manufacturing Facility or Affiliated Company."
+                ),
+            ),
+            Param(
+                "state",
+                "Optional[str]",
+                doc=(
+                    "Narrows the list to one US state (2-letter code)."
+                ),
+            ),
+            Param(
+                "location_country",
+                "Optional[str]",
+                doc=(
+                    "Narrows the list to one country, as MSC lists it (United States, Canada, "
+                    "Mexico, United Kingdom, Ireland, Asia)."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+)
+
+# Zoro: 6 endpoints on /api/v1/zoro.
+_ZORO_ENDPOINTS: tuple[Endpoint, ...] = (
+    Endpoint(
+        key="zoro_search",
+        namespace="zoro",
+        method="search",
+        http="POST",
+        path="/api/v1/zoro/search",
+        summary=(
+            "Search Zoro (zoro.com, the US industrial and business supply store, a Grainger "
+            "company). Scavio fetches the public zoro.com page on request. United States only: "
+            "English, prices in USD as zoro.com lists them to a visitor who is not signed in. "
+            "By keyword, part number or Zoro number, 36 per page in Zoro's order. Zoro sends "
+            "some keywords to a category or brand page and some part numbers to a product page: "
+            "redirected_to {type (category, brand, product, page), zoro_no, url, category "
+            "{code, slug, name}, brand} says where, and the list is that page's (page 2+ pages "
+            "it); a product redirect returns no items, ask product. Returns query, "
+            "redirected_to, did_you_mean, total, page, page_size (36), total_pages, has_more, "
+            "count, items [{position, zoro_no, name, brand, mfr_no, url, image, categories "
+            "[{code, name}], unit_price, price_unit, price_unit_name, package_qty, "
+            "order_multiple, order_multiple_price, order_multiple_price_source (computed), "
+            "was_price, currency, key_specs [{name, value}], variant_attributes, lead_time, "
+            "drop_ship_direct, ltl_freight, freight_cost, restricted_states, "
+            "commercial_shipping_restriction, discontinued, marked_out_of_stock}]. Zoro's "
+            "filters are not returned (facets []). unit_price is the price of one selling unit "
+            "(price_unit EA each, PK pack, PR pair...; package_qty pieces in it); "
+            "order_multiple is the number of selling units Zoro sells the item in multiples of, "
+            "order_multiple_price the price of one such multiple (order_multiple_price_source: "
+            "page, as the product page gives it, or computed, unit_price x order_multiple). A "
+            "keyword without products returns total 0. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of "
+            "at least 180 s."
+        ),
+        params=(
+            Param(
+                "query",
+                "str",
+                required=True,
+                doc=(
+                    "Keywords, a part number or a Zoro number."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 products per page, as Zoro lists them). "
+                    "total_pages reports the last one."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="zoro_category",
+        namespace="zoro",
+        method="category",
+        http="POST",
+        path="/api/v1/zoro/category",
+        summary=(
+            "One category of Zoro (zoro.com, the US industrial and business supply store, a "
+            "Grainger company). Scavio fetches the public zoro.com page on request. United "
+            "States only: English, prices in USD as zoro.com lists them to a visitor who is not "
+            "signed in. By category link, path or slug + code, 36 per page in Zoro's order. "
+            "Returns category {code, slug, name, url}, total, page, page_size (36), "
+            "total_pages, has_more, count, items [{position, zoro_no, name, brand, mfr_no, url, "
+            "image, categories [{code, name}], unit_price, price_unit, price_unit_name, "
+            "package_qty, order_multiple, order_multiple_price, order_multiple_price_source "
+            "(computed), was_price, currency, key_specs [{name, value}], variant_attributes, "
+            "lead_time, drop_ship_direct, ltl_freight, freight_cost, restricted_states, "
+            "commercial_shipping_restriction, discontinued, marked_out_of_stock}]. Zoro's "
+            "filters are not returned (facets []). unit_price is the price of one selling unit "
+            "(price_unit EA each, PK pack, PR pair...; package_qty pieces in it); "
+            "order_multiple is the number of selling units Zoro sells the item in multiples of, "
+            "order_multiple_price the price of one such multiple (order_multiple_price_source: "
+            "page, as the product page gives it, or computed, unit_price x order_multiple). An "
+            "unknown category is a charged 404. 1 credit. A not-found is charged; failed "
+            "upstream calls and refused inputs are not. Usually 5-60 s; set a client timeout of "
+            "at least 180 s."
+        ),
+        params=(
+            Param(
+                "category",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "A zoro.com category link or path "
+                    "(https://www.zoro.com/safety-glasses/c/6214/ or safety-glasses/c/6214), "
+                    "e.g. redirected_to.url of a search. Or send slug + code."
+                ),
+            ),
+            Param(
+                "slug",
+                "Optional[str]",
+                doc=(
+                    "The category's slug (with code)."
+                ),
+            ),
+            Param(
+                "code",
+                "Optional[str]",
+                doc=(
+                    "The category's code (categories[].code of an item, e.g. 6214 or z1), with "
+                    "slug."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 products per page, as Zoro lists them). "
+                    "total_pages reports the last one."
+                ),
+            ),
+        ),
+        one_of=(("category", "code"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="zoro_brand",
+        namespace="zoro",
+        method="brand",
+        http="POST",
+        path="/api/v1/zoro/brand",
+        summary=(
+            "One brand's products on Zoro (zoro.com, the US industrial and business supply "
+            "store, a Grainger company). Scavio fetches the public zoro.com page on request. "
+            "United States only: English, prices in USD as zoro.com lists them to a visitor who "
+            "is not signed in. By brand name or brand link, 36 per page in Zoro's order. "
+            "Returns brand, url, total, page, page_size (36), total_pages, has_more, count, "
+            "items [{position, zoro_no, name, brand, mfr_no, url, image, categories [{code, "
+            "name}], unit_price, price_unit, price_unit_name, package_qty, order_multiple, "
+            "order_multiple_price, order_multiple_price_source (computed), was_price, currency, "
+            "key_specs [{name, value}], variant_attributes, lead_time, drop_ship_direct, "
+            "ltl_freight, freight_cost, restricted_states, commercial_shipping_restriction, "
+            "discontinued, marked_out_of_stock}]. Zoro's filters are not returned (facets []). "
+            "unit_price is the price of one selling unit (price_unit EA each, PK pack, PR "
+            "pair...; package_qty pieces in it); order_multiple is the number of selling units "
+            "Zoro sells the item in multiples of, order_multiple_price the price of one such "
+            "multiple (order_multiple_price_source: page, as the product page gives it, or "
+            "computed, unit_price x order_multiple). A brand without products is a charged 404. "
+            "1 credit. A not-found is charged; failed upstream calls and refused inputs are "
+            "not. Usually 5-60 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "brand",
+                "str",
+                required=True,
+                doc=(
+                    "A brand as Zoro names it (items[].brand, e.g. 3M, Mcr Safety, Zoro Select) "
+                    "or a zoro.com brand link (https://www.zoro.com/b/3M/)."
+                ),
+            ),
+            Param(
+                "page",
+                "Optional[int]",
+                doc=(
+                    "Results page, 1-100 (36 products per page, as Zoro lists them). "
+                    "total_pages reports the last one."
+                ),
+            ),
+        ),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="zoro_product",
+        namespace="zoro",
+        method="product",
+        http="POST",
+        path="/api/v1/zoro/product",
+        summary=(
+            "One product of Zoro (zoro.com, the US industrial and business supply store, a "
+            "Grainger company). Scavio fetches the public zoro.com page on request. United "
+            "States only: English, prices in USD as zoro.com lists them to a visitor who is not "
+            "signed in. By Zoro number or link: requested_zoro_no, zoro_no, name, brand, mfr_no "
+            "(manufacturer part number), upc, url, categories [{code, name, slug, url}], "
+            "unit_price, price_unit, price_unit_name, package_qty, order_multiple, "
+            "order_multiple_price (order_multiple_price_source page: as the product page gives "
+            "it), was_price, currency, availability (in_stock, out_of_stock, ...), images, "
+            "documents [{name, url}] (technical guides and other PDFs of the Documents & "
+            "Resources section), specifications [{name, value}] (every attribute, with Country "
+            "of Origin), variant_attributes and variants [{zoro_no, name, mfr_no, url, "
+            "unit_price, price_unit, order_multiple, order_multiple_price, was_price, "
+            "attributes, marked_out_of_stock}], lead_time, drop_ship_direct, ltl_freight, "
+            "freight_cost, restricted_states (states Zoro does not ship the item to), "
+            "commercial_shipping_restriction, discontinued, marked_out_of_stock, hazmat, "
+            "expeditable. unit_price is the price of one selling unit (price_unit EA each, PK "
+            "pack, PR pair...; package_qty pieces in it); order_multiple is the number of "
+            "selling units Zoro sells the item in multiples of, order_multiple_price the price "
+            "of one such multiple (order_multiple_price_source: page, as the product page gives "
+            "it, or computed, unit_price x order_multiple). An unknown Zoro number is a charged "
+            "404. 1 credit. A not-found is charged; failed upstream calls and refused inputs "
+            "are not. Usually 5-60 s; set a client timeout of at least 180 s."
+        ),
+        params=(
+            Param(
+                "zoro_no",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed "
+                    "by digits). Send zoro_no or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A zoro.com product link, instead of zoro_no."
+                ),
+            ),
+        ),
+        one_of=(("zoro_no", "url"),),
+        credits=1,
+        min_timeout=180.0,
+    ),
+    Endpoint(
+        key="zoro_availability",
+        namespace="zoro",
+        method="availability",
+        http="POST",
+        path="/api/v1/zoro/availability",
+        summary=(
+            "The availability of one product of Zoro (zoro.com, the US industrial and business "
+            "supply store, a Grainger company). Scavio fetches the public zoro.com page on "
+            "request. as its product page shows it: zoro_no, name, brand, mfr_no, url, status "
+            "(e.g. In Stock), status_type, delivery_estimate (Zoro's delivery-time text), "
+            "can_back_order, orderable, min_order_qty, inventory_units (Zoro does not show unit "
+            "counts: null), price {unit_price, price_unit, package_qty, order_multiple, "
+            "order_multiple_price, currency}. An unknown Zoro number is a charged 404. 1 "
+            "credit. A not-found is charged; failed upstream calls and refused inputs are not. "
+            "Usually 60-120 s, up to about 230 s when Zoro is slow; set a client timeout of at "
+            "least 240 s."
+        ),
+        params=(
+            Param(
+                "zoro_no",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed "
+                    "by digits). Send zoro_no or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A zoro.com product link, instead of zoro_no."
+                ),
+            ),
+        ),
+        one_of=(("zoro_no", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+    Endpoint(
+        key="zoro_reviews",
+        namespace="zoro",
+        method="reviews",
+        http="POST",
+        path="/api/v1/zoro/reviews",
+        summary=(
+            "Customer reviews of one product of Zoro (zoro.com, the US industrial and business "
+            "supply store, a Grainger company). Scavio fetches the public zoro.com page on "
+            "request. The rollup and page 1 of the reviews as the product page shows it (5, "
+            "newest first): zoro_no, name, average_rating, rating_count, review_count, "
+            "recommended_ratio, rating_histogram {1-5}, properties [{name (Pros, Cons, Best "
+            "Uses), values [{label, count}]}], answered_questions, page, page_size, total, "
+            "total_pages, has_more, count, reviews [{review_id, rating, headline, comments, "
+            "bottom_line, created_at, updated_at, verified_buyer, verified_reviewer, "
+            "staff_reviewer, disclosure, helpful_votes, not_helpful_votes, media_count}]. "
+            "Deeper pages are not offered. No reviewer names or locations. 1 credit. A "
+            "not-found is charged; failed upstream calls and refused inputs are not. Usually "
+            "60-120 s, up to about 230 s when Zoro is slow; set a client timeout of at least "
+            "240 s."
+        ),
+        params=(
+            Param(
+                "zoro_no",
+                "Optional[str]",
+                positional=True,
+                doc=(
+                    "The Zoro number (items[].zoro_no; the Zoro # on a product page, G followed "
+                    "by digits). Send zoro_no or url."
+                ),
+            ),
+            Param(
+                "url",
+                "Optional[str]",
+                doc=(
+                    "A zoro.com product link, instead of zoro_no."
+                ),
+            ),
+        ),
+        one_of=(("zoro_no", "url"),),
+        credits=1,
+        min_timeout=240.0,
+    ),
+)
+
 _ENDPOINTS: tuple[Endpoint, ...] = (
     # ============================ Google (v2) ============================
     Endpoint(
@@ -62004,6 +62899,10 @@ _ENDPOINTS: tuple[Endpoint, ...] = (
     # ====== batch 7 wave 6 2026-11-27: 2 platforms (Riachuelo, Petz) ======
     *_RIACHUELO_ENDPOINTS,
     *_PETZ_ENDPOINTS,
+    # ====== batch 8 wave 1 2026-11-28: 3 platforms (Global Industrial, MSC, Zoro) ======
+    *_GLOBALINDUSTRIAL_ENDPOINTS,
+    *_MSC_ENDPOINTS,
+    *_ZORO_ENDPOINTS,
     # =========================== Dollar General ==========================
     # 5 endpoints, 1 credit each. Prices (dollars) and unit counts are one
     # store's, so store_id (from stores()) is required on search, product and
@@ -69005,6 +69904,9 @@ NAMESPACES: tuple[str, ...] = (
     "dafiti",
     "riachuelo",
     "petz",
+    "globalindustrial",
+    "msc",
+    "zoro",
 )
 
 

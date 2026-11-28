@@ -6,7 +6,7 @@
 [![Tests](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml/badge.svg)](https://github.com/scavio-ai/scavio-python/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 187 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
+The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme) Search API. Access real-time data from 190 sources -- Google, ChatGPT, Gemini, Amazon, Walmart, Costco, Best Buy, TCGplayer, the Nintendo eShop, H&M, Zara, Uniqlo, ASOS, Fashion Nova, Vinted, Mercari, Depop, Poshmark, OfferUp, thredUP, Macy's, Saks Fifth Avenue, Kohl's, JCPenney, Belk, Dick's Sporting Goods, Academy Sports + Outdoors, REI, L.L.Bean, Foot Locker, Zappos, 6pm, Fanatics, Gap, Old Navy, Banana Republic, Athleta, Abercrombie & Fitch, Hollister, Bath & Body Works, Williams Sonoma, Pottery Barn, West Elm, Bed Bath & Beyond, QVC, HSN, Argos, Media Expert, Action, HEMA, Nordstrom, Nordstrom Rack, Lowe's, Sam's Club, BJ's Wholesale Club, Canadian Tire, SportChek, Mark's, RONA, Dollar General, Dollar Tree, Discount Tire, Sephora, Ulta Beauty, Dermstore, Space NK, Lookfantastic, Cult Beauty, YesStyle, Notino, Douglas, Boots, ALDI, Micro Center, Newegg, Sweetwater, Walgreens, CVS, Whole Foods Market, Harbor Freight, AutoZone, O'Reilly Auto Parts, RockAuto, Cars.com, Autotrader, CarGurus, CarMax, Carvana, TrueCar, Edmunds, Kelley Blue Book, Bring a Trailer, Ace Hardware, Tractor Supply, Michaels, Nike, Staples, Instacart, PC Express, PetSmart, Petco, iHerb, Chewy, Menards, HEB, Kroger, Publix, IKEA, Wayfair, Ashley Furniture, Maisons du Monde, Carrefour, Allegro, bol.com, OLX, Trendyol, Spec's, Decathlon, Mercado Libre, KaBuM!, Magazine Luiza, Casas Bahia, Extra, Ponto, Buscape, Zoom, Drogasil, Droga Raia, Leroy Merlin, Natura, O Boticario, Eudora, Centauro, Enjoei, Atacadao, Carrefour Brasil, Terabyteshop, Cobasi, Netshoes, Estante Virtual, C&A Brasil, Lojas Renner, Pichau, Dafiti, Riachuelo, Petz, Global Industrial, MSC Industrial Supply, Zoro, eBay, EstateSales.net, Rakuten, Target, Home Depot, YouTube, Reddit, X, TikTok, TikTok Shop, Instagram, LinkedIn, Threads, Kuaishou, Zillow, Redfin, Realtor.com, Rightmove, Trulia, StreetEasy, Rent.com, Apartment Guide, RentCafe, Movoto, HotPads, Apartment List, Compass, AffordableHousing.com, Lennar, Extra Space Storage, Public Storage, U-Haul, Booking.com, Tripadvisor, Airbnb, Vrbo, Expedia, Yelp, Indeed, Glassdoor, the Apple App Store, Google Play, SEC EDGAR, Companies House, G2, Capterra, Trustpilot, Reclame Aqui, Goodreads, Barnes & Noble, ThriftBooks, Google Ads Transparency and the Meta Ad Library -- plus `extract` for reading any URL and for mapping, crawling or batch-extracting whole websites, and `company.enrich` for a business's emails, phones, socials and owner from its website or a Google Maps place_id, all with a single API key. Built for AI agents, LLM applications, and data pipelines.
 
 > One API key, 60 data sources, 355 endpoints, structured JSON with knowledge graphs. A powerful alternative to Tavily, SerpAPI, and ScraperAPI for developers who need more than just web search.
 
@@ -131,6 +131,9 @@ The official Python SDK for the [Scavio](https://scavio.dev?utm_source=pypi-scav
 | Dafiti Fashion Marketplace Prices, Units per Size, Delivery Type, Partner Stores and Reviews (Brazil; 7 endpoints) | Yes | No | No | No |
 | Riachuelo Fashion Prices, Sold-Out Flags and Units per Size, Campaign Deals and Reviews (Brazil; 4 endpoints) | Yes | No | No | No |
 | Petz Pet Supply Prices, Subscription and Clubz Member Prices, Stock Units and Stores (Brazil; 7 endpoints) | Yes | No | No | No |
+| Global Industrial MRO and Equipment Prices, Per-Piece Unit Prices, Quantity Breaks and Clearance (US and Canada; 5 endpoints) | Yes | No | No | No |
+| MSC Industrial Supply Metalworking and MRO Prices, Per-Quantity and Unit Prices, Clearance and Locations (US; 5 endpoints) | Yes | No | No | No |
+| Zoro Industrial Supply Unit and Order-Multiple Prices, Availability and Review Summaries (US; 6 endpoints) | Yes | No | No | No |
 | YouTube Search | Yes | No | Yes | No |
 | Reddit Data (12 endpoints) | Yes | No | No | No |
 | X Data (11 endpoints) | Yes | No | No | No |
@@ -8676,6 +8679,130 @@ for st in stores["stores"][:5]:
 Failed calls and refused inputs are not charged; a not-found is charged.
 Inputs the API only accepts to refuse are not in the method signatures.
 
+### 159. US industrial supply -- Global Industrial pack and per-piece prices, quantity breaks and clearance
+
+Global Industrial (globalindustrial.com, the US industrial-equipment and MRO
+supplier; Global Industrial Canada at globalindustrial.ca with `market="ca"`,
+prices in CAD): keyword, item number or part number search (up to 42 products
+with the full total, optionally one brand; a keyword can land on a category or
+a product page, and `landed_on` says which), a category by path (a leaf
+category lists its products by product group), one brand's products, one
+product by link, slug, item number or manufacturer part number, and the
+clearance section. Every item carries the price of one selling unit, the pieces
+in it, the per-piece unit price and the site's quantity breaks; a MAP-priced
+item shows no price on the page ("See price in cart"), so its price fields are
+null and `map_pricing` is true. `msrp` is not shown on the page and can sit
+below the price. Results come in the site's own order (no sort), and reviews
+and questions are not included. Namespace `globalindustrial`, 5 endpoints:
+`search`, `category`, `brand`, `product`, `clearance`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. The request timeout is
+raised to at least 180s. See the [Global Industrial API
+page](https://scavio.dev/globalindustrial-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/globalindustrial-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+gi = client.globalindustrial
+res = gi.search("nitrile gloves")["data"]
+print(res["landed_on"], res["total"], res["count"])
+for it in res["items"][:5]:
+    print(it["item_number"], it["name"], it["price"], it["package_quantity"], it["unit_price"], it["price_type"], it["availability"])
+item = gi.product("652508")["data"]
+print(item["name"], item["price"], item["unit_price"], item["map_pricing"])
+for qb in item["quantity_breaks"]:
+    print(qb["qty_start"], qb["qty_end"], qb["unit_price"], qb["package_price"])
+ca = gi.product("652508", market="ca")["data"]
+print(ca["currency"], ca["price"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 160. US metalworking and MRO -- MSC Industrial Supply prices per quantity, unit prices, clearance and locations
+
+MSC Industrial Supply (mscdirect.com, the US metalworking and MRO distributor):
+keyword, manufacturer part number or MSC# search and a category by navid (24 a
+page, up to page 400, in MSC's 6 sorts) with the price as MSC shows it, the
+quantity it is for (each, or per 100), a unit price computed by Scavio, the
+minimum order quantity and the order multiple; one product by MSC# or link
+with specifications, documents, compliance notices and the alternates MSC
+lists; the Clearance Specials or Web Specials list; and MSC's distribution,
+inventory and service locations (not pickup stores) with their published
+business phone numbers, narrowed by type, state and country. Prices in USD as
+shown to a visitor who is not signed in; review text, account pricing and
+per-branch stock are not returned. Namespace `msc`, 5 endpoints: `search`,
+`category`, `product`, `clearance`, `locations`. Credits: 1 credit each.
+`credits_used` in the response is what was charged. MSC pages are slow: the
+request timeout is raised to at least 300s on `search`, `category` and
+`product`, 180s on `clearance` and `locations`. See the [MSC Industrial Supply
+API page](https://scavio.dev/msc-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/msc-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+msc = client.msc
+res = msc.search("drill bit", sort="price")["data"]
+print(res["total"], res["total_pages"], res["has_more"])
+for it in res["items"][:5]:
+    print(it["msc_number"], it["name"], it["price_text"], it["unit_price"], it["minimum_order_quantity"], it["order_multiple"])
+item = msc.product("00647354")["data"]
+print(item["name"], item["price"], item["price_per_quantity"], item["unit_price"], item["availability"])
+locs = msc.locations(state="PA")["data"]
+for loc in locs["locations"]:
+    print(loc["name"], loc["types"], loc["address"]["city"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
+### 161. US industrial supply -- Zoro unit and order-multiple prices, availability and review summaries
+
+Zoro (zoro.com, the US online industrial and business supply store, part of
+Grainger): keyword, part number or Zoro number search, a category, and one
+brand's products (36 a page, up to page 100, in Zoro's order) with the price
+of one selling unit, the pieces in it and the order-multiple price, labelled
+as given by the page or computed; one product by Zoro number or link with
+specifications, documents, variants and shipping restrictions; its
+availability as the product page shows it (status and delivery estimate;
+Zoro shows no unit counts); and its reviews, the rating summary and the first
+5 reviews the page shows, newest first, without reviewer names. Prices in USD;
+search suggestions and filters are not returned. Namespace `zoro`, 6
+endpoints: `search`, `category`, `brand`, `product`, `availability`,
+`reviews`. Credits: 1 credit each. `credits_used` in the response is what was
+charged. The request timeout is raised to at least 180s (240s on
+`availability` and `reviews`, which are slower). See the [Zoro API
+page](https://scavio.dev/zoro-api?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
+and the
+[docs](https://scavio.dev/docs/zoro-search?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme).
+
+```python
+from scavio import ScavioClient
+
+client = ScavioClient()
+zo = client.zoro
+res = zo.search("3m n95 respirator")["data"]
+print(res["total"], res["total_pages"], res["redirected_to"])
+for it in res["items"][:5]:
+    print(it["zoro_no"], it["name"], it["unit_price"], it["price_unit"], it["package_qty"], it["order_multiple_price"], it["order_multiple_price_source"])
+item = zo.product("G2426514")["data"]
+print(item["name"], item["mfr_no"], item["unit_price"], item["availability"])
+av = zo.availability("G2426514")["data"]
+print(av["status"], av["delivery_estimate"], av["orderable"])
+rv = zo.reviews("G2426514")["data"]
+print(rv["average_rating"], rv["review_count"], rv["rating_histogram"])
+for r in rv["reviews"]:
+    print(r["rating"], r["headline"], r["created_at"])
+```
+
+Failed calls and refused inputs are not charged; a not-found is charged.
+Inputs the API only accepts to refuse are not in the method signatures.
+
 ## Error Handling
 
 ```python
@@ -8935,6 +9062,9 @@ Scavio works with popular AI/LLM frameworks:
 | Dafiti (`dafiti`) | `search`, `category`, `brand`, `deals`, `product`, `sizes`, `reviews`; Brazil; listings 48 a page plus sponsored slots in the site's 5 sorts; `category` by path or link, `brand` by its link name; `deals` is the outlet; `product` by `product_id`, `sku` or `url`; `sizes` by `sku` (units exact 0-10, more than 10 above); `reviews` by `sku`, `product_id` or `url`, up to 100 a page, `sort`, `filter` or `rating` | 1 each |
 | Riachuelo (`riachuelo`) | `search`, `category`, `deals`, `product`; Brazil; listings 24 a page, pages 1-500, in the site's 6 sorts, filtered by the listing's own `filters`; `category` by path or link; `deals` by `department` (its Black Friday page, seasonal; default feminino) or another `campaign` path; `product` by `sku` or `url` | 1 each |
 | Petz (`petz`) | `search`, `category`, `brand`, `deals`, `product`, `stores`, `store`; Brazil; listings 20 a page, pages 1-50, by relevance, price or newest (a search counts at most 1,000 products); `category` by path, `brand` by slug, `deals` by `collection` (default: the Promoções page); `product` by `product_id` or `url`; `stores` by `state` and `city`; `store` by `slug` or `url` | 1 each |
+| Global Industrial (`globalindustrial`) | `search`, `category`, `brand`, `product`, `clearance`; `market` us (USD) or ca (CAD); listings up to 42 products with the full total, in the site's order; `search` by keyword, item or part number, optional `brand`; `category` by `path`, optional `brand` or `group`; `product` by `item` or `url`; `clearance` by `category` and / or `brand` | 1 each |
+| MSC Industrial Supply (`msc`) | `search`, `category`, `product`, `clearance`, `locations`; US; listings 24 a page, up to page 400, in MSC's 6 sorts; `category` by `navid` or `url`; `product` by `msc_number` or `url`; `clearance` by `list` (clearance or web_specials); `locations` by `type`, `state` and `location_country` | 1 each |
+| Zoro (`zoro`) | `search`, `category`, `brand`, `product`, `availability`, `reviews`; US; listings 36 a page, up to page 100, in Zoro's order; `category` by link, path or `slug` + `code`; `brand` by name or link; `product`, `availability` and `reviews` by `zoro_no` or `url` | 1 each |
 | ChatGPT | `prompt` | 5 per answered prompt |
 | Gemini | `prompt` | 5 per answered prompt |
 | Company (`company`) | `enrich` | 10 from a `url`, 20 from a `place_id` (1 when the listing has no readable website); unreachable site free |
@@ -8943,6 +9073,15 @@ Scavio works with popular AI/LLM frameworks:
 Every method's full parameter list is available inline in your editor (typed
 keyword arguments with docstrings). See the [API docs](https://scavio.dev/docs?utm_source=pypi-scavio&utm_medium=package&utm_campaign=readme)
 for field-level details.
+
+### Changed in 0.107.0
+
+- **3 new namespaces** (sync and async), 16 endpoints, US industrial and MRO
+  supply: `globalindustrial` (Global Industrial, US and Canada, 5), `msc` (MSC
+  Industrial Supply, 5) and `zoro` (Zoro, 6). Credits: 1 per call. The request
+  timeout is raised to at least 180s (300s on `msc.search`, `msc.category` and
+  `msc.product`; 240s on `zoro.availability` and `zoro.reviews`). No existing
+  method changed.
 
 ### Changed in 0.106.0
 
